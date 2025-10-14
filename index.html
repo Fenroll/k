@@ -660,7 +660,7 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" style="flex-shrink:0;">
                   <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
                 </svg>
-                <span class="msg-note-title">${note.name.replace(/\.(txt|docx)$/i, '')}</span>
+                <span class="msg-note-title">${note.name.replace(/^msg-/i, '').replace(/\.(txt|docx)$/i, '')}</span>
                 <svg class="msg-note-arrow" width="18" height="18" viewBox="0 0 24 24">
                   <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="#f59e0b"/>
                 </svg>
