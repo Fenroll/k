@@ -783,7 +783,13 @@
           
           sectionContent += `<li style="margin-bottom:6px; font-size:0.95em; display:flex; align-items:center; gap:8px; min-width:0;">`;
           sectionContent += fileIcon;
-          sectionContent += `<a href="${file.path}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
+          
+          // Check if it's a .docx file
+          if (fileName.endsWith('.docx')) {
+            sectionContent += `<a href="#" onclick="event.preventDefault(); renderDocxFile('${file.path}', '${file.name.replace(/'/g, "\\'")}');" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
+          } else {
+            sectionContent += `<a href="${file.path}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
+          }
         });
         sectionContent += '</ul>';
       }
@@ -916,6 +922,44 @@
         closeTextCardModal();
       }
     });
+    
+    // Function to render DOCX files
+    async function renderDocxFile(filePath, fileName) {
+      try {
+        // Fetch the docx file
+        const response = await fetch(filePath);
+        const arrayBuffer = await response.arrayBuffer();
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'textCardModal';
+        modal.className = 'text-modal';
+        modal.style.display = 'block';
+        modal.onclick = function(e) {
+          if (e.target === modal) closeTextCardModal();
+        };
+        
+        const modalContent = document.createElement('div');
+        modalContent.className = 'text-modal-content';
+        modalContent.innerHTML = `
+          <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
+          <h2 class="text-modal-title">${fileName}</h2>
+          <div class="text-modal-body" id="docx-container" style="padding: 20px; background: white; max-height: 70vh; overflow-y: auto;"></div>
+        `;
+        
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        document.body.style.overflow = 'hidden';
+        
+        // Render the docx file
+        const container = document.getElementById('docx-container');
+        await docx.renderAsync(arrayBuffer, container);
+        
+      } catch (error) {
+        console.error('Error rendering DOCX file:', error);
+        alert('Грешка при зареждане на документа. Моля опитайте отново.');
+      }
+    }
     </script>
 
 <html lang="en">
@@ -934,6 +978,8 @@
   <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/42761-1d7134afcf37578a.css">
   <!-- Marked.js library for Markdown rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Docx.js library for Word document rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.0/dist/docx-preview.min.js"></script>
   <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/33651-1d7134afcf37578a.css">
   <style>
     .toggle-btn.selected {
