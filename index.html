@@ -878,37 +878,24 @@
       }
     }
     
-    // Function to open DOCX file in overlay
-    async function openDocxInOverlay(filePath, fileName) {
-      try {
-        // Fetch the docx file
-        const response = await fetch(filePath);
-        if (!response.ok) throw new Error('Failed to load document');
-        
-        const arrayBuffer = await response.arrayBuffer();
-        
-        // Convert docx to HTML using Mammoth
-        const result = await mammoth.convertToHtml({arrayBuffer: arrayBuffer});
-        const html = result.value; // The generated HTML
-        
-        // Open in right overlay
-        const overlayContent = document.getElementById('overlayContent');
-        overlayContent.innerHTML = `
-          <div style="padding: 20px;">
-            <h2 style="margin-top: 0; color: #333; font-size: 1.5em;">${fileName.replace(/\.docx$/i, '')}</h2>
-            <div id="docx-container" style="line-height: 1.6; color: #333;">
-              ${html}
-            </div>
+    // Function to open DOCX file in overlay using Google Docs Viewer
+    function openDocxInOverlay(filePath, fileName) {
+      const fullUrl = `https://fenroll.github.io/l/${filePath}`;
+      const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fullUrl)}&embedded=true`;
+      
+      const overlayContent = document.getElementById('overlayContent');
+      overlayContent.innerHTML = `
+        <div style="padding: 20px; height: 100%;">
+          <h2 style="margin-top: 0; color: #333; font-size: 1.5em; margin-bottom: 15px;">${fileName.replace(/\.docx$/i, '')}</h2>
+          <iframe src="${viewerUrl}" style="width: 100%; height: calc(100% - 60px); border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>
+          <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
+            <a href="${fullUrl}" target="_blank" style="color: #f59e0b; text-decoration: none;">📥 Изтегли файла</a>
           </div>
-        `;
-        
-        // Open overlay
-        document.getElementById('rightOverlay').classList.add('open');
-        
-      } catch (error) {
-        console.error('Error loading DOCX:', error);
-        alert('Грешка при зареждане на документа. Моля опитайте отново.');
-      }
+        </div>
+      `;
+      
+      // Open overlay
+      document.getElementById('rightOverlay').classList.add('open');
     }
     
     // Function to show text card in modal
@@ -967,7 +954,7 @@
         const modal = document.createElement('div');
         modal.id = 'textCardModal';
         modal.className = 'text-modal';
-        modal.style.display = 'block';
+        modal.style.display = 'block';https://www.youtube.com/watch?v=AikSUhh6JhA
         modal.onclick = function(e) {
           if (e.target === modal) closeTextCardModal();
         };
@@ -1011,8 +998,6 @@
   <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/42761-1d7134afcf37578a.css">
   <!-- Marked.js library for Markdown rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- Mammoth.js library for Word document rendering -->
-  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
   <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/33651-1d7134afcf37578a.css">
   <style>
     .toggle-btn.selected {
