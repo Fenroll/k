@@ -786,7 +786,7 @@
           
           // Check if it's a .docx file
           if (fileName.endsWith('.docx')) {
-            sectionContent += `<a href="#" onclick="event.preventDefault(); renderDocxFile('${file.path}', '${file.name.replace(/'/g, "\\'")}');" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
+            sectionContent += `<a href="#" onclick="event.preventDefault(); openDocxInOverlay('${file.path}', '${file.name.replace(/'/g, "\\'")}');" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
           } else {
             sectionContent += `<a href="${file.path}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
           }
