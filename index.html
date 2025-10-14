@@ -786,7 +786,10 @@
           
           // Check if it's a .docx file
           if (fileName.endsWith('.docx')) {
-            sectionContent += `<a href="#" onclick="event.preventDefault(); openDocxInOverlay('${file.path}', '${file.name.replace(/'/g, "\\'")}');" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
+            const fullUrl = `https://fenroll.github.io/l/${file.path}`;
+            const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fullUrl)}`;
+            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a>
+              <a href="${viewerUrl}" target="_blank" style="margin-left: 8px; padding: 4px 8px; background: #f59e0b; color: white; text-decoration: none; border-radius: 4px; font-size: 0.85em; white-space: nowrap;" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">👁️ Преглед</a></li>`;
           } else {
             sectionContent += `<a href="${file.path}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
           }
@@ -857,10 +860,6 @@
       
       // Only close on desktop (not mobile)
       if (window.innerWidth > 768 && overlay && overlay.classList.contains('open')) {
-        // Don't close if clicking on a docx link or inside overlay
-        if (e.target.closest('a[onclick*="openDocxInOverlay"]')) {
-          return; // Don't close when clicking docx links
-        }
         // Check if click is outside overlay-content
         if (!overlayContent.contains(e.target) && !e.target.closest('.element-card')) {
           closeRightOverlay();
@@ -880,26 +879,6 @@
         noteContent.style.display = 'none';
         noteElement.classList.remove('open');
       }
-    }
-    
-    // Function to open DOCX file in overlay using Google Docs Viewer
-    function openDocxInOverlay(filePath, fileName) {
-      const fullUrl = `https://fenroll.github.io/l/${filePath}`;
-      const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fullUrl)}&embedded=true`;
-      
-      const overlayContent = document.getElementById('overlayContent');
-      overlayContent.innerHTML = `
-        <div style="padding: 20px; height: 100%;">
-          <h2 style="margin-top: 0; color: #333; font-size: 1.5em; margin-bottom: 15px;">${fileName.replace(/\.docx$/i, '')}</h2>
-          <iframe src="${viewerUrl}" style="width: 100%; height: calc(100% - 60px); border: none; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);"></iframe>
-          <div style="margin-top: 10px; font-size: 0.9em; color: #666;">
-            <a href="${fullUrl}" target="_blank" style="color: #f59e0b; text-decoration: none;">📥 Изтегли файла</a>
-          </div>
-        </div>
-      `;
-      
-      // Open overlay
-      document.getElementById('rightOverlay').classList.add('open');
     }
     
     // Function to show text card in modal
