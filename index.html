@@ -887,26 +887,20 @@
         
         const arrayBuffer = await response.arrayBuffer();
         
-        // Create container for docx content
-        const container = document.createElement('div');
-        container.style.padding = '20px';
-        container.style.backgroundColor = '#fff';
-        container.style.borderRadius = '8px';
-        
-        // Render docx using docx-preview
-        await docx.renderAsync(arrayBuffer, container);
+        // Convert docx to HTML using Mammoth
+        const result = await mammoth.convertToHtml({arrayBuffer: arrayBuffer});
+        const html = result.value; // The generated HTML
         
         // Open in right overlay
         const overlayContent = document.getElementById('overlayContent');
         overlayContent.innerHTML = `
           <div style="padding: 20px;">
             <h2 style="margin-top: 0; color: #333; font-size: 1.5em;">${fileName.replace(/\.docx$/i, '')}</h2>
-            <div id="docx-container"></div>
+            <div id="docx-container" style="line-height: 1.6; color: #333;">
+              ${html}
+            </div>
           </div>
         `;
-        
-        // Append rendered content
-        document.getElementById('docx-container').appendChild(container);
         
         // Open overlay
         document.getElementById('rightOverlay').classList.add('open');
@@ -1017,8 +1011,8 @@
   <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/42761-1d7134afcf37578a.css">
   <!-- Marked.js library for Markdown rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- Docx.js library for Word document rendering -->
-  <script src="https://cdn.jsdelivr.net/npm/docx-preview@0.3.0/dist/docx-preview.min.js"></script>
+  <!-- Mammoth.js library for Word document rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/mammoth@1.6.0/mammoth.browser.min.js"></script>
   <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/33651-1d7134afcf37578a.css">
   <style>
     .toggle-btn.selected {
