@@ -1720,4 +1720,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "15.10.2025 г., 00:02";
+const buildTimestamp = "15.10.2025 01:04";

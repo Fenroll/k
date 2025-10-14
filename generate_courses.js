@@ -257,14 +257,21 @@ function main() {
   
   // Generate build timestamp
   const buildDate = new Date();
-  const buildTimestamp = buildDate.toLocaleString('bg-BG', { 
-    day: '2-digit', 
-    month: '2-digit', 
-    year: 'numeric',
-    hour: '2-digit', 
-    minute: '2-digit',
-    hour12: false 
-  });
+const dateParts = new Intl.DateTimeFormat('bg-BG', {
+  day: '2-digit',
+  month: '2-digit',
+  year: 'numeric'
+}).formatToParts(buildDate);
+
+const date = `${dateParts.find(p => p.type === 'day').value}.${dateParts.find(p => p.type === 'month').value}.${dateParts.find(p => p.type === 'year').value}`;
+
+// Часът остава същият
+const time = buildDate.toLocaleString('bg-BG', {
+  hour: '2-digit',
+  minute: '2-digit',
+  hour12: false
+});
+  const buildTimestamp = `${date} ${time}`;;
   
   const js = 'const courses = ' + JSON.stringify(courses, null, 2) + ';\n' +
              'const buildTimestamp = "' + buildTimestamp + '";\n';

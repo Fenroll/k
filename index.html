@@ -950,7 +950,7 @@
     function toggleVersionInfo() {
       const versionInfo = document.getElementById('versionInfo');
       if (versionInfo.style.display === 'none') {
-        versionInfo.textContent = 'Build: ' + (typeof buildTimestamp !== 'undefined' ? buildTimestamp : 'Unknown');
+        versionInfo.textContent = (typeof buildTimestamp !== 'undefined' ? buildTimestamp : 'Unknown');
         versionInfo.style.display = 'inline-block';
         // Auto-hide after 5 seconds
         setTimeout(() => {
@@ -1375,7 +1375,7 @@
           <span class="sidebar-footer-item">Privacy</span>
           <span class="sidebar-footer-item">Terms</span>
           <span class="sidebar-footer-item" onclick="toggleVersionInfo()" style="cursor: pointer;">Accessibility</span>
-          <span id="versionInfo" style="display: none; position: absolute; left: 100%; bottom: 0; margin-left: 10px; padding: 4px 8px; background: #f59e0b; color: white; border-radius: 4px; font-size: 0.85em; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"></span>
+          <span id="versionInfo" style="display: none; position: absolute; left: 100%; bottom: 0; margin-left: 20px; padding: 3px 20px; background: #333; color: white; border-radius: 6px; font-size: 0.85em; white-space: normal; box-shadow: 0 2px 10px rgba(0,0,0,0.3); max-width: calc(100vw - 280px);"></span>
         </div>
       </div>
     </div>
