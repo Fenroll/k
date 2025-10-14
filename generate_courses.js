@@ -164,11 +164,11 @@ function getAllCourses() {
         const filePath = path.join(sectionPath, fileName);
         const fileExt = path.extname(fileName).toLowerCase();
         
-        // Check if it's a msg file (txt or docx with "msg" in name)
-        if ((fileExt === '.txt' || fileExt === '.docx') && fileName.toLowerCase().includes('msg')) {
-          // Read content for txt files
+        // Check if it's a msg file (txt, md, or docx with "msg" in name)
+        if ((fileExt === '.txt' || fileExt === '.md' || fileExt === '.docx') && fileName.toLowerCase().includes('msg')) {
+          // Read content for txt and md files
           let content = '';
-          if (fileExt === '.txt') {
+          if (fileExt === '.txt' || fileExt === '.md') {
             content = readTextFile(filePath);
           }
           
@@ -176,7 +176,7 @@ function getAllCourses() {
             name: fileName,
             path: `${relativePath}/${fileName}`,
             content: content,
-            type: fileExt === '.txt' ? 'text' : 'docx'
+            type: fileExt === '.txt' ? 'text' : (fileExt === '.md' ? 'markdown' : 'docx')
           });
         } else {
           // Regular file

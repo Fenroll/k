@@ -168,15 +168,16 @@
       .overlay-header {
         justify-content: center;
         text-align: center;
-        padding: 0 55px 0 12px;
+        padding: 10px 55px 10px 12px;
       }
       .overlay-header .page-title {
         text-align: center;
         width: 100%;
-        font-size: 1.4em !important;
-        line-height: 1.25 !important;
+        font-size: 1.2em !important;
+        line-height: 1.3 !important;
         word-wrap: break-word;
         overflow-wrap: break-word;
+        word-break: break-word;
         hyphens: auto;
       }
     }
@@ -456,8 +457,8 @@
   background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
   border-left: 4px solid #f59e0b;
   border-radius: 8px;
-  padding: 14px 16px;
-  margin: 12px 0;
+  padding: 10px 14px;
+  margin: 8px 0;
   width: 100%;
   box-sizing: border-box;
   cursor: pointer;
@@ -494,23 +495,101 @@
 }
 
 .msg-note-content {
-  margin-top: 12px;
-  padding-top: 12px;
+  margin-top: 8px;
+  padding-top: 8px;
   border-top: 1px solid rgba(146, 64, 14, 0.2);
   color: #78350f;
-  line-height: 1.6;
+  line-height: 1;
   animation: slideDown 0.3s ease;
 }
 
 .msg-note-content pre {
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-family: 'Courier New', monospace;
-  font-size: 0.95em;
+  font-family: inherit;
+  font-size: 1em;
   margin: 0;
-  padding: 8px;
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+}
+
+/* Markdown content styling */
+.markdown-content {
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-size: 0.95em;
+}
+
+.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+  color: #92400e;
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+  font-weight: 600;
+}
+
+.markdown-content h1 { font-size: 1.5em; }
+.markdown-content h2 { font-size: 1.3em; }
+.markdown-content h3 { font-size: 1.1em; }
+
+.markdown-content p {
+  margin: 0.5em 0;
+  white-space: pre-wrap;
+}
+
+.markdown-content ul, .markdown-content ol {
+  margin: 0.5em 0;
+  padding-left: 1.5em;
+}
+
+.markdown-content li {
+  margin: 0.25em 0;
+}
+
+.markdown-content strong {
+  font-weight: 600;
+  color: #92400e;
+}
+
+.markdown-content em {
+  font-style: italic;
+}
+
+.markdown-content code {
+  background: rgba(146, 64, 14, 0.1);
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.9em;
+}
+
+.markdown-content pre {
   background: rgba(255, 255, 255, 0.5);
+  padding: 12px;
   border-radius: 4px;
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
+
+.markdown-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.markdown-content blockquote {
+  border-left: 3px solid #f59e0b;
+  padding-left: 1em;
+  margin: 0.5em 0;
+  font-style: italic;
+  color: #78350f;
+}
+
+.markdown-content a {
+  color: #f59e0b;
+  text-decoration: underline;
+}
+
+.markdown-content a:hover {
+  color: #d97706;
 }
 
 @keyframes slideDown {
@@ -660,13 +739,13 @@
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" style="flex-shrink:0;">
                   <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
                 </svg>
-                <span class="msg-note-title">${note.name.replace(/^msg-/i, '').replace(/\.(txt|docx)$/i, '')}</span>
+                <span class="msg-note-title">${note.name.replace(/^msg-/i, '').replace(/\.(txt|md|docx)$/i, '')}</span>
                 <svg class="msg-note-arrow" width="18" height="18" viewBox="0 0 24 24">
                   <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="#f59e0b"/>
                 </svg>
               </div>
               <div class="msg-note-content" id="${noteId}" style="display:none;">
-                ${note.type === 'text' ? `<pre>${note.content}</pre>` : '<p><i>Word файл - отвори за да видиш съдържанието</i><br><a href="' + note.path + '" target="_blank" style="color:#f59e0b;">Отвори файла</a></p>'}
+                ${note.type === 'text' ? `<pre>${note.content}</pre>` : (note.type === 'markdown' ? `<div class="markdown-content">${marked.parse(note.content.replace(/\n/g, '  \n'))}</div>` : '<p><i>Word файл - отвори за да видиш съдържанието</i><br><a href="' + note.path + '" target="_blank" style="color:#f59e0b;">Отвори файла</a></p>')}
               </div>
             </div>
           `;
@@ -765,6 +844,20 @@
       }
     }
     
+    // Close overlay when clicking outside on desktop
+    document.addEventListener('click', function(e) {
+      const overlay = document.getElementById('rightOverlay');
+      const overlayContent = document.getElementById('overlayContent');
+      
+      // Only close on desktop (not mobile)
+      if (window.innerWidth > 768 && overlay && overlay.classList.contains('open')) {
+        // Check if click is outside overlay-content
+        if (!overlayContent.contains(e.target) && !e.target.closest('.element-card')) {
+          closeRightOverlay();
+        }
+      }
+    });
+    
     // Function to toggle msg note content
     function toggleMsgNote(noteId) {
       const noteContent = document.getElementById(noteId);
@@ -834,6 +927,8 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/42761-1d7134afcf37578a.css">
+  <!-- Marked.js library for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/33651-1d7134afcf37578a.css">
   <style>
     .toggle-btn.selected {
