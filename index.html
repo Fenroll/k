@@ -878,6 +878,45 @@
       }
     }
     
+    // Function to open DOCX file in overlay
+    async function openDocxInOverlay(filePath, fileName) {
+      try {
+        // Fetch the docx file
+        const response = await fetch(filePath);
+        if (!response.ok) throw new Error('Failed to load document');
+        
+        const arrayBuffer = await response.arrayBuffer();
+        
+        // Create container for docx content
+        const container = document.createElement('div');
+        container.style.padding = '20px';
+        container.style.backgroundColor = '#fff';
+        container.style.borderRadius = '8px';
+        
+        // Render docx using docx-preview
+        await docx.renderAsync(arrayBuffer, container);
+        
+        // Open in right overlay
+        const overlayContent = document.getElementById('overlayContent');
+        overlayContent.innerHTML = `
+          <div style="padding: 20px;">
+            <h2 style="margin-top: 0; color: #333; font-size: 1.5em;">${fileName.replace(/\.docx$/i, '')}</h2>
+            <div id="docx-container"></div>
+          </div>
+        `;
+        
+        // Append rendered content
+        document.getElementById('docx-container').appendChild(container);
+        
+        // Open overlay
+        document.getElementById('rightOverlay').classList.add('open');
+        
+      } catch (error) {
+        console.error('Error loading DOCX:', error);
+        alert('Грешка при зареждане на документа. Моля опитайте отново.');
+      }
+    }
+    
     // Function to show text card in modal
     function showTextCardModal(cardId, title, content) {
       // Decode HTML entities
