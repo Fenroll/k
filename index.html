@@ -857,6 +857,10 @@
       
       // Only close on desktop (not mobile)
       if (window.innerWidth > 768 && overlay && overlay.classList.contains('open')) {
+        // Don't close if clicking on a docx link or inside overlay
+        if (e.target.closest('a[onclick*="openDocxInOverlay"]')) {
+          return; // Don't close when clicking docx links
+        }
         // Check if click is outside overlay-content
         if (!overlayContent.contains(e.target) && !e.target.closest('.element-card')) {
           closeRightOverlay();
