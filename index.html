@@ -786,8 +786,9 @@
           
           // Check if it's a .docx file
           if (fileName.endsWith('.docx')) {
-            const fullUrl = `https://fenroll.github.io/l/${file.path}`;
-            const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fullUrl)}`;
+            // Encode the full URL properly
+            const fullUrl = encodeURIComponent(`https://fenroll.github.io/l/${file.path}`);
+            const viewerUrl = `https://docs.google.com/viewer?url=${fullUrl}`;
             sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a>
               <a href="${viewerUrl}" target="_blank" style="margin-left: 8px; padding: 4px 8px; background: #f59e0b; color: white; text-decoration: none; border-radius: 4px; font-size: 0.85em; white-space: nowrap;" onmouseover="this.style.background='#d97706'" onmouseout="this.style.background='#f59e0b'">👁️ Преглед</a></li>`;
           } else {
