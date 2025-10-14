@@ -67,7 +67,13 @@ const courses = [
       },
       {
         "name": "Пулмология",
-        "files": [],
+        "files": [
+          {
+            "name": "Gold Класификация.url",
+            "path": "Елементи/Вътрешни болести 1 ч/Пулмология/Gold Класификация.url",
+            "url": "https://goldcopd.org/wp-content/uploads/2024/11/Pocket-Guide-2025-v1.0-New-Format-15Nov2024_WMV.pdf"
+          }
+        ],
         "msgNotes": [
           {
             "name": "msg-Пневмония.md",

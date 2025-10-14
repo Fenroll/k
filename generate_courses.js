@@ -79,6 +79,19 @@ function readTextFile(filePath) {
   }
 }
 
+// Read URL from .url file
+function readUrlFile(filePath) {
+  try {
+    const content = fs.readFileSync(filePath, 'utf8');
+    // Parse .url file format (INI-style)
+    const urlMatch = content.match(/URL=(.+)/i);
+    return urlMatch ? urlMatch[1].trim() : null;
+  } catch (error) {
+    console.warn('Could not read URL file:', filePath, error.message);
+    return null;
+  }
+}
+
 function getAllCourses() {
   if (!fs.existsSync(ELEMENTS_DIR)) return [];
   
@@ -145,7 +158,8 @@ function getAllCourses() {
       '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg',
       '.zip', '.rar', '.7z',
       '.txt', '.log', '.md',
-      '.one', '.onetoc2'
+      '.one', '.onetoc2',
+      '.url'
     ];
     
     // Get all supported files in this section
@@ -180,10 +194,20 @@ function getAllCourses() {
           });
         } else {
           // Regular file
-          files.push({
+          const fileData = {
             name: fileName,
             path: `${relativePath}/${fileName}`
-          });
+          };
+          
+          // If it's a .url file, extract the URL
+          if (fileExt === '.url') {
+            const url = readUrlFile(filePath);
+            if (url) {
+              fileData.url = url;
+            }
+          }
+          
+          files.push(fileData);
         }
       });
     
