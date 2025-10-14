@@ -254,9 +254,23 @@ function getAllCourses() {
 
 function main() {
   const courses = getAllCourses();
-  const js = 'const courses = ' + JSON.stringify(courses, null, 2) + ';\n';
+  
+  // Generate build timestamp
+  const buildDate = new Date();
+  const buildTimestamp = buildDate.toLocaleString('bg-BG', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric',
+    hour: '2-digit', 
+    minute: '2-digit',
+    hour12: false 
+  });
+  
+  const js = 'const courses = ' + JSON.stringify(courses, null, 2) + ';\n' +
+             'const buildTimestamp = "' + buildTimestamp + '";\n';
   fs.writeFileSync(OUTPUT_FILE, js, 'utf8');
   console.log('Generated courses:', OUTPUT_FILE);
+  console.log('Build timestamp:', buildTimestamp);
 }
 
 main();

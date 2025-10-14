@@ -946,6 +946,21 @@
       }
     }
     
+    // Function to toggle version info
+    function toggleVersionInfo() {
+      const versionInfo = document.getElementById('versionInfo');
+      if (versionInfo.style.display === 'none') {
+        versionInfo.textContent = 'Build: ' + (typeof buildTimestamp !== 'undefined' ? buildTimestamp : 'Unknown');
+        versionInfo.style.display = 'inline-block';
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          versionInfo.style.display = 'none';
+        }, 5000);
+      } else {
+        versionInfo.style.display = 'none';
+      }
+    }
+    
     // Function to show text card in modal
     function showTextCardModal(cardId, title, content) {
       // Decode HTML entities
@@ -1356,11 +1371,12 @@
             </li>
           </ul>
         </nav>
-      <div class="sidebar-footer-links">
-        <span class="sidebar-footer-item">Privacy</span>
-        <span class="sidebar-footer-item">Terms</span>
-        <span class="sidebar-footer-item">Accessibility</span>
-      </div>
+        <div class="sidebar-footer-links">
+          <span class="sidebar-footer-item">Privacy</span>
+          <span class="sidebar-footer-item">Terms</span>
+          <span class="sidebar-footer-item" onclick="toggleVersionInfo()" style="cursor: pointer;">Accessibility</span>
+          <span id="versionInfo" style="display: none; position: absolute; left: 100%; bottom: 0; margin-left: 10px; padding: 4px 8px; background: #f59e0b; color: white; border-radius: 4px; font-size: 0.85em; white-space: nowrap; box-shadow: 0 2px 8px rgba(0,0,0,0.2);"></span>
+        </div>
       </div>
     </div>
     <div class="main-content">
@@ -1742,28 +1758,21 @@ document.addEventListener('DOMContentLoaded', renderCourseList);
     width: 100%;
     box-sizing: border-box;
   }
+  .bb-inner-wrap {
+    position: relative;
+    height: 100%;
+  }
   .sidebar-footer-links {
     position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    padding: 16px 0 12px 0;
+    left: 12px;
+    bottom: 11px;
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.2em;
+    gap: 2.5px;
+    font-size: 12px;
   }
-    .sidebar-footer-links {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      position: absolute;
-      left: 12px;
-      bottom: 11px;
-      gap: 2.5px;
-      font-size: 12px;
-    }
-    .sidebar-footer-item {
+  .sidebar-footer-item {
       font-size: 12px;
       color: #cdcdcd;
       text-decoration: none;
