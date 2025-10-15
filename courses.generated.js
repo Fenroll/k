@@ -2,7 +2,28 @@ const courses = [
   {
     "id": "000001",
     "title": "Blackboard Help (students / студенти)",
-    "sections": []
+    "sections": [
+      {
+        "name": "Материали",
+        "files": [
+          {
+            "name": "Mega.url",
+            "path": "files/Blackboard Help/Материали/Mega.url",
+            "url": "https://mega.nz/folder/mY0nSaBQ#uGTfgaVvlcVDQ9l2u6iFJw"
+          },
+          {
+            "name": "му сиси.url",
+            "path": "files/Blackboard Help/Материали/му сиси.url",
+            "url": "https://mega.nz/folder/mY0nSaBQ#uGTfgaVvlcVDQ9l2u6iFJw"
+          },
+          {
+            "name": "Учебници 4 курс.url",
+            "path": "files/Blackboard Help/Материали/Учебници 4 курс.url",
+            "url": "https://drive.google.com/drive/folders/17dl4U1NcptvkBnpfa9YxRqzlk73WcBa-?fbclid=IwY2xjawNc3k5leHRuA2FlbQIxMQABHmHQONmtbnp1IyxXeRPHyoiSxL0MQGUk8Qtqk8mwMMIuwyWnffn7nKn8YP8m_aem_W2OqoAlkLAzMqg3-8jFsZQ"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "000002",
@@ -95,6 +116,11 @@ const courses = [
           {
             "name": "микроскопски-препарати-1.pdf",
             "path": "files/Клинична Патология/Изпит/микроскопски-препарати-1.pdf"
+          },
+          {
+            "name": "Препарати видеа.url",
+            "path": "files/Клинична Патология/Изпит/Препарати видеа.url",
+            "url": "https://drive.google.com/drive/folders/1-1ziHM_kr1W7g4Ouz1jiRHLYO50K9bp0?fbclid=IwY2xjawNc3kFleHRuA2FlbQIxMQABHpt3tIXQPstWNc5xRu7UChncimTB-9Jxa_RqZ9Qxm557BQhhP9Q1MDvrjOSa_aem_NZ0Xn3mb074n4TVr54hzAA"
           }
         ]
       }
@@ -1743,4 +1769,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "15.10.2025 18:18";
+const buildTimestamp = "15.10.2025 23:10";
