@@ -24,6 +24,10 @@ const courses = [
     "title": "Фармакология",
     "sections": [
       {
+        "name": "Изпит",
+        "files": []
+      },
+      {
         "name": "Колоквиум III",
         "files": [
           {
@@ -33,17 +37,12 @@ const courses = [
           {
             "name": "Лекции за трети колоквиум.pdf",
             "path": "files/Фармакология/Колоквиум III/Лекции за трети колоквиум.pdf"
-          },
-          {
-            "name": "Лекции за трети колоквиум.url",
-            "path": "files/Фармакология/Колоквиум III/Лекции за трети колоквиум.url",
-            "url": "https://www.dropbox.com/scl/fi/6zf2ehabgr2xygeq5t8r9/.pdf?rlkey=dmtyhvexf7kz684hpvdyogpax&st=0v7l7tbc&raw=1https://www.dropbox.com/scl/fi/4whhkqxt4l9gxo5l5fs9c/.pdf?rlkey=oezm0pxgpyqee50a63ku63yw2&st=7q4syz8s&raw=1"
-          },
-          {
-            "name": "Лекции за трети колоквиумtest.pdf",
-            "path": "files/Фармакология/Колоквиум III/Лекции за трети колоквиумtest.pdf"
           }
         ]
+      },
+      {
+        "name": "Колоквиум IV",
+        "files": []
       }
     ]
   },
@@ -110,6 +109,27 @@ const courses = [
     "id": "000007",
     "title": "Неврология",
     "sections": [
+      {
+        "name": "Графи",
+        "files": [
+          {
+            "name": "deep sensation.png",
+            "path": "files/Неврология/Графи/deep sensation.png"
+          },
+          {
+            "name": "eye-motor-nerves.png",
+            "path": "files/Неврология/Графи/eye-motor-nerves.png"
+          },
+          {
+            "name": "nervus-opticus.png",
+            "path": "files/Неврология/Графи/nervus-opticus.png"
+          },
+          {
+            "name": "superficial sensation.png",
+            "path": "files/Неврология/Графи/superficial sensation.png"
+          }
+        ]
+      },
       {
         "name": "Учебници",
         "files": [
@@ -1719,4 +1739,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "15.10.2025 17:28";
+const buildTimestamp = "15.10.2025 17:55";
