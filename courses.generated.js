@@ -117,12 +117,16 @@ const courses = [
             "path": "files/Неврология/Графи/deep sensation.png"
           },
           {
-            "name": "eye-motor-nerves.png",
-            "path": "files/Неврология/Графи/eye-motor-nerves.png"
+            "name": "eye motor nerves.png",
+            "path": "files/Неврология/Графи/eye motor nerves.png"
           },
           {
-            "name": "nervus-opticus.png",
-            "path": "files/Неврология/Графи/nervus-opticus.png"
+            "name": "face sensation.png",
+            "path": "files/Неврология/Графи/face sensation.png"
+          },
+          {
+            "name": "nervus opticus.png",
+            "path": "files/Неврология/Графи/nervus opticus.png"
           },
           {
             "name": "superficial sensation.png",
@@ -1739,4 +1743,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "15.10.2025 17:55";
+const buildTimestamp = "15.10.2025 18:13";

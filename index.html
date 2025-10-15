@@ -929,11 +929,11 @@
     document.addEventListener('click', function(e) {
       const overlay = document.getElementById('rightOverlay');
       const overlayContent = document.getElementById('overlayContent');
-      
+      const modal = document.getElementById('textCardModal');
       // Only close on desktop (not mobile)
       if (window.innerWidth > 768 && overlay && overlay.classList.contains('open')) {
-        // Check if click is outside overlay-content
-        if (!overlayContent.contains(e.target) && !e.target.closest('.element-card')) {
+        // Check if click is outside overlay-content and NOT inside modal
+        if (!overlayContent.contains(e.target) && !e.target.closest('.element-card') && !e.target.closest('#textCardModal')) {
           closeRightOverlay();
         }
       }
@@ -1076,11 +1076,11 @@
       }
       modalContent.innerHTML = `
         <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
-        <h2 class="text-modal-title">${imgName}</h2>
-        <div class="text-modal-body" style="padding: 20px; background: white; max-height: 70vh; overflow-y: auto; display: flex; justify-content: center; align-items: center;">
-          <img src="${imgPath}" alt="${imgName}" style="max-width: 100%; max-height: 60vh; border-radius: 8px; box-shadow: 0 2px 16px rgba(0,0,0,0.12);" />
+        <h2 class="text-modal-title" style="text-align:center; margin-bottom:10px; margin-top:2px;">${imgName}</h2>
+        <div class="text-modal-body" style="padding: 0; background: white; max-height: 80vh; min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+          <img src="${imgPath}" alt="${imgName}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); margin: 0 auto 16px auto; display: block;" />
+          ${navHtml}
         </div>
-        ${navHtml}
       `;
       modal.appendChild(modalContent);
       document.body.appendChild(modal);
