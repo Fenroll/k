@@ -6,7 +6,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const ELEMENTS_DIR = path.join(__dirname, 'Елементи');
+const ELEMENTS_DIR = path.join(__dirname, 'files');
 const OUTPUT_FILE = path.join(__dirname, 'courses.generated.js');
 const ID_MAPPING_FILE = path.join(__dirname, 'course-ids.json');
 const NAME_MAPPING_FILE = path.join(__dirname, 'folder-name-mappings.json');

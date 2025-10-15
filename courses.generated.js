@@ -35,6 +35,15 @@ const courses = [
           {
             "name": "Лекции за трети колоквиум.pdf",
             "path": "Елементи/Фармакология/Колоквиум III/Лекции за трети колоквиум.pdf"
+          },
+          {
+            "name": "Лекции за трети колоквиум.url",
+            "path": "Елементи/Фармакология/Колоквиум III/Лекции за трети колоквиум.url",
+            "url": "https://www.dropbox.com/scl/fi/6zf2ehabgr2xygeq5t8r9/.pdf?rlkey=dmtyhvexf7kz684hpvdyogpax&st=0v7l7tbc&raw=1https://www.dropbox.com/scl/fi/4whhkqxt4l9gxo5l5fs9c/.pdf?rlkey=oezm0pxgpyqee50a63ku63yw2&st=7q4syz8s&raw=1"
+          },
+          {
+            "name": "Лекции за трети колоквиумtest.pdf",
+            "path": "Елементи/Фармакология/Колоквиум III/Лекции за трети колоквиумtest.pdf"
           }
         ]
       },
@@ -126,7 +135,23 @@ const courses = [
   {
     "id": "000007",
     "title": "Неврология",
-    "sections": []
+    "sections": [
+      {
+        "name": "Учебници",
+        "files": [
+          {
+            "name": "Учебник Титянова.url",
+            "path": "Елементи/Неврология/Учебници/Учебник Титянова.url",
+            "url": "https://www.dropbox.com/scl/fi/6zf2ehabgr2xygeq5t8r9/.pdf?rlkey=dmtyhvexf7kz684hpvdyogpax&st=0v7l7tbc&raw=1"
+          },
+          {
+            "name": "Учебник Шотеков.url",
+            "path": "Елементи/Неврология/Учебници/Учебник Шотеков.url",
+            "url": "https://www.dropbox.com/scl/fi/owjjrc6c6wszvfcqyej7r/.pdf?rlkey=tzk1wabyryomg8jb142v7arxq&st=fgg7qxc9&raw=1"
+          }
+        ]
+      }
+    ]
   },
   {
     "id": "000008",
@@ -194,7 +219,16 @@ const courses = [
         "subsections": [
           {
             "name": "!!!kolokvium genetika",
-            "files": [],
+            "files": [
+              {
+                "name": "genetika-testove nastq.rar",
+                "path": "Елементи/Клинична имунология/Материали/!!!kolokvium genetika/genetika-testove nastq.rar"
+              },
+              {
+                "name": "Seminars genetics medicine 2013 2014.rar",
+                "path": "Елементи/Клинична имунология/Материали/!!!kolokvium genetika/Seminars genetics medicine 2013 2014.rar"
+              }
+            ],
             "subsections": [
               {
                 "name": "gen",
@@ -1720,4 +1754,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "15.10.2025 01:04";
+const buildTimestamp = "15.10.2025 12:32";
