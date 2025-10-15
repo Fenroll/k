@@ -7,7 +7,12 @@ const courses = [
   {
     "id": "000002",
     "title": "Актуални събития / Event center",
-    "sections": []
+    "sections": [
+      {
+        "name": "сдас",
+        "files": []
+      }
+    ]
   },
   {
     "id": "000003",
@@ -143,6 +148,11 @@ const courses = [
             "name": "Учебник Титянова.url",
             "path": "Елементи/Неврология/Учебници/Учебник Титянова.url",
             "url": "https://www.dropbox.com/scl/fi/6zf2ehabgr2xygeq5t8r9/.pdf?rlkey=dmtyhvexf7kz684hpvdyogpax&st=0v7l7tbc&raw=1"
+          },
+          {
+            "name": "Учебник Шотеков - Copy.url",
+            "path": "Елементи/Неврология/Учебници/Учебник Шотеков - Copy.url",
+            "url": "https://www.youtube.com/watch?v=njX2bu-_Vw4"
           },
           {
             "name": "Учебник Шотеков.url",
@@ -1754,4 +1764,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "15.10.2025 12:32";
+const buildTimestamp = "15.10.2025 16:51";
