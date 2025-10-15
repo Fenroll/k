@@ -1078,13 +1078,42 @@
         <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
         <h2 class="text-modal-title" style="text-align:center; margin-bottom:10px; margin-top:2px;">${imgName}</h2>
         <div class="text-modal-body" style="padding: 0; background: white; max-height: 80vh; min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-          <img src="${imgPath}" alt="${imgName}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); margin: 0 auto 16px auto; display: block;" />
+          <img id="modalZoomImg" src="${imgPath}" alt="${imgName}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); margin: 0 auto 16px auto; display: block; transition: transform 0.2s; cursor: zoom-in;" />
           ${navHtml}
         </div>
       `;
       modal.appendChild(modalContent);
       document.body.appendChild(modal);
       document.body.style.overflow = 'hidden';
+      // Add zoom logic after image is in DOM
+      setTimeout(function() {
+        const img = document.getElementById('modalZoomImg');
+        if (!img) return;
+        let scale = 1;
+        let originX = 0.5;
+        let originY = 0.5;
+        img.addEventListener('wheel', function(e) {
+          e.preventDefault();
+          // Zoom in/out
+          if (e.deltaY < 0) {
+            scale = Math.min(scale + 0.15, 5);
+          } else {
+            scale = Math.max(scale - 0.15, 1);
+          }
+          // Zoom to mouse position
+          const rect = img.getBoundingClientRect();
+          originX = ((e.clientX - rect.left) / rect.width) * 100;
+          originY = ((e.clientY - rect.top) / rect.height) * 100;
+          img.style.transformOrigin = `${originX}% ${originY}%`;
+          img.style.transform = `scale(${scale})`;
+          img.style.cursor = scale > 1 ? 'zoom-out' : 'zoom-in';
+        }, { passive: false });
+        img.addEventListener('mouseleave', function() {
+          scale = 1;
+          img.style.transform = 'scale(1)';
+          img.style.cursor = 'zoom-in';
+        });
+      }, 0);
     }
     </script>
 
