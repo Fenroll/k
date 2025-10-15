@@ -138,7 +138,7 @@ function getAllCourses() {
       .map(dirent => dirent.name)
       .map(section => {
         const sectionPath = path.join(subjectPath, section);
-        return processSection(section, sectionPath, `Елементи/${subject}/${section}`, nameMappings);
+  return processSection(section, sectionPath, `files/${subject}/${section}`, nameMappings);
       });
     
     return {
