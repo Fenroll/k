@@ -14,7 +14,7 @@ const courses = [
           {
             "name": "му сиси.url",
             "path": "files/Blackboard Help/Материали/му сиси.url",
-            "url": "https://mega.nz/folder/mY0nSaBQ#uGTfgaVvlcVDQ9l2u6iFJw"
+            "url": "https://drive.google.com/drive/folders/1PuZsrh59IxyZJG07NObnu0Xklb5XDAXx?dmr=1&ec=wgc-drive-globalnav-goto"
           },
           {
             "name": "Учебници 4 курс.url",
@@ -28,17 +28,7 @@ const courses = [
   {
     "id": "000002",
     "title": "Актуални събития / Event center",
-    "sections": [
-      {
-        "name": "Тест",
-        "files": [
-          {
-            "name": "Genetics_all.pdf",
-            "path": "files/Актуални събития Event center/Тест/Genetics_all.pdf"
-          }
-        ]
-      }
-    ]
+    "sections": []
   },
   {
     "id": "000003",
@@ -1769,4 +1759,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "15.10.2025 23:10";
+const buildTimestamp = "15.10.2025 23:14";
