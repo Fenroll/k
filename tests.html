@@ -1,0 +1,2310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Фармакологичен Тест - Medical University Varna</title>
+  <style>
+    body {
+      font-family: 'Open Sans', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+    
+    .layout {
+      display: flex;
+    }
+    
+    .main-content {
+      width: 100%;
+      padding: 20px;
+      margin-left: 200px;
+    }
+    
+    .main-header {
+      background: #fff;
+      padding: 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+    
+    .page-title {
+      margin: 0;
+      font-size: 1.6em;
+      font-weight: 400;
+      color: #262626;
+    }
+
+    /* Sidebar styles */
+    .sidebar {
+      width: 200px;
+      background: #262626;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+    }
+    
+    #side-menu {
+      background: #262626; 
+      width: 200px; 
+      min-width: 200px; 
+      max-width: 200px; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      height: 100vh; 
+      z-index: 100;
+    }
+    
+    .logo-header {
+      background: #262626;
+      width: 200px;
+      height: 107px;
+      min-width: 200px;
+      min-height: 107px;
+      max-width: 200px;
+      max-height: 107px;
+      text-align: center;
+      border-bottom: none;
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      flex: 0 0 107px;
+      box-sizing: content-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .logo-header > a {
+      display: block;
+      margin: 0;
+      padding: 0;
+      box-sizing: content-box;
+    }
+    
+    .logo-img {
+      width: 168px;
+      height: 22.55px;
+      min-width: 168px;
+      min-height: 22.55px;
+      max-width: 168px;
+      max-height: 22.55px;
+      object-fit: contain;
+      margin: 0;
+      display: block;
+      box-sizing: content-box;
+    }
+    
+    .sidebar-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    
+    .sidebar-nav li {
+      margin: 0;
+      position: relative;
+    }
+    
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      color: #fff;
+      text-decoration: none;
+      padding: 16px 28px 16px 28px;
+      font-size: 14px;
+      transition: background 0.2s;
+      position: relative;
+      border-radius: 0;
+      gap: 12px;
+      flex-direction: row;
+      background: #222b36;
+      font-weight: 400;
+    }
+    
+    .sidebar-nav .active a, .sidebar-nav li.active a {
+      background: #000000;
+      color: #fff;
+      position: relative;
+    }
+    
+    .sidebar-nav .active a::before, .sidebar-nav li.active a::before {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: #C56FD5;
+      border-radius: 0;
+    }
+    
+    .sidebar-nav a:hover {
+      background: #181818;
+    }
+    
+    .sidebar-nav .svg-icon {
+      width: 26px;
+      height: 26px;
+      margin-right: -2px;
+      margin-left: -2px;
+      margin-top: -2px;
+      margin-bottom: -2px;
+      flex-shrink: 0;
+      fill: #222;
+      stroke: #222;
+    }
+    
+    .sidebar-footer-links {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 15px 20px;
+      display: flex;
+      gap: 15px;
+      font-size: 12px;
+      color: #aaa;
+    }
+    
+    .sidebar-footer-item {
+      cursor: pointer;
+    }
+    
+    .sidebar-footer-item:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+    
+    #versionInfo {
+      display: none;
+      position: absolute;
+      left: 100%;
+      bottom: 0;
+      margin-left: 20px;
+      padding: 3px 20px;
+      background: #333;
+      color: white;
+      border-radius: 6px;
+      font-size: 0.85em;
+      white-space: normal;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+      max-width: calc(100vw - 280px);
+    }
+    
+    .mobile-menu-toggle {
+      display: none;
+      position: fixed;
+      top: 15px;
+      left: 15px;
+      z-index: 101;
+      background: #8b5cf6;
+      color: white;
+      border: none;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    }
+
+    /* Test styles */
+    .test-container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .test-creator, .test-preview, .test-runner, .results-section {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .form-group-half {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .form-group-compact {
+      flex: 0 0 auto;
+      width: auto;
+    }
+    
+    .input-narrow {
+      width: 80px !important;
+    }
+
+    /* Compact controls and group input width */
+    .form-group-compact .form-control {
+      width: auto;
+      min-width: 180px;
+    }
+
+    .group-name {
+      width: 200px;
+      max-width: 100%;
+    }
+    
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    /* Override for group name input: make it shorter than full width */
+    .form-control.group-name {
+      width: 600px;
+    }
+    
+    .btn {
+      padding: 10px 16px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    
+    .btn-primary {
+      background: #8b5cf6;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #7c3aed;
+    }
+    
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #4b5563;
+    }
+    
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+    
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #059669;
+    }
+    
+    .button-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    /* Sticky bar for test runner controls */
+    .sticky-runner {
+      position: sticky;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.95);
+      -webkit-backdrop-filter: blur(6px);
+      backdrop-filter: blur(6px);
+      border-top: 1px solid #e5e7eb;
+      padding: 8px 0;
+      z-index: 10;
+    }
+
+    /* Sticky action bar to avoid long scrolling */
+    .sticky-actions {
+      position: sticky;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.95);
+  -webkit-backdrop-filter: blur(6px);
+  backdrop-filter: blur(6px);
+      border-top: 1px solid #e5e7eb;
+      padding: 10px 0;
+      z-index: 10;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    .pulse-animation { animation: pulse 0.5s ease-in-out; }
+    
+    .groups-container {
+      margin: 16px 0;
+    }
+    
+    .group-item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 12px;
+      margin-bottom: 12px;
+    }
+    
+    .group-header {
+      display: flex;
+      align-items: center;
+  justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    
+    .group-title {
+      font-weight: 600;
+      font-size: 16px;
+      margin: 0;
+    }
+    
+    .remove-group {
+      background: #ef4444;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      width: 26px;
+      height: 26px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .drugs-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    
+    .drug-input-container {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    
+    .drug-input {
+      width: 200px;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    
+    .add-drug, .remove-drug {
+      width: 28px;
+      height: 28px;
+      border: none;
+      border-radius: 4px;
+      font-size: 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .add-drug {
+      background: #10b981;
+      color: white;
+    }
+    
+    .remove-drug {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .add-drug-btn {
+      margin-top: 10px;
+      font-size: 14px;
+      padding: 6px 12px;
+      background: transparent;
+      border: 1px dashed #10b981;
+      color: #10b981;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .add-drug-btn:hover {
+      background: rgba(16, 185, 129, 0.1);
+    }
+    
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+    
+    .btn-outline-primary {
+      background: transparent;
+      border: 1px solid #6366f1;
+      color: #6366f1;
+    }
+    
+    .btn-outline-primary:hover {
+      background: rgba(99, 102, 241, 0.1);
+    }
+    
+    
+    .test-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .test-progress {
+      background: #f3f4f6;
+      padding: 8px 16px;
+      border-radius: 50px;
+      font-size: 16px;
+    }
+    
+    .question-container {
+      background: #f9fafb;
+      border-radius: 8px;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    
+    .question-container h3 {
+      margin-top: 0;
+      margin-bottom: 15px;
+    }
+    
+    .answers-list {
+      list-style-type: none;
+      padding: 0;
+    }
+    
+    .answer-item {
+      padding: 12px 15px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .answer-item:hover {
+      background: #f3f4f6;
+    }
+    
+    .answer-item.selected {
+      background: #e0e7ff;
+      border-color: #8b5cf6;
+    }
+    
+    .score-display {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+    
+    .score-circle {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      background: #e0e7ff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      font-weight: 600;
+      color: #5b21b6;
+      margin-bottom: 15px;
+    }
+    
+    .detailed-results {
+      margin-top: 15px;
+      max-height: 65vh;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+    
+    .result-item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 6px;
+    }
+    
+    .result-item.correct {
+      border-left: 4px solid #10b981;
+    }
+    
+    .result-item.incorrect {
+      border-left: 4px solid #ef4444;
+    }
+    
+    .result-item p {
+      margin: 4px 0;
+    }
+    
+    /* Sample Files Section Styling */
+    .sample-files-section {
+      margin-top: 25px;
+      border-top: 1px dashed #ddd;
+      padding-top: 20px;
+    }
+    
+    .sample-description {
+      color: #666;
+      font-size: 14px;
+      margin-bottom: 15px;
+    }
+    
+    .sample-files-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 15px;
+    }
+    
+    .sample-file-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px;
+      transition: all 0.2s ease;
+      cursor: pointer;
+      background: #f9fafb;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    
+    .sample-file-card:hover {
+      border-color: #6366f1;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .sample-file-icon {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 10px;
+    }
+    
+    .sample-file-name {
+      font-weight: 500;
+      margin-bottom: 5px;
+      color: #1f2937;
+    }
+    
+    .sample-file-info {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    
+    /* Scrollbar styling for results */
+    .detailed-results::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    .detailed-results::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 4px;
+    }
+    
+    .detailed-results::-webkit-scrollbar-thumb {
+      background: #c4c4c4;
+      border-radius: 4px;
+    }
+    
+    .detailed-results::-webkit-scrollbar-thumb:hover {
+      background: #a0a0a0;
+    }
+    
+    .import-label {
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      display: inline-flex; /* behave like a button */
+      align-items: center;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+    
+    .import-label input[type="file"] {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 0;
+      width: 0.1px;
+      height: 0.1px;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    /* Pulse animation for answer selection */
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    
+    .pulse-animation {
+      animation: pulse 0.5s ease-in-out;
+    }
+    
+    @media (max-width: 768px) {
+      .main-content {
+        margin-left: 0;
+        padding: 10px;
+      }
+      
+      #side-menu {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+      }
+      
+      #side-menu.show {
+        transform: translateX(0);
+      }
+      
+      .mobile-menu-toggle {
+        display: flex;
+      }
+      
+      .button-row {
+        flex-direction: column;
+      }
+      
+      .button-row .btn {
+        width: 100%;
+      }
+      /* Ensure import label matches button width/centering on mobile */
+      .button-row .import-label {
+        width: 100%;
+      }
+      
+      /* Improved mobile styles */
+      .group-item {
+        padding: 10px;
+      }
+      
+      .drugs-container {
+        flex-direction: column;
+      }
+      
+      .drug-input-container {
+        width: 100%;
+        margin-bottom: 5px;
+      }
+      
+      .drug-input {
+        width: calc(100% - 35px);
+      }
+
+      /* Mobile: make group name input span wider (responsive) */
+      .form-control.group-name {
+        width: 100%;
+        max-width: 310px; /* between 400-500px as requested */
+      }
+      
+      .form-control {
+        font-size: 16px; /* Prevent zoom on iOS */
+      }
+      
+      .question-container {
+        padding: 14px;
+        margin-bottom: 12px;
+      }
+      .question-container h3 {
+        font-size: 17px;
+        margin-bottom: 10px;
+      }
+      .answers-list {
+        max-height: calc(100vh - 220px); /* fit viewport with sticky controls */
+        overflow-y: auto;
+        padding-right: 6px;
+      }
+      .answer-item {
+        padding: 10px 12px;
+        font-size: 15px;
+      }
+      
+      .score-circle {
+        width: 100px;
+        height: 100px;
+        font-size: 24px;
+      }
+      /* Fix double tap issue on mobile */
+      .answer-item {
+        -webkit-tap-highlight-color: transparent;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="layout">
+    <!-- Side menu -->
+    <div id="side-menu" class="sidebar">
+      <div class="bb-inner-wrap">
+        <div class="logo-header">
+          <a href="https://elearn.mu-varna.bg" target="_blank" rel="noopener noreferrer">
+            <img src="https://ultra.content.blackboardcdn.com/ultra/static/images/brand/blackboard_logo_white.svg" alt="Blackboard-Medical University Varna" class="logo-img">
+          </a>
+        </div>
+        <nav class="sidebar-nav" aria-label="Main">
+          <ul class="off-canvas-list" id="base_tools">
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/institution-page">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-institution-custom.svg" alt="Institution Page" />
+                <span class="link-text">Institution Page</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/profile">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-profile-custom.svg" alt="Profile" />
+                <span class="link-text">Профил</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/stream">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-activity-custom.svg" alt="Activity" />
+                <span class="link-text">Activity</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="index.html">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-courses-book.svg" alt="Courses" />
+                <span class="link-text">Courses</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/calendar">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-calendar-custom.svg" alt="Calendar" />
+                <span class="link-text">Calendar</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/messages">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/svgexport-8.svg" alt="Messages" />
+                <span class="link-text">Messages</span>
+              </a>
+            </li>
+            <li class="base-navigation-button active">
+              <a class="base-navigation-button-content" href="tests.html">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-grades-paper.svg" alt="Grades" />
+                <span class="link-text">Grades</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/tools">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-tools-custom.svg" alt="Tools" />
+                <span class="link-text">Tools</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/logout">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-signout-custom.svg" alt="Sign Out" />
+                <span class="link-text">Sign Out</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-footer-links">
+          <span class="sidebar-footer-item">Privacy</span>
+          <span class="sidebar-footer-item">Terms</span>
+          <span class="sidebar-footer-item" onclick="toggleVersionInfo()">Accessibility</span>
+          <span id="versionInfo"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile menu toggle button -->
+    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="3" y1="12" x2="21" y2="12"></line>
+        <line x1="3" y1="6" x2="21" y2="6"></line>
+        <line x1="3" y1="18" x2="21" y2="18"></line>
+      </svg>
+    </button>
+
+    <div class="main-content">
+      <header class="main-header">
+        <h1 class="page-title">Фармакологичен Тест</h1>
+      </header>
+      
+      <div class="content">
+        <div class="test-container">
+          <!-- Test Creator Section -->
+          <div id="testCreator" class="test-creator">
+            <h2>Създаване на тест</h2>
+            
+            <div class="form-row">
+              <div class="form-group form-group-compact">
+                <label for="questionType">Тип въпроси:</label>
+                <select id="questionType" class="form-control">
+                  <option value="drugToGroup">Лекарство → Група</option>
+                  <option value="groupToDrug">Група → Лекарство</option>
+                  <option value="both">И двата типа</option>
+                </select>
+              </div>
+              
+              <div class="form-group form-group-compact">
+                <label for="questionCount">Брой въпроси:</label>
+                <input type="number" id="questionCount" class="form-control input-narrow" min="1" max="100" value="10">
+              </div>
+            </div>
+            
+            <div id="groupsContainer" class="groups-container">
+              <!-- Groups will be added here dynamically -->
+            </div>
+            
+            <button id="addGroupBtn" class="btn btn-primary">+ Добави нова група</button>
+            
+            <div class="sticky-actions">
+              <div class="button-row">
+              <button id="generateBtn" class="btn btn-success">Стартирай тест</button>
+              <button id="exportBtn" class="btn btn-secondary">Експортирай като JSON</button>
+              <button id="clearFormBtn" class="btn btn-danger">Изчисти формата</button>
+              <label for="importFile" class="btn btn-secondary import-label">
+                <span>📂 Импортирай JSON</span>
+                <input type="file" id="importFile" accept=".json" class="hidden">
+              </label>
+              </div>
+            </div>
+            
+            <!-- Sample Files Section -->
+            <div class="sample-files-section">
+              <h3>Примерни файлове</h3>
+              <div id="sampleFilesContainer" class="sample-files-container">
+                <!-- Sample files will be loaded here -->
+              </div>
+            </div>
+          </div>
+          
+          <!-- Test Runner Section -->
+          <div id="testRunner" class="test-runner hidden">
+            <div class="test-header">
+              <h2 id="testTitle">Фармакологичен тест</h2>
+              <div id="testProgress" class="test-progress">Въпрос <span id="currentQuestion">1</span> от <span id="totalQuestions">10</span></div>
+            </div>
+            
+            <div id="questionContainer" class="question-container">
+              <!-- Current question will be displayed here -->
+            </div>
+            
+            <div class="sticky-runner">
+              <div class="button-row">
+                <button id="nextQuestionBtn" class="btn btn-primary">Следващ въпрос</button>
+                <button id="submitTestBtn" class="btn btn-success hidden">Предай теста</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Results Section -->
+          <div id="resultsSection" class="results-section hidden">
+            <h2>Резултати</h2>
+            <div class="results-container">
+              <div class="score-display">
+                <div class="score-circle">
+                  <span id="scorePercentage">0%</span>
+                </div>
+                <p>Верни отговори: <span id="correctAnswers">0</span> от <span id="totalAnswers">0</span></p>
+              </div>
+              <div id="detailedResults" class="detailed-results">
+                <!-- Detailed results will be shown here -->
+              </div>
+            </div>
+            <div class="button-row">
+              <button id="restartTestBtn" class="btn btn-primary">Повтори теста</button>
+              <button id="newTestBtn" class="btn btn-secondary">Създай нов тест</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Mobile menu toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const sideMenu = document.getElementById('side-menu');
+      
+      mobileMenuToggle.addEventListener('click', function() {
+        sideMenu.classList.toggle('show');
+      });
+      
+      // Initialize the pharmacology test system
+      initPharmacologyTest();
+    });
+    
+    // Function to toggle version info
+    function toggleVersionInfo() {
+      const versionInfo = document.getElementById('versionInfo');
+      if (versionInfo.classList.contains('hidden')) {
+        versionInfo.textContent = 'October 16, 2025';
+        versionInfo.classList.remove('hidden');
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          versionInfo.classList.add('hidden');
+        }, 5000);
+      } else {
+        versionInfo.classList.add('hidden');
+      }
+    }
+    
+    // Pharmacology Test System
+    function initPharmacologyTest() {
+      // DOM elements
+      const testCreator = document.getElementById('testCreator');
+      const testRunner = document.getElementById('testRunner');
+      const resultsSection = document.getElementById('resultsSection');
+      const groupsContainer = document.getElementById('groupsContainer');
+      const addGroupBtn = document.getElementById('addGroupBtn');
+      const generateBtn = document.getElementById('generateBtn');
+      const exportBtn = document.getElementById('exportBtn');
+      const importFile = document.getElementById('importFile');
+      const nextQuestionBtn = document.getElementById('nextQuestionBtn');
+      const submitTestBtn = document.getElementById('submitTestBtn');
+      const questionContainer = document.getElementById('questionContainer');
+      const currentQuestionEl = document.getElementById('currentQuestion');
+      const totalQuestionsEl = document.getElementById('totalQuestions');
+      const scorePercentage = document.getElementById('scorePercentage');
+      const correctAnswers = document.getElementById('correctAnswers');
+      const totalAnswers = document.getElementById('totalAnswers');
+      const detailedResults = document.getElementById('detailedResults');
+      const restartTestBtn = document.getElementById('restartTestBtn');
+      const newTestBtn = document.getElementById('newTestBtn');
+      const clearFormBtn = document.getElementById('clearFormBtn');
+      const sampleFilesContainer = document.getElementById('sampleFilesContainer');
+      
+      // State variables
+      let testData = {
+        questionType: 'drugToGroup',
+        questionCount: 10,
+        groups: []
+      };
+      let generatedQuestions = [];
+      let currentQuestionIndex = 0;
+      let userAnswers = [];
+      
+      // State initialization
+      
+      // Event listeners
+      addGroupBtn.addEventListener('click', addNewGroup);
+      generateBtn.addEventListener('click', generateQuestions);
+      exportBtn.addEventListener('click', exportToJson);
+      importFile.addEventListener('change', importFromJson);
+      clearFormBtn.addEventListener('click', clearForm);
+      nextQuestionBtn.addEventListener('click', goToNextQuestion);
+      submitTestBtn.addEventListener('click', finishTest);
+      restartTestBtn.addEventListener('click', restartTest);
+      newTestBtn.addEventListener('click', () => {
+        resultsSection.classList.add('hidden');
+        testCreator.classList.remove('hidden');
+      });
+      
+      // Functions
+      function addNewGroup() {
+        const groupId = Date.now(); // Unique ID for this group
+        const groupEl = document.createElement('div');
+        groupEl.className = 'group-item';
+        groupEl.dataset.groupId = groupId;
+        
+        groupEl.innerHTML = `
+          <div class="group-header">
+            <h3 class="group-title">Група</h3>
+            <button type="button" class="remove-group">×</button>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-control group-name" placeholder="Име на групата (напр. Фибринолитици)" required>
+          </div>
+          <div class="form-group">
+            <label>Лекарства в групата:</label>
+            <div class="drugs-container">
+              <!-- Първоначално празен контейнер, ще се добави първото лекарство отделно -->
+            </div>
+            <button type="button" class="btn btn-sm btn-outline-primary add-drug-btn">+ Добави лекарство</button>
+          </div>
+        `;
+        
+        groupsContainer.appendChild(groupEl);
+        
+        // Add event listeners to the new group
+        const removeGroupBtn = groupEl.querySelector('.remove-group');
+        removeGroupBtn.addEventListener('click', () => {
+          groupEl.remove();
+        });
+        
+        const addDrugBtn = groupEl.querySelector('.add-drug-btn');
+        addDrugBtn.addEventListener('click', () => {
+          const drugsContainer = groupEl.querySelector('.drugs-container');
+          addDrugInput(drugsContainer);
+        });
+      }
+      
+      function addDrugInput(container) {
+        const drugInputContainer = document.createElement('div');
+        drugInputContainer.className = 'drug-input-container';
+        drugInputContainer.innerHTML = `
+          <input type="text" class="drug-input" placeholder="Име на лекарство">
+          <button type="button" class="remove-drug">×</button>
+        `;
+        container.appendChild(drugInputContainer);
+        
+        const removeDrugBtn = drugInputContainer.querySelector('.remove-drug');
+        removeDrugBtn.addEventListener('click', () => {
+          drugInputContainer.remove();
+        });
+      }
+      
+      function collectTestData() {
+        const questionType = document.getElementById('questionType').value;
+        const questionCount = parseInt(document.getElementById('questionCount').value);
+        
+        const groups = [];
+        const groupElements = document.querySelectorAll('.group-item');
+        
+        groupElements.forEach(groupEl => {
+          const groupName = groupEl.querySelector('.group-name').value.trim();
+          if (!groupName) return;
+          
+          const drugs = [];
+          const drugInputs = groupEl.querySelectorAll('.drug-input');
+          drugInputs.forEach(input => {
+            const drugName = input.value.trim();
+            if (drugName) drugs.push(drugName);
+          });
+          
+          if (drugs.length > 0) {
+            groups.push({
+              groupName,
+              drugs
+            });
+          }
+        });
+        
+        return {
+          questionType,
+          questionCount,
+          groups
+        };
+      }
+      
+      function generateQuestions() {
+        testData = collectTestData();
+        
+        if (testData.groups.length < 2) {
+          alert('Необходими са поне две групи лекарства за генериране на въпроси.');
+          return;
+        }
+        
+        // Check if each group has at least one drug
+        const invalidGroups = testData.groups.filter(group => group.drugs.length === 0);
+        if (invalidGroups.length > 0) {
+          alert('Всяка група трябва да има поне едно лекарство.');
+          return;
+        }
+        
+        // Generate questions based on question type
+        generatedQuestions = [];
+        
+        switch(testData.questionType) {
+          case 'drugToGroup':
+            generateDrugToGroupQuestions();
+            break;
+          case 'groupToDrug':
+            generateGroupToDrugQuestions();
+            break;
+          case 'both':
+            // Mix both types
+            const halfCount = Math.ceil(testData.questionCount / 2);
+            const tempType = testData.questionType;
+            const originalCount = testData.questionCount;
+            
+            // Generate first half as drug to group questions
+            testData.questionType = 'drugToGroup';
+            testData.questionCount = halfCount;
+            generateDrugToGroupQuestions(); // This adds to generatedQuestions
+            
+            // Store the first set of questions
+            const firstHalfQuestions = [...generatedQuestions];
+            
+            // Clear for second half
+            generatedQuestions = [];
+            
+            // Generate second half as group to drug questions
+            testData.questionType = 'groupToDrug';
+            testData.questionCount = originalCount - halfCount;
+            generateGroupToDrugQuestions();
+            
+            // Combine both sets of questions
+            generatedQuestions = [...firstHalfQuestions, ...generatedQuestions];
+            
+            // Restore original settings
+            testData.questionType = tempType;
+            testData.questionCount = originalCount;
+            break;
+        }
+        
+        // Start test immediately instead of showing preview
+        startTest();
+      }
+      
+      function generateDrugToGroupQuestions() {
+        // Get all groups and drugs
+        const allGroups = testData.groups.map(g => g.groupName);
+        let allDrugsWithGroups = [];
+        
+        testData.groups.forEach(group => {
+          group.drugs.forEach(drug => {
+            allDrugsWithGroups.push({
+              drug,
+              group: group.groupName
+            });
+          });
+        });
+        
+        // Shuffle the drugs
+        shuffleArray(allDrugsWithGroups);
+        
+        // Take only the number of drugs we need
+        const drugsToUse = allDrugsWithGroups.slice(0, testData.questionCount);
+        
+        // For each drug, create a question
+        drugsToUse.forEach(item => {
+          // Get 9 random wrong answers (other groups)
+          let wrongGroups = allGroups.filter(g => g !== item.group);
+          shuffleArray(wrongGroups);
+          wrongGroups = wrongGroups.slice(0, Math.min(9, wrongGroups.length));
+          
+          // Combine correct and wrong answers
+          let answers = [item.group, ...wrongGroups];
+          shuffleArray(answers);
+          
+          generatedQuestions.push({
+            type: 'drugToGroup',
+            question: `Към коя група принадлежи "${item.drug}"?`,
+            answers: answers,
+            correctAnswer: item.group
+          });
+        });
+      }
+      
+      function generateGroupToDrugQuestions() {
+        // Shuffle the groups
+        let groupsToUse = [...testData.groups];
+        shuffleArray(groupsToUse);
+        
+        // Take only the number of groups we need
+        groupsToUse = groupsToUse.slice(0, testData.questionCount);
+        
+        // For each group, create a question
+        groupsToUse.forEach(group => {
+          // Get all drugs from other groups
+          let otherDrugs = [];
+          testData.groups.forEach(g => {
+            if (g.groupName !== group.groupName) {
+              otherDrugs = otherDrugs.concat(g.drugs);
+            }
+          });
+          shuffleArray(otherDrugs);
+          
+          // Take random drug from current group as correct answer
+          shuffleArray(group.drugs);
+          const correctDrug = group.drugs[0];
+          
+          // Add wrong answers
+          const wrongDrugs = otherDrugs.slice(0, 9);
+          
+          // Combine correct and wrong answers
+          let answers = [correctDrug, ...wrongDrugs];
+          shuffleArray(answers);
+          
+          generatedQuestions.push({
+            type: 'groupToDrug',
+            question: `Кое лекарство принадлежи към групата "${group.groupName}"?`,
+            answers: answers,
+            correctAnswer: correctDrug
+          });
+        });
+      }
+      
+      // Preview function removed as we now start test directly
+      
+      function exportToJson() {
+        const dataToExport = collectTestData();
+        
+        if (dataToExport.groups.length < 1) {
+          alert('Добавете поне една група с лекарства преди експорт.');
+          return;
+        }
+        
+        // Create a blob and download it
+        const blob = new Blob([JSON.stringify(dataToExport, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'testData.json';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+      
+      function importFromJson(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          try {
+            const importedData = JSON.parse(e.target.result);
+            
+            // Validate the imported data
+            if (!importedData.questionType || !importedData.groups) {
+              throw new Error('Invalid format');
+            }
+            
+            // Update the UI with the imported data
+            document.getElementById('questionType').value = importedData.questionType;
+            document.getElementById('questionCount').value = importedData.questionCount || 10;
+            
+            // Clear existing groups
+            groupsContainer.innerHTML = '';
+            
+            // Add imported groups
+            importedData.groups.forEach(group => {
+              const groupEl = document.createElement('div');
+              groupEl.className = 'group-item';
+              groupEl.dataset.groupId = Date.now() + Math.random();
+              
+              groupEl.innerHTML = `
+                <div class="group-header">
+                  <h3 class="group-title">Група</h3>
+                  <button type="button" class="remove-group">×</button>
+                </div>
+                <div class="form-group">
+                  <input type="text" class="form-control group-name" value="${group.groupName}" required>
+                </div>
+                <div class="form-group">
+                  <label>Лекарства в групата:</label>
+                  <div class="drugs-container"></div>
+                </div>
+              `;
+              
+              groupsContainer.appendChild(groupEl);
+              
+              // Add event listeners to the new group
+              const removeGroupBtn = groupEl.querySelector('.remove-group');
+              removeGroupBtn.addEventListener('click', () => {
+                groupEl.remove();
+              });
+              
+              // Add drugs to this group
+              const drugsContainer = groupEl.querySelector('.drugs-container');
+              
+              group.drugs.forEach((drug, index) => {
+                const drugInputContainer = document.createElement('div');
+                drugInputContainer.className = 'drug-input-container';
+                
+                if (index === group.drugs.length - 1) {
+                  // Last drug gets an add button
+                  drugInputContainer.innerHTML = `
+                    <input type="text" class="drug-input" value="${drug}">
+                    <button type="button" class="add-drug">+</button>
+                  `;
+                  
+                  const addDrugBtn = drugInputContainer.querySelector('.add-drug');
+                  addDrugBtn.addEventListener('click', (e) => {
+                    addDrugInput(drugsContainer);
+                  });
+                } else {
+                  // Other drugs get remove buttons
+                  drugInputContainer.innerHTML = `
+                    <input type="text" class="drug-input" value="${drug}">
+                    <button type="button" class="remove-drug">×</button>
+                  `;
+                  
+                  const removeDrugBtn = drugInputContainer.querySelector('.remove-drug');
+                  removeDrugBtn.addEventListener('click', () => {
+                    drugInputContainer.remove();
+                  });
+                }
+                
+                drugsContainer.appendChild(drugInputContainer);
+              });
+            });
+            
+            // Clear the file input
+            importFile.value = '';
+            
+            // Без известие при успешен импорт
+            
+          } catch (error) {
+            alert('Грешка при импортиране на файла. Проверете формата на JSON файла.');
+            console.error('Import error:', error);
+          }
+        };
+        reader.readAsText(file);
+      }
+      
+      function startTest() {
+        // Reset test state
+        currentQuestionIndex = 0;
+        userAnswers = Array(generatedQuestions.length).fill(null);
+        
+        // Shuffle questions
+        shuffleArray(generatedQuestions);
+        
+        // Update UI elements
+        currentQuestionEl.textContent = '1';
+        totalQuestionsEl.textContent = generatedQuestions.length;
+        
+        // Display first question
+        showCurrentQuestion();
+        
+        // Show the test runner
+        testCreator.classList.add('hidden');
+        testRunner.classList.remove('hidden');
+      }
+      
+      function showCurrentQuestion() {
+        const question = generatedQuestions[currentQuestionIndex];
+        questionContainer.innerHTML = '';
+        
+        const questionEl = document.createElement('div');
+        questionEl.className = 'question-content';
+        
+        // Create answer elements
+        let answersHtml = '';
+        question.answers.forEach((answer, idx) => {
+          answersHtml += `
+            <li class="answer-item" data-answer-index="${idx}" data-answer-value="${answer}">
+              ${answer}
+            </li>
+          `;
+        });
+        
+        questionEl.innerHTML = `
+          <h3>${currentQuestionIndex + 1}. ${question.question}</h3>
+          <ul class="answers-list">
+            ${answersHtml}
+          </ul>
+        `;
+        
+        questionContainer.appendChild(questionEl);
+        
+        // Add click event listeners to answers
+        const answerItems = questionContainer.querySelectorAll('.answer-item');
+        answerItems.forEach(item => {
+          item.addEventListener('click', handleAnswerClick);
+        });
+        
+        // Check if there's a saved answer for this question
+        if (userAnswers[currentQuestionIndex] !== null) {
+          const savedAnswer = userAnswers[currentQuestionIndex];
+          answerItems.forEach(item => {
+            if (item.dataset.answerValue === savedAnswer) {
+              item.classList.add('selected');
+            }
+          });
+        }
+        
+        // Update buttons based on question index
+        updateNavigationButtons();
+      }
+      
+      // Clear the form and reset to default state
+      function clearForm() {
+        // Reset the form fields
+        document.getElementById('questionType').value = 'drugToGroup';
+        document.getElementById('questionCount').value = '10';
+        
+        // Remove all groups
+        groupsContainer.innerHTML = '';
+        
+        // Add one empty default group
+        addNewGroup();
+        
+        // Без известие при изчистване на формата
+      }
+      
+      function handleAnswerClick(event) {
+        const answerItem = event.currentTarget;
+        const answerValue = answerItem.dataset.answerValue;
+        
+        // Remove selected class from all answers
+        const allAnswers = questionContainer.querySelectorAll('.answer-item');
+        allAnswers.forEach(item => item.classList.remove('selected'));
+        
+        // Add selected class to clicked answer
+        answerItem.classList.add('selected');
+        
+        // Save the answer
+        userAnswers[currentQuestionIndex] = answerValue;
+        
+        // Enable next button
+        nextQuestionBtn.disabled = false;
+        
+        // Add pulsing effect for visual feedback
+        answerItem.classList.add('pulse-animation');
+        setTimeout(() => {
+          answerItem.classList.remove('pulse-animation');
+        }, 500);
+      }
+      
+      function goToNextQuestion() {
+        if (currentQuestionIndex < generatedQuestions.length - 1) {
+          currentQuestionIndex++;
+          currentQuestionEl.textContent = currentQuestionIndex + 1;
+          showCurrentQuestion();
+        }
+      }
+      
+      function updateNavigationButtons() {
+        if (currentQuestionIndex === generatedQuestions.length - 1) {
+          nextQuestionBtn.classList.add('hidden');
+          submitTestBtn.classList.remove('hidden');
+        } else {
+          nextQuestionBtn.classList.remove('hidden');
+          submitTestBtn.classList.add('hidden');
+        }
+      }
+      
+      function finishTest() {
+        // Calculate score
+        let score = 0;
+        generatedQuestions.forEach((question, index) => {
+          if (userAnswers[index] === question.correctAnswer) {
+            score++;
+          }
+        });
+        
+        // Update results UI
+        const percentage = Math.round((score / generatedQuestions.length) * 100);
+        scorePercentage.textContent = `${percentage}%`;
+        correctAnswers.textContent = score;
+        totalAnswers.textContent = generatedQuestions.length;
+        
+        // Apply color to score circle based on percentage
+        const scoreCircle = document.querySelector('.score-circle');
+        if (percentage >= 80) {
+          scoreCircle.style.backgroundColor = '#d1fae5';
+          scoreCircle.style.color = '#10b981';
+        } else if (percentage >= 60) {
+          scoreCircle.style.backgroundColor = '#e0e7ff';
+          scoreCircle.style.color = '#6366f1';
+        } else if (percentage >= 40) {
+          scoreCircle.style.backgroundColor = '#fef3c7';
+          scoreCircle.style.color = '#d97706';
+        } else {
+          scoreCircle.style.backgroundColor = '#fee2e2';
+          scoreCircle.style.color = '#ef4444';
+        }
+        
+        // Show detailed results
+        showDetailedResults();
+        
+        // Show results section
+        testRunner.classList.add('hidden');
+        resultsSection.classList.remove('hidden');
+      }
+      
+      function showDetailedResults() {
+        detailedResults.innerHTML = '';
+        
+        generatedQuestions.forEach((question, index) => {
+          const isCorrect = userAnswers[index] === question.correctAnswer;
+          const resultItem = document.createElement('div');
+          resultItem.className = `result-item ${isCorrect ? 'correct' : 'incorrect'}`;
+          
+          // Icon based on correctness
+          const icon = isCorrect ? 
+            '<span style="color: #10b981; font-size: 1.2em; margin-right: 8px;">✓</span>' : 
+            '<span style="color: #ef4444; font-size: 1.2em; margin-right: 8px;">✗</span>';
+            
+          resultItem.innerHTML = `
+            <p style="font-size: 0.9em;"><strong>${icon} ${index + 1}. ${question.question}</strong></p>
+            <div style="display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85em;">
+              <p style="margin: 0;"><span style="opacity: 0.7;">Вашият отговор:</span> <span style="${isCorrect ? 'color: #10b981; font-weight: 500;' : 'color: #ef4444;'}">${userAnswers[index] || 'Няма отговор'}</span></p>
+              <p style="margin: 0;"><span style="opacity: 0.7;">Верен отговор:</span> <span style="color: #10b981; font-weight: 500;">${question.correctAnswer}</span></p>
+            </div>
+          `;
+          
+          detailedResults.appendChild(resultItem);
+        });
+      }
+      
+      function restartTest() {
+        // Clear the previous questions array before generating new ones
+        generatedQuestions = [];
+        
+        // Generate completely new questions
+        switch(testData.questionType) {
+          case 'drugToGroup':
+            generateDrugToGroupQuestions();
+            break;
+          case 'groupToDrug':
+            generateGroupToDrugQuestions();
+            break;
+          case 'both':
+            // Mix both types
+            const halfCount = Math.ceil(testData.questionCount / 2);
+            const tempType = testData.questionType;
+            const originalCount = testData.questionCount;
+            
+            // Generate first half as drug to group questions
+            testData.questionType = 'drugToGroup';
+            testData.questionCount = halfCount;
+            generatedQuestions = []; // Ensure array is empty
+            generateDrugToGroupQuestions();
+            
+            // Store the first set of questions
+            const firstHalfQuestions = [...generatedQuestions];
+            
+            // Clear for second half
+            generatedQuestions = [];
+            
+            // Generate second half as group to drug questions
+            testData.questionType = 'groupToDrug';
+            testData.questionCount = originalCount - halfCount;
+            generateGroupToDrugQuestions();
+            
+            // Combine both sets of questions
+            generatedQuestions = [...firstHalfQuestions, ...generatedQuestions];
+            
+            // Restore original settings
+            testData.questionType = tempType;
+            testData.questionCount = originalCount;
+            break;
+        }
+        
+        // Reset test state
+        currentQuestionIndex = 0;
+        userAnswers = Array(generatedQuestions.length).fill(null);
+        
+        // Update UI
+        currentQuestionEl.textContent = '1';
+        
+        // Show first question
+        showCurrentQuestion();
+        
+        // Switch to test runner
+        resultsSection.classList.add('hidden');
+        testRunner.classList.remove('hidden');
+      }
+      
+      // Utility function to shuffle an array
+      function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+      
+      // Example data functionality removed
+      
+      // Sample data buttons removed
+      
+      
+
+
+
+
+
+// ГЕНЕРИРАНИ ДАННИ ЗА ПРИМЕРНИ ФАЙЛОВЕ - НАЧАЛО
+const sampleFiles = [
+  {
+    "fileName": "Фармакология III.json",
+    "title": "Фармакология III",
+    "groups": 70,
+    "drugs": 149,
+    "data": {
+      "questionType": "both",
+      "questionCount": 20,
+      "groups": [
+        {
+          "groupName": "Инхибитори на ангиотензин-конвертиращия ензим (ACE-инхибитори)",
+          "drugs": [
+            "Enalapril",
+            "LisinopriI",
+            "Perindopril",
+            "Trandolapril",
+            "Cilazapril",
+            "QuinapriI",
+            "Ramipril",
+            "Captopril"
+          ]
+        },
+        {
+          "groupName": "Блокери на АТ1 рецепторите за ангиотензин II (ангиотензин рецепторни блокери, АРБ)",
+          "drugs": [
+            "Valsartan",
+            "Losartan",
+            "Irbesartan",
+            "Sacubitral/valsatran"
+          ]
+        },
+        {
+          "groupName": "Директни ренинови инхибитори",
+          "drugs": [
+            "Aliskiren"
+          ]
+        },
+        {
+          "groupName": "Антагонисти на алдостерона",
+          "drugs": [
+            "Spironolactone",
+            "Eplerenone"
+          ]
+        },
+        {
+          "groupName": "Дигиталисови (сърдечни) гликозиди",
+          "drugs": [
+            "Digoxin",
+            "Metildigoxin"
+          ]
+        },
+        {
+          "groupName": "Лекарства при дигиталисова интоксикация",
+          "drugs": [
+            "Lidocaine",
+            "Phenytoine"
+          ]
+        },
+        {
+          "groupName": "Адреномиметици",
+          "drugs": [
+            "Dobutamine",
+            "Dopamine"
+          ]
+        },
+        {
+          "groupName": "Периферни съдоактивни лекарства -  вазодилататори с предимно действие върху периферните съдове",
+          "drugs": [
+            "Pentoxifylline",
+            "Papaverine"
+          ]
+        },
+        {
+          "groupName": "Периферни съдоактивни лекарства -  вазодилататори с предимно действие върху мозъчните съдове",
+          "drugs": [
+            "Cinnarizine",
+            "Flunarizine",
+            "Nimodipine",
+            "Vinpocetine",
+            "Nicergoline",
+            "Naftidrofuryl",
+            "Betahistine"
+          ]
+        },
+        {
+          "groupName": "Венотонични и капиляротонични лекарства",
+          "drugs": [
+            "Diosmin",
+            "Bioflavonoids (Diosmin + Flavonoids) = Detralex",
+            "Troxerutin",
+            "Endotelon",
+            "Ascorbic acid",
+            "Rutin + Ascorbic acid Rutascorbin"
+          ]
+        },
+        {
+          "groupName": "Салидиуретици - тиазиди и подобни",
+          "drugs": [
+            "Hydrochlorothiazide",
+            "Chlorthalidone",
+            "Indapamide"
+          ]
+        },
+        {
+          "groupName": "Салидиуретици - бримкови диуретици",
+          "drugs": [
+            "Furosemide",
+            "Torasemide"
+          ]
+        },
+        {
+          "groupName": "Калий-съхраняващи диуретици - антагонисти на алдостерона",
+          "drugs": [
+            "Spironolactone",
+            "Eplerenone"
+          ]
+        },
+        {
+          "groupName": "Калий-съхраняващи диуретици - блокери на амилорид-чувствителните натриеви канали",
+          "drugs": [
+            "Triamterene",
+            "Triamterene + Hydrochlorothiazide = Triampur compositum"
+          ]
+        },
+        {
+          "groupName": "Осмотични диуретици",
+          "drugs": [
+            "Mannitol"
+          ]
+        },
+        {
+          "groupName": "Инхибитори на карбоанхидразата",
+          "drugs": [
+            "Acetazolamide",
+            "Brinzolamide",
+            "Dorzolamide"
+          ]
+        },
+        {
+          "groupName": "Инхибитори на карбоанхидразата - антиглаукомни лекарства",
+          "drugs": [
+            "Brinzolamide",
+            "Dorzolamide"
+          ]
+        },
+        {
+          "groupName": "Дихидропиридини (дипини) - I поколение",
+          "drugs": [
+            "Nifedipine",
+            "Nitrendipine",
+            "Nimodipine"
+          ]
+        },
+        {
+          "groupName": "Дихидропиридини (дипини) - II поколение",
+          "drugs": [
+            "Felodipine",
+            "Nifedipine ret."
+          ]
+        },
+        {
+          "groupName": "Дихидропиридини (дипини) - III поколение",
+          "drugs": [
+            "Amlodipine",
+            "Lercanidipine",
+            "Lacidipine"
+          ]
+        },
+        {
+          "groupName": "Недихидропиридини - Фенилалкиламини",
+          "drugs": [
+            "Verapamil"
+          ]
+        },
+        {
+          "groupName": "Недихидропиридини - бензотиазепини",
+          "drugs": [
+            "Diltiazem"
+          ]
+        },
+        {
+          "groupName": "Бета-блокери - неселективни",
+          "drugs": [
+            "Propranolol"
+          ]
+        },
+        {
+          "groupName": "Бета-блокери - бета1 селективни",
+          "drugs": [
+            "Metoprolol"
+          ]
+        },
+        {
+          "groupName": "Бета-блокери - вазодилатиращи",
+          "drugs": [
+            "Carvedilol",
+            "Nebivilol"
+          ]
+        },
+        {
+          "groupName": "Aлфа1 селективни блокери",
+          "drugs": [
+            "Prazosin",
+            "Doxazosin"
+          ]
+        },
+        {
+          "groupName": "Централно действащи симпатолитици - алфа2 селективни агонисти",
+          "drugs": [
+            "Clonidine",
+            "Methyldopa"
+          ]
+        },
+        {
+          "groupName": "Централно действащи симпатолитици - агонисти на I1-имидазолиновите рецептори",
+          "drugs": [
+            "Moxonidine",
+            "Rilmenidine"
+          ]
+        },
+        {
+          "groupName": "Пресинаптични симпатолитици",
+          "drugs": [
+            "Reserpine"
+          ]
+        },
+        {
+          "groupName": "Директни (миотропни) вазодилататори",
+          "drugs": [
+            "Nitroprusside"
+          ]
+        },
+        {
+          "groupName": "Лекарства при хипертензивна криза",
+          "drugs": [
+            "Furosemide",
+            "Clonidine",
+            "Nitroprusside"
+          ]
+        },
+        {
+          "groupName": "Вазоконстриктори (алфа-адреномиметици)",
+          "drugs": [
+            "Midodrine"
+          ]
+        },
+        {
+          "groupName": "Хормонални лекарства",
+          "drugs": [
+            "Fludrocortisone"
+          ]
+        },
+        {
+          "groupName": "Oрганични нитрати и лекарства с подобна активност",
+          "drugs": [
+            "Nitroglycerin",
+            "Nitrolingual",
+            "Perlinganit"
+          ]
+        },
+        {
+          "groupName": "Oрганични нитрати с продължително действие",
+          "drugs": [
+            "Isosorbidе dinitrate",
+            "Isosorbide mononitrate",
+            "Pentaerithrityl tetranitrate"
+          ]
+        },
+        {
+          "groupName": "Антиангинозни лекарства - инхибитори на If потока",
+          "drugs": [
+            "Ivabradine"
+          ]
+        },
+        {
+          "groupName": "Антиангинозни лекарства - метаболитни модулатори",
+          "drugs": [
+            "Trimetazidine",
+            "Ranolazine"
+          ]
+        },
+        {
+          "groupName": "Антиаритмични лекарства - клас I. блокери на натриви канали - клас IA (удължаващи реполяризацията)",
+          "drugs": [
+            "Quinidine"
+          ]
+        },
+        {
+          "groupName": "Антиаритмични лекарства - клас I. блокери на натриви канали - клас IB (скъсяващи реполяризацията)",
+          "drugs": [
+            "Lidocaine",
+            "Phenytoin"
+          ]
+        },
+        {
+          "groupName": "Антиаритмични лекарства - клас I. блокери на натриви канали - клас IC (без ефект върху реполяризацията)",
+          "drugs": [
+            "Propafenone"
+          ]
+        },
+        {
+          "groupName": "Антиаритмични лекарства - клас III. лекарства, удължаващи акционния потенциал",
+          "drugs": [
+            "Amiodarone",
+            "Sotalol"
+          ]
+        },
+        {
+          "groupName": "Други лекарства, използвани при ритъмни нарушения",
+          "drugs": [
+            "Digoxin",
+            "Atropine",
+            "Adenosine"
+          ]
+        },
+        {
+          "groupName": "Антидислипидемични лекарства - инхибитори на HMG Co-A редуктазата",
+          "drugs": [
+            "Simvastatin",
+            "Atorvastatin",
+            "Lovastatin",
+            "Fluvastatin",
+            "Pravastatin",
+            "Rosuvastatin"
+          ]
+        },
+        {
+          "groupName": "Антидислипидемични лекарства - инхибитори на чревната резорбция на стероли",
+          "drugs": [
+            "Ezetimibe",
+            "Simvastatin + Ezetimibe = Inegy"
+          ]
+        },
+        {
+          "groupName": "Антидислипидемични лекарства - PCSK9 инхибитори",
+          "drugs": [
+            "Alirocumab",
+            "Evolocumab"
+          ]
+        },
+        {
+          "groupName": "Антидислипидемични лекарства - смоли, свързващи жлъчни киселини",
+          "drugs": [
+            "Cholestyramine"
+          ]
+        },
+        {
+          "groupName": "Лекарства с предимно действие върху плазмените триглицериди (VLDL)",
+          "drugs": [
+            "Fenofibrate",
+            "Nicotinic acid",
+            "Omega-3-acid ethyl esters"
+          ]
+        },
+        {
+          "groupName": "Лекарства, използвани при анемии (антианемични лекарства) - железни препарати за орално приложение",
+          "drugs": [
+            "Ferrous sulfate",
+            "Ferric oxide polymaltose complex"
+          ]
+        },
+        {
+          "groupName": "Лекарства, използвани при анемии (антианемични лекарства) - железни препарати за парентерално приложение",
+          "drugs": [
+            "Ferric oxide dextran complex"
+          ]
+        },
+        {
+          "groupName": "Желязо-хелатиращи лекарства (антидоти)",
+          "drugs": [
+            "Deferoxamine",
+            "Deferasirox"
+          ]
+        },
+        {
+          "groupName": "Лекарства, използвани при анемии (антианемични лекарства)",
+          "drugs": [
+            "Cyancobalamin (Vit. B12)",
+            "Folic acid"
+          ]
+        },
+        {
+          "groupName": "Хемопоетични растежни фактори",
+          "drugs": [
+            "Erythropoietin"
+          ]
+        },
+        {
+          "groupName": "Хемопоетични растежни фактори - гранулоцит колони-стимулиращ фактор",
+          "drugs": [
+            "Filgrastim",
+            "Pegfilgrastim"
+          ]
+        },
+        {
+          "groupName": "Хемопоетични растежни фактори - тромбопоетин",
+          "drugs": [
+            "Romiplostim"
+          ]
+        },
+        {
+          "groupName": "Кумаринови антикоагуланти (антагонисти на витамин K)",
+          "drugs": [
+            "Acenocoumarol",
+            "Warfarin"
+          ]
+        },
+        {
+          "groupName": "Антикоагуланти - антагонист на кумаринови антикоагуланти",
+          "drugs": [
+            "Phytomenadione (Vitamin K1)"
+          ]
+        },
+        {
+          "groupName": "Антикоагуланти - хепарин и подобни лекарства",
+          "drugs": [
+            "Heparin",
+            "Nadroparin",
+            "Enoxaparin",
+            "Fondaparinux"
+          ]
+        },
+        {
+          "groupName": "Aнтагонист на хепарин и подобни лекарства",
+          "drugs": [
+            "Protamine sulfate"
+          ]
+        },
+        {
+          "groupName": "Антикоагуланти - директни инхибитори на тромбина (фактор IIa)",
+          "drugs": [
+            "Dabigatran"
+          ]
+        },
+        {
+          "groupName": "Антагонист на директни инхибитори на тромбина",
+          "drugs": [
+            "Idarucizumab"
+          ]
+        },
+        {
+          "groupName": "Антикоагуланти - инхибитори на фактор Xa",
+          "drugs": [
+            "Rivaroxaban",
+            "Apixaban"
+          ]
+        },
+        {
+          "groupName": "Антагонист на инхибитори на фактор Xa",
+          "drugs": [
+            "Andexanet alfa"
+          ]
+        },
+        {
+          "groupName": "Фибринолитици",
+          "drugs": [
+            "Streptokinase",
+            "Alteplase",
+            "Reteplase"
+          ]
+        },
+        {
+          "groupName": "Тромбоцитни антиагреганти - инхибитори на синтезата на ТхА2",
+          "drugs": [
+            "Acetylsalicylic acid"
+          ]
+        },
+        {
+          "groupName": "Тромбоцитни антиагреганти - антагонисти на аденозинови (P2Y12) рецептори",
+          "drugs": [
+            "Clopidogrel",
+            "Prasugrel",
+            "Ticagrelor"
+          ]
+        },
+        {
+          "groupName": "Тромбоцитни антиагреганти - фосфодиестеразни инхибитори",
+          "drugs": [
+            "Dipyridamole"
+          ]
+        },
+        {
+          "groupName": "Тромбоцитни антиагреганти - антагонисти на гликопротеин IIB/IIIA рецептори",
+          "drugs": [
+            "Tirofiban",
+            "Eptifibatide",
+            "Abciximab"
+          ]
+        },
+        {
+          "groupName": "Тромбоцитни антиагреганти - синтетичен аналог на PgI2",
+          "drugs": [
+            "Iloprost"
+          ]
+        },
+        {
+          "groupName": "Лекарства, използвани при кървене - инхибитори на фибринолизата",
+          "drugs": [
+            "Para-aminomethylbenzoic acid"
+          ]
+        },
+        {
+          "groupName": "Лекарства, използвани при кървене - системни хемостатици",
+          "drugs": [
+            "Etamsylate",
+            "Terlipressin"
+          ]
+        }
+      ]
+    }
+  }
+];
+
+// Функция за зареждане на примерните файлове в интерфейса
+function loadSampleFiles() {
+  // Изчистване на контейнера
+  sampleFilesContainer.innerHTML = '';
+
+  // Добавяне на карта за всеки примерен файл
+  if (sampleFiles.length > 0) {
+    sampleFiles.forEach(file => {
+      const card = document.createElement('div');
+      card.className = 'sample-file-card';
+      card.innerHTML = `
+        <img src="images/json-file-icon.svg" alt="JSON" class="sample-file-icon">
+        <div class="sample-file-name">${file.title}</div>
+        <div class="sample-file-info">${file.groups} групи, ${file.drugs} лекарства</div>
+      `;
+      
+      // Добавяне на събитие за зареждане на файла
+      card.addEventListener('click', () => loadSampleFile(file.fileName));
+      
+      sampleFilesContainer.appendChild(card);
+    });
+  }
+}
+
+// Важно: Извикване на функцията при зареждане
+loadSampleFiles();
+// ГЕНЕРИРАНИ ДАННИ ЗА ПРИМЕРНИ ФАЙЛОВЕ - КРАЙ
+
+
+      
+      // Function to load a sample file
+      function loadSampleFile(fileName) {
+        // 1) Опит с вградено съдържание в sampleFiles[].data (генерирано от update_pharma_samples.js)
+        try {
+          if (typeof sampleFiles !== 'undefined' && Array.isArray(sampleFiles)) {
+            const found = sampleFiles.find(f => f && f.fileName === fileName && f.data);
+            if (found && found.data) {
+              applyImportedData(found.data);
+              return; // успех без алерт
+            }
+          }
+        } catch (_) { /* ignore */ }
+
+        // 2) Опит с отделна карта sampleFileContents[fileName] (съвместимост с по-стара версия)
+        if (typeof sampleFileContents !== 'undefined' && sampleFileContents[fileName]) {
+          try {
+            applyImportedData(sampleFileContents[fileName]);
+            return; // успех без алерт
+          } catch (e) {
+            console.error('Embedded sample parse/apply error:', e);
+            // продължаваме към fallback
+          }
+        }
+
+        // 3) Fallback: fetch с encodeURI за пътища със спейсове/кирилица (работи само при http/https, не при file://)
+        const encodedPath = encodeURI(`Примерни/${fileName}`);
+        fetch(encodedPath)
+          .then(response => {
+            if (!response.ok) throw new Error('Грешка при зареждане на файл');
+            return response.json();
+          })
+          .then(data => {
+            applyImportedData(data);
+          })
+          .catch(error => {
+            console.error('Error loading sample file:', error);
+            alert('Грешка при зареждане на примерния файл');
+          });
+      }
+
+      // Helper: render imported data and wire events (без успешни алерти)
+      function applyImportedData(data) {
+        // Update the UI with the imported data
+        if (data.questionType) document.getElementById('questionType').value = data.questionType;
+        if (data.questionCount) document.getElementById('questionCount').value = data.questionCount;
+
+        // Clear existing groups
+        groupsContainer.innerHTML = '';
+
+        // Add imported groups
+        data.groups.forEach(group => {
+          const groupEl = document.createElement('div');
+          groupEl.className = 'group-item';
+          groupEl.dataset.groupId = Date.now() + Math.random();
+
+          groupEl.innerHTML = `
+            <div class="group-header">
+              <h3 class="group-title">Група</h3>
+              <button type="button" class="remove-group">×</button>
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-control group-name" value="${group.groupName}" required>
+            </div>
+            <div class="form-group">
+              <label>Лекарства в групата:</label>
+              <div class="drugs-container"></div>
+              <button type="button" class="btn btn-sm btn-outline-primary add-drug-btn">+ Добави лекарство</button>
+            </div>
+          `;
+
+          groupsContainer.appendChild(groupEl);
+
+          // Wire group remove
+          const removeGroupBtn = groupEl.querySelector('.remove-group');
+          removeGroupBtn.addEventListener('click', () => {
+            groupEl.remove();
+          });
+
+          // Add drugs to this group
+          const drugsContainer = groupEl.querySelector('.drugs-container');
+          (group.drugs || []).forEach(drug => {
+            const drugInputContainer = document.createElement('div');
+            drugInputContainer.className = 'drug-input-container';
+            drugInputContainer.innerHTML = `
+              <input type="text" class="drug-input" value="${drug}">
+              <button type="button" class="remove-drug">×</button>
+            `;
+            const removeDrugBtn = drugInputContainer.querySelector('.remove-drug');
+            removeDrugBtn.addEventListener('click', () => {
+              drugInputContainer.remove();
+            });
+            drugsContainer.appendChild(drugInputContainer);
+          });
+
+          // Add unified add button behavior
+          const addDrugBtn = groupEl.querySelector('.add-drug-btn');
+          addDrugBtn.addEventListener('click', () => {
+            addDrugInput(drugsContainer);
+          });
+        });
+
+        // After render: scroll to actions and hint the Start button
+        const sticky = document.querySelector('.sticky-actions');
+        const startBtn = document.getElementById('generateBtn');
+        if (sticky) {
+          sticky.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
+        if (startBtn) {
+          startBtn.classList.add('pulse-animation');
+          setTimeout(() => startBtn.classList.remove('pulse-animation'), 600);
+        }
+      }
+      
+      // Start with a clean form with one empty group
+      addNewGroup();
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,505 @@
+{
+  "questionType": "both",
+  "questionCount": 20,
+  "groups": [
+    {
+      "groupName": "Инхибитори на ангиотензин-конвертиращия ензим (ACE-инхибитори)",
+      "drugs": [
+        "Enalapril",
+        "LisinopriI",
+        "Perindopril",
+        "Trandolapril",
+        "Cilazapril",
+        "QuinapriI",
+        "Ramipril",
+        "Captopril"
+      ]
+    },
+    {
+      "groupName": "Блокери на АТ1 рецепторите за ангиотензин II (ангиотензин рецепторни блокери, АРБ)",
+      "drugs": [
+        "Valsartan",
+        "Losartan",
+        "Irbesartan",
+        "Sacubitral/valsatran"
+      ]
+    },
+    {
+      "groupName": "Директни ренинови инхибитори",
+      "drugs": [
+        "Aliskiren"
+      ]
+    },
+    {
+      "groupName": "Антагонисти на алдостерона",
+      "drugs": [
+        "Spironolactone",
+        "Eplerenone"
+      ]
+    },
+    {
+      "groupName": "Дигиталисови (сърдечни) гликозиди",
+      "drugs": [
+        "Digoxin",
+        "Metildigoxin"
+      ]
+    },
+    {
+      "groupName": "Лекарства при дигиталисова интоксикация",
+      "drugs": [
+        "Lidocaine",
+        "Phenytoine"
+      ]
+    },
+    {
+      "groupName": "Адреномиметици",
+      "drugs": [
+        "Dobutamine",
+        "Dopamine"
+      ]
+    },
+    {
+      "groupName": "Периферни съдоактивни лекарства -  вазодилататори с предимно действие върху периферните съдове",
+      "drugs": [
+        "Pentoxifylline",
+        "Papaverine"
+      ]
+    },
+    {
+      "groupName": "Периферни съдоактивни лекарства -  вазодилататори с предимно действие върху мозъчните съдове",
+      "drugs": [
+        "Cinnarizine",
+        "Flunarizine",
+        "Nimodipine",
+        "Vinpocetine",
+        "Nicergoline",
+        "Naftidrofuryl",
+        "Betahistine"
+      ]
+    },
+    {
+      "groupName": "Венотонични и капиляротонични лекарства",
+      "drugs": [
+        "Diosmin",
+        "Bioflavonoids (Diosmin + Flavonoids) = Detralex",
+        "Troxerutin",
+        "Endotelon",
+        "Ascorbic acid",
+        "Rutin + Ascorbic acid Rutascorbin"
+      ]
+    },
+    {
+      "groupName": "Салидиуретици - тиазиди и подобни",
+      "drugs": [
+        "Hydrochlorothiazide",
+        "Chlorthalidone",
+        "Indapamide"
+      ]
+    },
+    {
+      "groupName": "Салидиуретици - бримкови диуретици",
+      "drugs": [
+        "Furosemide",
+        "Torasemide"
+      ]
+    },
+    {
+      "groupName": "Калий-съхраняващи диуретици - антагонисти на алдостерона",
+      "drugs": [
+        "Spironolactone",
+        "Eplerenone"
+      ]
+    },
+    {
+      "groupName": "Калий-съхраняващи диуретици - блокери на амилорид-чувствителните натриеви канали",
+      "drugs": [
+        "Triamterene",
+        "Triamterene + Hydrochlorothiazide = Triampur compositum"
+      ]
+    },
+    {
+      "groupName": "Осмотични диуретици",
+      "drugs": [
+        "Mannitol"
+      ]
+    },
+    {
+      "groupName": "Инхибитори на карбоанхидразата",
+      "drugs": [
+        "Acetazolamide",
+        "Brinzolamide",
+        "Dorzolamide"
+      ]
+    },
+    {
+      "groupName": "Инхибитори на карбоанхидразата - антиглаукомни лекарства",
+      "drugs": [
+        "Brinzolamide",
+        "Dorzolamide"
+      ]
+    },
+    {
+      "groupName": "Дихидропиридини (дипини) - I поколение",
+      "drugs": [
+        "Nifedipine",
+        "Nitrendipine",
+        "Nimodipine"
+      ]
+    },
+    {
+      "groupName": "Дихидропиридини (дипини) - II поколение",
+      "drugs": [
+        "Felodipine",
+        "Nifedipine ret."
+      ]
+    },
+    {
+      "groupName": "Дихидропиридини (дипини) - III поколение",
+      "drugs": [
+        "Amlodipine",
+        "Lercanidipine",
+        "Lacidipine"
+      ]
+    },
+    {
+      "groupName": "Недихидропиридини - Фенилалкиламини",
+      "drugs": [
+        "Verapamil"
+      ]
+    },
+    {
+      "groupName": "Недихидропиридини - бензотиазепини",
+      "drugs": [
+        "Diltiazem"
+      ]
+    },
+    {
+      "groupName": "Бета-блокери - неселективни",
+      "drugs": [
+        "Propranolol"
+      ]
+    },
+    {
+      "groupName": "Бета-блокери - бета1 селективни",
+      "drugs": [
+        "Metoprolol"
+      ]
+    },
+    {
+      "groupName": "Бета-блокери - вазодилатиращи",
+      "drugs": [
+        "Carvedilol",
+        "Nebivilol"
+      ]
+    },
+    {
+      "groupName": "Aлфа1 селективни блокери",
+      "drugs": [
+        "Prazosin",
+        "Doxazosin"
+      ]
+    },
+    {
+      "groupName": "Централно действащи симпатолитици - алфа2 селективни агонисти",
+      "drugs": [
+        "Clonidine",
+        "Methyldopa"
+      ]
+    },
+    {
+      "groupName": "Централно действащи симпатолитици - агонисти на I1-имидазолиновите рецептори",
+      "drugs": [
+        "Moxonidine",
+        "Rilmenidine"
+      ]
+    },
+    {
+      "groupName": "Пресинаптични симпатолитици",
+      "drugs": [
+        "Reserpine"
+      ]
+    },
+    {
+      "groupName": "Директни (миотропни) вазодилататори",
+      "drugs": [
+        "Nitroprusside"
+      ]
+    },
+    {
+      "groupName": "Лекарства при хипертензивна криза",
+      "drugs": [
+        "Furosemide",
+        "Clonidine",
+        "Nitroprusside"
+      ]
+    },
+    {
+      "groupName": "Вазоконстриктори (алфа-адреномиметици)",
+      "drugs": [
+        "Midodrine"
+      ]
+    },
+    {
+      "groupName": "Хормонални лекарства",
+      "drugs": [
+        "Fludrocortisone"
+      ]
+    },
+    {
+      "groupName": "Oрганични нитрати и лекарства с подобна активност",
+      "drugs": [
+        "Nitroglycerin",
+        "Nitrolingual",
+        "Perlinganit"
+      ]
+    },
+    {
+      "groupName": "Oрганични нитрати с продължително действие",
+      "drugs": [
+        "Isosorbidе dinitrate",
+        "Isosorbide mononitrate",
+        "Pentaerithrityl tetranitrate"
+      ]
+    },
+    {
+      "groupName": "Антиангинозни лекарства - инхибитори на If потока",
+      "drugs": [
+        "Ivabradine"
+      ]
+    },
+    {
+      "groupName": "Антиангинозни лекарства - метаболитни модулатори",
+      "drugs": [
+        "Trimetazidine",
+        "Ranolazine"
+      ]
+    },
+    {
+      "groupName": "Антиаритмични лекарства - клас I. блокери на натриви канали - клас IA (удължаващи реполяризацията)",
+      "drugs": [
+        "Quinidine"
+      ]
+    },
+    {
+      "groupName": "Антиаритмични лекарства - клас I. блокери на натриви канали - клас IB (скъсяващи реполяризацията)",
+      "drugs": [
+        "Lidocaine",
+        "Phenytoin"
+      ]
+    },
+    {
+      "groupName": "Антиаритмични лекарства - клас I. блокери на натриви канали - клас IC (без ефект върху реполяризацията)",
+      "drugs": [
+        "Propafenone"
+      ]
+    },
+    {
+      "groupName": "Антиаритмични лекарства - клас III. лекарства, удължаващи акционния потенциал",
+      "drugs": [
+        "Amiodarone",
+        "Sotalol"
+      ]
+    },
+    {
+      "groupName": "Други лекарства, използвани при ритъмни нарушения",
+      "drugs": [
+        "Digoxin",
+        "Atropine",
+        "Adenosine"
+      ]
+    },
+    {
+      "groupName": "Антидислипидемични лекарства - инхибитори на HMG Co-A редуктазата",
+      "drugs": [
+        "Simvastatin",
+        "Atorvastatin",
+        "Lovastatin",
+        "Fluvastatin",
+        "Pravastatin",
+        "Rosuvastatin"
+      ]
+    },
+    {
+      "groupName": "Антидислипидемични лекарства - инхибитори на чревната резорбция на стероли",
+      "drugs": [
+        "Ezetimibe",
+        "Simvastatin + Ezetimibe = Inegy"
+      ]
+    },
+    {
+      "groupName": "Антидислипидемични лекарства - PCSK9 инхибитори",
+      "drugs": [
+        "Alirocumab",
+        "Evolocumab"
+      ]
+    },
+    {
+      "groupName": "Антидислипидемични лекарства - смоли, свързващи жлъчни киселини",
+      "drugs": [
+        "Cholestyramine"
+      ]
+    },
+    {
+      "groupName": "Лекарства с предимно действие върху плазмените триглицериди (VLDL)",
+      "drugs": [
+        "Fenofibrate",
+        "Nicotinic acid",
+        "Omega-3-acid ethyl esters"
+      ]
+    },
+    {
+      "groupName": "Лекарства, използвани при анемии (антианемични лекарства) - железни препарати за орално приложение",
+      "drugs": [
+        "Ferrous sulfate",
+        "Ferric oxide polymaltose complex"
+      ]
+    },
+    {
+      "groupName": "Лекарства, използвани при анемии (антианемични лекарства) - железни препарати за парентерално приложение",
+      "drugs": [
+        "Ferric oxide dextran complex"
+      ]
+    },
+    {
+      "groupName": "Желязо-хелатиращи лекарства (антидоти)",
+      "drugs": [
+        "Deferoxamine",
+        "Deferasirox"
+      ]
+    },
+    {
+      "groupName": "Лекарства, използвани при анемии (антианемични лекарства)",
+      "drugs": [
+        "Cyancobalamin (Vit. B12)",
+        "Folic acid"
+      ]
+    },
+    {
+      "groupName": "Хемопоетични растежни фактори",
+      "drugs": [
+        "Erythropoietin"
+      ]
+    },
+    {
+      "groupName": "Хемопоетични растежни фактори - гранулоцит колони-стимулиращ фактор",
+      "drugs": [
+        "Filgrastim",
+        "Pegfilgrastim"
+      ]
+    },
+    {
+      "groupName": "Хемопоетични растежни фактори - тромбопоетин",
+      "drugs": [
+        "Romiplostim"
+      ]
+    },
+    {
+      "groupName": "Кумаринови антикоагуланти (антагонисти на витамин K)",
+      "drugs": [
+        "Acenocoumarol",
+        "Warfarin"
+      ]
+    },
+    {
+      "groupName": "Антикоагуланти - антагонист на кумаринови антикоагуланти",
+      "drugs": [
+        "Phytomenadione (Vitamin K1)"
+      ]
+    },
+    {
+      "groupName": "Антикоагуланти - хепарин и подобни лекарства",
+      "drugs": [
+        "Heparin",
+        "Nadroparin",
+        "Enoxaparin",
+        "Fondaparinux"
+      ]
+    },
+    {
+      "groupName": "Aнтагонист на хепарин и подобни лекарства",
+      "drugs": [
+        "Protamine sulfate"
+      ]
+    },
+    {
+      "groupName": "Антикоагуланти - директни инхибитори на тромбина (фактор IIa)",
+      "drugs": [
+        "Dabigatran"
+      ]
+    },
+    {
+      "groupName": "Антагонист на директни инхибитори на тромбина",
+      "drugs": [
+        "Idarucizumab"
+      ]
+    },
+    {
+      "groupName": "Антикоагуланти - инхибитори на фактор Xa",
+      "drugs": [
+        "Rivaroxaban",
+        "Apixaban"
+      ]
+    },
+    {
+      "groupName": "Антагонист на инхибитори на фактор Xa",
+      "drugs": [
+        "Andexanet alfa"
+      ]
+    },
+    {
+      "groupName": "Фибринолитици",
+      "drugs": [
+        "Streptokinase",
+        "Alteplase",
+        "Reteplase"
+      ]
+    },
+    {
+      "groupName": "Тромбоцитни антиагреганти - инхибитори на синтезата на ТхА2",
+      "drugs": [
+        "Acetylsalicylic acid"
+      ]
+    },
+    {
+      "groupName": "Тромбоцитни антиагреганти - антагонисти на аденозинови (P2Y12) рецептори",
+      "drugs": [
+        "Clopidogrel",
+        "Prasugrel",
+        "Ticagrelor"
+      ]
+    },
+    {
+      "groupName": "Тромбоцитни антиагреганти - фосфодиестеразни инхибитори",
+      "drugs": [
+        "Dipyridamole"
+      ]
+    },
+    {
+      "groupName": "Тромбоцитни антиагреганти - антагонисти на гликопротеин IIB/IIIA рецептори",
+      "drugs": [
+        "Tirofiban",
+        "Eptifibatide",
+        "Abciximab"
+      ]
+    },
+    {
+      "groupName": "Тромбоцитни антиагреганти - синтетичен аналог на PgI2",
+      "drugs": [
+        "Iloprost"
+      ]
+    },
+    {
+      "groupName": "Лекарства, използвани при кървене - инхибитори на фибринолизата",
+      "drugs": [
+        "Para-aminomethylbenzoic acid"
+      ]
+    },
+    {
+      "groupName": "Лекарства, използвани при кървене - системни хемостатици",
+      "drugs": [
+        "Etamsylate",
+        "Terlipressin"
+      ]
+    }
+  ]
+}
