@@ -48,6 +48,10 @@
       min-height: 100vh;
       box-shadow: 2px 0 8px rgba(0,0,0,0.04);
     }
+    /* Match sidebar typography and link visuals to index.html */
+    .sidebar, .sidebar * {
+      font-family: 'Open Sans', Arial, sans-serif !important;
+    }
     
     #side-menu {
       background: #262626; 
@@ -63,18 +67,18 @@
     
     .logo-header {
       background: #262626;
-      width: 200px;
-      height: 107px;
-      min-width: 200px;
-      min-height: 107px;
-      max-width: 200px;
-      max-height: 107px;
+      width: 200px !important;
+      height: 107px !important;
+      min-width: 200px !important;
+      min-height: 107px !important;
+      max-width: 200px !important;
+      max-height: 107px !important;
       text-align: center;
       border-bottom: none;
-      margin: 0;
-      padding: 0;
+      margin: 0 !important;
+      padding: 0 !important;
       overflow: hidden;
-      flex: 0 0 107px;
+      flex: 0 0 107px !important;
       box-sizing: content-box;
       display: flex;
       align-items: center;
@@ -83,20 +87,20 @@
     
     .logo-header > a {
       display: block;
-      margin: 0;
-      padding: 0;
+      margin: 0 !important;
+      padding: 0 !important;
       box-sizing: content-box;
     }
     
     .logo-img {
-      width: 168px;
-      height: 22.55px;
-      min-width: 168px;
-      min-height: 22.55px;
-      max-width: 168px;
-      max-height: 22.55px;
+      width: 168px !important;
+      height: 22.55px !important;
+      min-width: 168px !important;
+      min-height: 22.55px !important;
+      max-width: 168px !important;
+      max-height: 22.55px !important;
       object-fit: contain;
-      margin: 0;
+      margin: 0 !important;
       display: block;
       box-sizing: content-box;
     }
@@ -118,7 +122,7 @@
     .sidebar-nav a {
       display: flex;
       align-items: center;
-      color: #fff;
+      color: #fff !important;
       text-decoration: none;
       padding: 16px 28px 16px 28px;
       font-size: 14px;
@@ -133,7 +137,7 @@
     
     .sidebar-nav .active a, .sidebar-nav li.active a {
       background: #000000;
-      color: #fff;
+      color: #fff !important;
       position: relative;
     }
     
@@ -152,6 +156,13 @@
     .sidebar-nav a:hover {
       background: #181818;
     }
+
+    .sidebar-nav .base-navigation-button-content {
+      border-radius: 0;
+      background: inherit;
+      color: inherit;
+      padding-left: 12px;
+    }
     
     .sidebar-nav .svg-icon {
       width: 26px;
@@ -161,8 +172,8 @@
       margin-top: -2px;
       margin-bottom: -2px;
       flex-shrink: 0;
-      fill: #222;
-      stroke: #222;
+      fill: #222 !important;
+      stroke: #222 !important;
     }
     
     .sidebar-footer-links {
