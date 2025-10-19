@@ -365,6 +365,36 @@
       z-index: 10;
     }
 
+  /* Test mode: hide page header and constrain layout */
+  body.test-mode .main-header { display: none; }
+  body.test-mode .layout { height: 100vh; }
+  body.test-mode { overflow: hidden; }
+  body.test-mode .content { height: 100%; overflow: hidden; }
+  body.test-mode .test-container { height: 100%; }
+  body.test-mode #testRunner.test-runner { height: 100%; display: flex; flex-direction: column; }
+    body.test-mode #questionContainer.question-container { flex: 1 1 auto; overflow: hidden; }
+  body.test-mode #questionContainer .question-content { display: flex; flex-direction: column; height: 100%; }
+    body.test-mode #questionContainer .answers-list { flex: 1 1 auto; overflow-y: auto; max-height: none; padding-right: 6px; }
+    body.test-mode .question-container { padding: 12px; }
+    body.test-mode .question-container h3 { font-size: 18px; margin-bottom: 8px; }
+    body.test-mode .answer-item { padding: 8px 10px; font-size: 15px; line-height: 1.3; margin-bottom: 8px; }
+    
+    /* Two-column answers on wider screens to reduce scrolling */
+    @media (min-width: 640px) {
+      body.test-mode #questionContainer .answers-list {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        padding-right: 6px;
+      }
+      body.test-mode #questionContainer .answer-item { margin: 0; }
+    }
+    @media (min-width: 1024px) {
+      body.test-mode #questionContainer .answers-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
     @keyframes pulse {
       0% { transform: scale(1); }
       50% { transform: scale(1.02); }
@@ -589,6 +619,14 @@
       border-top: 1px dashed #ddd;
       padding-top: 20px;
     }
+    .pulse-section {
+      animation: sectionPulse 0.8s ease-in-out;
+    }
+    @keyframes sectionPulse {
+      0% { box-shadow: 0 0 0 rgba(99,102,241,0); }
+      50% { box-shadow: 0 0 0 4px rgba(99,102,241,0.15); }
+      100% { box-shadow: 0 0 0 rgba(99,102,241,0); }
+    }
     
     .sample-description {
       color: #666;
@@ -759,11 +797,14 @@
         font-size: 17px;
         margin-bottom: 10px;
       }
-      .answers-list {
-        max-height: calc(100vh - 220px); /* fit viewport with sticky controls */
-        overflow-y: auto;
-        padding-right: 6px;
-      }
+      /* In test-mode, prevent page scroll and keep only answers scrollable */
+      body.test-mode .main-content { padding: 8px; }
+      body.test-mode .test-header { margin-bottom: 10px; }
+      body.test-mode .test-progress { padding: 6px 10px; font-size: 14px; }
+  body.test-mode #questionContainer .answers-list { max-height: none; }
+  body.test-mode .question-container { padding: 10px; }
+  body.test-mode .question-container h3 { font-size: 16px; }
+  body.test-mode .answer-item { padding: 8px 10px; font-size: 14px; }
       .answer-item {
         padding: 10px 12px;
         font-size: 15px;
@@ -905,6 +946,7 @@
               <button id="generateBtn" class="btn btn-success">Стартирай тест</button>
               <button id="exportBtn" class="btn btn-secondary">Експортирай като JSON</button>
               <button id="clearFormBtn" class="btn btn-danger">Изчисти формата</button>
+                <button id="sampleFilesBtn" class="btn btn-secondary">Примерни файлове</button>
               <label for="importFile" class="btn btn-secondary import-label">
                 <span>📂 Импортирай JSON</span>
                 <input type="file" id="importFile" accept=".json" class="hidden">
@@ -913,7 +955,7 @@
             </div>
             
             <!-- Sample Files Section -->
-            <div class="sample-files-section">
+            <div id="sampleFilesSection" class="sample-files-section">
               <h3>Примерни файлове</h3>
               <div id="sampleFilesContainer" class="sample-files-container">
                 <!-- Sample files will be loaded here -->
@@ -1016,6 +1058,8 @@
       const restartTestBtn = document.getElementById('restartTestBtn');
       const newTestBtn = document.getElementById('newTestBtn');
       const clearFormBtn = document.getElementById('clearFormBtn');
+  const sampleFilesBtn = document.getElementById('sampleFilesBtn');
+  const sampleFilesSection = document.getElementById('sampleFilesSection');
       const sampleFilesContainer = document.getElementById('sampleFilesContainer');
       
       // State variables
@@ -1036,6 +1080,13 @@
       exportBtn.addEventListener('click', exportToJson);
       importFile.addEventListener('change', importFromJson);
       clearFormBtn.addEventListener('click', clearForm);
+      if (sampleFilesBtn && sampleFilesSection) {
+        sampleFilesBtn.addEventListener('click', () => {
+          sampleFilesSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          sampleFilesSection.classList.add('pulse-section');
+          setTimeout(() => sampleFilesSection.classList.remove('pulse-section'), 800);
+        });
+      }
       nextQuestionBtn.addEventListener('click', goToNextQuestion);
       submitTestBtn.addEventListener('click', finishTest);
       restartTestBtn.addEventListener('click', restartTest);
@@ -1307,6 +1358,13 @@
               throw new Error('Invalid format');
             }
             
+            // Update test title from file name (without extension)
+            const testTitleEl = document.getElementById('testTitle');
+            if (testTitleEl && file && file.name) {
+              const nameNoExt = file.name.replace(/\.[^.]+$/, '');
+              testTitleEl.textContent = nameNoExt;
+            }
+
             // Update the UI with the imported data
             document.getElementById('questionType').value = importedData.questionType;
             document.getElementById('questionCount').value = importedData.questionCount || 10;
@@ -1408,6 +1466,16 @@
         // Show the test runner
         testCreator.classList.add('hidden');
         testRunner.classList.remove('hidden');
+        // Enter compact test mode (hide page title, lock layout)
+        document.body.classList.add('test-mode');
+
+        // Set test title from first group or default
+        const titleEl = document.getElementById('testTitle');
+        if (titleEl) {
+          const firstGroupNameInput = document.querySelector('.group-item .group-name');
+          const baseName = firstGroupNameInput && firstGroupNameInput.value.trim() ? firstGroupNameInput.value.trim() : 'Фармакологичен тест';
+          titleEl.textContent = baseName;
+        }
       }
       
       function showCurrentQuestion() {
@@ -1550,6 +1618,8 @@
         // Show results section
         testRunner.classList.add('hidden');
         resultsSection.classList.remove('hidden');
+        // Exit test mode to restore normal layout
+        document.body.classList.remove('test-mode');
       }
       
       function showDetailedResults() {
@@ -1656,11 +1726,17 @@
 
 
 
+
+
+
+
+
+
 // ГЕНЕРИРАНИ ДАННИ ЗА ПРИМЕРНИ ФАЙЛОВЕ - НАЧАЛО
 const sampleFiles = [
   {
-    "fileName": "21.json",
-    "title": "21",
+    "fileName": "Упражнение 21.json",
+    "title": "Упражнение 21",
     "groups": 19,
     "drugs": 43,
     "data": {
@@ -1670,23 +1746,23 @@ const sampleFiles = [
         {
           "groupName": "Пеницилини – тясноспектърни - природни бета-лактамаза чувствителни",
           "drugs": [
-            "Benzylpenicillin",
-            "Benathinbenzylpenicllin",
-            "Phenoxymethylpenicillin"
+            "Benzylpenicilin",
+            "Benathinbenzylpeniclinin",
+            "Phenoxymethylpenicilin"
           ]
         },
         {
           "groupName": "Пеницилини – тясноспектърни - полусинтетични бета-лактамаза резистентни",
           "drugs": [
-            "Мeticillin",
-            "Оxacillin"
+            "Мeticilin",
+            "Оxacilin"
           ]
         },
         {
           "groupName": "Пеницилини – широкоспектърни – аминопеницилини – бета-лактамаза чувствителни",
           "drugs": [
-            "Amoxicillin",
-            "Ampicililn"
+            "Amoxicilin",
+            "Ampicilin"
           ]
         },
         {
@@ -1698,7 +1774,7 @@ const sampleFiles = [
           ]
         },
         {
-          "groupName": "Цефалоспорини - II поколение",
+          "groupName": "Цефалоспорини - II поколене",
           "drugs": [
             "Cefuroxime",
             "Cefamandole",
@@ -1706,9 +1782,9 @@ const sampleFiles = [
           ]
         },
         {
-          "groupName": "Цефалоспорини - III поколение",
+          "groupName": "Цефалоспорини - III поколене",
           "drugs": [
-            "Ceftriaxone",
+            "Cefriaxone",
             "Cefoperazone",
             "Cefotaxime",
             "Ceftazidime",
@@ -1732,7 +1808,7 @@ const sampleFiles = [
         {
           "groupName": "Карбаценеми",
           "drugs": [
-            "Imipenem (+ Cilastatin)",
+            "Imipenem",
             "Meropenem"
           ]
         },
@@ -1783,26 +1859,26 @@ const sampleFiles = [
         {
           "groupName": "Пеницилини – широкоспектърни – аминопеницилини – бета-лактамаза резистентни",
           "drugs": [
-            "Amoxicillin + Clavulanic acid",
-            "Ampicillin + Sulbactam"
+            "Amoxicilin + Clavulanic acid",
+            "Ampicilin + Sulbactam"
           ]
         },
         {
           "groupName": "Пеницилини – широкоспектърни – карбоксипеницилини - бета-лактамаза чувствителни",
           "drugs": [
-            "Carbenicillin"
+            "Carbenicilin"
           ]
         },
         {
           "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили - бета-лактамаза чувствителни",
           "drugs": [
-            "piperacillin"
+            "piperacilin"
           ]
         },
         {
           "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили - бета-лактамаза резистентни комбинации с бета-лактамазен инхибитор",
           "drugs": [
-            "Piperacillin + Tazobactam = Tazocin"
+            "Piperacilin + Tazobactam = Tazocin"
           ]
         }
       ]
@@ -2327,22 +2403,78 @@ function loadSampleFiles() {
   sampleFilesContainer.innerHTML = '';
 
   // Добавяне на карта за всеки примерен файл
-  if (sampleFiles.length > 0) {
-    sampleFiles.forEach(file => {
-      const card = document.createElement('div');
-      card.className = 'sample-file-card';
-      card.innerHTML = `
-        <img src="images/json-file-icon.svg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><path d=\"M12 18v-6\"></path><path d=\"M8 15h8\"></path></svg>'" class="sample-file-icon">
-        <div class="sample-file-name">${file.title}</div>
-        <div class="sample-file-info">${file.groups} групи, ${file.drugs} лекарства</div>
-      `;
-      
-      // Добавяне на събитие за зареждане на файла
-      card.addEventListener('click', () => loadSampleFile(file.fileName));
-      
-      sampleFilesContainer.appendChild(card);
-    });
-  }
+    if (sampleFiles.length > 0) {
+        // Къстъм сортиране: Фармакология отпред (Изпит, I, II, III, IV ...), после Упражнение по номер
+        const norm = (s) => (s || '').toString().trim().toLowerCase().replace(/a/g, 'а');
+        const romanMap = { i:1, ii:2, iii:3, iv:4, v:5, vi:6, vii:7, viii:8, ix:9, x:10 };
+        const romanToInt = (s) => romanMap[s] !== undefined ? romanMap[s] : 999;
+        const meta = (file) => {
+            const title = file.title || file.fileName || '';
+            const t = norm(title);
+            const isPharma = /^s*фармакология/.test(t);
+            const isExercise = /^s*упражнение/.test(t);
+            let pRank = 999, pNum = 999, exNum = Number.POSITIVE_INFINITY;
+            if (isPharma) {
+                const rest = t.replace(/^s*фармакологияs*/, '');
+                if (/^изпит/.test(rest)) { pRank = 0; pNum = 0; }
+                else {
+                    const m = rest.match(/^(i{1,3}|iv|v|vi|vii|viii|ix|x)/);
+                    if (m) { pRank = 1; pNum = romanToInt(m[1]); }
+                    else { pRank = 2; pNum = 999; }
+                }
+            } else if (isExercise) {
+                const m = t.match(/упражнениеs*(d+)/);
+                if (m) exNum = parseInt(m[1], 10);
+            }
+            return { isPharma, isExercise, pRank, pNum, exNum, title };
+        };
+        const sorted = sampleFiles.slice().sort((a, b) => {
+            const A = meta(a), B = meta(b);
+            if (A.isPharma && !B.isPharma) return -1;
+            if (!A.isPharma && B.isPharma) return 1;
+            if (A.isPharma && B.isPharma) {
+                if (A.pRank !== B.pRank) return A.pRank - B.pRank;
+                if (A.pNum !== B.pNum) return A.pNum - B.pNum;
+                return A.title.localeCompare(B.title, 'bg');
+            }
+            if (A.isExercise && B.isExercise) {
+                if (A.exNum !== B.exNum) return A.exNum - B.exNum;
+                return A.title.localeCompare(B.title, 'bg');
+            }
+            return A.title.localeCompare(B.title, 'bg');
+        });
+
+        sorted.forEach(function(file) {
+            const card = document.createElement('div');
+            card.className = 'sample-file-card';
+
+            const img = document.createElement('img');
+            img.className = 'sample-file-icon';
+            img.alt = 'JSON';
+            img.src = 'images/json-file-icon.svg';
+            img.addEventListener('error', function() {
+                const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M8 15h8"/></svg>';
+                img.src = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+            }, { once: true });
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'sample-file-name';
+            nameDiv.textContent = file.title || file.fileName;
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'sample-file-info';
+            infoDiv.textContent = (file.groups + ' групи, ' + file.drugs + ' лекарства');
+
+            card.appendChild(img);
+            card.appendChild(nameDiv);
+            card.appendChild(infoDiv);
+
+            // Добавяне на събитие за зареждане на файла
+            card.addEventListener('click', function() { loadSampleFile(file.fileName); });
+
+            sampleFilesContainer.appendChild(card);
+        });
+    }
 }
 
 // Важно: Извикване на функцията при зареждане

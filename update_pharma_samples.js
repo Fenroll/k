@@ -99,22 +99,78 @@ function loadSampleFiles() {
   sampleFilesContainer.innerHTML = '';
 
   // Добавяне на карта за всеки примерен файл
-  if (sampleFiles.length > 0) {
-    sampleFiles.forEach(file => {
-      const card = document.createElement('div');
-      card.className = 'sample-file-card';
-      card.innerHTML = \`
-        <img src="images/json-file-icon.svg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\\"http://www.w3.org/2000/svg\\" viewBox=\\"0 0 24 24\\" fill=\\"none\\" stroke=\\"currentColor\\" stroke-width=\\"2\\" stroke-linecap=\\"round\\" stroke-linejoin=\\"round\\"><path d=\\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\\"></path><polyline points=\\"14 2 14 8 20 8\\"></polyline><path d=\\"M12 18v-6\\"></path><path d=\\"M8 15h8\\"></path></svg>'" class="sample-file-icon">
-        <div class="sample-file-name">\${file.title}</div>
-        <div class="sample-file-info">\${file.groups} групи, \${file.drugs} лекарства</div>
-      \`;
-      
-      // Добавяне на събитие за зареждане на файла
-      card.addEventListener('click', () => loadSampleFile(file.fileName));
-      
-      sampleFilesContainer.appendChild(card);
-    });
-  }
+    if (sampleFiles.length > 0) {
+        // Къстъм сортиране: Фармакология отпред (Изпит, I, II, III, IV ...), после Упражнение по номер
+        const norm = (s) => (s || '').toString().trim().toLowerCase().replace(/a/g, 'а');
+        const romanMap = { i:1, ii:2, iii:3, iv:4, v:5, vi:6, vii:7, viii:8, ix:9, x:10 };
+        const romanToInt = (s) => romanMap[s] !== undefined ? romanMap[s] : 999;
+        const meta = (file) => {
+            const title = file.title || file.fileName || '';
+            const t = norm(title);
+            const isPharma = /^\s*фармакология/.test(t);
+            const isExercise = /^\s*упражнение/.test(t);
+            let pRank = 999, pNum = 999, exNum = Number.POSITIVE_INFINITY;
+            if (isPharma) {
+                const rest = t.replace(/^\s*фармакология\s*/, '');
+                if (/^изпит\b/.test(rest)) { pRank = 0; pNum = 0; }
+                else {
+                    const m = rest.match(/^(i{1,3}|iv|v|vi|vii|viii|ix|x)\b/);
+                    if (m) { pRank = 1; pNum = romanToInt(m[1]); }
+                    else { pRank = 2; pNum = 999; }
+                }
+            } else if (isExercise) {
+                const m = t.match(/упражнение\s*(\d+)/);
+                if (m) exNum = parseInt(m[1], 10);
+            }
+            return { isPharma, isExercise, pRank, pNum, exNum, title };
+        };
+        const sorted = sampleFiles.slice().sort((a, b) => {
+            const A = meta(a), B = meta(b);
+            if (A.isPharma && !B.isPharma) return -1;
+            if (!A.isPharma && B.isPharma) return 1;
+            if (A.isPharma && B.isPharma) {
+                if (A.pRank !== B.pRank) return A.pRank - B.pRank;
+                if (A.pNum !== B.pNum) return A.pNum - B.pNum;
+                return A.title.localeCompare(B.title, 'bg');
+            }
+            if (A.isExercise && B.isExercise) {
+                if (A.exNum !== B.exNum) return A.exNum - B.exNum;
+                return A.title.localeCompare(B.title, 'bg');
+            }
+            return A.title.localeCompare(B.title, 'bg');
+        });
+
+        sorted.forEach(function(file) {
+            const card = document.createElement('div');
+            card.className = 'sample-file-card';
+
+            const img = document.createElement('img');
+            img.className = 'sample-file-icon';
+            img.alt = 'JSON';
+            img.src = 'images/json-file-icon.svg';
+            img.addEventListener('error', function() {
+                const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-6"/><path d="M8 15h8"/></svg>';
+                img.src = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(svg);
+            }, { once: true });
+
+            const nameDiv = document.createElement('div');
+            nameDiv.className = 'sample-file-name';
+            nameDiv.textContent = file.title || file.fileName;
+
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'sample-file-info';
+            infoDiv.textContent = (file.groups + ' групи, ' + file.drugs + ' лекарства');
+
+            card.appendChild(img);
+            card.appendChild(nameDiv);
+            card.appendChild(infoDiv);
+
+            // Добавяне на събитие за зареждане на файла
+            card.addEventListener('click', function() { loadSampleFile(file.fileName); });
+
+            sampleFilesContainer.appendChild(card);
+        });
+    }
 }
 
 // Важно: Извикване на функцията при зареждане

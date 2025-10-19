@@ -5,23 +5,23 @@
     {
       "groupName": "Пеницилини – тясноспектърни - природни бета-лактамаза чувствителни",
       "drugs": [
-        "Benzylpenicillin",
-        "Benathinbenzylpenicllin",
-        "Phenoxymethylpenicillin"
+        "Benzylpenicilin",
+        "Benathinbenzylpeniclinin",
+        "Phenoxymethylpenicilin"
       ]
     },
     {
       "groupName": "Пеницилини – тясноспектърни - полусинтетични бета-лактамаза резистентни",
       "drugs": [
-        "Мeticillin",
-        "Оxacillin"
+        "Мeticilin",
+        "Оxacilin"
       ]
     },
     {
       "groupName": "Пеницилини – широкоспектърни – аминопеницилини – бета-лактамаза чувствителни",
       "drugs": [
-        "Amoxicillin",
-        "Ampicililn"
+        "Amoxicilin",
+        "Ampicilin"
       ]
     },
     {
@@ -33,7 +33,7 @@
       ]
     },
     {
-      "groupName": "Цефалоспорини - II поколение",
+      "groupName": "Цефалоспорини - II поколене",
       "drugs": [
         "Cefuroxime",
         "Cefamandole",
@@ -41,9 +41,9 @@
       ]
     },
     {
-      "groupName": "Цефалоспорини - III поколение",
+      "groupName": "Цефалоспорини - III поколене",
       "drugs": [
-        "Ceftriaxone",
+        "Cefriaxone",
         "Cefoperazone",
         "Cefotaxime",
         "Ceftazidime",
@@ -67,7 +67,7 @@
     {
       "groupName": "Карбаценеми",
       "drugs": [
-        "Imipenem (+ Cilastatin)",
+        "Imipenem",
         "Meropenem"
       ]
     },
@@ -118,26 +118,26 @@
     {
       "groupName": "Пеницилини – широкоспектърни – аминопеницилини – бета-лактамаза резистентни",
       "drugs": [
-        "Amoxicillin + Clavulanic acid",
-        "Ampicillin + Sulbactam"
+        "Amoxicilin + Clavulanic acid",
+        "Ampicilin + Sulbactam"
       ]
     },
     {
       "groupName": "Пеницилини – широкоспектърни – карбоксипеницилини - бета-лактамаза чувствителни",
       "drugs": [
-        "Carbenicillin"
+        "Carbenicilin"
       ]
     },
     {
       "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили - бета-лактамаза чувствителни",
       "drugs": [
-        "piperacillin"
+        "piperacilin"
       ]
     },
     {
       "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили - бета-лактамаза резистентни комбинации с бета-лактамазен инхибитор",
       "drugs": [
-        "Piperacillin + Tazobactam = Tazocin"
+        "Piperacilin + Tazobactam = Tazocin"
       ]
     }
   ]
