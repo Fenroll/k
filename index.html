@@ -592,6 +592,26 @@
   color: #d97706;
 }
 
+/* Markdown tables with visible outlines */
+.markdown-content table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0.75em 0;
+}
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid rgba(146, 64, 14, 0.35); /* amber-800-ish */
+  padding: 6px 10px;
+  text-align: left;
+  vertical-align: top;
+}
+.markdown-content thead th {
+  background: rgba(245, 158, 11, 0.08); /* header tint */
+}
+.markdown-content tbody tr:nth-child(odd) {
+  background: rgba(146, 64, 14, 0.03);
+}
+
 @keyframes slideDown {
   from {
     opacity: 0;
@@ -798,7 +818,7 @@
                 </svg>
               </div>
               <div class="msg-note-content" id="${noteId}" style="display:none;">
-                ${note.type === 'text' ? `<pre>${note.content}</pre>` : (note.type === 'markdown' ? `<div class="markdown-content">${marked.parse(note.content.replace(/\n/g, '  \n'))}</div>` : '<p><i>Word файл - отвори за да видиш съдържанието</i><br><a href="' + note.path + '" target="_blank" style="color:#f59e0b;">Отвори файла</a></p>')}
+                ${note.type === 'text' ? `<pre>${note.content}</pre>` : (note.type === 'markdown' ? `<div class="markdown-content">${marked.parse(note.content)}</div>` : '<p><i>Word файл - отвори за да видиш съдържанието</i><br><a href="' + note.path + '" target="_blank" style="color:#f59e0b;">Отвори файла</a></p>')}
               </div>
             </div>
           `;
