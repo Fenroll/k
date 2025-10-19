@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<!-- Right-side overlay for course card click -->
+    <div id="rightOverlay" class="right-overlay">
+      <button class="mobile-overlay-close" onclick="closeRightOverlay()">✕</button>
+      <div class="overlay-content" id="overlayContent">
+        <!-- Dynamic content will be injected here -->
+      </div>
+    </div>
+
+    <style>
+    /* Overlay header styling to match main header */
+    .overlay-header {
+  background: #fff;
+  color: #000;
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-weight: 400;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 80px;
+  min-height: 80px;
+  max-height: 80px;
+  padding: 0 0 0 0;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #d3cdcd;
+  margin: 0;
+  box-sizing: border-box;
+  z-index: 2101;
+    }
+    .overlay-header .page-title {
+      font-weight: 400 !important;
+      font-size: 1.6em;
+      margin: 0;
+      color: #262626;
+    }
+    .right-overlay {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100vh;
+      width: 90vw;
+      max-width: none;
+      min-width: 0;
+      background: #fff;
+      box-shadow: -4px 0 24px rgba(0,0,0,0.18);
+      z-index: 2000;
+      transform: translateX(100%);
+      transition: transform 0.35s cubic-bezier(.4,0,.2,1);
+      display: flex;
+      flex-direction: column;
+      pointer-events: none;
+    }
+    .right-overlay.open {
+      transform: translateX(0);
+      pointer-events: auto;
+    }
+    @media (max-width: 900px) {
+      html, body {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        overflow-x: hidden;
+      }
+      #side-menu {
+        height: 100vh !important;
+        min-height: 100vh !important;
+        max-height: 100vh !important;
+        overflow-y: auto !important;
+        box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+        position: fixed !important;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        z-index: 3200;
+        width: 70vw !important;
+        max-width: 260px !important;
+        min-width: 200px !important;
+        display: block;
+      }
+      #side-menu.mobile-open {
+        transform: translateX(0);
+      }
+      .mobile-overlay {
+        display: none;
+      }
+      .mobile-overlay.active {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+        width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+        background: rgba(0,0,0,0.5);
+        z-index: 3100;
+      }
+    }
+    .overlay-ribbon {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: #c46dd8;
+      color: #fff;
+      height: 48px;
+      position: absolute;
+      left: -29px;
+      top: 24px;
+      width: 48px;
+      box-shadow: none;
+      z-index: 2200;
+      border-radius: 0;
+      font-size: 2.1em;
+      font-weight: 400;
+    }
+    .overlay-ribbon::before {
+      content: '';
+      position: absolute;
+      left: 1px;
+      top: 100%;
+      width: 0;
+      height: 0;
+      border-left: 28px solid transparent;
+      border-top: 22px solid #7c3aed;
+      z-index: -1;
+    }
+    .right-overlay.open .overlay-ribbon {
+      display: flex;
+    }
+    .overlay-close {
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 22px;
+      cursor: pointer;
+      margin-top: 2px;
+      padding: 0;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .overlay-content {
+  padding: 120px 32px 32px 58px;
+      margin-top: 0;
+      overflow-y: auto;
+      flex: 1 1 auto;
+    }
+    @media (max-width: 600px) {
+      .right-overlay {
+        width: 98vw;
+        min-width: 0;
+      }
+      .overlay-content {
+        padding: 100px 12px 20px 12px;
+      }
+      .overlay-ribbon {
+        left: -40px;
+        width: 40px;
+        height: 40px;
+      }
+      .overlay-header {
+        justify-content: center;
+        text-align: center;
+        padding: 0 55px 0 12px;
+      }
+      .overlay-header .page-title {
+        text-align: center;
+        width: 100%;
+        font-size: 1.4em !important;
+        line-height: 1.25 !important;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
+      }
+    }
+    /* --- MOBILE IMPROVEMENTS --- */
+@media (max-width: 768px) {
+  #side-menu {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+  }
+  .right-overlay {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+  }
+  .status-bar {
+    display: none !important;
+  }
+  .element-card {
+    border-radius: 12px;
+    min-height: 75px;
+    padding: 12px 10px !important;
+    margin-bottom: 6px !important;
+    display: flex;
+    align-items: flex-start;
+    box-sizing: border-box !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  }
+  .element-details-content {
+    max-width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    padding-top: 2px;
+  }
+  .course-title {
+    font-size: 15px !important;
+    line-height: 1.25 !important;
+    white-space: normal;
+    word-break: normal;
+    overflow-wrap: break-word;
+    max-width: 100%;
+    font-weight: 600 !important;
+    margin-bottom: 2px !important;
+    display: block;
+    color: #262626 !important;
+  }
+  .course-id {
+    font-size: 12px !important;
+    opacity: 0.75;
+    line-height: 1.2 !important;
+    display: block;
+    color: #666666 !important;
+    font-weight: 500 !important;
+  }
+  .favorite {
+    display: none !important;
+  }
+  
+  .mobile-overlay-close {
+    position: fixed;
+    top: 18px;
+    right: 18px;
+    z-index: 3100;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+  .right-overlay.open .mobile-overlay-close {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  /* Скрий всички елементи от .filter-bar освен .filter-search-group */
+  .filter-bar > *:not(.filter-search-group) {
+    display: none !important;
+  }
+  
+  /* Скрий "Others" само на мобилни устройства */
+  .others-label {
+    display: none !important;
+  }
+  
+  /* Main header на мобилни устройства */
+  .main-header {
+    justify-content: flex-start !important;
+    text-align: left !important;
+    padding-left: 75px !important;
+    padding-right: 16px !important;
+  }
+  .main-header .page-title {
+    text-align: left !important;
+    width: 100%;
+  }
+  
+  /* Елементите (карти) центрирани с еднакво разстояние */
+  .course-org-list {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    gap: 8px !important;
+    overflow-x: hidden;
+  }
+  #dynamic-course-list {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 8px;
+    box-sizing: border-box;
+  }
+  .element-card {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 0 12px 0 !important;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-overlay-close {
+    display: none !important;
+  }
+}
+    </style>
+    <script>
+    // Overlay logic for course cards
+    document.addEventListener('DOMContentLoaded', function() {
+      // Close overlay when clicking outside overlay-content
+      var overlay = document.getElementById('rightOverlay');
+      if (overlay) {
+        overlay.addEventListener('mousedown', function(e) {
+          // Only close if clicking directly on the overlay background, not on content or ribbon/close
+          if (e.target === overlay) {
+            closeRightOverlay();
+          }
+        });
+      }
+      
+      var courseList = document.getElementById('course-org-list');
+      if (courseList) {
+        courseList.querySelectorAll('.element-card').forEach(function(card) {
+          card.style.cursor = 'pointer';
+          card.addEventListener('click', function(e) {
+            openRightOverlayForCard(card);
+            e.stopPropagation();
+          });
+        });
+      }
+    });
+  function openRightOverlayForCard(card) {
+  var overlay = document.getElementById('rightOverlay');
+  var content = document.getElementById('overlayContent');
+  if (overlay && content) {
+    var title = card.querySelector('.course-title')?.textContent || 'Course';
+    var courseId = card.querySelector('.course-id')?.textContent || '';
+    var courseObj = courses.find(c => c.id === courseId);
+    let customContent = '';
+    if (courseObj && Array.isArray(courseObj.sections) && courseObj.sections.length > 0) {
+      customContent += `<div style="display:flex; flex-direction:column; gap:18px;">`;
+      courseObj.sections.forEach(section => {
+        customContent += renderSection(section, 0); // 0 = root level
+      });
+      customContent += `</div>`;
+    } else {
+      customContent = '<div style="color:#888;">Няма съдържание за този курс.</div>';
+    }
+    
+    // Recursive function to render sections and subsections
+    function renderSection(section, level) {
+      const indent = level * 16; // 16px indent per level
+      const fileCount = Array.isArray(section.files) ? section.files.length : 0;
+      const hasFiles = fileCount > 0;
+      const hasSubsections = Array.isArray(section.subsections) && section.subsections.length > 0;
+      const hasMany = fileCount > 5;
+      // Root level (0): collapsible only if many files. Nested levels (>0): always collapsible
+      const isCollapsible = (level === 0 && hasMany) || (level > 0);
+      const sectionId = section.name.replace(/\s+/g, '').replace(/[^\w]/g, '') + '_' + level + '_' + Math.random().toString(36).substr(2, 9);
+      
+      let sectionContent = '';
+      
+      // Root level (level 0) - full card style
+      if (level === 0) {
+        sectionContent += `<section style="background:#f7f4fa; border-radius:10px; padding:16px 18px 10px 18px; box-shadow:0 1px 6px #e3e3e3; margin-bottom:12px;">`;
+        // Title with dropdown arrow if many files
+        if (hasMany) {
+          sectionContent += `<div style="display:flex; align-items:center; gap:8px; cursor:pointer; user-select:none; margin-bottom:12px;" onclick="toggleFileDropdown('${sectionId}')">`;
+          sectionContent += `<span id="arrow-${sectionId}" style="color:#7c3aed; font-size:1em; min-width:12px; transition:all 0.2s ease;">►</span>`;
+          sectionContent += `<svg width="20" height="20" viewBox="0 0 24 24" fill="#7c3aed" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+          sectionContent += `<h3 style="margin:0; color:#7c3aed; font-size:1.1em; font-weight:600; flex:1;">${section.name} <span style="color:#999; font-size:0.85em; font-weight:400;">(${fileCount})</span></h3>`;
+          sectionContent += `</div>`;
+        } else {
+          sectionContent += `<div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">`;
+          sectionContent += `<svg width="20" height="20" viewBox="0 0 24 24" fill="#7c3aed" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+          sectionContent += `<h3 style="margin:0; color:#7c3aed; font-size:1.1em; font-weight:600;">${section.name}</h3>`;
+          sectionContent += `</div>`;
+        }
+      } 
+      // Nested levels - simple indent style
+      else {
+        sectionContent += `<div style="margin-left:${indent}px; margin-top:10px; margin-bottom:6px;">`;
+        // Title with dropdown arrow for nested folders
+        if (isCollapsible) {
+          sectionContent += `<div style="display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; margin-bottom:8px;" onclick="toggleFileDropdown('${sectionId}')">`;
+          sectionContent += `<span id="arrow-${sectionId}" style="color:#8b5cf6; font-size:0.9em; min-width:10px; transition:all 0.2s ease;">►</span>`;
+          sectionContent += `<svg width="18" height="18" viewBox="0 0 24 24" fill="#8b5cf6" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+          const label = hasMany ? `${section.name} (${fileCount})` : section.name;
+          sectionContent += `<h4 style="margin:0; color:#8b5cf6; font-size:${1.0 - level * 0.05}em; font-weight:500; flex:1;">${label}</h4>`;
+          sectionContent += `</div>`;
+        } else {
+          sectionContent += `<div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">`;
+          sectionContent += `<svg width="18" height="18" viewBox="0 0 24 24" fill="#8b5cf6" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+          sectionContent += `<h4 style="margin:0; color:#8b5cf6; font-size:${1.0 - level * 0.05}em; font-weight:500;">${section.name}</h4>`;
+          sectionContent += `</div>`;
+        }
+      }
+      
+      // Open collapsible container if needed
+      if (isCollapsible) {
+        sectionContent += `<div id="files-${sectionId}" style="display:none; margin-top:8px;">`;
+      }
+      
+      // Render files in this section
+      if (hasFiles) {
+        // Render file list
+        sectionContent += '<ul style="margin:8px 0 4px 0; padding-left:20px; list-style:none;">';
+        section.files.forEach(file => {
+          const fileName = file.name.toLowerCase();
+          let fileIcon = '';
+          
+          // Determine file icon based on extension
+          if (fileName.endsWith('.pdf')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#dc2626" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
+          } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#2563eb" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
+          } else if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#16a34a" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
+          } else if (fileName.endsWith('.ppt') || fileName.endsWith('.pptx')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ea580c" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
+          } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ec4899" style="flex-shrink:0;"><path d="M19,19H5V5H19M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M13.96,12.29L11.21,15.83L9.25,13.47L6.5,17H17.5L13.96,12.29Z"/></svg>`;
+          } else if (fileName.endsWith('.zip') || fileName.endsWith('.rar') || fileName.endsWith('.7z')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" style="flex-shrink:0;"><path d="M14,17H12V15H10V13H12V15H14M14,9H12V7H10V9H12V7H14M14,13H12V11H10V13H12V11H14M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6Z"/></svg>`;
+          } else {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#6b7280" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
+          }
+          
+          sectionContent += `<li style="margin-bottom:6px; font-size:0.95em; display:flex; align-items:center; gap:8px;">`;
+          sectionContent += fileIcon;
+          sectionContent += `<a href="${file.path}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
+        });
+        sectionContent += '</ul>';
+      }
+      
+      // Render subsections recursively
+      if (hasSubsections) {
+        section.subsections.forEach(subsection => {
+          sectionContent += renderSection(subsection, level + 1);
+        });
+      }
+      
+      // Show "no files" message only inside opened collapsible sections
+      if (isCollapsible && !section.files?.length && !section.subsections?.length) {
+        sectionContent += `<div style="color:#999; font-size:0.95em; font-style:italic; margin-top:4px; padding:8px 0;">Няма файлове</div>`;
+      }
+      
+      // Close collapsible container if needed
+      if (isCollapsible) {
+        sectionContent += `</div>`;
+      }
+      
+      // Close tag based on level
+      if (level === 0) {
+        sectionContent += `</section>`;
+      } else {
+        sectionContent += `</div>`; // close tree-item
+      }
+      return sectionContent;
+    }
+    content.innerHTML = `
+      <div class="overlay-ribbon">
+        <button class="overlay-close" onclick="closeRightOverlay()">&#10005;</button>
+      </div>
+      <header class="main-header overlay-header">
+        <h1 class="page-title">${title}</h1>
+      </header>
+      <div class="overlay-main-content" style="margin-top:18px;">${customContent}</div>
+    `;
+    overlay.classList.add('open');
+    // Скрий hamburger бутона на мобилни устройства когато overlay е отворен
+    var hamburger = document.getElementById('mobileMenuToggle');
+    if (hamburger && window.innerWidth <= 768) {
+      hamburger.style.opacity = '0';
+      hamburger.style.visibility = 'hidden';
+      hamburger.style.pointerEvents = 'none';
+    }
+  }
+}
+    function closeRightOverlay() {
+      var overlay = document.getElementById('rightOverlay');
+      if (overlay) overlay.classList.remove('open');
+      // Покажи hamburger бутона отново
+      var hamburger = document.getElementById('mobileMenuToggle');
+      if (hamburger && window.innerWidth <= 768) {
+        hamburger.style.opacity = '';
+        hamburger.style.visibility = '';
+        hamburger.style.pointerEvents = '';
+      }
+    }
+    </script>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/42761-1d7134afcf37578a.css">
+  <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/33651-1d7134afcf37578a.css">
+  <style>
+    .toggle-btn.selected {
+      background: #111 !important;
+      border-color: #111 !important;
+    }
+    .toggle-btn img {
+      filter: none;
+      transition: filter 0.15s;
+    }
+    .toggle-btn.selected img {
+      filter: brightness(0) invert(1);
+    }
+      /* Stray CSS removed */
+      /* .toggle-btn.selected { background: #111 !important; border-color: #111 !important; } */
+      /* .toggle-btn.selected img { filter: brightness(0) invert(1); } */
+  .filter-select-group:last-of-type .filter-select-wrapper {
+    box-shadow: none !important;
+  }
+  .filter-bar {
+  display: flex;
+  align-items: flex-end;
+  gap: 18px;
+  /* Ensure all filter boxes are the same width */
+  }
+  .filter-search-group,
+  .filter-select-group:not(:last-of-type) {
+    min-width: 0;
+    flex: 1 1 0;
+    max-width: none;
+    box-sizing: border-box;
+  }
+  .filter-search-group {
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
+  .filter-bar .filter-search-group,
+  .filter-bar .filter-select-group:not(:last-of-type) {
+    flex-basis: 0;
+    flex-grow: 1;
+    max-width: none;
+    min-width: 0;
+  }
+  }
+  body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
+    .base-courses-header-container { background: #262626; color: #fff; padding: 1rem; }
+  .page-title { font-size: 30px !important; margin-left: 30px !important; font-family: 'Noto Serif', serif; font-weight: 700; }
+    .course-org-list { margin: 2rem 23px 2rem 33px; }
+    .element-card {
+  background: #fff;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: stretch;
+  border-left: 10px solid #1976d2;
+  width: calc(100% - 25px);
+  height: 105px;
+  outline: 1.5px solid #d3cdcd;
+  outline-offset: -1.5px;
+  position: relative;
+  border-bottom: none;
+  z-index: 0;
+  margin-right: 0;
+  max-width: none;
+    }
+    .element-card:hover::after {
+  content: '';
+  position: absolute;
+  left: -10px;
+  width: calc(100% - 25px);
+  bottom: -4px;
+  height: 4px;
+  background: #e3e3e3;
+  z-index: 1;
+}
+    .course-banner {
+  width: 120px;
+  height: 100%;
+      background-size: cover;
+      background-position: center;
+    }
+    .element-details {
+          padding: 0.6rem 1.2rem 0.6rem 0.8rem;
+          flex: 1;
+          display: flex;
+          flex-direction: row;
+          justify-content: space-between;
+          align-items: center;
+          height: 100%;
+          text-align: left;
+    }
+        .element-details-content {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-start;
+          flex: 1;
+          min-width: 0;
+          position: relative;
+          top: -10px;
+        }
+        .element-details .favorite {
+          margin-left: 24px;
+          align-self: flex-start;
+        }
+  .course-title { font-size: 14px; color: #262626; text-decoration: none; font-weight: 525; }
+  .course-id { color: #888888; font-size: 14px; margin-bottom: 0.5rem; font-weight: 525; }
+  .status-bar { margin-top: 0.5rem; font-size: 0.88rem; display: flex; align-items: center; gap: 8px; }
+  .status-divider { display: inline-block; width: 1.5px; height: 16px; background: #444; margin: 0 8px; border-radius: 1px; vertical-align: middle; }
+  .status-open { font-size: 12px; font-weight: 400; color: #666666; }
+  .status-moreinfo { color: #222222; font-size: 12px; font-weight: 400; cursor: pointer; margin-left: 2px; display: flex; align-items: center; text-decoration: none; gap: 3px; }
+  .status-instructors { color: #1976D2; text-decoration: underline; font-weight: 400; font-size: 14px; }
+    .controls {
+  text-align: right;
+  min-width: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  padding: 0 1.2rem;
+    }
+    .favorite { background: none; border: none; cursor: pointer; margin-left: 8px; }
+    .base-footer { background: #262626; color: #fff; padding: 1.2rem 1rem; text-align: center; font-size: 1em; border-top: 1px solid #222; }
+  .base-footer .footer-links { display: inline-block; margin-left: 1.5em; font-size: 12px !important; }
+  .base-footer .footer-links a { font-size: 12px !important; }
+  .base-footer a { color: #cdcdcd; margin: 0 0.7em; text-decoration: none; }
+  .base-footer a:hover { text-decoration: underline; color: #fff; }
+    .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
+    .sidebar {
+  width: 200px;
+      background: #262626;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.04);
+    }
+  .logo-header {
+  background: #262626;
+  width: 200px !important;
+  height: 107px !important;
+  min-width: 200px !important;
+  min-height: 107px !important;
+  max-width: 200px !important;
+  max-height: 107px !important;
+  text-align: center;
+  border-bottom: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  flex: 0 0 107px !important;
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+    }
+    .logo-header > a {
+      display: block;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-sizing: content-box;
+    }
+    .logo-img {
+      width: 168px !important;
+      height: 22.55px !important;
+      min-width: 168px !important;
+      min-height: 22.55px !important;
+      max-width: 168px !important;
+      max-height: 22.55px !important;
+      object-fit: contain;
+      margin: 0 !important;
+      display: block;
+      box-sizing: content-box;
+    }
+    .sidebar-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+    .sidebar-nav li {
+      margin: 0;
+      position: relative;
+    }
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      color: #fff !important;
+      text-decoration: none;
+      padding: 16px 28px 16px 28px;
+  font-size: 14px;
+      transition: background 0.2s;
+      position: relative;
+      border-radius: 0;
+      gap: 12px;
+      flex-direction: row;
+      background: #222b36;
+      font-weight: 400;
+    }
+    .sidebar-nav .active a, .sidebar-nav li.active a {
+      background: #000000;
+      color: #fff !important;
+      position: relative;
+    }
+    .sidebar-nav .active a::before, .sidebar-nav li.active a::before {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: #C56FD5;
+      border-radius: 0;
+    }
+    .sidebar-nav a:hover {
+      background: #181818;
+    }
+    .sidebar-nav .base-navigation-button-content {
+      border-radius: 0;
+      background: inherit;
+      color: inherit;
+    }
+    .sidebar-nav .svg-icon {
+  width: 22px;
+  height: 22px;
+  margin-right: 0;
+  margin-left: 0;
+  flex-shrink: 0;
+  fill: #222 !important;
+  stroke: #222 !important;
+    }
+    .sidebar, .sidebar * {
+  font-family: 'Open Sans', Arial, sans-serif !important;
+}
+  </style>
+  <script src="courses.generated.js"></script>
+</head>
+<body>
+  <div class="layout">
+  <div id="side-menu" class="mode-light hide-in-background themed-background-primary-fill-only left-off-canvas-menu color-selection-live-mode" style="background: #262626; width: 200px; min-width: 200px; max-width: 200px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100;">
+      <div class="bb-inner-wrap">
+        <div class="logo-header">
+          <a href="https://elearn.mu-varna.bg" target="_blank" rel="noopener noreferrer">
+            <img src="https://ultra.content.blackboardcdn.com/ultra/static/images/brand/blackboard_logo_white.svg" alt="Blackboard-Medical University Varna" class="logo-img makeStyleslogoContainer-0-2-5 makeStyleslogoHref-0-2-4">
+          </a>
+        </div>
+        <nav class="sidebar-nav" aria-label="Main">
+          <ul class="off-canvas-list" id="base_tools">
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/institution-page">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-institution-banksolid-white.svg" alt="Institution Page" />
+                <span class="link-text">Institution Page</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/profile">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-profile-white.svg" alt="Profile" />
+                <span class="link-text">Сергей Павлов</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/stream">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-activity-globe-white.svg" alt="Activity" />
+                <span class="link-text">Activity</span>
+              </a>
+            </li>
+            <li class="base-navigation-button active">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/course">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-courses-booksolid-white.svg" alt="Courses" />
+                <span class="link-text">Courses</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/calendar">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-calendar-white.svg" alt="Calendar" />
+                <span class="link-text">Calendar</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/messages">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/svgexport-8.svg" alt="Messages" />
+                <span class="link-text">Messages</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/grades">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-grades-square-white.svg" alt="Grades" />
+                <span class="link-text">Grades</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/tools">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-tools-square-white.svg" alt="Tools" />
+                <span class="link-text">Tools</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/logout">
+                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-signout-left-white.svg" alt="Sign Out" />
+                <span class="link-text">Sign Out</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      <div class="sidebar-footer-links">
+        <span class="sidebar-footer-item">Privacy</span>
+        <span class="sidebar-footer-item">Terms</span>
+        <span class="sidebar-footer-item">Accessibility</span>
+      </div>
+      </div>
+    </div>
+    <div class="main-content">
+      <header class="main-header">
+        <h1 class="page-title">Courses</h1>
+      </header>
+      <section class="filter-bar">
+  <div class="filter-toggle-buttons" style="display: flex; align-items: center; height: 42px; margin-right: -15px;">
+    <div style="position: relative; display: flex;">
+      <button class="toggle-btn left-btn selected" type="button" style="width: 33px; height: 33px; border: 1.5px solid #bdbdbd; border-right: none; background: #fff; display: flex; align-items: center; justify-content: center; border-radius: 0; outline: none; cursor: pointer;">
+        <img src="elearn-mu-varna-bg/svgexport-13.svg" width="18" height="18" alt="Toggle 1" />
+      </button>
+      <div style="position:absolute; top:0; bottom:0; left:50%; width:1px; background:#bdbdbd; transform:translateX(-50%);"></div>
+      <button class="toggle-btn right-btn" type="button" style="width: 33px; height: 33px; border: 1.5px solid #bdbdbdbd; border-left: none; background: #fff; display: flex; align-items: center; justify-content: center; border-radius: 0; outline: none; cursor: pointer;">
+        <img src="elearn-mu-varna-bg/svgexport-14.svg" width="18" height="18" alt="Toggle 2" />
+      </button>
+    </div>
+  </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const leftBtn = document.querySelector('.toggle-btn.left-btn');
+      const rightBtn = document.querySelector('.toggle-btn.right-btn');
+      leftBtn.addEventListener('click', function() {
+        leftBtn.classList.add('selected');
+        rightBtn.classList.remove('selected');
+      });
+      rightBtn.addEventListener('click', function() {
+        rightBtn.classList.add('selected');
+        leftBtn.classList.remove('selected');
+      });
+    });
+  </script>
+  </div>
+  <div class="filter-search-group">
+    <span class="filter-label">Search your courses</span>
+    <div class="filter-search-input-wrapper">
+      <input id="courses-overview-filter-search" type="text" class="filter-search-input" placeholder=" " />
+      <span class="filter-search-icon" style="left:10px;top:calc(50% + 5px);transform:translateY(-50%);pointer-events:none;position:absolute;z-index:2;">
+          <img src="elearn-mu-varna-bg/svgexport-15.svg" width="18" height="18" alt="Search" />
+      </span>
+    </div>
+  </div>
+  <div class="filter-select-group">
+    <span class="filter-label">Terms</span>
+    <div class="filter-select-wrapper">
+      <svg class="filter-select-arrow arrow-down" width="18" height="18" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+      <svg class="filter-select-arrow arrow-up" width="18" height="18" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
+      <select id="courses-overview-filter-terms" class="filter-select">
+        <option>All Terms</option>
+      </select>
+    </div>
+  </div>
+  <div class="filter-select-group">
+    <span class="filter-label">Filters</span>
+    <div class="filter-select-wrapper">
+    <svg class="filter-select-arrow arrow-down" width="18" height="18" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+    <svg class="filter-select-arrow arrow-up" width="18" height="18" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
+    <select id="courses-overview-filter-filters" class="filter-select">
+      <option>All courses</option>
+       <option>Courses I am taking</option>
+        <option>Open courses</option>
+         <option>Completed courses</option>
+    </select>
+  </div>
+  </div>
+  <div class="filter-select-group" style="flex-direction: row; align-items: center;">
+    <div class="filter-select-wrapper" style="flex:1;">
+    <select id="courses-overview-filter-pagesize" class="filter-select">
+      <option selected>25</option>
+      <option>50</option>
+      <option>100</option>
+    </select>
+    <div class="filter-select-divider"></div>
+    <svg class="filter-select-arrow arrow-down" width="18" height="18" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
+    <svg class="filter-select-arrow arrow-up" width="18" height="18" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
+  <style>
+    .filter-select-wrapper {
+      overflow: visible;
+      position: relative;
+    }
+    .filter-select-divider {
+      position: absolute;
+      top: 20%;
+      bottom: 20%;
+      right: 36px;
+      width: 1.5px;
+      background: #ccc;
+      z-index: 3;
+      border-radius: 2px;
+      height: 60%;
+      content: '';
+      display: block;
+    }
+    #courses-overview-filter-pagesize.filter-select {
+         border-color: #bbb;
+         box-shadow: 0 0 0 0 #ddd;
+    }
+    .filter-select-wrapper .filter-select-arrow {
+      right: 10px;
+      max-width: 18px;
+    }
+  </style>
+  </div>
+    <span style="margin-left: 8px; color: #444; font-size: 0.95em;">items per page</span>
+  </div>
+</section>
+<div id="results-count" style="font-size: 14px; color: #444; font-weight: 400; margin: 0 0 1.2rem 36px; font-family: 'Open Sans', Arial, sans-serif !important; text-shadow:0.5px 0 0 #888;">5 results</div>
+  <div class="course-org-list" id="course-org-list">
+  <div class="others-label" style="font-size: 1.18em; color: #222; font-weight: 400; margin-bottom: 0.5rem; margin-left: 2px; font-family: 'Open Sans', Arial, sans-serif !important;">Others</div>
+  <div id="dynamic-course-list"></div>
+</div>
+<script>
+// Generate a consistent color based on course ID
+function generateColorFromId(id) {
+  // Remove any non-numeric characters and convert to number
+  const numericId = parseInt(id.replace(/\D/g, ''), 10) || 0;
+  
+  // Predefined color palette for better aesthetics
+  const colors = [
+    '#1976d2', // Blue
+    '#43a047', // Green
+    '#fbc02d', // Yellow
+    '#8e24aa', // Purple
+    '#e53935', // Red
+    '#ff5722', // Orange
+    '#009688', // Teal
+    '#795548', // Brown
+    '#607d8b', // Blue Grey
+    '#f57c00', // Orange (darker)
+    '#7b1fa2', // Purple (darker)
+    '#388e3c', // Green (darker)
+    '#1565c0', // Blue (darker)
+    '#c62828', // Red (darker)
+    '#00695c', // Teal (darker)
+    '#5d4037'  // Brown (darker)
+  ];
+  
+  // Use modulo to ensure we always get a valid color index
+  return colors[numericId % colors.length];
+}
+
+// Function to get color mapping for all courses (for debugging/reference)
+function getColorMapping() {
+  if (typeof courses !== 'undefined' && Array.isArray(courses)) {
+    console.log('Course ID -> Color mapping:');
+    courses.forEach(course => {
+      const color = generateColorFromId(course.id);
+      console.log(`${course.id} (${course.title}) -> ${color}`);
+    });
+  }
+}
+
+// Render course cards dynamically using the global courses array from courses.generated.js
+function renderCourseList() {
+  const list = document.getElementById('dynamic-course-list');
+  list.innerHTML = '';
+  if (typeof courses !== 'undefined' && Array.isArray(courses)) {
+    courses.forEach(course => {
+      const card = document.createElement('div');
+      card.className = 'element-card';
+      
+      // Generate color based on course ID
+      const borderColor = generateColorFromId(course.id);
+      
+      card.innerHTML = `
+        <div class="element-details">
+          <div class="element-details-content">
+            <div class="course-id" style="margin-bottom:8px; font-weight:400; text-shadow:0.5px 0 0 #888;">${course.id}</div>
+            <div class="course-title" style="margin-bottom:8px; font-weight:400; text-shadow:0.5px 0 0 #888;">${course.title}</div>
+            <div class="status-bar" style="margin-top:0;gap:2px;line-height:1.2;display:flex;align-items:center;">
+              <span class="status-open">Open</span>
+              <span class="status-divider" style="margin:0 3px;"></span>
+              <span class="status-instructors">Multiple Instructors</span>
+              <span class="status-divider" style="margin:0 3px;"></span>
+              <span class="status-moreinfo">More info</span>
+            </div>
+          </div>
+          <button class="favorite" title="Add to your favorites">
+            <svg class="svg-icon small-icon" focusable="false" aria-hidden="true">
+              <use xlink:href="https://elearn.mu-varna.bg/ultra/course#icon-small-star"></use>
+            </svg>
+          </button>
+        </div>
+      `;
+      
+      // Apply the color as border-left style
+      card.style.borderLeft = `11px solid ${borderColor}`;
+      
+      list.appendChild(card);
+    });
+    // Re-attach click listeners for overlay
+    list.querySelectorAll('.element-card').forEach(function(card) {
+      card.style.cursor = 'pointer';
+      card.addEventListener('click', function(e) {
+        openRightOverlayForCard(card);
+        e.stopPropagation();
+      });
+    });
+  }
+}
+document.addEventListener('DOMContentLoaded', renderCourseList);
+</script>
+      </div>
+    </div>
+  </div>
+  <script>
+    // Simple search system for filtering cards by name
+    const searchInput = document.getElementById('courses-overview-filter-search');
+    const courseList = document.getElementById('course-org-list');
+    const resultsCount = document.getElementById('results-count');
+    function updateResultsCount() {
+      const visible = courseList.querySelectorAll('.element-card:not([style*="display: none"])').length;
+      resultsCount.textContent = visible + (visible === 1 ? ' result' : ' results');
+    }
+    function filterCourses() {
+      const val = searchInput.value.trim().toLowerCase();
+      const cards = courseList.querySelectorAll('.element-card');
+      cards.forEach(card => {
+        const name = card.querySelector('.course-title')?.textContent.toLowerCase() || '';
+        const id = card.querySelector('.course-id')?.textContent.toLowerCase() || '';
+        if (name.includes(val) || id.includes(val)) {
+          card.style.display = '';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+      updateResultsCount();
+    }
+    if (searchInput) {
+      searchInput.addEventListener('input', filterCourses);
+    }
+    window.addEventListener('DOMContentLoaded', updateResultsCount);
+  </script>
+  <style>
+  body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
+    .layout { display: flex; min-height: 100vh; }
+  .logo-header { background: #262626; height: 107px; min-height: 107px; max-height: 107px; text-align: center; border-bottom: 2px solid #1d1b1b; padding: 0; display: flex; align-items: center; justify-content: center; }
+    .logo-img { width: 168px; margin-top: 3px; }
+    .sidebar-profile {
+      margin-left: 8px;
+      font-weight: 500;
+      vertical-align: middle;
+      box-shadow: 0 1px 4px rgba(229,57,53,0.15);
+    }
+    .main-content {
+  flex: 1;
+  padding: 0 0 0 200px;
+  background: #f5f5f5;
+  min-height: 100vh;
+    }
+    .main-header {
+  background: #fff;
+  color: #000;
+  font-family: 'Open Sans', Arial, sans-serif;
+  font-weight: 400;
+  width: 100%;
+  min-width: unset;
+  /* no max-width, no margin-left */
+  height: 107px;
+  min-height: 107px;
+  max-height: 107px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #d3cdcd;
+  /* outline removed, keep only border-bottom */
+    }
+    .main-header .page-title {
+      font-weight: 400 !important;
+    }
+    .page-title { font-size: 2rem; margin: 0; }
+    .filter-bar {
+      display: flex;
+      align-items: flex-end;
+  gap: 34px;
+      background: #f5f5f5;
+  padding: 18px 37px 18px 35px;
+      border-bottom: none;
+    }
+    .filter-label {
+      font-size: 0.95em;
+      color: #888;
+      margin-bottom: 0;
+      margin-left: 4px;
+  font-family: 'Open Sans', Arial, sans-serif;
+    }
+    .filter-search-group {
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      min-width: 220px;
+    }
+    .filter-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+    .filter-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  pointer-events: none;
+  z-index: 2;
+    }
+    .filter-search-input {
+      width: 100%;
+  padding: 10px 12px 10px 40px;
+      border: 1.5px solid #bdbdbd;
+      border-radius: 0 !important;
+      font-size: 1em;
+  font-family: 'Open Sans', Arial, sans-serif;
+      transition: border 0.2s;
+    }
+    .filter-select-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 140px;
+      position: relative;
+    }
+    .filter-select-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .filter-select {
+      width: 100%;
+      padding: 10px 32px 10px 12px;
+  height: 46px;
+      line-height: 20px;
+      border: 1.5px solid #444;
+      border-radius: 0 !important;
+      font-size: 1em;
+      font-family: 'Roboto', Arial, sans-serif;
+      background: #fff;
+      outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      margin-bottom: 0;
+      margin-top: 2px;
+      transition: border 0.2s;
+      vertical-align: middle;
+    }
+    .filter-select:focus {
+      border-color: #1976d2;
+    }
+    .filter-select-arrow {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      fill: #000;
+      z-index: 2;
+      opacity: 1;
+      display: block;
+    }
+    .filter-select-arrow.arrow-up {
+      opacity: 0;
+    }
+    .filter-select-wrapper:has(.filter-select:focus) .arrow-down {
+      opacity: 0;
+    }
+    .filter-select-wrapper:has(.filter-select:focus) .arrow-up {
+      opacity: 1;
+    }
+  .base-footer {
+    background: #262626;
+    color: #fff;
+    padding: 1.2rem 1rem 1.2rem 1.2rem;
+    text-align: left;
+    font-size: 0.85em;
+    border-top: 1px solid #222;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .sidebar-footer-links {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    padding: 16px 0 12px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.2em;
+  }
+    .sidebar-footer-links {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      position: absolute;
+      left: 12px;
+      bottom: 11px;
+      gap: 2.5px;
+      font-size: 12px;
+    }
+    .sidebar-footer-item {
+      font-size: 12px;
+      color: #cdcdcd;
+      text-decoration: none;
+      cursor: default;
+      padding: 0;
+      margin: 0;
+      background: none;
+      border: none;
+      outline: none;
+      display: block;
+    }
+  .sidebar-footer-links a:hover {
+    text-decoration: underline;
+    color: #fff;
+    opacity: 1;
+  }
+    .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
+    @media (max-width: 900px) {
+      .layout { flex-direction: column; }
+      .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
+      .main-content { padding: 0; }
+      .main-header, .filter-bar, .course-org-list { padding-left: 16px; padding-right: 16px; }
+    }
+  </style>
+  <style>
+.filter-search-group, .filter-select-group {
+  position: relative;
+  margin-top: 18px;
+}
+.filter-label {
+  position: absolute;
+  top: -0.8em;
+  left: 12px;
+  background: #f5f5f5;
+  padding: 0 4px;
+  font-size: 1em;
+  color: #222;
+  font-weight: normal;
+  font-family: 'Open Sans', Arial, sans-serif;
+  z-index: 2;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+.filter-search-input,
+.filter-select {
+  height: 42px;
+  line-height: 46px;
+  padding: 0 32px 0 12px;
+  border: 1.5px solid #444;
+  border-radius: 0 !important;
+  font-size: 1em;
+  font-family: 'Open Sans', Arial, sans-serif;
+  background: #fff;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  margin-bottom: 0;
+  margin-top: 2px;
+  transition: none;
+  box-sizing: border-box;
+  display: block;
+}
+.filter-search-input {
+  padding-left: 40px;
+}
+</style>
+
+<!-- Hamburger button for mobile -->
+<button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Отвори меню">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+<div class="mobile-overlay" id="mobileOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:3000;"></div>
+<div class="sidemenu-overlay" id="sidemenuOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:transparent;z-index:50;"></div>
+
+<style>
+@media (max-width: 768px) {
+  html, body {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    overflow-x: hidden;
+  }
+  #side-menu {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    width: 200px !important;
+    max-width: 200px !important;
+    min-width: 200px !important;
+  }
+  .right-overlay {
+    height: 100vh !important;
+    min-height: 100vh !important;
+    max-height: 100vh !important;
+    overflow-y: auto !important;
+    position: fixed !important;
+    top: 0;
+    bottom: 0;
+    right: 0;
+  }
+  .mobile-menu-toggle {
+    display: flex !important;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    background: #fff;
+    border: none;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    position: fixed;
+    top: 18px;
+    left: 18px;
+    z-index: 3300;
+    padding: 0;
+    transition: opacity 0.3s, visibility 0.3s;
+  }
+  #side-menu.mobile-open ~ .mobile-menu-toggle {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  .mobile-menu-toggle span {
+    display: block;
+    width: 26px;
+    height: 3px;
+    background: #222;
+    margin: 4px 0;
+    border-radius: 2px;
+  }
+}
+@media (min-width: 769px) {
+  .mobile-menu-toggle { display: none !important; }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const mobileToggle = document.getElementById('mobileMenuToggle');
+  const sidebar = document.getElementById('side-menu');
+  const mobileOverlay = document.getElementById('mobileOverlay');
+  const sidemenuOverlay = document.getElementById('sidemenuOverlay');
+  if (mobileToggle && sidebar && sidemenuOverlay) {
+    mobileToggle.addEventListener('click', function() {
+      const isOpen = sidebar.classList.contains('mobile-open');
+      if (isOpen) {
+        sidebar.classList.remove('mobile-open');
+        sidemenuOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+        mobileToggle.style.opacity = '';
+        mobileToggle.style.visibility = '';
+        mobileToggle.style.pointerEvents = '';
+      } else {
+        sidebar.classList.add('mobile-open');
+        sidemenuOverlay.style.display = 'block';
+        document.body.style.overflow = 'hidden';
+        mobileToggle.style.opacity = '0';
+        mobileToggle.style.visibility = 'hidden';
+        mobileToggle.style.pointerEvents = 'none';
+      }
+    });
+    sidemenuOverlay.addEventListener('click', function() {
+      sidebar.classList.remove('mobile-open');
+      sidemenuOverlay.style.display = 'none';
+      document.body.style.overflow = '';
+      mobileToggle.style.opacity = '';
+      mobileToggle.style.visibility = '';
+      mobileToggle.style.pointerEvents = '';
+    });
+    // Затваря менюто при клик на линк
+    sidebar.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        // Позволяваме на линка да работи нормално
+        // Затваряме менюто след малко закъснение
+        setTimeout(function() {
+          sidebar.classList.remove('mobile-open');
+          sidemenuOverlay.style.display = 'none';
+          document.body.style.overflow = '';
+          mobileToggle.style.opacity = '';
+          mobileToggle.style.visibility = '';
+          mobileToggle.style.pointerEvents = '';
+        }, 200);
+      });
+    });
+    // Затваря менюто при resize към desktop
+    window.addEventListener('resize', function() {
+      if (window.innerWidth > 768) {
+        sidebar.classList.remove('mobile-open');
+        sidemenuOverlay.style.display = 'none';
+        document.body.style.overflow = '';
+        mobileToggle.style.opacity = '';
+        mobileToggle.style.visibility = '';
+        mobileToggle.style.pointerEvents = '';
+      }
+    });
+  }
+});
+
+// Функция за показване/скриване на dropdown с файлове
+function toggleFileDropdown(sectionId) {
+  const dropdown = document.getElementById(`files-${sectionId}`);
+  const arrow = document.getElementById(`arrow-${sectionId}`);
+  
+  if (dropdown && arrow) {
+    if (dropdown.style.display === 'none' || dropdown.style.display === '') {
+      // Отваряме - показваме съдържанието и сменяме стрелката надолу
+      dropdown.style.display = 'block';
+      arrow.innerHTML = '▼';
+    } else {
+      // Затваряме - скриваме съдържанието и сменяме стрелката надясно
+      dropdown.style.display = 'none';
+      arrow.innerHTML = '►';
+      
+      // Затваряме всички вложени папки
+      const nestedDropdowns = dropdown.querySelectorAll('[id^="files-"]');
+      const nestedArrows = dropdown.querySelectorAll('[id^="arrow-"]');
+      
+      nestedDropdowns.forEach(nested => {
+        nested.style.display = 'none';
+      });
+      
+      nestedArrows.forEach(nestedArrow => {
+        nestedArrow.innerHTML = '►';
+      });
+    }
+  }
+}
+</script>
+</body>
+</html>

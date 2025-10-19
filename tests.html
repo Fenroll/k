@@ -1655,8 +1655,159 @@
 
 
 
+
 // ГЕНЕРИРАНИ ДАННИ ЗА ПРИМЕРНИ ФАЙЛОВЕ - НАЧАЛО
 const sampleFiles = [
+  {
+    "fileName": "21.json",
+    "title": "21",
+    "groups": 19,
+    "drugs": 43,
+    "data": {
+      "questionType": "drugToGroup",
+      "questionCount": 10,
+      "groups": [
+        {
+          "groupName": "Пеницилини – тясноспектърни - природни бета-лактамаза чувствителни",
+          "drugs": [
+            "Benzylpenicillin",
+            "Benathinbenzylpenicllin",
+            "Phenoxymethylpenicillin"
+          ]
+        },
+        {
+          "groupName": "Пеницилини – тясноспектърни - полусинтетични бета-лактамаза резистентни",
+          "drugs": [
+            "Мeticillin",
+            "Оxacillin"
+          ]
+        },
+        {
+          "groupName": "Пеницилини – широкоспектърни – аминопеницилини – бета-лактамаза чувствителни",
+          "drugs": [
+            "Amoxicillin",
+            "Ampicililn"
+          ]
+        },
+        {
+          "groupName": "Цефалоспорини - I поколение",
+          "drugs": [
+            "Cefalexin",
+            "Cefadroxil",
+            "Cefazolin"
+          ]
+        },
+        {
+          "groupName": "Цефалоспорини - II поколение",
+          "drugs": [
+            "Cefuroxime",
+            "Cefamandole",
+            "Cefaclor"
+          ]
+        },
+        {
+          "groupName": "Цефалоспорини - III поколение",
+          "drugs": [
+            "Ceftriaxone",
+            "Cefoperazone",
+            "Cefotaxime",
+            "Ceftazidime",
+            "Ceftibuten",
+            "Cefixime",
+            "Cefpodoxime"
+          ]
+        },
+        {
+          "groupName": "Цефалоспорини - IV поколене",
+          "drugs": [
+            "Cefepime"
+          ]
+        },
+        {
+          "groupName": "Цефалоспорини - V поколене",
+          "drugs": [
+            "Ceftaroline"
+          ]
+        },
+        {
+          "groupName": "Карбаценеми",
+          "drugs": [
+            "Imipenem (+ Cilastatin)",
+            "Meropenem"
+          ]
+        },
+        {
+          "groupName": "Гликопептиди",
+          "drugs": [
+            "Vancomycin",
+            "Teicoplanin"
+          ]
+        },
+        {
+          "groupName": "Аминогликозиди - природни",
+          "drugs": [
+            "Gentamicin",
+            "Tobramycin",
+            "Streptomycin",
+            "Neomycin"
+          ]
+        },
+        {
+          "groupName": "Аминогликозиди - полусинтетични",
+          "drugs": [
+            "Amikacin"
+          ]
+        },
+        {
+          "groupName": "Други антибиотици",
+          "drugs": [
+            "Fosfomycin",
+            "Fidaxomicin"
+          ]
+        },
+        {
+          "groupName": "Синтетични бактерицидни лекарства. Флуорирани хинолони - I поколение",
+          "drugs": [
+            "Ciprofloxacin",
+            "Norfloxacin",
+            "Ofloxacin"
+          ]
+        },
+        {
+          "groupName": "Синтетични бактерицидни лекарства. Флуорирани хинолони - II поколение",
+          "drugs": [
+            "Moxifloxacin",
+            "Levofloxacin"
+          ]
+        },
+        {
+          "groupName": "Пеницилини – широкоспектърни – аминопеницилини – бета-лактамаза резистентни",
+          "drugs": [
+            "Amoxicillin + Clavulanic acid",
+            "Ampicillin + Sulbactam"
+          ]
+        },
+        {
+          "groupName": "Пеницилини – широкоспектърни – карбоксипеницилини - бета-лактамаза чувствителни",
+          "drugs": [
+            "Carbenicillin"
+          ]
+        },
+        {
+          "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили - бета-лактамаза чувствителни",
+          "drugs": [
+            "piperacillin"
+          ]
+        },
+        {
+          "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили - бета-лактамаза резистентни комбинации с бета-лактамазен инхибитор",
+          "drugs": [
+            "Piperacillin + Tazobactam = Tazocin"
+          ]
+        }
+      ]
+    }
+  },
   {
     "fileName": "Фармакология III.json",
     "title": "Фармакология III",
@@ -2181,7 +2332,7 @@ function loadSampleFiles() {
       const card = document.createElement('div');
       card.className = 'sample-file-card';
       card.innerHTML = `
-        <img src="images/json-file-icon.svg" alt="JSON" class="sample-file-icon">
+        <img src="images/json-file-icon.svg" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z\"></path><polyline points=\"14 2 14 8 20 8\"></polyline><path d=\"M12 18v-6\"></path><path d=\"M8 15h8\"></path></svg>'" class="sample-file-icon">
         <div class="sample-file-name">${file.title}</div>
         <div class="sample-file-info">${file.groups} групи, ${file.drugs} лекарства</div>
       `;

@@ -1,0 +1,9 @@
+{
+  "comment": "Auto-generated mapping на PDF файлове към GitHub URLs. Генериран автоматично от PDF repository.",
+  "lastUpdated": "2025-10-15T09:03:06.954Z",
+  "totalFiles": 1,
+  "sourceRepository": "https://github.com/fenroll/medical-pdfs",
+  "mappings": {
+    "Елементи/Фармакология/Колоквиум III/Лекции за трети колоквиумtest.pdf": "https://raw.githubusercontent.com/fenroll/medical-pdfs/main/Фармакология/Колоквиум III/Лекции за трети колоквиумtest.pdf"
+  }
+}

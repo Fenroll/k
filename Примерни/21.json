@@ -1,0 +1,144 @@
+{
+  "questionType": "drugToGroup",
+  "questionCount": 10,
+  "groups": [
+    {
+      "groupName": "Пеницилини – тясноспектърни - природни бета-лактамаза чувствителни",
+      "drugs": [
+        "Benzylpenicillin",
+        "Benathinbenzylpenicllin",
+        "Phenoxymethylpenicillin"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – тясноспектърни - полусинтетични бета-лактамаза резистентни",
+      "drugs": [
+        "Мeticillin",
+        "Оxacillin"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – широкоспектърни – аминопеницилини – бета-лактамаза чувствителни",
+      "drugs": [
+        "Amoxicillin",
+        "Ampicililn"
+      ]
+    },
+    {
+      "groupName": "Цефалоспорини - I поколение",
+      "drugs": [
+        "Cefalexin",
+        "Cefadroxil",
+        "Cefazolin"
+      ]
+    },
+    {
+      "groupName": "Цефалоспорини - II поколение",
+      "drugs": [
+        "Cefuroxime",
+        "Cefamandole",
+        "Cefaclor"
+      ]
+    },
+    {
+      "groupName": "Цефалоспорини - III поколение",
+      "drugs": [
+        "Ceftriaxone",
+        "Cefoperazone",
+        "Cefotaxime",
+        "Ceftazidime",
+        "Ceftibuten",
+        "Cefixime",
+        "Cefpodoxime"
+      ]
+    },
+    {
+      "groupName": "Цефалоспорини - IV поколене",
+      "drugs": [
+        "Cefepime"
+      ]
+    },
+    {
+      "groupName": "Цефалоспорини - V поколене",
+      "drugs": [
+        "Ceftaroline"
+      ]
+    },
+    {
+      "groupName": "Карбаценеми",
+      "drugs": [
+        "Imipenem (+ Cilastatin)",
+        "Meropenem"
+      ]
+    },
+    {
+      "groupName": "Гликопептиди",
+      "drugs": [
+        "Vancomycin",
+        "Teicoplanin"
+      ]
+    },
+    {
+      "groupName": "Аминогликозиди - природни",
+      "drugs": [
+        "Gentamicin",
+        "Tobramycin",
+        "Streptomycin",
+        "Neomycin"
+      ]
+    },
+    {
+      "groupName": "Аминогликозиди - полусинтетични",
+      "drugs": [
+        "Amikacin"
+      ]
+    },
+    {
+      "groupName": "Други антибиотици",
+      "drugs": [
+        "Fosfomycin",
+        "Fidaxomicin"
+      ]
+    },
+    {
+      "groupName": "Синтетични бактерицидни лекарства. Флуорирани хинолони - I поколение",
+      "drugs": [
+        "Ciprofloxacin",
+        "Norfloxacin",
+        "Ofloxacin"
+      ]
+    },
+    {
+      "groupName": "Синтетични бактерицидни лекарства. Флуорирани хинолони - II поколение",
+      "drugs": [
+        "Moxifloxacin",
+        "Levofloxacin"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – широкоспектърни – аминопеницилини – бета-лактамаза резистентни",
+      "drugs": [
+        "Amoxicillin + Clavulanic acid",
+        "Ampicillin + Sulbactam"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – широкоспектърни – карбоксипеницилини - бета-лактамаза чувствителни",
+      "drugs": [
+        "Carbenicillin"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили - бета-лактамаза чувствителни",
+      "drugs": [
+        "piperacillin"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили - бета-лактамаза резистентни комбинации с бета-лактамазен инхибитор",
+      "drugs": [
+        "Piperacillin + Tazobactam = Tazocin"
+      ]
+    }
+  ]
+}
