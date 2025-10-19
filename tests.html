@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Фармакологичен Тест - Medical University Varna</title>
   <style>
+    /* Ensure consistent sizing across the app */
+    *, *::before, *::after { box-sizing: border-box; }
     body {
       font-family: 'Open Sans', Arial, sans-serif;
       margin: 0;
@@ -12,16 +14,28 @@
       background-color: #f5f5f5;
       color: #333;
       line-height: 1.6;
+      overflow-x: hidden; /* prevent accidental horizontal scroll */
     }
     
     .layout {
       display: flex;
+      max-width: 100vw;
+      overflow-x: hidden;
     }
     
     .main-content {
-      width: 100%;
+      flex: 1 1 auto;      /* take remaining space next to sidebar */
+      min-width: 0;        /* allow shrinking to avoid horizontal overflow */
+      width: auto;         /* let flex control width */
       padding: 20px;
-      margin-left: 200px;
+      margin-left: 0;      /* Sidebar is a flex sibling; no extra offset needed */
+    }
+
+    /* On desktop, offset content to the right of the fixed 200px sidebar using padding (not margin) */
+    @media (min-width: 769px) {
+      .main-content {
+        padding-left: calc(20px + 200px);
+      }
     }
     
     .main-header {
@@ -36,6 +50,9 @@
       font-size: 1.6em;
       font-weight: 400;
       color: #262626;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     /* Sidebar styles */
@@ -377,23 +394,12 @@
     body.test-mode #questionContainer .answers-list { flex: 1 1 auto; overflow-y: auto; max-height: none; padding-right: 6px; }
     body.test-mode .question-container { padding: 12px; }
     body.test-mode .question-container h3 { font-size: 18px; margin-bottom: 8px; }
-    body.test-mode .answer-item { padding: 8px 10px; font-size: 15px; line-height: 1.3; margin-bottom: 8px; }
+  body.test-mode .answer-item { padding: 8px 10px; font-size: 14px; line-height: 1.3; margin-bottom: 8px; }
     
     /* Two-column answers on wider screens to reduce scrolling */
-    @media (min-width: 640px) {
-      body.test-mode #questionContainer .answers-list {
-        display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 8px;
-        padding-right: 6px;
-      }
-      body.test-mode #questionContainer .answer-item { margin: 0; }
-    }
-    @media (min-width: 1024px) {
-      body.test-mode #questionContainer .answers-list {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-      }
-    }
+    /* Always stack answers one-per-row */
+    body.test-mode #questionContainer .answers-list { display: block; }
+    body.test-mode #questionContainer .answer-item { width: 100%; }
 
     @keyframes pulse {
       0% { transform: scale(1); }
@@ -534,6 +540,7 @@
       border-radius: 8px;
       padding: 20px;
       margin-bottom: 20px;
+      overflow-x: hidden;
     }
     
     .question-container h3 {
@@ -544,6 +551,8 @@
     .answers-list {
       list-style-type: none;
       padding: 0;
+      margin: 0;            /* remove default margin that can affect width */
+      overflow-x: hidden;
     }
     
     .answer-item {
@@ -554,6 +563,10 @@
       border: 1px solid #e5e7eb;
       cursor: pointer;
       transition: all 0.2s;
+      overflow-wrap: anywhere; /* break long drug names or long strings */
+      word-break: break-word;
+      display: block;       /* ensure full-width clickable row */
+      max-width: 100%;
     }
     
     .answer-item:hover {
@@ -567,38 +580,45 @@
     
     .score-display {
       display: flex;
-      flex-direction: column;
       align-items: center;
-      margin-bottom: 30px;
+      gap: 12px;
+      margin-bottom: 12px;
+      font-size: 0.95em;
     }
     
     .score-circle {
-      width: 120px;
-      height: 120px;
+      width: 72px;
+      height: 72px;
       border-radius: 50%;
       background: #e0e7ff;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 28px;
+      font-size: 20px;
       font-weight: 600;
       color: #5b21b6;
-      margin-bottom: 15px;
+      margin-bottom: 0;
+      flex: 0 0 auto;
     }
     
     .detailed-results {
-      margin-top: 15px;
-      max-height: 65vh;
+      margin-top: 8px;
+      max-height: 58vh;
       overflow-y: auto;
-      padding-right: 5px;
+      padding-right: 4px;
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px;
     }
     
     .result-item {
       background: #f9fafb;
       border: 1px solid #e5e7eb;
       border-radius: 6px;
-      padding: 10px;
-      margin-bottom: 6px;
+      padding: 8px;
+      margin: 0;
+      font-size: 0.92em;
+      line-height: 1.3;
     }
     
     .result-item.correct {
@@ -609,9 +629,7 @@
       border-left: 4px solid #ef4444;
     }
     
-    .result-item p {
-      margin: 4px 0;
-    }
+    .result-item p { margin: 2px 0; }
     
     /* Sample Files Section Styling */
     .sample-files-section {
@@ -1360,9 +1378,11 @@
             
             // Update test title from file name (without extension)
             const testTitleEl = document.getElementById('testTitle');
-            if (testTitleEl && file && file.name) {
+            if (file && file.name) {
               const nameNoExt = file.name.replace(/\.[^.]+$/, '');
-              testTitleEl.textContent = nameNoExt;
+              // store globally for consistency across flows
+              window.pharmaCurrentTestTitle = nameNoExt;
+              if (testTitleEl) testTitleEl.textContent = nameNoExt;
             }
 
             // Update the UI with the imported data
@@ -1469,12 +1489,16 @@
         // Enter compact test mode (hide page title, lock layout)
         document.body.classList.add('test-mode');
 
-        // Set test title from first group or default
+        // Set test title: prefer imported/selected filename title, else first group, else default
         const titleEl = document.getElementById('testTitle');
         if (titleEl) {
-          const firstGroupNameInput = document.querySelector('.group-item .group-name');
-          const baseName = firstGroupNameInput && firstGroupNameInput.value.trim() ? firstGroupNameInput.value.trim() : 'Фармакологичен тест';
-          titleEl.textContent = baseName;
+          if (window.pharmaCurrentTestTitle) {
+            titleEl.textContent = window.pharmaCurrentTestTitle;
+          } else {
+            const firstGroupNameInput = document.querySelector('.group-item .group-name');
+            const baseName = firstGroupNameInput && firstGroupNameInput.value.trim() ? firstGroupNameInput.value.trim() : 'Фармакологичен тест';
+            titleEl.textContent = baseName;
+          }
         }
       }
       
@@ -2485,6 +2509,15 @@ loadSampleFiles();
       
       // Function to load a sample file
       function loadSampleFile(fileName) {
+        // Задай глобално и показвай четливо заглавие от името на файла (без .json)
+        try {
+          if (fileName) {
+            const nameNoExt = fileName.replace(/\.[^.]+$/, '');
+            window.pharmaCurrentTestTitle = nameNoExt;
+            const testTitleEl = document.getElementById('testTitle');
+            if (testTitleEl) testTitleEl.textContent = nameNoExt;
+          }
+        } catch(_) {}
         // 1) Опит с вградено съдържание в sampleFiles[].data (генерирано от update_pharma_samples.js)
         try {
           if (typeof sampleFiles !== 'undefined' && Array.isArray(sampleFiles)) {
