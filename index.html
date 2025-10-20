@@ -592,6 +592,22 @@
   color: #d97706;
 }
 
+/* Scrollable wrapper for wide markdown tables */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0.5em 0;
+}
+.table-scroll table {
+  min-width: 560px; /* ensure horizontal scroll for many columns on mobile */
+}
+
+/* Mobile tweaks for markdown readability */
+@media (max-width: 768px) {
+  .markdown-content { font-size: 0.95em; }
+  .table-scroll table { font-size: 0.94em; }
+}
+
 /* Markdown tables with visible outlines */
 .markdown-content table {
   width: 100%;
@@ -967,6 +983,20 @@
       if (noteContent.style.display === 'none' || noteContent.style.display === '') {
         noteContent.style.display = 'block';
         noteElement.classList.add('open');
+        // Wrap any markdown tables with a horizontal scroll container (mobile-friendly)
+        try {
+          const mdRoot = noteContent.querySelector('.markdown-content');
+          if (mdRoot) {
+            mdRoot.querySelectorAll('table').forEach(tbl => {
+              if (!tbl.parentElement.classList.contains('table-scroll')) {
+                const wrap = document.createElement('div');
+                wrap.className = 'table-scroll';
+                tbl.parentElement.insertBefore(wrap, tbl);
+                wrap.appendChild(tbl);
+              }
+            });
+          }
+        } catch (_) { /* noop */ }
       } else {
         noteContent.style.display = 'none';
         noteElement.classList.remove('open');
