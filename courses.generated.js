@@ -71,6 +71,10 @@ const courses = [
         "name": "Пропедевтика",
         "files": [
           {
+            "name": "Анамнеза и Статус.md",
+            "path": "files/Вътрешни болести 1 ч/Пропедевтика/Анамнеза и Статус.md"
+          },
+          {
             "name": "Разписани теми.docx",
             "path": "files/Вътрешни болести 1 ч/Пропедевтика/Разписани теми.docx"
           }
@@ -1783,4 +1787,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "20.10.2025 20:39";
+const buildTimestamp = "25.10.2025 22:04";
