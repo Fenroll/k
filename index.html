@@ -1058,7 +1058,7 @@
 <body onload="(function(){document.querySelectorAll('.doc table').forEach(function(t){if(!t.parentElement.classList.contains('table-scroll')){var w=document.createElement('div');w.className='table-scroll';t.parentElement.insertBefore(w,t);w.appendChild(t);}});})();">
   <header>
     <h1>${title}</h1>
-    <a href="#" onclick="history.back(); return false;" title="Назад">⬅ Назад</a>
+    <a href="#" onclick="if (window.opener) { window.close(); } else if (document.referrer) { history.back(); } else { window.close(); } return false;" title="Назад">⬅ Назад</a>
   </header>
   <main>
     <div class="doc">${htmlInner}</div>
