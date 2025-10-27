@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Viewer</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <style>
+    :root {
+      --bg: #fafafa;
+      --fg: #1f2937;
+      --accent: #7c3aed;
+      --link: #6d28d9;
+      --link-hover: #7c3aed;
+      --card: #ffffff;
+      --border: #e5e7eb;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: 'Open Sans', Arial, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      line-height: 1.6;
+    }
+    header {
+      position: sticky; top: 0; z-index: 10;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    header h1 {
+      font-size: 1.05rem; font-weight: 600; margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    header a.btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 12px; border-radius: 6px; text-decoration: none;
+      background: #eef2ff; color: var(--link); border: 1px solid #c7d2fe;
+    }
+    header a.btn:hover { background: #e0e7ff; color: var(--link-hover); }
+    main { max-width: 980px; margin: 0 auto; padding: 16px; }
+
+    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
+      color: #4c1d95; margin-top: 1.2em; margin-bottom: 0.5em; font-weight: 600;
+    }
+    .markdown-body h1 { font-size: 1.7em; }
+    .markdown-body h2 { font-size: 1.4em; }
+    .markdown-body h3 { font-size: 1.2em; }
+    .markdown-body p { margin: 0.5em 0; }
+    .markdown-body a { color: var(--link); text-decoration: underline; }
+    .markdown-body a:hover { color: var(--link-hover); }
+
+    /* Tables: make horizontally scrollable on small screens */
+    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0.5em 0; }
+    .table-scroll table { min-width: 560px; }
+
+    .markdown-body table { width: 100%; border-collapse: collapse; margin: 0.75em 0; }
+    .markdown-body th, .markdown-body td { border: 1px solid #e5e7eb; padding: 6px 10px; text-align: left; vertical-align: top; }
+    .markdown-body thead th { background: #f3f4f6; }
+    .markdown-body tbody tr:nth-child(odd) { background: #fafafa; }
+
+    pre, code { font-family: Consolas, 'Courier New', monospace; }
+    pre { background: #f8fafc; padding: 12px; border-radius: 6px; overflow-x: auto; }
+    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+
+    @media (max-width: 768px) {
+      main { padding: 12px; }
+      .markdown-body { font-size: 0.94em; font-weight: 300; }
+      .table-scroll table { font-size: 0.92em; }
+    }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+  <header>
+    <h1 id="docTitle">Преглед на документ</h1>
+    <a id="downloadLink" class="btn" href="#" download>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>
+      Изтегли
+    </a>
+  </header>
+  <main>
+    <div id="content" class="markdown-body">Зареждане…</div>
+  </main>
+  <script>
+    (function(){
+      function getParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
+  const path = getParam('path');
+  if(!path){ document.getElementById('content').textContent = 'Липсва параметър path.'; return; }
+  const decodedPath = decodeURIComponent(path);
+  const title = decodedPath.split('/').pop();
+      document.title = title + ' — Markdown Viewer';
+      document.getElementById('docTitle').textContent = title;
+      const dl = document.getElementById('downloadLink');
+      dl.href = decodedPath;
+
+      // Encode path segments to handle spaces/кирилица и създай абсолютен URL
+      const encodedPath = decodedPath.split('/').map(encodeURIComponent).join('/');
+      const absoluteUrl = (window.location.origin && window.location.origin !== 'null')
+        ? new URL(encodedPath, window.location.origin).href
+        : encodedPath;
+
+      fetch(absoluteUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+        .then(md => {
+          const html = marked.parse(md);
+          const root = document.getElementById('content');
+          root.innerHTML = html;
+          // Wrap tables for horizontal scroll on mobile
+          root.querySelectorAll('table').forEach(tbl => {
+            if(!tbl.parentElement.classList.contains('table-scroll')){
+              const wrap = document.createElement('div');
+              wrap.className = 'table-scroll';
+              tbl.parentElement.insertBefore(wrap, tbl);
+              wrap.appendChild(tbl);
+            }
+          });
+          // Make all links open in new tab
+          root.querySelectorAll('a').forEach(a => a.target = '_blank');
+        })
+        .catch(err => {
+          const isFile = window.location.protocol === 'file:';
+          const hint = isFile
+            ? '<br><small>Съвет: Отвори сайта през локален HTTP сървър (напр. VS Code Live Server), тъй като браузърите блокират fetch от file://</small>'
+            : '';
+          document.getElementById('content').innerHTML = '<p style="color:#b91c1c">Грешка при зареждане: '+(err && err.message ? err.message : err)+'</p>'+hint;
+        });
+    })();
+  </script>
+</body>
+</html>

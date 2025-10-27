@@ -150,8 +150,8 @@ const courses = [
         "name": "Колоквиуми",
         "files": [
           {
-            "name": "На Виктор Пищова.pdf",
-            "path": "files/Клинична Патология/Колоквиуми/На Виктор Пищова.pdf"
+            "name": "На-Виктор-Пищова.pdf",
+            "path": "files/Клинична Патология/Колоквиуми/На-Виктор-Пищова.pdf"
           }
         ]
       }
@@ -1800,4 +1800,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "27.10.2025 22:08";
+const buildTimestamp = "27.10.2025 22:18";

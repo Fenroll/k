@@ -833,6 +833,9 @@
                   <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
                 </svg>
                 <span class="msg-note-title">${note.name.replace(/^msg-/i, '').replace(/\.(txt|md|docx)$/i, '')}</span>
+                ${/\.md$/i.test(note.path || '') ? `<a href="#" title="Отвори на цял екран" onclick="event.stopPropagation(); openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>
+                </a>` : ''}
                 <svg class="msg-note-arrow" width="18" height="18" viewBox="0 0 24 24">
                   <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="#f59e0b"/>
                 </svg>
@@ -1006,6 +1009,68 @@
         noteElement.classList.remove('open');
       }
     }
+
+    // Open a markdown msg-note in a full-screen new tab without fetching files
+    function openMdNoteFull(noteId, rawTitle) {
+      try {
+        const contentEl = document.getElementById(noteId);
+        if (!contentEl) return;
+        const mdHtmlEl = contentEl.querySelector('.markdown-content');
+        let htmlInner = '';
+        if (mdHtmlEl) {
+          htmlInner = mdHtmlEl.innerHTML;
+        } else {
+          // Fallback: take plain text if not markdown
+          const pre = contentEl.querySelector('pre');
+          htmlInner = pre ? ('<pre>' + pre.textContent.replace(/[&<>]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])) + '</pre>') : contentEl.innerHTML;
+        }
+        const title = (rawTitle || 'Документ').replace(/^msg-/i, '').replace(/\.(md|txt|docx)$/i, '');
+        const baseHref = document.baseURI || window.location.href;
+        const fullHtml = `<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <base href="${baseHref}">
+  <title>${title} — Преглед</title>
+  <style>
+    :root { --bg:#fafafa; --fg:#1f2937; --link:#6d28d9; --linkh:#7c3aed; --bd:#e5e7eb; }
+    *{box-sizing:border-box} html,body{height:100%}
+    body{margin:0;font-family:'Open Sans',Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
+    header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--bd);padding:10px 16px;display:flex;gap:10px;align-items:center}
+    header h1{margin:0;font-size:1.05rem;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    header a{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:6px;text-decoration:none;background:#eef2ff;color:var(--link);border:1px solid #c7d2fe}
+    header a:hover{background:#e0e7ff;color:var(--linkh)}
+    main{max-width:980px;margin:0 auto;padding:16px}
+    .doc a{color:var(--link);text-decoration:underline}
+    .doc a:hover{color:var(--linkh)}
+    .table-scroll{overflow-x:auto;margin:.5em 0}
+    .table-scroll table{min-width:560px}
+    .doc table{width:100%;border-collapse:collapse;margin:.75em 0}
+    .doc th,.doc td{border:1px solid var(--bd);padding:6px 10px;text-align:left;vertical-align:top}
+    .doc thead th{background:#f3f4f6}
+    .doc tbody tr:nth-child(odd){background:#fafafa}
+    pre{background:#f8fafc;padding:12px;border-radius:6px;overflow:auto}
+    code{background:#f3f4f6;padding:2px 6px;border-radius:4px}
+    @media (max-width:768px){ main{padding:12px} .doc{font-size:.94em;font-weight:300} .table-scroll table{font-size:.92em} }
+  </style>
+  </head>
+<body onload="(function(){document.querySelectorAll('.doc table').forEach(function(t){if(!t.parentElement.classList.contains('table-scroll')){var w=document.createElement('div');w.className='table-scroll';t.parentElement.insertBefore(w,t);w.appendChild(t);}});})();">
+  <header>
+    <h1>${title}</h1>
+    <a href="#" onclick="history.back(); return false;" title="Назад">⬅ Назад</a>
+  </header>
+  <main>
+    <div class="doc">${htmlInner}</div>
+  </main>
+</body></html>`;
+        const w = window.open('', '_blank');
+        if (!w) return;
+        w.document.open();
+        w.document.write(fullHtml);
+        w.document.close();
+      } catch (e) { console.error('openMdNoteFull error', e); }
+    }
     
     // Function to toggle version info
     function toggleVersionInfo() {
@@ -1077,8 +1142,8 @@
         // Create modal
         const modal = document.createElement('div');
         modal.id = 'textCardModal';
-        modal.className = 'text-modal';
-        modal.style.display = 'block';https://www.youtube.com/watch?v=AikSUhh6JhA
+  modal.className = 'text-modal';
+  modal.style.display = 'block';
         modal.onclick = function(e) {
           if (e.target === modal) closeTextCardModal();
         };
