@@ -145,6 +145,15 @@ const courses = [
             "url": "https://drive.google.com/drive/folders/1-1ziHM_kr1W7g4Ouz1jiRHLYO50K9bp0?fbclid=IwY2xjawNc3kFleHRuA2FlbQIxMQABHpt3tIXQPstWNc5xRu7UChncimTB-9Jxa_RqZ9Qxm557BQhhP9Q1MDvrjOSa_aem_NZ0Xn3mb074n4TVr54hzAA"
           }
         ]
+      },
+      {
+        "name": "Колоквиуми",
+        "files": [
+          {
+            "name": "На Виктор Пищова.pdf",
+            "path": "files/Клинична Патология/Колоквиуми/На Виктор Пищова.pdf"
+          }
+        ]
       }
     ]
   },
@@ -1791,4 +1800,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "27.10.2025 20:06";
+const buildTimestamp = "27.10.2025 22:08";
