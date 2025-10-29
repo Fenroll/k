@@ -4,6 +4,21 @@ const courses = [
     "title": "Blackboard Help (students / студенти)",
     "sections": [
       {
+        "name": "Линкове",
+        "files": [
+          {
+            "name": "ChatGPT.url",
+            "path": "files/Blackboard Help/Линкове/ChatGPT.url",
+            "url": "https://chatgpt.com/"
+          },
+          {
+            "name": "Grok AI.url",
+            "path": "files/Blackboard Help/Линкове/Grok AI.url",
+            "url": "https://grok.com/"
+          }
+        ]
+      },
+      {
         "name": "Материали",
         "files": [
           {
@@ -1838,4 +1853,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "29.10.2025 10:21";
+const buildTimestamp = "29.10.2025 11:24";
