@@ -4,8 +4,9 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Markdown Viewer</title>
-  <!-- KaTeX CDN -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <!-- KaTeX CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <style>
     :root {
       --bg: #fafafa;
@@ -54,7 +55,7 @@
     .markdown-body a:hover { color: var(--link-hover); }
 
     /* Tables: make horizontally scrollable on small screens */
-    .table-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 0.5em 0; }
+    .table-scroll { overflow-x: auto; margin: 0.5em 0; }
     .table-scroll table { min-width: 560px; }
 
     .markdown-body table { width: 100%; border-collapse: collapse; margin: 0.75em 0; }
@@ -72,10 +73,9 @@
       .table-scroll table { font-size: 0.92em; }
     }
   </style>
-  <!-- Markdown-it with KaTeX plugin -->
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/markdown-it/dist/markdown-it.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/markdown-it-katex/dist/markdown-it-katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
 </head>
 <body>
   <header>
@@ -95,16 +95,15 @@
   <script>
     (function(){
       function getParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
-  const path = getParam('path');
-  if(!path){ document.getElementById('content').textContent = 'Липсва параметър path.'; return; }
-  const decodedPath = decodeURIComponent(path);
-  const title = decodedPath.split('/').pop();
+      const path = getParam('path');
+      if(!path){ document.getElementById('content').textContent = 'Липсва параметър path.'; return; }
+      const decodedPath = decodeURIComponent(path);
+      const title = decodedPath.split('/').pop();
       document.title = title + ' — Markdown Viewer';
       document.getElementById('docTitle').textContent = title;
       const dl = document.getElementById('downloadLink');
       dl.href = decodedPath;
 
-      // Encode path segments to handle spaces/кирилица и създай абсолютен URL
       const encodedPath = decodedPath.split('/').map(encodeURIComponent).join('/');
       const absoluteUrl = (window.location.origin && window.location.origin !== 'null')
         ? new URL(encodedPath, window.location.origin).href
@@ -112,45 +111,37 @@
 
       fetch(absoluteUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
         .then(md => {
-          // Wait for all libraries to load
-          function tryRender(retries = 0) {
-            if (retries > 50) {
-              document.getElementById('content').innerHTML = '<p style="color:red">Грешка: Библиотеките не се зареждат</p>';
-              return;
+          const html = marked.parse(md);
+          const root = document.getElementById('content');
+          root.innerHTML = html;
+          
+          // Render LaTeX with auto-render - simple and direct
+          if (typeof renderMathInElement !== 'undefined') {
+            try {
+              renderMathInElement(root, {
+                delimiters: [
+                  {left: '$$', right: '$$', display: true},
+                  {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+              });
+            } catch (e) {
+              console.error('KaTeX error:', e);
             }
-            
-            if (!window.markdownit || !window.markdownitKatex) {
-              setTimeout(() => tryRender(retries + 1), 100);
-              return;
-            }
-            
-            // Initialize markdown-it with KaTeX plugin
-            const mdParser = window.markdownit({
-              html: true,
-              linkify: true,
-              typographer: true
-            }).use(window.markdownitKatex);
-            
-            // Parse and render
-            const html = mdParser.render(md);
-            const root = document.getElementById('content');
-            root.innerHTML = html;
-            
-            // Wrap tables for horizontal scroll on mobile
-            root.querySelectorAll('table').forEach(tbl => {
-              if(!tbl.parentElement.classList.contains('table-scroll')){
-                const wrap = document.createElement('div');
-                wrap.className = 'table-scroll';
-                tbl.parentElement.insertBefore(wrap, tbl);
-                wrap.appendChild(tbl);
-              }
-            });
-            
-            // Make all links open in new tab
-            root.querySelectorAll('a').forEach(a => a.target = '_blank');
           }
           
-          tryRender();
+          // Wrap tables for horizontal scroll on mobile
+          root.querySelectorAll('table').forEach(tbl => {
+            if(!tbl.parentElement.classList.contains('table-scroll')){
+              const wrap = document.createElement('div');
+              wrap.className = 'table-scroll';
+              tbl.parentElement.insertBefore(wrap, tbl);
+              wrap.appendChild(tbl);
+            }
+          });
+          
+          // Make all links open in new tab
+          root.querySelectorAll('a').forEach(a => a.target = '_blank');
         })
         .catch(err => {
           const isFile = window.location.protocol === 'file:';
