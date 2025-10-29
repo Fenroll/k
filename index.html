@@ -154,17 +154,16 @@
     }
     @media (max-width: 600px) {
       .right-overlay {
-        width: 98vw;
+        width: 100vw;
         min-width: 0;
+        left: 0;
+        right: 0;
       }
       .overlay-content {
         padding: 100px 12px 20px 12px;
       }
-      .overlay-ribbon {
-        left: -40px;
-        width: 40px;
-        height: 40px;
-      }
+      /* Hide desktop ribbon on phones */
+      .overlay-ribbon, .overlay-close { display: none !important; }
       .overlay-header {
         justify-content: center;
         text-align: center;
@@ -194,7 +193,12 @@
     min-height: 100vh !important;
     max-height: 100vh !important;
     overflow-y: auto !important;
+    width: 100vw;
+    left: 0;
+    right: 0;
   }
+  /* Ensure desktop ribbon button is hidden on mobile (incl. landscape) */
+  .overlay-ribbon, .overlay-close { display: none !important; }
   .status-bar {
     display: none !important;
   }
@@ -479,8 +483,8 @@
 }
 
 .msg-note-title {
-  /* Let the title take remaining space and truncate on small screens */
-  flex: 1 1 auto;
+  /* Title takes only the space needed (overridden inline for .md notes) */
+  flex: 0 1 auto;
   min-width: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -493,6 +497,7 @@
 .msg-note-arrow {
   transition: transform 0.3s ease;
   flex-shrink: 0;
+  margin-left: 8px; /* small gap next to title/eye */
 }
 
 .msg-note.open .msg-note-arrow {
@@ -838,10 +843,9 @@
                   <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
                 </svg>
                 <span class="msg-note-title">${note.name.replace(/^msg-/i, '').replace(/\.(txt|md|docx)$/i, '')}</span>
-                ${/\.md$/i.test(note.path || '') ? `<a href="#" title="Отвори на цял екран" onclick="event.stopPropagation(); openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0;">
+                ${/\.md$/i.test(note.path || '') ? `<a href="#" title="Отвори на цял екран" onclick="event.stopPropagation(); openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" style="display:inline-flex; align-items:center; justify-content:center; margin-left:auto; margin-right:6px; text-decoration:none; flex-shrink:0;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>
                 </a>` : ''}
-                <span style="flex:1 1 auto;"></span>
                 <svg class="msg-note-arrow" width="18" height="18" viewBox="0 0 24 24">
                   <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="#f59e0b"/>
                 </svg>
@@ -886,11 +890,7 @@
           } else if (fileName.endsWith('.one') || fileName.endsWith('.onetoc2')) {
             fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#7c2d99" style="flex-shrink:0;"><path d="M19,3H5C3.89,3 3,3.89 3,5V19C3,20.11 3.89,21 5,21H19C20.11,21 21,20.11 21,19V5C21,3.89 20.11,3 19,3M12,17C9.79,17 8,15.21 8,13C8,10.79 9.79,9 12,9C14.21,9 16,10.79 16,13C16,15.21 14.21,17 12,17Z"/></svg>`;
           } else if (fileName.endsWith('.url')) {
-            // Use site favicon for URL links if possible
-            let host = '';
-            try { host = new URL(file.url).hostname; } catch (e) { host = file.url; }
-            const favSrc = `https://www.google.com/s2/favicons?sz=32&domain=${host}`;
-            fileIcon = `<img src="${favSrc}" alt="" width="18" height="18" style="flex-shrink:0;border-radius:3px;"/>`;
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#3b82f6" style="flex-shrink:0;"><path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>`;
           } else {
             fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#6b7280" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
           }
@@ -902,7 +902,7 @@
           if (fileName.endsWith('.url') && file.url) {
             // Open the URL directly
             const displayName = file.name.replace('.url', '');
-            sectionContent += `<a href="${file.url}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${displayName}</a></li>`;
+            sectionContent += `<a href="${file.url}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${displayName}</a></li>`;
           } 
           // Check if it's a viewable Office file (Word, PowerPoint, Excel)
       else if (fileName.endsWith('.docx') || fileName.endsWith('.pptx') || fileName.endsWith('.ppt') || 
@@ -911,26 +911,26 @@
             const fullUrl = encodeURIComponent(`https://fenroll.github.io/l/${file.path}`);
             const viewerUrl = `https://docs.google.com/viewer?url=${fullUrl}`;
             const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
-            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a>
-              <a href="${viewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0;" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
+            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a>
+              <a href="${viewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
           }
           // Markdown files: open in our full-screen viewer; place eye icon next to title
           else if (fileName.endsWith('.md')) {
             const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(file.path)}`;
             const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
-            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a>
-              <a href="${mdViewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0;" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
+            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a>
+              <a href="${mdViewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
           }
          else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.bmp') || fileName.endsWith('.webp') || fileName.endsWith('.svg')) {
   const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z\"/></svg>`;
   const allImages = section.files.filter(f => /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(f.name));
   const currentIndex = allImages.findIndex(f => f.name === file.name);
   window._currentImageList = allImages;
-  sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a>
+  sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a>
     <a href="#" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0;" onclick="event.preventDefault(); showImageModal('${file.path.replace(/'/g, '\\\'')}','${file.name.replace(/'/g, '\\\'')}', window._currentImageList, ${currentIndex})" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
 }
           else {
-            sectionContent += `<a href="${file.path}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0; flex:1;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
+            sectionContent += `<a href="${file.path}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${file.name}</a></li>`;
           }
         });
         sectionContent += '</ul>';
