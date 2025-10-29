@@ -223,6 +223,10 @@ const courses = [
         "name": "Графи",
         "files": [
           {
+            "name": "Bulbar and pseudobulbar palsy.png",
+            "path": "files/Неврология/Графи/Bulbar and pseudobulbar palsy.png"
+          },
+          {
             "name": "deep sensation.png",
             "path": "files/Неврология/Графи/deep sensation.png"
           },
@@ -233,6 +237,10 @@ const courses = [
           {
             "name": "face sensation.png",
             "path": "files/Неврология/Графи/face sensation.png"
+          },
+          {
+            "name": "nervus facialis.png",
+            "path": "files/Неврология/Графи/nervus facialis.png"
           },
           {
             "name": "nervus opticus.png",
@@ -1853,4 +1861,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "29.10.2025 11:24";
+const buildTimestamp = "29.10.2025 11:30";
