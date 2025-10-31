@@ -1052,7 +1052,11 @@
           const pre = contentEl.querySelector('pre');
           htmlInner = pre ? ('<pre>' + pre.textContent.replace(/[&<>]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])) + '</pre>') : contentEl.innerHTML;
         }
-        const title = (rawTitle || 'Документ').replace(/^msg-/i, '').replace(/\.(md|txt|docx)$/i, '');
+        // Clean title: remove number prefix, msg- prefix, and extension
+        let title = rawTitle || 'Документ';
+        title = title.replace(/^\d+-/, '');  // Remove 1-, 2-, etc.
+        title = title.replace(/^msg-/i, ''); // Remove msg-
+        title = title.replace(/\.(txt|md|docx)$/i, ''); // Remove extension
         const baseHref = document.baseURI || window.location.href;
         const fullHtml = `<!DOCTYPE html>
 <html lang="bg">
@@ -1066,7 +1070,6 @@
     *{box-sizing:border-box} html,body{height:100%}
     body{margin:0;font-family:'Open Sans',Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
     header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--bd);padding:10px 16px;display:flex;gap:10px;align-items:center}
-    header h1{margin:0;font-size:1.05rem;font-weight:600;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     header a{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:6px;text-decoration:none;background:#eef2ff;color:var(--link);border:1px solid #c7d2fe}
     header a:hover{background:#e0e7ff;color:var(--linkh)}
     main{max-width:980px;margin:0 auto;padding:16px}
@@ -1085,7 +1088,6 @@
   </head>
 <body onload="(function(){document.querySelectorAll('.doc table').forEach(function(t){if(!t.parentElement.classList.contains('table-scroll')){var w=document.createElement('div');w.className='table-scroll';t.parentElement.insertBefore(w,t);w.appendChild(t);}});})();">
   <header>
-    <h1>${title}</h1>
     <a href="#" onclick="if (window.opener) { window.close(); } else if (document.referrer) { history.back(); } else { window.close(); } return false;" title="Назад">⬅ Назад</a>
   </header>
   <main>
