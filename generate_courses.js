@@ -162,6 +162,43 @@ function getAllCourses() {
       '.url'
     ];
     
+    // Helper function to extract order prefix (1-, 2-, 3-, etc.)
+    function extractOrderPrefix(fileName) {
+      const match = fileName.match(/^(\d+)-/);
+      return match ? parseInt(match[1], 10) : null;
+    }
+    
+    // Helper function to remove order prefix for display
+    function removeOrderPrefix(fileName) {
+      return fileName.replace(/^\d+-/, '');
+    }
+    
+    // Custom sort function: files with prefix first (sorted by number), then files without prefix (alphabetically)
+    function sortFiles(fileList) {
+      return fileList.sort((a, b) => {
+        const orderA = extractOrderPrefix(a.name);
+        const orderB = extractOrderPrefix(b.name);
+        
+        // Both have order prefix - sort by number
+        if (orderA !== null && orderB !== null) {
+          return orderA - orderB;
+        }
+        
+        // Only A has prefix - A comes first
+        if (orderA !== null && orderB === null) {
+          return -1;
+        }
+        
+        // Only B has prefix - B comes first
+        if (orderA === null && orderB !== null) {
+          return 1;
+        }
+        
+        // Neither has prefix - sort alphabetically
+        return a.name.localeCompare(b.name, 'bg');
+      });
+    }
+    
     // Get all supported files in this section
     // Separate msg files from regular files
     const files = [];
@@ -210,6 +247,10 @@ function getAllCourses() {
           files.push(fileData);
         }
       });
+    
+    // Sort files and msgNotes by order prefix
+    sortFiles(files);
+    sortFiles(msgNotes);
     
     // Get subdirectories and process them recursively
     const subsections = entries
