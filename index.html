@@ -890,8 +890,9 @@
       // Render subsections (folders) BEFORE files
       if (hasSubsections) {
         section.subsections.forEach(subsection => {
-          // Skip subsections with hidden- prefix
-          if (subsection.name.toLowerCase().startsWith('hidden-')) return;
+          // Skip subsections with hidden- prefix or assets folders
+          if (subsection.name.toLowerCase().startsWith('hidden-') || 
+              subsection.name.toLowerCase() === 'assets') return;
           sectionContent += renderSection(subsection, level + 1);
         });
       }
