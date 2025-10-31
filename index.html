@@ -602,6 +602,15 @@
   color: #d97706;
 }
 
+/* Responsive images in markdown content */
+.markdown-content img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+  margin: 1em 0;
+  border-radius: 4px;
+}
+
 /* Scrollable wrapper for wide markdown tables */
 .table-scroll {
   overflow-x: auto;
@@ -848,7 +857,7 @@
         section.msgNotes.forEach((note, idx) => {
           const noteId = `msg-note-${sectionId}-${idx}`;
           sectionContent += `
-            <div class="msg-note" onclick="toggleMsgNote('${noteId}')">
+            <div class="msg-note" onclick="toggleMsgNote('${noteId}')" data-note-path="${note.path}">
               <div class="msg-note-header">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" style="flex-shrink:0;">
                   <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
@@ -862,7 +871,16 @@
                 </svg>
               </div>
               <div class="msg-note-content" id="${noteId}" style="display:none;">
-                ${note.type === 'text' ? `<pre>${note.content}</pre>` : (note.type === 'markdown' ? `<div class="markdown-content">${marked.parse(note.content)}</div>` : '<p><i>Word файл - отвори за да видиш съдържанието</i><br><a href="' + note.path + '" target="_blank" style="color:#f59e0b;">Отвори файла</a></p>')}
+                ${note.type === 'text' ? `<pre>${note.content}</pre>` : (note.type === 'markdown' ? (() => {
+                  // Parse markdown and fix relative image paths
+                  const html = marked.parse(note.content);
+                  // Get base directory from note path (e.g., "files/Course/Section/")
+                  const basePath = note.path.substring(0, note.path.lastIndexOf('/') + 1);
+                  // Fix relative image paths: any relative path (not starting with http:// or /) -> prepend basePath
+                  const fixedHtml = html.replace(/<img([^>]+)src="(?!https?:\/\/)(?!\/)([^"]+)"/g, 
+                    (match, attrs, src) => `<img${attrs}src="${basePath}${src}"`);
+                  return `<div class="markdown-content">${fixedHtml}</div>`;
+                })() : '<p><i>Word файл - отвори за да видиш съдържанието</i><br><a href="' + note.path + '" target="_blank" style="color:#f59e0b;">Отвори файла</a></p>')}
               </div>
             </div>
           `;
@@ -872,6 +890,8 @@
       // Render subsections (folders) BEFORE files
       if (hasSubsections) {
         section.subsections.forEach(subsection => {
+          // Skip subsections with hidden- prefix
+          if (subsection.name.toLowerCase().startsWith('hidden-')) return;
           sectionContent += renderSection(subsection, level + 1);
         });
       }
@@ -881,6 +901,9 @@
         // Render file list
         sectionContent += '<ul style="margin:8px 0 4px 0; padding-left:20px; list-style:none;">';
         section.files.forEach(file => {
+          // Skip files with hidden- prefix
+          if (file.name.toLowerCase().startsWith('hidden-')) return;
+          
           const fileName = file.name.toLowerCase();
           let fileIcon = '';
           // Determine file icon based on extension
@@ -1043,6 +1066,12 @@
       try {
         const contentEl = document.getElementById(noteId);
         if (!contentEl) return;
+        
+        // Find the parent msg-note element to get the note path
+        const noteElement = contentEl.closest('.msg-note');
+        const notePath = noteElement ? noteElement.getAttribute('data-note-path') : '';
+        const basePath = notePath ? notePath.substring(0, notePath.lastIndexOf('/') + 1) : '';
+        
         const mdHtmlEl = contentEl.querySelector('.markdown-content');
         let htmlInner = '';
         if (mdHtmlEl) {
@@ -1057,13 +1086,16 @@
         title = title.replace(/^\d+-/, '');  // Remove 1-, 2-, etc.
         title = title.replace(/^msg-/i, ''); // Remove msg-
         title = title.replace(/\.(txt|md|docx)$/i, ''); // Remove extension
-        const baseHref = document.baseURI || window.location.href;
+        
+        // Create full base URL for relative paths
+        const currentOrigin = window.location.origin || (window.location.protocol + '//' + window.location.host);
+        const baseHref = basePath ? (currentOrigin + '/' + basePath) : (document.baseURI || window.location.href);
+        
         const fullHtml = `<!DOCTYPE html>
 <html lang="bg">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <base href="${baseHref}">
   <title>${title} — Преглед</title>
   <style>
     :root { --bg:#fafafa; --fg:#1f2937; --link:#6d28d9; --linkh:#7c3aed; --bd:#e5e7eb; }
