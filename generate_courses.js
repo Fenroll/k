@@ -162,15 +162,26 @@ function getAllCourses() {
       '.url'
     ];
     
-    // Helper function to extract order prefix (1-, 2-, 3-, etc.)
+    // Helper function to extract order prefix and convert to sortable number
+    // Supports: 1-, 2-, 11-, 1.1-, 2.1-, 2.2-, 2.11-
     function extractOrderPrefix(fileName) {
-      const match = fileName.match(/^(\d+)-/);
-      return match ? parseInt(match[1], 10) : null;
+      const match = fileName.match(/^([\d.]+)-/);
+      if (!match) return null;
+      
+      const prefix = match[1];
+      
+      // If it contains a dot, parse as decimal (e.g., "1.1" -> 1.1, "2.22" -> 2.22)
+      if (prefix.includes('.')) {
+        return parseFloat(prefix);
+      }
+      
+      // Otherwise, parse as integer (e.g., "1" -> 1, "11" -> 11)
+      return parseInt(prefix, 10);
     }
     
     // Helper function to remove order prefix for display
     function removeOrderPrefix(fileName) {
-      return fileName.replace(/^\d+-/, '');
+      return fileName.replace(/^[\d.]+-/, '');
     }
     
     // Custom sort function: files with prefix first (sorted by number), then files without prefix (alphabetically)

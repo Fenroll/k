@@ -768,10 +768,10 @@
       }
     }
     
-    // Helper function to remove order prefix (1-, 2-, 3-, etc.) and "msg-" from filenames for display
+    // Helper function to remove order prefix (1-, 2-, 1.1-, 2.2-, etc.) and "msg-" from filenames for display
     function removeOrderPrefix(fileName) {
-      // Remove number prefix (1-, 2-, etc.)
-      let cleaned = fileName.replace(/^\d+-/, '');
+      // Remove number prefix (1-, 2-, 1.1-, 2.22-, etc.)
+      let cleaned = fileName.replace(/^[\d.]+-/, '');
       // Remove "msg-" prefix (case insensitive)
       cleaned = cleaned.replace(/^msg-/i, '');
       // Remove file extension
