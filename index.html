@@ -530,7 +530,7 @@
   font-size: 0.95em;
 }
 
-.markdown-content h1, .markdown-content h2, .markdown-content h3 {
+.markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4 {
   color: #92400e;
   margin-top: 0.8em;
   margin-bottom: 0.3em;
@@ -540,6 +540,7 @@
 .markdown-content h1 { font-size: 1.5em; }
 .markdown-content h2 { font-size: 1.3em; }
 .markdown-content h3 { font-size: 1.1em; }
+.markdown-content h4 { font-size: 1.05em; }
 
 .markdown-content p {
   margin: 0.7em 0;
@@ -556,19 +557,23 @@
 .markdown-content h1 + p,
 .markdown-content h2 + p,
 .markdown-content h3 + p,
+.markdown-content h4 + p,
 .markdown-content h1 + ul,
 .markdown-content h2 + ul,
 .markdown-content h3 + ul,
+.markdown-content h4 + ul,
 .markdown-content h1 + ol,
 .markdown-content h2 + ol,
-.markdown-content h3 + ol {
+.markdown-content h3 + ol,
+.markdown-content h4 + ol {
   margin-top: 0.1em;
 }
 
 /* Reduce space between heading and following table */
 .markdown-content h1 + table,
 .markdown-content h2 + table,
-.markdown-content h3 + table {
+.markdown-content h3 + table,
+.markdown-content h4 + table {
   margin-top: 0.2em;
 }
 
@@ -666,14 +671,15 @@
 }
 .markdown-content th,
 .markdown-content td {
-  border: 1px solid rgba(146, 64, 14, 0.35); /* amber-800-ish */
+  border: 1px solid rgba(146,64,14,0.35);
   padding: 6px 10px;
   text-align: left;
   vertical-align: top;
 }
 .markdown-content thead th {
-  background: rgba(245, 158, 11, 0.08); /* header tint */
+  background: rgba(196, 127, 9, 0.08)
 }
+
 .markdown-content tbody tr:nth-child(odd) {
   background: rgba(146, 64, 14, 0.03);
 }
@@ -899,13 +905,21 @@
               </div>
               <div class="msg-note-content" id="${noteId}" style="display:none;">
                 ${note.type === 'text' ? `<pre>${note.content}</pre>` : (note.type === 'markdown' ? (() => {
+                  // Configure marked for GFM tables
+                  marked.setOptions({
+                    gfm: true,
+                    breaks: false,
+                    tables: true
+                  });
                   // Parse markdown and fix relative image paths
                   const html = marked.parse(note.content);
                   // Get base directory from note path (e.g., "files/Course/Section/")
                   const basePath = note.path.substring(0, note.path.lastIndexOf('/') + 1);
                   // Fix relative image paths: any relative path (not starting with http:// or /) -> prepend basePath
-                  const fixedHtml = html.replace(/<img([^>]+)src="(?!https?:\/\/)(?!\/)([^"]+)"/g, 
+                  let fixedHtml = html.replace(/<img([^>]+)src="(?!https?:\/\/)(?!\/)([^"]+)"/g, 
                     (match, attrs, src) => `<img${attrs}src="${basePath}${src}"`);
+                  // Add target="_blank" to all links
+                  fixedHtml = fixedHtml.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
                   return `<div class="markdown-content">${fixedHtml}</div>`;
                 })() : '<p><i>Word файл - отвори за да видиш съдържанието</i><br><a href="' + note.path + '" target="_blank" style="color:#f59e0b;">Отвори файла</a></p>')}
               </div>
@@ -1134,14 +1148,15 @@
     header a:hover{background:#e0e7ff;color:var(--linkh)}
     main{max-width:980px;margin:0 auto;padding:16px}
     .doc{color:#1f2937}
-    .doc h1,.doc h2,.doc h3{color:#1f2937;margin-top:0.5em;margin-bottom:0.2em;font-weight:600}
+    .doc h1,.doc h2,.doc h3,.doc h4{color:#1f2937;margin-top:0.5em;margin-bottom:0.2em;font-weight:600}
     .doc h1{font-size:1.5em}
     .doc h2{font-size:1.3em}
     .doc h3{font-size:1.1em}
+    .doc h4{font-size:1.05em}
     .doc p{margin:1.2em 0;white-space:pre-wrap}
     .doc p + ul,.doc p + ol{margin-top:-1.2em}
-    .doc h1 + p,.doc h2 + p,.doc h3 + p,.doc h1 + ul,.doc h2 + ul,.doc h3 + ul,.doc h1 + ol,.doc h2 + ol,.doc h3 + ol{margin-top:0.05em}
-    .doc h1 + table,.doc h2 + table,.doc h3 + table{margin-top:0.2em}
+    .doc h1 + p,.doc h2 + p,.doc h3 + p,.doc h4 + p,.doc h1 + ul,.doc h2 + ul,.doc h3 + ul,.doc h4 + ul,.doc h1 + ol,.doc h2 + ol,.doc h3 + ol,.doc h4 + ol{margin-top:0.05em}
+    .doc h1 + table,.doc h2 + table,.doc h3 + table,.doc h4 + table{margin-top:0.2em}
     .doc ul,.doc ol{margin:0.2em 0;padding-left:1.5em}
     .doc li{margin:0.1em 0}
     .doc strong{font-weight:600;color:#1f2937}
