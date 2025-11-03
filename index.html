@@ -570,11 +570,19 @@
 }
 
 /* Reduce space between heading and following table */
-.markdown-content h1 + table,
-.markdown-content h2 + table,
-.markdown-content h3 + table,
-.markdown-content h4 + table {
-  margin-top: 0.2em;
+.markdown-content h1 + .table-scroll,
+.markdown-content h2 + .table-scroll,
+.markdown-content h3 + .table-scroll {
+  margin-top: -0.5em;
+}
+
+.markdown-content h4 + .table-scroll {
+  margin-top: -0.5em;
+}
+
+/* Reduce space between h3 and h4 */
+.markdown-content h3 + h4 {
+  margin-top: 0.3em;
 }
 
 .markdown-content ul, .markdown-content ol {
@@ -1156,7 +1164,9 @@
     .doc p{margin:1.2em 0;white-space:pre-wrap}
     .doc p + ul,.doc p + ol{margin-top:-1.2em}
     .doc h1 + p,.doc h2 + p,.doc h3 + p,.doc h4 + p,.doc h1 + ul,.doc h2 + ul,.doc h3 + ul,.doc h4 + ul,.doc h1 + ol,.doc h2 + ol,.doc h3 + ol,.doc h4 + ol{margin-top:0.05em}
-    .doc h1 + table,.doc h2 + table,.doc h3 + table,.doc h4 + table{margin-top:0.2em}
+    .doc h1 + .table-scroll,.doc h2 + .table-scroll,.doc h3 + .table-scroll{margin-top:-0.4em}
+    .doc h4 + .table-scroll{margin-top:-0.7em}
+    .doc h3 + h4{margin-top:0.3em}
     .doc ul,.doc ol{margin:0.2em 0;padding-left:1.5em}
     .doc li{margin:0.1em 0}
     .doc strong{font-weight:600;color:#1f2937}
