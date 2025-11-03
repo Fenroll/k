@@ -532,8 +532,8 @@
 
 .markdown-content h1, .markdown-content h2, .markdown-content h3 {
   color: #92400e;
-  margin-top: 1em;
-  margin-bottom: 0.5em;
+  margin-top: 0.8em;
+  margin-bottom: 0.3em;
   font-weight: 600;
 }
 
@@ -542,17 +542,43 @@
 .markdown-content h3 { font-size: 1.1em; }
 
 .markdown-content p {
-  margin: 0.5em 0;
+  margin: 0.7em 0;
   white-space: pre-wrap;
 }
 
+/* Reduce space between paragraph and following list */
+.markdown-content p + ul,
+.markdown-content p + ol {
+  margin-top: -0.5em;
+}
+
+/* Reduce space between heading and following content */
+.markdown-content h1 + p,
+.markdown-content h2 + p,
+.markdown-content h3 + p,
+.markdown-content h1 + ul,
+.markdown-content h2 + ul,
+.markdown-content h3 + ul,
+.markdown-content h1 + ol,
+.markdown-content h2 + ol,
+.markdown-content h3 + ol {
+  margin-top: 0.1em;
+}
+
+/* Reduce space between heading and following table */
+.markdown-content h1 + table,
+.markdown-content h2 + table,
+.markdown-content h3 + table {
+  margin-top: 0.2em;
+}
+
 .markdown-content ul, .markdown-content ol {
-  margin: 0.5em 0;
+  margin: 0.3em 0;
   padding-left: 1.5em;
 }
 
 .markdown-content li {
-  margin: 0.25em 0;
+  margin: 0.15em 0;
 }
 
 .markdown-content strong {
@@ -562,6 +588,7 @@
 
 .markdown-content em {
   font-style: italic;
+  color: #92400e;
 }
 
 .markdown-content code {
@@ -1101,11 +1128,25 @@
   <style>
     :root { --bg:#fafafa; --fg:#1f2937; --link:#6d28d9; --linkh:#7c3aed; --bd:#e5e7eb; }
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:'Open Sans',Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6}
+    body{margin:0;font-family:'Open Sans',Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;font-size:16px}
     header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--bd);padding:10px 16px;display:flex;gap:10px;align-items:center}
     header a{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:6px;text-decoration:none;background:#eef2ff;color:var(--link);border:1px solid #c7d2fe}
     header a:hover{background:#e0e7ff;color:var(--linkh)}
     main{max-width:980px;margin:0 auto;padding:16px}
+    .doc{color:#1f2937}
+    .doc h1,.doc h2,.doc h3{color:#1f2937;margin-top:0.5em;margin-bottom:0.2em;font-weight:600}
+    .doc h1{font-size:1.5em}
+    .doc h2{font-size:1.3em}
+    .doc h3{font-size:1.1em}
+    .doc p{margin:1.2em 0;white-space:pre-wrap}
+    .doc p + ul,.doc p + ol{margin-top:-1.2em}
+    .doc h1 + p,.doc h2 + p,.doc h3 + p,.doc h1 + ul,.doc h2 + ul,.doc h3 + ul,.doc h1 + ol,.doc h2 + ol,.doc h3 + ol{margin-top:0.05em}
+    .doc h1 + table,.doc h2 + table,.doc h3 + table{margin-top:0.2em}
+    .doc ul,.doc ol{margin:0.2em 0;padding-left:1.5em}
+    .doc li{margin:0.1em 0}
+    .doc strong{font-weight:600;color:#1f2937}
+    .doc em{font-style:italic;color:#1f2937}
+    .doc img{max-width:100%;height:auto;display:block;margin:1em 0;border-radius:4px}
     .doc a{color:var(--link);text-decoration:underline}
     .doc a:hover{color:var(--linkh)}
     .table-scroll{overflow-x:auto;margin:.5em 0}
@@ -1114,7 +1155,7 @@
     .doc th,.doc td{border:1px solid var(--bd);padding:6px 10px;text-align:left;vertical-align:top}
     .doc thead th{background:#f3f4f6}
     .doc tbody tr:nth-child(odd){background:#fafafa}
-    pre{background:#f8fafc;padding:12px;border-radius:6px;overflow:auto}
+    pre{background:#f8fafc;padding:12px;border-radius:6px;overflow:auto;margin:0.2em 0}
     code{background:#f3f4f6;padding:2px 6px;border-radius:4px}
     @media (max-width:768px){ main{padding:12px} .doc{font-size:.94em;font-weight:300} .table-scroll table{font-size:.92em} }
   </style>
