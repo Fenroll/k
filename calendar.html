@@ -726,18 +726,18 @@
     }
 
     .info-panel-content h1 {
-      font-size: 24px;
+      font-size: 20px;
     }
     
     .info-panel-content h2 {
-      font-size: 20px;
+      font-size: 18px;
     }
 
     .info-panel-content h3 {
-      font-size: 18px;
+      font-size: 17px;
     }
      .info-panel-content h4 {
-      font-size: 15px;
+      font-size: 14.5px;
     }
     
     .modal-content {
@@ -779,20 +779,25 @@
       border-radius: 2px;
     }
   }
-  
-  /* Extra small screens - further reduce font sizes */
+
+  /* Extra small screens - use letter-spacing and reduce padding */
   @media (max-width: 480px) {
     .schedule-item-subject {
-      font-size: 11px !important;
+      letter-spacing: -0.3px !important;
     }
     
     .schedule-item-time,
     .schedule-item-room {
-      font-size: 10px !important;
+      letter-spacing: -0.3px !important;
     }
     
     .schedule-time {
-      font-size: 10px !important;
+      letter-spacing: -0.23px !important;
+      display: block !important;
+    }
+    
+    .schedule-table td {
+      padding: 2px 2px !important;
     }
   }
   
