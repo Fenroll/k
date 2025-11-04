@@ -974,7 +974,31 @@
           } else if (fileName.endsWith('.one') || fileName.endsWith('.onetoc2')) {
             fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#7c2d99" style="flex-shrink:0;"><path d="M19,3H5C3.89,3 3,3.89 3,5V19C3,20.11 3.89,21 5,21H19C20.11,21 21,20.11 21,19V5C21,3.89 20.11,3 19,3M12,17C9.79,17 8,15.21 8,13C8,10.79 9.79,9 12,9C14.21,9 16,10.79 16,13C16,15.21 14.21,17 12,17Z"/></svg>`;
           } else if (fileName.endsWith('.url')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#3b82f6" style="flex-shrink:0;"><path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>`;
+            // Try to get favicon from the URL if available
+            let faviconUrl = '';
+            if (file.url) {
+              try {
+                const urlObj = new URL(file.url);
+                const hostname = urlObj.hostname.toLowerCase();
+                
+                // Special handling for popular services with custom icons
+                if (hostname.includes('drive.google.com') || hostname.includes('docs.google.com')) {
+                  faviconUrl = 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
+                } else if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
+                  faviconUrl = 'https://www.youtube.com/s/desktop/d743f786/img/favicon_32x32.png';
+                } else if (hostname.includes('github.com')) {
+                  faviconUrl = 'https://github.githubassets.com/favicons/favicon.png';
+                } else {
+                  // Use Google Favicon Service for other domains
+                  faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
+                }
+              } catch (e) {
+                // If URL parsing fails, use default icon
+              }
+            }
+            fileIcon = faviconUrl 
+              ? `<img src="${faviconUrl}" width="18" height="18" style="flex-shrink:0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" /><svg width="18" height="18" viewBox="0 0 24 24" fill="#3b82f6" style="flex-shrink:0;display:none;"><path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>`
+              : `<svg width="18" height="18" viewBox="0 0 24 24" fill="#3b82f6" style="flex-shrink:0;"><path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>`;
           } else {
             fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#6b7280" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
           }
@@ -1148,15 +1172,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>${title} — Преглед</title>
   <style>
-    :root { --bg:#fafafa; --fg:#1f2937; --link:#6d28d9; --linkh:#7c3aed; --bd:#e5e7eb; }
+    :root { --bg:#fafafa; --fg:#000000; --link:#6d28d9; --linkh:#7c3aed; --bd:#e5e7eb; }
     *{box-sizing:border-box} html,body{height:100%}
-    body{margin:0;font-family:'Open Sans',Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;font-size:16px}
+    body{margin:0;font-family:'Open Sans',Arial,sans-serif;background:var(--bg);color:var(--fg);line-height:1.7;font-size:16px}
     header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--bd);padding:10px 16px;display:flex;gap:10px;align-items:center}
     header a{display:inline-flex;align-items:center;gap:6px;padding:8px 12px;border-radius:6px;text-decoration:none;background:#eef2ff;color:var(--link);border:1px solid #c7d2fe}
     header a:hover{background:#e0e7ff;color:var(--linkh)}
-    main{max-width:980px;margin:0 auto;padding:16px}
-    .doc{color:#1f2937}
-    .doc h1,.doc h2,.doc h3,.doc h4{color:#1f2937;margin-top:0.5em;margin-bottom:0.2em;font-weight:600}
+    main{max-width:1400px;margin:0 auto;padding:16px}
+    .doc{color:#000000}
+    .doc h1,.doc h2,.doc h3,.doc h4{color:#000000;margin-top:0.5em;margin-bottom:0.2em;font-weight:600}
     .doc h1{font-size:1.5em}
     .doc h2{font-size:1.3em}
     .doc h3{font-size:1.1em}
@@ -2115,6 +2139,20 @@ document.addEventListener('DOMContentLoaded', renderCourseList);
       .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
       .main-content { padding: 0; }
       .main-header, .filter-bar, .course-org-list { padding-left: 16px; padding-right: 16px; }
+      
+      /* Mobile overlay header styling */
+      .overlay-header {
+        justify-content: center !important;
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+      }
+      .overlay-header .page-title {
+        font-family: 'Open Sans', Arial, sans-serif !important;
+        font-size: 1.3em !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        width: 100%;
+      }
     }
   </style>
   <style>
