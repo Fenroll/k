@@ -141,7 +141,7 @@ const scheduleData = {
       "floor": "",
       "teacher": "доц. д-р Щерю Николаев Щерев, д.м.",
       "startTime": "11:30",
-      "endTime": "13:00",
+      "endTime": "13:00"
     },
     {
       "day": "ВТ",
@@ -341,6 +341,27 @@ const scheduleData = {
       },
       {
         "removeDay": "СР" 
+      },
+      {
+      "day": "ЧЕТ",
+        "subject": "ОМ",
+        "fullName": "Обща Медицина",
+        "type": "Упражнение",
+        "building": "ДКЦ",
+        "room": "",
+        "floor": "",
+        "teacher": "доц. д-р Женя Русева Петрова, д.м.",
+        "startTime": "08:00",
+        "endTime": "09:30",
+        "additionalInfo": "От 8:30 започва"
+    },
+      {
+       "day": "ЧЕТ",
+        "subject": "кимун",
+        "startTime": "08:00",
+        "changes": {
+          "removed": true
+        }
       }
     ],
     
@@ -358,6 +379,27 @@ const scheduleData = {
         "startTime": "10:00",
         "endTime": "11:30",
         "additionalInfo": "Тестът е затворен тип. 30 въпроса за 90 минути."
+      },
+      {
+      "day": "ЧЕТ",
+        "subject": "ОМ",
+        "fullName": "Обща Медицина",
+        "type": "Упражнение",
+        "building": "ДКЦ",
+        "room": "",
+        "floor": "",
+        "teacher": "доц. д-р Женя Русева Петрова, д.м.",
+        "startTime": "08:00",
+        "endTime": "09:30",
+        "additionalInfo": "От 8:30 започва"
+    },
+      {
+       "day": "ЧЕТ",
+        "subject": "кимун",
+        "startTime": "08:00",
+        "changes": {
+          "removed": true
+        }
       }
     ],
     "2": [
@@ -385,11 +427,81 @@ const scheduleData = {
      ],
         "7": [
       {
+        "removeDay": "ПЕТ"
+      },
+          {
       "day": "ВТ",
         "subject": "клпат",
         "startTime": "08:00",
         "changes": {
           "type": "Колоквиум",
+        }
+      },
+      {
+      "day": "ЧЕТ",
+        "subject": "ОМ",
+        "fullName": "Обща Медицина",
+        "type": "Упражнение",
+        "building": "ДКЦ",
+        "room": "",
+        "floor": "",
+        "teacher": "доц. д-р Женя Русева Петрова, д.м.",
+        "startTime": "08:00",
+        "endTime": "09:30",
+        "additionalInfo": "От 8:30 започва"
+    },
+      {
+       "day": "ЧЕТ",
+        "subject": "кимун",
+        "startTime": "08:00",
+        "changes": {
+          "removed": true
+        }
+      }
+     ],
+     "11": [
+      {
+      "day": "ЧЕТ",
+        "subject": "ОМ",
+        "fullName": "Обща Медицина",
+        "type": "Упражнение",
+        "building": "ДКЦ",
+        "room": "",
+        "floor": "",
+        "teacher": "доц. д-р Женя Русева Петрова, д.м.",
+        "startTime": "08:00",
+        "endTime": "09:30",
+        "additionalInfo": "От 8:30 започва"
+    },
+      {
+       "day": "ЧЕТ",
+        "subject": "кимун",
+        "startTime": "08:00",
+        "changes": {
+          "removed": true
+        }
+      }
+     ],
+     "13": [
+      {
+      "day": "ЧЕТ",
+        "subject": "ОМ",
+        "fullName": "Обща Медицина",
+        "type": "Упражнение",
+        "building": "ДКЦ",
+        "room": "",
+        "floor": "",
+        "teacher": "доц. д-р Женя Русева Петрова, д.м.",
+        "startTime": "08:00",
+        "endTime": "09:30",
+        "additionalInfo": "От 8:30 започва"
+    },
+      {
+       "day": "ЧЕТ",
+        "subject": "кимун",
+        "startTime": "08:00",
+        "changes": {
+          "removed": true
         }
       }
      ],
@@ -400,6 +512,27 @@ const scheduleData = {
         "startTime": "15:00",
         "changes": {
           "type": "Колоквиум",
+        }
+      },
+      {
+      "day": "ЧЕТ",
+        "subject": "ОМ",
+        "fullName": "Обща Медицина",
+        "type": "Упражнение",
+        "building": "ДКЦ",
+        "room": "",
+        "floor": "",
+        "teacher": "доц. д-р Женя Русева Петрова, д.м.",
+        "startTime": "08:00",
+        "endTime": "09:30",
+        "additionalInfo": "От 8:30 започва"
+    },
+    {
+       "day": "ЧЕТ",
+        "subject": "кимун",
+        "startTime": "08:00",
+        "changes": {
+          "removed": true
         }
       }
      ],
@@ -417,6 +550,27 @@ const scheduleData = {
     "1": [
       {
         "removeDay": "ПОН", 
+      },
+      {
+      "day": "ЧЕТ",
+        "subject": "ОМ",
+        "fullName": "Обща Медицина",
+        "type": "Упражнение",
+        "building": "ДКЦ",
+        "room": "",
+        "floor": "",
+        "teacher": "доц. д-р Женя Русева Петрова, д.м.",
+        "startTime": "08:00",
+        "endTime": "09:30",
+        "additionalInfo": "От 8:30 започва"
+    },
+      {
+       "day": "ЧЕТ",
+        "subject": "кимун",
+        "startTime": "08:00",
+        "changes": {
+          "removed": true
+        }
       }
     ]
   },

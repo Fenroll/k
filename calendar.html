@@ -1167,15 +1167,24 @@
                   item.startTime === override.startTime)
               );
             } else if (override.changes) {
-              // Modify existing item
-              const index = schedule.findIndex(item => 
-                item.day === override.day && 
-                item.subject === override.subject && 
-                item.startTime === override.startTime
-              );
-              if (index !== -1) {
-                // Apply changes
-                Object.assign(schedule[index], override.changes);
+              // Check if item should be removed
+              if (override.changes.removed === true) {
+                schedule = schedule.filter(item => 
+                  !(item.day === override.day && 
+                    item.subject === override.subject && 
+                    item.startTime === override.startTime)
+                );
+              } else {
+                // Modify existing item
+                const index = schedule.findIndex(item => 
+                  item.day === override.day && 
+                  item.subject === override.subject && 
+                  item.startTime === override.startTime
+                );
+                if (index !== -1) {
+                  // Apply changes
+                  Object.assign(schedule[index], override.changes);
+                }
               }
             } else {
               // Add new item
