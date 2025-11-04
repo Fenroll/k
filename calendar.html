@@ -720,20 +720,23 @@
       white-space: nowrap !important;
     }
     
-    .info-panel {
+    .currentInfoPanel {
       margin: 1rem 12px;
       padding: 12px;
     }
-    
+
     .info-panel-content h1 {
-      font-size: 20px;
+      font-size: 24px;
     }
     
     .info-panel-content h2 {
+      font-size: 20px;
+    }
+
+    .info-panel-content h3 {
       font-size: 18px;
     }
-    
-    .info-panel-content h3 {
+     .info-panel-content h4 {
       font-size: 15px;
     }
     
@@ -774,6 +777,22 @@
       background: #222;
       margin: 4px 0;
       border-radius: 2px;
+    }
+  }
+  
+  /* Extra small screens - further reduce font sizes */
+  @media (max-width: 480px) {
+    .schedule-item-subject {
+      font-size: 11px !important;
+    }
+    
+    .schedule-item-time,
+    .schedule-item-room {
+      font-size: 10px !important;
+    }
+    
+    .schedule-time {
+      font-size: 10px !important;
     }
   }
   
