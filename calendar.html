@@ -1274,12 +1274,29 @@
     }
     
     // Get current day of week (ПОН, ВТ, etc.) or Monday if weekend
+    // Returns null if we're viewing a different week than current
     function getCurrentDay() {
       const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      // Check if today is in the currently displayed week
+      const currentWeek = scheduleByWeek[currentWeekIndex];
+      if (!currentWeek) return null;
+      
+      const weekStart = new Date(currentWeek.startDate);
+      weekStart.setHours(0, 0, 0, 0);
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 4); // Friday
+      
+      // If today is not in this week, don't highlight anything
+      if (today < weekStart || today > weekEnd) {
+        return null;
+      }
+      
       const dayIndex = today.getDay(); // 0=Sunday, 1=Monday, etc.
       const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
       
-      // If Saturday (6) or Sunday (0), return Monday
+      // If Saturday (6) or Sunday (0), return Monday (for current week only)
       if (dayIndex === 0 || dayIndex === 6) {
         return 'ПОН';
       }
