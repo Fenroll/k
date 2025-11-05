@@ -34,19 +34,26 @@
     z-index: 100;
   }
   
-  .logo-header {
-    background: #262626;
-    width: 200px !important;
-    height: 107px !important;
-    min-height: 107px !important;
-    text-align: center;
-    margin: 0 !important;
-    padding: 0 !important;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-bottom: 2px solid #1d1b1b;  /* Тънка линия под логото */
-  }
+ .logo-header {
+      background: #262626;
+      width: 200px !important;
+      height: 107px !important;
+      min-width: 200px !important;
+      min-height: 107px !important;
+      max-width: 200px !important;
+      max-height: 107px !important;
+      text-align: center;
+      border-bottom: none;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden;
+      flex: 0 0 107px !important;
+      box-sizing: content-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 2px solid #1d1b1b;
+    }
   
   .logo-img {
     width: 168px !important;
@@ -867,13 +874,13 @@
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="tests.html">
+              <a href="https://elearn.mu-varna.bg/ultra/messages">
                 <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-grades-paper.svg" alt="Grades" />
                 <span class="link-text">Grades</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="https://elearn.mu-varna.bg/ultra/tools">
+              <a href="tests.html">
                 <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-tools-custom.svg" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>

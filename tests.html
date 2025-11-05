@@ -27,27 +27,35 @@
       flex: 1 1 auto;      /* take remaining space next to sidebar */
       min-width: 0;        /* allow shrinking to avoid horizontal overflow */
       width: auto;         /* let flex control width */
-      padding: 20px;
+      padding: 0;          /* Remove padding - header will be full width */
       margin-left: 0;      /* Sidebar is a flex sibling; no extra offset needed */
     }
 
     /* On desktop, offset content to the right of the fixed 200px sidebar using padding (not margin) */
     @media (min-width: 769px) {
       .main-content {
-        padding-left: calc(20px + 200px);
+        padding-left: 200px;  /* Only offset for sidebar, no extra padding */
       }
     }
     
-    .main-header {
-      background: #fff;
-      padding: 20px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-      margin-bottom: 20px;
-    }
+  .main-header {
+    background: #fff;
+    color: #000;
+    width: 100%;
+    height: 108px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #d3cdcd;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
     
     .page-title {
+      font-size: 30px !important;
       margin: 0;
-      font-size: 1.6em;
+      margin-left: 30px !important;
+      font-family: 'Noto Serif', serif;
       font-weight: 400;
       color: #262626;
       white-space: nowrap;
@@ -100,6 +108,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      border-bottom: 2px solid #1d1b1b;
     }
     
     .logo-header > a {
@@ -141,14 +150,14 @@
       align-items: center;
       color: #fff !important;
       text-decoration: none;
-      padding: 16px 28px 16px 28px;
+      padding: 16px 28px 16px 12px;
       font-size: 14px;
       transition: background 0.2s;
       position: relative;
       border-radius: 0;
       gap: 12px;
       flex-direction: row;
-      background: #222b36;
+      background: transparent;
       font-weight: 400;
     }
     
@@ -193,20 +202,27 @@
       stroke: #222 !important;
     }
     
-    .sidebar-footer-links {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      padding: 15px 20px;
-      display: flex;
-      gap: 15px;
+      .sidebar-footer-links {
+    position: absolute;
+    left: 12px;
+    bottom: 11px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2.5px;
+    font-size: 12px;
+  }
+  .sidebar-footer-item {
       font-size: 12px;
-      color: #aaa;
-    }
-    
-    .sidebar-footer-item {
-      cursor: pointer;
+      color: #cdcdcd;
+      text-decoration: none;
+      cursor: default;
+      padding: 0;
+      margin: 0;
+      background: none;
+      border: none;
+      outline: none;
+      display: block;
     }
     
     .sidebar-footer-item:hover {
@@ -231,26 +247,63 @@
     }
     
     .mobile-menu-toggle {
+      display: flex !important;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 44px;
+      height: 44px;
+      background: #fff;
+      border: none;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      position: fixed;
+      top: 18px;
+      left: 18px;
+      z-index: 3300;
+      padding: 0;
+      transition: opacity 0.3s, visibility 0.3s;
+    }
+       
+    .mobile-menu-toggle.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    
+    .mobile-menu-toggle span {
+      display: block;
+      width: 26px;
+      height: 3px;
+      background: #222;
+      margin: 4px 0;
+      border-radius: 2px;
+    }
+    
+    /* Mobile menu overlay */
+    .mobile-menu-overlay {
       display: none;
       position: fixed;
-      top: 15px;
-      left: 15px;
-      z-index: 101;
-      background: #8b5cf6;
-      color: white;
-      border: none;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .mobile-menu-overlay.show {
+      display: block;
+      opacity: 1;
     }
 
     /* Test styles */
     .test-container {
       max-width: 1000px;
-      margin: 0 auto;
+      margin: 2rem auto 0 auto;
+      padding: 0 20px;
     }
     
     .test-creator, .test-preview, .test-runner, .results-section {
@@ -877,7 +930,7 @@
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/calendar">
+              <a class="base-navigation-button-content" href="calendar.html">
                 <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-calendar-custom.svg" alt="Calendar" />
                 <span class="link-text">Calendar</span>
               </a>
@@ -888,14 +941,14 @@
                 <span class="link-text">Messages</span>
               </a>
             </li>
-            <li class="base-navigation-button active">
-              <a class="base-navigation-button-content" href="tests.html">
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/grades">
                 <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-grades-paper.svg" alt="Grades" />
                 <span class="link-text">Grades</span>
               </a>
             </li>
-            <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/tools">
+            <li class="base-navigation-button active">
+              <a class="base-navigation-button-content" href="tests.html">
                 <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-tools-custom.svg" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
@@ -1029,9 +1082,44 @@
     document.addEventListener('DOMContentLoaded', function() {
       const mobileMenuToggle = document.getElementById('mobileMenuToggle');
       const sideMenu = document.getElementById('side-menu');
+      const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
       
+      // Function to close menu
+      function closeMenu() {
+        sideMenu.classList.remove('show');
+        mobileMenuOverlay.classList.remove('show');
+        mobileMenuToggle.classList.remove('hidden');
+      }
+      
+      // Function to open menu
+      function openMenu() {
+        sideMenu.classList.add('show');
+        mobileMenuOverlay.classList.add('show');
+        mobileMenuToggle.classList.add('hidden');
+      }
+      
+      // Toggle menu on button click
       mobileMenuToggle.addEventListener('click', function() {
-        sideMenu.classList.toggle('show');
+        if (sideMenu.classList.contains('show')) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      });
+      
+      // Close menu when clicking on overlay
+      mobileMenuOverlay.addEventListener('click', function() {
+        closeMenu();
+      });
+      
+      // Close menu when clicking outside of it
+      document.addEventListener('click', function(event) {
+        const isClickInsideMenu = sideMenu.contains(event.target);
+        const isClickOnToggle = mobileMenuToggle.contains(event.target);
+        
+        if (!isClickInsideMenu && !isClickOnToggle && sideMenu.classList.contains('show')) {
+          closeMenu();
+        }
       });
       
       // Initialize the pharmacology test system
@@ -2633,5 +2721,8 @@ loadSampleFiles();
       addNewGroup();
     }
   </script>
+  
+  <!-- Mobile menu overlay -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 </body>
 </html>

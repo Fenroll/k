@@ -1696,13 +1696,13 @@
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="tests.html">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/messages">
                 <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-grades-paper.svg" alt="Grades" />
                 <span class="link-text">Grades</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/tools">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="tests.html">
                 <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-tools-custom.svg" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
@@ -2367,25 +2367,5 @@ function toggleFileDropdown(sectionId) {
 }
 </script>
 
-<script>
-// Fix for Grades link - ensure it redirects to tests.html
-document.addEventListener('DOMContentLoaded', function() {
-  // Find all links with Grades text content
-  const allLinks = document.querySelectorAll('a');
-  allLinks.forEach(link => {
-    // Find links with Grades text or the grades icon
-    const hasGradesText = link.textContent.includes('Grades');
-    const hasGradesIcon = link.querySelector('img[src*="grades-paper.svg"]');
-    
-    if (hasGradesText || hasGradesIcon) {
-      // Override the href and force a direct navigation to tests.html
-      link.addEventListener('click', function(e) {
-        e.preventDefault();
-        window.location.href = 'tests.html';
-      });
-    }
-  });
-});
-</script>
 </body>
 </html>
