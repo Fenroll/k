@@ -409,7 +409,14 @@
     color: #6b7280;
     font-weight: 500;
   }
+
+  /* Current day highlight */
+  .schedule-table td.current-day {
+    background-color: #e0f2fe; /* много светло синьо */
+  }
   
+
+
   /* Modal overlay */
   .modal-overlay {
     display: none;
@@ -1266,8 +1273,24 @@
       return `${formatHour(startTime)}-${formatHour(endTime)}`;
     }
     
+    // Get current day of week (ПОН, ВТ, etc.) or Monday if weekend
+    function getCurrentDay() {
+      const today = new Date();
+      const dayIndex = today.getDay(); // 0=Sunday, 1=Monday, etc.
+      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
+      
+      // If Saturday (6) or Sunday (0), return Monday
+      if (dayIndex === 0 || dayIndex === 6) {
+        return 'ПОН';
+      }
+      
+      // Otherwise return the current day (Monday=1 -> index 0)
+      return days[dayIndex - 1];
+    }
+    
     function renderSchedule() {
       const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
+      const currentDay = getCurrentDay();
       const tbody = document.getElementById('scheduleBody');
       tbody.innerHTML = ''; // Clear existing content
       
@@ -1304,6 +1327,12 @@
         const row = document.createElement('tr');
         days.forEach(day => {
           const td = document.createElement('td');
+          
+          // Add current-day class if this is today
+          if (day === currentDay) {
+            td.classList.add('current-day');
+          }
+          
           const event = eventsByDay[day][i];
           
           if (event) {
@@ -1467,6 +1496,9 @@
     // Update dates in table header
     function updateTableHeaderDates(startDate) {
       const headerCells = document.querySelectorAll('#scheduleHeader th .date-label');
+      const headerThs = document.querySelectorAll('#scheduleHeader th');
+      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
+      const currentDay = getCurrentDay();
       
       for (let i = 0; i < 5; i++) {
         const date = new Date(startDate);
@@ -1476,6 +1508,13 @@
         const month = date.getMonth() + 1; // Month is 0-indexed
         
         headerCells[i].textContent = `${day}.${month < 10 ? '0' + month : month}`;
+        
+        // Add current-day class if this is today
+        if (days[i] === currentDay) {
+          headerThs[i].classList.add('current-day');
+        } else {
+          headerThs[i].classList.remove('current-day');
+        }
       }
     }
 
