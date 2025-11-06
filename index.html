@@ -673,9 +673,9 @@
 
 /* Markdown tables with visible outlines */
 .markdown-content table {
-  width: 100%;
   border-collapse: collapse;
   margin: 0.75em 0;
+  table-layout: auto;
 }
 .markdown-content th,
 .markdown-content td {
@@ -1265,10 +1265,14 @@
     .doc a:hover{color:var(--linkh)}
     .table-scroll{overflow-x:auto;margin:.5em 0}
     .table-scroll table{min-width:560px}
-    .doc table{width:100%;border-collapse:collapse;margin:.75em 0}
+    .doc table{border-collapse:collapse;margin:.75em 0;table-layout:auto}
     .doc th,.doc td{border:1px solid var(--bd);padding:6px 10px;text-align:left;vertical-align:top}
     .doc thead th{background:#f3f4f6}
     .doc tbody tr:nth-child(odd){background:#fafafa}
+    .table-small table{font-size:12px;width:60%!important}
+    .table-small td,.table-small th{padding:4px 8px!important}
+    .table-compact table{font-size:11px;width:50%!important}
+    .table-compact td,.table-compact th{padding:3px 6px!important}
     pre{background:#f8fafc;padding:12px;border-radius:6px;overflow:auto;margin:0.2em 0}
     code{background:#f3f4f6;padding:2px 6px;border-radius:4px}
     @media (max-width:768px){ main{padding:12px} .doc{font-size:.94em;font-weight:300} .table-scroll table{font-size:.92em} }
