@@ -1242,6 +1242,30 @@
       }
     }
     
+    // Function to copy git commands
+    function copyGitCommand(type) {
+      let command = '';
+      if (type === 'main') {
+        command = 'node generate_courses.js; git add .; git commit -m "update"; git push';
+      } else if (type === 'files') {
+        command = 'cd files; git add .; git commit -m "update"; git push';
+      }
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(command).then(() => {
+        // Show temporary notification
+        const versionInfo = document.getElementById('versionInfo');
+        versionInfo.textContent = 'Copied: ' + command;
+        versionInfo.style.display = 'inline-block';
+        setTimeout(() => {
+          versionInfo.style.display = 'none';
+        }, 3000);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy command');
+      });
+    }
+    
     // Function to show text card in modal
     function showTextCardModal(cardId, title, content) {
       // Decode HTML entities
@@ -1718,8 +1742,8 @@
           </ul>
         </nav>
         <div class="sidebar-footer-links">
-          <span class="sidebar-footer-item">Privacy</span>
-          <span class="sidebar-footer-item">Terms</span>
+          <span class="sidebar-footer-item" onclick="copyGitCommand('main')" style="cursor: pointer;">Privacy</span>
+          <span class="sidebar-footer-item" onclick="copyGitCommand('files')" style="cursor: pointer;">Terms</span>
           <span class="sidebar-footer-item" onclick="toggleVersionInfo()" style="cursor: pointer;">Accessibility</span>
           <span id="versionInfo" style="display: none; position: absolute; left: 100%; bottom: 0; margin-left: 20px; padding: 3px 20px; background: #333; color: white; border-radius: 6px; font-size: 0.85em; white-space: normal; box-shadow: 0 2px 10px rgba(0,0,0,0.3); max-width: calc(100vw - 280px);"></span>
         </div>
