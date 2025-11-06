@@ -299,10 +299,6 @@ const courses = [
         "name": "Материали",
         "files": [
           {
-            "name": "~$локвиум.docx",
-            "path": "files/Клинична Генетика/Материали/~$локвиум.docx"
-          },
-          {
             "name": "Изпитни въпроси.docx",
             "path": "files/Клинична Генетика/Материали/Изпитни въпроси.docx"
           }
@@ -445,4 +441,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "06.11.2025 14:04";
+const buildTimestamp = "06.11.2025 14:07";

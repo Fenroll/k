@@ -219,6 +219,8 @@ function getAllCourses() {
       .filter(dirent => {
         if (!dirent.isFile()) return false;
         const fileName = dirent.name.toLowerCase();
+        // Skip temporary files (Word/Excel temp files starting with ~$)
+        if (fileName.startsWith('~$')) return false;
         return supportedExtensions.some(ext => fileName.endsWith(ext));
       })
       .forEach(file => {
