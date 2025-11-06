@@ -57,6 +57,11 @@ const courses = [
             "url": "https://www.crazygames.com/game/geometry-dash-online"
           },
           {
+            "name": "Kinda Hard Golf.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/Kinda Hard Golf.url",
+            "url": "https://kindahardgolf.com/"
+          },
+          {
             "name": "Neal Fun.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Neal Fun.url",
             "url": "https://neal.fun/"
@@ -454,4 +459,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "06.11.2025 19:16";
+const buildTimestamp = "06.11.2025 21:17";
