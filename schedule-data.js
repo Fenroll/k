@@ -538,6 +538,12 @@ const scheduleData = {
      ],
      "13": [
       {
+        "removeDay": "ПОН"
+      },
+      {
+        "removeDay": "ВТ"
+      },
+      {
       "day": "ЧЕТ",
         "subject": "ОМ",
         "fullName": "Обща Медицина",
