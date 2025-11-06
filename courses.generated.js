@@ -42,6 +42,11 @@ const courses = [
         "name": "Тежки Учебни Материали",
         "files": [
           {
+            "name": "Cookie Clicker.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/Cookie Clicker.url",
+            "url": "https://orteil.dashnet.org/cookieclicker/"
+          },
+          {
             "name": "Geoguesser.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Geoguesser.url",
             "url": "http://httpsgeoguesser.io/"
@@ -441,4 +446,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "06.11.2025 14:13";
+const buildTimestamp = "06.11.2025 14:18";
