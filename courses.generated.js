@@ -49,7 +49,7 @@ const courses = [
           {
             "name": "Geoguesser.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Geoguesser.url",
-            "url": "http://httpsgeoguesser.io/"
+            "url": "https://geoguesser.io/"
           },
           {
             "name": "Geometry Dash.url",
@@ -454,4 +454,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "06.11.2025 19:04";
+const buildTimestamp = "06.11.2025 19:16";
