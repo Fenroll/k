@@ -87,7 +87,7 @@ const scheduleData = {
       "day": "ПОН",
       "subject": "УНГ",
       "fullName": "Ушни, носни и гърлени болести",
-      "type": "Лекция",
+      "type": "Важна лекция",
       "building": "СВ. МАРИНА - УМБАЛ",
       "room": "Аудитория А",
       "floor": 2,
@@ -294,7 +294,7 @@ const scheduleData = {
       "fullName": "Вътрешни Болести I част",
       "type": "Лекция",
       "building": "СВ. МАРИНА - УМБАЛ",
-      "room": "Аудитория А",
+      "room": "Вл. Иванов",
       "floor": 2,
       "teacher": "проф. д-р Диана Петкова Господинова-Вълкова, д.м.",
       "startTime": "09:15",
@@ -480,7 +480,61 @@ const scheduleData = {
         "changes": {
           "removed": true
         }
+      },
+       {
+        "day": "ПЕТ",
+        "subject": "ВБ1",
+        "startTime": "09:15",
+        "changes": {
+          "type": "Важна лекция",
       }
+    },
+     {
+        "day": "ЧЕТ",
+        "subject": "ВБ1",
+        "startTime": "13:30",
+        "changes": {
+          "type": "Важна лекция",
+      }
+    } 
+     ],
+     "10": [
+      {
+      "day": "ЧЕТ",
+        "subject": "кимун",
+        "startTime": "08:00",
+        "changes":{ 
+          "type": "Колоквиум",
+        }
+    },
+     {
+        "day": "ПЕТ",
+        "subject": "ВБ1",
+        "startTime": "09:15",
+        "changes": {
+          "type": "Важна лекция",
+      }
+    } 
+     ],
+      "8": [
+      {
+        "day": "ПЕТ",
+        "subject": "ВБ1",
+        "startTime": "09:15",
+        "changes": {
+          "type": "Важна лекция",
+      }
+    } 
+     ],
+     "12": [
+      {
+        "day": "ЧЕТ",
+        "subject": "ВБ1",
+        "startTime": "13:30",
+        "changes": {
+          "type": "Важна лекция",
+      }
+    } 
      ],
      "13": [
       {
@@ -503,7 +557,33 @@ const scheduleData = {
         "changes": {
           "removed": true
         }
+      },
+      {
+        "day": "ПЕТ",
+        "subject": "ВБ1",
+        "startTime": "09:15",
+        "changes": {
+          "type": "Важна лекция",
       }
+    },
+    {
+        "day": "ЧЕТ",
+        "subject": "ВБ1",
+        "startTime": "13:30",
+        "changes": {
+          "type": "Важна лекция",
+      }
+    } 
+     ],
+     "14": [
+      {
+        "day": "ЧЕТ",
+        "subject": "ВБ1",
+        "startTime": "13:30",
+        "changes": {
+          "type": "Важна лекция",
+      }
+    } 
      ],
      "9": [
       {
@@ -534,7 +614,23 @@ const scheduleData = {
         "changes": {
           "removed": true
         }
+      },
+    {
+        "day": "ПЕТ",
+        "subject": "ВБ1",
+        "startTime": "09:15",
+        "changes": {
+          "type": "Важна лекция",
       }
+    },
+     {
+        "day": "ЧЕТ",
+        "subject": "ВБ1",
+        "startTime": "13:30",
+        "changes": {
+          "type": "Важна лекция",
+      }
+    } 
      ],
 		 "15": [
       {

@@ -336,7 +336,7 @@
   
   /* Упражнение - vibrant blue */
   .schedule-item.type-exercise {
-    background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%);
+    background: linear-gradient(135deg, #dbeafe 0%, #91c3fd 100%);
     border-left: 4px solid #2563eb;
   }
   
@@ -362,6 +362,21 @@
   
   .schedule-item.type-lecture .schedule-subject {
     color: #4b5563;
+  }
+  
+  /* ImportantLecture - gradient between exercise blue and lecture gray */
+  .schedule-item.type-important-lecture {
+    background: linear-gradient(135deg, #e5e7eb 0%, #a3a4f8 110%);
+    border-left: 4px solid #646c7e;
+  }
+  
+  .schedule-item.type-important-lecture:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(107,114,128,0.3);
+  }
+  
+  .schedule-item.type-important-lecture .schedule-subject {
+    color: #374151;
   }
   
   /* Колоквиум - vibrant purple */
@@ -1333,6 +1348,8 @@
         const typeMap = {
           'Упражнение': 'type-exercise',
           'Лекция': 'type-lecture',
+          'Важна лекция': 'type-important-lecture',
+          'ImportantLecture': 'type-important-lecture',
           'Колоквиум': 'type-exam',
           'Тест': 'type-test'
         };
