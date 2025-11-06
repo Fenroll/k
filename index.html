@@ -1016,7 +1016,7 @@
       else if (fileName.endsWith('.docx') || fileName.endsWith('.pptx') || fileName.endsWith('.ppt') || 
         fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.doc')) {
             // Encode the full URL properly
-            const fullUrl = encodeURIComponent(`https://fenroll.github.io/l/${file.path}`);
+            const fullUrl = encodeURIComponent(`https://fenroll.github.io/k/${file.path}`);
             const viewerUrl = `https://docs.google.com/viewer?url=${fullUrl}`;
             const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
             sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; word-break:break-word; overflow-wrap:break-word; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a>
