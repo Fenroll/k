@@ -986,9 +986,15 @@
                   
                   // Get base directory from note path (e.g., "files/Course/Section/")
                   const basePath = note.path.substring(0, note.path.lastIndexOf('/') + 1);
-                  // Fix relative image paths: any relative path (not starting with http:// or /) -> prepend basePath
+                  // Cache-busting version for images
+                  const cacheVersion = typeof buildTimestamp !== 'undefined' ? buildTimestamp : Date.now();
+                  // Fix relative image paths: any relative path (not starting with http:// or /) -> prepend basePath + add cache-busting
                   let fixedHtml = html.replace(/<img([^>]+)src="(?!https?:\/\/)(?!\/)([^"]+)"/g, 
-                    (match, attrs, src) => `<img${attrs}src="${basePath}${src}"`);
+                    (match, attrs, src) => {
+                      const fullSrc = `${basePath}${src}`;
+                      const separator = src.includes('?') ? '&' : '?';
+                      return `<img${attrs}src="${fullSrc}${separator}v=${cacheVersion}"`;
+                    });
                   // Add target="_blank" to all links
                   fixedHtml = fixedHtml.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
                   return `<div class="markdown-content">${fixedHtml}</div>`;
@@ -1272,10 +1278,6 @@
     .doc th,.doc td{border:1px solid var(--bd);padding:6px 10px;text-align:left;vertical-align:top}
     .doc thead th{background:#f3f4f6}
     .doc tbody tr:nth-child(odd){background:#fafafa}
-    .table-small table{font-size:12px;width:60%!important}
-    .table-small td,.table-small th{padding:4px 8px!important}
-    .table-compact table{font-size:11px;width:50%!important}
-    .table-compact td,.table-compact th{padding:3px 6px!important}
     pre{background:#f8fafc;padding:12px;border-radius:6px;overflow:auto;margin:0.2em 0}
     code{background:#f3f4f6;padding:2px 6px;border-radius:4px}
     @media (max-width:768px){ main{padding:12px} .doc{font-size:.94em;font-weight:300} .table-scroll table{font-size:.92em} }
