@@ -1248,7 +1248,7 @@
       if (type === 'main') {
         command = 'node generate_courses.js; git add .; git commit -m "update"; git push';
       } else if (type === 'files') {
-        command = 'cd files; git add .; git commit -m "update"; git push';
+        command = 'cd files; git add .; git commit -m "update"; git push; cd ..';
       }
       
       // Copy to clipboard
