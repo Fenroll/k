@@ -621,6 +621,14 @@ const scheduleData = {
           "removed": true
         }
       },
+        {
+       "day": "ЧЕТ",
+        "subject": "рент.",
+        "startTime": "15:15",
+        "changes": {
+          "removed": true
+        }
+      },
     {
         "day": "ПЕТ",
         "subject": "ВБ1",

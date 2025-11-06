@@ -703,6 +703,63 @@
   }
     </style>
     <script>
+    // Function to process table rowspans (convert ^ to rowspan)
+    function processTableRowspans(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const tables = doc.querySelectorAll('table');
+      
+      tables.forEach(table => {
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        
+        // Process each column
+        const maxCols = Math.max(...rows.map(row => row.cells.length));
+        
+        for (let colIndex = 0; colIndex < maxCols; colIndex++) {
+          let spanStart = -1;
+          let spanCount = 0;
+          
+          for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+            const cell = rows[rowIndex].cells[colIndex];
+            
+            if (!cell) continue;
+            
+            const cellText = cell.textContent.trim();
+            
+            if (cellText === '^') {
+              // Mark cell for deletion and count span
+              cell.setAttribute('data-delete', 'true');
+              spanCount++;
+            } else {
+              // If we were counting spans, apply rowspan
+              if (spanCount > 0 && spanStart >= 0) {
+                const spanCell = rows[spanStart].cells[colIndex];
+                if (spanCell) {
+                  spanCell.setAttribute('rowspan', spanCount + 1);
+                }
+              }
+              // Reset for next potential span
+              spanStart = rowIndex;
+              spanCount = 0;
+            }
+          }
+          
+          // Handle trailing spans
+          if (spanCount > 0 && spanStart >= 0) {
+            const spanCell = rows[spanStart].cells[colIndex];
+            if (spanCell) {
+              spanCell.setAttribute('rowspan', spanCount + 1);
+            }
+          }
+        }
+        
+        // Remove cells marked for deletion
+        table.querySelectorAll('[data-delete="true"]').forEach(cell => cell.remove());
+      });
+      
+      return doc.body.innerHTML;
+    }
+    
     // Overlay logic for course cards
     document.addEventListener('DOMContentLoaded', function() {
       // Close overlay when clicking outside overlay-content
@@ -920,7 +977,13 @@
                     tables: true
                   });
                   // Parse markdown and fix relative image paths
-                  const html = marked.parse(note.content);
+                  let html = marked.parse(note.content);
+                  
+                  // Process tables to support rowspan with ^ syntax (only if needed)
+                  if (html.includes('^')) {
+                    html = processTableRowspans(html);
+                  }
+                  
                   // Get base directory from note path (e.g., "files/Course/Section/")
                   const basePath = note.path.substring(0, note.path.lastIndexOf('/') + 1);
                   // Fix relative image paths: any relative path (not starting with http:// or /) -> prepend basePath
