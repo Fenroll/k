@@ -637,6 +637,14 @@ const scheduleData = {
           "type": "Важна лекция",
       }
     },
+	{
+        "day": "ПЕТ",
+        "subject": "рент.",
+        "startTime": "07:30",
+        "changes": {
+          "type": "Колоквиум",
+      }
+    },
      {
         "day": "ЧЕТ",
         "subject": "ВБ1",
