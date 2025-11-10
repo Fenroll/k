@@ -77,6 +77,11 @@ const courses = [
             "url": "https://randomstreetview.com/"
           },
           {
+            "name": "Timeguessr.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/Timeguessr.url",
+            "url": "https://timeguessr.com/"
+          },
+          {
             "name": "Ztype.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Ztype.url",
             "url": "https://zty.pe/"
@@ -474,4 +479,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "10.11.2025 13:03";
+const buildTimestamp = "10.11.2025 13:18";
