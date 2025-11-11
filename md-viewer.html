@@ -93,6 +93,106 @@
     <div id="content" class="markdown-body">Зареждане…</div>
   </main>
   <script>
+    // Function to process table rowspans (convert ^ to rowspan)
+    function processTableRowspans(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const tables = doc.querySelectorAll('table');
+      
+      tables.forEach(table => {
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        
+        // Process each column
+        const maxCols = Math.max(...rows.map(row => row.cells.length));
+        
+        for (let colIndex = 0; colIndex < maxCols; colIndex++) {
+          let spanStart = -1;
+          let spanCount = 0;
+          
+          for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+            const cell = rows[rowIndex].cells[colIndex];
+            
+            if (!cell) continue;
+            
+            const cellText = cell.textContent.trim();
+            
+            if (cellText === '^') {
+              // Mark cell for deletion and count span
+              cell.setAttribute('data-delete', 'true');
+              spanCount++;
+            } else {
+              // If we were counting spans, apply rowspan
+              if (spanCount > 0 && spanStart >= 0) {
+                const spanCell = rows[spanStart].cells[colIndex];
+                if (spanCell) {
+                  spanCell.setAttribute('rowspan', spanCount + 1);
+                }
+              }
+              // Reset for next potential span
+              spanStart = rowIndex;
+              spanCount = 0;
+            }
+          }
+          
+          // Handle trailing spans
+          if (spanCount > 0 && spanStart >= 0) {
+            const spanCell = rows[spanStart].cells[colIndex];
+            if (spanCell) {
+              spanCell.setAttribute('rowspan', spanCount + 1);
+            }
+          }
+        }
+        
+        // Remove cells marked for deletion
+        table.querySelectorAll('[data-delete="true"]').forEach(cell => cell.remove());
+      });
+      
+      return doc.body.innerHTML;
+    }
+
+    // Function to process table colspans (convert < to colspan)
+    function processTableColspans(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const tables = doc.querySelectorAll('table');
+      
+      tables.forEach(table => {
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        
+        // Process each row
+        rows.forEach(row => {
+          const cells = Array.from(row.cells);
+          
+          for (let colIndex = cells.length - 1; colIndex >= 0; colIndex--) {
+            const cell = cells[colIndex];
+            const cellText = cell.textContent.trim();
+            
+            if (cellText === '<') {
+              // Mark cell for deletion
+              cell.setAttribute('data-delete-colspan', 'true');
+              
+              // Find the previous non-deleted cell to add colspan
+              let prevColIndex = colIndex - 1;
+              while (prevColIndex >= 0) {
+                const prevCell = cells[prevColIndex];
+                if (!prevCell.getAttribute('data-delete-colspan')) {
+                  const currentColspan = parseInt(prevCell.getAttribute('colspan') || '1');
+                  prevCell.setAttribute('colspan', currentColspan + 1);
+                  break;
+                }
+                prevColIndex--;
+              }
+            }
+          }
+        });
+        
+        // Remove cells marked for deletion
+        table.querySelectorAll('[data-delete-colspan="true"]').forEach(cell => cell.remove());
+      });
+      
+      return doc.body.innerHTML;
+    }
+
     (function(){
       function getParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
       const path = getParam('path');
@@ -111,7 +211,18 @@
 
       fetch(absoluteUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
         .then(md => {
-          const html = marked.parse(md);
+          let html = marked.parse(md);
+          
+          // Process tables to support rowspan with ^ syntax (only if needed)
+          if (html.includes('^')) {
+            html = processTableRowspans(html);
+          }
+          
+          // Process tables to support colspan with < syntax (only if needed)
+          if (html.includes('<')) {
+            html = processTableColspans(html);
+          }
+          
           const root = document.getElementById('content');
           root.innerHTML = html;
           

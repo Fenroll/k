@@ -759,6 +759,49 @@
       
       return doc.body.innerHTML;
     }
+
+    // Function to process table colspans (convert < to colspan)
+    function processTableColspans(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const tables = doc.querySelectorAll('table');
+      
+      tables.forEach(table => {
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        
+        // Process each row
+        rows.forEach(row => {
+          const cells = Array.from(row.cells);
+          
+          for (let colIndex = cells.length - 1; colIndex >= 0; colIndex--) {
+            const cell = cells[colIndex];
+            const cellText = cell.textContent.trim();
+            
+            if (cellText === '<') {
+              // Mark cell for deletion
+              cell.setAttribute('data-delete-colspan', 'true');
+              
+              // Find the previous non-deleted cell to add colspan
+              let prevColIndex = colIndex - 1;
+              while (prevColIndex >= 0) {
+                const prevCell = cells[prevColIndex];
+                if (!prevCell.getAttribute('data-delete-colspan')) {
+                  const currentColspan = parseInt(prevCell.getAttribute('colspan') || '1');
+                  prevCell.setAttribute('colspan', currentColspan + 1);
+                  break;
+                }
+                prevColIndex--;
+              }
+            }
+          }
+        });
+        
+        // Remove cells marked for deletion
+        table.querySelectorAll('[data-delete-colspan="true"]').forEach(cell => cell.remove());
+      });
+      
+      return doc.body.innerHTML;
+    }
     
     // Overlay logic for course cards
     document.addEventListener('DOMContentLoaded', function() {
@@ -982,6 +1025,11 @@
                   // Process tables to support rowspan with ^ syntax (only if needed)
                   if (html.includes('^')) {
                     html = processTableRowspans(html);
+                  }
+                  
+                  // Process tables to support colspan with < syntax (only if needed)
+                  if (html.includes('<')) {
+                    html = processTableColspans(html);
                   }
                   
                   // Get base directory from note path (e.g., "files/Course/Section/")
