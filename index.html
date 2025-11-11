@@ -772,32 +772,75 @@
         // Process each row
         rows.forEach(row => {
           const cells = Array.from(row.cells);
+          let spanStart = -1;
+          let spanCount = 0;
           
-          for (let colIndex = cells.length - 1; colIndex >= 0; colIndex--) {
+          for (let colIndex = 0; colIndex < cells.length; colIndex++) {
             const cell = cells[colIndex];
-            const cellText = cell.textContent.trim();
+            const cellText = cell.innerHTML.trim();
             
-            if (cellText === '<') {
-              // Mark cell for deletion
+            if (cellText === '&lt;') {
+              // Mark cell for deletion and count span
               cell.setAttribute('data-delete-colspan', 'true');
-              
-              // Find the previous non-deleted cell to add colspan
-              let prevColIndex = colIndex - 1;
-              while (prevColIndex >= 0) {
-                const prevCell = cells[prevColIndex];
-                if (!prevCell.getAttribute('data-delete-colspan')) {
-                  const currentColspan = parseInt(prevCell.getAttribute('colspan') || '1');
-                  prevCell.setAttribute('colspan', currentColspan + 1);
-                  break;
+              spanCount++;
+            } else {
+              // If we were counting spans, apply colspan
+              if (spanCount > 0 && spanStart >= 0) {
+                const spanCell = cells[spanStart];
+                if (spanCell) {
+                  spanCell.setAttribute('colspan', spanCount + 1);
                 }
-                prevColIndex--;
               }
+              // Reset for next potential span
+              spanStart = colIndex;
+              spanCount = 0;
+            }
+          }
+          
+          // Handle trailing spans
+          if (spanCount > 0 && spanStart >= 0) {
+            const spanCell = cells[spanStart];
+            if (spanCell) {
+              spanCell.setAttribute('colspan', spanCount + 1);
             }
           }
         });
         
         // Remove cells marked for deletion
         table.querySelectorAll('[data-delete-colspan="true"]').forEach(cell => cell.remove());
+      });
+      
+      return doc.body.innerHTML;
+    }
+
+    // Function to process table cell alignment (>>text<<, <<text, text>>)
+    function processTableAlignment(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const tables = doc.querySelectorAll('table');
+      
+      tables.forEach(table => {
+        const allCells = table.querySelectorAll('td, th');
+        
+        allCells.forEach(cell => {
+          let content = cell.innerHTML.trim();
+          
+          // Check for center alignment >>text<<
+          if (content.startsWith('&gt;&gt;') && content.endsWith('&lt;&lt;')) {
+            cell.style.textAlign = 'center';
+            cell.innerHTML = content.slice(8, -8); // Remove &gt;&gt; and &lt;&lt;
+          }
+          // Check for left alignment <<text
+          else if (content.startsWith('&lt;&lt;')) {
+            cell.style.textAlign = 'left';
+            cell.innerHTML = content.slice(8); // Remove &lt;&lt;
+          }
+          // Check for right alignment text>>
+          else if (content.endsWith('&gt;&gt;')) {
+            cell.style.textAlign = 'right';
+            cell.innerHTML = content.slice(0, -8); // Remove &gt;&gt;
+          }
+        });
       });
       
       return doc.body.innerHTML;
@@ -1027,8 +1070,13 @@
                     html = processTableRowspans(html);
                   }
                   
+                  // Process tables to support cell alignment with >>text<<, <<text, text>> (BEFORE colspan!)
+                  if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) {
+                    html = processTableAlignment(html);
+                  }
+                  
                   // Process tables to support colspan with < syntax (only if needed)
-                  if (html.includes('<')) {
+                  if (html.includes('&lt;')) {
                     html = processTableColspans(html);
                   }
                   
