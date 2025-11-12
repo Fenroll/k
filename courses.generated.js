@@ -720,4 +720,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "12.11.2025 13:49";
+const buildTimestamp = "12.11.2025 14:01";
