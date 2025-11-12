@@ -1169,8 +1169,8 @@
           if (fileName.endsWith('.url') && file.url) {
             // Open the URL directly
             const displayName = file.name.replace('.url', '');
-            sectionContjent += `<a href="${file.url}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(displayName)}</a></li>`;
-          } about:blank
+            sectionContent += `<a href="${file.url}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(displayName)}</a></li>`;
+          } 
           // Check if it's a viewable Office file (Word, PowerPoint, Excel)
       else if (fileName.endsWith('.docx') || fileName.endsWith('.pptx') || fileName.endsWith('.ppt') || 
         fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.doc')) {
