@@ -82,6 +82,11 @@ const courses = [
             "url": "https://timeguessr.com/"
           },
           {
+            "name": "Wordle.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/Wordle.url",
+            "url": "https://www.nytimes.com/games/wordle/index.html"
+          },
+          {
             "name": "Ztype.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Ztype.url",
             "url": "https://zty.pe/"
@@ -720,4 +725,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "12.11.2025 14:03";
+const buildTimestamp = "13.11.2025 07:43";
