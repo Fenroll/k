@@ -464,7 +464,7 @@ const scheduleData = {
       "day": "ЧЕТ",
         "subject": "ОМ",
         "fullName": "Обща Медицина",
-        "type": "Упражнение",
+        "type": "Колоквиум",
         "building": "ДКЦ",
         "room": "",
         "floor": "",
