@@ -57,6 +57,16 @@ const courses = [
             "url": "https://www.crazygames.com/game/geometry-dash-online"
           },
           {
+            "name": "Globle.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/Globle.url",
+            "url": "https://globle-game.com/"
+          },
+          {
+            "name": "Just One Boss.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/Just One Boss.url",
+            "url": "https://aylanonsense.itch.io/just-one-boss"
+          },
+          {
             "name": "Kinda Hard Golf.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Kinda Hard Golf.url",
             "url": "https://kindahardgolf.com/"
@@ -75,6 +85,11 @@ const courses = [
             "name": "Random Street View.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Random Street View.url",
             "url": "https://randomstreetview.com/"
+          },
+          {
+            "name": "Soulbound.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/Soulbound.url",
+            "url": "https://play.soulbound.game/"
           },
           {
             "name": "Timeguessr.url",
@@ -755,4 +770,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "18.11.2025 16:12";
+const buildTimestamp = "20.11.2025 13:15";
