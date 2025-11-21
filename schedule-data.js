@@ -468,7 +468,7 @@ const scheduleData = {
         "building": "ДКЦ",
         "room": "",
         "floor": "",
-        "teacher": "доц. д-р Женя Русева Петрова, д.м.",
+        "teacher": "доц. д-р Женя Русева Петрова, дn.м.",
         "startTime": "08:00",
         "endTime": "09:30",
         "additionalInfo": "От 8:30 започва"
@@ -487,6 +487,14 @@ const scheduleData = {
         "startTime": "09:15",
         "changes": {
           "type": "Важна лекция",
+      }
+    },
+    {
+        "day": "ВТ",
+        "subject": "АГ",
+        "startTime": "09:45",
+        "changes": {
+          "type": "Колоквиум",
       }
     },
      {
@@ -534,7 +542,15 @@ const scheduleData = {
         "changes": {
           "type": "Важна лекция",
       }
-    } 
+    },
+    {
+        "day": "ПОН",
+        "subject": "фарм",
+        "startTime": "07:15",
+        "changes": {
+          "type": "Колоквиум",
+      }
+    }  
      ],
      "13": [
       {
