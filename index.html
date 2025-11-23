@@ -1403,13 +1403,13 @@
       }
     }
     
-    /genetika/ Function to copy git commands
+    // Function to copy git commands
     function copyGitCommand(type) {
       let command = '';
       if (type === 'main') {
         command = 'node generate_courses.js; git add .; git commit -m "update"; git push';
       } else if (type === 'files') {
-        command = 'cd files; git add .; git commit -m "update"; git push; cd ..; git add files; git commit -m "update files"; git push';
+        command = 'cd files; git add .; git commit -m "update"; git push; cd ..';
       }
       
       // Copy to clipboard
