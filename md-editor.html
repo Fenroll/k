@@ -405,6 +405,14 @@
       background: #fef3c7;
     }
 
+    .file-item[data-type="markdown"] {
+      background: #fef8f0;
+    }
+
+    .file-item[data-type="html"] {
+      background: #f5f3ff;
+    }
+
     .file-item:last-child {
       border-bottom: none;
     }
@@ -930,11 +938,12 @@
         course.sections.forEach(section => {
           if (section.msgNotes) {
             section.msgNotes.forEach(note => {
-              if (note.path && /\.md$/i.test(note.path) && note.type === 'markdown') {
+              if (note.path && (/\.md$/i.test(note.path) && note.type === 'markdown') || (/\.html$/i.test(note.path) && note.type === 'html')) {
                 filesByCourse[courseName].push({
                   name: note.name,
                   path: note.path,
                   content: note.content,
+                  type: note.type,
                   courseName: courseName,
                   sectionName: section.name
                 });
@@ -964,13 +973,14 @@
           const fileItem = document.createElement('div');
           fileItem.className = 'file-item';
           fileItem.setAttribute('data-course', courseName);
+          fileItem.setAttribute('data-type', file.type);
           fileItem.setAttribute('data-search-text', (file.courseName + ' ' + file.sectionName + ' ' + file.name).toLowerCase());
           
-          // Clean up file name: remove msg-, number prefix (including decimals like 2.4), and .md extension
+          // Clean up file name: remove msg-, number prefix (including decimals like 2.4), and extension
           const cleanName = file.name
             .replace(/^\d+(\.\d+)?-/, '')   // Remove number prefix (e.g., "1-", "2.4-")
             .replace(/^msg-/i, '')          // Remove "msg-" prefix
-            .replace(/\.(md|txt)$/i, '');   // Remove .md or .txt extension
+            .replace(/\.(md|txt|html)$/i, '');   // Remove .md, .txt, or .html extension
           
           fileItem.innerHTML = `
             <div class="file-item-name">${cleanName}</div>
@@ -1035,16 +1045,28 @@
         globalImageBasePath = currentOrigin + '/' + basePath;
       }
       
-      // Convert markdown to HTML
+      // Convert markdown to HTML or use HTML directly
       isLoadingFile = true;
-      const html = markdownToHtml(file.content);
+      let html;
+      
+      // If it's an HTML file, use content directly (extract body content)
+      if (file.type === 'html') {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(file.content, 'text/html');
+        // Get body content and trim whitespace
+        html = doc.body.innerHTML.trim();
+      } else {
+        // Otherwise parse as Markdown
+        html = markdownToHtml(file.content);
+      }
+      
       editor.innerHTML = html;
       saveToHistory();
       setTimeout(() => { isLoadingFile = false; }, 100); // Reset after load
       
       // Extract file info for saving later
       const numberMatch = file.name.match(/^(\d+(\.\d+)?)-/);
-      const cleanName = file.name.replace(/^\d+(\.\d+)?-/, '').replace(/^msg-/i, '').replace(/\.(md|txt)$/i, '');
+      const cleanName = file.name.replace(/^\d+(\.\d+)?-/, '').replace(/^msg-/i, '').replace(/\.(md|txt|html)$/i, '');
       
       currentFileInfo = {
         name: cleanName,
@@ -1099,21 +1121,24 @@
         return;
       }
       
+      // Clean the name: remove .html, .md, .txt extensions
+      const cleanName = name.replace(/\.(html|md|txt)$/i, '');
+      
       // Create standalone HTML file with embedded content
       const htmlDoc = `<!DOCTYPE html>
 <html lang="bg">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${name}</title>
+  <title>${cleanName}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <style>
     body { 
       font-family: "Open Sans", Arial, sans-serif; 
-      max-width: 900px; 
-      margin: 2rem auto; 
+      max-width: 1000px; 
+      margin: 0.5rem auto; 
       padding: 0 1rem; 
-      line-height: 1.6; 
+      line-height: 1.8; 
       color: #1f2937; 
     }
     h1, h2, h3, h4 { 
@@ -1201,6 +1226,22 @@
     }
     a:hover {
       color: #d97706;
+    }
+    @media (max-width: 768px) {
+      body {
+        max-width: 100%;
+        margin: 0.5rem 0;
+        padding: 0 0.5rem;
+        font-size: 16px;
+      }
+      h1 { font-size: 1.3em; }
+      h2 { font-size: 1.1em; }
+      h3 { font-size: 1em; }
+      p { margin: 0.5em 0; }
+      ul, ol { padding-left: 1.2em; }
+      li { margin: 0.1em 0; }
+      table { font-size: 0.9em; }
+      th, td { padding: 4px 6px; }
     }
   </style>
 </head>

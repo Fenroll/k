@@ -18,34 +18,48 @@
       --border: #e5e7eb;
     }
     * { box-sizing: border-box; }
-    html, body { height: 100%; }
+    html { margin: 0; padding: 0; }
+    html, body { margin: 0; padding: 0; }
     body {
       margin: 0;
+      padding: 0;
       font-family: 'Open Sans', Arial, sans-serif;
       background: var(--bg);
       color: var(--fg);
       line-height: 1.6;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
     }
     header {
       position: sticky; top: 0; z-index: 10;
       background: var(--card);
       border-bottom: 1px solid var(--border);
       padding: 10px 16px;
+      margin: 0;
+      flex-shrink: 0;
       display: flex; align-items: center; gap: 10px;
+      width: 100vw;
+      position: fixed;
+      top: 0;
+      left: 0;
     }
     header h1 {
-      font-size: 1.05rem; font-weight: 600; margin: 0; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      display: none;
     }
     header a.btn {
       display: inline-flex; align-items: center; gap: 6px;
       padding: 8px 12px; border-radius: 6px; text-decoration: none;
       background: #eef2ff; color: var(--link); border: 1px solid #c7d2fe;
     }
+    header a.btn:nth-child(3) {
+      display: none;
+    }
     header a.btn:hover { background: #e0e7ff; color: var(--link-hover); }
-    main { max-width: 980px; margin: 0 auto; padding: 16px; }
+    main { max-width: 1200px; margin: 0 auto; padding: 16px 32px; flex: 1; width: 100%; margin-top: 40px; }
 
     .markdown-body h1, .markdown-body h2, .markdown-body h3 {
-      color: #4c1d95; margin-top: 1.2em; margin-bottom: 0.5em; font-weight: 600;
+      color: #92400e; margin-top: 1.2em; margin-bottom: 0.5em; font-weight: 600;
     }
     .markdown-body h1 { font-size: 1.7em; }
     .markdown-body h2 { font-size: 1.4em; }
@@ -239,6 +253,7 @@
     (function(){
       function getParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
       const path = getParam('path');
+      const loadFromHash = getParam('loadFromHash') === 'true';
       if(!path){ document.getElementById('content').textContent = 'Липсва параметър path.'; return; }
       const decodedPath = decodeURIComponent(path);
       const title = decodedPath.split('/').pop();
@@ -247,28 +262,75 @@
       const dl = document.getElementById('downloadLink');
       dl.href = decodedPath;
 
+      // If content is passed in hash, use it directly (no fetch needed)
+      if (loadFromHash && window.location.hash) {
+        try {
+          const htmlContent = decodeURIComponent(window.location.hash.substring(1));
+          const root = document.getElementById('content');
+          root.innerHTML = htmlContent;
+          
+          // Render LaTeX with auto-render
+          if (typeof renderMathInElement !== 'undefined') {
+            try {
+              renderMathInElement(root, {
+                delimiters: [
+                  {left: '$$', right: '$$', display: true},
+                  {left: '$', right: '$', display: false}
+                ],
+                throwOnError: false
+              });
+            } catch (e) {
+              console.error('KaTeX error:', e);
+            }
+          }
+          
+          // Wrap tables for horizontal scroll on mobile
+          root.querySelectorAll('table').forEach(tbl => {
+            if(!tbl.parentElement.classList.contains('table-scroll')){
+              const wrap = document.createElement('div');
+              wrap.className = 'table-scroll';
+              tbl.parentElement.insertBefore(wrap, tbl);
+              wrap.appendChild(tbl);
+            }
+          });
+        } catch (err) {
+          document.getElementById('content').textContent = 'Грешка при зареждане на съдържанието: ' + err.message;
+        }
+        return;
+      }
+
       const encodedPath = decodedPath.split('/').map(encodeURIComponent).join('/');
       const absoluteUrl = (window.location.origin && window.location.origin !== 'null')
         ? new URL(encodedPath, window.location.origin).href
         : encodedPath;
 
       fetch(absoluteUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
-        .then(md => {
-          let html = marked.parse(md);
+        .then(content => {
+          let html;
           
-          // Process tables to support rowspan with ^ syntax (only if needed)
-          if (html.includes('^')) {
-            html = processTableRowspans(html);
-          }
-          
-          // Process tables to support cell alignment with >>text<<, <<text, text>> (BEFORE colspan!)
-          if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) {
-            html = processTableAlignment(html);
-          }
-          
-          // Process tables to support colspan with < syntax (only if needed)
-          if (html.includes('&lt;')) {
-            html = processTableColspans(html);
+          // If it's an HTML file, extract body content directly
+          if (/\.html$/i.test(decodedPath)) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(content, 'text/html');
+            html = doc.body.innerHTML;
+          } else {
+            // Otherwise parse as Markdown
+            html = marked.parse(content);
+            
+            // Process tables to support rowspan with ^ syntax (only if needed)
+            if (html.includes('^')) {
+              html = processTableRowspans(html);
+            }
+            
+            // Process tables to support cell alignment with >>text<<, <<text, text>> (BEFORE colspan!)
+            if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) {
+              html = processTableAlignment(html);
+            }
+            
+            // Process tables to support colspan with < syntax (only if needed)
+            if (html.includes('&lt;')) {
+              html = processTableColspans(html);
+            }
           }
           
           const root = document.getElementById('content');

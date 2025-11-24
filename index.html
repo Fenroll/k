@@ -475,6 +475,15 @@
   transform: translateY(-2px);
 }
 
+.msg-note-html {
+  border-left: 4px solid #7c3aed !important;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15) !important;
+}
+
+.msg-note-html:hover {
+  box-shadow: 0 4px 16px rgba(124, 58, 237, 0.25) !important;
+}
+
 .msg-note-header {
   display: flex;
   align-items: center;
@@ -1040,34 +1049,23 @@
       if (section.msgNotes && section.msgNotes.length > 0) {
         section.msgNotes.forEach((note, idx) => {
           const noteId = `msg-note-${sectionId}-${idx}`;
+          const isHtml = /\.html$/i.test(note.path || '');
           sectionContent += `
-            <div class="msg-note" onclick="toggleMsgNote('${noteId}')" data-note-path="${note.path}">
+            <div class="msg-note ${isHtml ? 'msg-note-html' : ''}" onclick="${isHtml ? `openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;` : `toggleMsgNote('${noteId}')`}" data-note-path="${note.path}" style="${isHtml ? 'background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); cursor: pointer;' : ''}">
               <div class="msg-note-header">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" style="flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="${isHtml ? '#7c3aed' : '#f59e0b'}" style="flex-shrink:0;">
                   <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
                 </svg>
-                <span class="msg-note-title">${removeOrderPrefix(note.name)}</span>
-                ${/\.(md|html)$/i.test(note.path || '') ? `<a href="#" title="Отвори на цял екран" onclick="event.stopPropagation(); openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" style="display:inline-flex; align-items:center; justify-content:center; margin-left:auto; margin-right:6px; text-decoration:none; flex-shrink:0;">
+                <span class="msg-note-title" style="${isHtml ? 'color: #6d28d9;' : ''}">${isHtml ? removeOrderPrefix(note.name).replace(/\.html$/i, '') : removeOrderPrefix(note.name)}</span>
+                ${!isHtml && /\.md$/i.test(note.path || '') ? `<a href="#" title="Отвори на цял екран" onclick="event.stopPropagation(); openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" style="display:inline-flex; align-items:center; justify-content:center; margin-left:auto; margin-right:6px; text-decoration:none; flex-shrink:0;">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>
                 </a>` : ''}
-                <svg class="msg-note-arrow" width="18" height="18" viewBox="0 0 24 24">
+                ${!isHtml ? `<svg class="msg-note-arrow" width="18" height="18" viewBox="0 0 24 24">
                   <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="#f59e0b"/>
-                </svg>
+                </svg>` : ''}
               </div>
               <div class="msg-note-content" id="${noteId}" style="display:none;">
-                ${note.type === 'text' ? `<pre>${note.content}</pre>` : ((note.type === 'markdown' || note.type === 'html') ? (() => {
-                  // If it's HTML, use content directly
-                  if (note.type === 'html') {
-                    // Get base directory from note path
-                    const basePath = note.path.substring(0, note.path.lastIndexOf('/') + 1);
-                    // Fix relative image paths and add target="_blank" to links
-                    let fixedHtml = note.content.replace(/<img([^>]+)src="(?!https?:\/\/)(?!\/)([^"]+)"/g, 
-                      (match, attrs, src) => `<img${attrs}src="${basePath}${src}"`);
-                    fixedHtml = fixedHtml.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
-                    return `<div class="markdown-content">${fixedHtml}</div>`;
-                  }
-                  
-                  // If it's Markdown, parse it first
+                ${note.type === 'text' ? `<pre>${note.content}</pre>` : (note.type === 'markdown' ? (() => {
                   // Configure marked for GFM tables
                   marked.setOptions({
                     gfm: true,
@@ -1316,9 +1314,30 @@
         const notePath = noteElement ? noteElement.getAttribute('data-note-path') : '';
         const basePath = notePath ? notePath.substring(0, notePath.lastIndexOf('/') + 1) : '';
         
-        // Check if this is an HTML file - if so, open it directly
+        // Check if this is an HTML file - open in md-viewer with content passed in hash
         if (notePath && /\.html$/i.test(notePath)) {
-          window.open(notePath, '_blank');
+          // Find the HTML content from courses data
+          let htmlContent = '';
+          if (typeof courses !== 'undefined') {
+            outerLoop: for (let course of courses) {
+              for (let section of course.sections) {
+                if (section.msgNotes) {
+                  for (let note of section.msgNotes) {
+                    if (note.path === notePath && note.type === 'html') {
+                      htmlContent = note.content;
+                      break outerLoop;
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
+          if (htmlContent) {
+            const encodedHtml = encodeURIComponent(htmlContent);
+            const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&loadFromHash=true#${encodedHtml}`;
+            window.open(mdViewerUrl, '_blank');
+          }
           return;
         }
         
