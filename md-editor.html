@@ -126,18 +126,54 @@
     #editor h4 {
       color: #92400e;
       margin-top: 0.8em;
-      margin-bottom: 0.3em;
+      margin-bottom: 0.15em;
       font-weight: 600;
     }
 
     #editor h1 { font-size: 1.5em; color: #000000; }
     #editor h2 { font-size: 1.3em; color: #000000; }
-    #editor h3 { font-size: 1.1em; color: #000000; }
-    #editor h4 { font-size: 1.05em; color: #000000; }
+    #editor h3 { font-size: 1.1em; color: #000000; margin-bottom: 0.1em; }
+    #editor h4 { font-size: 1.05em; color: #000000; margin-bottom: 0.1em; }
 
     #editor p {
-      margin: 0.7em 0;
+      margin: 0.3em 0;
       white-space: pre-wrap;
+    }
+
+    /* CRITICAL: Fix for list formatting - prevent <p> tags from breaking lists */
+    #editor ul, #editor ol {
+      margin: 0.5em 0;
+      padding-left: 1.5em;
+      list-style-position: outside;
+    }
+
+    #editor li {
+      margin: 0.2em 0;
+      padding: 0;
+      display: list-item;
+    }
+
+    /* Remove <p> tags inside list items - they should not exist */
+    #editor li p {
+      margin: 0;
+      padding: 0;
+      display: inline;
+    }
+
+    /* Prevent nested list paragraph issues */
+    #editor li > ul,
+    #editor li > ol {
+      margin: 0.3em 0 0 0;
+      padding-left: 1.5em;
+    }
+
+    /* Ensure list structure is clean */
+    #editor ul ul, #editor ul ol,
+    #editor ol ul, #editor ol ol {
+      margin-top: 0.2em;
+      padding-left: 1.5em;
+    }
+    }
     }
 
     /* Reduce space between paragraph and following list */
@@ -298,6 +334,8 @@
       padding: 6px 10px;
       text-align: left;
       vertical-align: top;
+      height: 24px;
+      line-height: 1.2;
     }
 
     #editor thead th {
@@ -519,6 +557,46 @@
       margin-left: auto;
     }
 
+    /* Table context menu */
+    .table-context-menu {
+      position: fixed;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 4px 0;
+      z-index: 1000;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      display: none;
+    }
+
+    .table-context-menu.active {
+      display: block;
+    }
+
+    .table-context-menu button {
+      display: block;
+      width: 100%;
+      padding: 8px 16px;
+      border: none;
+      background: white;
+      color: #1f2937;
+      text-align: left;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .table-context-menu button:hover {
+      background: #f3f4f6;
+    }
+
+    .table-context-menu button:first-child {
+      border-radius: 6px 6px 0 0;
+    }
+
+    .table-context-menu button:last-child {
+      border-radius: 0 0 6px 6px;
+    }
+
     @media (max-width: 768px) {
       .toolbar {
         padding: 8px 12px;
@@ -573,7 +651,7 @@
     </div>
 
     <div class="toolbar-group">
-      <button id="tableBtn" title="Table (Ctrl+T)">⊞ Table</button>
+      <button id="editTableBtn" title="Edit table with Tables Generator">📊 Edit Table</button>
       <button id="linkBtn" title="Link (Ctrl+K)">🔗 Link</button>
       <button id="hrBtn" title="Horizontal Line">━━ Line</button>
     </div>
@@ -658,6 +736,7 @@
           <li style="margin: 8px 0;"><strong>Ctrl+I</strong> - Italic</li>
           <li style="margin: 8px 0;"><strong>Ctrl+U</strong> - Underline</li>
           <li style="margin: 8px 0;"><strong>Ctrl+`</strong> - Code</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+Alt+C</strong> - Apply last text color</li>
         </ul>
         <h3>Lists & Blocks</h3>
         <ul style="list-style: none; padding: 0;">
@@ -939,7 +1018,7 @@
         for (let i = 0; i < rowNum - 1; i++) {
           table += '<tr>';
           for (let j = 0; j < colNum; j++) {
-            table += '<td>Cell</td>';
+            table += '<td>&nbsp;</td>';
           }
           table += '</tr>';
         }
@@ -1030,8 +1109,51 @@
       insertBlockquote();
     });
 
-    document.getElementById('tableBtn').addEventListener('click', () => {
-      insertTable();
+    document.getElementById('editTableBtn').addEventListener('click', () => {
+      editor.focus();
+      
+      const selection = window.getSelection();
+      let table = null;
+      
+      // Try to find the table where cursor is
+      if (selection.anchorNode) {
+        const node = selection.anchorNode.nodeType === 3 ? selection.anchorNode.parentElement : selection.anchorNode;
+        table = node.closest('table');
+      }
+      
+      if (!table && selection.focusNode) {
+        const node = selection.focusNode.nodeType === 3 ? selection.focusNode.parentElement : selection.focusNode;
+        table = node.closest('table');
+      }
+      
+      if (!table && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const node = range.commonAncestorContainer.nodeType === 3 ? range.commonAncestorContainer.parentElement : range.commonAncestorContainer;
+        table = node.closest('table');
+      }
+      
+      if (!table) {
+        const tables = editor.querySelectorAll('table');
+        if (tables.length > 0) {
+          table = tables[0];
+        }
+      }
+      
+      if (!table) {
+        alert('No table found. Create a table first or click inside a table');
+        return;
+      }
+
+      // Copy table HTML to clipboard
+      const tableHtml = table.outerHTML;
+      navigator.clipboard.writeText(tableHtml).then(() => {
+        // Open Tables Generator
+        alert('Table copied to clipboard!\n\nNow:\n1. Go to tablesgenerator.com\n2. Click "Import" or "Paste" button\n3. Paste your table (Ctrl+V)\n4. Edit it\n5. Copy the HTML\n6. Come back and paste here');
+        window.open('https://www.tablesgenerator.com/html_tables', '_blank');
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy table. Please try again');
+      });
     });
 
     document.getElementById('linkBtn').addEventListener('click', () => {
@@ -1126,90 +1248,25 @@
       // Work with the range
       const range = selection.getRangeAt(0);
       
-      // Instead of cloning and rebuilding, we'll modify in place
-      // Get all nodes within the range
-      const commonAncestor = range.commonAncestorContainer;
+      // Get the selected text
+      const selectedText = range.toString();
       
-      // Function to apply formatting to text nodes in a range
-      const applyToRange = (startContainer, startOffset, endContainer, endOffset) => {
-        // Create a list of text nodes to process
-        const textNodes = [];
-        const walker = document.createTreeWalker(
-          commonAncestor.nodeType === 1 ? commonAncestor : commonAncestor.parentNode,
-          NodeFilter.SHOW_TEXT,
-          null,
-          false
-        );
-        
-        let node;
-        let inRange = false;
-        let started = false;
-        let ended = false;
-        
-        while (node = walker.nextNode()) {
-          // Check if node is within range
-          const nodeRange = document.createRange();
-          nodeRange.selectNode(node);
-          
-          const comparison = range.compareBoundaryPoints(Range.START_TO_END, nodeRange);
-          const comparison2 = range.compareBoundaryPoints(Range.END_TO_START, nodeRange);
-          
-          // Node is within range if both comparisons indicate overlap
-          if (comparison >= 0 && comparison2 <= 0) {
-            textNodes.push(node);
-          }
-        }
-        
-        // Apply formatting to each text node
-        textNodes.forEach(textNode => {
-          const parent = textNode.parentNode;
-          
-          // Don't touch block elements - only wrap text
-          if (!parent || ['H1', 'H2', 'H3', 'H4', 'P', 'LI', 'DIV', 'BLOCKQUOTE'].includes(parent.tagName)) {
-            if (parent.tagName === 'SPAN') {
-              // Parent is span, update its style
-              if (property === 'color') {
-                parent.style.color = value;
-              } else if (property === 'fontSize') {
-                parent.style.fontSize = value + 'px';
-              }
-            } else if (parent.tagName === 'LI' || parent.tagName === 'P' || parent.tagName === 'H1' || parent.tagName === 'H2' || parent.tagName === 'H3' || parent.tagName === 'H4') {
-              // Text is direct child of block element, wrap in span
-              const span = document.createElement('span');
-              if (property === 'color') {
-                span.style.color = value;
-              } else if (property === 'fontSize') {
-                span.style.fontSize = value + 'px';
-              }
-              span.textContent = textNode.textContent;
-              parent.replaceChild(span, textNode);
-            }
-          } else {
-            // Handle other inline elements
-            if (parent.tagName === 'SPAN') {
-              if (property === 'color') {
-                parent.style.color = value;
-              } else if (property === 'fontSize') {
-                parent.style.fontSize = value + 'px';
-              }
-            } else {
-              // Wrap in span
-              const span = document.createElement('span');
-              if (property === 'color') {
-                span.style.color = value;
-              } else if (property === 'fontSize') {
-                span.style.fontSize = value + 'px';
-              }
-              span.textContent = textNode.textContent;
-              parent.replaceChild(span, textNode);
-            }
-          }
-        });
-      };
+      // Create a span with the formatting
+      const span = document.createElement('span');
+      if (property === 'color') {
+        span.style.color = value;
+      } else if (property === 'fontSize') {
+        span.style.fontSize = value + 'px';
+      }
       
-      applyToRange(range.startContainer, range.startOffset, range.endContainer, range.endOffset);
+      // Delete the selected content and insert the formatted span
+      range.deleteContents();
+      span.textContent = selectedText;
+      range.insertNode(span);
       
-      // Restore selection
+      // Move cursor after the span
+      range.setStartAfter(span);
+      range.collapse(true);
       selection.removeAllRanges();
       selection.addRange(range);
       
@@ -1527,10 +1584,45 @@
       
       // Convert absolute image paths to relative paths
       let editorContent = editor.innerHTML;
-      // Replace absolute file:// paths with relative paths
+      
+      // SAFE: Remove only EMPTY <p> tags (those with just whitespace or empty formatting)
+      // This removes the empty paragraphs browser creates between list items
+      let prevContent;
+      let iterations = 0;
+      do {
+        prevContent = editorContent;
+        iterations++;
+        // Remove <p></p> tags with only whitespace or <br> inside
+        editorContent = editorContent.replace(/<p>\s*<\/p>/g, '');
+        editorContent = editorContent.replace(/<p><br\s*\/?><\/p>/g, '');
+        editorContent = editorContent.replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, '');
+        
+        // Remove <p> tags containing ONLY empty formatting tags + br (inside list items)
+        // Matches: <p><b></b><br></p>, <p><strong></strong><br></p>, <p><b><br></b></p>, etc
+        editorContent = editorContent.replace(/<p>\s*<(?:b|strong|em|i|u|span)[^>]*>\s*<\/(?:b|strong|em|i|u|span)>\s*<br\s*\/?>\s*<\/p>/g, '');
+        editorContent = editorContent.replace(/<p>\s*<(?:b|strong|em|i|u|span)[^>]*>\s*<br\s*\/?>\s*<\/(?:b|strong|em|i|u|span)>\s*<\/p>/g, '');
+        
+      } while (editorContent !== prevContent && iterations < 5);
+      
+      // CRITICAL: Fix image src to use relative paths for export
+      // Replace all file:// URLs and absolute paths with relative assets/ paths
+      // First, handle file:// protocol paths
+      editorContent = editorContent.replace(/src="file:\/\/\/[^"]*?\/([^\/]+)"(?=[^>]*>)/g, 'src="assets/$1"');
+      // Also handle Windows-style absolute paths
+      editorContent = editorContent.replace(/src="[A-Z]:[\/\\][^"]*?\/([^\/\\]+)"(?=[^>]*>)/g, 'src="assets/$1"');
+      // Also handle any remaining long paths with /assets/ in them - just take from /assets/ onward
+      editorContent = editorContent.replace(/src="[^"]*?(\/assets\/[^"]*)"(?=[^>]*>)/g, 'src="$1"');
+      
+      // Ensure data-original-src matches src for consistency
+      editorContent = editorContent.replace(/(<img[^>]*src="([^"]*?)"[^>]*)data-original-src="[^"]*?"(?=[^>]*>)/g, '$1data-original-src="$2"');
+      
+      // Replace absolute file:// paths with relative paths (for backwards compatibility)
       editorContent = editorContent.replace(/file:\/\/\/[A-Za-z]:[\/\\]Filen[\/\\]Personal[\/\\]Website[\/\\]/g, '');
       // Also handle forward slashes in Windows paths
       editorContent = editorContent.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
+      
+      // Get heading color from localStorage
+      const savedHeadingColor = localStorage.getItem('mdEditorHeadingColor') || '#000000';
       
       // Create standalone HTML file with embedded content
       const htmlDoc = `<!DOCTYPE html>
@@ -1553,6 +1645,7 @@
       font-weight: 600; 
       margin-top: 0.8em;
       margin-bottom: 0.3em;
+      color: ${savedHeadingColor};
     }
     h1 { font-size: 1.5em; }
     h2 { font-size: 1.3em; }
@@ -1615,6 +1708,8 @@
       padding: 6px 10px; 
       text-align: left; 
       vertical-align: top;
+      height: 24px;
+      line-height: 1.2;
     }
     thead th { 
       background: rgba(196, 127, 9, 0.08); 
@@ -1951,6 +2046,25 @@ renderMathInElement(document.body, {
 
     // Keyboard shortcuts
     editor.addEventListener('keydown', (e) => {
+      // CRITICAL: Handle Enter in list items to prevent <p> tag wrapping
+      if (e.key === 'Enter') {
+        const selection = window.getSelection();
+        if (selection.rangeCount) {
+          const range = selection.getRangeAt(0);
+          let node = range.startContainer;
+          
+          // Check if we're inside a list item
+          while (node && node !== editor) {
+            if (node.nodeType === 1 && node.tagName === 'LI') {
+              // We're in a list item - let browser handle it but don't prevent
+              // The input event will clean up any stray <p> tags
+              return;
+            }
+            node = node.parentNode;
+          }
+        }
+      }
+      
       // Handle Tab/Shift+Tab for list indentation
       if (e.key === 'Tab') {
         const selection = window.getSelection();
@@ -2045,12 +2159,67 @@ renderMathInElement(document.body, {
           e.preventDefault();
           mergeAdjacentLists();
           saveToHistory();
+        } else if ((e.key === 'c' || e.key === 'C' || e.key === 'С' || e.key === 'с') && e.altKey) {
+          e.preventDefault();
+          // Apply last used text color
+          const lastColor = localStorage.getItem('mdEditorTextColor') || '#1f2937';
+          applyFormatting('color', lastColor);
+          saveToHistory();
+        }
+      }
+    });
+
+    // CRITICAL: Prevent browser from wrapping list content in <p> tags
+    // This event fires BEFORE the change is made, allowing us to prevent it
+    editor.addEventListener('beforeinput', (e) => {
+      if (e.inputType === 'insertParagraph') {
+        // Check if we're in a list item
+        const selection = window.getSelection();
+        if (selection.rangeCount) {
+          const range = selection.getRangeAt(0);
+          let node = range.startContainer;
+          
+          while (node && node !== editor) {
+            if (node.nodeType === 1 && node.tagName === 'LI') {
+              // We're in a list item - don't prevent, let browser handle it
+              // But the input event will clean up any unwanted tags
+              return;
+            }
+            node = node.parentNode;
+          }
         }
       }
     });
 
     // Save to history on input and detect "---" for horizontal rule
     editor.addEventListener('input', () => {
+      // SAFE: Only remove completely empty <p> tags
+      let cleanedHtml = editor.innerHTML;
+      cleanedHtml = cleanedHtml.replace(/<p>\s*<\/p>/g, '');
+      
+      // If HTML changed, update editor (preserve cursor position)
+      if (cleanedHtml !== editor.innerHTML) {
+        const sel = window.getSelection();
+        const range = sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
+        const offset = range ? range.startOffset : 0;
+        const container = range ? range.startContainer : null;
+        
+        editor.innerHTML = cleanedHtml;
+        
+        // Try to restore cursor position
+        if (container && editor.contains(container)) {
+          try {
+            const newRange = document.createRange();
+            newRange.setStart(container, Math.min(offset, container.length || 0));
+            newRange.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(newRange);
+          } catch (e) {
+            // Ignore cursor restoration errors
+          }
+        }
+      }
+      
       if (editor.textContent.trim().length > 0) {
         // Debounce history saving
         clearTimeout(editor.historyTimeout);
@@ -2147,18 +2316,43 @@ renderMathInElement(document.body, {
       range.deleteContents();
       
       if (inListItem) {
-        // Special handling for list items - just paste text content
-        // Get all text from pasted content
-        let pastedText = '';
+        // Special handling for list items - preserve HTML structure but flatten to inline
+        // Get all content from pasted, converting blocks to inline with preserved whitespace
+        let pastedHtml = '';
         const processNode = (n) => {
           if (n.nodeType === 3) {
-            pastedText += n.textContent;
+            // Text node - preserve all whitespace including indents
+            pastedHtml += n.textContent;
           } else if (n.nodeType === 1) {
-            if (n.tagName === 'P' || n.tagName === 'DIV') {
-              if (pastedText) pastedText += '\n';
-            }
-            for (let child of n.childNodes) {
-              processNode(child);
+            const tag = n.tagName.toLowerCase();
+            // For block elements, add them with proper spacing but keep inline formatting
+            if (tag === 'p' || tag === 'div') {
+              if (pastedHtml && !pastedHtml.endsWith('\n')) pastedHtml += '\n';
+              for (let child of n.childNodes) {
+                processNode(child);
+              }
+              pastedHtml += '\n';
+            } else if (tag === 'li') {
+              // Preserve list item content
+              if (pastedHtml && !pastedHtml.endsWith('\n')) pastedHtml += '\n';
+              for (let child of n.childNodes) {
+                processNode(child);
+              }
+            } else if (tag === 'br') {
+              pastedHtml += '\n';
+            } else if (tag === 'strong' || tag === 'b') {
+              pastedHtml += '<strong>' + n.innerHTML + '</strong>';
+            } else if (tag === 'em' || tag === 'i') {
+              pastedHtml += '<em>' + n.innerHTML + '</em>';
+            } else if (tag === 'code') {
+              pastedHtml += '<code>' + n.innerHTML + '</code>';
+            } else if (tag === 'u') {
+              pastedHtml += '<u>' + n.innerHTML + '</u>';
+            } else {
+              // For other elements, just process children
+              for (let child of n.childNodes) {
+                processNode(child);
+              }
             }
           }
         };
@@ -2168,11 +2362,11 @@ renderMathInElement(document.body, {
           tempDiv.removeChild(tempDiv.firstChild);
         }
         
-        // Insert the text into the list item
-        if (pastedText) {
-          const textNode = document.createTextNode(pastedText);
-          range.insertNode(textNode);
-          range.setStartAfter(textNode);
+        // Insert the content into the list item, preserving formatting
+        if (pastedHtml) {
+          const fragment = document.createRange().createContextualFragment(pastedHtml);
+          range.insertNode(fragment);
+          range.setStartAfter(fragment);
           range.collapse(true);
         }
       } else {
@@ -2625,80 +2819,63 @@ renderMathInElement(document.body, {
       while (i < lines.length && iterations < MAX_ITERATIONS) {
         iterations++;
         const line = lines[i];
+        // IGNORE completely empty lines inside lists (prevents <p><br></p> between <li>)
+        if (!line.trim()) {
+          i++;
+          continue;
+        }
         // Match list items - allow empty content after marker
         const match = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)$/);
-        
-        if (!match) {
-          console.log('Line', i, 'does not match list pattern, breaking. Line:', line);
-          console.log('Line char codes:', Array.from(line.substring(0, 20)).map(c => `${c}=${c.charCodeAt(0)}`).join(' '));
-          break;
-        }
-        
+        if (!match) break;
         const indent = match[1].length;
         const level = Math.floor(indent / 2); // 2 spaces = 1 level
         const marker = match[2];
         const content = match[3];
         const tag = /^\d+\.$/.test(marker) ? 'ol' : 'ul';
-        
-        console.log('Processing list item:', {line: i, indent, level, marker, tag, content});
-        
+
         // Close deeper levels
         while (stack.length > 0 && stack[stack.length - 1].level > level) {
           const last = stack.pop();
           html += '</' + last.tag + '></li>';
-          console.log('Closed deeper level:', last);
         }
-        
+
         // Close same level if different tag type
         if (stack.length > 0 && stack[stack.length - 1].level === level && stack[stack.length - 1].tag !== tag) {
           const last = stack.pop();
           html += '</' + last.tag + '>';
           stack.push({ tag, level });
           html += '<' + tag + '>';
-          console.log('Changed tag type from', last.tag, 'to', tag);
         }
-        
+
         // Open new level if needed
         if (stack.length === 0 || stack[stack.length - 1].level < level) {
           stack.push({ tag, level });
           html += '<' + tag + '>';
-          console.log('Opened new level:', tag, 'at level', level);
         }
-        
+
         // Add list item
         html += '<li>' + applyInlineFormatting(content);
-        
-        // Peek at next line
+
+        // Peek ahead to see if next line is a deeper indent (nested list)
         const nextLine = i + 1 < lines.length ? lines[i + 1] : null;
         const nextMatch = nextLine ? nextLine.match(/^(\s*)([-*]|\d+\.)\s/) : null;
         const nextLevel = nextMatch ? Math.floor(nextMatch[1].length / 2) : -1;
-        
-        console.log('Next level:', nextLevel, 'current level:', level);
-        
-        // Close </li> only if next item is not deeper
+
+        // If next line is deeper, do not close </li> yet (nested list will be inside this <li>)
         if (nextLevel <= level) {
           html += '</li>';
-          console.log('Closed </li>');
         }
-        
+
         i++;
       }
-      
-      if (iterations >= MAX_ITERATIONS) {
-        console.error('processListBlock: MAX_ITERATIONS reached! Possible infinite loop prevented.');
-      }
-      
-      // Close all remaining tags
-      console.log('Closing remaining tags, stack length:', stack.length);
+
+      // Close all remaining open lists
       while (stack.length > 0) {
         const last = stack.pop();
         html += '</' + last.tag + '>';
         if (stack.length > 0) html += '</li>';
-        console.log('Closed tag:', last.tag);
       }
-      
-      console.log('processListBlock result:', html);
-      
+
       return { html, nextIndex: i };
     }
 
@@ -2790,18 +2967,107 @@ renderMathInElement(document.body, {
             if (!r.ok) throw new Error('HTTP ' + r.status);
             return r.text();
           })
-          .then(markdown => {
-            // Convert markdown to HTML
+          .then(content => {
+            // Determine if it's HTML or Markdown based on file extension
+            const fileName = decodedPath.split('/').pop();
+            const isHtmlFile = fileName.endsWith('.html');
+            
             isLoadingFile = true;
-            const html = markdownToHtml(markdown);
+            let html = '';
+            
+            if (isHtmlFile) {
+              // It's HTML - extract ONLY what's between <body> tags, NOT the <head>
+              const bodyMatch = content.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+              if (bodyMatch) {
+                html = bodyMatch[1];
+              } else {
+                // Fallback: if no body tags, this is probably a corrupted file
+                // Try to extract everything after </head> or <body> markers
+                const headEndMatch = content.match(/<\/head\s*>/i);
+                if (headEndMatch) {
+                  // Find everything after </head>
+                  const headEndIndex = headEndMatch.index + headEndMatch[0].length;
+                  let afterHead = content.substring(headEndIndex);
+                  // Remove opening <body> tag if present
+                  afterHead = afterHead.replace(/^<body[^>]*>/i, '');
+                  // Remove closing tags
+                  afterHead = afterHead.replace(/<\/body\s*>[\s\S]*$/i, '');
+                  html = afterHead;
+                } else {
+                  // Last resort - use empty content
+                  html = '';
+                }
+              }
+              
+              // REMOVE ALL <br> tags between list items - this fixes the indent list problem
+              // Loop until no more <br> tags found between list elements
+              let prevHtml;
+              do {
+                prevHtml = html;
+                // Remove <br> between any list-related closing and opening tags
+                html = html.replace(/<\/(li|ul|ol)>\s*<br\s*\/?>\s*</gi, '</$1><');
+              } while (html !== prevHtml);
+              
+              // Also remove leading empty <br> and whitespace
+              html = html.replace(/^\s*<br\s*\/?>\s*/i, '');
+              // CRITICAL: Remove all block-level tags that shouldn't be in contenteditable
+              // Keep only formatting tags: strong, em, u, code, a, img, li, ul, ol, h1-h4, blockquote, table
+              // Remove: p, div, span, style, meta, script, head, body, html, link, etc.
+              
+              // First, unwrap <p> tags - keep content but remove the tag itself
+              html = html.replace(/<\/?p[^>]*>/gi, '');
+              
+              // Remove <div> tags but keep content
+              html = html.replace(/<\/?div[^>]*>/gi, '');
+              
+              // Remove <span> tags but keep content
+              html = html.replace(/<\/?span[^>]*>/gi, '');
+              
+              // Remove ALL <style> blocks
+              html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
+              
+              // Remove ALL <script> blocks
+              html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
+              
+              // Remove <meta> tags
+              html = html.replace(/<meta[^>]*>/gi, '');
+              
+              // Remove <link> tags
+              html = html.replace(/<link[^>]*>/gi, '');
+              
+              // Remove <title> tags
+              html = html.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, '');
+              
+              // Remove <head> tags
+              html = html.replace(/<\/?head[^>]*>/gi, '');
+              
+              // Remove <html> tags
+              html = html.replace(/<\/?html[^>]*>/gi, '');
+            } else {
+              // It's Markdown - convert to HTML
+              html = markdownToHtml(content);
+            }
+            
             editor.innerHTML = html;
-            setTimeout(() => { isLoadingFile = false; }, 100); // Reset after load
-            history = [html];
+            
+            // CRITICAL: After setting innerHTML, remove all <br> tags that are between list items
+            // This prevents visual empty lines that appear when editing
+            let editorHtml = editor.innerHTML;
+            let prevEditorHtml;
+            do {
+              prevEditorHtml = editorHtml;
+              // Remove <br> between list-related tags
+              editorHtml = editorHtml.replace(/<\/(li|ul|ol)>\s*<br\s*\/?>\s*</gi, '</$1><');
+            } while (editorHtml !== prevEditorHtml);
+            
+            editor.innerHTML = editorHtml;
+            
+            setTimeout(() => { isLoadingFile = false; }, 100);
+            history = [editorHtml];
             historyIndex = 0;
             
             // Update page title
-            const fileName = decodedPath.split('/').pop();
-            document.title = fileName.replace(/\.(md|txt)$/i, '') + ' — Markdown Editor';
+            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' — Markdown Editor';
           })
           .catch(err => {
             const isFile = window.location.protocol === 'file:';
@@ -2830,6 +3096,35 @@ renderMathInElement(document.body, {
       editor.saveTimeout = setTimeout(() => {
         localStorage.setItem('mdEditorContent', editor.innerHTML);
       }, 2000);
+    });
+
+    // Table context menu
+    // Edit table button - copy table and open Tables Generator
+
+    // Function to import table from clipboard
+    function importTableFromClipboard() {
+      navigator.clipboard.readText().then(html => {
+        // Check if it's a table
+        if (html.includes('<table')) {
+          const fragment = document.createRange().createContextualFragment(html);
+          const range = window.getSelection().getRangeAt(0);
+          range.insertNode(fragment);
+          saveToHistory();
+          alert('Table imported successfully!');
+        } else {
+          alert('Clipboard does not contain a table. Please copy HTML table from tablesgenerator.com');
+        }
+      }).catch(err => {
+        console.error('Failed to read clipboard:', err);
+      });
+    }
+
+    // Add keyboard shortcut for importing: Ctrl+Shift+V
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'V') {
+        e.preventDefault();
+        importTableFromClipboard();
+      }
     });
   </script>
 </body>

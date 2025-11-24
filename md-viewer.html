@@ -30,6 +30,7 @@
       display: flex;
       flex-direction: column;
       min-height: 100vh;
+      font-size: 1em;
     }
     header {
       position: sticky; top: 0; z-index: 10;
@@ -52,34 +53,50 @@
       padding: 8px 12px; border-radius: 6px; text-decoration: none;
       background: #eef2ff; color: var(--link); border: 1px solid #c7d2fe;
     }
+    header button.btn {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 12px; border-radius: 6px;
+      background: #eef2ff; color: var(--link); border: 1px solid #c7d2fe;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 14px;
+    }
+    header button.btn:hover {
+      background: #e0e7ff;
+      color: var(--link-hover);
+    }
     header a.btn:nth-child(3) {
       display: none;
     }
     header a.btn:hover { background: #e0e7ff; color: var(--link-hover); }
     main { max-width: 1700px; margin: 0 auto; padding: 3px 3px; flex: 1; width: 100%; margin-top: 25px; }
 
-    .markdown-body h1, .markdown-body h2, .markdown-body h3 {
-      color: #92400e; margin-top: 1.2em; margin-bottom: 0.5em; font-weight: 600;
+    .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
+      margin-top: 0.05em; margin-bottom: 0.05em; font-weight: 600;
     }
     .markdown-body h1 { font-size: 1.7em; }
     .markdown-body h2 { font-size: 1.4em; }
-    .markdown-body h3 { font-size: 1.2em; }
-    .markdown-body p { margin: 0.5em 0; }
+    .markdown-body h3 { font-size: 1.2em;}
+    .markdown-body h4 { font-size: 1.05em;}
+    .markdown-body p { margin: 0.5em; }
     .markdown-body a { color: var(--link); text-decoration: underline; }
     .markdown-body a:hover { color: var(--link-hover); }
+
+    /* Add padding to content so h1 doesn't hide under fixed header */
+    #content { padding-top: 20px; }
 
     /* Tables: make horizontally scrollable on small screens */
     .table-scroll { overflow-x: auto; margin: 0.5em 0; }
     .table-scroll table { min-width: 560px; }
 
-    .markdown-body table { width: 100%; border-collapse: collapse; margin: 0.75em 0; }
-    .markdown-body th, .markdown-body td { border: 1px solid #e5e7eb; padding: 6px 10px; text-align: left; vertical-align: top; }
-    .markdown-body thead th { background: #f3f4f6; }
-    .markdown-body tbody tr:nth-child(odd) { background: #fafafa; }
+    .markdown-body table { width: 100%; border-collapse: collapse; margin: 0.2em 0; table-layout: auto; }
+    .markdown-body th, .markdown-body td { border: 1px solid rgba(146, 64, 14, 0.35); padding: 6px 10px; text-align: left; vertical-align: top; height: 24px; line-height: 1.2; }
+    .markdown-body thead th { background: rgba(196, 127, 9, 0.08); font-weight: 600; }
+    .markdown-body tbody tr:nth-child(odd) { background: rgba(146, 64, 14, 0.03); }
 
     pre, code { font-family: Consolas, 'Courier New', monospace; }
-    pre { background: #f8fafc; padding: 12px; border-radius: 6px; overflow-x: auto; }
-    code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; }
+    pre { background: var(--bg); padding: 12px; border-radius: 6px; overflow-x: auto; border: 1px solid var(--border); color: var(--fg); }
+    code { background: var(--bg); padding: 2px 6px; border-radius: 4px; color: var(--fg); }
 
     @media (max-width: 768px) {
       main { padding: 12px; }
@@ -102,6 +119,10 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>
       Изтегли
     </a>
+    <button id="fontSizeBtn" class="btn" title="Увеличи размер на текста">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="bold">A</text></svg>
+      A+
+    </button>
   </header>
   <main>
     <div id="content" class="markdown-body">Зареждане…</div>
@@ -336,6 +357,19 @@
           const root = document.getElementById('content');
           root.innerHTML = html;
           
+          // Fix image paths to work from md-viewer location
+          // Images in exported HTML have relative paths like "assets/БТЕ-Фиг1.png"
+          // We need to prepend the directory of the loaded file (where assets/ folder is)
+          const fileDir = decodedPath.substring(0, decodedPath.lastIndexOf('/') + 1);
+          root.querySelectorAll('img').forEach(img => {
+            let src = img.getAttribute('src');
+            
+            // Fix src attribute - if it starts with "assets/", prepend the file directory
+            if (src && src.startsWith('assets/')) {
+              img.setAttribute('src', fileDir + src);
+            }
+          });
+          
           // Render LaTeX with auto-render - simple and direct
           if (typeof renderMathInElement !== 'undefined') {
             try {
@@ -372,6 +406,43 @@
           document.getElementById('content').innerHTML = '<p style="color:#b91c1c">Грешка при зареждане: '+(err && err.message ? err.message : err)+'</p>'+hint;
         });
     })();
+    
+    // Font size control - outside IIFE so it works immediately
+    const fontSizeBtn = document.getElementById('fontSizeBtn');
+    const contentDiv = document.getElementById('content');
+    
+    // Load saved font size from localStorage
+    const savedFontSize = localStorage.getItem('mdViewerFontSize');
+    if (savedFontSize && contentDiv) {
+      contentDiv.style.fontSize = savedFontSize;
+    }
+    
+    // Font size increment levels
+    const fontSizes = ['1em', '1.1em', '1.2em', '1.3em', '1.4em'];
+    let currentSizeIndex = fontSizes.findIndex(size => {
+      if (savedFontSize) return size === savedFontSize;
+      return size === '1em'; // Default
+    });
+    if (currentSizeIndex === -1) currentSizeIndex = 0;
+    
+    fontSizeBtn.addEventListener('click', () => {
+      currentSizeIndex = (currentSizeIndex + 1) % fontSizes.length;
+      const newSize = fontSizes[currentSizeIndex];
+      
+      contentDiv.style.fontSize = newSize;
+      
+      // Save to localStorage
+      localStorage.setItem('mdViewerFontSize', newSize);
+      
+      // Visual feedback
+      fontSizeBtn.style.transform = 'scale(1.1)';
+      setTimeout(() => {
+        fontSizeBtn.style.transform = 'scale(1)';
+      }, 200);
+    });
+    
+    // Add transition to button
+    fontSizeBtn.style.transition = 'transform 0.2s ease';
   </script>
 </body>
 </html>
