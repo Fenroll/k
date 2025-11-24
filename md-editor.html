@@ -1528,6 +1528,10 @@ renderMathInElement(document.body, {
           e.preventDefault();
           document.execCommand('italic', false, null);
           saveToHistory();
+        } else if (e.key === 's' || e.key === 'S' || е.key == "с"|| е.key == "С") {
+          e.preventDefault();
+          // Open save modal (same as download button)
+          document.getElementById('saveFileModal').style.display = 'block';
         } else if (e.key === '`') {
           e.preventDefault();
           document.execCommand('formatBlock', false, 'code');
