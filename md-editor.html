@@ -715,7 +715,50 @@
     function insertFormat(tag) {
       const selection = window.getSelection();
       if (selection.toString().length > 0) {
-        document.execCommand('formatBlock', false, tag);
+        const range = selection.getRangeAt(0);
+        let node = range.commonAncestorContainer;
+        
+        // Find the closest block element (heading, paragraph, etc.)
+        while (node && node !== editor) {
+          if (node.nodeType === 1) {
+            const nodeName = node.tagName.toLowerCase();
+            // If node is a heading or paragraph
+            if (['h1', 'h2', 'h3', 'h4', 'p'].includes(nodeName)) {
+              // Toggle: if same tag, convert to p; otherwise convert to requested tag
+              const targetTag = (nodeName === tag) ? 'p' : tag;
+              
+              // Create new element with the target tag
+              const newElement = document.createElement(targetTag);
+              
+              // Move all children from old element to new element
+              while (node.firstChild) {
+                newElement.appendChild(node.firstChild);
+              }
+              
+              // Replace old element with new element
+              node.parentNode.replaceChild(newElement, node);
+              
+              // Restore selection
+              selection.removeAllRanges();
+              range.selectNodeContents(newElement);
+              selection.addRange(range);
+              
+              return; // Exit after handling the block element
+            }
+          }
+          node = node.parentNode;
+        }
+        
+        // If no heading/paragraph found, wrap selected text in new element
+        const selectedContent = range.extractContents();
+        const newElement = document.createElement(tag);
+        newElement.appendChild(selectedContent);
+        range.insertNode(newElement);
+        
+        // Restore selection
+        selection.removeAllRanges();
+        range.selectNodeContents(newElement);
+        selection.addRange(range);
       }
     }
 
@@ -1553,6 +1596,47 @@ renderMathInElement(document.body, {
       }
     });
 
+    // Handle paste events - convert markdown to HTML and insert
+    editor.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const text = e.clipboardData.getData('text/plain');
+      
+      // Get current selection
+      const selection = window.getSelection();
+      if (selection.rangeCount === 0) return;
+      
+      const range = selection.getRangeAt(0);
+      
+      // Convert markdown to HTML
+      const html = markdownToHtml(text);
+      
+      // Create temporary container with the HTML
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = html;
+      
+      // Delete current selection
+      range.deleteContents();
+      
+      // Move all children from tempDiv into the range in order
+      let lastNode = null;
+      while (tempDiv.firstChild) {
+        const node = tempDiv.firstChild;
+        range.insertNode(node);
+        lastNode = node;
+        range.setStartAfter(node);
+      }
+      
+      // Move cursor after all inserted content
+      if (lastNode) {
+        range.setStartAfter(lastNode);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      
+      // Trigger input event to save history
+      editor.dispatchEvent(new Event('input', { bubbles: true }));
+    });
     // Click handler for links (Ctrl+Click to open)
     editor.addEventListener('click', (e) => {
       // Check if clicking on a link
