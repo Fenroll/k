@@ -536,6 +536,21 @@
     </div>
 
     <div class="toolbar-group">
+      <label for="fontSizeControl" style="margin-right: 8px; display: inline-flex; align-items: center; gap: 6px;">
+        <span style="font-size: 0.9em;">Size:</span>
+        <input type="range" id="fontSizeControl" min="12" max="20" value="16" style="width: 80px; cursor: pointer;">
+        <span id="fontSizeDisplay" style="font-size: 0.9em; min-width: 30px;">16px</span>
+      </label>
+    </div>
+
+    <div class="toolbar-group">
+      <label for="textColorControl" style="margin-right: 8px; display: inline-flex; align-items: center; gap: 6px;">
+        <span style="font-size: 0.9em;">Color:</span>
+        <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 34px; cursor: pointer; border: none; border-radius: 4px;">
+      </label>
+    </div>
+
+    <div class="toolbar-group">
       <button id="openLocalBtn" title="Open .md file from computer">📂 Open Local</button>
       <button id="openCoursesBtn" title="Open .md file from courses">📚 Open Courses</button>
     </div>
@@ -864,6 +879,71 @@
       }
     });
 
+    // Font Size Control
+    document.getElementById('fontSizeControl').addEventListener('input', (e) => {
+      const size = e.target.value;
+      applyFormatting('fontSize', size);
+      document.getElementById('fontSizeDisplay').textContent = size + 'px';
+    });
+
+    // Text Color Control
+    document.getElementById('textColorControl').addEventListener('input', (e) => {
+      const color = e.target.value;
+      applyFormatting('color', color);
+    });
+
+    // Apply formatting to selected text
+    function applyFormatting(property, value) {
+      const selection = window.getSelection();
+      
+      // If no selection or selection is in editor
+      if (!selection.toString() || !editor.contains(selection.anchorNode)) {
+        alert('Моля, избери текст първо');
+        return;
+      }
+
+      // Get the selected content
+      const range = selection.getRangeAt(0);
+      const selectedContent = range.extractContents();
+      
+      // Create a span with the formatting
+      const span = document.createElement('span');
+      
+      if (property === 'fontSize') {
+        span.style.fontSize = value + 'px';
+      } else if (property === 'color') {
+        span.style.color = value;
+      } else if (property === 'lineHeight') {
+        span.style.lineHeight = value;
+      }
+      
+      span.appendChild(selectedContent);
+      range.insertNode(span);
+      
+      // Restore selection
+      selection.removeAllRanges();
+      range.selectNodeContents(span);
+      selection.addRange(range);
+      
+      // Mark as modified
+      saveToHistory();
+    }
+
+    // Load saved default preferences on page load
+    window.addEventListener('load', () => {
+      const savedFontSize = localStorage.getItem('mdEditorFontSize');
+      const savedTextColor = localStorage.getItem('mdEditorTextColor');
+
+      if (savedFontSize) {
+        document.getElementById('fontSizeControl').value = savedFontSize;
+        document.getElementById('fontSizeDisplay').textContent = savedFontSize + 'px';
+      }
+
+      if (savedTextColor) {
+        document.getElementById('textColorControl').value = savedTextColor;
+      }
+    });
+
     document.getElementById('downloadBtn').addEventListener('click', () => {
       // Populate modal with current file info
       document.getElementById('fileNumberInput').value = currentFileInfo.number || '';
@@ -1124,6 +1204,13 @@
       // Clean the name: remove .html, .md, .txt extensions
       const cleanName = name.replace(/\.(html|md|txt)$/i, '');
       
+      // Convert absolute image paths to relative paths
+      let editorContent = editor.innerHTML;
+      // Replace absolute file:// paths with relative paths
+      editorContent = editorContent.replace(/file:\/\/\/[A-Za-z]:[\/\\]Filen[\/\\]Personal[\/\\]Website[\/\\]/g, '');
+      // Also handle forward slashes in Windows paths
+      editorContent = editorContent.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
+      
       // Create standalone HTML file with embedded content
       const htmlDoc = `<!DOCTYPE html>
 <html lang="bg">
@@ -1142,7 +1229,6 @@
       color: #1f2937; 
     }
     h1, h2, h3, h4 { 
-      color: #92400e; 
       font-weight: 600; 
       margin-top: 0.8em;
       margin-bottom: 0.3em;
@@ -1246,7 +1332,7 @@
   </style>
 </head>
 <body>
-${editor.innerHTML}
+${editorContent}
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"><\/script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"><\/script>
 <script>
