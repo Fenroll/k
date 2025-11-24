@@ -357,18 +357,9 @@
           const root = document.getElementById('content');
           root.innerHTML = html;
           
-          // Fix image paths to work from md-viewer location
-          // Images in exported HTML have relative paths like "assets/БТЕ-Фиг1.png"
-          // We need to prepend the directory of the loaded file (where assets/ folder is)
-          const fileDir = decodedPath.substring(0, decodedPath.lastIndexOf('/') + 1);
-          root.querySelectorAll('img').forEach(img => {
-            let src = img.getAttribute('src');
-            
-            // Fix src attribute - if it starts with "assets/", prepend the file directory
-            if (src && src.startsWith('assets/')) {
-              img.setAttribute('src', fileDir + src);
-            }
-          });
+          // Images now use relative paths like "assets/image.png" which resolve correctly
+          // from md-viewer.html location since all assets are in the central assets/ folder
+          // No path fixing needed!
           
           // Render LaTeX with auto-render - simple and direct
           if (typeof renderMathInElement !== 'undefined') {

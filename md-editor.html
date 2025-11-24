@@ -1605,19 +1605,12 @@
       } while (editorContent !== prevContent && iterations < 5);
       
       // CRITICAL: Fix image src to use relative paths for export
-      // Replace all file:// URLs and absolute paths with relative assets/ paths
-      // First, handle file:// protocol paths
-      editorContent = editorContent.replace(/src="file:\/\/\/[^"]*?\/([^\/]+)"(?=[^>]*>)/g, 'src="assets/$1"');
-      // Also handle Windows-style absolute paths
-      editorContent = editorContent.replace(/src="[A-Z]:[\/\\][^"]*?\/([^\/\\]+)"(?=[^>]*>)/g, 'src="assets/$1"');
-      // Also handle any remaining long paths with /assets/ in them - just take from /assets/ onward
-      editorContent = editorContent.replace(/src="[^"]*?(\/assets\/[^"]*)"(?=[^>]*>)/g, 'src="$1"');
+      // Extract path starting from "assets/" and use it as the relative path
+      // This handles both file:// and Windows absolute paths
+      editorContent = editorContent.replace(/src="[^"]*?(assets\/[^"]*)"(?=[^>]*>)/g, 'src="$1"');
       
       // Ensure data-original-src matches src for consistency
       editorContent = editorContent.replace(/(<img[^>]*src="([^"]*?)"[^>]*)data-original-src="[^"]*?"(?=[^>]*>)/g, '$1data-original-src="$2"');
-      
-      // Replace absolute file:// paths with relative paths (for backwards compatibility)
-      editorContent = editorContent.replace(/file:\/\/\/[A-Za-z]:[\/\\]Filen[\/\\]Personal[\/\\]Website[\/\\]/g, '');
       // Also handle forward slashes in Windows paths
       editorContent = editorContent.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
       
