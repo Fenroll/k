@@ -177,14 +177,6 @@
       margin: 0.15em 0;
     }
 
-    #editor ul ul {
-      list-style-type: circle;
-    }
-
-    #editor ul ul ul {
-      list-style-type: square;
-    }
-
     #editor strong {
       font-weight: 600;
     }
@@ -540,7 +532,7 @@
   </div>
 
   <!-- Hidden file input for local file opening -->
-  <input type="file" id="fileInput" accept=".md,.txt,.html" style="display:none;">
+  <input type="file" id="fileInput" accept=".md,.txt" style="display:none;">
 
   <!-- Editor -->
   <div class="editor-container">
@@ -549,7 +541,26 @@
     </div>
   </div>
 
+  <!-- Raw code button -->
+  <button class="raw-code-btn" id="rawCodeBtn" title="Show Raw Code">{ }</button>
 
+  <!-- Raw code modal -->
+  <div class="modal" id="rawCodeModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>Raw Markdown Code</h2>
+        <button class="modal-close" id="closeModalBtn">×</button>
+      </div>
+      <div class="modal-body">
+        <textarea class="raw-code" id="rawCodeTextarea" spellcheck="false"></textarea>
+      </div>
+      <div class="modal-footer">
+        <button id="copyBtn">📋 Copy</button>
+        <button class="primary" id="updateBtn">Save</button>
+        <button id="cancelBtn">Cancel</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Shortcuts modal -->
   <div class="modal" id="shortcutsModal">
@@ -632,7 +643,7 @@
           <input type="text" id="fileNameInput" placeholder="e.g., ХОББ, Белодробен карцином" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
         </div>
         <div style="padding: 10px; background: #f3f4f6; border-radius: 4px; font-size: 0.9em; color: #4b5563;">
-          <strong>Preview:</strong> <span id="fileNamePreview" style="color: #92400e; font-family: monospace;">document.html</span>
+          <strong>Preview:</strong> <span id="fileNamePreview" style="color: #92400e; font-family: monospace;">document.md</span>
         </div>
       </div>
       <div class="modal-footer">
@@ -648,12 +659,20 @@
 
   <script>
     const editor = document.getElementById('editor');
+    const rawCodeBtn = document.getElementById('rawCodeBtn');
+    const rawCodeModal = document.getElementById('rawCodeModal');
+    const rawCodeTextarea = document.getElementById('rawCodeTextarea');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const cancelBtn = document.getElementById('cancelBtn');
+    const copyBtn = document.getElementById('copyBtn');
+    const updateBtn = document.getElementById('updateBtn');
     
     const shortcutsBtn = document.getElementById('shortcutsBtn');
     const shortcutsModal = document.getElementById('shortcutsModal');
     const closeShortcutsBtn = document.getElementById('closeShortcutsBtn');
     const closeShortcutsBtn2 = document.getElementById('closeShortcutsBtn2');
 
+    let isRawMode = false;
     let editorContent = '';
     let rawContent = '';
     let originalHtml = '<p>Start typing here...</p>';
@@ -1082,7 +1101,7 @@
       if (number) {
         fileName += number + '-msg-';
       }
-      fileName += (name || 'document') + '.html';
+      fileName += (name || 'document') + '.md';
       
       preview.textContent = fileName;
     }
@@ -1099,141 +1118,24 @@
         return;
       }
       
-      // Create standalone HTML file with embedded content
-      const htmlDoc = `<!DOCTYPE html>
-<html lang="bg">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${name}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <style>
-    body { 
-      font-family: "Open Sans", Arial, sans-serif; 
-      max-width: 900px; 
-      margin: 2rem auto; 
-      padding: 0 1rem; 
-      line-height: 1.6; 
-      color: #1f2937; 
-    }
-    h1, h2, h3, h4 { 
-      color: #92400e; 
-      font-weight: 600; 
-      margin-top: 0.8em;
-      margin-bottom: 0.3em;
-    }
-    h1 { font-size: 1.5em; }
-    h2 { font-size: 1.3em; }
-    h3 { font-size: 1.1em; }
-    h4 { font-size: 1.05em; }
-    h3 + h4 { margin-top: 0.3em; }
-    p { 
-      margin: 0.7em 0; 
-      white-space: pre-wrap;
-    }
-    p + ul, p + ol { margin-top: -0.5em; }
-    h1 + p, h2 + p, h3 + p, h4 + p,
-    h1 + ul, h2 + ul, h3 + ul, h4 + ul,
-    h1 + ol, h2 + ol, h3 + ol, h4 + ol { 
-      margin-top: 0.1em; 
-    }
-    ul, ol { 
-      margin: 0.3em 0; 
-      padding-left: 1.5em; 
-    }
-    li { margin: 0.15em 0; }
-    ul ul { list-style-type: circle; }
-    ul ul ul { list-style-type: square; }
-    strong { font-weight: 600; }
-    em { font-style: italic; }
-    code { 
-      background: rgba(146, 64, 14, 0.1); 
-      padding: 2px 6px; 
-      border-radius: 3px; 
-      font-family: "Courier New", monospace; 
-      font-size: 0.9em; 
-    }
-    pre {
-      background: rgba(255, 255, 255, 0.5);
-      padding: 12px;
-      border-radius: 4px;
-      overflow-x: auto;
-      margin: 0.5em 0;
-      font-family: "Courier New", monospace;
-    }
-    pre code {
-      background: none;
-      padding: 0;
-    }
-    blockquote {
-      border-left: 3px solid #f59e0b;
-      padding-left: 1em;
-      margin: 0.5em 0;
-      font-style: italic;
-      color: #78350f;
-    }
-    table { 
-      border-collapse: collapse; 
-      margin: 0.75em 0; 
-      width: 100%; 
-      table-layout: auto;
-    }
-    th, td { 
-      border: 1px solid rgba(146, 64, 14, 0.35); 
-      padding: 6px 10px; 
-      text-align: left; 
-      vertical-align: top;
-    }
-    thead th { 
-      background: rgba(196, 127, 9, 0.08); 
-      font-weight: 600; 
-    }
-    tbody tr:nth-child(odd) { 
-      background: rgba(146, 64, 14, 0.03); 
-    }
-    img { 
-      max-width: 100%; 
-      height: auto; 
-    }
-    a { 
-      color: #f59e0b; 
-      text-decoration: underline; 
-    }
-    a:hover {
-      color: #d97706;
-    }
-  </style>
-</head>
-<body>
-${editor.innerHTML}
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"><\/script>
-<script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"><\/script>
-<script>
-renderMathInElement(document.body, {
-  delimiters: [
-    {left: '$$', right: '$$', display: true},
-    {left: '$', right: '$', display: false}
-  ]
-});
-<\/script>
-</body>
-</html>`;
-      
-      const blob = new Blob([htmlDoc], { type: 'text/html;charset=utf-8' });
+      const markdown = htmlToMarkdown(editor.innerHTML);
+      const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       
+      // Format: number-msg-filename.md or just msg-filename.md
       let fileName = '';
       if (number) {
-        fileName = number + '-msg-' + name + '.html';
+        fileName = number + '-msg-' + name + '.md';
       } else {
-        fileName = name + '.html';
+        fileName = name + '.md';
       }
       
       link.download = fileName;
       link.click();
       URL.revokeObjectURL(link.href);
       
+      // Close modal
       document.getElementById('saveFileModal').style.display = 'none';
     });
 
@@ -1323,32 +1225,45 @@ renderMathInElement(document.body, {
       return highlighted;
     }
 
+    rawCodeBtn.addEventListener('click', () => {
+      if (!isRawMode) {
+        // Switch to raw mode - show markdown source with syntax highlighting
+        isRawMode = true;
+        originalHtml = editor.innerHTML;
+        rawContent = htmlToMarkdown(originalHtml);
+        
+        // Apply syntax highlighting
+        const highlighted = highlightMarkdown(rawContent);
+        editor.innerHTML = highlighted;
+        editor.contentEditable = 'true';
+        editor.style.fontFamily = "'Courier New', monospace";
+        editor.style.fontSize = '0.9em';
+        editor.style.whiteSpace = 'pre-wrap';
+        rawCodeBtn.style.background = '#d97706';
+        rawCodeBtn.title = 'Switch to formatted view';
+      } else {
+        // Switch to formatted mode - convert raw markdown to HTML
+        isRawMode = false;
+        
+        // Get text content (now it has correct - and * symbols)
+        rawContent = editor.textContent;
+        
+        originalHtml = markdownToHtml(rawContent);
+        editor.innerHTML = originalHtml;
+        editor.style.fontFamily = "'Open Sans', Arial, sans-serif";
+        editor.style.fontSize = '0.95em';
+        editor.style.whiteSpace = 'normal';
+        rawCodeBtn.style.background = '#92400e';
+        rawCodeBtn.title = 'Show raw code';
+      }
+      editor.focus();
+      saveToHistory();
+    });
+
+    // No modal needed - toggle is in editor directly
+
     // Keyboard shortcuts
     editor.addEventListener('keydown', (e) => {
-      // Handle Tab/Shift+Tab for list indentation
-      if (e.key === 'Tab') {
-        const selection = window.getSelection();
-        if (!selection.rangeCount) return;
-        
-        const range = selection.getRangeAt(0);
-        let node = range.startContainer;
-        
-        // Find if we're in a list item
-        while (node && node !== editor) {
-          if (node.nodeType === 1 && node.tagName === 'LI') {
-            e.preventDefault();
-            if (e.shiftKey) {
-              document.execCommand('outdent', false, null);
-            } else {
-              document.execCommand('indent', false, null);
-            }
-            saveToHistory();
-            return;
-          }
-          node = node.parentNode;
-        }
-      }
-      
       if (e.ctrlKey || e.metaKey) {
         if (e.key === 'b') {
           e.preventDefault();
@@ -1382,11 +1297,11 @@ renderMathInElement(document.body, {
           e.preventDefault();
           insertFormat('p');
           saveToHistory();
-        } else if (e.key === 'U' && e.shiftKey) {
+        } else if (e.shiftKey && e.key === 'U') {
           e.preventDefault();
           document.execCommand('insertUnorderedList', false, null);
           saveToHistory();
-        } else if (e.key === 'O' && e.shiftKey) {
+        } else if (e.shiftKey && e.key === 'O') {
           e.preventDefault();
           document.execCommand('insertOrderedList', false, null);
           saveToHistory();
@@ -1727,9 +1642,7 @@ renderMathInElement(document.body, {
           const cells = row.querySelectorAll('td, th');
           markdown += '| ';
           cells.forEach(cell => {
-            // Process cell content and replace newlines with <br>
-            let cellContent = processChildren(cell).replace(/\n/g, '<br>').trim();
-            markdown += cellContent + ' | ';
+            markdown += processChildren(cell).trim() + ' | ';
           });
           markdown += '\n';
           
@@ -1812,7 +1725,7 @@ renderMathInElement(document.body, {
           let tableIterations = 0;
           while (i < lines.length && lines[i].includes('|') && tableIterations < 1000) {
             tableIterations++;
-            const cells = lines[i].split('|').map(c => c.trim()).filter(c => c && !c.match(/^:?-+:?$/));
+            const cells = lines[i].split('|').map(c => c.trim()).filter(c => c && !c.match(/^-+$/));
             if (cells.length > 0) {
               tableHtml += '<tr>';
               cells.forEach(cell => {

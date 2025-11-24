@@ -157,7 +157,7 @@ function getAllCourses() {
       '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
       '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg',
       '.zip', '.rar', '.7z',
-      '.txt', '.log', '.md',
+      '.txt', '.log', '.md', '.html',
       '.one', '.onetoc2',
       '.url'
     ];
@@ -228,11 +228,11 @@ function getAllCourses() {
         const filePath = path.join(sectionPath, fileName);
         const fileExt = path.extname(fileName).toLowerCase();
         
-        // Check if it's a msg file (txt, md, or docx with "msg" in name)
-        if ((fileExt === '.txt' || fileExt === '.md' || fileExt === '.docx') && fileName.toLowerCase().includes('msg')) {
-          // Read content for txt and md files
+        // Check if it's a msg file (txt, md, html, or docx with "msg" in name)
+        if ((fileExt === '.txt' || fileExt === '.md' || fileExt === '.html' || fileExt === '.docx') && fileName.toLowerCase().includes('msg')) {
+          // Read content for txt, md, and html files
           let content = '';
-          if (fileExt === '.txt' || fileExt === '.md') {
+          if (fileExt === '.txt' || fileExt === '.md' || fileExt === '.html') {
             content = readTextFile(filePath);
           }
           
@@ -240,7 +240,7 @@ function getAllCourses() {
             name: fileName,
             path: `${relativePath}/${fileName}`,
             content: content,
-            type: fileExt === '.txt' ? 'text' : (fileExt === '.md' ? 'markdown' : 'docx')
+            type: fileExt === '.txt' ? 'text' : (fileExt === '.md' ? 'markdown' : (fileExt === '.html' ? 'html' : 'docx'))
           });
         } else {
           // Regular file
