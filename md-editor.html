@@ -130,10 +130,10 @@
       font-weight: 600;
     }
 
-    #editor h1 { font-size: 1.5em; }
-    #editor h2 { font-size: 1.3em; }
-    #editor h3 { font-size: 1.1em; }
-    #editor h4 { font-size: 1.05em; }
+    #editor h1 { font-size: 1.5em; color: #000000; }
+    #editor h2 { font-size: 1.3em; color: #000000; }
+    #editor h3 { font-size: 1.1em; color: #000000; }
+    #editor h4 { font-size: 1.05em; color: #000000; }
 
     #editor p {
       margin: 0.7em 0;
@@ -233,6 +233,58 @@
       color: #d97706;
     }
 
+    .heading-color-btn {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .heading-color-btn:hover:not(.active) {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .heading-color-btn.active {
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
+      transform: scale(1.05);
+    }
+
+    .heading-color-btn.active:hover {
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
+      transform: scale(1.05);
+    }
+
+    .heading-color-btn:focus,
+    .heading-color-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3) !important;
+      transform: scale(1.05) !important;
+    }
+
+    .text-color-btn {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .text-color-btn:hover:not(.active) {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .text-color-btn.active {
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
+      transform: scale(1.05);
+    }
+
+    .text-color-btn.active:hover {
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
+      transform: scale(1.05);
+    }
+
+    .text-color-btn:focus,
+    .text-color-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3) !important;
+      transform: scale(1.05) !important;
+    }
+
     #editor table {
       border-collapse: collapse;
       margin: 0.75em 0;
@@ -306,7 +358,7 @@
       background: #fff;
       border-radius: 8px;
       width: 100%;
-      max-width: 900px;
+      max-width: 1400px;
       max-height: 80vh;
       display: flex;
       flex-direction: column;
@@ -449,10 +501,6 @@
       display: none;
     }
 
-      font-size: 0.85em;
-      color: #6b7280;
-    }
-
     .file-item.hidden {
       display: none;
     }
@@ -535,18 +583,35 @@
       <button id="redoBtn" title="Redo (Ctrl+Y)">↷ Redo</button>
     </div>
 
+
+
     <div class="toolbar-group">
-      <label for="fontSizeControl" style="margin-right: 8px; display: inline-flex; align-items: center; gap: 6px;">
-        <span style="font-size: 0.9em;">Size:</span>
-        <input type="range" id="fontSizeControl" min="12" max="20" value="16" style="width: 80px; cursor: pointer;">
-        <span id="fontSizeDisplay" style="font-size: 0.9em; min-width: 30px;">16px</span>
+      <label style="margin-right: 8px; display: inline-flex; align-items: center; gap: 6px;">
+        <span style="font-size: 0.9em;">Text Color:</span>
+        <div id="textColorOptions" style="display: inline-flex; gap: 6px;">
+          <button class="text-color-btn" data-color="#dd0a0ab7" title="Red" style="background-color: #dd0a0ab7; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#65a30d" title="Green" style="background-color: #65a30d; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#3b82f6" title="Blue" style="background-color: #3b82f6; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#eab308" title="Yellow" style="background-color: #eab308; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#7c2d12" title="Deep Orange" style="background-color: #7c2d12; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#7e22ce" title="Purple" style="background-color: #7e22ce; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#000000" title="Black" style="background-color: #000000; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 34px; cursor: pointer; border: none; border-radius: 4px; margin-left: 6px;">
+        </div>
       </label>
     </div>
 
     <div class="toolbar-group">
-      <label for="textColorControl" style="margin-right: 8px; display: inline-flex; align-items: center; gap: 6px;">
-        <span style="font-size: 0.9em;">Color:</span>
-        <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 34px; cursor: pointer; border: none; border-radius: 4px;">
+      <label style="margin-right: 8px; display: inline-flex; align-items: center; gap: 6px;">
+        <span style="font-size: 0.9em;">Heading Color:</span>
+        <div id="headingColorOptions" style="display: inline-flex; gap: 6px;">
+          <button class="heading-color-btn" data-color="#000000" title="Black" style="background-color: #000000; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="heading-color-btn" data-color="#1f2937" title="Dark Gray" style="background-color: #1f2937; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="heading-color-btn" data-color="#1e40af" title="Deep Blue" style="background-color: #1e40af; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="heading-color-btn" data-color="#7c2d12" title="Deep Orange" style="background-color: #7c2d12; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="heading-color-btn" data-color="#65a30d" title="Lime Green" style="background-color: #65a30d; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="heading-color-btn" data-color="#7e22ce" title="Purple" style="background-color: #7e22ce; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+        </div>
       </label>
     </div>
 
@@ -608,6 +673,7 @@
         <ul style="list-style: none; padding: 0;">
           <li style="margin: 8px 0;"><strong>Ctrl+Z</strong> - Undo</li>
           <li style="margin: 8px 0;"><strong>Ctrl+Y</strong> or <strong>Ctrl+Shift+Z</strong> - Redo</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+M</strong> - Merge adjacent lists</li>
         </ul>
       </div>
       <div class="modal-footer">
@@ -671,6 +737,74 @@
 
   <script>
     const editor = document.getElementById('editor');
+    
+    // Set up MutationObserver to prevent nested lists
+    const preventNestedLists = () => {
+      // Find all nested OL/UL elements and flatten them
+      const nestedLists = editor.querySelectorAll('ol ol, ol ul, ul ol, ul ul');
+      
+      nestedLists.forEach(nestedList => {
+        const parentLi = nestedList.parentElement;
+        if (parentLi && parentLi.tagName === 'LI') {
+          const grandparent = parentLi.parentElement;
+          
+          // Check if parent LI is already indented (has nested list)
+          // If it does, don't add more nesting - just remove the new nested list
+          
+          // Move all items from nested list to after parent LI
+          const items = Array.from(nestedList.children);
+          items.forEach((item, idx) => {
+            const newItem = item.cloneNode(true);
+            
+            // Remove any nested lists from items to keep them flat
+            const childLists = newItem.querySelectorAll('ol, ul');
+            childLists.forEach(list => list.remove());
+            
+            const nextSibling = parentLi.nextElementSibling;
+            
+            if (nextSibling) {
+              grandparent.insertBefore(newItem, nextSibling);
+            } else {
+              grandparent.appendChild(newItem);
+            }
+          });
+          
+          // Remove the nested list
+          nestedList.remove();
+        }
+      });
+    };
+    
+    // Create observer to watch for nested list creation
+    const observer = new MutationObserver((mutations) => {
+      // Check if any OL or UL elements were added/modified
+      let hasListChanges = false;
+      
+      for (let mutation of mutations) {
+        if (mutation.type === 'childList') {
+          // Check if ol or ul was added
+          for (let node of mutation.addedNodes) {
+            if (node.nodeType === 1 && (node.tagName === 'OL' || node.tagName === 'UL')) {
+              hasListChanges = true;
+              break;
+            }
+          }
+        }
+        if (hasListChanges) break;
+      }
+      
+      // If lists were modified, flatten any nested ones
+      if (hasListChanges) {
+        preventNestedLists();
+      }
+    });
+    
+    // Start observing the editor for changes
+    observer.observe(editor, {
+      childList: true,
+      subtree: true,
+      attributes: false
+    });
     
     const shortcutsBtn = document.getElementById('shortcutsBtn');
     const shortcutsModal = document.getElementById('shortcutsModal');
@@ -922,17 +1056,61 @@
       }
     });
 
-    // Font Size Control
-    document.getElementById('fontSizeControl').addEventListener('input', (e) => {
-      const size = e.target.value;
-      applyFormatting('fontSize', size);
-      document.getElementById('fontSizeDisplay').textContent = size + 'px';
+    // Text Color Control - Preset buttons
+    document.querySelectorAll('.text-color-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const color = btn.dataset.color;
+        applyFormatting('color', color);
+        
+        // Update color picker value
+        document.getElementById('textColorControl').value = color;
+        
+        // Update active button
+        document.querySelectorAll('.text-color-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Remove focus to hide hover state
+        btn.blur();
+      });
     });
 
-    // Text Color Control
+    // Text Color Control - Custom color picker
     document.getElementById('textColorControl').addEventListener('input', (e) => {
       const color = e.target.value;
       applyFormatting('color', color);
+      
+      // Remove active class from preset buttons when using custom color
+      document.querySelectorAll('.text-color-btn').forEach(b => b.classList.remove('active'));
+    });
+
+    // Heading Color Control
+    document.querySelectorAll('.heading-color-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const color = btn.dataset.color;
+        
+        // Update CSS for all headings
+        const style = document.createElement('style');
+        style.id = 'heading-color-style';
+        const existingStyle = document.getElementById('heading-color-style');
+        if (existingStyle) existingStyle.remove();
+        
+        style.textContent = `
+          #editor h1, #editor h2, #editor h3, #editor h4 { color: ${color} !important; }
+        `;
+        document.head.appendChild(style);
+        
+        // Update active button
+        document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Save to localStorage
+        localStorage.setItem('mdEditorHeadingColor', color);
+        
+        // Remove focus to hide hover state
+        btn.blur();
+      });
     });
 
     // Apply formatting to selected text
@@ -945,28 +1123,100 @@
         return;
       }
 
-      // Get the selected content
+      // Work with the range
       const range = selection.getRangeAt(0);
-      const selectedContent = range.extractContents();
       
-      // Create a span with the formatting
-      const span = document.createElement('span');
+      // Instead of cloning and rebuilding, we'll modify in place
+      // Get all nodes within the range
+      const commonAncestor = range.commonAncestorContainer;
       
-      if (property === 'fontSize') {
-        span.style.fontSize = value + 'px';
-      } else if (property === 'color') {
-        span.style.color = value;
-      } else if (property === 'lineHeight') {
-        span.style.lineHeight = value;
-      }
+      // Function to apply formatting to text nodes in a range
+      const applyToRange = (startContainer, startOffset, endContainer, endOffset) => {
+        // Create a list of text nodes to process
+        const textNodes = [];
+        const walker = document.createTreeWalker(
+          commonAncestor.nodeType === 1 ? commonAncestor : commonAncestor.parentNode,
+          NodeFilter.SHOW_TEXT,
+          null,
+          false
+        );
+        
+        let node;
+        let inRange = false;
+        let started = false;
+        let ended = false;
+        
+        while (node = walker.nextNode()) {
+          // Check if node is within range
+          const nodeRange = document.createRange();
+          nodeRange.selectNode(node);
+          
+          const comparison = range.compareBoundaryPoints(Range.START_TO_END, nodeRange);
+          const comparison2 = range.compareBoundaryPoints(Range.END_TO_START, nodeRange);
+          
+          // Node is within range if both comparisons indicate overlap
+          if (comparison >= 0 && comparison2 <= 0) {
+            textNodes.push(node);
+          }
+        }
+        
+        // Apply formatting to each text node
+        textNodes.forEach(textNode => {
+          const parent = textNode.parentNode;
+          
+          // Don't touch block elements - only wrap text
+          if (!parent || ['H1', 'H2', 'H3', 'H4', 'P', 'LI', 'DIV', 'BLOCKQUOTE'].includes(parent.tagName)) {
+            if (parent.tagName === 'SPAN') {
+              // Parent is span, update its style
+              if (property === 'color') {
+                parent.style.color = value;
+              } else if (property === 'fontSize') {
+                parent.style.fontSize = value + 'px';
+              }
+            } else if (parent.tagName === 'LI' || parent.tagName === 'P' || parent.tagName === 'H1' || parent.tagName === 'H2' || parent.tagName === 'H3' || parent.tagName === 'H4') {
+              // Text is direct child of block element, wrap in span
+              const span = document.createElement('span');
+              if (property === 'color') {
+                span.style.color = value;
+              } else if (property === 'fontSize') {
+                span.style.fontSize = value + 'px';
+              }
+              span.textContent = textNode.textContent;
+              parent.replaceChild(span, textNode);
+            }
+          } else {
+            // Handle other inline elements
+            if (parent.tagName === 'SPAN') {
+              if (property === 'color') {
+                parent.style.color = value;
+              } else if (property === 'fontSize') {
+                parent.style.fontSize = value + 'px';
+              }
+            } else {
+              // Wrap in span
+              const span = document.createElement('span');
+              if (property === 'color') {
+                span.style.color = value;
+              } else if (property === 'fontSize') {
+                span.style.fontSize = value + 'px';
+              }
+              span.textContent = textNode.textContent;
+              parent.replaceChild(span, textNode);
+            }
+          }
+        });
+      };
       
-      span.appendChild(selectedContent);
-      range.insertNode(span);
+      applyToRange(range.startContainer, range.startOffset, range.endContainer, range.endOffset);
       
       // Restore selection
       selection.removeAllRanges();
-      range.selectNodeContents(span);
       selection.addRange(range);
+      
+      // Save to localStorage
+      if (property === 'color') {
+        localStorage.setItem('mdEditorTextColor', value);
+      }
       
       // Mark as modified
       saveToHistory();
@@ -974,16 +1224,44 @@
 
     // Load saved default preferences on page load
     window.addEventListener('load', () => {
-      const savedFontSize = localStorage.getItem('mdEditorFontSize');
       const savedTextColor = localStorage.getItem('mdEditorTextColor');
-
-      if (savedFontSize) {
-        document.getElementById('fontSizeControl').value = savedFontSize;
-        document.getElementById('fontSizeDisplay').textContent = savedFontSize + 'px';
-      }
+      const savedHeadingColor = localStorage.getItem('mdEditorHeadingColor');
 
       if (savedTextColor) {
         document.getElementById('textColorControl').value = savedTextColor;
+        // Clear all active classes first
+        document.querySelectorAll('.text-color-btn').forEach(b => b.classList.remove('active'));
+        // Activate corresponding button if it exists
+        const btn = document.querySelector(`.text-color-btn[data-color="${savedTextColor}"]`);
+        if (btn) {
+          btn.classList.add('active');
+        }
+      } else {
+        // If no saved color, activate the default (Dark Gray)
+        document.querySelectorAll('.text-color-btn').forEach(b => b.classList.remove('active'));
+        const defaultBtn = document.querySelector('.text-color-btn[data-color="#1f2937"]');
+        if (defaultBtn) defaultBtn.classList.add('active');
+      }
+
+      if (savedHeadingColor) {
+        // Apply saved heading color
+        const btn = document.querySelector(`.heading-color-btn[data-color="${savedHeadingColor}"]`);
+        if (btn) {
+          const style = document.createElement('style');
+          style.id = 'heading-color-style';
+          style.textContent = `
+            #editor h1, #editor h2, #editor h3, #editor h4 { color: ${savedHeadingColor} !important; }
+          `;
+          document.head.appendChild(style);
+          // Clear all active classes first
+          document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        }
+      } else {
+        // If no saved color, activate the default (Black)
+        document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
+        const defaultBtn = document.querySelector('.heading-color-btn[data-color="#000000"]');
+        if (defaultBtn) defaultBtn.classList.add('active');
       }
     });
 
@@ -1265,7 +1543,7 @@
   <style>
     body { 
       font-family: "Open Sans", Arial, sans-serif; 
-      max-width: 1000px; 
+      max-width: 1550px; 
       margin: 0.5rem auto; 
       padding: 0 1rem; 
       line-height: 1.8; 
@@ -1493,6 +1771,184 @@ renderMathInElement(document.body, {
       return highlighted;
     }
 
+    // Flatten nested lists - remove unnecessary nesting
+    function flattenNestedLists() {
+      // Recursively flatten all nested lists
+      let changed = true;
+      while (changed) {
+        changed = false;
+        
+        // Find all OL and UL elements
+        const allLists = Array.from(editor.querySelectorAll('ol, ul'));
+        
+        for (let list of allLists) {
+          // Check if this list is nested inside an LI
+          const parentLi = list.parentElement;
+          if (parentLi && parentLi.tagName === 'LI') {
+            // This is a nested list
+            const grandparentList = parentLi.parentElement;
+            
+            // Only flatten if both parent and child are same type or if parent is OL
+            if (grandparentList && (grandparentList.tagName === 'OL' || grandparentList.tagName === 'UL')) {
+              // Move all items from nested list to after the parent LI
+              const items = Array.from(list.querySelectorAll(':scope > li'));
+              
+              for (let item of items) {
+                // If this is an OL > LI > OL, move items to parent OL
+                if (grandparentList.tagName === 'OL' && list.tagName === 'OL') {
+                  const nextSibling = parentLi.nextElementSibling;
+                  if (nextSibling) {
+                    grandparentList.insertBefore(item.cloneNode(true), nextSibling);
+                  } else {
+                    grandparentList.appendChild(item.cloneNode(true));
+                  }
+                }
+              }
+              
+              // Remove the nested list if we moved items
+              if (items.length > 0 && list.tagName === 'OL' && grandparentList.tagName === 'OL') {
+                list.remove();
+                changed = true;
+              }
+            }
+          }
+        }
+      }
+      
+      // Second pass: remove any remaining nested OL/UL that are direct children of LI
+      const nestedLists = editor.querySelectorAll('ol ol, ol ul, ul ol, ul ul');
+      nestedLists.forEach(nestedList => {
+        const parent = nestedList.parentElement;
+        if (parent && parent.tagName === 'LI') {
+          // Move all items up
+          const items = Array.from(nestedList.children);
+          const grandparent = parent.parentElement;
+          
+          items.forEach((item, index) => {
+            const clone = item.cloneNode(true);
+            const nextSibling = parent.nextElementSibling;
+            if (nextSibling) {
+              grandparent.insertBefore(clone, nextSibling);
+            } else {
+              grandparent.appendChild(clone);
+            }
+          });
+          
+          nestedList.remove();
+        }
+      });
+    }
+
+    // Merge adjacent lists of the same type
+    function mergeAdjacentLists() {
+      const selection = window.getSelection();
+      let currentNode = selection.focusNode;
+      
+      // Find the list item we're in
+      while (currentNode && currentNode !== editor) {
+        if (currentNode.nodeType === 1 && currentNode.tagName === 'LI') {
+          const listItem = currentNode;
+          const list = listItem.parentNode;
+          
+          if (list && (list.tagName === 'OL' || list.tagName === 'UL')) {
+            // Check if there's an identical list immediately after this one
+            let nextElement = list.nextElementSibling;
+            while (nextElement && nextElement.nodeType === 8) {
+              // Skip comment nodes
+              nextElement = nextElement.nextElementSibling;
+            }
+            
+            if (nextElement && nextElement.tagName === list.tagName) {
+              // Move all items from next list to current list
+              while (nextElement.firstChild) {
+                list.appendChild(nextElement.firstChild);
+              }
+              // Remove the now-empty list
+              nextElement.remove();
+              
+              // Show notification
+              const notification = document.createElement('div');
+              notification.textContent = '✓ Списъци обединени';
+              notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
+              document.body.appendChild(notification);
+              
+              setTimeout(() => {
+                notification.style.transition = 'opacity 0.3s';
+                notification.style.opacity = '0';
+                setTimeout(() => notification.remove(), 300);
+              }, 2000);
+            } else {
+              alert('Няма съседен списък за обединяване');
+            }
+          }
+          return;
+        }
+        currentNode = currentNode.parentNode;
+      }
+      
+      alert('Моля, позиционирай курсора в списък');
+    }
+
+    // Double-click to edit list item numbers
+    editor.addEventListener('dblclick', (e) => {
+      // Find if we're in an OL li
+      let li = e.target.closest('li');
+      
+      if (li && li.parentNode && li.parentNode.tagName === 'OL') {
+        e.preventDefault();
+        
+        // Find the current position in the list
+        const ol = li.parentNode;
+        const items = Array.from(ol.children);
+        const currentIndex = items.indexOf(li);
+        const currentNumber = currentIndex + 1;
+        
+        // Prompt user for new number
+        const newNumber = prompt(`Промени номера на list item (текущо: ${currentNumber}):`, currentNumber.toString());
+        
+        if (newNumber !== null && newNumber.trim() !== '') {
+          const num = parseInt(newNumber);
+          if (!isNaN(num) && num > 0) {
+            // Store the custom number as data attribute
+            li.setAttribute('data-ol-number', num);
+            
+            // Apply custom CSS if not already applied
+            if (!document.getElementById('custom-ol-numbers')) {
+              const style = document.createElement('style');
+              style.id = 'custom-ol-numbers';
+              style.textContent = `
+                ol li[data-ol-number] {
+                  list-style: none;
+                  counter-increment: none;
+                }
+                ol li[data-ol-number]::before {
+                  content: attr(data-ol-number) ". ";
+                  font-weight: inherit;
+                }
+              `;
+              document.head.appendChild(style);
+            }
+            
+            saveToHistory();
+            
+            // Show notification
+            const notification = document.createElement('div');
+            notification.textContent = `✓ Номер на list item промънен на ${num}`;
+            notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+              notification.style.transition = 'opacity 0.3s';
+              notification.style.opacity = '0';
+              setTimeout(() => notification.remove(), 300);
+            }, 2000);
+          } else {
+            alert('Моля, въведи положително число');
+          }
+        }
+      }
+    });
+
     // Keyboard shortcuts
     editor.addEventListener('keydown', (e) => {
       // Handle Tab/Shift+Tab for list indentation
@@ -1528,7 +1984,7 @@ renderMathInElement(document.body, {
           e.preventDefault();
           document.execCommand('italic', false, null);
           saveToHistory();
-        } else if (e.key === 's' || e.key === 'S' || е.key == "с"|| е.key == "С") {
+        } else if (e.key === 's' || e.key === 'S' || e.key === 'С' || e.key === 'с') {
           e.preventDefault();
           // Open save modal (same as download button)
           document.getElementById('saveFileModal').style.display = 'block';
@@ -1556,40 +2012,44 @@ renderMathInElement(document.body, {
           e.preventDefault();
           insertFormat('p');
           saveToHistory();
-        } else if (e.key === 'U' && e.shiftKey) {
+        } else if (e.key === 'g' || e.key === 'G' || e.key === 'Г' || e.key === 'г') {
           e.preventDefault();
           document.execCommand('insertUnorderedList', false, null);
           saveToHistory();
-        } else if (e.key === 'O' && e.shiftKey) {
+        } else if ((e.key === 'o' || e.key === 'O'|| e.key === 'О' || e.key === 'о') && e.shiftKey) {
           e.preventDefault();
           document.execCommand('insertOrderedList', false, null);
           saveToHistory();
-        } else if (e.key === 't') {
+        } else if (e.key === 't' || e.key === 'T' || e.key === 'т' || e.key === 'Т') {
           e.preventDefault();
           insertTable();
-        } else if (e.key === 'k') {
+        } else if (e.key === 'k' || e.key === 'K'|| e.key === 'К' || e.key === 'к') {
           e.preventDefault();
           insertLink();
-        } else if (e.key === 'q') {
+        } else if (e.key === 'q' || e.key === 'Q' || e.key === 'я' || e.key === 'Я') {
           e.preventDefault();
           insertBlockquote();
-        } else if (e.key === 'z' && !e.shiftKey) {
+        } else if ((e.key === 'z' || e.key === 'Z'|| e.key === 'З' || e.key === 'з') && !e.shiftKey) {
           e.preventDefault();
           if (historyIndex > 0) {
             historyIndex--;
             editor.innerHTML = history[historyIndex];
           }
-        } else if ((e.key === 'z' && e.shiftKey) || e.key === 'y') {
+        } else if (((e.key === 'z' || e.key === 'Z') && e.shiftKey) || (e.key === 'y' || e.key === 'Y')) {
           e.preventDefault();
           if (historyIndex < history.length - 1) {
             historyIndex++;
             editor.innerHTML = history[historyIndex];
           }
+        } else if (e.key === 'm' || e.key === 'M' || e.key === 'М' || e.key === 'м') {
+          e.preventDefault();
+          mergeAdjacentLists();
+          saveToHistory();
         }
       }
     });
 
-    // Save to history on input
+    // Save to history on input and detect "---" for horizontal rule
     editor.addEventListener('input', () => {
       if (editor.textContent.trim().length > 0) {
         // Debounce history saving
@@ -1598,6 +2058,60 @@ renderMathInElement(document.body, {
           saveToHistory();
         }, 1000);
       }
+      
+      // Auto-convert "---" to horizontal rule
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        let node = range.startContainer;
+        
+        // Find parent paragraph
+        while (node && node !== editor) {
+          if (node.nodeType === 1 && (node.tagName === 'P' || node.tagName === 'DIV')) {
+            const text = node.textContent.trim();
+            if (text === '---' && node.tagName === 'P') {
+              // Replace this paragraph with <hr>
+              const hr = document.createElement('hr');
+              node.parentNode.replaceChild(hr, node);
+              
+              // Create new paragraph after hr and focus there
+              const newP = document.createElement('p');
+              newP.innerHTML = '<br>';
+              hr.parentNode.insertBefore(newP, hr.nextSibling);
+              
+              const newRange = document.createRange();
+              newRange.setStart(newP, 0);
+              newRange.collapse(true);
+              selection.removeAllRanges();
+              selection.addRange(newRange);
+              
+              saveToHistory();
+            }
+            break;
+          }
+          node = node.parentNode;
+        }
+      }
+    });
+
+    // Handle copy events - preserve formatting
+    editor.addEventListener('copy', (e) => {
+      const selection = window.getSelection();
+      if (selection.toString().length === 0) return;
+      
+      // Get the HTML content
+      const range = selection.getRangeAt(0);
+      const fragment = range.cloneContents();
+      const div = document.createElement('div');
+      div.appendChild(fragment);
+      
+      // Convert HTML to markdown
+      const markdown = htmlToMarkdown(div.innerHTML);
+      
+      // Set both plain text and HTML in clipboard
+      e.clipboardData.setData('text/plain', markdown);
+      e.clipboardData.setData('text/html', div.innerHTML);
+      e.preventDefault();
     });
 
     // Handle paste events - convert markdown to HTML and insert
@@ -1611,6 +2125,17 @@ renderMathInElement(document.body, {
       
       const range = selection.getRangeAt(0);
       
+      // Check if we're inside a list item
+      let node = range.startContainer;
+      let inListItem = false;
+      while (node && node !== editor) {
+        if (node.nodeType === 1 && node.tagName === 'LI') {
+          inListItem = true;
+          break;
+        }
+        node = node.parentNode;
+      }
+      
       // Convert markdown to HTML
       const html = markdownToHtml(text);
       
@@ -1621,22 +2146,54 @@ renderMathInElement(document.body, {
       // Delete current selection
       range.deleteContents();
       
-      // Move all children from tempDiv into the range in order
-      let lastNode = null;
-      while (tempDiv.firstChild) {
-        const node = tempDiv.firstChild;
-        range.insertNode(node);
-        lastNode = node;
-        range.setStartAfter(node);
+      if (inListItem) {
+        // Special handling for list items - just paste text content
+        // Get all text from pasted content
+        let pastedText = '';
+        const processNode = (n) => {
+          if (n.nodeType === 3) {
+            pastedText += n.textContent;
+          } else if (n.nodeType === 1) {
+            if (n.tagName === 'P' || n.tagName === 'DIV') {
+              if (pastedText) pastedText += '\n';
+            }
+            for (let child of n.childNodes) {
+              processNode(child);
+            }
+          }
+        };
+        
+        while (tempDiv.firstChild) {
+          processNode(tempDiv.firstChild);
+          tempDiv.removeChild(tempDiv.firstChild);
+        }
+        
+        // Insert the text into the list item
+        if (pastedText) {
+          const textNode = document.createTextNode(pastedText);
+          range.insertNode(textNode);
+          range.setStartAfter(textNode);
+          range.collapse(true);
+        }
+      } else {
+        // Normal paste - insert HTML elements
+        let lastNode = null;
+        while (tempDiv.firstChild) {
+          const node = tempDiv.firstChild;
+          range.insertNode(node);
+          lastNode = node;
+          range.setStartAfter(node);
+        }
+        
+        // Move cursor after all inserted content
+        if (lastNode) {
+          range.setStartAfter(lastNode);
+          range.collapse(true);
+        }
       }
       
-      // Move cursor after all inserted content
-      if (lastNode) {
-        range.setStartAfter(lastNode);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
+      selection.removeAllRanges();
+      selection.addRange(range);
       
       // Trigger input event to save history
       editor.dispatchEvent(new Event('input', { bubbles: true }));
