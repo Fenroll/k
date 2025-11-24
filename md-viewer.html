@@ -408,13 +408,19 @@
       contentDiv.style.fontSize = savedFontSize;
     }
     
-    // Font size increment levels
-    const fontSizes = ['1em', '1.1em', '1.2em', '1.3em', '1.4em'];
+    // Detect if mobile
+    const isMobile = window.innerWidth <= 768;
+    
+    // Font size increment levels - different for mobile and desktop
+    const fontSizes = isMobile 
+      ? ['0.6em', '0.75em', '0.9em', '1em'] // Mobile sizes (smaller)
+      : ['0.8em', '1em', '1.2em', '1.4em']; // Desktop sizes
+    
     let currentSizeIndex = fontSizes.findIndex(size => {
       if (savedFontSize) return size === savedFontSize;
-      return size === '1em'; // Default
+      return isMobile ? size === '0.75em' : size === '1em'; // Default
     });
-    if (currentSizeIndex === -1) currentSizeIndex = 0;
+    if (currentSizeIndex === -1) currentSizeIndex = isMobile ? 1 : 1;
     
     fontSizeBtn.addEventListener('click', () => {
       currentSizeIndex = (currentSizeIndex + 1) % fontSizes.length;
