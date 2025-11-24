@@ -882,11 +882,6 @@ const courses = [
     "id": "000012",
     "title": "Рентгенология",
     "sections": []
-  },
-  {
-    "id": "000013",
-    "title": "Backup_Pulmonology_c9fcd31",
-    "sections": []
   }
 ];
-const buildTimestamp = "24.11.2025 20:15";
+const buildTimestamp = "25.11.2025 00:36";
