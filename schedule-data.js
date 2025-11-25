@@ -16,45 +16,57 @@ const scheduleData = {
   // ИЗПИТИ - добави дати за изпити и поправки
   "exams": [
     {
-      "subject": "Фармакология",
-      "fullName": "Фармакология",
-      "examDate": "2026-01-15",
-      "examTime": "09:00",
-      "examLocation": "Ректорат, Зала 5",
-      "retakeDate": "2026-02-05",
-      "retakeTime": "10:00",
-      "retakeLocation": "Ректорат, Зала 3"
-    },
-       {
-      "subject": "Рентгенология, радиология",
-      "fullName": "Рентгенология, радиология",
-      "examDate": "2026-01-15",
-      "examTime": "09:00",
-      "examLocation": "Ректорат, Зала 5",
-      "retakeDate": "2026-02-05",
-      "retakeTime": "10:00",
-      "retakeLocation": "Ректорат, Зала 3"
-    },
-         {
-      "subject": "Ушни, носни и гърлени болести",
-      "fullName": "Ушни, носни и гърлени болести",
-      "examDate": "2026-01-15",
-      "examTime": "09:00",
-      "examLocation": "Ректорат, Зала 5",
-      "retakeDate": "2026-02-05",
-      "retakeTime": "10:00",
-      "retakeLocation": "Ректорат, Зала 3"
+      "subject": "Медицинска генетика",
+      "fullName": "Медицинска генетика",
+      "examDate": "2026-01-07",
+      "examTime": "",
+      "examLocation": "",
+      "retakeDate": "2026-02-13",
+      "retakeTime": "",
+      "retakeLocation": ""
     },
     {
+      "subject": "Фармакология",
+      "fullName": "Фармакология",
+      "examDate": "2026-01-12",
+      "examTime": "",
+      "examLocation": "",
+      "retakeDate": "",
+      "retakeTime": "",
+      "retakeLocation": ""
+    },
+     {
       "subject": "Клинична имунология",
       "fullName": "Клинична имунология",
-      "examDate": "2026-01-20",
-      "examTime": "08:00",
-      "examLocation": "СВ. МАРИНА - УМБАЛ, Аудитория А",
-      "retakeDate": "2026-02-10",
-      "retakeTime": "08:00",
-      "retakeLocation": "СВ. МАРИНА - УМБАЛ, Аудитория А"
-    }
+      "examDate": "2026-01-15",
+      "examTime": "",
+      "examLocation": "",
+      "retakeDate": "2026-02-13",
+      "retakeTime": "",
+      "retakeLocation": ""
+    },
+    
+    {
+      "subject": "Рентгенология, радиология",
+      "fullName": "Рентгенология, радиология",
+      "examDate": "2026-01-23",
+      "examTime": "",
+      "examLocation": "",
+      "retakeDate": "",
+      "retakeTime": "",
+      "retakeLocation": ""
+    },
+    {
+      "subject": "Ушни, носни и гърлени болести",
+      "fullName": "Ушни, носни и гърлени болести",
+      "examDate": "2026-01-28",
+      "examTime": "",
+      "examLocation": "",
+      "retakeDate": "",
+      "retakeTime": "",
+      "retakeLocation": ""
+    },
+   
   ],
   
   // ШАБЛОН - базово разписание, което се повтаря всяка седмица
@@ -477,6 +489,14 @@ const scheduleData = {
        "day": "ЧЕТ",
         "subject": "кимун",
         "startTime": "08:00",
+        "changes": {
+          "removed": true
+        }
+      },
+      {
+       "day": "ЧЕТ",
+        "subject": "ВБ1",
+        "startTime": "09:45",
         "changes": {
           "removed": true
         }
