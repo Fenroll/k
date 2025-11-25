@@ -745,6 +745,47 @@
         bottom: 15px;
         right: 15px;
       }
+
+      /* Mobile font sizes for viewer */
+      #editor h1 {
+        font-size: 1.5em;
+      }
+
+      #editor h2 {
+        font-size: 1.3em;
+      }
+
+      #editor h3 {
+        font-size: 1.1em;
+      }
+
+      #editor h4 {
+        font-size: 1em;
+      }
+
+      #editor h5,
+      #editor h6 {
+        font-size: 0.95em;
+      }
+
+      #editor p,
+      #editor li,
+      #editor div {
+        font-size: 0.9em;
+        line-height: 1.4;
+      }
+
+      #editor code {
+        font-size: 0.8em;
+      }
+
+      #editor blockquote {
+        font-size: 0.9em;
+      }
+
+      #editor table {
+        font-size: 0.85em;
+      }
     }
   </style>
 </head>
@@ -2962,17 +3003,6 @@ renderMathInElement(document.body, {
       
       const range = selection.getRangeAt(0);
       
-      // Check if we're inside a list item
-      let node = range.startContainer;
-      let inListItem = false;
-      while (node && node !== editor) {
-        if (node.nodeType === 1 && node.tagName === 'LI') {
-          inListItem = true;
-          break;
-        }
-        node = node.parentNode;
-      }
-      
       // Convert markdown to HTML
       const html = markdownToHtml(text);
       
@@ -2983,75 +3013,19 @@ renderMathInElement(document.body, {
       // Delete current selection
       range.deleteContents();
       
-      if (inListItem) {
-        // Special handling for list items - preserve HTML structure but flatten to inline
-        // Get all content from pasted, converting blocks to inline with preserved whitespace
-        let pastedHtml = '';
-        const processNode = (n) => {
-          if (n.nodeType === 3) {
-            // Text node - preserve all whitespace including indents
-            pastedHtml += n.textContent;
-          } else if (n.nodeType === 1) {
-            const tag = n.tagName.toLowerCase();
-            // For block elements, add them with proper spacing but keep inline formatting
-            if (tag === 'p' || tag === 'div') {
-              if (pastedHtml && !pastedHtml.endsWith('\n')) pastedHtml += '\n';
-              for (let child of n.childNodes) {
-                processNode(child);
-              }
-              pastedHtml += '\n';
-            } else if (tag === 'li') {
-              // Preserve list item content
-              if (pastedHtml && !pastedHtml.endsWith('\n')) pastedHtml += '\n';
-              for (let child of n.childNodes) {
-                processNode(child);
-              }
-            } else if (tag === 'br') {
-              pastedHtml += '\n';
-            } else if (tag === 'strong' || tag === 'b') {
-              pastedHtml += '<strong>' + n.innerHTML + '</strong>';
-            } else if (tag === 'em' || tag === 'i') {
-              pastedHtml += '<em>' + n.innerHTML + '</em>';
-            } else if (tag === 'code') {
-              pastedHtml += '<code>' + n.innerHTML + '</code>';
-            } else if (tag === 'u') {
-              pastedHtml += '<u>' + n.innerHTML + '</u>';
-            } else {
-              // For other elements, just process children
-              for (let child of n.childNodes) {
-                processNode(child);
-              }
-            }
-          }
-        };
-        
-        while (tempDiv.firstChild) {
-          processNode(tempDiv.firstChild);
-          tempDiv.removeChild(tempDiv.firstChild);
-        }
-        
-        // Insert the content into the list item, preserving formatting
-        if (pastedHtml) {
-          const fragment = document.createRange().createContextualFragment(pastedHtml);
-          range.insertNode(fragment);
-          range.setStartAfter(fragment);
-          range.collapse(true);
-        }
-      } else {
-        // Normal paste - insert HTML elements
-        let lastNode = null;
-        while (tempDiv.firstChild) {
-          const node = tempDiv.firstChild;
-          range.insertNode(node);
-          lastNode = node;
-          range.setStartAfter(node);
-        }
-        
-        // Move cursor after all inserted content
-        if (lastNode) {
-          range.setStartAfter(lastNode);
-          range.collapse(true);
-        }
+      // Insert HTML nodes directly - preserves list structure including nested lists
+      let lastNode = null;
+      while (tempDiv.firstChild) {
+        const node = tempDiv.firstChild;
+        range.insertNode(node);
+        lastNode = node;
+        range.setStartAfter(node);
+      }
+      
+      // Move cursor after all inserted content
+      if (lastNode) {
+        range.setStartAfter(lastNode);
+        range.collapse(true);
       }
       
       selection.removeAllRanges();
@@ -3477,74 +3451,61 @@ renderMathInElement(document.body, {
     function processListBlock(lines, startIndex) {
       let i = startIndex;
       let html = '';
-      const stack = []; // Track open tags: [{tag: 'ul', level: 0}, ...]
       let iterations = 0;
-      const MAX_ITERATIONS = 1000; // Safety limit
+      const MAX_ITERATIONS = 1000;
       
-      console.log('processListBlock called at line', startIndex, 'content:', lines[startIndex]);
-      console.log('First 10 chars as code points:', Array.from(lines[startIndex].substring(0, 10)).map(c => c.charCodeAt(0)));
+      // Simple approach: build list recursively by level
+      function processListAtLevel(startIdx, minLevel) {
+        let idx = startIdx;
+        let result = '';
+        let currentTag = null;
+        
+        while (idx < lines.length && iterations < MAX_ITERATIONS) {
+          iterations++;
+          const line = lines[idx];
+          
+          if (!line.trim()) {
+            idx++;
+            continue;
+          }
+          
+          const match = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)$/);
+          if (!match) break;
+          
+          const indent = match[1].length;
+          const level = Math.floor(indent / 2);
+          const marker = match[2];
+          const content = match[3];
+          const tag = /^\d+\.$/.test(marker) ? 'ol' : 'ul';
+          
+          // If level is less than minLevel, stop and return
+          if (level < minLevel) break;
+          
+          // If level is greater than minLevel, recursively process nested list
+          if (level > minLevel) {
+            const nested = processListAtLevel(idx, level);
+            result += nested.html;
+            idx = nested.nextIdx;
+            continue;
+          }
+          
+          // Same level
+          if (currentTag !== tag) {
+            if (currentTag) result += '</' + currentTag + '>';
+            currentTag = tag;
+            result += '<' + tag + '>';
+          }
+          
+          result += '<li>' + applyInlineFormatting(content) + '</li>';
+          idx++;
+        }
+        
+        if (currentTag) result += '</' + currentTag + '>';
+        return { html: result, nextIdx: idx };
+      }
       
-      while (i < lines.length && iterations < MAX_ITERATIONS) {
-        iterations++;
-        const line = lines[i];
-        // IGNORE completely empty lines inside lists (prevents <p><br></p> between <li>)
-        if (!line.trim()) {
-          i++;
-          continue;
-        }
-        // Match list items - allow empty content after marker
-        const match = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)$/);
-        if (!match) break;
-        const indent = match[1].length;
-        const level = Math.floor(indent / 2); // 2 spaces = 1 level
-        const marker = match[2];
-        const content = match[3];
-        const tag = /^\d+\.$/.test(marker) ? 'ol' : 'ul';
-
-        // Close deeper levels
-        while (stack.length > 0 && stack[stack.length - 1].level > level) {
-          const last = stack.pop();
-          html += '</' + last.tag + '></li>';
-        }
-
-        // Close same level if different tag type
-        if (stack.length > 0 && stack[stack.length - 1].level === level && stack[stack.length - 1].tag !== tag) {
-          const last = stack.pop();
-          html += '</' + last.tag + '>';
-          stack.push({ tag, level });
-          html += '<' + tag + '>';
-        }
-
-        // Open new level if needed
-        if (stack.length === 0 || stack[stack.length - 1].level < level) {
-          stack.push({ tag, level });
-          html += '<' + tag + '>';
-        }
-
-        // Add list item
-        html += '<li>' + applyInlineFormatting(content);
-
-        // Peek ahead to see if next line is a deeper indent (nested list)
-        const nextLine = i + 1 < lines.length ? lines[i + 1] : null;
-        const nextMatch = nextLine ? nextLine.match(/^(\s*)([-*]|\d+\.)\s/) : null;
-        const nextLevel = nextMatch ? Math.floor(nextMatch[1].length / 2) : -1;
-
-        // If next line is deeper, do not close </li> yet (nested list will be inside this <li>)
-        if (nextLevel <= level) {
-          html += '</li>';
-        }
-
-        i++;
-      }
-
-      // Close all remaining open lists
-      while (stack.length > 0) {
-        const last = stack.pop();
-        html += '</' + last.tag + '>';
-        if (stack.length > 0) html += '</li>';
-      }
-
-      return { html, nextIndex: i };
+      const listResult = processListAtLevel(startIndex, 0);
+      return { html: listResult.html, nextIndex: listResult.nextIdx };
     }
 
     // Apply inline formatting (bold, italic, code, links, images)
