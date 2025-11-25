@@ -3205,7 +3205,7 @@ renderMathInElement(document.body, {
       const parser = new DOMParser();
       const doc = parser.parseFromString('<div>' + html + '</div>', 'text/html');
       
-      const processNode = (node) => {
+      const processNode = (node, insideListItem = false) => {
         if (node.nodeType === 3) {
           // Text node
           return node.textContent;
@@ -3213,25 +3213,29 @@ renderMathInElement(document.body, {
           const tag = node.tagName.toLowerCase();
           
           if (tag === 'h1') {
-            return '# ' + processChildren(node) + '\n';
+            return '# ' + processChildren(node, false) + '\n';
           } else if (tag === 'h2') {
-            return '## ' + processChildren(node) + '\n';
+            return '## ' + processChildren(node, false) + '\n';
           } else if (tag === 'h3') {
-            return '### ' + processChildren(node) + '\n';
+            return '### ' + processChildren(node, false) + '\n';
           } else if (tag === 'h4') {
-            return '#### ' + processChildren(node) + '\n';
+            return '#### ' + processChildren(node, false) + '\n';
           } else if (tag === 'p') {
-            return processChildren(node) + '\n';
+            // Special handling: if inside list item, don't add newline
+            if (insideListItem) {
+              return processChildren(node, true);
+            }
+            return processChildren(node, false) + '\n';
           } else if (tag === 'strong' || tag === 'b') {
-            return '**' + processChildren(node) + '**';
+            return '**' + processChildren(node, insideListItem) + '**';
           } else if (tag === 'em' || tag === 'i') {
-            return '*' + processChildren(node) + '*';
+            return '*' + processChildren(node, insideListItem) + '*';
           } else if (tag === 'u') {
-            return '__' + processChildren(node) + '__';
+            return '__' + processChildren(node, insideListItem) + '__';
           } else if (tag === 'code') {
-            return '`' + processChildren(node) + '`';
+            return '`' + processChildren(node, insideListItem) + '`';
           } else if (tag === 'a') {
-            return '[' + processChildren(node) + '](' + (node.href || '#') + ')';
+            return '[' + processChildren(node, insideListItem) + '](' + (node.href || '#') + ')';
           } else if (tag === 'img') {
             // ALWAYS use data-original-src for relative path (e.g., assets/image.png)
             // Never use the absolute src attribute which may contain file:// or http://
@@ -3241,7 +3245,7 @@ renderMathInElement(document.body, {
             if (!src) return '';
             return '![' + alt + '](' + src + ')';
           } else if (tag === 'blockquote') {
-            return '> ' + processChildren(node).trim() + '\n';
+            return '> ' + processChildren(node, false).trim() + '\n';
           } else if (tag === 'ul') {
             let items = '';
             node.querySelectorAll(':scope > li').forEach(li => {
@@ -3253,7 +3257,7 @@ renderMathInElement(document.body, {
                 } else if (child.nodeType === 1) {
                   const childTag = child.tagName.toLowerCase();
                   if (childTag !== 'ul' && childTag !== 'ol') {
-                    textContent += processNode(child);
+                    textContent += processNode(child, true);
                   }
                 }
               }
@@ -3263,11 +3267,11 @@ renderMathInElement(document.body, {
               const nestedUl = li.querySelector(':scope > ul');
               const nestedOl = li.querySelector(':scope > ol');
               if (nestedUl) {
-                const nestedItems = processNode(nestedUl);
+                const nestedItems = processNode(nestedUl, false);
                 items += nestedItems.split('\n').map(line => line ? '  ' + line : '').join('\n');
               }
               if (nestedOl) {
-                const nestedItems = processNode(nestedOl);
+                const nestedItems = processNode(nestedOl, false);
                 items += nestedItems.split('\n').map(line => line ? '  ' + line : '').join('\n');
               }
             });
@@ -3284,7 +3288,7 @@ renderMathInElement(document.body, {
                 } else if (child.nodeType === 1) {
                   const childTag = child.tagName.toLowerCase();
                   if (childTag !== 'ul' && childTag !== 'ol') {
-                    textContent += processNode(child);
+                    textContent += processNode(child, true);
                   }
                 }
               }
@@ -3295,11 +3299,11 @@ renderMathInElement(document.body, {
               const nestedUl = li.querySelector(':scope > ul');
               const nestedOl = li.querySelector(':scope > ol');
               if (nestedUl) {
-                const nestedItems = processNode(nestedUl);
+                const nestedItems = processNode(nestedUl, false);
                 items += nestedItems.split('\n').map(line => line ? '  ' + line : '').join('\n');
               }
               if (nestedOl) {
-                const nestedItems = processNode(nestedOl);
+                const nestedItems = processNode(nestedOl, false);
                 items += nestedItems.split('\n').map(line => line ? '  ' + line : '').join('\n');
               }
             });
@@ -3313,16 +3317,16 @@ renderMathInElement(document.body, {
           } else if (tag === 'pre') {
             return '```\n' + node.textContent + '\n```\n';
           } else {
-            return processChildren(node);
+            return processChildren(node, insideListItem);
           }
         }
         return '';
       };
       
-      const processChildren = (node) => {
+      const processChildren = (node, insideListItem = false) => {
         let result = '';
         for (let child of node.childNodes) {
-          result += processNode(child);
+          result += processNode(child, insideListItem);
         }
         return result;
       };
