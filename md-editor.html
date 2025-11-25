@@ -3134,9 +3134,6 @@ renderMathInElement(document.body, {
             img.style.maxWidth = '100%';
             img.style.height = 'auto';
             
-            // Store the relative path in data attribute
-            img.setAttribute('data-original-src', 'assets/' + fileName);
-            
             // Insert at drop position
             if (range) {
               range.insertNode(img);
@@ -3237,12 +3234,24 @@ renderMathInElement(document.body, {
           } else if (tag === 'a') {
             return '[' + processChildren(node, insideListItem) + '](' + (node.href || '#') + ')';
           } else if (tag === 'img') {
-            // ALWAYS use data-original-src for relative path (e.g., assets/image.png)
-            // Never use the absolute src attribute which may contain file:// or http://
-            const src = node.getAttribute('data-original-src') || '';
             const alt = node.getAttribute('alt') || '';
-            // Skip if no original source (broken image)
+            
+            // Generate path from alt text (all images are in assets/ folder)
+            // If alt is "ДН", generate "assets/ДН.png"
+            let src = '';
+            if (alt) {
+              // Try to detect file extension from src if it's not base64
+              let ext = '.png'; // default
+              if (node.src && !node.src.startsWith('data:')) {
+                const match = node.src.match(/\.([a-z]+)$/i);
+                if (match) ext = '.' + match[1];
+              }
+              src = 'assets/' + alt + ext;
+            }
+            
+            // Skip if no alt text (can't generate filename)
             if (!src) return '';
+            
             return '![' + alt + '](' + src + ')';
           } else if (tag === 'blockquote') {
             return '> ' + processChildren(node, false).trim() + '\n';
