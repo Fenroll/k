@@ -62,11 +62,6 @@ const courses = [
             "url": "https://globle-game.com/"
           },
           {
-            "name": "Just One Boss.url",
-            "path": "files/Blackboard Help/Тежки Учебни Материали/Just One Boss.url",
-            "url": "https://aylanonsense.itch.io/just-one-boss"
-          },
-          {
             "name": "Kinda Hard Golf.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Kinda Hard Golf.url",
             "url": "https://kindahardgolf.com/"
@@ -913,4 +908,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "26.11.2025 19:41";
+const buildTimestamp = "26.11.2025 19:42";
