@@ -49,17 +49,25 @@
       display: none;
     }
     header a.btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 12px; border-radius: 6px; text-decoration: none;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 6px; text-decoration: none;
       background: #eef2ff; color: var(--link); border: 1px solid #c7d2fe;
+      transition: background 0.2s, transform 0.1s;
     }
     header button.btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 8px 12px; border-radius: 6px;
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 40px; height: 40px; border-radius: 6px;
       background: #eef2ff; color: var(--link); border: 1px solid #c7d2fe;
       cursor: pointer;
       font-family: inherit;
-      font-size: 14px;
+      transition: background 0.2s, transform 0.1s;
+    }
+    header a.btn:hover, header button.btn:hover {
+      background: #e0e7ff;
+      transform: scale(1.05);
+    }
+    header a.btn:active, header button.btn:active {
+      transform: scale(0.95);
     }
     header button.btn:hover {
       background: #e0e7ff;
@@ -131,21 +139,17 @@
 <body>
   <header>
     <h1 id="docTitle">Преглед на документ</h1>
-    <a class="btn" href="#" onclick="if (window.opener) { window.close(); } else if (document.referrer) { history.back(); } else { window.close(); } return false;" title="Close">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9"><path d="M20,11H7.83l5.59-5.59L12,4l-8,8 8,8 1.41-1.41L7.83,13H20v-2z"/></svg>
-      Close
+    <a class="btn" href="#" onclick="if (window.opener) { window.close(); } else if (document.referrer) { history.back(); } else { window.close(); } return false;" title="Назад">
+      <img src="svg/material-symbols_outlined_arrow_back.svg" alt="Назад" width="20" height="20">
     </a>
-    <a id="downloadLink" class="btn" href="#" download>
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9"><path d="M5,20H19V18H5M19,9H15V3H9V9H5L12,16L19,9Z"/></svg>
-      Изтегли
+    <a id="downloadLink" class="btn" href="#" download title="Изтегли">
+      <img src="svg/vscode-codicon_text-size.svg" alt="Изтегли" width="20" height="20">
     </a>
-    <button id="summaryBtn" class="btn" title="View Summary">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9"><path d="M3,5H21V7H3V5M3,11H21V13H3V11M3,17H21V19H3V17Z"/></svg>
-      Summary
+    <button id="summaryBtn" class="btn" title="Summary">
+      <img src="svg/material-symbols_outlined_article_shortcut.svg" alt="Summary" width="20" height="20">
     </button>
-    <button id="fontSizeBtn" class="btn" title="Увеличи размер на текста">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" font-size="14" font-weight="bold">A</text></svg>
-      A+
+    <button id="fontSizeBtn" class="btn" title="Change Font Size">
+      <img src="svg/vscode-codicon_text-size.svg" alt="Change Font Size" width="20" height="20">
     </button>
   </header>
   <main>
@@ -686,10 +690,12 @@
                   const selector = rule.split('{')[0].trim();
                   const styles = rule.split('{')[1] || '';
                   
-                  if (!selector || selector.match(/^(body|html|:root)/i)) {
+                  // Skip only body, html, and :root selectors - include h1 and other tags
+                  if (!selector || selector.match(/^(body|html|:root)$/i)) {
                     return rule + '}';
                   }
                   
+                  // Scope to #content for everything else including h1
                   return `#content ${selector} { ${styles} }`;
                 }).join('');
                 
