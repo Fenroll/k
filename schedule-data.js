@@ -31,7 +31,7 @@ const scheduleData = {
       "examDate": "2026-01-12",
       "examTime": "",
       "examLocation": "",
-      "retakeDate": "2026-02-06,2026-02-13",
+      "retakeDate": "2026-02-09 и 2026-02-13",
       "retakeTime": "",
       "retakeLocation": ""
     },
@@ -65,7 +65,7 @@ const scheduleData = {
       "retakeDate": "2026-02-09",
       "retakeTime": "",
       "retakeLocation": ""
-    },
+    }
    
   ],
   

@@ -501,32 +501,32 @@
   .exam-card {
     background: #fff;
     border-radius: 12px;
-    padding: 24px;
+    padding: 12px 14px 14px 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border-left: 4px solid #7c3aed;
   }
   
   .exam-card-header {
-    margin-bottom: 20px;
-    padding-bottom: 16px;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
     border-bottom: 1px solid #e5e7eb;
   }
   
   .exam-card-title {
     color: #7c3aed;
-    font-size: 20px;
-    font-weight: 600;
-    margin: 0 0 4px 0;
+    font-size: 16px;
+    font-weight: 700;
+    margin: 0;
   }
   
   .exam-card-subtitle {
     color: #6b7280;
-    font-size: 14px;
+    font-size: 13px;
     margin: 0;
   }
   
   .exam-section {
-    margin-bottom: 16px;
+    margin-bottom: 10px;
   }
   
   .exam-section:last-child {
@@ -535,12 +535,12 @@
   
   .exam-section-title {
     color: #374151;
-    font-size: 14px;
-    font-weight: 600;
-    margin: 0 0 8px 0;
+    font-size: 15px;
+    font-weight: 700;
+    margin: 6px 0 6px 0;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
   }
   
   .exam-section-icon {
@@ -552,25 +552,57 @@
   .exam-info-row {
     display: flex;
     justify-content: space-between;
-    padding: 8px 12px;
+    padding: 4px 8px;
     background: #f9fafb;
-    border-radius: 6px;
-    margin-bottom: 6px;
+    border-radius: 4px;
+    margin-bottom: 3px;
+    gap: 12px;
   }
   
   .exam-info-row:last-child {
     margin-bottom: 0;
   }
   
+  .exam-info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 0;
+  }
+  
+  .exam-info-item {
+    display: flex;
+    flex-direction: column;
+    padding: 4px 8px;
+    background: #f9fafb;
+    border-radius: 4px;
+  }
+  
   .exam-info-label {
     color: #6b7280;
     font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
   }
   
   .exam-info-value {
     color: #111827;
     font-size: 14px;
     font-weight: 500;
+    text-align: left;
+  }
+  
+  /* Show line break after "и" only on mobile */
+  .mobile-break {
+    display: none;
+  }
+  
+  @media (max-width: 768px) {
+    .mobile-break {
+      display: block;
+    }
   }
   
   .modal-title {
@@ -1619,12 +1651,33 @@
         const examYear = examDate.getFullYear();
         const examDateFormatted = `${examDay} ${examMonth} ${examYear}`;
         
-        // Format retake date
-        const retakeDate = new Date(exam.retakeDate);
-        const retakeDay = retakeDate.getDate();
-        const retakeMonth = months[retakeDate.getMonth()];
-        const retakeYear = retakeDate.getFullYear();
-        const retakeDateFormatted = `${retakeDay} ${retakeMonth} ${retakeYear}`;
+        // Format retake date - handle multiple dates separated by " и " (and)
+        let retakeDateFormatted = '';
+        if (exam.retakeDate && exam.retakeDate.includes(' и ')) {
+          // Multiple dates
+          const retakeDates = exam.retakeDate.split(' и ').map(d => d.trim());
+          const formattedDates = retakeDates.map(dateStr => {
+            const d = new Date(dateStr);
+            if (isNaN(d.getTime())) return dateStr; // Return original if invalid
+            const day = d.getDate();
+            const month = months[d.getMonth()];
+            const year = d.getFullYear();
+            return `${day} ${month} ${year}`;
+          });
+          // Add <br> after "и" for mobile devices
+          retakeDateFormatted = formattedDates.join(' и <span class="mobile-break"></span>');
+        } else if (exam.retakeDate) {
+          // Single date
+          const retakeDate = new Date(exam.retakeDate);
+          if (!isNaN(retakeDate.getTime())) {
+            const retakeDay = retakeDate.getDate();
+            const retakeMonth = months[retakeDate.getMonth()];
+            const retakeYear = retakeDate.getFullYear();
+            retakeDateFormatted = `${retakeDay} ${retakeMonth} ${retakeYear}`;
+          } else {
+            retakeDateFormatted = exam.retakeDate;
+          }
+        }
         
         return `
           <div class="exam-card">
@@ -1639,13 +1692,15 @@
                 </svg>
                 Редовен изпит
               </div>
-              <div class="exam-info-row">
-                <span class="exam-info-label">Дата:</span>
-                <span class="exam-info-value">${examDateFormatted}, ${exam.examTime}</span>
-              </div>
-              <div class="exam-info-row">
-                <span class="exam-info-label">Локация:</span>
-                <span class="exam-info-value">${exam.examLocation}</span>
+              <div class="exam-info-grid">
+                <div class="exam-info-item">
+                  <span class="exam-info-label">Дата:</span>
+                  <span class="exam-info-value">${examDateFormatted}${exam.examTime ? ', ' + exam.examTime : ''}</span>
+                </div>
+                <div class="exam-info-item">
+                  <span class="exam-info-label">Локация:</span>
+                  <span class="exam-info-value">${exam.examLocation}</span>
+                </div>
               </div>
             </div>
             
@@ -1656,13 +1711,15 @@
                 </svg>
                 Поправка
               </div>
-              <div class="exam-info-row">
-                <span class="exam-info-label">Дата:</span>
-                <span class="exam-info-value">${retakeDateFormatted}, ${exam.retakeTime}</span>
-              </div>
-              <div class="exam-info-row">
-                <span class="exam-info-label">Локация:</span>
-                <span class="exam-info-value">${exam.retakeLocation}</span>
+              <div class="exam-info-grid">
+                <div class="exam-info-item">
+                  <span class="exam-info-label">Дата:</span>
+                  <span class="exam-info-value">${retakeDateFormatted}${exam.retakeTime ? ', ' + exam.retakeTime : ''}</span>
+                </div>
+                <div class="exam-info-item">
+                  <span class="exam-info-label">Локация:</span>
+                  <span class="exam-info-value">${exam.retakeLocation}</span>
+                </div>
               </div>
             </div>
           </div>
