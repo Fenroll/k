@@ -2298,8 +2298,55 @@
       // Clean the name: remove .html, .md, .txt extensions
       const cleanName = name.replace(/\.(html|md|txt)$/i, '');
       
-      // Convert absolute image paths to relative paths
+      // Get content
       let editorContent = editor.innerHTML;
+      
+      // FIRST: Remove ALL <br> tags ONLY inside <li> elements - they are hidden with CSS in editor anyway
+      // Process with DOM to ensure we only remove <br> in list items
+      const tempBrDiv = document.createElement('div');
+      tempBrDiv.innerHTML = editorContent;
+      
+      // Find all <li> elements and remove <br> inside them recursively
+      tempBrDiv.querySelectorAll('li').forEach(li => {
+        let html = li.innerHTML;
+        // Remove <br> tags inside this list item
+        html = html.replace(/<br\s*\/?>/gi, '');
+        li.innerHTML = html;
+      });
+      
+      editorContent = tempBrDiv.innerHTML;
+      
+      // Create a temporary container to clone and clean
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = editorContent;
+      
+      // Remove all elements that are hidden with CSS (display: none, visibility: hidden, etc)
+      const removeHiddenElements = (element) => {
+        const nodesToRemove = [];
+        const walk = document.createTreeWalker(
+          element,
+          NodeFilter.SHOW_ELEMENT,
+          null,
+          false
+        );
+        
+        let node;
+        while (node = walk.nextNode()) {
+          const style = window.getComputedStyle(node);
+          // Remove if display is none or visibility is hidden
+          if (style.display === 'none' || style.visibility === 'hidden') {
+            nodesToRemove.push(node);
+          }
+        }
+        
+        // Remove collected nodes
+        nodesToRemove.forEach(n => n.remove());
+      };
+      
+      removeHiddenElements(tempDiv);
+      
+      // Get cleaned content
+      editorContent = tempDiv.innerHTML;
       
       // SAFE: Remove only EMPTY <p> tags (those with just whitespace or empty formatting)
       // This removes the empty paragraphs browser creates between list items
@@ -2437,6 +2484,12 @@
     }
     a:hover {
       color: #d97706;
+    }
+    /* Keep <p> tags inside list items on same line (as they appear in editor) */
+    li p {
+      margin: 0;
+      padding: 0;
+      display: inline;
     }
     @media (max-width: 768px) {
       body {

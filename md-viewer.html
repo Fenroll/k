@@ -277,8 +277,10 @@
       const loadFromHash = getParam('loadFromHash') === 'true';
       if(!path){ document.getElementById('content').textContent = 'Липсва параметър path.'; return; }
       const decodedPath = decodeURIComponent(path);
-      const title = decodedPath.split('/').pop();
-      document.title = title + ' — Markdown Viewer';
+      const title = decodedPath.split('/').pop()
+        .replace(/^\d+-msg-/, '') // Remove "NUMBER-msg-" prefix
+        .replace(/\.(html|md|txt)$/i, ''); // Remove extension
+      document.title = title;
       document.getElementById('docTitle').textContent = title;
       const dl = document.getElementById('downloadLink');
       dl.href = decodedPath;
