@@ -1048,6 +1048,9 @@
       // Render msg notes (sticky notes) FIRST
       if (section.msgNotes && section.msgNotes.length > 0) {
         section.msgNotes.forEach((note, idx) => {
+          // Skip files with -summary in name
+          if (note.name.toLowerCase().includes('-summary')) return;
+          
           const noteId = `msg-note-${sectionId}-${idx}`;
           const isHtml = /\.html$/i.test(note.path || '');
           sectionContent += `
@@ -1120,8 +1123,9 @@
         // Render file list
         sectionContent += '<ul style="margin:8px 0 4px 0; padding-left:20px; list-style:none;">';
         section.files.forEach(file => {
-          // Skip files with hidden- prefix
-          if (file.name.toLowerCase().startsWith('hidden-')) return;
+          // Skip files with hidden- prefix or -summary suffix
+          if (file.name.toLowerCase().startsWith('hidden-') || 
+              file.name.toLowerCase().includes('-summary')) return;
           
           const fileName = file.name.toLowerCase();
           let fileIcon = '';

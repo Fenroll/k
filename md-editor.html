@@ -900,6 +900,7 @@
     <div class="toolbar-group">
 
       <button id="linkBtn" title="Link (Ctrl+K)"><img src="svg/material-symbols_outlined_add_link.svg" alt="Bold" class="toolbar-icon"></button>
+      <button id="imageBtn" title="Add Image"><img src="svg/image.svg" alt="Image" class="toolbar-icon"></button>
       <button id="hrBtn" title="Horizontal Line"><svg width="18" height="18" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32s-14.33-32-32-32H64c-17.67 0-32 14.33-32 32z"/></svg></button>
     </div>
 
@@ -942,32 +943,37 @@
       <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
         <h3>Formatting</h3>
         <ul style="list-style: none; padding: 0;">
+          <li style="margin: 8px 0;"><strong>Ctrl+B</strong> - Bold</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+I</strong> - Italic</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+`</strong> - Code</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+S</strong> - Save/Download file</li>
+        </ul>
+        <h3>Headings & Paragraphs</h3>
+        <ul style="list-style: none; padding: 0;">
           <li style="margin: 8px 0;"><strong>Ctrl+0</strong> - Normal paragraph</li>
           <li style="margin: 8px 0;"><strong>Ctrl+1</strong> - Heading 1</li>
           <li style="margin: 8px 0;"><strong>Ctrl+2</strong> - Heading 2</li>
           <li style="margin: 8px 0;"><strong>Ctrl+3</strong> - Heading 3</li>
           <li style="margin: 8px 0;"><strong>Ctrl+4</strong> - Heading 4</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+B</strong> - Bold</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+I</strong> - Italic</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+U</strong> - Underline</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+`</strong> - Code</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+Alt+C</strong> - Apply last text color</li>
         </ul>
         <h3>Lists & Blocks</h3>
         <ul style="list-style: none; padding: 0;">
-          <li style="margin: 8px 0;"><strong>Ctrl+Shift+U</strong> - Unordered list</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+G</strong> - Unordered list</li>
           <li style="margin: 8px 0;"><strong>Ctrl+Shift+O</strong> - Ordered list</li>
-          <li style="margin: 8px 0;"><strong>Tab</strong> - Indent list item (move right)</li>
-          <li style="margin: 8px 0;"><strong>Shift+Tab</strong> - Outdent list item (move left)</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+Q</strong> - Quote</li>
+          <li style="margin: 8px 0;"><strong>Tab</strong> - Indent list item</li>
+          <li style="margin: 8px 0;"><strong>Shift+Tab</strong> - Outdent list item</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+Q</strong> - Blockquote</li>
           <li style="margin: 8px 0;"><strong>Ctrl+T</strong> - Table</li>
           <li style="margin: 8px 0;"><strong>Ctrl+K</strong> - Link</li>
         </ul>
-        <h3>Editing</h3>
+        <h3>Text Color & Styles</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 8px 0;"><strong>Ctrl+M</strong> - Apply last text color</li>
+        </ul>
+        <h3>Undo/Redo</h3>
         <ul style="list-style: none; padding: 0;">
           <li style="margin: 8px 0;"><strong>Ctrl+Z</strong> - Undo</li>
           <li style="margin: 8px 0;"><strong>Ctrl+Y</strong> or <strong>Ctrl+Shift+Z</strong> - Redo</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+M</strong> - Merge adjacent lists</li>
         </ul>
       </div>
       <div class="modal-footer">
@@ -993,6 +999,31 @@
       </div>
       <div class="modal-footer">
         <button id="closeFileBrowserBtn2">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Image Modal -->
+  <div id="imageModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Add Image</h2>
+        <span class="close" id="closeImageModalBtn">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 16px;">
+          <label for="imageNameInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Image File Name</label>
+          <input type="text" id="imageNameInput" placeholder="e.g., photo.png" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">File must exist in assets/ folder</div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label for="imageAltInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Alt Text (Description)</label>
+          <input type="text" id="imageAltInput" placeholder="e.g., Brain hemisphere diagram" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelImageBtn">Cancel</button>
+        <button class="primary" id="insertImageBtn">Insert Image</button>
       </div>
     </div>
   </div>
@@ -1488,6 +1519,21 @@
       }
       saveToHistory();
       editor.focus();
+    }
+
+    // Store cursor position for image insertion
+    let savedImageRange = null;
+
+    function insertImage() {
+      // Save current cursor position
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        savedImageRange = selection.getRangeAt(0);
+      }
+      
+      const imageModal = document.getElementById('imageModal');
+      imageModal.style.display = 'flex';
+      document.getElementById('imageNameInput').focus();
     }
 
     function insertHR() {
@@ -2487,9 +2533,22 @@
     }
     /* Keep <p> tags inside list items on same line (as they appear in editor) */
     li p {
-      margin: 0;
-      padding: 0;
-      display: inline;
+      margin: 0 !important;
+      padding: 0 !important;
+      display: inline !important;
+      line-height: 1 !important;
+    }
+    /* Prevent nested list paragraph issues */
+    li > ul,
+    li > ol {
+      margin: 0.3em 0 0 0;
+      padding-left: 1.5em;
+    }
+    /* Ensure list structure is clean */
+    ul ul, ul ol,
+    ol ul, ol ol {
+      margin-top: 0.2em;
+      padding-left: 1.5em;
     }
     @media (max-width: 768px) {
       body {
@@ -2554,6 +2613,75 @@ renderMathInElement(document.body, {
       if (e.target.id === 'saveFileModal') {
         document.getElementById('saveFileModal').style.display = 'none';
       }
+    });
+
+    // Image modal events
+    document.getElementById('imageBtn').addEventListener('click', insertImage);
+    
+    document.getElementById('closeImageModalBtn').addEventListener('click', () => {
+      document.getElementById('imageModal').style.display = 'none';
+    });
+    
+    document.getElementById('cancelImageBtn').addEventListener('click', () => {
+      document.getElementById('imageModal').style.display = 'none';
+    });
+    
+    document.getElementById('imageModal').addEventListener('click', (e) => {
+      if (e.target.id === 'imageModal') {
+        document.getElementById('imageModal').style.display = 'none';
+      }
+    });
+    
+    document.getElementById('insertImageBtn').addEventListener('click', () => {
+      const imageName = document.getElementById('imageNameInput').value.trim();
+      const imageAlt = document.getElementById('imageAltInput').value.trim();
+      
+      if (!imageName) {
+        alert('Please enter image file name');
+        return;
+      }
+      
+      // Use saved range if available, otherwise get current selection
+      let range = savedImageRange;
+      if (!range) {
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0) {
+          alert('Please click in the editor first');
+          return;
+        }
+        range = selection.getRangeAt(0);
+      }
+      
+      const img = document.createElement('img');
+      img.src = 'assets/' + imageName;
+      img.alt = imageAlt || imageName;
+      img.style.maxWidth = '100%';
+      img.style.height = 'auto';
+      img.setAttribute('data-original-src', 'assets/' + imageName);
+      
+      range.insertNode(img);
+      
+      // Add line break after image
+      const br = document.createElement('br');
+      range.setStartAfter(img);
+      range.insertNode(br);
+      
+      // Move cursor after br
+      range.setStartAfter(br);
+      range.collapse(true);
+      
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      // Clear inputs and close modal
+      document.getElementById('imageNameInput').value = '';
+      document.getElementById('imageAltInput').value = '';
+      document.getElementById('imageModal').style.display = 'none';
+      savedImageRange = null; // Clear saved range
+      
+      saveToHistory();
+      editor.focus();
     });
 
     document.getElementById('clearBtn').addEventListener('click', () => {
@@ -2919,7 +3047,9 @@ renderMathInElement(document.body, {
           }
         } else if (e.key === 'm' || e.key === 'M' || e.key === 'М' || e.key === 'м') {
           e.preventDefault();
-          mergeAdjacentLists();
+          // Apply last used text color
+          const lastColor = localStorage.getItem('mdEditorTextColor') || '#1f2937';
+          applyFormatting('color', lastColor);
           saveToHistory();
         } else if ((e.key === 'c' || e.key === 'C' || e.key === 'С' || e.key === 'с') && e.altKey) {
           e.preventDefault();
