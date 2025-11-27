@@ -82,11 +82,32 @@
       min-width: 36px;
     }
 
-    .toolbar button svg {
-      width: 18px;
-      height: 18px;
+    .toolbar button img {
+      width: 21px;
+      height: 21px;
       stroke-width: 1.5;
       flex-shrink: 0;
+    }
+
+    /* UpToDate icon - larger size only */
+    #uptodateBtn img {
+      width: 29px;
+      height: 29px;
+    }
+
+      #shortcutsBtn img {
+      width: 23px;
+      height: 23px;
+    }
+
+     #ulBtn img {
+      width: 23px;
+      height: 23px;
+    }
+
+     #olBtn img {
+      width: 24px;
+      height: 24px;
     }
 
     .toolbar button::before {
@@ -895,6 +916,7 @@
 
     <div class="toolbar-group">
       <button id="quoteBtn" title="Quote (Ctrl+Q)"><img src="svg/bootstrap_quote.svg" alt="Bold" class="toolbar-icon"></button>
+      <button id="checklistBtn" title="Checkbox List"><img src="svg/checklist.svg" alt="Checklist" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
@@ -918,6 +940,13 @@
       <button id="downloadBtn" title="Download as .html file"><img src="svg/material-symbols_outlined_download.svg" alt="Delete" class="toolbar-icon"></button>
       <button id="clearBtn" title="Clear all content"><img src="svg/vscode-codicon_clear-all.svg" alt="Delete" class="toolbar-icon"></button>
       <button id="shortcutsBtn" title="Show keyboard shortcuts"><img src="svg/material-symbols_outlined_keyboard.svg" alt="Delete" class="toolbar-icon"></button>
+      <button id="resetFontSizeBtn" title="Reset font size to default"><img src="svg/material-symbols_outlined_font_download_off.svg" alt="Reset Font Size" class="toolbar-icon"></button>
+    </div>
+
+    <div class="toolbar-group">
+      <button id="geminiBtn" title="Send to Gemini AI"><img src="svg/gemini.svg" alt="Gemini" class="toolbar-icon"></button>
+      <button id="chatgptBtn" title="Open ChatGPT"><img src="svg/chatgpt.svg" alt="ChatGPT" class="toolbar-icon"></button>
+      <button id="uptodateBtn" title="Open UpToDate"><img src="svg/uptodate.svg" alt="UpToDate" class="toolbar-icon"></button>
     </div>
   </div>
 
@@ -1052,6 +1081,38 @@
       <div class="modal-footer">
         <button id="cancelSaveBtn">Cancel</button>
         <button class="primary" id="confirmSaveBtn">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checklist Modal -->
+  <div id="checklistModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Create Checkbox List</h2>
+        <span class="close" id="closeChecklistModalBtn">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 16px;">
+          <label for="checklistCountInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Number of Checkboxes</label>
+          <input type="number" id="checklistCountInput" placeholder="e.g., 4" value="4" min="1" max="20" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">Will be overridden if you paste text below</div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label for="checklistTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Paste Answer Text (one per line)</label>
+          <textarea id="checklistTextInput" placeholder="Paste each answer on a new line..." style="width: 100%; height: 150px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: monospace; resize: vertical;"></textarea>
+          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">Each line becomes one answer option</div>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500; color: #374151;">
+            <input type="checkbox" id="checklistBulgarianLabelsCheckbox" checked style="margin-right: 8px; cursor: pointer;">
+            Use Bulgarian letters (А, Б, В, Г)
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelChecklistBtn">Cancel</button>
+        <button class="primary" id="confirmChecklistBtn">Insert</button>
       </div>
     </div>
   </div>
@@ -1280,6 +1341,12 @@
       document.execCommand('formatBlock', false, 'blockquote');
       saveToHistory();
       editor.focus();
+    }
+
+    function insertChecklist() {
+      const checklistModal = document.getElementById('checklistModal');
+      checklistModal.style.display = 'flex';
+      document.getElementById('checklistCountInput').focus();
     }
 
     function insertTable() {
@@ -1523,6 +1590,7 @@
 
     // Store cursor position for image insertion
     let savedImageRange = null;
+    let savedChecklistRange = null;
 
     function insertImage() {
       // Save current cursor position
@@ -1534,6 +1602,18 @@
       const imageModal = document.getElementById('imageModal');
       imageModal.style.display = 'flex';
       document.getElementById('imageNameInput').focus();
+    }
+
+    function insertChecklist() {
+      // Save current cursor position BEFORE opening modal
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        savedChecklistRange = selection.getRangeAt(0);
+      }
+      
+      const checklistModal = document.getElementById('checklistModal');
+      checklistModal.style.display = 'flex';
+      document.getElementById('checklistCountInput').focus();
     }
 
     function insertHR() {
@@ -1717,6 +1797,10 @@
 
     document.getElementById('quoteBtn').addEventListener('click', () => {
       insertBlockquote();
+    });
+
+    document.getElementById('checklistBtn').addEventListener('click', () => {
+      insertChecklist();
     });
 
     document.getElementById('editTableBtn').addEventListener('click', () => {
@@ -2684,6 +2768,128 @@ renderMathInElement(document.body, {
       editor.focus();
     });
 
+    // Checklist modal events
+    const checklistModal = document.getElementById('checklistModal');
+    
+    document.getElementById('closeChecklistModalBtn').addEventListener('click', () => {
+      checklistModal.style.display = 'none';
+    });
+    
+    document.getElementById('cancelChecklistBtn').addEventListener('click', () => {
+      checklistModal.style.display = 'none';
+    });
+    
+    checklistModal.addEventListener('click', (e) => {
+      if (e.target.id === 'checklistModal') {
+        checklistModal.style.display = 'none';
+      }
+    });
+    
+    document.getElementById('confirmChecklistBtn').addEventListener('click', () => {
+      // Check if user pasted text in textarea
+      const textInput = document.getElementById('checklistTextInput').value.trim();
+      let count;
+      let customAnswers = [];
+      
+      if (textInput) {
+        // Use pasted text to generate answers
+        customAnswers = textInput.split('\n').filter(line => line.trim().length > 0);
+        count = customAnswers.length;
+      } else {
+        // Use the number input
+        count = parseInt(document.getElementById('checklistCountInput').value) || 4;
+      }
+      
+      const useBulgarianLabels = document.getElementById('checklistBulgarianLabelsCheckbox').checked;
+      
+      // Use saved range
+      let range = savedChecklistRange;
+      if (!range) {
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0) {
+          alert('Please click in the editor first');
+          return;
+        }
+        range = selection.getRangeAt(0);
+      }
+      
+      // Bulgarian letters: А, Б, В, Г, Д, ...
+      const bulgarianLetters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У'];
+      
+      // Build the HTML for the checklist with styled circle buttons
+      let checklistHtml = '<div style="display: flex; flex-direction: column; gap: 4px; width: 33.33%; min-width: 300px; user-select: none;">';
+      for (let i = 1; i <= count; i++) {
+        const label = useBulgarianLabels ? bulgarianLetters[i - 1] : String.fromCharCode(64 + i);
+        const answerText = customAnswers.length > 0 ? customAnswers[i - 1] : `Option ${i}`;
+        checklistHtml += `<div class="option-answer" style="display: flex; align-items: center; padding: 6px 8px; cursor: pointer; transition: all 0.2s; border-left: 4px solid transparent; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; user-select: none; font-weight: 400;" data-selected="false"><div style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 2px solid #d1d5db; border-radius: 50%; margin-right: 12px; cursor: pointer; font-weight: bold; user-select: none; background-color: white; color: #374151; flex-shrink: 0; transition: all 0.2s; pointer-events: none; line-height: 1; font-size: 16px;" class="option-circle" data-option="${label}" contenteditable="false">${label}</div><span style="font-size: 16px; cursor: pointer; color: #374151; user-select: none;" class="option-text" data-option="${label}">${answerText}</span></div>`;
+      }
+      checklistHtml += '</div>';
+      
+      // Create a temporary container
+      const temp = document.createElement('div');
+      temp.innerHTML = checklistHtml;
+      
+      // Get the container element
+      const container = temp.querySelector('div');
+      
+      // Add click handlers to answers
+      const answers = container.querySelectorAll('.option-answer');
+      answers.forEach(answer => {
+        answer.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const circle = this.querySelector('.option-circle');
+          const text = this.querySelector('.option-text');
+          const isSelected = this.getAttribute('data-selected') === 'true';
+          
+          if (isSelected) {
+            // Deselect
+            this.style.backgroundColor = '#f9fafb';
+            this.style.borderLeftColor = 'transparent';
+            circle.style.backgroundColor = 'white';
+            circle.style.color = '#374151';
+            circle.style.borderColor = '#d1d5db';
+            text.style.color = '#374151';
+            this.setAttribute('data-selected', 'false');
+          } else {
+            // Select
+            this.style.backgroundColor = '#f3f4f6';
+            this.style.borderLeftColor = '#7c3aed';
+            circle.style.backgroundColor = '#1f2937';
+            circle.style.color = 'white';
+            circle.style.borderColor = '#1f2937';
+            text.style.color = '#1f2937';
+            this.setAttribute('data-selected', 'true');
+          }
+        });
+      });
+      
+      // Insert the container at cursor position
+      range.insertNode(container);
+      
+      // Add a line break after for spacing
+      const br = document.createElement('br');
+      range.setStartAfter(container);
+      range.insertNode(br);
+      
+      // Move cursor after the br
+      range.setStartAfter(br);
+      range.collapse(true);
+      
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      // Close modal and reset
+      document.getElementById('checklistModal').style.display = 'none';
+      document.getElementById('checklistCountInput').value = '4';
+      document.getElementById('checklistTextInput').value = '';
+      document.getElementById('checklistBulgarianLabelsCheckbox').checked = true;
+      savedChecklistRange = null; // Clear saved range
+      
+      saveToHistory();
+      editor.focus();
+    });
+
     document.getElementById('clearBtn').addEventListener('click', () => {
       if (confirm('Are you sure you want to clear all content?')) {
         editor.innerHTML = '<p></p>';
@@ -2710,6 +2916,137 @@ renderMathInElement(document.body, {
         shortcutsModal.classList.remove('open');
       }
     });
+
+    // Reset font size functionality
+    function resetFontSizes() {
+      const editor = document.getElementById('editor');
+      
+      // Define default font sizes for each element type
+      const defaultSizes = {
+        'h1': '1.5em',
+        'h2': '1.3em',
+        'h3': '1.1em',
+        'h4': '1.05em',
+        'p': '1em',
+        'li': '1em',
+        'blockquote': '1em',
+        'code': '0.9em',
+        'td': '1em',
+        'th': '1em'
+      };
+      
+      // Reset all elements
+      Object.entries(defaultSizes).forEach(([selector, fontSize]) => {
+        const elements = editor.querySelectorAll(selector);
+        elements.forEach(el => {
+          el.style.fontSize = fontSize;
+        });
+      });
+      
+      // Also reset inline style font-size on any element
+      const allElements = editor.querySelectorAll('*');
+      allElements.forEach(el => {
+        if (el.style.fontSize) {
+          const tag = el.tagName.toLowerCase();
+          if (defaultSizes[tag]) {
+            el.style.fontSize = defaultSizes[tag];
+          } else {
+            // For other elements, reset to inherit
+            el.style.fontSize = 'inherit';
+          }
+        }
+      });
+      
+      saveToHistory();
+      
+      // Show notification
+      const notification = document.createElement('div');
+      notification.textContent = '✓ Font sizes reset to default';
+      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.transition = 'opacity 0.3s';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
+    }
+
+    // Reset font size button event listener
+    const resetFontSizeBtn = document.getElementById('resetFontSizeBtn');
+    if (resetFontSizeBtn) {
+      resetFontSizeBtn.addEventListener('click', () => {
+        resetFontSizes();
+      });
+    }
+
+    // Gemini button - Copy prompt to clipboard and open Gemini
+    const geminiBtn = document.getElementById('geminiBtn');
+    if (geminiBtn) {
+      geminiBtn.addEventListener('click', () => {
+        const geminiPrompt = `Преобразувай целия следващ текст в СУРОВ MD КОД с цел максимална четимост и ясна структура.
+
+Ако изпращам текста на части, продължавай смислово от последната завършена секция.
+
+Изисквания за форматиране:
+1.  Използвай **H1 (#)** само веднъж за главното заглавие на темата.
+2.  Използвай **H3 (###)** и **H4 (####)** за всички подтеми и секции. Избягвай H2.
+3.  Преобразувай дългите абзаци в ЛОГИЧЕСКИ СПИСЪЦИ (bullet points), където е възможно, за да се подобри прегледността.
+4.  Използвай удебеляване (bold) за ключови термини, синдроми и анатомични структури.
+5.  СЪДЪРЖАНИЕТО да бъде запазено изцяло, но форматиране може да бъде променено за по-добра структура и четимост.
+6.  Не добавяй LaTeX, емоджита, cite_start или снимки.
+7.  Ако има препратки към фигури (напр. "фиг. 8.1"), ги премахни.
+
+Трябва да генерираш само и единствено самия .md код.`;
+
+        // Copy to clipboard
+        navigator.clipboard.writeText(geminiPrompt).then(() => {
+          // Show notification
+          const notification = document.createElement('div');
+          notification.textContent = '✓ Prompt copied to clipboard! Opening Gemini...';
+          notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.style.transition = 'opacity 0.3s';
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+          }, 2000);
+
+          // Open Gemini in new tab
+          window.open('https://gemini.google.com/app', '_blank');
+        }).catch(err => {
+          console.error('Failed to copy:', err);
+          // Show error notification
+          const notification = document.createElement('div');
+          notification.textContent = '✗ Failed to copy prompt';
+          notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #ef4444; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
+          document.body.appendChild(notification);
+          
+          setTimeout(() => {
+            notification.style.transition = 'opacity 0.3s';
+            notification.style.opacity = '0';
+            setTimeout(() => notification.remove(), 300);
+          }, 2000);
+        });
+      });
+    }
+
+    // ChatGPT button - Open ChatGPT
+    const chatgptBtn = document.getElementById('chatgptBtn');
+    if (chatgptBtn) {
+      chatgptBtn.addEventListener('click', () => {
+        window.open('https://chatgpt.com', '_blank');
+      });
+    }
+
+    // UpToDate button - Open UpToDate
+    const uptodateBtn = document.getElementById('uptodateBtn');
+    if (uptodateBtn) {
+      uptodateBtn.addEventListener('click', () => {
+        window.open('https://www.uptodate.com/contents/search', '_blank');
+      });
+    }
 
     // Raw code modal - TOGGLE MODE
     // Function to apply syntax highlighting to markdown
@@ -3085,32 +3422,14 @@ renderMathInElement(document.body, {
 
     // Save to history on input and detect "---" for horizontal rule
     editor.addEventListener('input', () => {
-      // SAFE: Only remove completely empty <p> tags
-      let cleanedHtml = editor.innerHTML;
-      cleanedHtml = cleanedHtml.replace(/<p>\s*<\/p>/g, '');
-      
-      // If HTML changed, update editor (preserve cursor position)
-      if (cleanedHtml !== editor.innerHTML) {
-        const sel = window.getSelection();
-        const range = sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
-        const offset = range ? range.startOffset : 0;
-        const container = range ? range.startContainer : null;
-        
-        editor.innerHTML = cleanedHtml;
-        
-        // Try to restore cursor position
-        if (container && editor.contains(container)) {
-          try {
-            const newRange = document.createRange();
-            newRange.setStart(container, Math.min(offset, container.length || 0));
-            newRange.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(newRange);
-          } catch (e) {
-            // Ignore cursor restoration errors
-          }
+      // SAFE: Only remove completely empty <p> tags using textContent manipulation
+      // Instead of innerHTML which breaks cursor position
+      const emptyParagraphs = editor.querySelectorAll('p');
+      emptyParagraphs.forEach(p => {
+        if (p.textContent.trim() === '' && !p.querySelector('input, img, br')) {
+          p.remove();
         }
-      }
+      });
       
       if (editor.textContent.trim().length > 0) {
         // Debounce history saving
@@ -3192,6 +3511,15 @@ renderMathInElement(document.body, {
       // Create temporary container with the HTML
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = html;
+      
+      // Remove all style attributes to prevent font size changes
+      const allElements = tempDiv.querySelectorAll('*');
+      allElements.forEach(el => {
+        el.removeAttribute('style');
+        // Also remove font-related attributes
+        el.removeAttribute('size');
+        el.removeAttribute('face');
+      });
       
       // Delete current selection
       range.deleteContents();
