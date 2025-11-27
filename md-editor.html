@@ -1094,19 +1094,23 @@
       </div>
       <div class="modal-body">
         <div style="margin-bottom: 16px;">
-          <label for="checklistCountInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Number of Checkboxes</label>
+          <label for="checklistCountInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Number of Options</label>
           <input type="number" id="checklistCountInput" placeholder="e.g., 4" value="4" min="1" max="20" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
-          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">Will be overridden if you paste text below</div>
         </div>
         <div style="margin-bottom: 16px;">
           <label for="checklistTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Paste Answer Text (one per line)</label>
-          <textarea id="checklistTextInput" placeholder="Paste each answer on a new line..." style="width: 100%; height: 150px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: monospace; resize: vertical;"></textarea>
-          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">Each line becomes one answer option</div>
+          <textarea id="checklistTextInput" placeholder="Paste each answer on a new line..." style="width: 100%; height: 120px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: monospace; resize: vertical;"></textarea>
         </div>
         <div style="margin-bottom: 16px;">
           <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500; color: #374151;">
-            <input type="checkbox" id="checklistBulgarianLabelsCheckbox" checked style="margin-right: 8px; cursor: pointer;">
-            Use Bulgarian letters (А, Б, В, Г)
+            <input type="checkbox" id="checklistHighlightCheckbox" checked style="margin-right: 8px; cursor: pointer;">
+            Highlight selected answer in red
+          </label>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500; color: #374151;">
+            <input type="checkbox" id="checklistBoldCheckbox" style="margin-right: 8px; cursor: pointer;">
+            Bold selected answer
           </label>
         </div>
       </div>
@@ -2800,7 +2804,8 @@ renderMathInElement(document.body, {
         count = parseInt(document.getElementById('checklistCountInput').value) || 4;
       }
       
-      const useBulgarianLabels = document.getElementById('checklistBulgarianLabelsCheckbox').checked;
+      const doHighlight = document.getElementById('checklistHighlightCheckbox').checked;
+      const doBold = document.getElementById('checklistBoldCheckbox').checked;
       
       // Use saved range
       let range = savedChecklistRange;
@@ -2816,59 +2821,54 @@ renderMathInElement(document.body, {
       // Bulgarian letters: А, Б, В, Г, Д, ...
       const bulgarianLetters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У'];
       
-      // Build the HTML for the checklist with styled circle buttons
-      let checklistHtml = '<div style="display: flex; flex-direction: column; gap: 4px; width: 33.33%; min-width: 300px; user-select: none;">';
+      // Build the HTML for the checklist
+      let checklistHtml = '<ul style="list-style-type: none; padding-left: 0;">';
       for (let i = 1; i <= count; i++) {
-        const label = useBulgarianLabels ? bulgarianLetters[i - 1] : String.fromCharCode(64 + i);
+        const label = bulgarianLetters[i - 1];
         const answerText = customAnswers.length > 0 ? customAnswers[i - 1] : `Option ${i}`;
-        checklistHtml += `<div class="option-answer" style="display: flex; align-items: center; padding: 6px 8px; cursor: pointer; transition: all 0.2s; border-left: 4px solid transparent; background-color: #f9fafb; border-bottom: 1px solid #e5e7eb; user-select: none; font-weight: 400;" data-selected="false"><div style="display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border: 2px solid #d1d5db; border-radius: 50%; margin-right: 12px; cursor: pointer; font-weight: bold; user-select: none; background-color: white; color: #374151; flex-shrink: 0; transition: all 0.2s; pointer-events: none; line-height: 1; font-size: 16px;" class="option-circle" data-option="${label}" contenteditable="false">${label}</div><span style="font-size: 16px; cursor: pointer; color: #374151; user-select: none;" class="option-text" data-option="${label}">${answerText}</span></div>`;
+        
+        checklistHtml += `<li style="margin-bottom: 8px; display: flex; align-items: center;"><span class="checklist-circle" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 1px solid #999; border-radius: 50%; margin-right: 8px; font-size: 12px; font-weight: bold; background-color: white; color: #000; transition: all 0.2s;">${label}</span><span class="checklist-item" style="cursor: pointer;">${answerText}</span></li>`;
       }
-      checklistHtml += '</div>';
+      checklistHtml += '</ul>';
       
       // Create a temporary container
       const temp = document.createElement('div');
       temp.innerHTML = checklistHtml;
       
-      // Get the container element
-      const container = temp.querySelector('div');
+      // Get the UL element
+      const ul = temp.querySelector('ul');
       
-      // Add click handlers to answers
-      const answers = container.querySelectorAll('.option-answer');
-      answers.forEach(answer => {
-        answer.addEventListener('click', function(e) {
+      // Add click handlers to checklist items
+      const items = ul.querySelectorAll('li');
+      items.forEach(item => {
+        item.addEventListener('click', function(e) {
           e.stopPropagation();
-          const circle = this.querySelector('.option-circle');
-          const text = this.querySelector('.option-text');
-          const isSelected = this.getAttribute('data-selected') === 'true';
+          const circle = this.querySelector('.checklist-circle');
+          const span = this.querySelector('.checklist-item');
+          const isSelected = circle.style.backgroundColor === 'rgb(0, 0, 0)';
           
           if (isSelected) {
             // Deselect
-            this.style.backgroundColor = '#f9fafb';
-            this.style.borderLeftColor = 'transparent';
             circle.style.backgroundColor = 'white';
-            circle.style.color = '#374151';
-            circle.style.borderColor = '#d1d5db';
-            text.style.color = '#374151';
-            this.setAttribute('data-selected', 'false');
+            circle.style.color = '#000';
+            if (doHighlight) span.style.color = 'inherit';
+            if (doBold) span.style.fontWeight = 'normal';
           } else {
             // Select
-            this.style.backgroundColor = '#f3f4f6';
-            this.style.borderLeftColor = '#7c3aed';
-            circle.style.backgroundColor = '#1f2937';
+            circle.style.backgroundColor = '#000';
             circle.style.color = 'white';
-            circle.style.borderColor = '#1f2937';
-            text.style.color = '#1f2937';
-            this.setAttribute('data-selected', 'true');
+            if (doHighlight) span.style.color = '#ef4444';
+            if (doBold) span.style.fontWeight = 'bold';
           }
         });
       });
       
-      // Insert the container at cursor position
-      range.insertNode(container);
+      // Insert the UL at cursor position
+      range.insertNode(ul);
       
       // Add a line break after for spacing
       const br = document.createElement('br');
-      range.setStartAfter(container);
+      range.setStartAfter(ul);
       range.insertNode(br);
       
       // Move cursor after the br
@@ -2883,7 +2883,8 @@ renderMathInElement(document.body, {
       document.getElementById('checklistModal').style.display = 'none';
       document.getElementById('checklistCountInput').value = '4';
       document.getElementById('checklistTextInput').value = '';
-      document.getElementById('checklistBulgarianLabelsCheckbox').checked = true;
+      document.getElementById('checklistHighlightCheckbox').checked = true;
+      document.getElementById('checklistBoldCheckbox').checked = false;
       savedChecklistRange = null; // Clear saved range
       
       saveToHistory();
@@ -2989,7 +2990,7 @@ renderMathInElement(document.body, {
 Изисквания за форматиране:
 1. Генерирай само и единствено самия .md код, ОГРАДЕН В БЛОК ЗА КОД (markdown...), за да може да бъде копиран.
 2. Използвай **H1 (#)** само веднъж за главното заглавие на темата.
-3. Използвай **H3 (###)** и **H4 (####)** за всички подтеми и секции. Избягвай H2.
+3. Използвай **H3 (###)** и **H4 (####)** за всички подтеми и секции. Избягвай H2. Не използвай H5 или по-ниски.
 4. Преобразувай дългите абзаци в ЛОГИЧЕСКИ СПИСЪЦИ (bullet points), където е възможно, за да се подобри прегледността.
 5. Използвай удебеляване (bold) за ключови термини, синдроми и анатомични структури.
 6. СЪДЪРЖАНИЕТО да бъде запазено изцяло, но форматиране може да бъде променено за по-добра структура и четимост.
