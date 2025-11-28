@@ -1,0 +1,133 @@
+{
+  "questionType": "drugToGroup",
+  "questionCount": 10,
+  "groups": [
+    {
+      "groupName": "Антидиабетични лекарства - инсулини с бързко и кратко действие - човешки инсулини",
+      "drugs": [
+        "Regular insulin (Insulin Actrapid)",
+        "Insulin Actrapid penfill",
+        "Humulin R"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства - инсулини с бързко и кратко действие - инсулинови аналози",
+      "drugs": [
+        "Insulin lispro",
+        "Insulin aspart"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства - инсулини с интермедиерно действие - самостоятелни инсулини",
+      "drugs": [
+        "Insulatard",
+        "Humulin N"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства - инсулини с интермедиерно действие - инсулинови смеси:",
+      "drugs": [
+        "Insulin Mixtard",
+        "Humulin M1"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства - инсулини с интермедиерно действие - смеси от инсулинови аналози",
+      "drugs": [
+        "Insulin lispro + Insulin lispro protamine"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства - инсулини с интермедиерно действие - дълго действащи инсулинови аналози",
+      "drugs": [
+        "Insulin glargine penfill",
+        "Insulin detemir penfill"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инсулинови очувствители. Бигваниди",
+      "drugs": [
+        "Metformin"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инсулинови очувствители. Тиазолидиндиони",
+      "drugs": [
+        "Pioglitazone"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инсулинови секретагоги. Сулфонилурейни",
+      "drugs": [
+        "Glibenclamide",
+        "Glipizide",
+        "Gliclazide",
+        "Glimepiride"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инсулинови секретагоги. Меглитиниди",
+      "drugs": [
+        "Repaglinide",
+        "Nateglinide"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инсулинови секретагоги. Алфа-глюкозидазни инхибитори",
+      "drugs": [
+        "Acarbose"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инкретинови миметици.",
+      "drugs": [
+        "Exenatide",
+        "Dulaglutide",
+        "Liraglutide",
+        "Lixisenatide"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инхибитори на дипептидил пептидаза-4 (DPP-4)",
+      "drugs": [
+        "Sitagliptin",
+        "Vildagliptin",
+        "Saxagliptin",
+        "Linagliptin"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Глюкуретици: инхибитори на натриево-глюкозен котранспортер 2 (SGLT2)",
+      "drugs": [
+        "Dapagliflozin",
+        "Empagliflozin",
+        "Canagliflozin"
+      ]
+    },
+    {
+      "groupName": "Антихипогликемични лекарства",
+      "drugs": [
+        "Glucagon"
+      ]
+    },
+    {
+      "groupName": "Tиреотропни лекарства.Тиреомиметици",
+      "drugs": [
+        "Levothyroxine"
+      ]
+    },
+    {
+      "groupName": "Tиреотропни лекарства.Тиреостатици",
+      "drugs": [
+        "Thiamazole",
+        "Propylthiouracil"
+      ]
+    },
+    {
+      "groupName": "Tиреотропни лекарства. Йодиди",
+      "drugs": [
+        "Potassium iodide"
+      ]
+    }
+  ]
+}
