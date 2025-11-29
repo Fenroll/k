@@ -124,7 +124,16 @@
       "groupName": "Антиретровирусни лекарства – интегразни инхибитори",
       "drugs": [
         "Raltegravir",
-        "Dolutegravir"
+        "Dolutegravir",
+		"Elvitegravir"
+      ]
+    },
+	  {
+      "groupName": "Антиретровирусни лекарства – интегразни инхибитори",
+      "drugs": [
+        "Raltegravir",
+        "Dolutegravir",
+		"Elvitegravir"
       ]
     },
     {
@@ -132,6 +141,7 @@
       "drugs": [
         "Entecavir",
         "Tenfovir",
+		"Lamivudine",
         "Interferon alfa-2a",
         "Peginterferon alfa-2a"
       ]
