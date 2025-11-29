@@ -1,6 +1,6 @@
 {
-  "questionType": "drugToGroup",
-  "questionCount": 10,
+  "questionType": "both",
+  "questionCount": 20,
   "groups": [
     {
       "groupName": "Пеницилини – тясноспектърни - природни бета-лактамаза чувствителни",
@@ -25,7 +25,7 @@
       ]
     },
     {
-      "groupName": "Цефалоспорини - I поколение",
+      "groupName": "Цефалоспорини I поколение",
       "drugs": [
         "Cefalexin",
         "Cefadroxil",
@@ -33,7 +33,7 @@
       ]
     },
     {
-      "groupName": "Цефалоспорини - II поколене",
+      "groupName": "Цефалоспорини II поколене",
       "drugs": [
         "Cefuroxime",
         "Cefamandole",
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "groupName": "Цефалоспорини - III поколене",
+      "groupName": "Цефалоспорини III поколене",
       "drugs": [
         "Cefriaxone",
         "Cefoperazone",
@@ -53,33 +53,33 @@
       ]
     },
     {
-      "groupName": "Цефалоспорини - IV поколене",
+      "groupName": "Цефалоспорини IV поколене",
       "drugs": [
         "Cefepime"
       ]
     },
     {
-      "groupName": "Цефалоспорини - V поколене",
+      "groupName": "Цефалоспорини V поколене",
       "drugs": [
         "Ceftaroline"
       ]
     },
     {
-      "groupName": "Карбаценеми",
+      "groupName": "Карбапенеми",
       "drugs": [
         "Imipenem",
         "Meropenem"
       ]
     },
     {
-      "groupName": "Гликопептиди",
+      "groupName": "Гликопептидни антибиотици",
       "drugs": [
         "Vancomycin",
         "Teicoplanin"
       ]
     },
     {
-      "groupName": "Аминогликозиди - природни",
+      "groupName": "Аминогликозидни антибиотици - природни",
       "drugs": [
         "Gentamicin",
         "Tobramycin",
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "groupName": "Аминогликозиди - полусинтетични",
+      "groupName": "Аминогликозидни антибиотици - полусинтетични",
       "drugs": [
         "Amikacin"
       ]
@@ -101,7 +101,7 @@
       ]
     },
     {
-      "groupName": "Синтетични бактерицидни лекарства. Флуорирани хинолони - I поколение",
+      "groupName": "Флуорирани хинолони I поколение",
       "drugs": [
         "Ciprofloxacin",
         "Norfloxacin",
@@ -109,7 +109,7 @@
       ]
     },
     {
-      "groupName": "Синтетични бактерицидни лекарства. Флуорирани хинолони - II поколение",
+      "groupName": "Флуорирани хинолони II поколение",
       "drugs": [
         "Moxifloxacin",
         "Levofloxacin"
@@ -123,21 +123,15 @@
       ]
     },
     {
-      "groupName": "Пеницилини – широкоспектърни – карбоксипеницилини - бета-лактамаза чувствителни",
+      "groupName": "Пеницилини – широкоспектърни – карбоксипеницилини",
       "drugs": [
         "Carbenicilin"
       ]
     },
     {
-      "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили - бета-лактамаза чувствителни",
+      "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили",
       "drugs": [
-        "piperacilin"
-      ]
-    },
-    {
-      "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили - бета-лактамаза резистентни комбинации с бета-лактамазен инхибитор",
-      "drugs": [
-        "Piperacilin + Tazobactam = Tazocin"
+        "Piperacilin"
       ]
     }
   ]
