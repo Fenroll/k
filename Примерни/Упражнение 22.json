@@ -1,0 +1,73 @@
+{
+  "questionType": "both",
+  "questionCount": 20,
+  "groups": [
+    {
+      "groupName": "Тетрациклини - природни",
+      "drugs": [
+        "Tetracycline",
+        "Doxycycline"
+      ]
+    },
+    {
+      "groupName": "Амфениколи",
+      "drugs": [
+        "Chloramphenicol"
+      ]
+    },
+    {
+      "groupName": "Макролиди I поколение",
+      "drugs": [
+        "Erythromycin",
+        "Spiramycin"
+      ]
+    },
+    {
+      "groupName": "Макролиди II поколение",
+      "drugs": [
+        "Clarithromycin",
+        "Azithromycin",
+        "Midecamycin",
+        "Roxithromycin"
+      ]
+    },
+    {
+      "groupName": "Линкозамиди",
+      "drugs": [
+        "Clindamycin",
+        "Lincomycin"
+      ]
+    },
+    {
+      "groupName": "Сулфонамиди със системно действие",
+      "drugs": [
+        "Sulfamethoxazole + Trimethoprim = Co-trimoxazole"
+      ]
+    },
+    {
+      "groupName": "Сулфонамиди с локално действие в храносмилателния тракт",
+      "drugs": [
+        "Sulfasalazine"
+      ]
+    },
+    {
+      "groupName": "Сулфонамиди с локално действие върху кожата",
+      "drugs": [
+        "Sulfathiazole"
+      ]
+    },
+    {
+      "groupName": "Оксазолидинони",
+      "drugs": [
+        "Linezolid"
+      ]
+    },
+    {
+      "groupName": "Антианаеробни антимикробни лекарства – нитроимидазоли",
+      "drugs": [
+        "Metronidazole",
+        "Tinidazole"
+      ]
+    }
+  ]
+}
