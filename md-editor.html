@@ -1042,17 +1042,13 @@
       </div>
       <div class="modal-body">
         <div style="margin-bottom: 16px;">
-          <label for="imageFileInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Choose Image File</label>
-          <input type="file" id="imageFileInput" accept="image/*" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
-          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">Supported: JPG, PNG, GIF, WebP, SVG</div>
+          <label for="imageNameInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Image File Name</label>
+          <input type="text" id="imageNameInput" placeholder="e.g., photo.png" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">File must exist in assets/ folder</div>
         </div>
         <div style="margin-bottom: 16px;">
           <label for="imageAltInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Alt Text (Description)</label>
           <input type="text" id="imageAltInput" placeholder="e.g., Brain hemisphere diagram" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
-        </div>
-        <div id="imagePreview" style="margin-bottom: 16px; display: none;">
-          <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Preview</label>
-          <img id="previewImg" style="max-width: 100%; max-height: 200px; border-radius: 4px; border: 1px solid #d1d5db;">
         </div>
       </div>
       <div class="modal-footer">
@@ -2808,15 +2804,13 @@ renderMathInElement(document.body, {
     });
     
     document.getElementById('insertImageBtn').addEventListener('click', () => {
-      const fileInput = document.getElementById('imageFileInput');
+      const imageName = document.getElementById('imageNameInput').value.trim();
       const imageAlt = document.getElementById('imageAltInput').value.trim();
       
-      if (!fileInput.files || fileInput.files.length === 0) {
-        alert('Please select an image file');
+      if (!imageName) {
+        alert('Please enter image file name');
         return;
       }
-      
-      const file = fileInput.files[0];
       
       // Use saved range if available, otherwise get current selection
       let range = savedImageRange;
@@ -2829,158 +2823,36 @@ renderMathInElement(document.body, {
         range = selection.getRangeAt(0);
       }
       
-      // Read file as base64
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64Data = e.target.result;
-        
-        // Create img element with base64 data
-        const img = document.createElement('img');
-        img.src = base64Data;
-        img.alt = imageAlt || file.name;
-        img.style.maxWidth = '100%';
-        img.style.height = 'auto';
-        
-        range.insertNode(img);
-        
-        // Add line break after image
-        const br = document.createElement('br');
-        range.setStartAfter(img);
-        range.insertNode(br);
-        
-        // Move cursor after br
-        range.setStartAfter(br);
-        range.collapse(true);
-        
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
-        
-        // Clear inputs and close modal
-        document.getElementById('imageFileInput').value = '';
-        document.getElementById('imageAltInput').value = '';
-        document.getElementById('imagePreview').style.display = 'none';
-        document.getElementById('imageModal').style.display = 'none';
-        savedImageRange = null; // Clear saved range
-        
-        saveToHistory();
-        editor.focus();
-      };
+      const img = document.createElement('img');
+      img.src = 'assets/' + imageName;
+      img.alt = imageAlt || imageName;
+      img.style.maxWidth = '100%';
+      img.style.height = 'auto';
+      img.setAttribute('data-original-src', 'assets/' + imageName);
       
-      reader.readAsDataURL(file);
-    });
-
-    // Preview image when file is selected
-    document.getElementById('imageFileInput').addEventListener('change', function() {
-      if (this.files && this.files[0]) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const previewImg = document.getElementById('previewImg');
-          previewImg.src = e.target.result;
-          document.getElementById('imagePreview').style.display = 'block';
-        };
-        reader.readAsDataURL(this.files[0]);
-      }
-    });
-
-    // Drag and drop for images
-    editor.addEventListener('dragover', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      editor.style.background = '#fef3c7';
-    });
-
-    editor.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      editor.style.background = '#fff';
-    });
-
-    editor.addEventListener('drop', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      editor.style.background = '#fff';
+      range.insertNode(img);
       
-      const files = e.dataTransfer.files;
-      if (files.length === 0) return;
+      // Add line break after image
+      const br = document.createElement('br');
+      range.setStartAfter(img);
+      range.insertNode(br);
       
-      // Get drop position
-      let range;
-      if (document.caretRangeFromPoint) {
-        range = document.caretRangeFromPoint(e.clientX, e.clientY);
-      } else if (e.rangeParent) {
-        range = document.createRange();
-        range.setStart(e.rangeParent, e.rangeOffset);
-      }
+      // Move cursor after br
+      range.setStartAfter(br);
+      range.collapse(true);
       
-      // Process each dropped file
-      Array.from(files).forEach(file => {
-        if (file.type.startsWith('image/')) {
-          console.log('Image dropped:', file.name);
-          
-          // Create FileReader to get base64
-          const reader = new FileReader();
-          reader.onload = (event) => {
-            const base64 = event.target.result;
-            const fileName = file.name;
-            
-            console.log('Image loaded, creating element...');
-            
-            // Create img element with base64
-            const img = document.createElement('img');
-            img.src = base64;
-            img.alt = fileName.replace(/\.[^.]+$/, ''); // Remove extension for alt
-            img.style.maxWidth = '100%';
-            img.style.height = 'auto';
-            
-            // Insert at drop position
-            if (range) {
-              range.insertNode(img);
-              
-              // Add a line break after image
-              const br = document.createElement('br');
-              range.setStartAfter(img);
-              range.insertNode(br);
-              
-              // Move cursor after br
-              range.setStartAfter(br);
-              range.collapse(true);
-              const selection = window.getSelection();
-              selection.removeAllRanges();
-              selection.addRange(range);
-            } else {
-              // Fallback: append to editor
-              editor.appendChild(img);
-              editor.appendChild(document.createElement('br'));
-            }
-            
-            saveToHistory();
-            console.log('Image inserted successfully');
-            
-            // Show notification
-            const notification = document.createElement('div');
-            notification.textContent = `✓ Image added: ${fileName}`;
-            notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px; max-width: 400px;';
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-              notification.style.transition = 'opacity 0.3s';
-              notification.style.opacity = '0';
-              setTimeout(() => notification.remove(), 300);
-            }, 3000);
-          };
-          reader.readAsDataURL(file);
-        }
-      });
-    });
-
-    // Prevent default drag & drop behavior on the whole page
-    document.addEventListener('dragover', (e) => {
-      e.preventDefault();
-    });
-
-    document.addEventListener('drop', (e) => {
-      e.preventDefault();
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      // Clear inputs and close modal
+      document.getElementById('imageNameInput').value = '';
+      document.getElementById('imageAltInput').value = '';
+      document.getElementById('imageModal').style.display = 'none';
+      savedImageRange = null; // Clear saved range
+      
+      saveToHistory();
+      editor.focus();
     });
 
     // Checklist modal events
