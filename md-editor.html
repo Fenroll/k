@@ -1042,13 +1042,17 @@
       </div>
       <div class="modal-body">
         <div style="margin-bottom: 16px;">
-          <label for="imageNameInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Image File Name</label>
-          <input type="text" id="imageNameInput" placeholder="e.g., photo.png" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
-          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">File must exist in assets/ folder</div>
+          <label for="imageFileInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Choose Image File</label>
+          <input type="file" id="imageFileInput" accept="image/*" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">Supported: JPG, PNG, GIF, WebP, SVG</div>
         </div>
         <div style="margin-bottom: 16px;">
           <label for="imageAltInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Alt Text (Description)</label>
           <input type="text" id="imageAltInput" placeholder="e.g., Brain hemisphere diagram" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+        </div>
+        <div id="imagePreview" style="margin-bottom: 16px; display: none;">
+          <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Preview</label>
+          <img id="previewImg" style="max-width: 100%; max-height: 200px; border-radius: 4px; border: 1px solid #d1d5db;">
         </div>
       </div>
       <div class="modal-footer">
@@ -2804,13 +2808,15 @@ renderMathInElement(document.body, {
     });
     
     document.getElementById('insertImageBtn').addEventListener('click', () => {
-      const imageName = document.getElementById('imageNameInput').value.trim();
+      const fileInput = document.getElementById('imageFileInput');
       const imageAlt = document.getElementById('imageAltInput').value.trim();
       
-      if (!imageName) {
-        alert('Please enter image file name');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        alert('Please select an image file');
         return;
       }
+      
+      const file = fileInput.files[0];
       
       // Use saved range if available, otherwise get current selection
       let range = savedImageRange;
@@ -2823,36 +2829,58 @@ renderMathInElement(document.body, {
         range = selection.getRangeAt(0);
       }
       
-      const img = document.createElement('img');
-      img.src = 'assets/' + imageName;
-      img.alt = imageAlt || imageName;
-      img.style.maxWidth = '100%';
-      img.style.height = 'auto';
-      img.setAttribute('data-original-src', 'assets/' + imageName);
+      // Read file as base64
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const base64Data = e.target.result;
+        
+        // Create img element with base64 data
+        const img = document.createElement('img');
+        img.src = base64Data;
+        img.alt = imageAlt || file.name;
+        img.style.maxWidth = '100%';
+        img.style.height = 'auto';
+        
+        range.insertNode(img);
+        
+        // Add line break after image
+        const br = document.createElement('br');
+        range.setStartAfter(img);
+        range.insertNode(br);
+        
+        // Move cursor after br
+        range.setStartAfter(br);
+        range.collapse(true);
+        
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+        
+        // Clear inputs and close modal
+        document.getElementById('imageFileInput').value = '';
+        document.getElementById('imageAltInput').value = '';
+        document.getElementById('imagePreview').style.display = 'none';
+        document.getElementById('imageModal').style.display = 'none';
+        savedImageRange = null; // Clear saved range
+        
+        saveToHistory();
+        editor.focus();
+      };
       
-      range.insertNode(img);
-      
-      // Add line break after image
-      const br = document.createElement('br');
-      range.setStartAfter(img);
-      range.insertNode(br);
-      
-      // Move cursor after br
-      range.setStartAfter(br);
-      range.collapse(true);
-      
-      const selection = window.getSelection();
-      selection.removeAllRanges();
-      selection.addRange(range);
-      
-      // Clear inputs and close modal
-      document.getElementById('imageNameInput').value = '';
-      document.getElementById('imageAltInput').value = '';
-      document.getElementById('imageModal').style.display = 'none';
-      savedImageRange = null; // Clear saved range
-      
-      saveToHistory();
-      editor.focus();
+      reader.readAsDataURL(file);
+    });
+
+    // Preview image when file is selected
+    document.getElementById('imageFileInput').addEventListener('change', function() {
+      if (this.files && this.files[0]) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const previewImg = document.getElementById('previewImg');
+          previewImg.src = e.target.result;
+          document.getElementById('imagePreview').style.display = 'block';
+        };
+        reader.readAsDataURL(this.files[0]);
+      }
     });
 
     // Checklist modal events
