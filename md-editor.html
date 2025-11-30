@@ -2883,6 +2883,106 @@ renderMathInElement(document.body, {
       }
     });
 
+    // Drag and drop for images
+    editor.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      editor.style.background = '#fef3c7';
+    });
+
+    editor.addEventListener('dragleave', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      editor.style.background = '#fff';
+    });
+
+    editor.addEventListener('drop', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      editor.style.background = '#fff';
+      
+      const files = e.dataTransfer.files;
+      if (files.length === 0) return;
+      
+      // Get drop position
+      let range;
+      if (document.caretRangeFromPoint) {
+        range = document.caretRangeFromPoint(e.clientX, e.clientY);
+      } else if (e.rangeParent) {
+        range = document.createRange();
+        range.setStart(e.rangeParent, e.rangeOffset);
+      }
+      
+      // Process each dropped file
+      Array.from(files).forEach(file => {
+        if (file.type.startsWith('image/')) {
+          console.log('Image dropped:', file.name);
+          
+          // Create FileReader to get base64
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const base64 = event.target.result;
+            const fileName = file.name;
+            
+            console.log('Image loaded, creating element...');
+            
+            // Create img element with base64
+            const img = document.createElement('img');
+            img.src = base64;
+            img.alt = fileName.replace(/\.[^.]+$/, ''); // Remove extension for alt
+            img.style.maxWidth = '100%';
+            img.style.height = 'auto';
+            
+            // Insert at drop position
+            if (range) {
+              range.insertNode(img);
+              
+              // Add a line break after image
+              const br = document.createElement('br');
+              range.setStartAfter(img);
+              range.insertNode(br);
+              
+              // Move cursor after br
+              range.setStartAfter(br);
+              range.collapse(true);
+              const selection = window.getSelection();
+              selection.removeAllRanges();
+              selection.addRange(range);
+            } else {
+              // Fallback: append to editor
+              editor.appendChild(img);
+              editor.appendChild(document.createElement('br'));
+            }
+            
+            saveToHistory();
+            console.log('Image inserted successfully');
+            
+            // Show notification
+            const notification = document.createElement('div');
+            notification.textContent = `✓ Image added: ${fileName}`;
+            notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px; max-width: 400px;';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+              notification.style.transition = 'opacity 0.3s';
+              notification.style.opacity = '0';
+              setTimeout(() => notification.remove(), 300);
+            }, 3000);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    });
+
+    // Prevent default drag & drop behavior on the whole page
+    document.addEventListener('dragover', (e) => {
+      e.preventDefault();
+    });
+
+    document.addEventListener('drop', (e) => {
+      e.preventDefault();
+    });
+
     // Checklist modal events
     const checklistModal = document.getElementById('checklistModal');
     
