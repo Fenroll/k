@@ -1,0 +1,805 @@
+{
+  "questionType": "both",
+  "questionCount": 20,
+  "groups": [
+    {
+      "groupName": "Пеницилини – тясноспектърни - природни бета-лактамаза чувствителни",
+      "drugs": [
+        "Benzylpenicilin",
+        "Benathinbenzylpeniclinin",
+        "Phenoxymethylpenicilin"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – тясноспектърни - полусинтетични бета-лактамаза резистентни",
+      "drugs": [
+        "Мeticilin",
+        "Оxacilin"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – широкоспектърни – аминопеницилини – бета-лактамаза чувствителни",
+      "drugs": [
+        "Amoxicilin",
+        "Ampicilin"
+      ]
+    },
+    {
+      "groupName": "Цефалоспорини I поколение",
+      "drugs": [
+        "Cefalexin",
+        "Cefadroxil",
+        "Cefazolin"
+      ]
+    },
+    {
+      "groupName": "Цефалоспорини II поколене",
+      "drugs": [
+        "Cefuroxime",
+        "Cefamandole",
+        "Cefaclor"
+      ]
+    },
+    {
+      "groupName": "Цефалоспорини III поколене",
+      "drugs": [
+        "Cefriaxone",
+        "Cefoperazone",
+        "Cefotaxime",
+        "Ceftazidime",
+        "Ceftibuten",
+        "Cefixime",
+        "Cefpodoxime"
+      ]
+    },
+    {
+      "groupName": "Цефалоспорини IV поколене",
+      "drugs": [
+        "Cefepime"
+      ]
+    },
+    {
+      "groupName": "Цефалоспорини V поколене",
+      "drugs": [
+        "Ceftaroline"
+      ]
+    },
+    {
+      "groupName": "Карбапенеми",
+      "drugs": [
+        "Imipenem",
+        "Meropenem"
+      ]
+    },
+    {
+      "groupName": "Гликопептидни антибиотици",
+      "drugs": [
+        "Vancomycin",
+        "Teicoplanin"
+      ]
+    },
+    {
+      "groupName": "Аминогликозидни антибиотици - природни",
+      "drugs": [
+        "Gentamicin",
+        "Tobramycin",
+        "Streptomycin",
+        "Neomycin"
+      ]
+    },
+    {
+      "groupName": "Аминогликозидни антибиотици - полусинтетични",
+      "drugs": [
+        "Amikacin"
+      ]
+    },
+    {
+      "groupName": "Други антибиотици",
+      "drugs": [
+        "Fosfomycin",
+        "Fidaxomicin"
+      ]
+    },
+    {
+      "groupName": "Флуорирани хинолони I поколение",
+      "drugs": [
+        "Ciprofloxacin",
+        "Norfloxacin",
+        "Ofloxacin"
+      ]
+    },
+    {
+      "groupName": "Флуорирани хинолони II поколение",
+      "drugs": [
+        "Moxifloxacin",
+        "Levofloxacin"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – широкоспектърни – аминопеницилини – бета-лактамаза резистентни",
+      "drugs": [
+        "Amoxicilin + Clavulanic acid",
+        "Ampicilin + Sulbactam"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – широкоспектърни – карбоксипеницилини",
+      "drugs": [
+        "Carbenicilin"
+      ]
+    },
+    {
+      "groupName": "Пеницилини – широкоспектърни – ацилуреиодопеницили",
+      "drugs": [
+        "Piperacilin"
+      ]
+    },
+	 {
+      "groupName": "Тетрациклини",
+      "drugs": [
+        "Tetracycline",
+        "Doxycycline"
+      ]
+    },
+    {
+      "groupName": "Амфениколи",
+      "drugs": [
+        "Chloramphenicol"
+      ]
+    },
+    {
+      "groupName": "Макролиди I поколение",
+      "drugs": [
+        "Erythromycin",
+        "Spiramycin"
+      ]
+    },
+    {
+      "groupName": "Макролиди II поколение",
+      "drugs": [
+        "Clarithromycin",
+        "Azithromycin",
+        "Midecamycin",
+        "Roxithromycin"
+      ]
+    },
+    {
+      "groupName": "Линкозамиди",
+      "drugs": [
+        "Clindamycin",
+        "Lincomycin"
+      ]
+    },
+    {
+      "groupName": "Сулфонамиди със системно действие",
+      "drugs": [
+        "Sulfamethoxazole",
+		"Co-trimoxazole (Sulfamethoxazole + Trimethoprim)"
+      ]
+    },
+    {
+      "groupName": "Сулфонамиди с локално действие в храносмилателния тракт",
+      "drugs": [
+        "Sulfasalazine"
+      ]
+    },
+    {
+      "groupName": "Сулфонамиди с локално действие върху кожата",
+      "drugs": [
+        "Sulfathiazole"
+      ]
+    },
+    {
+      "groupName": "Оксазолидинони",
+      "drugs": [
+        "Linezolid"
+      ]
+    },
+    {
+      "groupName": "Антианаеробни антимикробни лекарства – нитроимидазоли",
+      "drugs": [
+        "Metronidazole",
+        "Tinidazole"
+      ]
+    },
+	{
+      "groupName": "Противогъбичкови лекарства при системни микози – антибиотици",
+      "drugs": [
+        "Amphothericin B",
+        "Caspofungi"
+      ]
+    },
+    {
+      "groupName": "Противогъбичкови лекарства при системни микози – синтетични – азоли",
+      "drugs": [
+        "Fluconazole",
+        "Ketoconazole",
+        "Itraconazole",
+        "Voriconazole"
+      ]
+    },
+    {
+      "groupName": "Противогъбичкови лекарства при системни микози – синтетични – антиметаболити",
+      "drugs": [
+        "Flucytosine"
+      ]
+    },
+    {
+      "groupName": "Противогъбичкови лекарства при повърхностни микози – антибиотици",
+      "drugs": [
+        "Nystatin"
+      ]
+    },
+    {
+      "groupName": "Противогъбичкови лекарства при повърхностни микози – синтетични – азоли",
+      "drugs": [
+        "Ketoconazole",
+        "Miconazole",
+        "Clotrimazole",
+        "Econazole"
+      ]
+    },
+    {
+      "groupName": "Противогъбичкови лекарства при повърхностни микози – синтетични – други",
+      "drugs": [
+        "Ciclopirox olamine",
+        "Amorolfine",
+        "Salicylic acid"
+      ]
+    },
+    {
+      "groupName": "Противогъбичкови лекарства при повърхностни микози – синтетични – алиламини",
+      "drugs": [
+        "Naftifine",
+        "Terbinafine"
+      ]
+    },
+    {
+      "groupName": "Антитуберкулозни лекарства от първи ред",
+      "drugs": [
+        "Rifampicin",
+        "Isoniazid",
+        "Ethambutol",
+        "Pyrazinamide"
+      ]
+    },
+    {
+      "groupName": "Антитуберкулозни лекарства от втори ред",
+      "drugs": [
+        "Streptomycin",
+        "Clarithromycin",
+        "Флуорирани хинолони"
+      ]
+    },
+    {
+      "groupName": "Противовирусни лекарства за Herpes simplex и Varicella zoster вируси",
+      "drugs": [
+        "Aciclovir",
+        "Valaciclovir"
+      ]
+    },
+    {
+      "groupName": "Противовирусни лекарства – противогрипни – инхибитори на вирусното събличане",
+      "drugs": [
+        "Amantadine",
+        "Rimantadine"
+      ]
+    },
+    {
+      "groupName": "Противовирусни лекарства – противогрипни – невраминидазни инхибитори",
+      "drugs": [
+        "Oseltamivir",
+        "Zanamivir"
+      ]
+    },
+    {
+      "groupName": "Антиретровирусни лекарства – нуклеозидни инхибитори на обратната транскриптаза",
+      "drugs": [
+        "Zidovudine",
+        "Lamivudine"
+      ]
+    },
+    {
+      "groupName": "Антиретровирусни лекарства – ненуклеозидни инхибитори на обратната транскриптаза",
+      "drugs": [
+        "Efavirenz",
+        "Nevirapine"
+      ]
+    },
+    {
+      "groupName": "Антиретровирусни лекарства – протеазни инхибитори",
+      "drugs": [
+        "Ritonavir",
+        "Indinavir"
+      ]
+    },
+    {
+      "groupName": "Антиретровирусни лекарства – фузионни инхибитори",
+      "drugs": [
+        "Enfuvirtide",
+        "Maraviroc"
+      ]
+    },
+    {
+      "groupName": "Антиретровирусни лекарства – интегразни инхибитори",
+      "drugs": [
+        "Raltegravir",
+        "Dolutegravir",
+		"Elvitegravir"
+      ]
+    },
+	  {
+      "groupName": "Антиретровирусни лекарства – интегразни инхибитори",
+      "drugs": [
+        "Raltegravir",
+        "Dolutegravir",
+		"Elvitegravir"
+      ]
+    },
+    {
+      "groupName": "Противохепатитни лекарства срещу HBV",
+      "drugs": [
+        "Entecavir",
+        "Tenfovir",
+		"Lamivudine",
+        "Interferon alfa-2a",
+        "Peginterferon alfa-2a"
+      ]
+    },
+    {
+      "groupName": "Противохепатитни лекарства срещу HCV - ковенциална терапия",
+      "drugs": [
+        "Ribavirin"
+      ]
+    },
+    {
+      "groupName": "Директно действащи анти-HCV лекaрства срещу специфични не-структурни (NS) вирусни протеини",
+      "drugs": [
+        "Simeprevir",
+        "Glecaprevir",
+        "Sofosbuvir",
+        "Dasabuvir",
+        "Pibrentasvir",
+        "Velpatasvir",
+        "Glecaprevir + Pibrentasvir = Mavyrеt",
+        "Sofosbuvir + Velpatasvir = Epclusa"
+      ]
+    },
+	 {
+      "groupName": "Лекарства с активност на соматостатин",
+      "drugs": [
+        "Octreotide"
+      ]
+    },
+    {
+      "groupName": "Аналози на GnRH",
+      "drugs": [
+        "Goserelin",
+        "Nafarelin",
+        "Triptorelin"
+      ]
+    },
+    {
+      "groupName": "Антагонисти на GnRH",
+      "drugs": [
+        "Ganirelix",
+        "Cetrorelix"
+      ]
+    },
+    {
+      "groupName": "Лекарство с активност на растежен хормон",
+      "drugs": [
+        "Somatropin"
+      ]
+    },
+	 {
+      "groupName": "Антагонист на растежния хормон",
+      "drugs": [
+        "Pegvisomant"
+      ]
+    },
+    {
+      "groupName": "Лекарства с активност на гонадотропни хормони",
+      "drugs": [
+        "Urofollitropin",
+        "Chorionic gonadotropin"
+      ]
+    },
+    {
+      "groupName": "Инхибитор на пролактинова секреция",
+      "drugs": [
+        "Bromocriptine"
+      ]
+    },
+    {
+      "groupName": "Антагонист на Oxytocin",
+      "drugs": [
+        "Atosiban"
+      ]
+    },
+    {
+      "groupName": "Лекарство с активност на антидиуретичен хормон",
+      "drugs": [
+        "Desmopressin",
+        "Terlipressin"
+      ]
+    },
+    {
+      "groupName": "Лекарства, свързани с хипофизните хормони - антагонисти (акваретици) на антидиуретичен хормон",
+      "drugs": [
+        "Conivaptan",
+        "Tolvaptan"
+      ]
+    },
+    {
+      "groupName": "Лекарства, свързани с женските полови хормони; лекарство с естрогенна активност",
+      "drugs": [
+        "Estradiol",
+        "Estriol",
+		"Ethinylestradiol"
+      ]
+    },
+    {
+      "groupName": "Селективен естроген-рецепторен модулатор (SERM)",
+      "drugs": [
+        "Tamoxifen",
+        "Raloxifene",
+        "Clomifene"
+      ]
+    },
+    {
+      "groupName": "Естрогенен антагонист, разграждащ естрогенните рецептори",
+      "drugs": [
+        "Fulvestrant"
+      ]
+    },
+    {
+      "groupName": "Ароматазен инхибитор",
+      "drugs": [
+        "Anastrozole",
+        "Letrozole",
+        "Exemestane"
+      ]
+    },
+    {
+      "groupName": "Лекарства, свързани с женските полови хормони; лекарство с гестагенна активност",
+      "drugs": [
+        "Progesterone",
+        "Medroxyprogesterone",
+        "Dydrogesterone",
+		"Norethisterone",
+        "Lynestrenol",
+        "Levonorgestrel",
+        "Dienogest",
+        "Gestodene",
+		"Drosprirenone"
+      ]
+    },
+    {
+      "groupName": "Лекарства, свързани с женските полови хормони; антипрогестини",
+      "drugs": [
+        "Mifepristone",
+        "Ulipristal acetate"
+      ]
+    },
+    {
+      "groupName": "Лекарства, свързани с мъжките полови хормони; андрогени",
+      "drugs": [
+        "Testosterone"
+      ]
+    },
+    {
+      "groupName": "Лекарства, свързани с мъжките полови хормони; рецепторен антагонист",
+      "drugs": [
+        "Cyproterone",
+        "Flutamide"
+      ]
+    },
+    {
+      "groupName": "Антиандрогени. Инхибитор на 5-алфа редуктазата",
+      "drugs": [
+        "Finasteride"
+      ]
+    },
+    {
+      "groupName": "Инхибитор на тестостеронова синтеза",
+      "drugs": [
+        "Ketoconazole",
+	"Гонадорелини, реликси"
+      ]
+    },
+    {
+      "groupName": "Лекарства, свързани с мъжките полови хормони - антиандрогени - анаболни стероиди",
+      "drugs": [
+        "Nandrolone"
+      ]
+    },
+    {
+      "groupName": "Монофазен комбиниран орален контрацептив",
+      "drugs": [
+        "Logest",
+        "Jeanine",
+        "Ethinylestradiol 30 mcg + Drospirenone 3 mg = Yasmin",
+        "Tri-regol",
+        "Miligest"
+      ]
+    },
+    {
+      "groupName": "Контрацептиви - монопрепарати с гестагени - орални форми за продължителен прием",
+      "drugs": [
+        "Norethisterone acetate"
+      ]
+    },
+    {
+      "groupName": "Контрацептиви - монопрепарати с гестагени - вътрематочни системи",
+      "drugs": [
+        "Levonorgestrel"
+      ]
+    },
+    {
+      "groupName": "Посткоитален (спешен) контрацептиви",
+      "drugs": [
+        "Levonorgestrel",
+        "Mifepristone",
+        "Ulipristal acetate"
+      ]
+    },
+	 {
+      "groupName": "Нехормонален контрацептив",
+      "drugs": [
+        "Benzalkonium"
+      ]
+    },
+    {
+      "groupName": "Контрацептиви - монопрепарати с гестагени - нехормонални контрацептиви",
+      "drugs": [
+        "Benzalkonium"
+      ]
+    },
+	{
+      "groupName": "Хормонална заместителна терапия за циклично приложение",
+      "drugs": [
+        "Estradiol + Levonorgestrel = Klimonorm"
+      ]
+    },
+	{
+      "groupName": "Хормонална заместителна терапия по време на менопауза за перманентно приложение",
+      "drugs": [
+        "Estradiol + Norethisterone = Novofem",
+		"Estradiol + Dydrogesterone = Femoston"
+      ]
+    },
+	{
+      "groupName": "Лекарства за зачеване (при безплодие)",
+      "drugs": [
+        "Clomifene",
+		"Bromocriptine"
+      ]
+    },
+	 {
+      "groupName": "Глюкокортикостероиди за системно приложение с натрий-съдържащ ефект",
+      "drugs": [
+        "Prednisone",
+        "Prednisolone",
+        "Methylprednisolone"
+      ]
+    },
+    {
+      "groupName": "Глюкокортикостероиди за системно приложение без натрий-съдържащ ефект",
+      "drugs": [
+        "Betamethasone",
+        "Dexamethasone"
+      ]
+    },
+    {
+      "groupName": "Глюкокортикостероиди за локално приложение в дерматологията",
+      "drugs": [
+        "Betamethasone",
+        "Fluocinolone",
+        "Clobetasol"
+      ]
+    },
+    {
+      "groupName": "Глюкокортикостероиди за локално приложение в офталмологията",
+      "drugs": [
+        "Dexamethasone"
+      ]
+    },
+    {
+      "groupName": "Глюкокортикостероиди за локално приложение в колопроктологията",
+      "drugs": [
+        "Budesonide"
+      ]
+    },
+    {
+      "groupName": "Глюкокортикостероиди за локално приложение в ринологията",
+      "drugs": [
+        "Mometasone"
+      ]
+    },
+    {
+      "groupName": "Глюкокортикостероиди за локално приложение в пулмологията",
+      "drugs": [
+        "Beclometasone",
+        "Fluticasone",
+        "Budesonide"
+      ]
+    },
+    {
+      "groupName": "Минералкортикостероиди",
+      "drugs": [
+        "Fludrocortisone"
+      ]
+    },
+    {
+      "groupName": "Лекарство, влияещи върху костно-минералната обмяна: бифосфонат",
+      "drugs": [
+        "Clodronic acid",
+		"Alendronic acid",
+        "Ibandronic acid",
+        "Zoledronic acid"
+      ]
+    },
+    {
+      "groupName": "Лекарство, влияещи върху костно-минералната обмяна: ХЗТ",
+      "drugs": [
+        "Femoston"
+      ]
+    },
+    {
+      "groupName": "Лекарство, влияещи върху костно-минералната обмяна: SERM",
+      "drugs": [
+        "Raloxifene"
+      ]
+    },
+    {
+      "groupName": "Лекарство, влияещи върху костно-минералната обмяна: Аналог на паратхормона",
+      "drugs": [
+        "Teriparatide"
+      ]
+    },
+    {
+      "groupName": "Лекарство, влияещи върху костно-минералната обмяна: Моноклонално антитяло срещу RANKL",
+      "drugs": [
+        "Denosumab"
+      ]
+    },
+    {
+      "groupName": "Лекарство, влияещи върху костно-минералната обмяна: Калцитонин",
+      "drugs": [
+        "Calcitonin"
+      ]
+    },
+    {
+      "groupName": "Лекарство, влияещи върху костно-минералната обмяна: Vitamin D и аналози",
+      "drugs": [
+        "Calcitriol",
+        "Cholecalciferol",
+        "Calcipotriol"
+      ]
+    },
+    {
+      "groupName": "Лекарства, влияещи върху костно-минералната обмяна: Калцимиметици",
+      "drugs": [
+        "Cinacalcet"
+      ]
+    },
+	{
+      "groupName": "Антидиабетични лекарства - инсулини с бързко и кратко действие - човешки инсулини",
+      "drugs": [
+        "Regular insulin (Insulin Actrapid)",
+        "Insulin Actrapid penfill",
+        "Humulin R"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства - инсулини с бързко и кратко действие - инсулинови аналози",
+      "drugs": [
+        "Insulin lispro",
+        "Insulin aspart"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства. Инсулини с интермедиерно действие",
+      "drugs": [
+        "Insulatard",
+        "Humulin N",
+		"Insulin Mixtard",
+        "Humulin M1",
+		 "Insulin lispro + Insulin lispro protamine"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства. Дълго действащи инсулинови аналози",
+      "drugs": [
+        "Insulin glargine penfill",
+        "Insulin detemir penfill"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инсулинови очувствители. Бигваниди",
+      "drugs": [
+        "Metformin"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инсулинови очувствители. Тиазолидиндиони",
+      "drugs": [
+        "Pioglitazone"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инсулинови секретагоги. Сулфонилурейни",
+      "drugs": [
+        "Glibenclamide",
+        "Glipizide",
+        "Gliclazide",
+        "Glimepiride"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инсулинови секретагоги. Меглитиниди",
+      "drugs": [
+        "Repaglinide",
+        "Nateglinide"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Алфа-глюкозидазни инхибитори",
+      "drugs": [
+        "Acarbose"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инкретинови миметици.",
+      "drugs": [
+        "Exenatide",
+        "Dulaglutide",
+        "Liraglutide",
+        "Lixisenatide"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инхибитори на дипептидил пептидаза-4",
+      "drugs": [
+        "Sitagliptin",
+        "Vildagliptin",
+        "Saxagliptin",
+        "Linagliptin"
+      ]
+    },
+    {
+      "groupName": "Антидиабетични лекарства за диабет тип 2. Инхибитори на натриево-глюкозен ко-транспортер 2",
+      "drugs": [
+        "Dapagliflozin",
+        "Empagliflozin",
+        "Canagliflozin"
+      ]
+    },
+    {
+      "groupName": "Антихипогликемични лекарства",
+      "drugs": [
+        "Glucagon"
+      ]
+    },
+    {
+      "groupName": "Tиреотропни лекарства. Тиреомиметици",
+      "drugs": [
+        "Levothyroxine"
+      ]
+    },
+    {
+      "groupName": "Tиреотропни лекарства. Тиреостатици",
+      "drugs": [
+        "Thiamazole",
+        "Propylthiouracil"
+      ]
+    },
+    {
+      "groupName": "Tиреотропни лекарства. Йодиди",
+      "drugs": [
+        "Potassium iodide"
+      ]
+    }
+  ]
+}
