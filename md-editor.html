@@ -834,6 +834,104 @@
         font-size: 0.85em;
       }
     }
+
+    /* HTML Editor Modal Styles */
+    #htmlEditorModal {
+      display: none;
+      position: fixed;
+      z-index: 2000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .html-editor-container {
+      background-color: white;
+      margin: 30px auto;
+      padding: 20px;
+      border: 1px solid #888;
+      border-radius: 8px;
+      width: 95%;
+      max-width: 1200px;
+      height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .html-editor-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 10px;
+    }
+
+    .html-editor-header h2 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 1.3em;
+    }
+
+    .html-editor-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    #htmlEditorTextarea {
+      flex: 1;
+      padding: 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 4px;
+      font-family: 'Monaco', 'Courier New', monospace;
+      font-size: 13px;
+      line-height: 1.5;
+      resize: none;
+      color: #1f2937;
+      background: #fafafa;
+      white-space: pre;
+      overflow-wrap: normal;
+      overflow: auto;
+    }
+
+    #htmlEditorTextarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .html-editor-button {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 500;
+      transition: background-color 0.3s;
+    }
+
+    .html-editor-save {
+      background-color: #10b981;
+      color: white;
+    }
+
+    .html-editor-save:hover {
+      background-color: #059669;
+    }
+
+    .html-editor-close {
+      background-color: #ef4444;
+      color: white;
+    }
+
+    .html-editor-close:hover {
+      background-color: #dc2626;
+    }
+
   </style>
 </head>
 <body>
@@ -883,8 +981,8 @@
           <button class="text-color-btn" data-color="#eab308" title="Yellow" style="background-color: #eab308; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
           <button class="text-color-btn" data-color="#7c2d12" title="Deep Orange" style="background-color: #7c2d12; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
           <button class="text-color-btn" data-color="#7e22ce" title="Purple" style="background-color: #7e22ce; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="text-color-btn" data-color="#000000" title="Black" style="background-color: #000000; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
           <button class="text-color-btn" data-color="#1f2937" title="Dark Gray" style="background-color: #1f2937; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button id="removeColorBtn" title="Remove Color" style="background-color: transparent; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #3b82f6; cursor: pointer; color: #3b82f6; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 16px; padding: 0;">✕</button>
           <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 34px; cursor: pointer; border: none; border-radius: 4px;">
         </div>
       </div>
@@ -965,7 +1063,7 @@
 
     <div class="toolbar-group">
 
-      <button id="linkBtn" title="Link (Ctrl+K)"><img src="svg/material-symbols_outlined_add_link.svg" alt="Bold" class="toolbar-icon"></button>
+      <button id="linkBtn" title="Link"><img src="svg/material-symbols_outlined_add_link.svg" alt="Bold" class="toolbar-icon"></button>
       <button id="imageBtn" title="Add Image"><img src="svg/image.svg" alt="Image" class="toolbar-icon"></button>
       <button id="hrBtn" title="Horizontal Line"><svg width="18" height="18" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32s-14.33-32-32-32H64c-17.67 0-32 14.33-32 32z"/></svg></button>
     </div>
@@ -978,6 +1076,7 @@
     <div class="toolbar-group">
       <button id="openLocalBtn" title="Open file from computer"><img src="svg/material-symbols_outlined_folder_open.svg" alt="Open Local" class="toolbar-icon"></button>
       <button id="openCoursesBtn" title="Open file from courses"><img src="svg/material-symbols_outlined_folder_data.svg" alt="Delete" class="toolbar-icon"></button>
+      <button id="htmlEditorBtn" title="Edit HTML/Source Code"><img src="svg/html.svg" alt="HTML Editor" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
@@ -1037,11 +1136,13 @@
           <li style="margin: 8px 0;"><strong>Shift+Tab</strong> - Outdent list item</li>
           <li style="margin: 8px 0;"><strong>Ctrl+Q</strong> - Blockquote</li>
           <li style="margin: 8px 0;"><strong>Ctrl+T</strong> - Table</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+K</strong> - Link</li>
         </ul>
         <h3>Text Color & Styles</h3>
         <ul style="list-style: none; padding: 0;">
           <li style="margin: 8px 0;"><strong>Ctrl+M</strong> - Apply last text color</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+Shift+M</strong> - Remove text color</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+D</strong> - Apply last text color</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+Shift+D</strong> - Remove text color</li>
           <li style="margin: 8px 0;"><strong>Ctrl+H</strong> - Apply last highlight color</li>
           <li style="margin: 8px 0;"><strong>Ctrl+Shift+H</strong> - Remove highlight</li>
         </ul>
@@ -1061,7 +1162,7 @@
   <div id="fileBrowserModal" class="modal">
     <div class="modal-content" style="max-width: 700px;">
       <div class="modal-header">
-        <h2>Open Markdown File from Courses</h2>
+        <h2>Open File from Courses</h2>
         <span class="close" id="closeFileBrowserBtn">&times;</span>
       </div>
       <div class="modal-body" style="max-height: 600px; overflow: hidden; display: flex; flex-direction: column;">
@@ -1095,6 +1196,21 @@
           <label for="imageAltInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Alt Text (Description)</label>
           <input type="text" id="imageAltInput" placeholder="e.g., Brain hemisphere diagram" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
         </div>
+        <div style="margin-bottom: 16px;">
+          <label for="imageSizeInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Image Size (Width)</label>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <input type="number" id="imageSizeInput" placeholder="e.g., 100" value="100" min="10" max="100" style="width: 80px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+            <span style="color: #6b7280;">%</span>
+            <select id="imageSizePreset" style="padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; cursor: pointer;">
+              <option value="50">Small (50%)</option>
+              <option value="75">Medium (75%)</option>
+              <option value="100" selected>Full (100%)</option>
+              <option value="custom">Custom</option>
+            </select>
+          </div>
+          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">Width as percentage of content</div>
+        </div>
+
       </div>
       <div class="modal-footer">
         <button id="cancelImageBtn">Cancel</button>
@@ -1202,6 +1318,20 @@
           Copy to clipboard
         </label>
       </div>
+    </div>
+  </div>
+
+  <!-- HTML Editor Modal -->
+  <div id="htmlEditorModal">
+    <div class="html-editor-container">
+      <div class="html-editor-header">
+        <h2>📄 HTML Source Code Editor</h2>
+        <div class="html-editor-actions">
+          <button id="htmlEditorSaveBtn" class="html-editor-button html-editor-save">💾 Save & Update</button>
+          <button id="htmlEditorCloseBtn" class="html-editor-button html-editor-close">Close</button>
+        </div>
+      </div>
+      <textarea id="htmlEditorTextarea" spellcheck="false" placeholder="HTML Code will appear here..."></textarea>
     </div>
   </div>
 
@@ -1687,6 +1817,7 @@
         savedImageRange = selection.getRangeAt(0);
       }
       
+
       const imageModal = document.getElementById('imageModal');
       imageModal.style.display = 'flex';
       document.getElementById('imageNameInput').focus();
@@ -2132,6 +2263,27 @@
       document.querySelectorAll('.text-color-btn').forEach(b => b.classList.remove('active'));
     });
 
+    // Remove Color Button
+    document.getElementById('removeColorBtn').addEventListener('click', (e) => {
+      e.preventDefault();
+      const selection = window.getSelection();
+      
+      // If no selection or selection is in editor
+      if (!selection.toString() || !editor.contains(selection.anchorNode)) {
+        alert('Моля, избери текст първо');
+        return;
+      }
+
+      // Remove color by applying default dark gray
+      document.execCommand('foreColor', false, 'rgb(31, 41, 55)');
+      
+      // Close dropdown
+      document.getElementById('textColorOptions').style.display = 'none';
+      
+      // Mark as modified
+      saveToHistory();
+    });
+
     // Heading Color Toggle Button
     document.getElementById('headingColorToggleBtn').addEventListener('click', (e) => {
       e.preventDefault();
@@ -2469,6 +2621,7 @@
         filesByCourse[courseName] = [];
         
         course.sections.forEach(section => {
+          // Add msg notes (HTML files with msg prefix)
           if (section.msgNotes) {
             section.msgNotes.forEach(note => {
               if (note.path && (/\.md$/i.test(note.path) && note.type === 'markdown') || (/\.html$/i.test(note.path) && note.type === 'html')) {
@@ -2477,6 +2630,23 @@
                   path: note.path,
                   content: note.content,
                   type: note.type,
+                  courseName: courseName,
+                  sectionName: section.name
+                });
+              }
+            });
+          }
+          
+          // Add regular files (including msg-terms.html)
+          if (section.files) {
+            section.files.forEach(file => {
+              // Include any HTML or markdown files (like msg-terms.html)
+              if (file.path && (file.path.match(/\.(html|md|txt)$/i))) {
+                filesByCourse[courseName].push({
+                  name: file.name,
+                  path: file.path,
+                  content: file.content,
+                  type: file.type || (file.path.match(/\.html$/i) ? 'html' : 'markdown'),
                   courseName: courseName,
                   sectionName: section.name
                 });
@@ -2535,6 +2705,123 @@
       document.getElementById('fileSearchInput').focus();
     });
 
+    // HTML Editor functionality
+    let htmlEditorMode = false;
+    let htmlEditorOriginalContent = '';
+    let currentFileName = ''; // Track current file name
+
+    // Format HTML for readability with proper indentation
+    function formatHTML(html) {
+      let formatted = '';
+      let indent = 0;
+      const indentStr = '  '; // 2 spaces per indent level
+
+      // Split by tags
+      const tokens = html.match(/(<[^>]+>|[^<]+)/g) || [];
+
+      for (let token of tokens) {
+        token = token.trim();
+        if (!token) continue;
+
+        // Check if it's a closing tag
+        const isClosingTag = token.startsWith('</');
+        // Check if it's a self-closing tag or void element
+        const isSelfClosing = token.endsWith('/>') || /^<(img|br|hr|input|meta|link)[\s>]/i.test(token);
+        // Check if it's an opening tag
+        const isOpeningTag = token.startsWith('<') && !isClosingTag && !isSelfClosing;
+
+        if (isClosingTag) {
+          indent = Math.max(0, indent - 1);
+          formatted += indentStr.repeat(indent) + token + '\n';
+        } else if (isSelfClosing) {
+          formatted += indentStr.repeat(indent) + token + '\n';
+        } else if (isOpeningTag) {
+          formatted += indentStr.repeat(indent) + token + '\n';
+          // Don't increase indent for certain tags
+          if (!/^<(br|hr|img|input|meta|link|!DOCTYPE|!doctype)/i.test(token)) {
+            indent++;
+          }
+        } else {
+          // Text content
+          const text = token.trim();
+          if (text.length > 0) {
+            // Only add non-empty text
+            formatted += indentStr.repeat(indent) + text + '\n';
+          }
+        }
+      }
+
+      return formatted.trim();
+    }
+
+    document.getElementById('htmlEditorBtn').addEventListener('click', () => {
+      // Check if editor has content
+      if (!editor.innerHTML.trim()) {
+        alert('⚠️ No content to edit.\n\nPlease open a file first.');
+        return;
+      }
+
+      // Get current HTML content from editor
+      let currentHtml = editor.innerHTML;
+      
+      // Format HTML for readability
+      currentHtml = formatHTML(currentHtml);
+      
+      // Set textarea content
+      document.getElementById('htmlEditorTextarea').value = currentHtml;
+      
+      // Show modal
+      document.getElementById('htmlEditorModal').style.display = 'block';
+      document.getElementById('htmlEditorTextarea').focus();
+    });
+
+    // HTML Editor Save
+    document.getElementById('htmlEditorSaveBtn').addEventListener('click', () => {
+      let htmlContent = document.getElementById('htmlEditorTextarea').value;
+      
+      // Minify HTML for storage (remove extra whitespace/newlines)
+      // But keep meaningful structure
+      htmlContent = htmlContent
+        .replace(/>\s+</g, '><') // Remove space between tags
+        .replace(/\n/g, '') // Remove newlines
+        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
+        .trim();
+      
+      // Update editor with minified HTML
+      editor.innerHTML = htmlContent;
+      
+      // Save to history and storage
+      saveToHistory();
+      localStorage.setItem('mdEditorContent', htmlContent);
+      
+      // Close modal
+      document.getElementById('htmlEditorModal').style.display = 'none';
+      
+      // Show confirmation
+      const notification = document.createElement('div');
+      notification.textContent = '✅ HTML updated successfully!';
+      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.transition = 'opacity 0.3s';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
+    });
+
+    // HTML Editor Close
+    document.getElementById('htmlEditorCloseBtn').addEventListener('click', () => {
+      document.getElementById('htmlEditorModal').style.display = 'none';
+    });
+
+    // Close HTML editor on escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && document.getElementById('htmlEditorModal').style.display === 'block') {
+        document.getElementById('htmlEditorModal').style.display = 'none';
+      }
+    });
+
     // File search functionality
     document.getElementById('fileSearchInput').addEventListener('input', (e) => {
       const searchText = e.target.value.toLowerCase();
@@ -2588,6 +2875,11 @@
         const doc = parser.parseFromString(file.content, 'text/html');
         // Get body content and trim whitespace
         html = doc.body.innerHTML.trim();
+        
+        // Parse msg-terms.html file if opened
+        if (file.name === 'msg-terms.html') {
+          // Just load normally, no special parsing needed
+        }
       } else {
         // Otherwise parse as Markdown
         html = markdownToHtml(file.content);
@@ -2944,11 +3236,28 @@ renderMathInElement(document.body, {
         document.getElementById('imageModal').style.display = 'none';
       }
     });
+
+
+
+    // Image size preset selector
+    document.getElementById('imageSizePreset').addEventListener('change', (e) => {
+      const preset = e.target.value;
+      const sizeInput = document.getElementById('imageSizeInput');
+      
+      if (preset === 'custom') {
+        sizeInput.style.display = 'block';
+        sizeInput.focus();
+      } else {
+        sizeInput.value = preset;
+        sizeInput.style.display = 'block';
+      }
+    });
     
     document.getElementById('insertImageBtn').addEventListener('click', () => {
       const imageName = document.getElementById('imageNameInput').value.trim();
       const imageAlt = document.getElementById('imageAltInput').value.trim();
-      
+      const imageSize = document.getElementById('imageSizeInput').value || 100;
+
       if (!imageName) {
         alert('Please enter image file name');
         return;
@@ -2968,9 +3277,11 @@ renderMathInElement(document.body, {
       const img = document.createElement('img');
       img.src = 'assets/' + imageName;
       img.alt = imageAlt || imageName;
-      img.style.maxWidth = '100%';
+      img.style.maxWidth = imageSize + '%';
       img.style.height = 'auto';
+      img.style.display = 'block';
       img.setAttribute('data-original-src', 'assets/' + imageName);
+      img.setAttribute('data-width', imageSize);
       
       range.insertNode(img);
       
@@ -2990,6 +3301,8 @@ renderMathInElement(document.body, {
       // Clear inputs and close modal
       document.getElementById('imageNameInput').value = '';
       document.getElementById('imageAltInput').value = '';
+      document.getElementById('imageSizeInput').value = '100';
+      document.getElementById('imageSizePreset').value = '100';
       document.getElementById('imageModal').style.display = 'none';
       savedImageRange = null; // Clear saved range
       
@@ -3588,9 +3901,22 @@ renderMathInElement(document.body, {
         } else if (e.key === 't' || e.key === 'T' || e.key === 'т' || e.key === 'Т') {
           e.preventDefault();
           insertTable();
-        } else if (e.key === 'k' || e.key === 'K'|| e.key === 'К' || e.key === 'к') {
-          e.preventDefault();
-          insertLink();
+        } else if (e.key === 'D' || e.key === 'd'|| e.key === 'Д' || e.key === 'д') {
+          if (e.shiftKey) {
+            e.preventDefault();
+            // Remove text color (reset to dark gray)
+            const selection = window.getSelection();
+            if (selection.toString() && editor.contains(selection.anchorNode)) {
+              document.execCommand('foreColor', false, 'rgb(31, 41, 55)');
+              saveToHistory();
+            }
+          } else {
+            e.preventDefault();
+            // Apply last used text color
+            const lastColor = localStorage.getItem('mdEditorTextColor') || '#1f2937';
+            applyFormatting('color', lastColor);
+            saveToHistory();
+          }
         } else if (e.key === 'q' || e.key === 'Q' || e.key === 'я' || e.key === 'Я') {
           e.preventDefault();
           insertBlockquote();
@@ -3607,11 +3933,21 @@ renderMathInElement(document.body, {
             editor.innerHTML = history[historyIndex];
           }
         } else if (e.key === 'm' || e.key === 'M' || e.key === 'М' || e.key === 'м') {
-          e.preventDefault();
-          // Apply last used text color
-          const lastColor = localStorage.getItem('mdEditorTextColor') || '#1f2937';
-          applyFormatting('color', lastColor);
-          saveToHistory();
+          if (e.shiftKey) {
+            e.preventDefault();
+            // Remove text color (reset to black)
+            const selection = window.getSelection();
+            if (selection.toString() && editor.contains(selection.anchorNode)) {
+              document.execCommand('foreColor', false, 'rgb(31, 41, 55)');
+              saveToHistory();
+            }
+          } else {
+            e.preventDefault();
+            // Apply last used text color
+            const lastColor = localStorage.getItem('mdEditorTextColor') || '#1f2937';
+            applyFormatting('color', lastColor);
+            saveToHistory();
+          }
         } else if ((e.key === 'c' || e.key === 'C' || e.key === 'С' || e.key === 'с') && e.altKey) {
           e.preventDefault();
           // Apply last used text color

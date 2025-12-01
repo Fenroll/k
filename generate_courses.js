@@ -307,6 +307,7 @@ function getAllCourses() {
 }
 
 function main() {
+  // Get regular courses
   const courses = getAllCourses();
   
   // Generate build timestamp
