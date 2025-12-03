@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Anchors</title>
+  <style>
+    body { 
+      font-family: "Open Sans", Arial, sans-serif; 
+      max-width: 1550px; 
+      margin: 0.5rem auto; 
+      padding: 0 1rem; 
+      line-height: 1.8; 
+      color: #1f2937; 
+    }
+    h2 { 
+      font-size: 1.3em;
+      font-weight: 600;
+      color: #7c2d12;
+      margin-top: 1.5em;
+      padding-top: 1em;
+      border-top: 2px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+
+<h1>ТЕСТ НА ANCHORS</h1>
+
+<div>
+  <a href="#topic1"><b>1. Topic 1</b></a><br>
+  <a href="#topic2"><b>2. Topic 2</b></a><br>
+  <a href="#topic3"><b>3. Topic 3</b></a><br>
+  <a href="#topic4"><b>4. Topic 4</b></a><br>
+  <a href="#topic5"><b>5. Topic 5</b></a><br>
+</div>
+
+<hr>
+
+<h2 id="topic1">Topic 1 - Introduction</h2>
+<p>Съдържание на Topic 1</p>
+
+<h2 id="topic2">Topic 2 - Advanced</h2>
+<p>Съдържание на Topic 2</p>
+
+<h2 id="topic3">Topic 3 - Detailed</h2>
+<p>Съдържание на Topic 3</p>
+
+<h2 id="topic4">Topic 4 - Complex</h2>
+<p>Съдържание на Topic 4</p>
+
+<h2 id="topic5">Topic 5 - Expert</h2>
+<p>Съдържание на Topic 5</p>
+
+<script>
+// Handle anchor links with smooth scroll - MUST run before page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Handle all anchor links on the page
+  const links = document.querySelectorAll('a[href^="#"]');
+  
+  links.forEach(link => {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      
+      // Get the anchor ID
+      const anchorId = this.getAttribute('href').substring(1);
+      const targetElement = document.getElementById(anchorId);
+      
+      console.log('Clicked link to:', anchorId, 'Target found:', !!targetElement);
+      
+      if (targetElement) {
+        // Scroll to the element
+        targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        
+        // Highlight the element
+        const originalBg = window.getComputedStyle(targetElement).backgroundColor;
+        targetElement.style.backgroundColor = '#fff3cd';
+        targetElement.style.transition = 'background-color 0.3s';
+        
+        setTimeout(() => {
+          targetElement.style.backgroundColor = originalBg;
+        }, 1500);
+        
+        // Also update URL without page reload
+        window.history.pushState(null, null, '#' + anchorId);
+      }
+    });
+  });
+});
+</script>
+
+</body>
+</html>

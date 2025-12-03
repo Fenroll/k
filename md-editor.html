@@ -1076,6 +1076,7 @@
     <div class="toolbar-group">
       <button id="openLocalBtn" title="Open file from computer"><img src="svg/material-symbols_outlined_folder_open.svg" alt="Open Local" class="toolbar-icon"></button>
       <button id="openCoursesBtn" title="Open file from courses"><img src="svg/material-symbols_outlined_folder_data.svg" alt="Delete" class="toolbar-icon"></button>
+      <button id="anchorLinkBtn" title="Create/Link Anchors"><img src="svg/dataset.svg" alt="Anchor Link" class="toolbar-icon"></button>
       <button id="htmlEditorBtn" title="Edit HTML/Source Code"><img src="svg/html.svg" alt="HTML Editor" class="toolbar-icon"></button>
     </div>
 
@@ -1317,6 +1318,60 @@
           <input type="checkbox" id="symbolCopyCheckbox" style="margin-right: 8px; cursor: pointer;">
           Copy to clipboard
         </label>
+      </div>
+    </div>
+  </div>
+
+  <!-- Anchor Link Modal -->
+  <div class="modal" id="anchorLinkModal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>🔗 Create/Link Anchors</h2>
+        <span class="close" id="closeAnchorLinkModalBtn">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div style="display: flex; gap: 12px; margin-bottom: 20px;">
+          <button id="createAnchorTabBtn" class="anchor-tab-btn active" style="flex: 1; padding: 10px 16px; background: #2563eb; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Create Anchor</button>
+          <button id="linkToAnchorTabBtn" class="anchor-tab-btn" style="flex: 1; padding: 10px 16px; background: #d1d5db; color: #374151; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Link to Anchor</button>
+        </div>
+
+        <!-- Create Anchor Tab -->
+        <div id="createAnchorTab" class="anchor-tab-content">
+          <div style="margin-bottom: 16px;">
+            <label for="anchorIdInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Anchor ID</label>
+            <input type="text" id="anchorIdInput" placeholder="e.g., section1, introduction" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+            <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">No spaces, use lowercase and hyphens</div>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label for="anchorTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Anchor Text</label>
+            <input type="text" id="anchorTextInput" placeholder="e.g., Topic 1 – Introduction" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label for="anchorHeadingTypeInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Heading Type</label>
+            <select id="anchorHeadingTypeInput" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+              <option value="h2">Heading 2 (H2)</option>
+              <option value="h3">Heading 3 (H3)</option>
+              <option value="h4">Heading 4 (H4)</option>
+            </select>
+          </div>
+          <button id="createAnchorBtn" style="width: 100%; padding: 10px 16px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Create Anchor</button>
+        </div>
+
+        <!-- Link to Anchor Tab -->
+        <div id="linkToAnchorTab" class="anchor-tab-content" style="display: none;">
+          <div style="margin-bottom: 16px;">
+            <label for="existingAnchorsSelect" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Select Anchor</label>
+            <select id="existingAnchorsSelect" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+              <option value="">-- No anchors found --</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 16px;">
+            <label for="linkTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Link Text</label>
+            <input type="text" id="linkTextInput" placeholder="Text for the link" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+            <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">Leave empty to use anchor text</div>
+          </div>
+          <button id="createLinkBtn" style="width: 100%; padding: 10px 16px; background: #3b82f6; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500;">Create Link</button>
+        </div>
       </div>
     </div>
   </div>
@@ -4866,6 +4921,226 @@ renderMathInElement(document.body, {
         }
       }
     });
+
+    // Anchor Link Functions
+    let anchorLinkModalOpen = false;
+    let savedAnchorSelection = null; // Save selection when modal opens
+
+    document.getElementById('anchorLinkBtn').addEventListener('click', () => {
+      // Save current selection BEFORE opening modal
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        savedAnchorSelection = selection.getRangeAt(0).cloneRange();
+      }
+      
+      document.getElementById('anchorLinkModal').style.display = 'block';
+      anchorLinkModalOpen = true;
+      refreshAnchorsList();
+    });
+
+    document.getElementById('closeAnchorLinkModalBtn').addEventListener('click', () => {
+      document.getElementById('anchorLinkModal').style.display = 'none';
+      anchorLinkModalOpen = false;
+    });
+
+    // Tab switching
+    document.getElementById('createAnchorTabBtn').addEventListener('click', () => {
+      document.getElementById('createAnchorTab').style.display = 'block';
+      document.getElementById('linkToAnchorTab').style.display = 'none';
+      document.getElementById('createAnchorTabBtn').style.background = '#2563eb';
+      document.getElementById('createAnchorTabBtn').style.color = 'white';
+      document.getElementById('linkToAnchorTabBtn').style.background = '#d1d5db';
+      document.getElementById('linkToAnchorTabBtn').style.color = '#374151';
+    });
+
+    document.getElementById('linkToAnchorTabBtn').addEventListener('click', () => {
+      document.getElementById('createAnchorTab').style.display = 'none';
+      document.getElementById('linkToAnchorTab').style.display = 'block';
+      document.getElementById('linkToAnchorTabBtn').style.background = '#2563eb';
+      document.getElementById('linkToAnchorTabBtn').style.color = 'white';
+      document.getElementById('createAnchorTabBtn').style.background = '#d1d5db';
+      document.getElementById('createAnchorTabBtn').style.color = '#374151';
+      refreshAnchorsList();
+    });
+
+    // Create Anchor
+    document.getElementById('createAnchorBtn').addEventListener('click', () => {
+      const anchorId = document.getElementById('anchorIdInput').value.trim().toLowerCase().replace(/\s+/g, '-');
+      const anchorText = document.getElementById('anchorTextInput').value.trim();
+      const headingType = document.getElementById('anchorHeadingTypeInput').value;
+
+      if (!anchorId || !anchorText) {
+        alert('⚠️ Please fill in both Anchor ID and Anchor Text');
+        return;
+      }
+
+      // Create heading element
+      const heading = document.createElement(headingType);
+      heading.id = anchorId;
+      heading.textContent = anchorText;
+      heading.style.marginTop = '20px';
+      heading.style.marginBottom = '10px';
+
+      // Insert at saved cursor position
+      if (savedAnchorSelection) {
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(savedAnchorSelection);
+        
+        const range = savedAnchorSelection;
+        range.insertNode(heading);
+        range.setStartAfter(heading);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      } else {
+        editor.appendChild(heading);
+      }
+
+      saveToHistory();
+
+      // Clear inputs
+      document.getElementById('anchorIdInput').value = '';
+      document.getElementById('anchorTextInput').value = '';
+
+      // Refresh anchors list
+      refreshAnchorsList();
+
+      // Show success message
+      const notification = document.createElement('div');
+      notification.textContent = '✅ Anchor created: #' + anchorId;
+      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.transition = 'opacity 0.3s';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
+    });
+
+    // Create Link to Anchor
+    document.getElementById('createLinkBtn').addEventListener('click', () => {
+      const selectedAnchor = document.getElementById('existingAnchorsSelect').value;
+      let linkText = document.getElementById('linkTextInput').value.trim();
+
+      if (!selectedAnchor) {
+        alert('⚠️ Please select an anchor first');
+        return;
+      }
+
+      // Get anchor text if link text is empty
+      if (!linkText) {
+        const anchorElement = document.getElementById(selectedAnchor);
+        if (anchorElement) {
+          linkText = anchorElement.textContent;
+        } else {
+          linkText = selectedAnchor;
+        }
+      }
+
+      // Create link element
+      const link = document.createElement('a');
+      link.href = '#' + selectedAnchor;
+      link.textContent = linkText;
+      link.style.color = '#2563eb';
+      link.style.textDecoration = 'underline';
+      link.style.cursor = 'pointer';
+
+      // Insert at saved cursor position
+      if (savedAnchorSelection) {
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(savedAnchorSelection);
+        
+        const range = savedAnchorSelection;
+        range.insertNode(link);
+        range.setStartAfter(link);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      } else {
+        editor.appendChild(link);
+      }
+
+      saveToHistory();
+
+      // Clear inputs
+      document.getElementById('linkTextInput').value = '';
+
+      // Show success message
+      const notification = document.createElement('div');
+      notification.textContent = '✅ Link created to #' + selectedAnchor;
+      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #3b82f6; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
+      document.body.appendChild(notification);
+
+      setTimeout(() => {
+        notification.style.transition = 'opacity 0.3s';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
+    });
+
+    // Refresh anchors list from current editor content
+    function refreshAnchorsList() {
+      const select = document.getElementById('existingAnchorsSelect');
+      select.innerHTML = '';
+
+      // Find all elements with IDs (h2, h3, h4, etc.)
+      const anchors = editor.querySelectorAll('[id]');
+      
+      if (anchors.length === 0) {
+        select.innerHTML = '<option value="">-- No anchors found --</option>';
+        return;
+      }
+
+      anchors.forEach(anchor => {
+        const option = document.createElement('option');
+        option.value = anchor.id;
+        option.textContent = anchor.textContent || anchor.id;
+        select.appendChild(option);
+      });
+    }
+
+    // Handle anchor link clicks - scroll to anchor instead of following href
+    // Works both in editor and on regular HTML pages
+    function handleAnchorClick(e) {
+      if (e.target.tagName === 'A' && e.target.href && e.target.href.includes('#')) {
+        const href = e.target.getAttribute('href');
+        // Only prevent default if href is local anchor (starts with #)
+        if (href.startsWith('#')) {
+          e.preventDefault();
+          
+          const anchorId = href.substring(1);
+          const targetElement = document.getElementById(anchorId);
+          
+          console.log('Anchor click - ID:', anchorId, 'Found:', !!targetElement);
+          
+          if (targetElement) {
+            // Scroll to the element
+            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            
+            // Highlight the element briefly
+            const originalBg = window.getComputedStyle(targetElement).backgroundColor;
+            targetElement.style.backgroundColor = '#fff3cd';
+            targetElement.style.transition = 'background-color 0.3s';
+            
+            setTimeout(() => {
+              targetElement.style.backgroundColor = originalBg;
+            }, 1500);
+            
+            // Update URL
+            window.history.pushState(null, null, href);
+          }
+        }
+      }
+    }
+    
+    // Attach to editor
+    editor.addEventListener('click', handleAnchorClick);
+    
+    // Also attach globally for any page
+    document.addEventListener('click', handleAnchorClick);
 
     editor.addEventListener('mouseout', (e) => {
       if (!resizingColumn && (e.target.tagName === 'TD' || e.target.tagName === 'TH')) {
