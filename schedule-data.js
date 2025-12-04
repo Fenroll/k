@@ -570,7 +570,15 @@ const scheduleData = {
         "changes": {
           "type": "Колоквиум",
       }
-    }  
+    },
+    {
+        "day": "ПЕТ",
+        "subject": "ВБ1",
+        "startTime": "09:15",
+        "changes": {
+          "type": "Важна лекция",
+      }  
+    }
      ],
      "13": [
       {
