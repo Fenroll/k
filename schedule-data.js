@@ -599,7 +599,7 @@ const scheduleData = {
         "startTime": "08:00",
         "endTime": "09:30",
         "additionalInfo": "От 8:30 започва"
-    },
+      },
       {
        "day": "ЧЕТ",
         "subject": "кимун",
@@ -623,7 +623,15 @@ const scheduleData = {
         "changes": {
           "type": "Важна лекция",
       }
-    } 
+    },
+    {
+       "day": "СР",
+        "subject": "НБ",
+        "startTime": "13:15",
+        "changes": {
+          "type": "Колоквиум",
+        }
+      }
      ],
      "14": [
       {
