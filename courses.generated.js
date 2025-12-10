@@ -4,26 +4,6 @@ const courses = [
     "title": "Blackboard Help (students / студенти)",
     "sections": [
       {
-        "name": "Дневни",
-        "files": [
-          {
-            "name": "Globle.url",
-            "path": "files/Blackboard Help/Дневни/Globle.url",
-            "url": "https://globle-game.com/"
-          },
-          {
-            "name": "Kinda Hard Golf.url",
-            "path": "files/Blackboard Help/Дневни/Kinda Hard Golf.url",
-            "url": "https://kindahardgolf.com/"
-          },
-          {
-            "name": "Wordle.url",
-            "path": "files/Blackboard Help/Дневни/Wordle.url",
-            "url": "https://www.nytimes.com/games/wordle/index.html"
-          }
-        ]
-      },
-      {
         "name": "Доктори",
         "files": [
           {
@@ -60,6 +40,26 @@ const courses = [
             "name": "Mega.url",
             "path": "files/Blackboard Help/Материали/Mega.url",
             "url": "https://mega.nz/folder/mY0nSaBQ#uGTfgaVvlcVDQ9l2u6iFJw"
+          }
+        ]
+      },
+      {
+        "name": "Много Тежки Учебни Материали",
+        "files": [
+          {
+            "name": "Globle.url",
+            "path": "files/Blackboard Help/Много Тежки Учебни Материали/Globle.url",
+            "url": "https://globle-game.com/"
+          },
+          {
+            "name": "Kinda Hard Golf.url",
+            "path": "files/Blackboard Help/Много Тежки Учебни Материали/Kinda Hard Golf.url",
+            "url": "https://kindahardgolf.com/"
+          },
+          {
+            "name": "Wordle.url",
+            "path": "files/Blackboard Help/Много Тежки Учебни Материали/Wordle.url",
+            "url": "https://www.nytimes.com/games/wordle/index.html"
           }
         ]
       },
@@ -973,4 +973,4 @@ const courses = [
     "sections": []
   }
 ];
-const buildTimestamp = "10.12.2025 11:52";
+const buildTimestamp = "10.12.2025 11:58";
