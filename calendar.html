@@ -393,6 +393,21 @@
   .schedule-item.type-exam .schedule-subject {
     color: #7e22ce;
   }
+
+  /* Поправка на Колоквиум - orange/amber */
+  .schedule-item.type-makeup {
+    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+    border-left: 4px solid #f97316;
+  }
+  
+  .schedule-item.type-makeup:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 8px rgba(249,115,22,0.4);
+  }
+  
+  .schedule-item.type-makeup .schedule-subject {
+    color: #c2410c;
+  }
   
   /* Тест - vibrant green */
   .schedule-item.type-test {
@@ -407,6 +422,12 @@
   
   .schedule-item.type-test .schedule-subject {
     color: #047857;
+  }
+
+  /* Highlight - добавя светещ ефект */
+  .schedule-item.highlight {
+    box-shadow: 0 0 12px rgba(255, 193, 7, 0.6), 0 2px 8px rgba(0,0,0,0.1) !important;
+    border-right: 3px solid #fbbf24;
   }
   
   .schedule-item:last-child {
@@ -1383,6 +1404,7 @@
           'Важна лекция': 'type-important-lecture',
           'ImportantLecture': 'type-important-lecture',
           'Колоквиум': 'type-exam',
+          'Поправка на Колоквиум': 'type-makeup',
           'Тест': 'type-test'
         };
         return typeMap[type] || 'type-lecture';
@@ -1410,6 +1432,12 @@
             
             const item = document.createElement('div');
             item.className = 'schedule-item ' + getTypeClass(event.type);
+            
+            // Add highlight class if event has highlight property
+            if (event.highlight) {
+              item.classList.add('highlight');
+            }
+            
             item.innerHTML = `
               <div class="schedule-subject">${event.subject}${infoIndicator}</div>
               <div class="schedule-time">${displayTime}</div>

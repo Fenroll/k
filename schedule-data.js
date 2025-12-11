@@ -588,19 +588,6 @@ const scheduleData = {
         "removeDay": "ВТ"
       },
       {
-      "day": "ЧЕТ",
-        "subject": "ОМ",
-        "fullName": "Обща Медицина",
-        "type": "Упражнение",
-        "building": "ДКЦ",
-        "room": "",
-        "floor": "",
-        "teacher": "доц. д-р Женя Русева Петрова, д.м.",
-        "startTime": "08:00",
-        "endTime": "09:30",
-        "additionalInfo": "От 8:30 започва"
-      },
-      {
        "day": "ЧЕТ",
         "subject": "кимун",
         "startTime": "08:00",
@@ -614,6 +601,14 @@ const scheduleData = {
         "startTime": "09:15",
         "changes": {
           "type": "Важна лекция",
+      }
+    },
+    {
+        "day": "ПЕТ",
+        "subject": "УНГ",
+        "startTime": "11:00",
+        "changes": {
+          "removed": true
       }
     },
     {
@@ -641,8 +636,43 @@ const scheduleData = {
         "changes": {
           "type": "Важна лекция",
       }
-    } 
-     ],
+    },
+     {
+        "day": "СР",
+        "subject": "ОМ",
+        "startTime": "09:45",
+        "changes": {
+          "removed": true
+      }
+    },
+    {
+        "day": "СР",
+        "subject": "мген",
+        "startTime": "11:30",
+        "changes": {
+          "removed": true
+      }
+    }, 
+      {
+        "day": "СР",
+        "subject": "рент.",
+        "fullName": "Рентгенология, радиология",
+        "type": "Упражнение",
+        "building": "Онкологичен и лъчетерапевтичен център",
+        "startTime": "10:30",
+        "endTime": "12:45",
+        "additionalInfo": "Преместено от четвъртък 15:15-17:30."
+
+      },
+        {
+        "day": "ЧЕТ",
+        "subject": "рент.",
+        "startTime": "15:15",
+        "changes": {
+          "removed": true
+      }
+    }, 
+    ] ,
      "9": [
       {
       "day": "СР",
