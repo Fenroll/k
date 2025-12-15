@@ -638,6 +638,14 @@ const scheduleData = {
       }
     },
      {
+        "day": "ЧЕТ",
+        "subject": "ВБ1",
+        "startTime": "09:45",
+        "changes": {
+          "type": "Колоквиум",
+      }
+    },
+     {
         "day": "СР",
         "subject": "ОМ",
         "startTime": "09:45",
@@ -745,6 +753,30 @@ const scheduleData = {
       },
       {
 		"removeDay": "ПЕТ", 
+      },
+      {
+       "day": "ПОН",
+        "subject": "ВБ1",
+        "startTime": "09:45",
+        "changes": {
+          "removed": true
+        }
+      },
+         {
+       "day": "ВТ",
+        "subject": "ВБ1",
+        "startTime": "13:15",
+        "changes": {
+          "removed": true
+        }
+      },
+          {
+       "day": "ВТ",
+        "subject": "клпат",
+        "startTime": "08:00",
+        "changes": {
+          "removed": true
+        }
       }
     ],
     "1": [
