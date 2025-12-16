@@ -3309,13 +3309,18 @@ renderMathInElement(document.body, {
     });
     
     document.getElementById('insertImageBtn').addEventListener('click', () => {
-      const imageName = document.getElementById('imageNameInput').value.trim();
+      let imageName = document.getElementById('imageNameInput').value.trim();
       const imageAlt = document.getElementById('imageAltInput').value.trim();
       const imageSize = document.getElementById('imageSizeInput').value || 100;
 
       if (!imageName) {
         alert('Please enter image file name');
         return;
+      }
+      
+      // Auto-add .png extension if missing
+      if (!imageName.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
+        imageName = imageName + '.png';
       }
       
       // Use saved range if available, otherwise get current selection
@@ -3363,6 +3368,14 @@ renderMathInElement(document.body, {
       
       saveToHistory();
       editor.focus();
+    });
+
+    // Enter key support for image name input
+    document.getElementById('imageNameInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        document.getElementById('insertImageBtn').click();
+      }
     });
 
     // Checklist modal events
@@ -4053,6 +4066,25 @@ renderMathInElement(document.body, {
 
     // Save to history on input and detect "---" for horizontal rule
     editor.addEventListener('input', () => {
+      // CRITICAL: Convert unwanted <div> elements to <p> tags to prevent font size issues
+      // Only convert top-level divs that are not part of special structures (tables, etc)
+      const unwantedDivs = editor.querySelectorAll(':scope > div');
+      unwantedDivs.forEach(div => {
+        // Skip divs that are part of special structures (if any)
+        const p = document.createElement('p');
+        // Move all children to the new paragraph
+        while (div.firstChild) {
+          p.appendChild(div.firstChild);
+        }
+        // Copy useful attributes if any
+        Array.from(div.attributes).forEach(attr => {
+          if (attr.name !== 'style' && attr.name !== 'class') {
+            p.setAttribute(attr.name, attr.value);
+          }
+        });
+        div.parentNode.replaceChild(p, div);
+      });
+      
       // SAFE: Only remove completely empty <p> tags using textContent manipulation
       // Instead of innerHTML which breaks cursor position
       const emptyParagraphs = editor.querySelectorAll('p');
@@ -4150,6 +4182,24 @@ renderMathInElement(document.body, {
         // Also remove font-related attributes
         el.removeAttribute('size');
         el.removeAttribute('face');
+      });
+      
+      // CRITICAL: Convert any unwanted <div> elements to <p>
+      // This prevents browser from wrapping content in divs with wrong font size
+      const divs = tempDiv.querySelectorAll(':scope > div');
+      divs.forEach(div => {
+        const p = document.createElement('p');
+        // Copy all children
+        while (div.firstChild) {
+          p.appendChild(div.firstChild);
+        }
+        // Copy attributes if any
+        Array.from(div.attributes).forEach(attr => {
+          if (attr.name !== 'style') {
+            p.setAttribute(attr.name, attr.value);
+          }
+        });
+        div.parentNode.replaceChild(p, div);
       });
       
       // Delete current selection
