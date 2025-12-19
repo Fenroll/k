@@ -525,6 +525,13 @@
     padding: 12px 14px 14px 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     border-left: 4px solid #7c3aed;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  
+  .exam-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
   }
   
   .exam-card-header {
@@ -1076,7 +1083,7 @@
             <div class="modal-info-value" id="modalTime"></div>
           </div>
         </div>
-        <div class="modal-info-row">
+        <div class="modal-info-row" id="modalBuildingRow">
           <svg class="modal-info-icon" viewBox="0 0 24 24">
             <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z"/>
           </svg>
@@ -1118,6 +1125,20 @@
       </div>
     </div>
   </div>
+
+  <!-- Exam Info Modal -->
+  <div class="modal-overlay" id="examInfoModal">
+    <div class="modal-content">
+      <button class="modal-close" onclick="closeExamModal()">×</button>
+      <h2 class="modal-title">Допълнителна информация</h2>
+      <div class="modal-info" id="examInfoContent">
+        <div class="modal-info-row">
+          <div id="examAdditionalInfo" style="width: 100%; line-height: 1.6; color: #374151; white-space: pre-wrap; word-wrap: break-word;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Schedule data loaded from schedule-data.js
     let scheduleByWeek = [];
@@ -1612,6 +1633,39 @@
       }
     }
 
+    // Open exam info modal
+    function showExamModal(exam) {
+      const examAdditionalInfo = document.getElementById('examAdditionalInfo');
+      
+      if (exam.additionalInfo && exam.additionalInfo.trim()) {
+        examAdditionalInfo.textContent = exam.additionalInfo;
+      } else {
+        examAdditionalInfo.textContent = 'Няма добавена информация.';
+      }
+      
+      document.getElementById('examInfoModal').classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeExamModal() {
+      document.getElementById('examInfoModal').classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    // Close exam modal on overlay click
+    document.getElementById('examInfoModal').addEventListener('click', function(e) {
+      if (e.target === this) {
+        closeExamModal();
+      }
+    });
+
+    // Close exam modal on Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && document.getElementById('examInfoModal').classList.contains('open')) {
+        closeExamModal();
+      }
+    });
+
     // Open modal with event details
     function openModal(event) {
       // Use fullName if available, otherwise use subject
@@ -1652,9 +1706,7 @@
       
       document.getElementById('modalOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
-    }
-
-    // Close modal
+    }    // Close modal
     function closeModal() {
       document.getElementById('modalOverlay').classList.remove('open');
       document.body.style.overflow = '';
@@ -1708,7 +1760,7 @@
         }
         
         return `
-          <div class="exam-card">
+          <div class="exam-card" onclick="showExamModal(${JSON.stringify(exam).replace(/"/g, '&quot;')})">
             <div class="exam-card-header">
               <h3 class="exam-card-title">${exam.fullName || exam.subject}</h3>
             </div>
@@ -1723,11 +1775,11 @@
               <div class="exam-info-grid">
                 <div class="exam-info-item">
                   <span class="exam-info-label">Дата:</span>
-                  <span class="exam-info-value">${examDateFormatted}${exam.examTime ? ', ' + exam.examTime : ''}</span>
+                  <span class="exam-info-value">${examDateFormatted}</span>
                 </div>
                 <div class="exam-info-item">
-                  <span class="exam-info-label">Локация:</span>
-                  <span class="exam-info-value">${exam.examLocation}</span>
+                  <span class="exam-info-label">Час:</span>
+                  <span class="exam-info-value">${exam.examTime || ''}</span>
                 </div>
               </div>
             </div>
@@ -1742,11 +1794,11 @@
               <div class="exam-info-grid">
                 <div class="exam-info-item">
                   <span class="exam-info-label">Дата:</span>
-                  <span class="exam-info-value">${retakeDateFormatted}${exam.retakeTime ? ', ' + exam.retakeTime : ''}</span>
+                  <span class="exam-info-value">${retakeDateFormatted}</span>
                 </div>
                 <div class="exam-info-item">
-                  <span class="exam-info-label">Локация:</span>
-                  <span class="exam-info-value">${exam.retakeLocation}</span>
+                  <span class="exam-info-label">Час:</span>
+                  <span class="exam-info-value">${exam.retakeTime || ''}</span>
                 </div>
               </div>
             </div>

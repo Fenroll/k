@@ -19,11 +19,12 @@ const scheduleData = {
       "subject": "Медицинска генетика",
       "fullName": "Медицинска генетика",
       "examDate": "2026-01-07",
-      "examTime": "",
+      "examTime": "10:00",
       "examLocation": "",
       "retakeDate": "2026-02-13",
       "retakeTime": "",
-      "retakeLocation": ""
+      "retakeLocation": "",
+      "additionalInfo": "Крайната оценка се формира, както следва:\n• 20% - семестриален тест;\n• 30% - финален тест;\n• 50% - устен изпит."
     },
     {
       "subject": "Фармакология",
@@ -33,7 +34,8 @@ const scheduleData = {
       "examLocation": "",
       "retakeDate": "2026-02-06 и 2026-02-12",
       "retakeTime": "",
-      "retakeLocation": ""
+      "retakeLocation": "",
+      "additionalInfo": ""
     },
      {
       "subject": "Клинична имунология",
@@ -43,7 +45,8 @@ const scheduleData = {
       "examLocation": "",
       "retakeDate": "2026-02-13",
       "retakeTime": "",
-      "retakeLocation": ""
+      "retakeLocation": "",
+      "additionalInfo": ""
     },
     
     {
@@ -54,7 +57,8 @@ const scheduleData = {
       "examLocation": "",
       "retakeDate": "2026-02-09 и 2026-02-13",
       "retakeTime": "",
-      "retakeLocation": ""
+      "retakeLocation": "",
+      "additionalInfo": ""
     },
     {
       "subject": "Ушни, носни и гърлени болести",
@@ -64,7 +68,8 @@ const scheduleData = {
       "examLocation": "",
       "retakeDate": "2026-02-09",
       "retakeTime": "",
-      "retakeLocation": ""
+      "retakeLocation": "",
+      "additionalInfo": ""
     }
    
   ],
@@ -633,6 +638,14 @@ const scheduleData = {
         "day": "ЧЕТ",
         "subject": "ВБ1",
         "startTime": "13:30",
+        "changes": {
+          "type": "Важна лекция",
+      }
+    },
+    {
+        "day": "ПЕТ",
+        "subject": "ВБ1",
+        "startTime": "09:15",
         "changes": {
           "type": "Важна лекция",
       }
