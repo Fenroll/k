@@ -1868,8 +1868,9 @@
         resultDiv.className = "success";
         resultDiv.innerHTML = `Тъй като годишната Ви оценка е висока, Ви трябват само минималните <strong>60 точки</strong>, за да преминете изпита.`;
       } else {
+        const actualScaleGrade = scoreScale.find(e => e.pts === foundPoints).val;
         resultDiv.className = "success";
-        resultDiv.innerHTML = `За крайна оценка <strong>${target.toFixed(2)}</strong>,<br>на изпита Ви трябват минимум:<br><span style="font-size: 1.3em;"><strong>${foundPoints} точки</strong></span><br>(Оценка: ${neededExamGrade.toFixed(2)})`;
+        resultDiv.innerHTML = `За крайна оценка <strong>${target.toFixed(2)}</strong>,<br>на изпита Ви трябват минимум:<br><span style="font-size: 1.3em;"><strong>${foundPoints} точки</strong></span><br>(Това съответства на <strong>${actualScaleGrade.toFixed(2)}</strong> от теста на изпита)`;
       }
     }
 
