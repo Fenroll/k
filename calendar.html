@@ -479,6 +479,8 @@
     padding: 32px;
     max-width: 500px;
     width: 90%;
+    max-height: 90vh;
+    overflow-y: auto;
     box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     animation: slideIn 0.3s ease;
     position: relative;
@@ -683,6 +685,143 @@
   #modalAdditionalInfo {
     color: #374151;  /* По-тъмен сив от другите */
     font-weight: 500;
+    font-size: 14px;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding-right: 8px;
+  }
+  
+  #modalAdditionalInfo::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  #modalAdditionalInfo::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 10px;
+  }
+  
+  #modalAdditionalInfo::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
+  }
+  
+  #modalAdditionalInfo::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+  }
+
+  /* Table styles for markdown tables */
+  #modalAdditionalInfo table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 4px 0;
+    font-size: 12px;
+    table-layout: fixed;
+  }
+
+  #modalAdditionalInfo table thead {
+    background-color: #f3f4f6;
+  }
+
+  #modalAdditionalInfo table th,
+  #modalAdditionalInfo table td {
+    border: 1px solid #d1d5db;
+    padding: 6px 4px;
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  #modalAdditionalInfo table th {
+    font-weight: 700;
+    color: #111827;
+    background-color: #f3f4f6;
+    font-size: 11px;
+  }
+
+  #modalAdditionalInfo table tbody tr:nth-child(odd) {
+    background-color: #fafbfc;
+  }
+
+  #modalAdditionalInfo table tbody tr:hover {
+    background-color: #f0f4f8;
+  }
+
+  #examAdditionalInfo table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 4px 0;
+    font-size: 12px;
+    table-layout: fixed;
+  }
+
+  #examAdditionalInfo table thead {
+    background-color: #f3f4f6;
+  }
+
+  #examAdditionalInfo table th,
+  #examAdditionalInfo table td {
+    border: 1px solid #d1d5db;
+    padding: 6px 4px;
+    text-align: left;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+  }
+
+  #examAdditionalInfo table th {
+    font-weight: 700;
+    color: #111827;
+    background-color: #f3f4f6;
+    font-size: 11px;
+  }
+
+  #examAdditionalInfo table tbody tr:nth-child(odd) {
+    background-color: #fafbfc;
+  }
+
+  #examAdditionalInfo table tbody tr:hover {
+    background-color: #f0f4f8;
+  }
+
+  /* Calculator styles */
+  .calc-input-group {
+    margin-bottom: 12px;
+  }
+
+  .calc-input-group label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: 600;
+    color: #555;
+    font-size: 13px;
+  }
+
+  .calc-input-group input,
+  .calc-input-group select {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 13px;
+  }
+
+  .calc-input-group input:focus,
+  .calc-input-group select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 4px rgba(52, 152, 219, 0.3);
+  }
+
+  #calcResult.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+  }
+
+  #calcResult.warning {
+    background-color: #fff3cd;
+    color: #856404;
+    border: 1px solid #ffeeba;
   }
   
   /* Mobile responsive */
@@ -1131,9 +1270,33 @@
     <div class="modal-content">
       <button class="modal-close" onclick="closeExamModal()">×</button>
       <h2 class="modal-title">Допълнителна информация</h2>
+      
+      <!-- Calculator Section (hidden by default) -->
+      <div id="calculatorSection" style="display: none; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
+        <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 1.1em; text-align: center;">Калкулатор на изпита</h3>
+        
+        <div class="calc-input-group">
+          <label for="calcAnnualGrade">Годишна оценка:</label>
+          <input type="number" id="calcAnnualGrade" step="0.01" min="2" max="6" placeholder="Напр. 5.58">
+        </div>
+
+        <div class="calc-input-group">
+          <label for="calcTargetGrade">Желана крайна оценка:</label>
+          <select id="calcTargetGrade">
+            <option value="3.50">3.50 (Добър)</option>
+            <option value="4.50">4.50 (Много добър)</option>
+            <option value="5.50">5.50 (Отличен)</option>
+          </select>
+        </div>
+
+        <button onclick="calculateExamPoints()" style="width: 100%; padding: 10px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95em; font-weight: bold;">Изчисли</button>
+
+        <div id="calcResult" style="margin-top: 15px; padding: 12px; border-radius: 6px; display: none; text-align: center; line-height: 1.5; font-size: 13px;"></div>
+      </div>
+      
       <div class="modal-info" id="examInfoContent">
         <div class="modal-info-row">
-          <div id="examAdditionalInfo" style="width: 100%; line-height: 1.6; color: #374151; white-space: pre-wrap; word-wrap: break-word;"></div>
+          <div id="examAdditionalInfo" style="width: 100%; line-height: 1.6; color: #374151; word-wrap: break-word; font-size: 14px; overflow: auto; max-height: 70vh;"></div>
         </div>
       </div>
     </div>
@@ -1638,9 +1801,17 @@
       const examAdditionalInfo = document.getElementById('examAdditionalInfo');
       
       if (exam.additionalInfo && exam.additionalInfo.trim()) {
-        examAdditionalInfo.textContent = exam.additionalInfo;
+        examAdditionalInfo.innerHTML = marked.parse(exam.additionalInfo);
       } else {
-        examAdditionalInfo.textContent = 'Няма добавена информация.';
+        examAdditionalInfo.innerHTML = 'Няма добавена информация.';
+      }
+      
+      // Show/hide calculator based on flag
+      const calculatorSection = document.getElementById('calculatorSection');
+      if (exam.hasCalculatorPharmacology1) {
+        calculatorSection.style.display = 'block';
+      } else {
+        calculatorSection.style.display = 'none';
       }
       
       document.getElementById('examInfoModal').classList.add('open');
@@ -1650,6 +1821,56 @@
     function closeExamModal() {
       document.getElementById('examInfoModal').classList.remove('open');
       document.body.style.overflow = '';
+    }
+
+    // Calculator function
+    function calculateExamPoints() {
+      const scoreScale = [
+        {pts: "60-61", val: 3.00}, {pts: "62-63", val: 3.10}, {pts: "64-65", val: 3.20},
+        {pts: "66-67", val: 3.30}, {pts: "68-69", val: 3.40}, {pts: "70", val: 3.50},
+        {pts: "71", val: 3.60}, {pts: "72", val: 3.70}, {pts: "73", val: 3.80},
+        {pts: "74", val: 3.90}, {pts: "75", val: 4.00}, {pts: "76", val: 4.10},
+        {pts: "77", val: 4.20}, {pts: "78", val: 4.30}, {pts: "79", val: 4.40},
+        {pts: "80", val: 4.50}, {pts: "81", val: 4.60}, {pts: "82", val: 4.70},
+        {pts: "83", val: 4.80}, {pts: "84", val: 4.90}, {pts: "85", val: 5.00},
+        {pts: "86", val: 5.10}, {pts: "87", val: 5.20}, {pts: "88", val: 5.30},
+        {pts: "89", val: 5.40}, {pts: "90-91", val: 5.50}, {pts: "92-93", val: 5.60},
+        {pts: "94-95", val: 5.70}, {pts: "96-97", val: 5.80}, {pts: "98", val: 5.90},
+        {pts: "99-100", val: 6.00}
+      ];
+
+      const annual = parseFloat(document.getElementById('calcAnnualGrade').value);
+      const target = parseFloat(document.getElementById('calcTargetGrade').value);
+      const resultDiv = document.getElementById('calcResult');
+
+      if (isNaN(annual) || annual < 2 || annual > 6) {
+        resultDiv.textContent = 'Моля, въведете валидна годишна оценка между 2 и 6.';
+        resultDiv.className = 'warning';
+        resultDiv.style.display = 'block';
+        return;
+      }
+
+      const neededExamGrade = (target - (0.3 * annual)) / 0.7;
+      
+      let foundPoints = "";
+      for (let entry of scoreScale) {
+        if (entry.val >= neededExamGrade) {
+          foundPoints = entry.pts;
+          break;
+        }
+      }
+
+      resultDiv.style.display = "block";
+      if (foundPoints === "" && neededExamGrade > 6) {
+        resultDiv.className = "warning";
+        resultDiv.innerHTML = `За съжаление, целта от <strong>${target.toFixed(2)}</strong> е математически недостижима с годишна оценка ${annual.toFixed(2)}.`;
+      } else if (neededExamGrade <= 3.00) {
+        resultDiv.className = "success";
+        resultDiv.innerHTML = `Тъй като годишната Ви оценка е висока, Ви трябват само минималните <strong>60 точки</strong>, за да преминете изпита.`;
+      } else {
+        resultDiv.className = "success";
+        resultDiv.innerHTML = `За крайна оценка <strong>${target.toFixed(2)}</strong>,<br>на изпита Ви трябват минимум:<br><span style="font-size: 1.3em;"><strong>${foundPoints} точки</strong></span><br>(Оценка: ${neededExamGrade.toFixed(2)})`;
+      }
     }
 
     // Close exam modal on overlay click
@@ -1698,7 +1919,7 @@
       const additionalInfoRow = document.getElementById('modalAdditionalInfoRow');
       
       if (event.additionalInfo) {
-        additionalInfoElement.textContent = event.additionalInfo;
+        additionalInfoElement.innerHTML = marked.parse(event.additionalInfo);
         additionalInfoRow.style.display = 'flex';  // Променено на flex
       } else {
         additionalInfoRow.style.display = 'none';
