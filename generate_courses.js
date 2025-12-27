@@ -102,8 +102,9 @@ function getAllCourses() {
   console.log('Loaded name mappings:', Object.keys(nameMappings).length, 'folders');
   
   // Get current subjects from filesystem
+  // Filter out hidden folders that start with . or _ (they won't appear in courses)
   const subjects = fs.readdirSync(ELEMENTS_DIR, { withFileTypes: true })
-    .filter(dirent => dirent.isDirectory())
+    .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('.') && !dirent.name.startsWith('_'))
     .map(dirent => dirent.name);
   
   // Clean up ID mappings - remove entries for courses that no longer exist
