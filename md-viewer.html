@@ -473,6 +473,9 @@
             // Otherwise parse as Markdown
             html = marked.parse(content);
             
+            // Convert ~~~ paragraphs to dashed <hr>
+            html = html.replace(/<p>~~~<\/p>/g, '<hr style="border: none; border-top: 2px dashed #8B6F47;">');
+            
             // Process tables to support rowspan with ^ syntax (only if needed)
             if (html.includes('^')) {
               html = processTableRowspans(html);

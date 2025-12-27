@@ -1066,6 +1066,7 @@
       <button id="linkBtn" title="Link"><img src="svg/material-symbols_outlined_add_link.svg" alt="Bold" class="toolbar-icon"></button>
       <button id="imageBtn" title="Add Image"><img src="svg/image.svg" alt="Image" class="toolbar-icon"></button>
       <button id="hrBtn" title="Horizontal Line"><svg width="18" height="18" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32s-14.33-32-32-32H64c-17.67 0-32 14.33-32 32z"/></svg></button>
+      <button id="dashedLineBtn" title="Topic Divider (Dashed Line)"><img src="svg/line-dashed.svg" alt="Dashed Line" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
@@ -1903,6 +1904,24 @@
       editor.focus();
     }
 
+    function insertDashedLine() {
+      const selection = window.getSelection();
+      const range = selection.getRangeAt(0);
+      
+      // Create <hr> with dashed style
+      const hr = document.createElement('hr');
+      hr.style.cssText = 'border: none; border-top: 2px dashed #8B6F47;';
+      
+      range.insertNode(hr);
+      range.setStartAfter(hr);
+      range.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      saveToHistory();
+      editor.focus();
+    }
+
     // Toolbar button events
     // Format dropdown toggle
     const formatToggleBtn = document.getElementById('formatToggleBtn');
@@ -2235,6 +2254,10 @@
 
     document.getElementById('hrBtn').addEventListener('click', () => {
       insertHR();
+    });
+
+    document.getElementById('dashedLineBtn').addEventListener('click', () => {
+      insertDashedLine();
     });
 
     document.getElementById('undoBtn').addEventListener('click', () => {
@@ -3695,6 +3718,9 @@ renderMathInElement(document.body, {
       // Horizontal rule
       highlighted = highlighted.replace(/^---+$/gm, '<span style="color: #6b7280;">---</span>');
       
+      // Dashed divider (topic separator)
+      highlighted = highlighted.replace(/^~~~+$/gm, '<span style="color: #8B6F47; border-bottom: 2px dashed #8B6F47; display: inline-block; padding-bottom: 2px;">~~~</span>');
+      
       return highlighted;
     }
 
@@ -3878,6 +3904,36 @@ renderMathInElement(document.body, {
 
     // Keyboard shortcuts
     editor.addEventListener('keydown', (e) => {
+      // Handle Delete/Backspace on dashed line dividers (works same as regular <hr>)
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        const selection = window.getSelection();
+        if (selection.rangeCount) {
+          const range = selection.getRangeAt(0);
+          let node = range.startContainer;
+          
+          // Find the actual element
+          while (node && node !== editor && node.nodeType === 3) {
+            node = node.parentNode;
+          }
+          
+          // Check if adjacent to <hr>
+          if (node && node.nodeType === 1) {
+            if (e.key === 'Backspace' && node.previousSibling && node.previousSibling.tagName === 'HR') {
+              e.preventDefault();
+              node.previousSibling.remove();
+              saveToHistory();
+              return;
+            }
+            if (e.key === 'Delete' && node.nextSibling && node.nextSibling.tagName === 'HR') {
+              e.preventDefault();
+              node.nextSibling.remove();
+              saveToHistory();
+              return;
+            }
+          }
+        }
+      }
+      
       // CRITICAL: Handle Enter in list items to prevent <p> tag wrapping
       if (e.key === 'Enter') {
         const selection = window.getSelection();
@@ -4102,7 +4158,7 @@ renderMathInElement(document.body, {
         }, 1000);
       }
       
-      // Auto-convert "---" to horizontal rule
+      // Auto-convert "---" to horizontal rule and "~~~" to dashed divider
       const selection = window.getSelection();
       if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
@@ -4127,6 +4183,24 @@ renderMathInElement(document.body, {
               newRange.collapse(true);
               selection.removeAllRanges();
               selection.addRange(newRange);
+              
+              saveToHistory();
+            } else if (text === '~~~' && node.tagName === 'P') {
+              // Replace this paragraph with dashed <hr>
+              const hr = document.createElement('hr');
+              hr.style.cssText = 'border: none; border-top: 2px dashed #8B6F47;';
+              node.parentNode.replaceChild(hr, node);
+              
+              // Create new paragraph after hr and focus there
+              const newP2 = document.createElement('p');
+              newP2.innerHTML = '<br>';
+              hr.parentNode.insertBefore(newP2, hr.nextSibling);
+              
+              const newRange2 = document.createRange();
+              newRange2.setStart(newP2, 0);
+              newRange2.collapse(true);
+              selection.removeAllRanges();
+              selection.addRange(newRange2);
               
               saveToHistory();
             }
