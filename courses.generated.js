@@ -987,10 +987,6 @@ const courses = [
             "path": "files/Рентгенология/Изпит/Учебник по образна диагностика.pdf"
           },
           {
-            "name": "Фокуси.png",
-            "path": "files/Рентгенология/Изпит/Фокуси.png"
-          },
-          {
             "name": "Learning Radiology.pdf",
             "path": "files/Рентгенология/Изпит/Learning Radiology.pdf"
           }
@@ -1018,6 +1014,11 @@ const courses = [
         ]
       }
     ]
+  },
+  {
+    "id": "000013",
+    "title": "media",
+    "sections": []
   }
 ];
-const buildTimestamp = "27.12.2025 15:20";
+const buildTimestamp = "27.12.2025 15:29";
