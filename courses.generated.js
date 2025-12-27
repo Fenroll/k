@@ -1014,11 +1014,6 @@ const courses = [
         ]
       }
     ]
-  },
-  {
-    "id": "000013",
-    "title": "media",
-    "sections": []
   }
 ];
-const buildTimestamp = "27.12.2025 15:29";
+const buildTimestamp = "27.12.2025 15:31";
