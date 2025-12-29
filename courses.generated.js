@@ -583,7 +583,12 @@ const courses = [
     "sections": [
       {
         "name": "Изпит",
-        "files": [],
+        "files": [
+          {
+            "name": "Изпитни въпроси.docx",
+            "path": "files/Клинична Генетика/Изпит/Изпитни въпроси.docx"
+          }
+        ],
         "msgNotes": [
           {
             "name": "1-msg-Някои темички.html",
@@ -592,19 +597,6 @@ const courses = [
             "type": "html"
           }
         ]
-      },
-      {
-        "name": "Материали",
-        "files": [
-          {
-            "name": "Изпитни въпроси.docx",
-            "path": "files/Клинична Генетика/Материали/Изпитни въпроси.docx"
-          }
-        ]
-      },
-      {
-        "name": "Упражнения",
-        "files": []
       }
     ]
   },
