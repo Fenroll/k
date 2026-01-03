@@ -698,10 +698,6 @@ const courses = [
             "path": "files/Рентгенология/Изпит/Събрани Тестове.doc"
           },
           {
-            "name": "Учебник по образна диагностика.pdf",
-            "path": "files/Рентгенология/Изпит/Учебник по образна диагностика.pdf"
-          },
-          {
             "name": "Learning Radiology.pdf",
             "path": "files/Рентгенология/Изпит/Learning Radiology.pdf"
           }
@@ -731,4 +727,4 @@ const courses = [
     ]
   }
 ];
-const buildTimestamp = "03.01.2026 17:59";
+const buildTimestamp = "03.01.2026 18:00";
