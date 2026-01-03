@@ -690,10 +690,6 @@ const courses = [
             "path": "files/Рентгенология/Изпит/Практически изпит 2018.pdf"
           },
           {
-            "name": "РЕНТГЕН-ТЕМИ.pdf",
-            "path": "files/Рентгенология/Изпит/РЕНТГЕН-ТЕМИ.pdf"
-          },
-          {
             "name": "Събрани Тестове.doc",
             "path": "files/Рентгенология/Изпит/Събрани Тестове.doc"
           },
@@ -731,4 +727,4 @@ const courses = [
     ]
   }
 ];
-const buildTimestamp = "03.01.2026 17:57";
+const buildTimestamp = "03.01.2026 17:58";
