@@ -692,10 +692,6 @@ const courses = [
           {
             "name": "Събрани Тестове.doc",
             "path": "files/Рентгенология/Изпит/Събрани Тестове.doc"
-          },
-          {
-            "name": "Learning Radiology.pdf",
-            "path": "files/Рентгенология/Изпит/Learning Radiology.pdf"
           }
         ],
         "msgNotes": [
@@ -723,4 +719,4 @@ const courses = [
     ]
   }
 ];
-const buildTimestamp = "03.01.2026 18:03";
+const buildTimestamp = "03.01.2026 18:04";
