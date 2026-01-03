@@ -203,10 +203,6 @@ const courses = [
         "name": "Пулмология",
         "files": [
           {
-            "name": "заявл. персональные данные_2958a635-2e29-41bf-8fce-13bd7e436148.pdf",
-            "path": "files/Вътрешни болести 1 ч/Пулмология/заявл. персональные данные_2958a635-2e29-41bf-8fce-13bd7e436148.pdf"
-          },
-          {
             "name": "Gold Класификация.url",
             "path": "files/Вътрешни болести 1 ч/Пулмология/Gold Класификация.url",
             "url": "https://goldcopd.org/wp-content/uploads/2024/11/Pocket-Guide-2025-v1.0-New-Format-15Nov2024_WMV.pdf"
@@ -727,4 +723,4 @@ const courses = [
     ]
   }
 ];
-const buildTimestamp = "03.01.2026 18:00";
+const buildTimestamp = "03.01.2026 18:03";
