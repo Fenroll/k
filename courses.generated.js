@@ -685,6 +685,11 @@ const courses = [
             "path": "files/Рентгенология/Изпит/Практически изпит 2018.pdf"
           },
           {
+            "name": "Преговор на Гръдна Клетка и Медиастинум.url",
+            "path": "files/Рентгенология/Изпит/Преговор на Гръдна Клетка и Медиастинум.url",
+            "url": "https://drive.google.com/file/d/14QPqMu5IwybRrzIf2egEi08oBnrBdePL/view?usp=drive_link"
+          },
+          {
             "name": "РЕНТГЕН-ТЕМИ.pdf",
             "path": "files/Рентгенология/Изпит/РЕНТГЕН-ТЕМИ.pdf"
           },
@@ -726,4 +731,4 @@ const courses = [
     ]
   }
 ];
-const buildTimestamp = "02.01.2026 23:22";
+const buildTimestamp = "03.01.2026 17:57";
