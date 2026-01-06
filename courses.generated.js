@@ -569,15 +569,6 @@ const courses = [
             "type": "html"
           }
         ]
-      },
-      {
-        "name": "Материали",
-        "files": [
-          {
-            "name": "Изпитни въпроси.docx",
-            "path": "files/Клинична Генетика/Материали/Изпитни въпроси.docx"
-          }
-        ]
       }
     ]
   },
@@ -720,4 +711,4 @@ const courses = [
     ]
   }
 ];
-const buildTimestamp = "06.01.2026 15:23";
+const buildTimestamp = "06.01.2026 15:34";
