@@ -726,4 +726,4 @@ const courses = [
     ]
   }
 ];
-const buildTimestamp = "07.01.2026 05:58";
+const buildTimestamp = "07.01.2026 05:59";
