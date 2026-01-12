@@ -42,12 +42,12 @@ const scheduleData = {
       "subject": "Клинична имунология",
       "fullName": "Клинична имунология",
       "examDate": "2026-01-15",
-      "examTime": "",
+      "examTime": "13:30",
       "examLocation": "",
       "retakeDate": "2026-02-13",
       "retakeTime": "",
       "retakeLocation": "",
-      "additionalInfo": ""
+      "additionalInfo": "Крайната оценка ще се сформира от колоквиума (20%), изпитния тест (30%) и устния отговор на въпроса (50%)."
     },
     
     {
