@@ -830,6 +830,105 @@
       animation: pulse 0.5s ease-in-out;
     }
     
+    /* Question Creator Styles */
+    .question-item {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    
+    .question-item-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    
+    .question-item-number {
+      font-weight: 600;
+      color: #333;
+      font-size: 16px;
+    }
+    
+    .question-item-actions {
+      display: flex;
+      gap: 8px;
+    }
+    
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 14px;
+    }
+    
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+    
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+    
+    .answers-container {
+      margin-top: 12px;
+    }
+    
+    .answer-item-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+      align-items: flex-start;
+    }
+    
+    .answer-input {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 14px;
+    }
+    
+    .answer-controls {
+      display: flex;
+      gap: 4px;
+    }
+    
+    .checkbox-correct {
+      margin-top: 2px;
+    }
+    
+    .option {
+      padding: 12px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+    
+    .option:hover {
+      background: #f3f4f6;
+      border-color: #9ca3af;
+    }
+    
+    .option.selected {
+      background: #dbeafe;
+      border-color: #3b82f6;
+      font-weight: 500;
+    }
+    
+    .option.correct {
+      background: #dcfce7;
+      border-color: #22c55e;
+    }
+    
+    .option.incorrect {
+      background: #fee2e2;
+      border-color: #ef4444;
+    }
+    
     @media (max-width: 768px) {
       .main-content {
         margin-left: 0;
@@ -1020,6 +1119,9 @@
           <button class="test-menu-btn active" data-test="pharmacology" style="padding: 20px; border: 2px solid #3b82f6; background: #eff6ff; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 500; color: #1e40af; transition: all 0.3s;">
             💊 Фармакологичен Тест
           </button>
+          <button class="test-menu-btn" data-test="questionCreator" style="padding: 20px; border: 2px solid #e5e7eb; background: white; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 500; color: #666; transition: all 0.3s;">
+            ✏️ Нормален Тест
+          </button>
           <button class="test-menu-btn" data-test="test2" style="padding: 20px; border: 2px solid #e5e7eb; background: white; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 500; color: #666; transition: all 0.3s;">
             📋 Тест 2 (скоро)
           </button>
@@ -1119,6 +1221,81 @@
             <div class="button-row">
               <button id="restartTestBtn" class="btn btn-primary">Повтори теста</button>
               <button id="newTestBtn" class="btn btn-secondary">Създай нов тест</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Question Creator Test Container -->
+        <div id="questionCreatorTest" class="test-container" style="display: none;">
+          <header class="main-header" style="margin-top: 0;">
+            <h1 class="page-title">Създай Тест</h1>
+          </header>
+          
+          <!-- Question Creator Section -->
+          <div id="questionCreatorSection" class="test-creator">
+            <h2>Създаване на въпроси</h2>
+            
+            <div class="form-group">
+              <label for="testTitle">Име на теста:</label>
+              <input type="text" id="testTitle" class="form-control" placeholder="нпр. Клинична имунологија - Колоквиум">
+            </div>
+            
+            <div id="questionsContainer" class="groups-container">
+              <!-- Questions will be added here dynamically -->
+            </div>
+            
+            <button id="addQuestionBtn" class="btn btn-primary">+ Добави въпрос</button>
+            
+            <div class="sticky-actions">
+              <div class="button-row">
+                <button id="startQCTestBtn" class="btn btn-success">Стартирай тест</button>
+                <button id="exportQCBtn" class="btn btn-secondary">Експортирай JSON</button>
+                <button id="clearQCFormBtn" class="btn btn-secondary">Исчисти форма</button>
+                <label for="importQCFile" class="btn btn-secondary import-label">
+                  <span>📂 Импортирай JSON</span>
+                  <input type="file" id="importQCFile" accept=".json" class="hidden">
+                </label>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Question Creator Test Runner -->
+          <div id="questionCreatorTestRunner" class="test-runner hidden">
+            <div class="test-header">
+              <h2 id="qcTestTitle">Тест</h2>
+              <div id="qcTestProgress" class="test-progress">Въпрос <span id="qcCurrentQuestion">1</span> од <span id="qcTotalQuestions">1</span></div>
+            </div>
+            
+            <div id="qcQuestionContainer" class="question-container">
+              <!-- Current question will be displayed here -->
+            </div>
+            
+            <div class="sticky-runner">
+              <div class="button-row">
+                <button id="qcPrevQuestionBtn" class="btn btn-secondary">Претходен</button>
+                <button id="qcNextQuestionBtn" class="btn btn-primary">Следен</button>
+                <button id="qcSubmitTestBtn" class="btn btn-success">Предај тест</button>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Question Creator Results Section -->
+          <div id="questionCreatorResultsSection" class="results-section hidden">
+            <h2>Резултати</h2>
+            <div class="results-container">
+              <div class="score-display">
+                <div class="score-circle">
+                  <span id="qcScorePercentage">0%</span>
+                </div>
+                <p>Верни одговори: <span id="qcCorrectAnswers">0</span> од <span id="qcTotalAnswers">0</span></p>
+              </div>
+              <div id="qcDetailedResults" class="detailed-results">
+                <!-- Detailed results will be shown here -->
+              </div>
+            </div>
+            <div class="button-row">
+              <button id="qcRestartTestBtn" class="btn btn-primary">Повтори тест</button>
+              <button id="qcNewTestBtn" class="btn btn-secondary">Создај нов тест</button>
             </div>
           </div>
         </div>
@@ -4343,6 +4520,9 @@ loadSampleFiles();
       addNewGroup();
     }
   </script>
+  
+  <!-- Question Creator Script -->
+  <script src="js/question-creator.js"></script>
   
   <!-- Mobile menu overlay -->
   <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
