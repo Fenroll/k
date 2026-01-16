@@ -45,6 +45,19 @@ document.addEventListener('DOMContentLoaded', function() {
   init();
   
   function init() {
+    console.log('Question Creator инициализирање...');
+    console.log('addQuestionBtn:', addQuestionBtn);
+    console.log('startQCTestBtn:', startQCTestBtn);
+    
+    if (!addQuestionBtn) {
+      console.error('ГРЕШКА: addQuestionBtn не е намерен!');
+      return;
+    }
+    if (!startQCTestBtn) {
+      console.error('ГРЕШКА: startQCTestBtn не е намерен!');
+      return;
+    }
+    
     addQuestionBtn.addEventListener('click', addQuestion);
     startQCTestBtn.addEventListener('click', startTest);
     exportQCBtn.addEventListener('click', exportJSON);
@@ -55,6 +68,8 @@ document.addEventListener('DOMContentLoaded', function() {
     qcSubmitTestBtn.addEventListener('click', submitTest);
     qcRestartTestBtn.addEventListener('click', restartTest);
     qcNewTestBtn.addEventListener('click', newTest);
+    
+    console.log('Event listeners добавени успешно');
     
     // Добави първи въпрос
     addQuestion();
@@ -297,17 +312,32 @@ document.addEventListener('DOMContentLoaded', function() {
    * Начни тест
    */
   function startTest() {
-    if (!validateForm()) return;
+    console.log('startTest е повикана');
+    if (!validateForm()) {
+      console.log('Форма не е валидна');
+      return;
+    }
+    
+    console.log('Форма е валидна, број на въпроси:', questions.length);
     
     // Получи брой въпроси за включване
     const numInput = prompt('Колко въпроса за теста? (максимум ' + questions.length + ')', Math.min(5, questions.length));
-    if (!numInput) return;
+    if (!numInput) {
+      console.log('Потребителят отказа промпта');
+      return;
+    }
+    
+    console.log('Избран брой въпроси:', numInput);
     
     selectedTestQuestionCount = Math.min(parseInt(numInput) || 5, questions.length);
     if (selectedTestQuestionCount < 1) selectedTestQuestionCount = 1;
     
+    console.log('Брой за тест:', selectedTestQuestionCount);
+    
     // Разбъркай и избери въпроси
     testQuestions = shuffleArray([...questions]).slice(0, selectedTestQuestionCount);
+    
+    console.log('Избрани въпроси:', testQuestions.length);
     
     // Инициализирай отговори на потребителя
     userAnswers = new Array(testQuestions.length).fill(null);
@@ -317,13 +347,19 @@ document.addEventListener('DOMContentLoaded', function() {
     qcTestTitle.textContent = testTitleInput.value;
     qcTotalQuestions.textContent = testQuestions.length;
     
+    console.log('UI обновена, скрий създавател...');
+    
     // Скрий създавател, покажи тестване
     document.getElementById('questionCreatorSection').classList.add('hidden');
     questionCreatorTestRunner.classList.remove('hidden');
     questionCreatorResultsSection.classList.add('hidden');
     
+    console.log('Елементите показани, прикажи въпрос...');
+    
     // Покажи първи въпрос
     displayCurrentQuestion();
+    
+    console.log('startTest завршена успешно');
   }
   
   /**
