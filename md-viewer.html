@@ -390,7 +390,7 @@
     (function(){
       function getParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
       const path = getParam('path');
-      const loadFromHash = getParam('loadFromHash') === 'true';
+      const sessionKey = getParam('sessionKey');
       if(!path){ document.getElementById('content').textContent = 'Липсва параметър path.'; return; }
       const decodedPath = decodeURIComponent(path);
       const title = decodedPath.split('/').pop()
@@ -401,10 +401,15 @@
       const dl = document.getElementById('downloadLink');
       dl.href = decodedPath;
 
-      // If content is passed in hash, use it directly (no fetch needed)
-      if (loadFromHash && window.location.hash) {
+      // If content is passed via sessionStorage, use it directly
+      if (sessionKey) {
         try {
-          const htmlContent = decodeURIComponent(window.location.hash.substring(1));
+          const htmlContent = sessionStorage.getItem(sessionKey);
+          if (!htmlContent) {
+            document.getElementById('content').textContent = 'Съдържанието не е намерено в памет. Молля, опитайте отново.';
+            return;
+          }
+          
           const root = document.getElementById('content');
           root.innerHTML = htmlContent;
           

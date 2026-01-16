@@ -1318,7 +1318,7 @@
         const notePath = noteElement ? noteElement.getAttribute('data-note-path') : '';
         const basePath = notePath ? notePath.substring(0, notePath.lastIndexOf('/') + 1) : '';
         
-        // Check if this is an HTML file - open in md-viewer with content passed in hash
+        // Check if this is an HTML file - open in md-viewer with content passed via sessionStorage
         if (notePath && /\.html$/i.test(notePath)) {
           // Find the HTML content from courses data
           let htmlContent = '';
@@ -1338,8 +1338,12 @@
           }
           
           if (htmlContent) {
-            const encodedHtml = encodeURIComponent(htmlContent);
-            const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&loadFromHash=true#${encodedHtml}`;
+            // Store in sessionStorage to avoid URL length limits
+            const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem(sessionKey, htmlContent);
+            sessionStorage.setItem(sessionKey + '_path', notePath);
+            
+            const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&sessionKey=${sessionKey}`;
             window.open(mdViewerUrl, '_blank');
           }
           return;
