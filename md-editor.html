@@ -1079,6 +1079,7 @@
       <button id="openCoursesBtn" title="Open file from courses"><img src="svg/material-symbols_outlined_folder_data.svg" alt="Delete" class="toolbar-icon"></button>
       <button id="anchorLinkBtn" title="Create/Link Anchors"><img src="svg/dataset.svg" alt="Anchor Link" class="toolbar-icon"></button>
       <button id="htmlEditorBtn" title="Edit HTML/Source Code"><img src="svg/html.svg" alt="HTML Editor" class="toolbar-icon"></button>
+      <button id="combineFilesBtn" title="Combine HTML files"><img src="svg/combine-svgrepo-com.svg" alt="Combine Files" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
@@ -1391,6 +1392,37 @@
     </div>
   </div>
 
+  <!-- Combine Files Modal -->
+  <div id="combineFilesModal" class="modal">
+    <div class="modal-content" style="max-width: 800px;">
+      <div class="modal-header">
+        <h2>Комбинирай HTML файлове</h2>
+        <span class="close" id="closeCombineFilesBtn">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Избери HTML файлове:</label>
+          <input type="file" id="combineFilesInput" accept=".html" multiple style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+        </div>
+        
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Редослед на файлове:</label>
+          <div id="filesList" style="border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; min-height: 200px; padding: 12px; max-height: 300px; overflow-y: auto;">
+            <div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; justify-content: space-between; font-size: 0.85em; color: #6b7280;">
+          <div>💡 Можеш да преместваш файловете за да промениш редоследа</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="closeCombineFilesBtn2">Отмени</button>
+        <button class="primary" id="saveCombineFilesBtn">Комбинирай и вмъкни</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
   <script src="courses.generated.js"></script>
@@ -1512,7 +1544,7 @@
       
       const range = selection.getRangeAt(0);
       
-      // Save cursor offset for restoration
+      // Запази позицијата на курсорот
       const preCaretRange = range.cloneRange();
       preCaretRange.selectNodeContents(editor);
       preCaretRange.setEnd(range.startContainer, range.startOffset);
@@ -1520,72 +1552,84 @@
       
       let node = range.commonAncestorContainer;
       
-      // If text node, get parent
+      // Ако е text node, оди до parent
       if (node.nodeType === 3) {
         node = node.parentNode;
       }
       
-      // Walk up to find the paragraph/heading element
+      // Оди нагоре додека не найдеш блок елемент (p, div, h1-h4)
       while (node && node !== editor) {
-        if (node.nodeType === 1) {
-          const tagName = node.tagName.toLowerCase();
-          if (['h1', 'h2', 'h3', 'h4', 'p', 'div'].includes(tagName)) {
-            // Found a block element
-            const targetTag = (tagName === tag) ? 'p' : tag;
-            
-            // Create new element
-            const newEl = document.createElement(targetTag);
-            
-            // Copy children
-            while (node.firstChild) {
-              newEl.appendChild(node.firstChild);
-            }
-            
-            // Replace in DOM
-            node.parentNode.replaceChild(newEl, node);
-            
-            // Restore cursor at the same position
-            const newRange = document.createRange();
-            const sel = window.getSelection();
-            
-            // Walk through new element to find cursor position
-            let charCount = 0;
-            let found = false;
-            
-            function findPosition(n) {
-              if (found) return;
-              if (n.nodeType === 3) {
-                const nextCount = charCount + n.length;
-                if (nextCount >= cursorOffset) {
-                  const offset = cursorOffset - charCount;
-                  newRange.setStart(n, Math.min(offset, n.length));
-                  newRange.collapse(true);
-                  found = true;
-                  return;
-                }
-                charCount = nextCount;
-              } else {
-                for (let child of n.childNodes) {
-                  findPosition(child);
-                  if (found) return;
-                }
-              }
-            }
-            
-            findPosition(newEl);
-            
-            // If position not found, put at start
-            if (!found) {
-              newRange.setStart(newEl, 0);
-            }
-            
-            sel.removeAllRanges();
-            sel.addRange(newRange);
-            return;
-          }
+        const tagName = node.tagName.toLowerCase();
+        if (['h1', 'h2', 'h3', 'h4', 'p', 'div'].includes(tagName)) {
+          break;
         }
         node = node.parentNode;
       }
+      
+      // Проверка дали имаме валиден блок елемент
+      if (!node || node === editor) {
+        return;
+      }
+      
+      const tagName = node.tagName.toLowerCase();
+      if (!['h1', 'h2', 'h3', 'h4', 'p', 'div'].includes(tagName)) {
+        return;
+      }
+      
+      // Замена на блок елементот
+      const targetTag = (tagName === tag) ? 'p' : tag;
+      const newEl = document.createElement(targetTag);
+      
+      // Копирај детелја
+      while (node.firstChild) {
+        const child = node.firstChild;
+        newEl.appendChild(child);
+      }
+      
+      // Зачувај text-align ако постои
+      const oldAlign = node.style.textAlign;
+      if (oldAlign) {
+        newEl.style.textAlign = oldAlign;
+      }
+      
+      // Замени во DOM
+      node.parentNode.replaceChild(newEl, node);
+      
+      // Врати фокус на иста позиција
+      const newRange = document.createRange();
+      const sel = window.getSelection();
+      
+      let charCount = 0;
+      let found = false;
+      
+      function findPosition(n) {
+        if (found) return;
+        if (n.nodeType === 3) {
+          const nextCount = charCount + n.length;
+          if (nextCount >= cursorOffset) {
+            const offset = cursorOffset - charCount;
+            newRange.setStart(n, Math.min(offset, n.length));
+            newRange.collapse(true);
+            found = true;
+            return;
+          }
+          charCount = nextCount;
+        } else {
+          for (let child of n.childNodes) {
+            findPosition(child);
+            if (found) return;
+          }
+        }
+      }
+      
+      findPosition(newEl);
+      
+      if (!found) {
+        newRange.setStart(newEl, 0);
+      }
+      
+      sel.removeAllRanges();
+      sel.addRange(newRange);
     }
 
     function insertInline(tag) {
@@ -1948,19 +1992,25 @@
 
     // Format option selection
     document.querySelectorAll('.format-option').forEach(option => {
-      option.addEventListener('click', (e) => {
+      option.addEventListener('mousedown', (e) => {
         e.preventDefault();
         e.stopPropagation();
         
-        // Focus editor first
-        editor.focus();
-        
         const format = option.dataset.format;
+        
+        // Use mousedown instead of click to intercept before selection loss
+        // Close dropdown immediately
+        const formatOptions = document.getElementById('formatOptions');
+        if (formatOptions) {
+          formatOptions.style.display = 'none';
+        }
+        
+        // Apply format - insertFormat will use current selection from editor
         insertFormat(format);
         saveToHistory();
         
-        // Close dropdown
-        document.getElementById('formatOptions').style.display = 'none';
+        // Ensure editor stays focused
+        editor.focus();
       });
     });
 
@@ -3030,80 +3080,81 @@
       // Get content
       let editorContent = editor.innerHTML;
       
-      // FIRST: Remove ALL <br> tags ONLY inside <li> elements - they are hidden with CSS in editor anyway
-      // Process with DOM to ensure we only remove <br> in list items
-      const tempBrDiv = document.createElement('div');
-      tempBrDiv.innerHTML = editorContent;
+      // CRITICAL FIX: Process lists BEFORE doing any cleanup
+      const contentDiv = document.createElement('div');
+      contentDiv.innerHTML = editorContent;
       
-      // Find all <li> elements and remove <br> inside them recursively
-      tempBrDiv.querySelectorAll('li').forEach(li => {
-        let html = li.innerHTML;
-        // Remove <br> tags inside this list item
-        html = html.replace(/<br\s*\/?>/gi, '');
-        li.innerHTML = html;
+      // Step 1: Clean up list structure first - ensure proper nesting
+      // Process each list to fix any broken structures
+      contentDiv.querySelectorAll('ul, ol').forEach(list => {
+        // For each list, go through its direct <li> children
+        Array.from(list.children).forEach(li => {
+          if (li.tagName === 'LI') {
+            let html = li.innerHTML;
+            
+            // Remove ONLY leading and trailing <br> tags in the TEXT content
+            // BUT preserve <br> tags before nested lists
+            // First, check if there's a nested list
+            const hasNestedList = li.querySelector('ul, ol') !== null;
+            
+            if (hasNestedList) {
+              // If has nested list, only remove trailing <br> after the nested list
+              html = html.replace(/<br\s*\/?>\s*$/gi, '');
+            } else {
+              // If no nested list, remove both leading and trailing <br>
+              html = html.replace(/^<br\s*\/?>/gi, '');
+              html = html.replace(/<br\s*\/?>\s*$/gi, '');
+            }
+            
+            li.innerHTML = html;
+          }
+        });
       });
       
-      editorContent = tempBrDiv.innerHTML;
+      editorContent = contentDiv.innerHTML;
       
-      // Create a temporary container to clone and clean
+      // Step 2: Create a temporary container
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = editorContent;
       
-      // Remove all elements that are hidden with CSS (display: none, visibility: hidden, etc)
+      // Step 3: Remove hidden elements
       const removeHiddenElements = (element) => {
         const nodesToRemove = [];
-        const walk = document.createTreeWalker(
-          element,
-          NodeFilter.SHOW_ELEMENT,
-          null,
-          false
-        );
-        
-        let node;
-        while (node = walk.nextNode()) {
+        element.querySelectorAll('*').forEach(node => {
           const style = window.getComputedStyle(node);
-          // Remove if display is none or visibility is hidden
           if (style.display === 'none' || style.visibility === 'hidden') {
             nodesToRemove.push(node);
           }
-        }
-        
-        // Remove collected nodes
-        nodesToRemove.forEach(n => n.remove());
+        });
+        nodesToRemove.reverse().forEach(n => n.remove());
       };
       
       removeHiddenElements(tempDiv);
-      
-      // Get cleaned content
       editorContent = tempDiv.innerHTML;
       
-      // SAFE: Remove only EMPTY <p> tags (those with just whitespace or empty formatting)
-      // This removes the empty paragraphs browser creates between list items
+      // Step 4: VERY CAREFULLY remove only COMPLETELY EMPTY <p> tags
+      // Do NOT remove <p> tags that contain any content or are near lists
       let prevContent;
       let iterations = 0;
       do {
         prevContent = editorContent;
         iterations++;
-        // Remove <p></p> tags with only whitespace or <br> inside
+        
+        // Only remove <p> tags that are completely empty
         editorContent = editorContent.replace(/<p>\s*<\/p>/g, '');
+        
+        // Only remove <p> with just <br> tags (these are spacing)
         editorContent = editorContent.replace(/<p><br\s*\/?><\/p>/g, '');
         editorContent = editorContent.replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, '');
         
-        // Remove <p> tags containing ONLY empty formatting tags + br (inside list items)
-        // Matches: <p><b></b><br></p>, <p><strong></strong><br></p>, <p><b><br></b></p>, etc
-        editorContent = editorContent.replace(/<p>\s*<(?:b|strong|em|i|u|span)[^>]*>\s*<\/(?:b|strong|em|i|u|span)>\s*<br\s*\/?>\s*<\/p>/g, '');
-        editorContent = editorContent.replace(/<p>\s*<(?:b|strong|em|i|u|span)[^>]*>\s*<br\s*\/?>\s*<\/(?:b|strong|em|i|u|span)>\s*<\/p>/g, '');
+        // DO NOT try to remove <p> containing text or formatting
+        // This breaks lists completely
         
-      } while (editorContent !== prevContent && iterations < 5);
+      } while (editorContent !== prevContent && iterations < 2);
       
-      // CRITICAL: Fix image src to use relative paths for export
-      // Extract path starting from "assets/" and use it as the relative path
-      // This handles both file:// and Windows absolute paths
+      // Step 5: Fix image paths
       editorContent = editorContent.replace(/src="[^"]*?(assets\/[^"]*)"(?=[^>]*>)/g, 'src="$1"');
-      
-      // Ensure data-original-src matches src for consistency
       editorContent = editorContent.replace(/(<img[^>]*src="([^"]*?)"[^>]*)data-original-src="[^"]*?"(?=[^>]*>)/g, '$1data-original-src="$2"');
-      // Also handle forward slashes in Windows paths
       editorContent = editorContent.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
       
       // Get heading color from localStorage
@@ -4211,24 +4262,50 @@ renderMathInElement(document.body, {
       }
     });
 
-    // Handle copy events - preserve formatting
+    // Handle copy events - convert to clean markdown
     editor.addEventListener('copy', (e) => {
       const selection = window.getSelection();
       if (selection.toString().length === 0) return;
       
-      // Get the HTML content
-      const range = selection.getRangeAt(0);
-      const fragment = range.cloneContents();
-      const div = document.createElement('div');
-      div.appendChild(fragment);
-      
-      // Convert HTML to markdown
-      const markdown = htmlToMarkdown(div.innerHTML);
-      
-      // Set both plain text and HTML in clipboard
-      e.clipboardData.setData('text/plain', markdown);
-      e.clipboardData.setData('text/html', div.innerHTML);
       e.preventDefault();
+      
+      try {
+        // Get the HTML content from selection
+        const range = selection.getRangeAt(0);
+        const fragment = range.cloneContents();
+        const div = document.createElement('div');
+        div.appendChild(fragment);
+        
+        let html = div.innerHTML;
+        
+        // Clean up the HTML before converting to markdown
+        // Remove BR tags only inside list items (browser artifacts)
+        // Don't remove all BR tags globally as they may be important for structure
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = html;
+        
+        // Remove BR tags specifically from within LI elements
+        tempDiv.querySelectorAll('li').forEach(li => {
+          li.querySelectorAll('br').forEach(br => br.remove());
+        });
+        
+        html = tempDiv.innerHTML;
+        
+        // Remove empty paragraphs
+        html = html.replace(/<p>\s*<\/p>/gi, '');
+        
+        // Convert HTML to markdown
+        const markdown = htmlToMarkdown(html);
+        
+        // Set clipboard - use markdown as plain text
+        e.clipboardData.setData('text/plain', markdown);
+        e.clipboardData.setData('text/html', html);
+        
+        console.log('Copied markdown:', markdown);
+      } catch (error) {
+        console.error('Error in copy handler:', error);
+        // Fallback - let browser handle it
+      }
     });
 
     // Handle paste events - convert markdown to HTML and insert
@@ -4368,7 +4445,7 @@ renderMathInElement(document.body, {
       const parser = new DOMParser();
       const doc = parser.parseFromString('<div>' + html + '</div>', 'text/html');
       
-      const processNode = (node, insideListItem = false) => {
+      const processNode = (node, insideListItem = false, depth = 0) => {
         if (node.nodeType === 3) {
           // Text node
           return node.textContent;
@@ -4376,29 +4453,29 @@ renderMathInElement(document.body, {
           const tag = node.tagName.toLowerCase();
           
           if (tag === 'h1') {
-            return '# ' + processChildren(node, false) + '\n';
+            return '# ' + processChildren(node, false, depth) + '\n';
           } else if (tag === 'h2') {
-            return '## ' + processChildren(node, false) + '\n';
+            return '## ' + processChildren(node, false, depth) + '\n';
           } else if (tag === 'h3') {
-            return '### ' + processChildren(node, false) + '\n';
+            return '### ' + processChildren(node, false, depth) + '\n';
           } else if (tag === 'h4') {
-            return '#### ' + processChildren(node, false) + '\n';
+            return '#### ' + processChildren(node, false, depth) + '\n';
           } else if (tag === 'p') {
             // Special handling: if inside list item, don't add newline
             if (insideListItem) {
-              return processChildren(node, true);
+              return processChildren(node, true, depth);
             }
-            return processChildren(node, false) + '\n';
+            return processChildren(node, false, depth) + '\n';
           } else if (tag === 'strong' || tag === 'b') {
-            return '**' + processChildren(node, insideListItem) + '**';
+            return '**' + processChildren(node, insideListItem, depth) + '**';
           } else if (tag === 'em' || tag === 'i') {
-            return '*' + processChildren(node, insideListItem) + '*';
+            return '*' + processChildren(node, insideListItem, depth) + '*';
           } else if (tag === 'u') {
-            return '__' + processChildren(node, insideListItem) + '__';
+            return '__' + processChildren(node, insideListItem, depth) + '__';
           } else if (tag === 'code') {
-            return '`' + processChildren(node, insideListItem) + '`';
+            return '`' + processChildren(node, insideListItem, depth) + '`';
           } else if (tag === 'a') {
-            return '[' + processChildren(node, insideListItem) + '](' + (node.href || '#') + ')';
+            return '[' + processChildren(node, insideListItem, depth) + '](' + (node.href || '#') + ')';
           } else if (tag === 'img') {
             const alt = node.getAttribute('alt') || '';
             
@@ -4420,68 +4497,100 @@ renderMathInElement(document.body, {
             
             return '![' + alt + '](' + src + ')';
           } else if (tag === 'blockquote') {
-            return '> ' + processChildren(node, false).trim() + '\n';
+            return '> ' + processChildren(node, false, depth).trim() + '\n';
           } else if (tag === 'ul') {
             let items = '';
-            node.querySelectorAll(':scope > li').forEach(li => {
-              // Get only direct text content, excluding nested lists
-              let textContent = '';
-              for (let child of li.childNodes) {
-                if (child.nodeType === 3) {
-                  textContent += child.textContent;
-                } else if (child.nodeType === 1) {
-                  const childTag = child.tagName.toLowerCase();
-                  if (childTag !== 'ul' && childTag !== 'ol') {
-                    textContent += processNode(child, true);
+            const itemIndent = '  '.repeat(depth);
+            
+            // Process both direct LI children and direct nested UL/OL children
+            for (let child of node.childNodes) {
+              if (child.nodeType === 1) {
+                const childTag = child.tagName.toLowerCase();
+                
+                if (childTag === 'li') {
+                  // Process list item
+                  let textContent = '';
+                  let nestedLists = [];
+                  
+                  for (let liChild of child.childNodes) {
+                    if (liChild.nodeType === 3) {
+                      // Text node
+                      textContent += liChild.textContent;
+                    } else if (liChild.nodeType === 1) {
+                      const liChildTag = liChild.tagName.toLowerCase();
+                      if (liChildTag === 'ul' || liChildTag === 'ol') {
+                        // Save nested list for later
+                        nestedLists.push(liChild);
+                      } else {
+                        // Process other elements (strong, em, span, p, etc.)
+                        textContent += processNode(liChild, true, depth);
+                      }
+                    }
                   }
+                  
+                  // Add main item
+                  items += itemIndent + '- ' + textContent.trim() + '\n';
+                  
+                  // Process all nested lists with increased depth
+                  nestedLists.forEach(nestedList => {
+                    const nestedItems = processNode(nestedList, false, depth + 1);
+                    items += nestedItems;
+                  });
+                } else if (childTag === 'ul' || childTag === 'ol') {
+                  // Direct nested list (without LI wrapper)
+                  const nestedItems = processNode(child, false, depth + 1);
+                  items += nestedItems;
                 }
               }
-              items += '- ' + textContent.trim() + '\n';
-              
-              // Process nested lists with indent
-              const nestedUl = li.querySelector(':scope > ul');
-              const nestedOl = li.querySelector(':scope > ol');
-              if (nestedUl) {
-                const nestedItems = processNode(nestedUl, false);
-                items += nestedItems.split('\n').map(line => line ? '  ' + line : '').join('\n');
-              }
-              if (nestedOl) {
-                const nestedItems = processNode(nestedOl, false);
-                items += nestedItems.split('\n').map(line => line ? '  ' + line : '').join('\n');
-              }
-            });
+            }
             return items;
           } else if (tag === 'ol') {
             let items = '';
             let counter = 1;
-            node.querySelectorAll(':scope > li').forEach(li => {
-              // Get only direct text content, excluding nested lists
-              let textContent = '';
-              for (let child of li.childNodes) {
-                if (child.nodeType === 3) {
-                  textContent += child.textContent;
-                } else if (child.nodeType === 1) {
-                  const childTag = child.tagName.toLowerCase();
-                  if (childTag !== 'ul' && childTag !== 'ol') {
-                    textContent += processNode(child, true);
+            const itemIndent = '  '.repeat(depth);
+            
+            // Process both direct LI children and direct nested UL/OL children
+            for (let child of node.childNodes) {
+              if (child.nodeType === 1) {
+                const childTag = child.tagName.toLowerCase();
+                
+                if (childTag === 'li') {
+                  // Process list item
+                  let textContent = '';
+                  let nestedLists = [];
+                  
+                  for (let liChild of child.childNodes) {
+                    if (liChild.nodeType === 3) {
+                      // Text node
+                      textContent += liChild.textContent;
+                    } else if (liChild.nodeType === 1) {
+                      const liChildTag = liChild.tagName.toLowerCase();
+                      if (liChildTag === 'ul' || liChildTag === 'ol') {
+                        // Save nested list for later
+                        nestedLists.push(liChild);
+                      } else {
+                        // Process other elements (strong, em, span, p, etc.)
+                        textContent += processNode(liChild, true, depth);
+                      }
+                    }
                   }
+                  
+                  // Add main item
+                  items += itemIndent + counter + '. ' + textContent.trim() + '\n';
+                  counter++;
+                  
+                  // Process all nested lists with increased depth
+                  nestedLists.forEach(nestedList => {
+                    const nestedItems = processNode(nestedList, false, depth + 1);
+                    items += nestedItems;
+                  });
+                } else if (childTag === 'ul' || childTag === 'ol') {
+                  // Direct nested list (without LI wrapper)
+                  const nestedItems = processNode(child, false, depth + 1);
+                  items += nestedItems;
                 }
               }
-              items += counter + '. ' + textContent.trim() + '\n';
-              counter++;
-              
-              // Process nested lists with indent
-              const nestedUl = li.querySelector(':scope > ul');
-              const nestedOl = li.querySelector(':scope > ol');
-              if (nestedUl) {
-                const nestedItems = processNode(nestedUl, false);
-                items += nestedItems.split('\n').map(line => line ? '  ' + line : '').join('\n');
-              }
-              if (nestedOl) {
-                const nestedItems = processNode(nestedOl, false);
-                items += nestedItems.split('\n').map(line => line ? '  ' + line : '').join('\n');
-              }
-            });
+            }
             return items;
           } else if (tag === 'hr') {
             return '---\n';
@@ -4492,16 +4601,16 @@ renderMathInElement(document.body, {
           } else if (tag === 'pre') {
             return '```\n' + node.textContent + '\n```\n';
           } else {
-            return processChildren(node, insideListItem);
+            return processChildren(node, insideListItem, depth);
           }
         }
         return '';
       };
       
-      const processChildren = (node, insideListItem = false) => {
+      const processChildren = (node, insideListItem = false, depth = 0) => {
         let result = '';
         for (let child of node.childNodes) {
-          result += processNode(child, insideListItem);
+          result += processNode(child, insideListItem, depth);
         }
         return result;
       };
@@ -5270,6 +5379,189 @@ renderMathInElement(document.body, {
       if (!resizingColumn && (e.target.tagName === 'TD' || e.target.tagName === 'TH')) {
         document.body.style.cursor = 'default';
       }
+    });
+
+    // Combine Files functionality
+    const combineFilesBtn = document.getElementById('combineFilesBtn');
+    const combineFilesModal = document.getElementById('combineFilesModal');
+    const closeCombineFilesBtn = document.getElementById('closeCombineFilesBtn');
+    const closeCombineFilesBtn2 = document.getElementById('closeCombineFilesBtn2');
+    const combineFilesInput = document.getElementById('combineFilesInput');
+    const filesList = document.getElementById('filesList');
+    const saveCombineFilesBtn = document.getElementById('saveCombineFilesBtn');
+
+    let uploadedFiles = []; // Store file objects
+
+    combineFilesBtn.addEventListener('click', () => {
+      combineFilesModal.classList.add('open');
+      uploadedFiles = [];
+      filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>';
+      combineFilesInput.value = '';
+    });
+
+    closeCombineFilesBtn.addEventListener('click', () => {
+      combineFilesModal.classList.remove('open');
+    });
+
+    closeCombineFilesBtn2.addEventListener('click', () => {
+      combineFilesModal.classList.remove('open');
+    });
+
+    combineFilesModal.addEventListener('click', (e) => {
+      if (e.target === combineFilesModal) {
+        combineFilesModal.classList.remove('open');
+      }
+    });
+
+    combineFilesInput.addEventListener('change', (e) => {
+      uploadedFiles = Array.from(e.target.files);
+      renderFilesList();
+    });
+
+    function renderFilesList() {
+      if (uploadedFiles.length === 0) {
+        filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>';
+        return;
+      }
+
+      filesList.innerHTML = '';
+      uploadedFiles.forEach((file, index) => {
+        const fileItem = document.createElement('div');
+        fileItem.draggable = true;
+        fileItem.dataset.index = index;
+        fileItem.style.cssText = `
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 12px;
+          background: white;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+          margin-bottom: 8px;
+          cursor: move;
+          user-select: none;
+        `;
+
+        const dragHandle = document.createElement('span');
+        dragHandle.textContent = '⋮⋮';
+        dragHandle.style.cssText = 'color: #9ca3af; cursor: grab;';
+
+        const fileName = document.createElement('span');
+        fileName.textContent = file.name;
+        fileName.style.cssText = 'flex: 1; font-size: 0.9em;';
+
+        const removeBtn = document.createElement('button');
+        removeBtn.textContent = '✕';
+        removeBtn.style.cssText = `
+          background: #ef4444;
+          color: white;
+          border: none;
+          border-radius: 3px;
+          padding: 4px 8px;
+          cursor: pointer;
+          font-size: 0.85em;
+        `;
+
+        removeBtn.addEventListener('click', () => {
+          uploadedFiles.splice(index, 1);
+          renderFilesList();
+        });
+
+        fileItem.appendChild(dragHandle);
+        fileItem.appendChild(fileName);
+        fileItem.appendChild(removeBtn);
+        filesList.appendChild(fileItem);
+
+        // Drag and drop
+        fileItem.addEventListener('dragstart', (e) => {
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/html', e.target.innerHTML);
+          fileItem.style.opacity = '0.5';
+        });
+
+        fileItem.addEventListener('dragend', () => {
+          fileItem.style.opacity = '1';
+        });
+
+        fileItem.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          e.dataTransfer.dropEffect = 'move';
+          fileItem.style.borderTop = '2px solid #3b82f6';
+        });
+
+        fileItem.addEventListener('dragleave', () => {
+          fileItem.style.borderTop = 'none';
+        });
+
+        fileItem.addEventListener('drop', (e) => {
+          e.preventDefault();
+          fileItem.style.borderTop = 'none';
+          
+          const draggedIndex = parseInt(e.dataTransfer.getData('text/html') ? 
+            document.querySelector('[style*="opacity: 0.5"]')?.dataset.index : -1);
+          
+          const draggedItem = document.querySelector('[style*="opacity: 0.5"]');
+          if (draggedItem) {
+            const draggedIdx = parseInt(draggedItem.dataset.index);
+            const dropIdx = index;
+            
+            if (draggedIdx !== dropIdx) {
+              const temp = uploadedFiles[draggedIdx];
+              uploadedFiles[draggedIdx] = uploadedFiles[dropIdx];
+              uploadedFiles[dropIdx] = temp;
+              renderFilesList();
+            }
+          }
+        });
+      });
+    }
+
+    saveCombineFilesBtn.addEventListener('click', async () => {
+      if (uploadedFiles.length === 0) {
+        alert('Моля качи поне един файл');
+        return;
+      }
+
+      let combinedHtml = '';
+
+      // Прочитај съдържанието на всеки файл
+      for (let i = 0; i < uploadedFiles.length; i++) {
+        const file = uploadedFiles[i];
+        const text = await file.text();
+        // Извлеки HTML съдържанието
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(text, 'text/html');
+        const bodyContent = doc.body.innerHTML;
+        
+        combinedHtml += bodyContent;
+        
+        // Добави разделител между файлове (но не после последния)
+        if (i < uploadedFiles.length - 1) {
+          combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+          combinedHtml += '<p><br></p>';
+          combinedHtml += '<p><br></p>';
+          combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+        }
+      }
+
+      // Замени целиот текст во editor-от с комбинираниот
+      editor.innerHTML = combinedHtml;
+      saveToHistory();
+      
+      // Затвори modal
+      combineFilesModal.classList.remove('open');
+      
+      // Покажи нотификация
+      const notification = document.createElement('div');
+      notification.textContent = '✓ Файлове комбинирани успешно!';
+      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
     });
   </script>
 </body>

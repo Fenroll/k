@@ -924,7 +924,18 @@
   if (overlay && content) {
     var title = card.querySelector('.course-title')?.textContent || 'Course';
     var courseId = card.querySelector('.course-id')?.textContent || '';
-    var courseObj = courses.find(c => c.id === courseId);
+    var isArchivedCard = card.style.opacity === '0.75'; // Archived cards have opacity
+    
+    // Find the course - need to check if it's archived or active
+    var courseObj;
+    if (isArchivedCard) {
+      // For archived cards, find in archived courses only
+      courseObj = courses.find(c => c.id === courseId && c.isArchived === true);
+    } else {
+      // For active cards, find in active courses only
+      courseObj = courses.find(c => c.id === courseId && (!c.isArchived || c.isArchived === false));
+    }
+    
     let customContent = '';
     
     // Check if this is "Актуални събития Event center" course - show event info instead

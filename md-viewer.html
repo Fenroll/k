@@ -390,7 +390,7 @@
     (function(){
       function getParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
       const path = getParam('path');
-      const sessionKey = getParam('sessionKey');
+      const loadFromHash = getParam('loadFromHash') === 'true';
       if(!path){ document.getElementById('content').textContent = 'Липсва параметър path.'; return; }
       const decodedPath = decodeURIComponent(path);
       const title = decodedPath.split('/').pop()
@@ -401,15 +401,27 @@
       const dl = document.getElementById('downloadLink');
       dl.href = decodedPath;
 
-      // If content is passed via sessionStorage, use it directly
-      if (sessionKey) {
+      // Check if content is passed via sessionKey (sessionStorage)
+      const sessionKey = getParam('sessionKey');
+      let contentPromise;
+      
+      if (sessionKey && window.sessionStorage) {
+        // Content passed via sessionStorage - use it directly (no fetch needed)
+        const htmlContent = sessionStorage.getItem(sessionKey);
+        if (htmlContent) {
+          contentPromise = Promise.resolve(htmlContent);
+        } else {
+          // Fallback to fetch if sessionStorage is empty
+          const encodedPath = decodedPath.split('/').map(encodeURIComponent).join('/');
+          const absoluteUrl = (window.location.origin && window.location.origin !== 'null')
+            ? new URL(encodedPath, window.location.origin).href
+            : encodedPath;
+          contentPromise = fetch(absoluteUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
+        }
+      } else if (loadFromHash && window.location.hash) {
+        // If content is passed in hash, use it directly (no fetch needed)
         try {
-          const htmlContent = sessionStorage.getItem(sessionKey);
-          if (!htmlContent) {
-            document.getElementById('content').textContent = 'Съдържанието не е намерено в памет. Молля, опитайте отново.';
-            return;
-          }
-          
+          const htmlContent = decodeURIComponent(window.location.hash.substring(1));
           const root = document.getElementById('content');
           root.innerHTML = htmlContent;
           
@@ -441,15 +453,16 @@
           document.getElementById('content').textContent = 'Грешка при зареждане на съдържанието: ' + err.message;
         }
         return;
+      } else {
+        // Fetch from URL
+        const encodedPath = decodedPath.split('/').map(encodeURIComponent).join('/');
+        const absoluteUrl = (window.location.origin && window.location.origin !== 'null')
+          ? new URL(encodedPath, window.location.origin).href
+          : encodedPath;
+        contentPromise = fetch(absoluteUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
       }
 
-      const encodedPath = decodedPath.split('/').map(encodeURIComponent).join('/');
-      const absoluteUrl = (window.location.origin && window.location.origin !== 'null')
-        ? new URL(encodedPath, window.location.origin).href
-        : encodedPath;
-
-      fetch(absoluteUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
-        .then(content => {
+      contentPromise.then(content => {
           let html;
           
           // If it's an HTML file, extract body content directly
