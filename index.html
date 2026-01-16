@@ -180,6 +180,41 @@
         hyphens: auto;
       }
     }
+    /* --- EVENT INFO OVERLAY STYLES (DESKTOP AND MOBILE) --- */
+    .event-info-overlay {
+      padding: 0;
+      line-height: 1.7;
+      color: #333;
+    }
+    .event-info-overlay h1 {
+      font-size: 22px;
+      margin: 0 0 12px 0;
+      color: #1565c0;
+      font-weight: 600;
+      border-bottom: 2px solid #1565c0;
+      padding-bottom: 8px;
+    }
+    .event-info-overlay h2 {
+      font-size: 18px;
+      margin: 16px 0 8px 0;
+      color: #1565c0;
+      font-weight: 600;
+    }
+    .event-info-overlay ul {
+      margin: 8px 0;
+      padding-left: 24px;
+    }
+    .event-info-overlay li {
+      margin: 4px 0;
+      color: #444;
+    }
+    .event-info-overlay ul ul {
+      margin: 4px 0;
+      padding-left: 20px;
+    }
+    .event-info-overlay p {
+      margin: 8px 0;
+    }
     /* --- MOBILE IMPROVEMENTS --- */
 @media (max-width: 768px) {
   #side-menu {
@@ -281,8 +316,6 @@
   .others-label {
     display: none !important;
   }
-  
-  /* Main header на мобилни устройства */
   .main-header {
     justify-content: flex-start !important;
     text-align: left !important;
@@ -312,40 +345,6 @@
     height: 1px;
     background-color: #ddd;
     margin: 20px 0 12px 0;
-  }
-  .event-info-overlay {
-    padding: 0;
-    line-height: 1.7;
-    color: #333;
-  }
-  .event-info-overlay h1 {
-    font-size: 22px;
-    margin: 0 0 12px 0;
-    color: #1565c0;
-    font-weight: 600;
-    border-bottom: 2px solid #1565c0;
-    padding-bottom: 8px;
-  }
-  .event-info-overlay h2 {
-    font-size: 18px;
-    margin: 16px 0 8px 0;
-    color: #1565c0;
-    font-weight: 600;
-  }
-  .event-info-overlay ul {
-    margin: 8px 0;
-    padding-left: 24px;
-  }
-  .event-info-overlay li {
-    margin: 4px 0;
-    color: #444;
-  }
-  .event-info-overlay ul ul {
-    margin: 4px 0;
-    padding-left: 20px;
-  }
-  .event-info-overlay p {
-    margin: 8px 0;
   }
   .element-card {
     width: 100% !important;
