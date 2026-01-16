@@ -1,13 +1,12 @@
 /**
- * Question Creator and Test Runner
- * Allows creating custom tests with multiple choice questions
- * Copies scoring and display logic from pharmacology test
+ * Создавач на вопроси и тестирање
+ * Дозволува создавање на прилагодени тестови со вишестопни избирни прашања
+ * Копира логика за оценување и прикажување од фармакологијата
  */
 
 document.addEventListener('DOMContentLoaded', function() {
-  // DOM Elements
+  // DOM елементи
   const testTitleInput = document.getElementById('testTitle');
-  const questionNumInput = document.getElementById('testQuestionCount');
   const questionsContainer = document.getElementById('questionsContainer');
   const addQuestionBtn = document.getElementById('addQuestionBtn');
   const startQCTestBtn = document.getElementById('startQCTestBtn');
@@ -15,7 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const clearQCFormBtn = document.getElementById('clearQCFormBtn');
   const importQCFile = document.getElementById('importQCFile');
   
-  // Test runner elements
+  // Елементи за тестирање
   const questionCreatorTestRunner = document.getElementById('questionCreatorTestRunner');
   const qcQuestionContainer = document.getElementById('qcQuestionContainer');
   const qcTestTitle = document.getElementById('qcTestTitle');
@@ -25,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const qcNextQuestionBtn = document.getElementById('qcNextQuestionBtn');
   const qcSubmitTestBtn = document.getElementById('qcSubmitTestBtn');
   
-  // Results elements
+  // Елементи за резултати
   const questionCreatorResultsSection = document.getElementById('questionCreatorResultsSection');
   const qcScorePercentage = document.getElementById('qcScorePercentage');
   const qcCorrectAnswers = document.getElementById('qcCorrectAnswers');
@@ -34,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const qcRestartTestBtn = document.getElementById('qcRestartTestBtn');
   const qcNewTestBtn = document.getElementById('qcNewTestBtn');
   
-  // State Variables
+  // Променливи за состојба
   let questions = [];
   let currentQuestionIndex = 0;
   let userAnswers = [];
@@ -42,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
   let selectedTestQuestionCount = 5;
   let testQuestions = [];
   
-  // Initialize
+  // Инијализирај
   init();
   
   function init() {
@@ -57,12 +56,12 @@ document.addEventListener('DOMContentLoaded', function() {
     qcRestartTestBtn.addEventListener('click', restartTest);
     qcNewTestBtn.addEventListener('click', newTest);
     
-    // Add first question
+    // Додај прво прашање
     addQuestion();
   }
   
   /**
-   * Add a new question
+   * Додај ново прашање
    */
   function addQuestion(questionText = '', answers = ['', '', '', ''], correctIndex = 0) {
     questionCounter++;
@@ -77,7 +76,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Remove a question
+   * Избриши прашање
    */
   function removeQuestion(id) {
     questions = questions.filter(q => q.id !== id);
@@ -86,7 +85,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Update question text
+   * Ажурирај текст на прашање
    */
   function updateQuestionText(id, text) {
     const question = questions.find(q => q.id === id);
@@ -96,7 +95,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Update an answer in a question
+   * Ажурирај одговор во прашање
    */
   function updateAnswer(questionId, answerIndex, text) {
     const question = questions.find(q => q.id === questionId);
@@ -110,13 +109,13 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Remove an answer from a question
+   * Избриши одговор од прашање
    */
   function removeAnswer(questionId, answerIndex) {
     const question = questions.find(q => q.id === questionId);
-    if (question && question.answers.length > 2) { // Keep at least 2 answers
+    if (question && question.answers.length > 2) { // Задржи барем 2 одговора
       question.answers.splice(answerIndex, 1);
-      // Adjust correctIndex if needed
+      // Прилагоди correctIndex ако е потребно
       if (question.correctIndex >= question.answers.length) {
         question.correctIndex = question.answers.length - 1;
       }
@@ -125,7 +124,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Set the correct answer for a question
+   * Постави правилен одговор за прашање
    */
   function setCorrectAnswer(questionId, answerIndex) {
     const question = questions.find(q => q.id === questionId);
@@ -136,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Render all questions in the form
+   * Прикажи сите прашања во формата
    */
   function renderQuestions() {
     questionsContainer.innerHTML = '';
@@ -145,13 +144,13 @@ document.addEventListener('DOMContentLoaded', function() {
       const questionDiv = document.createElement('div');
       questionDiv.className = 'question-item';
       
-      // Question header
+      // Заглавие на прашање
       const header = document.createElement('div');
       header.className = 'question-item-header';
       
       const numberLabel = document.createElement('div');
       numberLabel.className = 'question-item-number';
-      numberLabel.textContent = `Вопрос ${index + 1}`;
+      numberLabel.textContent = `Прашање ${index + 1}`;
       
       const actions = document.createElement('div');
       actions.className = 'question-item-actions';
@@ -167,12 +166,12 @@ document.addEventListener('DOMContentLoaded', function() {
       header.appendChild(actions);
       questionDiv.appendChild(header);
       
-      // Question text
+      // Текст на прашање
       const questionGroup = document.createElement('div');
       questionGroup.className = 'form-group';
       
       const questionLabel = document.createElement('label');
-      questionLabel.textContent = 'Вопрос:';
+      questionLabel.textContent = 'Прашање:';
       
       const questionInput = document.createElement('textarea');
       questionInput.className = 'form-control';
@@ -184,7 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
       questionGroup.appendChild(questionInput);
       questionDiv.appendChild(questionGroup);
       
-      // Answers section
+      // Секција за одговори
       const answersContainer = document.createElement('div');
       answersContainer.className = 'answers-container';
       
@@ -196,7 +195,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const answerRow = document.createElement('div');
         answerRow.className = 'answer-item-row';
         
-        // Checkbox for correct answer
+        // Checkbox за правилен одговор
         const checkboxDiv = document.createElement('div');
         checkboxDiv.style.display = 'flex';
         checkboxDiv.style.alignItems = 'center';
@@ -216,7 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
         correctLabel.style.cursor = 'pointer';
         checkboxDiv.appendChild(correctLabel);
         
-        // Answer input
+        // Инпут за одговор
         const answerInput = document.createElement('input');
         answerInput.type = 'text';
         answerInput.className = 'answer-input';
@@ -224,7 +223,7 @@ document.addEventListener('DOMContentLoaded', function() {
         answerInput.value = answer;
         answerInput.addEventListener('change', (e) => updateAnswer(question.id, answerIndex, e.target.value));
         
-        // Delete button for answer
+        // Копче за избирање на одговор
         const deleteAnswerBtn = document.createElement('button');
         deleteAnswerBtn.type = 'button';
         deleteAnswerBtn.className = 'btn btn-danger btn-small';
@@ -242,7 +241,7 @@ document.addEventListener('DOMContentLoaded', function() {
         answersContainer.appendChild(answerRow);
       });
       
-      // Add answer button
+      // Копче за додавање на одговор
       const addAnswerBtn = document.createElement('button');
       addAnswerBtn.type = 'button';
       addAnswerBtn.className = 'btn btn-secondary btn-small';
@@ -260,7 +259,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Validate form
+   * Валидирај форма
    */
   function validateForm() {
     if (!testTitleInput.value.trim()) {
@@ -269,18 +268,18 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     
     if (questions.length === 0) {
-      alert('Креирај барем еден вопрос');
+      alert('Креирај барем едно прашање');
       return false;
     }
     
     for (let q of questions) {
       if (!q.text.trim()) {
-        alert('Сите вопроси мораат да имаат текст');
+        alert('Сите прашања мораат да имаат текст');
         return false;
       }
       
       if (q.answers.length < 2) {
-        alert('Секој вопрос мора да има барем 2 одговора');
+        alert('Секое прашање мора да има барем 2 одговора');
         return false;
       }
       
@@ -296,51 +295,51 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Start the test
+   * Почни тест
    */
   function startTest() {
     if (!validateForm()) return;
     
-    // Get number of questions to include
-    const numInput = prompt('Колку вопроси за тестот? (максимум ' + questions.length + ')', Math.min(5, questions.length));
+    // Добиј број на прашања за вклучување
+    const numInput = prompt('Колку прашања за тестот? (максимум ' + questions.length + ')', Math.min(5, questions.length));
     if (!numInput) return;
     
     selectedTestQuestionCount = Math.min(parseInt(numInput) || 5, questions.length);
     if (selectedTestQuestionCount < 1) selectedTestQuestionCount = 1;
     
-    // Shuffle and select questions
+    // Мешај и избери прашања
     testQuestions = shuffleArray([...questions]).slice(0, selectedTestQuestionCount);
     
-    // Initialize user answers
+    // Инијализирај одговори на корисникот
     userAnswers = new Array(testQuestions.length).fill(null);
     currentQuestionIndex = 0;
     
-    // Update UI
+    // Ажурирај UI
     qcTestTitle.textContent = testTitleInput.value;
     qcTotalQuestions.textContent = testQuestions.length;
     
-    // Hide creator, show test runner
+    // Скриј создавач, покажи тестирање
     document.getElementById('questionCreatorSection').classList.add('hidden');
     questionCreatorTestRunner.classList.remove('hidden');
     questionCreatorResultsSection.classList.add('hidden');
     
-    // Display first question
+    // Прикажи прво прашање
     displayCurrentQuestion();
   }
   
   /**
-   * Display the current question
+   * Прикажи тековното прашање
    */
   function displayCurrentQuestion() {
     const question = testQuestions[currentQuestionIndex];
     
-    // Update progress
+    // Ажурирај прогресија
     qcCurrentQuestion.textContent = currentQuestionIndex + 1;
     
-    // Clear container
+    // Исчисти контејнер
     qcQuestionContainer.innerHTML = '';
     
-    // Create question element
+    // Создај елемент за прашање
     const questionEl = document.createElement('div');
     questionEl.className = 'question';
     
@@ -357,21 +356,21 @@ document.addEventListener('DOMContentLoaded', function() {
       optionEl.className = 'option';
       optionEl.textContent = answer;
       
-      // Check if this option is selected
+      // Проверај дали је опција избрана
       if (userAnswers[currentQuestionIndex] === index) {
         optionEl.classList.add('selected');
       }
       
       optionEl.addEventListener('click', () => {
-        // Remove selected class from all options
+        // Отстрани избранатокласа од сите опции
         optionsContainer.querySelectorAll('.option').forEach(opt => {
           opt.classList.remove('selected');
         });
         
-        // Add selected class to clicked option
+        // Додај избранатокласа на кликнатата опција
         optionEl.classList.add('selected');
         
-        // Save user answer
+        // Зачувај одговор на корисникот
         userAnswers[currentQuestionIndex] = index;
       });
       
@@ -381,14 +380,14 @@ document.addEventListener('DOMContentLoaded', function() {
     questionEl.appendChild(optionsContainer);
     qcQuestionContainer.appendChild(questionEl);
     
-    // Update button states
+    // Ажурирај состојба на копчињата
     qcPrevQuestionBtn.disabled = currentQuestionIndex === 0;
     qcNextQuestionBtn.disabled = currentQuestionIndex === testQuestions.length - 1;
     qcSubmitTestBtn.style.display = currentQuestionIndex === testQuestions.length - 1 ? 'inline-block' : 'none';
   }
   
   /**
-   * Go to previous question
+   * Оди на претходно прашање
    */
   function previousQuestion() {
     if (currentQuestionIndex > 0) {
@@ -398,7 +397,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Go to next question
+   * Оди на следно прашање
    */
   function nextQuestion() {
     if (currentQuestionIndex < testQuestions.length - 1) {
@@ -408,10 +407,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Submit the test and calculate results
+   * Предај тест и пресметај резултати
    */
   function submitTest() {
-    // Calculate score (copied from pharmacology test)
+    // Пресметај резултат (копирано од фармакологијата)
     let correctCount = 0;
     const results = [];
     
@@ -432,12 +431,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalQuestions = testQuestions.length;
     const percentage = Math.round((correctCount / totalQuestions) * 100);
     
-    // Update result elements
+    // Ажурирај елементи за резултати
     qcScorePercentage.textContent = percentage + '%';
     qcCorrectAnswers.textContent = correctCount;
     qcTotalAnswers.textContent = totalQuestions;
     
-    // Display detailed results
+    // Прикажи детални резултати
     qcDetailedResults.innerHTML = '';
     results.forEach((result, index) => {
       const resultDiv = document.createElement('div');
@@ -448,7 +447,7 @@ document.addEventListener('DOMContentLoaded', function() {
       resultDiv.style.borderRadius = '4px';
       
       const questionH = document.createElement('strong');
-      questionH.textContent = `Вопрос ${index + 1}: ${result.question}`;
+      questionH.textContent = `Прашање ${index + 1}: ${result.question}`;
       resultDiv.appendChild(questionH);
       
       const userAnswerP = document.createElement('p');
@@ -468,38 +467,38 @@ document.addEventListener('DOMContentLoaded', function() {
       qcDetailedResults.appendChild(resultDiv);
     });
     
-    // Hide runner, show results
+    // Скриј тестирање, покажи резултати
     questionCreatorTestRunner.classList.add('hidden');
     questionCreatorResultsSection.classList.remove('hidden');
   }
   
   /**
-   * Restart the test
+   * Повтори тест
    */
   function restartTest() {
     currentQuestionIndex = 0;
     userAnswers = new Array(testQuestions.length).fill(null);
     
-    // Show runner, hide results
+    // Покажи тестирање, скриј резултати
     questionCreatorTestRunner.classList.remove('hidden');
     questionCreatorResultsSection.classList.add('hidden');
     
-    // Display first question
+    // Прикажи прво прашање
     displayCurrentQuestion();
   }
   
   /**
-   * Create a new test
+   * Создај нов тест
    */
   function newTest() {
-    // Show creator, hide results
+    // Покажи создавач, скриј резултати
     document.getElementById('questionCreatorSection').classList.remove('hidden');
     questionCreatorTestRunner.classList.add('hidden');
     questionCreatorResultsSection.classList.add('hidden');
   }
   
   /**
-   * Export questions as JSON
+   * Експортирај прашања како JSON
    */
   function exportJSON() {
     if (!validateForm()) return;
@@ -520,7 +519,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Import questions from JSON
+   * Импортирај прашања од JSON
    */
   function importJSON(event) {
     const file = event.target.files[0];
@@ -536,7 +535,7 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
         
-        // Load data
+        // Учитај податоци
         testTitleInput.value = data.title;
         questions = [];
         questionCounter = 0;
@@ -552,7 +551,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         renderQuestions();
-        alert('Вопросите се вчитаа успешно!');
+        alert('Прашањата се вчитаа успешно!');
       } catch (err) {
         alert('Грешка при вчитување на JSON: ' + err.message);
       }
@@ -562,10 +561,10 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Clear the form
+   * Исчисти формата
    */
   function clearForm() {
-    if (confirm('Си сигурен? Сите вопроси ќе бидат избришани.')) {
+    if (confirm('Си сигурен? Сите прашања ќе бидат избришани.')) {
       testTitleInput.value = '';
       questions = [];
       questionCounter = 0;
@@ -575,7 +574,7 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   
   /**
-   * Shuffle array utility
+   * Мешај низа
    */
   function shuffleArray(arr) {
     const shuffled = [...arr];
