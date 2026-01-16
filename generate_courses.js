@@ -120,9 +120,23 @@ function getAllCourses() {
     console.log(`Cleaned up ${removedCount} ID(s) for non-existent courses`);
   }
   
-  // Find the highest existing ID number to continue from
-  const existingIds = Object.values(idMappings).map(id => parseInt(id, 10));
-  const nextIdValue = existingIds.length > 0 ? Math.max(...existingIds) + 1 : 1;
+  // Find gaps in existing IDs to reuse, or find the next available ID
+  const existingIds = Object.values(idMappings).map(id => parseInt(id, 10)).sort((a, b) => a - b);
+  let nextIdValue = 1;
+  
+  // Find the first gap in the sequence
+  for (let i = 1; i <= existingIds.length; i++) {
+    if (!existingIds.includes(i)) {
+      nextIdValue = i;
+      break;
+    }
+  }
+  
+  // If no gaps, use the next number after the highest
+  if (nextIdValue === 1 && existingIds.length > 0) {
+    nextIdValue = Math.max(...existingIds) + 1;
+  }
+  
   const nextId = { value: nextIdValue };
 
   const courses = subjects.map((subject) => {
@@ -295,21 +309,97 @@ function getAllCourses() {
   // Save updated mappings
   saveIdMappings(idMappings);
   
-  // Sort courses by ID number for consistent ordering
-  courses.sort((a, b) => {
+  // Separate active and archived courses
+  const activeCourses = [];
+  const archivedCourses = [];
+  
+  courses.forEach(course => {
+    if (course.title.startsWith('[АРХИВ]')) {
+      // Remove [АРХИВ] prefix from display title for archived courses
+      course.title = course.title.replace('[АРХИВ] ', '');
+      course.isArchived = true;
+      archivedCourses.push(course);
+    } else {
+      course.isArchived = false;
+      activeCourses.push(course);
+    }
+  });
+  
+  // Sort active courses by ID number
+  activeCourses.sort((a, b) => {
     const idA = parseInt(a.id, 10);
     const idB = parseInt(b.id, 10);
     return idA - idB;
   });
   
-  console.log('Courses sorted by ID:', courses.map(c => `${c.id}: ${c.title}`).join(', '));
+  // Defragment active courses - reassign sequential IDs from 1
+  console.log('\nDefragmenting active courses...');
+  const courseIdMap = {}; // Maps old ID to new ID
   
-  return courses;
+  activeCourses.forEach((course, index) => {
+    const oldId = course.id;
+    const newId = padId(index + 1);
+    
+    if (oldId !== newId) {
+      console.log(`Reassigning: ${oldId} -> ${newId} (${course.title})`);
+      courseIdMap[oldId] = newId;
+      course.id = newId;
+    }
+  });
+  
+  // Update idMappings with new IDs
+  if (Object.keys(courseIdMap).length > 0) {
+    Object.keys(idMappings).forEach(courseTitle => {
+      const oldId = idMappings[courseTitle];
+      if (courseIdMap[oldId]) {
+        idMappings[courseTitle] = courseIdMap[oldId];
+      }
+    });
+  }
+  
+  // Sort archived courses by ID number
+  archivedCourses.sort((a, b) => {
+    const idA = parseInt(a.id, 10);
+    const idB = parseInt(b.id, 10);
+    return idA - idB;
+  });
+  
+  // Defragment archived courses - reassign sequential IDs from 1
+  console.log('\nDefragmenting archived courses...');
+  archivedCourses.forEach((course, index) => {
+    const oldId = course.id;
+    const newId = padId(index + 1);
+    
+    if (oldId !== newId) {
+      console.log(`Reassigning archived: ${oldId} -> ${newId} (${course.title})`);
+      course.id = newId;
+    }
+  });
+  
+  // Save updated mappings after defragmentation
+  saveIdMappings(idMappings);
+  
+  console.log('Active courses after defragmentation:', activeCourses.map(c => `${c.id}: ${c.title}`).join(', '));
+  console.log('Archived courses after defragmentation:', archivedCourses.map(c => `${c.id}: ${c.title}`).join(', '));
+  
+  // Combine: active courses first, then archived courses
+  return [...activeCourses, ...archivedCourses];
 }
 
 function main() {
   // Get regular courses
   const courses = getAllCourses();
+  
+  // Load event info from INFO.md - try to read it directly
+  let eventInfo = '';
+  const eventInfoPath = path.join(ELEMENTS_DIR, 'Актуални събития Event center', 'INFO.md');
+  try {
+    eventInfo = fs.readFileSync(eventInfoPath, 'utf8');
+    console.log('✓ Loaded event info from:', eventInfoPath);
+    console.log('  Event info length:', eventInfo.length, 'characters');
+  } catch (error) {
+    console.log('ℹ Event info file not found or could not be read');
+  }
   
   // Generate build timestamp
   const buildDate = new Date();
@@ -330,6 +420,7 @@ const time = buildDate.toLocaleString('bg-BG', {
   const buildTimestamp = `${date} ${time}`;;
   
   const js = 'const courses = ' + JSON.stringify(courses, null, 2) + ';\n' +
+             'const eventInfo = ' + JSON.stringify(eventInfo) + ';\n' +
              'const buildTimestamp = "' + buildTimestamp + '";\n';
   fs.writeFileSync(OUTPUT_FILE, js, 'utf8');
   console.log('Generated courses:', OUTPUT_FILE);

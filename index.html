@@ -307,6 +307,46 @@
     padding: 0 8px;
     box-sizing: border-box;
   }
+  .archive-separator {
+    width: calc(100% - 7px);
+    height: 1px;
+    background-color: #ddd;
+    margin: 20px 0 12px 0;
+  }
+  .event-info-overlay {
+    padding: 0;
+    line-height: 1.7;
+    color: #333;
+  }
+  .event-info-overlay h1 {
+    font-size: 22px;
+    margin: 0 0 12px 0;
+    color: #1565c0;
+    font-weight: 600;
+    border-bottom: 2px solid #1565c0;
+    padding-bottom: 8px;
+  }
+  .event-info-overlay h2 {
+    font-size: 18px;
+    margin: 16px 0 8px 0;
+    color: #1565c0;
+    font-weight: 600;
+  }
+  .event-info-overlay ul {
+    margin: 8px 0;
+    padding-left: 24px;
+  }
+  .event-info-overlay li {
+    margin: 4px 0;
+    color: #444;
+  }
+  .event-info-overlay ul ul {
+    margin: 4px 0;
+    padding-left: 20px;
+  }
+  .event-info-overlay p {
+    margin: 8px 0;
+  }
   .element-card {
     width: 100% !important;
     max-width: none !important;
@@ -888,25 +928,34 @@
     var courseObj = courses.find(c => c.id === courseId);
     let customContent = '';
     
-    // Render text cards if available
-    if (courseObj && Array.isArray(courseObj.textCards) && courseObj.textCards.length > 0) {
-      customContent += `<div class="text-cards-container">`;
-      courseObj.textCards.forEach(card => {
-        customContent += renderTextCardBig(card);
-      });
-      customContent += `</div>`;
-    }
-    
-    if (courseObj && Array.isArray(courseObj.sections) && courseObj.sections.length > 0) {
-      customContent += `<div style="display:flex; flex-direction:column; gap:18px;">`;
-      courseObj.sections.forEach(section => {
-        // Sort files and folders before rendering
-        sortFilesAndFolders(section);
-        customContent += renderSection(section, 1); // 1 = first level sections (Материали, Колоквиум I, etc.)
-      });
-      customContent += `</div>`;
-    } else if (!courseObj || !courseObj.textCards || courseObj.textCards.length === 0) {
-      customContent = '<div style="color:#888;">Няма съдържание за този курс.</div>';
+    // Check if this is "Актуални събития Event center" course - show event info instead
+    if (title.includes('Актуални събит') || title.includes('Event center')) {
+      if (typeof eventInfo !== 'undefined' && eventInfo && eventInfo.trim().length > 0) {
+        customContent = `<div class="event-info-overlay">` + marked.parse(eventInfo) + `</div>`;
+      } else {
+        customContent = '<div style="color:#888;">Няма информация за актуални събития.</div>';
+      }
+    } else {
+      // Render text cards if available
+      if (courseObj && Array.isArray(courseObj.textCards) && courseObj.textCards.length > 0) {
+        customContent += `<div class="text-cards-container">`;
+        courseObj.textCards.forEach(card => {
+          customContent += renderTextCardBig(card);
+        });
+        customContent += `</div>`;
+      }
+      
+      if (courseObj && Array.isArray(courseObj.sections) && courseObj.sections.length > 0) {
+        customContent += `<div style="display:flex; flex-direction:column; gap:18px;">`;
+        courseObj.sections.forEach(section => {
+          // Sort files and folders before rendering
+          sortFilesAndFolders(section);
+          customContent += renderSection(section, 1); // 1 = first level sections (Материали, Колоквиум I, etc.)
+        });
+        customContent += `</div>`;
+      } else if (!courseObj || !courseObj.textCards || courseObj.textCards.length === 0) {
+        customContent = '<div style="color:#888;">Няма съдържание за този курс.</div>';
+      }
     }
     
     // Function to render big text card (folder-style)
@@ -1161,6 +1210,9 @@
                   faviconUrl = 'https://www.youtube.com/s/desktop/d743f786/img/favicon_32x32.png';
                 } else if (hostname.includes('github.com')) {
                   faviconUrl = 'https://github.githubassets.com/favicons/favicon.png';
+                } else if (hostname.includes('blackboard.lol')) {
+                  // Use blackboard.lol favicon for all blackboard.lol subdomains
+                  faviconUrl = 'https://blackboard.lol/favicon.ico';
                 } else {
                   // Use Google Favicon Service for other domains
                   faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
@@ -1467,6 +1519,53 @@
         closeTextCardModal();
       }
     });
+    
+    // Keyboard shortcuts for priority HTML files (Ctrl+1, Ctrl+2, Ctrl+3)
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && (e.key === '1' || e.key === '2' || e.key === '3')) {
+        e.preventDefault();
+        openPriorityHtmlFile(parseInt(e.key));
+      }
+    });
+    
+    // Function to open priority HTML file by number (1, 2, or 3)
+    function openPriorityHtmlFile(priority) {
+      if (typeof htmlPriority === 'undefined' || !htmlPriority[priority]) {
+        console.warn(`Priority HTML file ${priority} not configured`);
+        return;
+      }
+      
+      const filePath = htmlPriority[priority];
+      
+      // Find the HTML content from courses data
+      let htmlContent = '';
+      if (typeof courses !== 'undefined') {
+        outerLoop: for (let course of courses) {
+          for (let section of course.sections) {
+            if (section.msgNotes) {
+              for (let note of section.msgNotes) {
+                if (note.path === filePath && note.type === 'html') {
+                  htmlContent = note.content;
+                  break outerLoop;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      if (htmlContent) {
+        // Store in sessionStorage
+        const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        sessionStorage.setItem(sessionKey, htmlContent);
+        sessionStorage.setItem(sessionKey + '_path', filePath);
+        
+        const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(filePath)}&sessionKey=${sessionKey}`;
+        window.open(mdViewerUrl, '_blank');
+      } else {
+        console.warn(`HTML content for ${filePath} not found in courses data`);
+      }
+    }
     
     // Function to render DOCX files
     async function renderDocxFile(filePath, fileName) {
@@ -1829,6 +1928,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
+  <script src="html-priority.js"></script>
   <script src="courses.generated.js"></script>
 </head>
 <body>
@@ -2017,7 +2117,7 @@
 </div>
 <script>
 // Generate a consistent color based on course ID
-function generateColorFromId(id) {
+function generateColorFromId(id, isArchived = false) {
   // Remove any non-numeric characters and convert to number
   const numericId = parseInt(id.replace(/\D/g, ''), 10) || 0;
   
@@ -2041,8 +2141,18 @@ function generateColorFromId(id) {
     '#5d4037'  // Brown (darker)
   ];
   
+  // For archived courses, use an offset to get different colors
+  let colorIndex;
+  if (isArchived) {
+    // Use a different offset (half the palette) for archived courses
+    const offset = Math.floor(colors.length / 2);
+    colorIndex = (numericId + offset) % colors.length;
+  } else {
+    colorIndex = numericId % colors.length;
+  }
+  
   // Use modulo to ensure we always get a valid color index
-  return colors[numericId % colors.length];
+  return colors[colorIndex];
 }
 
 // Function to get color mapping for all courses (for debugging/reference)
@@ -2061,7 +2171,35 @@ function renderCourseList() {
   const list = document.getElementById('dynamic-course-list');
   list.innerHTML = '';
   if (typeof courses !== 'undefined' && Array.isArray(courses)) {
+    // Separate active and archived courses
+    const activeCourses = [];
+    const archivedCourses = [];
+    
     courses.forEach(course => {
+      // Check if course is in the archived section (after all active ones)
+      // We'll determine this by looking at the structure: archived ones come after active ones
+      // For now, we'll check if title starts with certain patterns or use a simple heuristic
+      // Actually, since generate_courses.js already separates them, we can assume the last courses might be archived
+      // Better approach: we'll mark them during generation or check the structure
+      // For simplicity, let's check if it has an archived marker
+      const isArchived = course.isArchived || false; // We'll update generate_courses.js to set this
+      
+      if (isArchived) {
+        archivedCourses.push(course);
+      } else {
+        activeCourses.push(course);
+      }
+    });
+    
+    // If we don't have explicit markers, try to detect based on position
+    // (assumes generate_courses puts archived courses at the end)
+    if (archivedCourses.length === 0 && activeCourses.length === 0) {
+      // All courses are in the courses array, let's not separate
+      activeCourses.push(...courses);
+    }
+    
+    // Render active courses
+    activeCourses.forEach(course => {
       const card = document.createElement('div');
       card.className = 'element-card';
       
@@ -2094,6 +2232,56 @@ function renderCourseList() {
       
       list.appendChild(card);
     });
+    
+    // Add archive separator if there are archived courses
+    if (archivedCourses.length > 0) {
+      const separator = document.createElement('div');
+      separator.className = 'archive-separator';
+      list.appendChild(separator);
+      
+      const archiveLabel = document.createElement('div');
+      archiveLabel.className = 'others-label';
+      archiveLabel.style.cssText = 'font-size: 1.18em; color: #222; font-weight: 400; margin-bottom: 0.5rem; margin-left: 2px; font-family: "Open Sans", Arial, sans-serif !important;';
+      archiveLabel.textContent = 'Архив';
+      list.appendChild(archiveLabel);
+      
+      // Render archived courses
+      archivedCourses.forEach(course => {
+        const card = document.createElement('div');
+        card.className = 'element-card';
+        card.style.opacity = '0.75';
+        
+        // Generate color based on course ID with isArchived flag for different palette
+        const borderColor = generateColorFromId(course.id, true);
+        
+        card.innerHTML = `
+          <div class="element-details">
+            <div class="element-details-content">
+              <div class="course-id" style="margin-bottom:8px; font-weight:450; text-shadow:0.5px 0 0 #888;">${course.id}</div>
+              <div class="course-title" style="margin-bottom:8px; font-weight:450; text-shadow:0.5px 0 0 #888;">${course.title}</div>
+              <div class="status-bar" style="margin-top:0;gap:2px;line-height:1.2;display:flex;align-items:center;">
+                <span class="status-open">Archived</span>
+                <span class="status-divider" style="margin:0 3px;"></span>
+                <span class="status-instructors">Multiple Instructors</span>
+                <span class="status-divider" style="margin:0 3px;"></span>
+                <span class="status-moreinfo">More info</span>
+              </div>
+            </div>
+            <button class="favorite" title="Add to your favorites">
+              <svg class="svg-icon small-icon" focusable="false" aria-hidden="true">
+                <use xlink:href="https://elearn.mu-varna.bg/ultra/course#icon-small-star"></use>
+              </svg>
+            </button>
+          </div>
+        `;
+        
+        // Apply the color as border-left style
+        card.style.borderLeft = "10px solid " + borderColor;
+        
+        list.appendChild(card);
+      });
+    }
+    
     // Re-attach click listeners for overlay
     list.querySelectorAll('.element-card').forEach(function(card) {
       card.style.cursor = 'pointer';
@@ -2104,7 +2292,10 @@ function renderCourseList() {
     });
   }
 }
-document.addEventListener('DOMContentLoaded', renderCourseList);
+
+document.addEventListener('DOMContentLoaded', function() {
+  renderCourseList();
+});
 </script>
       </div>
     </div>
