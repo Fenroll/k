@@ -82,8 +82,22 @@
     header button#summaryBtn.visible {
       display: inline-flex !important;
     }
+    header button#editBtn {
+      display: none;
+    }
+    header button#editBtn.visible {
+      display: inline-flex !important;
+    }
     header a.btn:hover { background: #e0e7ff; color: var(--link-hover); }
     main { max-width: 1700px; margin: 0 auto; padding: 3px 3px; flex: 1; width: 100%; margin-top: 25px; }
+    
+    /* Hide edit button on mobile (screens 768px and smaller) */
+    @media (max-width: 768px) {
+      header button#editBtn,
+      header button#editBtn.visible {
+        display: none !important;
+      }
+    }
 
     .markdown-body h1, .markdown-body h2, .markdown-body h3, .markdown-body h4 {
       margin-top: 0.05em; margin-bottom: 0.05em; font-weight: 600;
@@ -148,6 +162,9 @@
     </a>
     <button id="summaryBtn" class="btn" title="Summary">
       <img src="svg/material-symbols_outlined_article_shortcut.svg" alt="Summary" width="20" height="20">
+    </button>
+    <button id="editBtn" class="btn" title="Редактирай">
+      <img src="svg/Edit Pencil.svg" alt="Редактирай" width="20" height="20">
     </button>
     <button id="fontSizeBtn" class="btn" title="Change Font Size">
       <img src="svg/vscode-codicon_text-size.svg" alt="Change Font Size" width="20" height="20">
@@ -791,6 +808,96 @@
     
     // Add transition to button
     fontSizeBtn.style.transition = 'transform 0.2s ease';
+    
+    // Edit button handler
+    let currentEditPath = null;
+    let currentEditContent = null;
+    
+    function setupEditButton() {
+      const editBtn = document.getElementById('editBtn');
+      if (!editBtn) return;
+      
+      // Get the current file path from URL parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const filePath = urlParams.get('path');
+      
+      if (filePath) {
+        currentEditPath = filePath;
+        // Make button visible on desktop/tablet
+        if (window.innerWidth > 768) {
+          editBtn.classList.add('visible');
+        }
+        
+        editBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          
+          // Find file content from courses data
+          const normalizedPath = filePath.replace(/\\/g, '/');
+          let fileData = null;
+          
+          function searchSection(section) {
+            if (section.files) {
+              for (const file of section.files) {
+                if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) {
+                  return file;
+                }
+              }
+            }
+            if (section.msgNotes) {
+              for (const note of section.msgNotes) {
+                if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) {
+                  return note;
+                }
+              }
+            }
+            if (section.subsections) {
+              for (const subsection of section.subsections) {
+                const result = searchSection(subsection);
+                if (result) return result;
+              }
+            }
+            return null;
+          }
+          
+          // Search through courses
+          if (typeof courses !== 'undefined') {
+            for (const course of courses) {
+              if (course.sections) {
+                for (const section of course.sections) {
+                  const result = searchSection(section);
+                  if (result) {
+                    fileData = result;
+                    break;
+                  }
+                }
+              }
+              if (fileData) break;
+            }
+          }
+          
+          if (fileData && fileData.content) {
+            // Store content in sessionStorage to avoid URL length limits
+            sessionStorage.setItem('editFileContent', fileData.content);
+            sessionStorage.setItem('editFilePath', filePath);
+            
+            // Navigate to md-editor
+            window.location.href = `md-editor.html?editMode=true`;
+          } else {
+            alert('Не беше намерено содържанието на файла. Файлът може да не е включен в courses.generated.js');
+          }
+        });
+      }
+    }
+    
+    // Setup edit button when DOM is ready
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', setupEditButton);
+    } else {
+      setupEditButton();
+    }
+    
+    // Also try to setup after a short delay
+    setTimeout(setupEditButton, 100);
   </script>
   
   <!-- Load courses data for summary file detection -->

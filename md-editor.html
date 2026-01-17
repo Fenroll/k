@@ -1400,20 +1400,44 @@
         <span class="close" id="closeCombineFilesBtn">&times;</span>
       </div>
       <div class="modal-body">
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Избери HTML файлове:</label>
-          <input type="file" id="combineFilesInput" accept=".html" multiple style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+        <!-- Tabs for combining mode -->
+        <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
+          <button id="combineLocalTab" class="combine-tab-btn active" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid #7c3aed; color: #7c3aed; font-weight: 500;">Локални файлове</button>
+          <button id="combineCourseTab" class="combine-tab-btn" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280; font-weight: 500;">От курсове</button>
         </div>
-        
-        <div style="margin-bottom: 16px;">
-          <label style="display: block; margin-bottom: 8px; font-weight: 500;">Редослед на файлове:</label>
-          <div id="filesList" style="border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; min-height: 200px; padding: 12px; max-height: 300px; overflow-y: auto;">
-            <div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>
+
+        <!-- Local Files Tab -->
+        <div id="combineLocalPanel" class="combine-panel">
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Избери HTML файлове:</label>
+            <input type="file" id="combineFilesInput" accept=".html" multiple style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+          </div>
+          
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Редослед на файлове:</label>
+            <div id="filesList" style="border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; min-height: 200px; padding: 12px; max-height: 300px; overflow-y: auto;">
+              <div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>
+            </div>
+          </div>
+
+          <div style="display: flex; gap: 8px; justify-content: space-between; font-size: 0.85em; color: #6b7280;">
+            <div>💡 Можеш да преместваш файловете за да промениш редоследа</div>
           </div>
         </div>
 
-        <div style="display: flex; gap: 8px; justify-content: space-between; font-size: 0.85em; color: #6b7280;">
-          <div>💡 Можеш да преместваш файловете за да промениш редоследа</div>
+        <!-- Courses Tab -->
+        <div id="combineCoursePanel" class="combine-panel" style="display: none;">
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Търси файлове от курсове:</label>
+            <input type="text" id="combineFileSearch" placeholder="Търси по име..." style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+          </div>
+          
+          <div style="margin-bottom: 16px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Избрани файлове:</label>
+            <div id="courseFilesList" style="border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; min-height: 200px; padding: 12px; max-height: 300px; overflow-y: auto;">
+              <div style="color: #9ca3af; text-align: center; padding: 20px;">Избери файлове от курсове</div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="modal-footer">
@@ -4824,6 +4848,68 @@ renderMathInElement(document.body, {
       const urlParams = new URLSearchParams(window.location.search);
       const filePath = urlParams.get('path');
       const loadFromHash = urlParams.get('loadFromHash');
+      const editMode = urlParams.get('editMode');
+      
+      // Check for sessionStorage content (from md-viewer edit button)
+      if (editMode === 'true') {
+        const sessionContent = sessionStorage.getItem('editFileContent');
+        const sessionPath = sessionStorage.getItem('editFilePath');
+        
+        if (sessionContent && sessionPath) {
+          try {
+            // Set global base path for images
+            const basePath = sessionPath.substring(0, sessionPath.lastIndexOf('/') + 1);
+            
+            if (window.location.protocol === 'file:') {
+              const currentPath = window.location.pathname;
+              const currentDir = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
+              globalImageBasePath = window.location.protocol + '//' + currentDir + basePath;
+            } else {
+              const currentOrigin = window.location.origin;
+              globalImageBasePath = currentOrigin + '/' + basePath;
+            }
+            
+            console.log('Global Image Base Path:', globalImageBasePath);
+            
+            // Parse content (could be HTML or Markdown)
+            isLoadingFile = true;
+            let html = '';
+            const fileName = sessionPath.split('/').pop();
+            const isHtmlFile = fileName.endsWith('.html');
+            
+            if (isHtmlFile && sessionContent.includes('<!DOCTYPE')) {
+              // It's HTML - extract body content
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(sessionContent, 'text/html');
+              html = doc.body.innerHTML.trim();
+            } else {
+              // Treat as Markdown
+              html = markdownToHtml(sessionContent);
+            }
+            
+            editor.innerHTML = html;
+            saveToHistory();
+            setTimeout(() => { isLoadingFile = false; }, 100);
+            
+            // Update page title
+            const cleanName = fileName.replace(/\.(md|txt|html)$/i, '').replace(/^\d+(\.\d+)?-/, '').replace(/^msg-/i, '');
+            document.title = cleanName + ' — Markdown Editor';
+            
+            // Clear sessionStorage
+            sessionStorage.removeItem('editFileContent');
+            sessionStorage.removeItem('editFilePath');
+            
+            // Clear URL parameters
+            window.history.replaceState({}, document.title, window.location.pathname);
+            return;
+          } catch (err) {
+            alert('Грешка при зареждане на съдържанието: ' + err.message);
+            console.error('Load error:', err);
+            sessionStorage.removeItem('editFileContent');
+            sessionStorage.removeItem('editFilePath');
+          }
+        }
+      }
       
       if (loadFromHash === 'true' && window.location.hash) {
         // Load from URL hash (content passed from index.html)
@@ -5389,14 +5475,78 @@ renderMathInElement(document.body, {
     const combineFilesInput = document.getElementById('combineFilesInput');
     const filesList = document.getElementById('filesList');
     const saveCombineFilesBtn = document.getElementById('saveCombineFilesBtn');
+    
+    // Tab switching
+    const combineLocalTab = document.getElementById('combineLocalTab');
+    const combineCourseTab = document.getElementById('combineCourseTab');
+    const combineLocalPanel = document.getElementById('combineLocalPanel');
+    const combineCoursePanel = document.getElementById('combineCoursePanel');
+    const combineFileSearch = document.getElementById('combineFileSearch');
+    const courseFilesList = document.getElementById('courseFilesList');
 
-    let uploadedFiles = []; // Store file objects
+    let uploadedFiles = []; // Store local file objects
+    let selectedCourseFiles = []; // Store selected course files
+    let allCourseFilesIndex = []; // Index of all course files for searching
+    let currentCombineMode = 'local'; // 'local' or 'course'
+
+    // Build index of all course files
+    function buildCourseFilesIndex() {
+      allCourseFilesIndex = [];
+      
+      if (typeof courses === 'undefined') return;
+      
+      courses.forEach(course => {
+        function searchSection(section, breadcrumb = '') {
+          const currentPath = breadcrumb ? breadcrumb + ' > ' + section.name : course.title;
+          
+          if (section.files) {
+            section.files.forEach(file => {
+              if (file.type === 'html' && file.content) {
+                allCourseFilesIndex.push({
+                  ...file,
+                  breadcrumb: currentPath
+                });
+              }
+            });
+          }
+          
+          if (section.msgNotes) {
+            section.msgNotes.forEach(note => {
+              if (note.type === 'html' && note.content) {
+                allCourseFilesIndex.push({
+                  ...note,
+                  breadcrumb: currentPath
+                });
+              }
+            });
+          }
+          
+          if (section.subsections) {
+            section.subsections.forEach(subsection => {
+              searchSection(subsection, currentPath);
+            });
+          }
+        }
+        
+        if (course.sections) {
+          course.sections.forEach(section => {
+            searchSection(section, course.title);
+          });
+        }
+      });
+    }
 
     combineFilesBtn.addEventListener('click', () => {
       combineFilesModal.classList.add('open');
       uploadedFiles = [];
+      selectedCourseFiles = [];
       filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>';
+      courseFilesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Избери файлове от курсове</div>';
       combineFilesInput.value = '';
+      combineFileSearch.value = '';
+      
+      // Build course index on modal open
+      buildCourseFilesIndex();
     });
 
     closeCombineFilesBtn.addEventListener('click', () => {
@@ -5413,9 +5563,35 @@ renderMathInElement(document.body, {
       }
     });
 
+    // Tab switching
+    combineLocalTab.addEventListener('click', () => {
+      currentCombineMode = 'local';
+      combineLocalPanel.style.display = 'block';
+      combineCoursePanel.style.display = 'none';
+      combineLocalTab.style.color = '#7c3aed';
+      combineLocalTab.style.borderBottomColor = '#7c3aed';
+      combineCourseTab.style.color = '#6b7280';
+      combineCourseTab.style.borderBottomColor = 'transparent';
+    });
+
+    combineCourseTab.addEventListener('click', () => {
+      currentCombineMode = 'course';
+      combineLocalPanel.style.display = 'none';
+      combineCoursePanel.style.display = 'block';
+      combineLocalTab.style.color = '#6b7280';
+      combineLocalTab.style.borderBottomColor = 'transparent';
+      combineCourseTab.style.color = '#7c3aed';
+      combineCourseTab.style.borderBottomColor = '#7c3aed';
+      renderCourseFilesList();
+    });
+
     combineFilesInput.addEventListener('change', (e) => {
       uploadedFiles = Array.from(e.target.files);
       renderFilesList();
+    });
+
+    combineFileSearch.addEventListener('input', () => {
+      renderCourseFilesList();
     });
 
     function renderFilesList() {
@@ -5516,42 +5692,144 @@ renderMathInElement(document.body, {
       });
     }
 
-    saveCombineFilesBtn.addEventListener('click', async () => {
-      if (uploadedFiles.length === 0) {
-        alert('Моля качи поне един файл');
+    function renderCourseFilesList() {
+      const searchTerm = combineFileSearch.value.toLowerCase();
+      
+      let filteredFiles = allCourseFilesIndex;
+      if (searchTerm) {
+        filteredFiles = allCourseFilesIndex.filter(file => 
+          file.name.toLowerCase().includes(searchTerm) ||
+          file.breadcrumb.toLowerCase().includes(searchTerm)
+        );
+      }
+
+      if (filteredFiles.length === 0) {
+        courseFilesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Нема резултати</div>';
         return;
       }
 
-      let combinedHtml = '';
+      courseFilesList.innerHTML = '';
+      filteredFiles.forEach((file, idx) => {
+        const isSelected = selectedCourseFiles.some(f => f.path === file.path);
+        
+        const fileItem = document.createElement('div');
+        fileItem.style.cssText = `
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 10px 12px;
+          background: white;
+          border: 1px solid #d1d5db;
+          border-radius: 4px;
+          margin-bottom: 8px;
+          cursor: pointer;
+          user-select: none;
+          ${isSelected ? 'background: #eef2ff; border-color: #7c3aed;' : ''}
+        `;
 
-      // Прочитај съдържанието на всеки файл
-      for (let i = 0; i < uploadedFiles.length; i++) {
-        const file = uploadedFiles[i];
-        const text = await file.text();
-        // Извлеки HTML съдържанието
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(text, 'text/html');
-        const bodyContent = doc.body.innerHTML;
-        
-        combinedHtml += bodyContent;
-        
-        // Добави разделител между файлове (но не после последния)
-        if (i < uploadedFiles.length - 1) {
-          combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
-          combinedHtml += '<p><br></p>';
-          combinedHtml += '<p><br></p>';
-          combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = isSelected;
+        checkbox.style.cssText = 'cursor: pointer;';
+
+        const fileInfo = document.createElement('div');
+        fileInfo.style.cssText = 'flex: 1;';
+        const cleanFileName = file.name
+          .replace(/^\d+(\.\d+)?-/, '') // Remove number prefix like "1-", "2-msg-", etc
+          .replace(/^msg-/i, '') // Remove "msg-" prefix
+          .replace(/\.(html|md|txt)$/i, ''); // Remove file extension
+        fileInfo.innerHTML = `
+          <div style="font-size: 0.9em; font-weight: 500;">${cleanFileName}</div>
+          <div style="font-size: 0.75em; color: #6b7280;">${file.breadcrumb}</div>
+        `;
+
+        fileItem.appendChild(checkbox);
+        fileItem.appendChild(fileInfo);
+        courseFilesList.appendChild(fileItem);
+
+        fileItem.addEventListener('click', () => {
+          if (isSelected) {
+            selectedCourseFiles = selectedCourseFiles.filter(f => f.path !== file.path);
+          } else {
+            selectedCourseFiles.push(file);
+          }
+          renderCourseFilesList();
+        });
+      });
+    }
+
+    saveCombineFilesBtn.addEventListener('click', async () => {
+      if (currentCombineMode === 'local') {
+        if (uploadedFiles.length === 0) {
+          alert('Моля качи поне един файл');
+          return;
         }
-      }
 
-      // Замени целиот текст во editor-от с комбинираниот
-      editor.innerHTML = combinedHtml;
-      saveToHistory();
+        let combinedHtml = '';
+
+        // Read content of each file
+        for (let i = 0; i < uploadedFiles.length; i++) {
+          const file = uploadedFiles[i];
+          const text = await file.text();
+          // Extract HTML content
+          const parser = new DOMParser();
+          const doc = parser.parseFromString(text, 'text/html');
+          const bodyContent = doc.body.innerHTML;
+          
+          combinedHtml += bodyContent;
+          
+          // Add separator between files (but not after the last one)
+          if (i < uploadedFiles.length - 1) {
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+            combinedHtml += '<p><br></p>';
+            combinedHtml += '<p><br></p>';
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+          }
+        }
+
+        // Replace entire editor text with combined content
+        editor.innerHTML = combinedHtml;
+        saveToHistory();
+      } else {
+        // Handle course files combining
+        if (selectedCourseFiles.length === 0) {
+          alert('Моля избери поне един файл');
+          return;
+        }
+
+        let combinedHtml = '';
+
+        for (let i = 0; i < selectedCourseFiles.length; i++) {
+          const file = selectedCourseFiles[i];
+          
+          // Extract HTML content
+          if (file.type === 'html' || file.content.includes('<!DOCTYPE')) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(file.content, 'text/html');
+            combinedHtml += doc.body.innerHTML;
+          } else {
+            // Treat as markdown
+            combinedHtml += markdownToHtml(file.content);
+          }
+          
+          // Add separator between files
+          if (i < selectedCourseFiles.length - 1) {
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+            combinedHtml += '<p><br></p>';
+            combinedHtml += '<p><br></p>';
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+          }
+        }
+
+        // Replace entire editor text with combined content
+        editor.innerHTML = combinedHtml;
+        saveToHistory();
+      }
       
-      // Затвори modal
+      // Close modal
       combineFilesModal.classList.remove('open');
       
-      // Покажи нотификация
+      // Show notification
       const notification = document.createElement('div');
       notification.textContent = '✓ Файлове комбинирани успешно!';
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
