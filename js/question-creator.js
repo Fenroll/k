@@ -1,12 +1,37 @@
-/**
- * Създаватель на въпроси и тестване
- * Позволява създаване на персонализирани тестове с вариантни отговори
- * Копира логика за оценяване и показване от фармакологията
- */
+// Чека се за конплетно вчитување на страната
+console.log('question-creator.js се вчитува...');
 
-document.addEventListener('DOMContentLoaded', function() {
-  // DOM елементи
-  const testTitleInput = document.getElementById('testTitle');
+function checkAndInitialize() {
+  console.log('Проверка на DOM статус...');
+  console.log('document.readyState:', document.readyState);
+  
+  if (document.readyState === 'loading') {
+    // DOM все още се вчитва
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log('DOM готов, инициџализирање на Question Creator...');
+      setTimeout(function() {
+        console.log('ПРЕДИ инициџализирање - #testTitle съществува ли?', document.getElementById('testTitle'));
+        initializeQuestionCreator();
+      }, 100);
+    });
+  } else {
+    // DOM е вече готов
+    console.log('DOM е готов веднага, инициџализирање на Question Creator...');
+    setTimeout(function() {
+      console.log('ПРЕДИ инициџализирање - #testTitle съществува ли?', document.getElementById('testTitle'));
+      initializeQuestionCreator();
+    }, 100);
+  }
+}
+
+checkAndInitialize();
+
+function initializeQuestionCreator() {
+  console.log('========== НАЧАЛО НА ИНИЦИЏАЛИЗИРАЊЕ ==========');
+  console.log('Почнува инициџализирање на Question Creator...');
+  
+  // Проверка на елементи
+  console.log('Търсене на елементи в DOM...');
   const questionsContainer = document.getElementById('questionsContainer');
   const addQuestionBtn = document.getElementById('addQuestionBtn');
   const startQCTestBtn = document.getElementById('startQCTestBtn');
@@ -14,17 +39,18 @@ document.addEventListener('DOMContentLoaded', function() {
   const clearQCFormBtn = document.getElementById('clearQCFormBtn');
   const importQCFile = document.getElementById('importQCFile');
   
-  // Елементи за тестване
+  const questionCountMenu = document.getElementById('questionCountMenu');
+  const qcCustomCount = document.getElementById('qcCustomCount');
+  const qcAllCount = document.getElementById('qcAllCount');
+  
   const questionCreatorTestRunner = document.getElementById('questionCreatorTestRunner');
   const qcQuestionContainer = document.getElementById('qcQuestionContainer');
-  const qcTestTitle = document.getElementById('qcTestTitle');
   const qcCurrentQuestion = document.getElementById('qcCurrentQuestion');
   const qcTotalQuestions = document.getElementById('qcTotalQuestions');
   const qcPrevQuestionBtn = document.getElementById('qcPrevQuestionBtn');
   const qcNextQuestionBtn = document.getElementById('qcNextQuestionBtn');
   const qcSubmitTestBtn = document.getElementById('qcSubmitTestBtn');
   
-  // Елементи за резултати
   const questionCreatorResultsSection = document.getElementById('questionCreatorResultsSection');
   const qcScorePercentage = document.getElementById('qcScorePercentage');
   const qcCorrectAnswers = document.getElementById('qcCorrectAnswers');
@@ -33,51 +59,155 @@ document.addEventListener('DOMContentLoaded', function() {
   const qcRestartTestBtn = document.getElementById('qcRestartTestBtn');
   const qcNewTestBtn = document.getElementById('qcNewTestBtn');
   
-  // Променливи за състояние
+  // Проверки
+  console.log('❌ questionsContainer:', questionsContainer);
+  console.log('❌ addQuestionBtn:', addQuestionBtn);
+  console.log('❌ startQCTestBtn:', startQCTestBtn);
+  console.log('❌ questionCountMenu:', questionCountMenu);
+  console.log('❌ qcCustomCount:', qcCustomCount);
+  console.log('❌ questionCreatorTestRunner:', questionCreatorTestRunner);
+  console.log('❌ qcQuestionContainer:', qcQuestionContainer);
+  console.log('❌ qcCurrentQuestion:', qcCurrentQuestion);
+  console.log('❌ qcTotalQuestions:', qcTotalQuestions);
+  console.log('❌ qcPrevQuestionBtn:', qcPrevQuestionBtn);
+  console.log('❌ qcNextQuestionBtn:', qcNextQuestionBtn);
+  console.log('❌ qcSubmitTestBtn:', qcSubmitTestBtn);
+  console.log('❌ questionCreatorResultsSection:', questionCreatorResultsSection);
+  
+  if (!startQCTestBtn) {
+    console.error('🔴 КРИТИЧНА ГРЕШКА: startQCTestBtn НЕ Е НАМЕРЕН В DOM!');
+    console.error('🔴 Проверка - дали елементът #startQCTestBtn съществува в HTML файла?');
+    console.log('Целия DOM:', document.documentElement.innerHTML.substring(0, 500));
+    return;
+  }
+  
+  console.log('✅ ВСИЧКИ ЕЛЕМЕНТИ НАМЕРЕНИ!');
+  
+  // Состояние
   let questions = [];
   let currentQuestionIndex = 0;
   let userAnswers = [];
   let questionCounter = 0;
-  let selectedTestQuestionCount = 5;
   let testQuestions = [];
   
-  // Инициализирай
-  init();
+  // Добави първо въпрос
+  addQuestion('', ['', '', '', ''], 0);
+  updateQuestionCountDisplay();
   
-  function init() {
-    console.log('Question Creator инициализирање...');
-    console.log('addQuestionBtn:', addQuestionBtn);
-    console.log('startQCTestBtn:', startQCTestBtn);
-    
-    if (!addQuestionBtn) {
-      console.error('ГРЕШКА: addQuestionBtn не е намерен!');
-      return;
-    }
-    if (!startQCTestBtn) {
-      console.error('ГРЕШКА: startQCTestBtn не е намерен!');
-      return;
-    }
-    
-    addQuestionBtn.addEventListener('click', addQuestion);
-    startQCTestBtn.addEventListener('click', startTest);
-    exportQCBtn.addEventListener('click', exportJSON);
-    clearQCFormBtn.addEventListener('click', clearForm);
-    importQCFile.addEventListener('change', importJSON);
-    qcPrevQuestionBtn.addEventListener('click', previousQuestion);
-    qcNextQuestionBtn.addEventListener('click', nextQuestion);
-    qcSubmitTestBtn.addEventListener('click', submitTest);
-    qcRestartTestBtn.addEventListener('click', restartTest);
-    qcNewTestBtn.addEventListener('click', newTest);
-    
-    console.log('Event listeners добавени успешно');
-    
-    // Добави първи въпрос
+  // Event слушатели
+  console.log('✅ Добавяне на event слушатели...');
+  
+  addQuestionBtn.addEventListener('click', function() {
+    console.log('✅ addQuestionBtn клик');
     addQuestion();
+    updateQuestionCountDisplay();
+  });
+  
+  startQCTestBtn.addEventListener('click', function() {
+    console.log('🔵 startQCTestBtn клик детектиран!');
+    console.log('Проверка на форма...');
+    
+    if (!validateForm()) {
+      console.log('🔴 Форма е невалидна - validateForm() върна false');
+      return;
+    }
+    
+    console.log('✅ Форма е валидна');
+    
+    // Прочети брой от input поле
+    let count = parseInt(qcCustomCount.value);
+    console.log('📝 Стойност от input:', qcCustomCount.value);
+    console.log('📊 Прочетен брой:', count);
+    
+    // Ако input е празен или 0, използвай всички въпроси
+    if (!count || count === 0) {
+      count = questions.length;
+      console.log('📊 Input е празен, използвам всички:', count);
+    }
+    
+    // Валидирай че числото е поне 1
+    if (count < 1) {
+      alert('Невалидна бройка! Напиши число по-голямо от 0');
+      console.log('❌ Число е невалидно:', count);
+      return;
+    }
+    
+    // Ако числото е по-голямо от броя въпроси, ще повтаря въпросите
+    if (count > questions.length) {
+      console.log('📌 Брой ' + count + ' е по-голям от ' + questions.length + ' - въпросите ще се повтарят');
+    }
+    
+    console.log('✅ Стартиране с брой:', count);
+    startTestWithCount(count);
+  });
+  
+  qcCustomCount.addEventListener('blur', function() {
+    console.log('✅ Blur на input поле');
+    let count = parseInt(qcCustomCount.value);
+    
+    // Ако input е празен, постави всички въпроси
+    if (!count || count === 0) {
+      qcCustomCount.value = questions.length;
+    }
+  });
+  
+  // Премахнати: qcCustomCountBtn event слушател
+  
+  exportQCBtn.addEventListener('click', function() {
+    console.log('✅ exportQCBtn клик');
+    exportJSON();
+  });
+  
+  clearQCFormBtn.addEventListener('click', function() {
+    console.log('✅ clearQCFormBtn клик');
+    clearForm();
+    updateQuestionCountDisplay();
+  });
+  
+  importQCFile.addEventListener('change', function(e) {
+    console.log('✅ importQCFile промена');
+    importJSON(e);
+    updateQuestionCountDisplay();
+  });
+  
+  qcPrevQuestionBtn.addEventListener('click', function() {
+    console.log('✅ qcPrevQuestionBtn клик');
+    previousQuestion();
+  });
+  
+  qcNextQuestionBtn.addEventListener('click', function() {
+    console.log('✅ qcNextQuestionBtn клик');
+    nextQuestion();
+  });
+  
+  qcSubmitTestBtn.addEventListener('click', function() {
+    console.log('✅ qcSubmitTestBtn клик');
+    submitTest();
+  });
+  
+  qcRestartTestBtn.addEventListener('click', function() {
+    console.log('✅ qcRestartTestBtn клик');
+    restartTest();
+  });
+  
+  qcNewTestBtn.addEventListener('click', function() {
+    console.log('✅ qcNewTestBtn клик');
+    newTest();
+    updateQuestionCountDisplay();
+  });
+  
+  console.log('========== ВСИЧКИ EVENT СЛУШАТЕЛИ ДОБАВЕНИ =========');
+  console.log('========== ИНИЦИЏАЛИЗИРАЊЕ ЗАВРШЕНО ==========');
+  
+  function updateQuestionCountDisplay() {
+    const totalCount = questions.length;
+    // Покажи числото в label
+    qcAllCount.textContent = '(' + totalCount + ')';
+    // Постави числото в input полето като placeholder или value
+    qcCustomCount.value = totalCount;
   }
   
-  /**
-   * Добави ново въпрос
-   */
+  // Функции
   function addQuestion(questionText = '', answers = ['', '', '', ''], correctIndex = 0) {
     questionCounter++;
     questions.push({
@@ -90,18 +220,12 @@ document.addEventListener('DOMContentLoaded', function() {
     renderQuestions();
   }
   
-  /**
-   * Изтрий въпрос
-   */
   function removeQuestion(id) {
     questions = questions.filter(q => q.id !== id);
     questionCounter--;
     renderQuestions();
   }
   
-  /**
-   * Обнови текст на въпрос
-   */
   function updateQuestionText(id, text) {
     const question = questions.find(q => q.id === id);
     if (question) {
@@ -109,9 +233,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  /**
-   * Обнови отговор във въпрос
-   */
   function updateAnswer(questionId, answerIndex, text) {
     const question = questions.find(q => q.id === questionId);
     if (question) {
@@ -123,9 +244,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  /**
-   * Изтрий отговор от въпрос
-   */
   function removeAnswer(questionId, answerIndex) {
     const question = questions.find(q => q.id === questionId);
     if (question && question.answers.length > 2) {
@@ -137,9 +255,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  /**
-   * Определи правилния отговор за въпрос
-   */
   function setCorrectAnswer(questionId, answerIndex) {
     const question = questions.find(q => q.id === questionId);
     if (question) {
@@ -148,9 +263,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  /**
-   * Показ всички въпроси в формата
-   */
   function renderQuestions() {
     questionsContainer.innerHTML = '';
     
@@ -158,7 +270,6 @@ document.addEventListener('DOMContentLoaded', function() {
       const questionDiv = document.createElement('div');
       questionDiv.className = 'question-item';
       
-      // Заглавие на въпрос
       const header = document.createElement('div');
       header.className = 'question-item-header';
       
@@ -180,7 +291,6 @@ document.addEventListener('DOMContentLoaded', function() {
       header.appendChild(actions);
       questionDiv.appendChild(header);
       
-      // Текст на въпрос
       const questionGroup = document.createElement('div');
       questionGroup.className = 'form-group';
       
@@ -197,7 +307,6 @@ document.addEventListener('DOMContentLoaded', function() {
       questionGroup.appendChild(questionInput);
       questionDiv.appendChild(questionGroup);
       
-      // Раздел за отговори
       const answersContainer = document.createElement('div');
       answersContainer.className = 'answers-container';
       
@@ -209,7 +318,6 @@ document.addEventListener('DOMContentLoaded', function() {
         const answerRow = document.createElement('div');
         answerRow.className = 'answer-item-row';
         
-        // Checkbox за правилен отговор
         const checkboxDiv = document.createElement('div');
         checkboxDiv.style.display = 'flex';
         checkboxDiv.style.alignItems = 'center';
@@ -229,7 +337,6 @@ document.addEventListener('DOMContentLoaded', function() {
         correctLabel.style.cursor = 'pointer';
         checkboxDiv.appendChild(correctLabel);
         
-        // Поле за отговор
         const answerInput = document.createElement('input');
         answerInput.type = 'text';
         answerInput.className = 'answer-input';
@@ -237,7 +344,6 @@ document.addEventListener('DOMContentLoaded', function() {
         answerInput.value = answer;
         answerInput.addEventListener('change', (e) => updateAnswer(question.id, answerIndex, e.target.value));
         
-        // Копче за изтриване на отговор
         const deleteAnswerBtn = document.createElement('button');
         deleteAnswerBtn.type = 'button';
         deleteAnswerBtn.className = 'btn btn-danger btn-small';
@@ -255,7 +361,6 @@ document.addEventListener('DOMContentLoaded', function() {
         answersContainer.appendChild(answerRow);
       });
       
-      // Копче за добавяне на отговор
       const addAnswerBtn = document.createElement('button');
       addAnswerBtn.type = 'button';
       addAnswerBtn.className = 'btn btn-secondary btn-small';
@@ -272,14 +377,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
   
-  /**
-   * Валидирай форма
-   */
   function validateForm() {
-    if (!testTitleInput.value.trim()) {
-      alert('Посочи заглавие на теста');
-      return false;
-    }
+    console.log('Валидация на форма...');
     
     if (questions.length === 0) {
       alert('Създай поне един въпрос');
@@ -308,73 +407,89 @@ document.addEventListener('DOMContentLoaded', function() {
     return true;
   }
   
-  /**
-   * Начни тест
-   */
-  function startTest() {
-    console.log('startTest е повикана');
+  function startTestWithCount(selectedCount) {
+    console.log('========== startTest ФУНКЦИЯ АКТИВИРАНА ==========');
+    console.log('📊 Брой въпроси:', selectedCount);
+    
     if (!validateForm()) {
-      console.log('Форма не е валидна');
+      console.log('🔴 Форма е невалидна - validateForm() върна false');
       return;
     }
     
-    console.log('Форма е валидна, број на въпроси:', questions.length);
+    console.log('✅ Форма е валидна');
+    proceedWithQuestionCount(selectedCount);
+  }
+  
+  function showQuestionCountMenu() {
+    console.log('Показване на меню за брой въпроси...');
+    console.log('Проверка на форма...');
     
-    // Получи брой въпроси за включване
-    const numInput = prompt('Колко въпроса за теста? (максимум ' + questions.length + ')', Math.min(5, questions.length));
-    if (!numInput) {
-      console.log('Потребителят отказа промпта');
+    if (!validateForm()) {
+      console.log('🔴 Форма е невалидна - validateForm() върна false');
       return;
     }
     
-    console.log('Избран брой въпроси:', numInput);
+    console.log('✅ Форма е валидна');
+    // Менюто е винаги видимо, просто скролираме до него
+    questionCountMenu.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+  
+  
+  function proceedWithQuestionCount(selectedCount) {
+    console.log('Продължаване с ' + selectedCount + ' въпроса...');
     
-    selectedTestQuestionCount = Math.min(parseInt(numInput) || 5, questions.length);
-    if (selectedTestQuestionCount < 1) selectedTestQuestionCount = 1;
+    // Ако има повече избрани въпроси отколкото въпроси в теста, повтаряй ги
+    let allQuestionsNeeded = [];
+    while (allQuestionsNeeded.length < selectedCount) {
+      allQuestionsNeeded = allQuestionsNeeded.concat(shuffleArray([...questions]));
+    }
     
-    console.log('Брой за тест:', selectedTestQuestionCount);
-    
-    // Разбъркай и избери въпроси
-    testQuestions = shuffleArray([...questions]).slice(0, selectedTestQuestionCount);
-    
-    console.log('Избрани въпроси:', testQuestions.length);
-    
-    // Инициализирай отговори на потребителя
+    testQuestions = allQuestionsNeeded.slice(0, selectedCount);
     userAnswers = new Array(testQuestions.length).fill(null);
     currentQuestionIndex = 0;
     
-    // Обнови UI
-    qcTestTitle.textContent = testTitleInput.value;
+    console.log('✅ testQuestions:', testQuestions);
+    console.log('✅ userAnswers подготвена:', userAnswers);
+    
+    // Запазване на първия въпрос
+    const firstQuestion = testQuestions[0];
     qcTotalQuestions.textContent = testQuestions.length;
     
-    console.log('UI обновена, скрий създавател...');
-    
-    // Скрий създавател, покажи тестване
-    document.getElementById('questionCreatorSection').classList.add('hidden');
+    console.log('🔵 Скриване на questionCreatorSection...');
+    document.getElementById('questionCreatorSection').classList.add('hidden');    
+    console.log('🔵 Скриване на main-header в тест...');
+    const questionCreatorTestContainer = document.getElementById('questionCreatorTest');
+    const testMainHeader = questionCreatorTestContainer.querySelector('.main-header');
+    if (testMainHeader) {
+      testMainHeader.classList.add('hidden');
+    }
+        console.log('🔵 Показване на questionCreatorTestRunner...');
     questionCreatorTestRunner.classList.remove('hidden');
+    console.log('🔵 Скриване на questionCreatorResultsSection...');
     questionCreatorResultsSection.classList.add('hidden');
     
-    console.log('Елементите показани, прикажи въпрос...');
-    
-    // Покажи първи въпрос
+    console.log('📲 Показване на първия въпрос...');
     displayCurrentQuestion();
-    
-    console.log('startTest завршена успешно');
+    console.log('========== startTest ЗАВЕРШЕНА ==========');
   }
   
-  /**
-   * Покажи текущия въпрос
-   */
   function displayCurrentQuestion() {
+    console.log('📺 displayCurrentQuestion() - въпрос №:', currentQuestionIndex);
+    console.log('📺 Всички въпроси:', testQuestions);
+    
     const question = testQuestions[currentQuestionIndex];
     
-    // Обнови прогреса
+    if (!question) {
+      console.error('🔴 ГРЕШКА: Въпрос не е намерен за индекс', currentQuestionIndex);
+      return;
+    }
+    
+    console.log('📺 Текущ въпрос:', question);
+    
     qcCurrentQuestion.textContent = currentQuestionIndex + 1;
     
-    // Изчисти контейнер
     qcQuestionContainer.innerHTML = '';
     
-    // Създай елемент за въпрос
     const questionEl = document.createElement('div');
     questionEl.className = 'question';
     
@@ -391,21 +506,16 @@ document.addEventListener('DOMContentLoaded', function() {
       optionEl.className = 'option';
       optionEl.textContent = answer;
       
-      // Проверка дали тази опция е избрана
       if (userAnswers[currentQuestionIndex] === index) {
         optionEl.classList.add('selected');
       }
       
       optionEl.addEventListener('click', () => {
-        // Премахни избрана класа от всички опции
         optionsContainer.querySelectorAll('.option').forEach(opt => {
           opt.classList.remove('selected');
         });
         
-        // Добави избрана класа на кликнатата опция
         optionEl.classList.add('selected');
-        
-        // Запази отговор на потребителя
         userAnswers[currentQuestionIndex] = index;
       });
       
@@ -415,15 +525,11 @@ document.addEventListener('DOMContentLoaded', function() {
     questionEl.appendChild(optionsContainer);
     qcQuestionContainer.appendChild(questionEl);
     
-    // Обнови състояние на копчетата
     qcPrevQuestionBtn.disabled = currentQuestionIndex === 0;
     qcNextQuestionBtn.disabled = currentQuestionIndex === testQuestions.length - 1;
     qcSubmitTestBtn.style.display = currentQuestionIndex === testQuestions.length - 1 ? 'inline-block' : 'none';
   }
   
-  /**
-   * Отиди на предишния въпрос
-   */
   function previousQuestion() {
     if (currentQuestionIndex > 0) {
       currentQuestionIndex--;
@@ -431,9 +537,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  /**
-   * Отиди на следващия въпрос
-   */
   function nextQuestion() {
     if (currentQuestionIndex < testQuestions.length - 1) {
       currentQuestionIndex++;
@@ -441,11 +544,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  /**
-   * Предай тест и пресметни резултати
-   */
   function submitTest() {
-    // Пресметни резултат
     let correctCount = 0;
     const results = [];
     
@@ -466,12 +565,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalQuestions = testQuestions.length;
     const percentage = Math.round((correctCount / totalQuestions) * 100);
     
-    // Обнови елементи за резултати
     qcScorePercentage.textContent = percentage + '%';
     qcCorrectAnswers.textContent = correctCount;
     qcTotalAnswers.textContent = totalQuestions;
     
-    // Покажи детални резултати
     qcDetailedResults.innerHTML = '';
     results.forEach((result, index) => {
       const resultDiv = document.createElement('div');
@@ -502,44 +599,40 @@ document.addEventListener('DOMContentLoaded', function() {
       qcDetailedResults.appendChild(resultDiv);
     });
     
-    // Скрий тестване, покажи резултати
     questionCreatorTestRunner.classList.add('hidden');
     questionCreatorResultsSection.classList.remove('hidden');
   }
   
-  /**
-   * Повтори тест
-   */
   function restartTest() {
     currentQuestionIndex = 0;
     userAnswers = new Array(testQuestions.length).fill(null);
     
-    // Покажи тестване, скрий резултати
     questionCreatorTestRunner.classList.remove('hidden');
     questionCreatorResultsSection.classList.add('hidden');
     
-    // Покажи първи въпрос
     displayCurrentQuestion();
   }
   
-  /**
-   * Създай нов тест
-   */
   function newTest() {
-    // Покажи създавател, скрий резултати
     document.getElementById('questionCreatorSection').classList.remove('hidden');
     questionCreatorTestRunner.classList.add('hidden');
     questionCreatorResultsSection.classList.add('hidden');
+    
+    // Покажи main-header отново
+    const questionCreatorTestContainer = document.getElementById('questionCreatorTest');
+    const testMainHeader = questionCreatorTestContainer.querySelector('.main-header');
+    if (testMainHeader) {
+      testMainHeader.classList.remove('hidden');
+    }
+    
+    updateQuestionCountDisplay();
   }
   
-  /**
-   * Експортирай въпроси като JSON
-   */
   function exportJSON() {
     if (!validateForm()) return;
     
     const data = {
-      title: testTitleInput.value,
+      title: (testTitleInput && testTitleInput.value) ? testTitleInput.value : 'Тест',
       questions: questions
     };
     
@@ -553,9 +646,6 @@ document.addEventListener('DOMContentLoaded', function() {
     URL.revokeObjectURL(url);
   }
   
-  /**
-   * Импортирай въпроси от JSON
-   */
   function importJSON(event) {
     const file = event.target.files[0];
     if (!file) return;
@@ -570,7 +660,6 @@ document.addEventListener('DOMContentLoaded', function() {
           return;
         }
         
-        // Зареди данни
         testTitleInput.value = data.title;
         questions = [];
         questionCounter = 0;
@@ -595,9 +684,6 @@ document.addEventListener('DOMContentLoaded', function() {
     reader.readAsText(file);
   }
   
-  /**
-   * Изчисти формата
-   */
   function clearForm() {
     if (confirm('Сигурен ли си? Всички въпроси ще бъдат изтрити.')) {
       testTitleInput.value = '';
@@ -608,9 +694,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   }
   
-  /**
-   * Разбъркай низ
-   */
   function shuffleArray(arr) {
     const shuffled = [...arr];
     for (let i = shuffled.length - 1; i > 0; i--) {
@@ -619,4 +702,6 @@ document.addEventListener('DOMContentLoaded', function() {
     }
     return shuffled;
   }
-});
+  
+  console.log('Question Creator инициџализирање завршено!');
+}
