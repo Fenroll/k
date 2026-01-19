@@ -106,20 +106,38 @@ function generateRecentFilesHtml() {
       }
     }
 
-    // Правя карта на текущите файлове
+    // Правя карта на текущите файлове (всички типове, но игнорирам .url shortcut файлове)
     const currentFilesList = {};
-    htmlFiles.forEach(file => {
-      const relativePath = path.relative(ELEMENTS_DIR, file).replace(/\\/g, '/');
-      currentFilesList[relativePath] = true;
+    allFiles.forEach(file => {
+      // Игнорирам .url файлове (shortcut файлове)
+      if (!file.endsWith('.url')) {
+        const relativePath = path.relative(ELEMENTS_DIR, file).replace(/\\/g, '/');
+        currentFilesList[relativePath] = true;
+      }
     });
 
     // Намирам добавени файлове
-    const addedFiles = Object.keys(currentFilesList).filter(file => !previousIndex[file]);
-    console.log('Added files:', addedFiles.length);
+    let addedFiles = Object.keys(currentFilesList).filter(file => !previousIndex[file]);
+    console.log('Added files (before filter):', addedFiles.length);
+    
+    // Филтрирам файлове със системни имена или разширения
+    const ignorePatterns = ['git', 'html', 'tmp', 'info.md', 'readme.md', '.tmp', '.git', '~$', '.docx'];
+    addedFiles = addedFiles.filter(file => {
+      const lowerFile = file.toLowerCase();
+      return !ignorePatterns.some(pattern => lowerFile.includes(pattern));
+    });
+    console.log('Added files (after filter):', addedFiles.length);
 
-    // Намирам премахнати файлове
-    const removedFiles = Object.keys(previousIndex).filter(file => !currentFilesList[file]);
-    console.log('Removed files:', removedFiles.length);
+    // Намирам премахнати файлове (от индекса)
+    let removedFiles = Object.keys(previousIndex).filter(file => !currentFilesList[file]);
+    console.log('Removed files (before filter):', removedFiles.length);
+    
+    // Филтрирам файлове със системни имена или разширения
+    removedFiles = removedFiles.filter(file => {
+      const lowerFile = file.toLowerCase();
+      return !ignorePatterns.some(pattern => lowerFile.includes(pattern));
+    });
+    console.log('Removed files (after filter):', removedFiles.length);
 
     // Запазвам текущия индекс
     fs.writeFileSync(FILES_INDEX_FILE, JSON.stringify(currentFilesList, null, 2), 'utf-8');
@@ -161,7 +179,8 @@ function generateRecentFilesHtml() {
     console.log('Recent unique files:', Object.keys(courseGroups).length, 'courses');
 
     // ГЕНЕРИРАМ HTML ЗА ПОСЛЕДНИ ПРОМЕНИ - МИНИМАЛЕН ФОРМАТ
-    let html = '<div style="margin: 20px 0;">\n\n';
+    const timestamp = Date.now();
+    let html = `<div style="margin: 20px 0;" data-version="${timestamp}">\n\n`;
     
     // ТАБЛИЦА 1: ПОСЛЕДНИТЕ 5 ПРОМЕНЕНИ HTML ФАЙЛОВЕ
     html += '<h3>⭐ Последни 5 променени файлове:</h3>\n';
@@ -182,15 +201,28 @@ function generateRecentFilesHtml() {
       html += '<ol style="margin: 10px 0; padding-left: 20px;">\n';
       
       top5Files.forEach((file, index) => {
-        // Форматирам име на файла - премахвам "msg" и ".html"
+        // Форматирам име на файла - премахвам "msg", ".html" и начални числа
         let displayFileName = path.basename(file.path);
-        displayFileName = displayFileName.replace(/-msg-/g, ' - ').replace(/\.html$/i, '');
+        
+        // Премахни .html разширение
+        if (displayFileName.endsWith('.html')) {
+          displayFileName = displayFileName.slice(0, -5);
+        }
+        
+        // Премахни "-msg-" дял (например "1-msg-Теми" -> "1 - Теми")
+        displayFileName = displayFileName.replace(/-msg-/g, ' - ');
+        
+        // Премахни начални числа с дефис (например "1 - Теми" -> "Теми")
+        const match = displayFileName.match(/^\d+\s+-\s+(.+)$/);
+        if (match) {
+          displayFileName = match[1];
+        }
         
         // Взимам папката от пътя
         const pathParts = file.path.split(path.sep);
         const course = pathParts[0];
         const folder = pathParts[1] || 'Root';
-        const displayCourseName = getMappedName(course, nameMappings);
+        const displayCourseName = getMappedName(course, nameMappings).replace(/\[АРХИВ\]\s*/, '');
         
         const modDate = new Date(file.modified).toLocaleString('bg-BG', {
           year: 'numeric',
@@ -200,73 +232,20 @@ function generateRecentFilesHtml() {
           minute: '2-digit'
         });
         
-        html += `<li>${displayCourseName} - ${folder} - ${displayFileName}: ${modDate}</li>\n`;
-      });
-      
-      html += '</ol>\n\n';
-    }
-    
-    // ТАБЛИЦА 2: ПОСЛЕДНИТЕ 5 ПРОМЕНИ В СТРУКТУРАТА
-    html += '<h3>📝 Последни 5 промени в структурата на файлове:</h3>\n';
-    
-    // Събирам всички промени
-    const allChanges = [];
-    
-    // Добавени файлове
-    addedFiles.forEach(file => {
-      const pathParts = file.split('/');
-      const course = pathParts[0];
-      const fileName = pathParts[pathParts.length - 1];
-      const displayCourseName = getMappedName(course, nameMappings);
-      
-      allChanges.push({
-        type: 'added',
-        text: `Добавен ${displayCourseName}-${fileName}`,
-        order: 1
-      });
-    });
-    
-    // Изтрити файлове
-    removedFiles.forEach(file => {
-      const pathParts = file.split('/');
-      const course = pathParts[0];
-      const fileName = pathParts[pathParts.length - 1];
-      const displayCourseName = getMappedName(course, nameMappings);
-      
-      allChanges.push({
-        type: 'removed',
-        text: `Изтрит ${displayCourseName}-${fileName}`,
-        order: 2
-      });
-    });
-    
-    // Архивирани предмети
-    Object.keys(courseGroups).forEach(courseName => {
-      if (courseName.startsWith('[АРХИВ]')) {
-        const cleanName = courseName.replace('[АРХИВ] ', '');
-        const displayCourseName = getMappedName(courseName, nameMappings);
+        // Определям статуса на файла
+        const relativePath = file.path.replace(/\\/g, '/');
+        let status = '✏️ Редактиран';
         
-        allChanges.push({
-          type: 'archived',
-          text: `Архивиран е предметът ${displayCourseName}`,
-          order: 3
-        });
-      }
-    });
-    
-    // Взимам последните 5 промени
-    const top5Changes = allChanges.slice(0, 5);
-    
-    if (top5Changes.length > 0) {
-      html += '<ol style="margin: 10px 0; padding-left: 20px;">\n';
-      
-      top5Changes.forEach((change, index) => {
-        html += `<li>${change.text}</li>\n`;
+        if (addedFiles.some(f => f === relativePath)) {
+          status = '✅ Добавен';
+        } else if (removedFiles.some(f => f === relativePath)) {
+          status = '❌ Изтрит';
+        }
+        
+        html += `<li>${displayCourseName} - ${folder} - <strong>${displayFileName}</strong>: ${modDate} ${status}</li>\n`;
       });
       
       html += '</ol>\n\n';
-    } else {
-      html += '<p><em>Няма промени</em></p>\n\n';
     }
     
     // Дата на последна актуализация
