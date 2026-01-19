@@ -1,12 +1,13 @@
 // Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDvQqT3t5M9pK2L7N8o1Q3r5T7u9w0x2Y", // Генериран конфиг
+  apiKey: "AIzaSyBoGfYxsZDyh1mxlWMazSYqjpt8Yexl3s",
   authDomain: "med-student-chat.firebaseapp.com",
   databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
   projectId: "med-student-chat",
-  storageBucket: "med-student-chat.appspot.com",
-  messagingSenderId: "876543210",
-  appId: "1:876543210:web:1234567890abcdef"
+  storageBucket: "med-student-chat.firebasestorage.app",
+  messagingSenderId: "181414766637",
+  appId: "1:181414766637:web:547948b1d7f994d03f22c7",
+  measurementId: "G-ZQKF2X8A5K"
 };
 
 console.log('Инициализирам Firebase...');
