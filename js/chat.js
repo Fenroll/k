@@ -239,6 +239,12 @@ class ChatFirebaseREST {
 
       Object.keys(data || {}).forEach(userId => {
         const user = data[userId];
+        // Провери дали user имa необходимите полета
+        if (!user || !user.userName || !user.color || !user.lastSeen) {
+          inactiveUsers.push(userId);
+          return;
+        }
+        
         if (now - user.lastSeen < 60000) {  // 1 минута
           activeUsers[userId] = user;
         } else {
@@ -320,6 +326,14 @@ class ChatUIManager {
       this.chatFirebase.startPolling((messages) => {
         this.renderMessages(messages);
       }, 2500);  // Всеки 2.5 секунди (вместо 1)
+
+      // Polling за реакции - по-често!
+      setInterval(async () => {
+        const messages = await this.chatFirebase.loadMessages();
+        messages.forEach(msg => {
+          this.loadAndDisplayReactions(msg.id);
+        });
+      }, 1000);  // Всяка секунда за реакции
 
       // Polling за активни потребители
       this.chatFirebase.startActiveUsersPolling((data) => {
@@ -590,9 +604,16 @@ class ChatUIManager {
     if (!usersList) return;
 
     const users = Object.values(data.users || {}).slice(0, 5);
+    const activeCount = data.count || users.length || 0;
+    
+    if (users.length === 0) {
+      usersList.innerHTML = '';
+      return;
+    }
+
     usersList.innerHTML = `
-      <strong>Активни (${data.count}):</strong><br>
-      ${users.map(user => `
+      <strong>Активни (${activeCount}):</strong><br>
+      ${users.filter(user => user && user.userName && user.color).map(user => `
         <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
           <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${user.color};"></div>
           <span style="font-size: 10px;">${user.userName}</span>
@@ -738,13 +759,19 @@ class ChatUIManager {
         </button>
       `).join('');
 
-      // Добави listeners за toggle реакции
+      // Добави listeners за toggle реакции при клик на badge
       container.querySelectorAll('.reaction-badge').forEach(btn => {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
           const emoji = btn.dataset.emoji;
+          const msgId = btn.dataset.messageId;
+          
+          // Ако аз съм вече добавил - премахни
           if (myReactions[emoji]) {
-            // Премахни реакцията
-            this.removeReaction(messageId, emoji);
+            this.removeReaction(msgId, emoji);
+          } else {
+            // Ако не съм добавил - добави
+            this.addReaction(msgId, emoji);
           }
         });
       });
