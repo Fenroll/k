@@ -300,6 +300,10 @@ class ChatUIManager {
       });
 
       this.attachEventListeners();
+      
+      // Инициализирай бутон за уведомления един път
+      this.initNotificationButton();
+      
       console.log('✓✓✓ ChatUIManager готов');
     } catch (error) {
       console.error('Init error:', error);
@@ -327,6 +331,41 @@ class ChatUIManager {
           messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 50;
         this.autoScroll = isAtBottom;
       });
+    }
+  }
+
+  initNotificationButton() {
+    // Инициализирай бутон за уведомления един път
+    const sidebarEl = this.container.querySelector('.chat-active-users');
+    if (!sidebarEl) return;
+
+    sidebarEl.innerHTML = `
+      <div style="padding: 8px;">
+        <button id="toggle-notifications" style="width: 100%; padding: 10px; background: ${this.notificationsDisabled ? '#ff6b6b' : '#4ade80'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
+          ${this.notificationsDisabled ? '🔔 Включи уведомл.' : '🔕 Отключи уведомл.'}
+        </button>
+      </div>
+    `;
+
+    // Добави listener един път
+    const toggleBtn = document.getElementById('toggle-notifications');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        this.notificationsDisabled = !this.notificationsDisabled;
+        localStorage.setItem(`notificationsDisabled_${this.documentId}`, this.notificationsDisabled);
+        // Обнови цвета без да презаписваш HTML
+        this.updateNotificationButtonColor();
+        console.log('Уведомления:', this.notificationsDisabled ? 'Отключени' : 'Включени');
+      });
+    }
+  }
+
+  updateNotificationButtonColor() {
+    // Обнови само цвета и текста на бутона без да презаписваш HTML
+    const toggleBtn = document.getElementById('toggle-notifications');
+    if (toggleBtn) {
+      toggleBtn.style.background = this.notificationsDisabled ? '#ff6b6b' : '#4ade80';
+      toggleBtn.textContent = this.notificationsDisabled ? '🔔 Включи уведомл.' : '🔕 Отключи уведомл.';
     }
   }
 
@@ -400,28 +439,8 @@ class ChatUIManager {
   }
 
   updateNotificationButton(data) {
-    const sidebarEl = this.container.querySelector('.chat-active-users');
-    if (!sidebarEl) return;
-
-    // Само показвай бутон за уведомления - не пречи на header
-    sidebarEl.innerHTML = `
-      <div style="padding: 8px;">
-        <button id="toggle-notifications" style="width: 100%; padding: 10px; background: ${this.notificationsDisabled ? '#ff6b6b' : '#4ade80'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
-          ${this.notificationsDisabled ? '🔔 Включи уведомл.' : '🔕 Отключи уведомл.'}
-        </button>
-      </div>
-    `;
-
-    // Добави listener за бутона
-    const toggleBtn = document.getElementById('toggle-notifications');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        this.notificationsDisabled = !this.notificationsDisabled;
-        localStorage.setItem(`notificationsDisabled_${this.documentId}`, this.notificationsDisabled);
-        this.updateNotificationButton(data);
-        console.log('Уведомления:', this.notificationsDisabled ? 'Отключени' : 'Включени');
-      });
-    }
+    // Не презаписвай HTML, само обнови цвета
+    this.updateNotificationButtonColor();
   }
 
   updateActiveSidebar(users) {
