@@ -63,16 +63,6 @@ const currentUser = new AnonymousUser();
 console.log('✓ Потребител:', currentUser.userName);
 
 // ============================================
-// RESET FUNCTION - за тестване
-// ============================================
-
-window.resetChat = function() {
-  localStorage.clear();
-  console.log('✓ Имена ресетнати! Refresh страницата...');
-  location.reload();
-};
-
-// ============================================
 // PART 2: FIREBASE REST API
 // ============================================
 
@@ -541,3 +531,17 @@ class ChatUIManager {
 
   tryInit();
 })();
+
+// ============================================
+// GLOBAL RESET FUNCTION - достъпна отвсякъде
+// ============================================
+
+window.resetChat = function() {
+  localStorage.removeItem('userId');
+  localStorage.removeItem('userName');
+  localStorage.removeItem('userColor');
+  console.log('✅ Ресет завършен! Напиши в консолата: location.reload()');
+};
+
+console.log('💡 Команда: resetChat() - за ресет на име, след това F5');
+
