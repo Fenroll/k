@@ -370,32 +370,6 @@ class ChatUIManager {
     }
   }
 
-  initNotificationButton() {
-    // Инициализирай бутон за уведомления един път
-    const sidebarEl = this.container.querySelector('.chat-active-users');
-    if (!sidebarEl) return;
-
-    sidebarEl.innerHTML = `
-      <div style="padding: 8px;">
-        <button id="toggle-notifications" style="width: 100%; padding: 10px; background: ${this.notificationsDisabled ? '#ff6b6b' : '#4ade80'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
-          ${this.notificationsDisabled ? '🔔 Включи уведомл.' : '🔕 Отключи уведомл.'}
-        </button>
-      </div>
-    `;
-
-    // Добави listener един път
-    const toggleBtn = document.getElementById('toggle-notifications');
-    if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
-        this.notificationsDisabled = !this.notificationsDisabled;
-        localStorage.setItem(`notificationsDisabled_${this.documentId}`, this.notificationsDisabled);
-        // Обнови цвета без да презаписваш HTML
-        this.updateNotificationButtonColor();
-        console.log('Уведомления:', this.notificationsDisabled ? 'Отключени' : 'Включени');
-      });
-    }
-  }
-
   updateNotificationButtonColor() {
     // Обнови само цвета и текста на бутона без да презаписваш HTML
     const toggleBtn = document.getElementById('toggle-notifications');
@@ -403,6 +377,23 @@ class ChatUIManager {
       toggleBtn.style.background = this.notificationsDisabled ? '#ff6b6b' : '#4ade80';
       toggleBtn.textContent = this.notificationsDisabled ? '🔔 Включи уведомл.' : '🔕 Отключи уведомл.';
     }
+  }
+
+  updateNotificationButton(data) {
+    // Обнови активни потребители в списъка (без да презаписваш бутона)
+    const usersList = document.getElementById('active-users-list');
+    if (!usersList) return;
+
+    const users = Object.values(data.users || {}).slice(0, 5);
+    usersList.innerHTML = `
+      <strong>Активни (${data.count}):</strong><br>
+      ${users.map(user => `
+        <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
+          <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${user.color};"></div>
+          <span style="font-size: 10px;">${user.userName}</span>
+        </div>
+      `).join('')}
+    `;
   }
 
   async handleSendMessage() {
