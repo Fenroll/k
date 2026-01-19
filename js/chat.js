@@ -49,7 +49,13 @@ class AnonymousUser {
   }
 
   generateUserColor() {
-    const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
+    const colors = [
+      '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE',
+      '#FF8B94', '#6BCB77', '#4D96FF', '#FFD93D', '#6A4C93', '#FF6B9D', '#C06C84',
+      '#FF9671', '#FFC75F', '#F9F871', '#845EC2', '#2C73D2', '#00B0FF', '#FB5607',
+      '#7209B7', '#3A0CA3', '#560BAD', '#B5179E', '#F72585', '#4CC9F0', '#72DDF7',
+      '#90E0EF', '#ADE8F7', '#CAF0F8', '#00D9FF', '#00BBF9', '#0096C7', '#023E8A'
+    ];
     let color = localStorage.getItem('userColor');
     if (!color) {
       color = colors[Math.floor(Math.random() * colors.length)];
@@ -78,7 +84,7 @@ class ChatFirebaseREST {
     console.log('✓ Firebase REST за:', documentId);
   }
 
-  async sendMessage(text) {
+  async sendMessage(text, replyTo = null, replyAuthor = null) {
     if (!text.trim()) return false;
 
     const message = {
@@ -89,6 +95,12 @@ class ChatFirebaseREST {
       timestamp: Date.now(),
       id: Date.now() + '_' + Math.random().toString(36).substr(2, 9)
     };
+
+    // Ако има reply, добави го
+    if (replyTo && replyAuthor) {
+      message.replyTo = replyTo;
+      message.replyAuthor = replyAuthor;
+    }
 
     try {
       const response = await fetch(this.messagesEndpoint, {
@@ -404,10 +416,20 @@ class ChatUIManager {
 
     if (!text.trim()) return;
 
-    const success = await this.chatFirebase.sendMessage(text);
+    // Провери дали има reply
+    const replyTo = input.dataset.replyTo;
+    const replyAuthor = input.dataset.replyAuthor;
+
+    const success = await this.chatFirebase.sendMessage(text, replyTo, replyAuthor);
     if (success) {
       input.value = '';
+      input.dataset.replyTo = '';
+      input.dataset.replyAuthor = '';
       input.focus();
+      
+      // Премахни reply indicator
+      const replyIndicator = this.container.querySelector('.reply-indicator');
+      if (replyIndicator) replyIndicator.remove();
       
       setTimeout(async () => {
         const messages = await this.chatFirebase.loadMessages();
@@ -423,20 +445,88 @@ class ChatUIManager {
     const scrollWasAtBottom = this.autoScroll ||
       messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 50;
 
-    messagesContainer.innerHTML = messages.map(msg => `
-      <div class="chat-message" data-user-id="${msg.userId}">
-        <div class="message-avatar" style="background-color: ${msg.userColor}">
-          ${msg.userName.charAt(0)}
-        </div>
-        <div class="message-content">
-          <div class="message-header">
-            <span class="message-author">${this.escapeHtml(msg.userName)}</span>
-            <span class="message-time">${this.formatTime(msg.timestamp)}</span>
+    // Направи map за лесен достъп до съобщенията по ID
+    const messagesMap = {};
+    messages.forEach(msg => {
+      messagesMap[msg.id] = msg;
+    });
+
+    messagesContainer.innerHTML = messages.map(msg => {
+      // Ако има reply, намери оригиналното съобщение
+      let replyHTML = '';
+      if (msg.replyTo && messagesMap[msg.replyTo]) {
+        const originalMsg = messagesMap[msg.replyTo];
+        replyHTML = `
+          <div style="background: #e8f5e9; border-left: 3px solid #4ade80; padding: 8px; margin-bottom: 8px; font-size: 11px; border-radius: 3px;">
+            <div style="color: #666; font-weight: bold; margin-bottom: 4px;">Отговор на ${this.escapeHtml(msg.replyAuthor)}</div>
+            <div style="color: #999; padding: 6px; background: white; border-radius: 3px; max-height: 40px; overflow: hidden;">"${this.escapeHtml(originalMsg.text)}"</div>
           </div>
-          <div class="message-text">${this.escapeHtml(msg.text)}</div>
+        `;
+      }
+
+      return `
+        <div class="chat-message" data-user-id="${msg.userId}" data-message-id="${msg.id}" style="position: relative;">
+          <div class="message-avatar" style="background-color: ${msg.userColor}">
+            ${msg.userName.charAt(0)}
+          </div>
+          <div class="message-content">
+            <div class="message-header">
+              <span class="message-author">${this.escapeHtml(msg.userName)}</span>
+              <span class="message-time">${this.formatTime(msg.timestamp)}</span>
+            </div>
+            ${replyHTML}
+            <div class="message-text">${this.escapeHtml(msg.text)}</div>
+            <div class="message-reactions" data-message-id="${msg.id}"></div>
+          </div>
+          <button class="message-reply-btn" data-message-id="${msg.id}" style="position: absolute; top: 8px; right: 8px; display: none; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 28px; height: 28px;" title="Отговори">
+            <img src="svg/reply-svgrepo-com.svg" alt="Reply" style="width: 100%; height: 100%; opacity: 0.7; filter: invert(0.3);">
+          </button>
+          <button class="message-reaction-btn" data-message-id="${msg.id}" style="position: absolute; top: 8px; right: 36px; display: none; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 28px; height: 28px;" title="Добави реакция">
+            <img src="svg/reaction-emoji-add-svgrepo-com.svg" alt="Reaction" style="width: 100%; height: 100%; opacity: 0.7;">
+          </button>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
+
+    // Добави hover events
+    const messageEls = messagesContainer.querySelectorAll('.chat-message');
+    messageEls.forEach(msgEl => {
+      msgEl.addEventListener('mouseenter', () => {
+        const btn = msgEl.querySelector('.message-reaction-btn');
+        const replyBtn = msgEl.querySelector('.message-reply-btn');
+        if (btn) btn.style.display = 'block';
+        if (replyBtn) replyBtn.style.display = 'block';
+      });
+      msgEl.addEventListener('mouseleave', () => {
+        const btn = msgEl.querySelector('.message-reaction-btn');
+        const replyBtn = msgEl.querySelector('.message-reply-btn');
+        if (btn) btn.style.display = 'none';
+        if (replyBtn) replyBtn.style.display = 'none';
+      });
+
+      // Добави listener за реакции
+      const reactionBtn = msgEl.querySelector('.message-reaction-btn');
+      if (reactionBtn) {
+        reactionBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.showReactionPicker(msgEl.dataset.messageId);
+        });
+      }
+
+      // Добави listener за reply
+      const replyBtn = msgEl.querySelector('.message-reply-btn');
+      if (replyBtn) {
+        replyBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.startReply(msgEl.dataset.messageId, msgEl);
+        });
+      }
+    });
+
+    // Зареди реакциите за всяко съобщение
+    messages.forEach(msg => {
+      this.loadAndDisplayReactions(msg.id);
+    });
 
     // Изчисли непрочетени съобщения
     if (messages.length > 0) {
@@ -519,6 +609,185 @@ class ChatUIManager {
       localStorage.setItem(`lastReadMessage_${this.documentId}`, lastMessage.id);
       this.unreadCount = 0;
       this.updateActiveCount();
+    }
+  }
+
+  showReactionPicker(messageId) {
+    // Премахни стар picker ако съществува
+    const oldPicker = document.querySelector('.reaction-picker');
+    if (oldPicker) oldPicker.remove();
+
+    const emojis = ['👍', '👎', '😂', '❤️', '😮'];
+    const picker = document.createElement('div');
+    picker.className = 'reaction-picker';
+    picker.style.cssText = `
+      position: fixed;
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 8px;
+      display: flex;
+      gap: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 10000;
+    `;
+
+    emojis.forEach(emoji => {
+      const btn = document.createElement('button');
+      btn.textContent = emoji;
+      btn.style.cssText = `
+        background: none;
+        border: none;
+        font-size: 20px;
+        cursor: pointer;
+        padding: 4px 8px;
+      `;
+      btn.addEventListener('click', () => {
+        this.addReaction(messageId, emoji);
+        picker.remove();
+      });
+      picker.appendChild(btn);
+    });
+
+    // Позиционирай picker до съобщението
+    const msgEl = document.querySelector(`[data-message-id="${messageId}"]`);
+    if (msgEl) {
+      const rect = msgEl.getBoundingClientRect();
+      picker.style.left = rect.left + 'px';
+      picker.style.top = (rect.top - 50) + 'px';
+      document.body.appendChild(picker);
+    }
+  }
+
+  async addReaction(messageId, emoji) {
+    const reactionRef = `${this.chatFirebase.baseURL}/reactions/${this.chatFirebase.documentId}/${messageId}/${emoji}/${currentUser.userId}.json`;
+    
+    try {
+      await fetch(reactionRef, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(true)
+      });
+
+      console.log('✓ Реакция добавена:', emoji);
+      this.loadAndDisplayReactions(messageId);
+    } catch (error) {
+      console.error('Reaction error:', error);
+    }
+  }
+
+  async loadAndDisplayReactions(messageId) {
+    try {
+      const reactionsRef = `${this.chatFirebase.baseURL}/reactions/${this.chatFirebase.documentId}/${messageId}.json`;
+      const response = await fetch(reactionsRef);
+      
+      if (!response.ok) {
+        // Няма реакции
+        const container = document.querySelector(`[data-message-id="${messageId}"] .message-reactions`);
+        if (container) container.innerHTML = '';
+        return;
+      }
+
+      const reactions = await response.json();
+      const container = document.querySelector(`[data-message-id="${messageId}"] .message-reactions`);
+      
+      if (!container || !reactions) return;
+
+      const reactionCounts = {};
+      const myReactions = {};
+      
+      Object.keys(reactions).forEach(emoji => {
+        const userIds = Object.keys(reactions[emoji]);
+        const count = userIds.length;
+        if (count > 0) {
+          reactionCounts[emoji] = count;
+          // Провери дали аз съм добавил този emoji
+          if (userIds.includes(currentUser.userId)) {
+            myReactions[emoji] = true;
+          }
+        }
+      });
+
+      container.innerHTML = Object.keys(reactionCounts).map(emoji => `
+        <button class="reaction-badge" data-emoji="${emoji}" data-message-id="${messageId}" 
+          style="background: ${myReactions[emoji] ? '#93c5fd' : '#f0f0f0'}; border: none; border-radius: 12px; padding: 4px 8px; margin-right: 4px; cursor: pointer; font-size: 12px; font-weight: ${myReactions[emoji] ? 'bold' : 'normal'};">
+          ${emoji} <span>${reactionCounts[emoji]}</span>
+        </button>
+      `).join('');
+
+      // Добави listeners за toggle реакции
+      container.querySelectorAll('.reaction-badge').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const emoji = btn.dataset.emoji;
+          if (myReactions[emoji]) {
+            // Премахни реакцията
+            this.removeReaction(messageId, emoji);
+          }
+        });
+      });
+    } catch (error) {
+      console.error('Load reactions error:', error);
+    }
+  }
+
+  async removeReaction(messageId, emoji) {
+    const reactionRef = `${this.chatFirebase.baseURL}/reactions/${this.chatFirebase.documentId}/${messageId}/${emoji}/${currentUser.userId}.json`;
+    
+    try {
+      await fetch(reactionRef, {
+        method: 'DELETE'
+      });
+
+      console.log('✓ Реакция премахната:', emoji);
+      this.loadAndDisplayReactions(messageId);
+    } catch (error) {
+      console.error('Remove reaction error:', error);
+    }
+  }
+
+  startReply(messageId, messageEl) {
+    // Намери текста на съобщението
+    const textEl = messageEl.querySelector('.message-text');
+    const authorEl = messageEl.querySelector('.message-author');
+    
+    if (!textEl || !authorEl) return;
+
+    const author = authorEl.textContent;
+    const text = textEl.textContent;
+
+    // Постави reply инфо в input поле
+    const input = this.container.querySelector('.chat-input');
+    if (input) {
+      input.dataset.replyTo = messageId;
+      input.dataset.replyAuthor = author;
+      input.dataset.replyText = text;
+      
+      // Добавяй визуална индикация
+      const inputArea = this.container.querySelector('.chat-input-area');
+      let replyIndicator = inputArea.querySelector('.reply-indicator');
+      
+      if (!replyIndicator) {
+        replyIndicator = document.createElement('div');
+        replyIndicator.className = 'reply-indicator';
+        inputArea.insertBefore(replyIndicator, input);
+      }
+
+      replyIndicator.style.cssText = `
+        background: #f0f0f0;
+        border-left: 3px solid #4ade80;
+        padding: 8px;
+        margin-bottom: 8px;
+        border-radius: 4px;
+        font-size: 12px;
+      `;
+
+      replyIndicator.innerHTML = `
+        <div style="color: #666; margin-bottom: 4px; font-weight: bold;">Отговор на ${this.escapeHtml(author)}</div>
+        <div style="color: #999; margin-bottom: 6px; padding: 6px; background: white; border-radius: 3px; max-height: 50px; overflow: hidden;">"${this.escapeHtml(text)}"</div>
+        <button onclick="this.closest('.reply-indicator').remove(); this.previousElementSibling.dataset.replyTo = '';" style="background: #999; color: white; border: none; border-radius: 3px; padding: 2px 6px; cursor: pointer; font-size: 11px;">Отмяна</button>
+      `;
+
+      input.focus();
     }
   }
 
