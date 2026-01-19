@@ -26,6 +26,9 @@ class AnonymousUser {
   }
 
   getOrCreateUserName() {
+    // ОПЦИЯ: Разкомент долу за НОВО име при всяко refresh
+    // localStorage.removeItem('userName');
+    
     let userName = localStorage.getItem('userName');
     if (!userName) {
       const adjectives = [
@@ -58,6 +61,16 @@ class AnonymousUser {
 
 const currentUser = new AnonymousUser();
 console.log('✓ Потребител:', currentUser.userName);
+
+// ============================================
+// RESET FUNCTION - за тестване
+// ============================================
+
+window.resetChat = function() {
+  localStorage.clear();
+  console.log('✓ Имена ресетнати! Refresh страницата...');
+  location.reload();
+};
 
 // ============================================
 // PART 2: FIREBASE REST API
