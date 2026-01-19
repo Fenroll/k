@@ -2082,5 +2082,108 @@
       }
     });
   </script>
+
+<!-- ============================================
+     CHAT SYSTEM - Firebase
+     ============================================ -->
+
+<!-- Firebase Scripts -->
+<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
+
+<!-- Chat System Scripts -->
+<script src="js/firebase-init.js"></script>
+<script src="js/chat-system.js"></script>
+<script src="js/chat-init.js"></script>
+
+<!-- Chat Widget HTML -->
+<div id="chat-widget" class="chat-widget">
+  <button class="chat-icon" id="chat-toggle" title="Отвори чат">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+    <span class="chat-badge-count" style="display: none;">0</span>
+    <span class="chat-notification-pulse"></span>
+  </button>
+
+  <div class="chat-panel">
+    <div class="chat-header">
+      <div class="chat-header-title">
+        <h3>💬 Живо Обсъждане</h3>
+        <span class="chat-online-count">Загрузване...</span>
+      </div>
+      <button class="chat-close-btn" id="chat-close" title="Затвори чат">✕</button>
+    </div>
+
+    <div class="chat-container">
+      <div class="chat-messages-wrapper">
+        <div class="chat-messages"></div>
+      </div>
+      <div class="chat-active-users"></div>
+    </div>
+
+    <div class="chat-input-area">
+      <input type="text" class="chat-input" placeholder="Напиши съобщение... (Enter за изпрати)" maxlength="500" />
+      <button class="chat-send-btn" title="Изпрати">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16151496 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.4429026 C0.994623095,2.08 0.837654326,3.0226 1.15159189,3.97788954 L3.03521743,10.4188814 C3.03521743,10.5759788 3.34915502,10.7330762 3.50612381,10.7330762 L16.6915026,11.5185631 C16.6915026,11.5185631 17.1624089,11.5185631 17.1624089,12.0598639 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"></path>
+        </svg>
+      </button>
+    </div>
+
+    <div class="chat-user-info">
+      Известен като: <strong id="current-user-name"></strong>
+    </div>
+  </div>
+</div>
+
+<style>
+#chat-widget { --chat-primary: #7c3aed; --chat-secondary: #f3f4f6; --chat-border: #e5e7eb; --chat-text: #1f2937; --chat-text-light: #6b7280; }
+.chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 5000; font-family: 'Open Sans', Arial, sans-serif; }
+.chat-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--chat-primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); transition: all 0.3s ease; position: relative; }
+.chat-icon:hover { background: #6d28d9; box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4); transform: scale(1.1); }
+.chat-badge-count { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); }
+.chat-notification-pulse { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background: #22c55e; border-radius: 50%; border: 2px solid white; opacity: 0; transition: opacity 0.3s ease; }
+.chat-icon.has-notification .chat-notification-pulse { animation: pulse 0.6s ease-out; }
+@keyframes pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
+.chat-panel { position: fixed; bottom: 90px; right: 20px; width: 380px; height: 500px; background: white; border-radius: 12px; box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.chat-panel.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.chat-header { padding: 16px; border-bottom: 1px solid var(--chat-border); display: flex; justify-content: space-between; align-items: flex-start; background: linear-gradient(135deg, var(--chat-primary) 0%, #6d28d9 100%); color: white; border-radius: 12px 12px 0 0; }
+.chat-header-title h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; }
+.chat-online-count { font-size: 12px; opacity: 0.9; }
+.chat-close-btn { background: rgba(255, 255, 255, 0.2); border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: background 0.2s; }
+.chat-close-btn:hover { background: rgba(255, 255, 255, 0.3); }
+.chat-container { display: flex; flex: 1; min-height: 0; gap: 0; }
+.chat-messages-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.chat-message { display: flex; gap: 8px; animation: slideIn 0.3s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.message-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; flex-shrink: 0; }
+.message-content { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.message-header { display: flex; gap: 8px; align-items: baseline; }
+.message-author { font-weight: 600; font-size: 13px; color: var(--chat-text); }
+.message-time { font-size: 11px; color: var(--chat-text-light); }
+.message-text { font-size: 13px; color: var(--chat-text); word-break: break-word; background: var(--chat-secondary); padding: 8px 10px; border-radius: 8px; line-height: 1.4; }
+.chat-active-users { width: 120px; padding: 12px 8px; border-left: 1px solid var(--chat-border); overflow-y: auto; background: #fafafa; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.active-users-header { font-size: 11px; font-weight: 600; color: var(--chat-text-light); padding: 0 4px; text-transform: uppercase; }
+.active-user { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--chat-text); padding: 4px; border-radius: 6px; cursor: pointer; transition: background 0.2s; min-width: 0; }
+.active-user:hover { background: var(--chat-secondary); }
+.active-user-badge { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 11px; flex-shrink: 0; }
+.active-user span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
+.chat-input-area { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--chat-border); background: #fafafa; }
+.chat-input { flex: 1; border: 1px solid var(--chat-border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; transition: all 0.2s; resize: none; }
+.chat-input:focus { border-color: var(--chat-primary); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+.chat-send-btn { width: 36px; height: 36px; border: none; background: var(--chat-primary); color: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+.chat-send-btn:hover { background: #6d28d9; transform: scale(1.05); }
+.chat-send-btn:active { transform: scale(0.95); }
+.chat-user-info { padding: 8px 12px; font-size: 11px; color: var(--chat-text-light); border-top: 1px solid var(--chat-border); background: #fafafa; border-radius: 0 0 12px 12px; }
+#current-user-name { color: var(--chat-primary); font-weight: 600; }
+@media (max-width: 600px) { .chat-panel { width: calc(100vw - 40px); height: calc(100vh - 120px); bottom: 100px; right: 20px; left: 20px; max-width: none; } .chat-active-users { display: none; } .chat-widget { bottom: 10px; right: 10px; } .chat-icon { width: 48px; height: 48px; } }
+.chat-messages::-webkit-scrollbar, .chat-active-users::-webkit-scrollbar { width: 6px; }
+.chat-messages::-webkit-scrollbar-track, .chat-active-users::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb, .chat-active-users::-webkit-scrollbar-thumb { background: var(--chat-border); border-radius: 3px; }
+.chat-messages::-webkit-scrollbar-thumb:hover, .chat-active-users::-webkit-scrollbar-thumb:hover { background: var(--chat-text-light); }
+</style>
+
 </body>
 </html>
