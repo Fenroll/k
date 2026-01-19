@@ -265,6 +265,9 @@ class ChatUIManager {
     this.chatFirebase = new ChatFirebaseREST(this.documentId);
     this.isOpen = false;
     this.autoScroll = true;
+    this.lastReadMessageId = localStorage.getItem(`lastReadMessage_${documentId}`) || null;
+    this.notificationsDisabled = localStorage.getItem(`notificationsDisabled_${documentId}`) === 'true';
+    this.unreadCount = 0;
 
     this.init();
   }
@@ -367,6 +370,18 @@ class ChatUIManager {
       </div>
     `).join('');
 
+    // Изчисли непрочетени съобщения
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (!this.lastReadMessageId || this.lastReadMessageId !== lastMessage.id) {
+        this.unreadCount = messages.length - (this.lastReadMessageId ? 
+          messages.findIndex(m => m.id === this.lastReadMessageId) + 1 : 0);
+      }
+    }
+
+    // Обнови badge
+    this.updateActiveCount();
+
     if (scrollWasAtBottom) {
       setTimeout(() => {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -376,15 +391,11 @@ class ChatUIManager {
 
   updateActiveCount(data) {
     const badgeEl = document.querySelector('.chat-badge-count');
-    const countEl = document.querySelector('.chat-online-count');
     
+    // Покази брой непрочетени съобщения вместо активни потребители
     if (badgeEl) {
-      badgeEl.textContent = data.count;
-      badgeEl.style.display = data.count > 1 ? 'flex' : 'none';
-    }
-
-    if (countEl) {
-      countEl.textContent = `${data.count} онлайн`;
+      badgeEl.textContent = this.unreadCount;
+      badgeEl.style.display = this.unreadCount > 0 ? 'flex' : 'none';
     }
   }
 
@@ -394,25 +405,54 @@ class ChatUIManager {
 
     const usersList = Object.values(users).slice(0, 5);
     sidebarEl.innerHTML = `
-      <div class="active-users-header">Активни сега:</div>
-      ${usersList.map(user => `
-        <div class="active-user" title="${user.userName}">
-          <div class="active-user-badge" style="background-color: ${user.color}">
-            ${user.userName.charAt(0)}
+      <div class="active-users-header">Уведомления:</div>
+      <button id="toggle-notifications" style="width: 100%; padding: 8px; margin: 8px 0; background: ${this.notificationsDisabled ? '#ff6b6b' : '#4ade80'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
+        ${this.notificationsDisabled ? '🔔 Включи' : '🔕 Отключи'}
+      </button>
+      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280;">
+        <strong>Активни:</strong><br>
+        ${usersList.map(user => `
+          <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
+            <div style="width: 16px; height: 16px; border-radius: 50%; background-color: ${user.color};"></div>
+            <span style="font-size: 10px;">${user.userName}</span>
           </div>
-          <span>${user.userName}</span>
-        </div>
-      `).join('')}
+        `).join('')}
+      </div>
     `;
+
+    // Добави listener за бутона
+    const toggleBtn = document.getElementById('toggle-notifications');
+    if (toggleBtn) {
+      toggleBtn.addEventListener('click', () => {
+        this.notificationsDisabled = !this.notificationsDisabled;
+        localStorage.setItem(`notificationsDisabled_${this.documentId}`, this.notificationsDisabled);
+        this.updateActiveSidebar(users);
+        console.log('Уведомления:', this.notificationsDisabled ? 'Отключени' : 'Включени');
+      });
+    }
   }
 
   showNotification() {
+    // Не показвай уведомление ако са отключени
+    if (this.notificationsDisabled) return;
+
     const icon = document.querySelector('.chat-icon');
     if (icon) {
       icon.classList.add('has-notification');
       setTimeout(() => {
         icon.classList.remove('has-notification');
       }, 3000);
+    }
+  }
+
+  markAsRead() {
+    const messages = this.chatFirebase.messages;
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      this.lastReadMessageId = lastMessage.id;
+      localStorage.setItem(`lastReadMessage_${this.documentId}`, lastMessage.id);
+      this.unreadCount = 0;
+      this.updateActiveCount();
     }
   }
 
@@ -428,6 +468,9 @@ class ChatUIManager {
       if (this.isOpen) {
         const input = this.container.querySelector('.chat-input');
         if (input) input.focus();
+        
+        // Маркирай съобщенията като прочетени
+        this.markAsRead();
       }
     }
   }
