@@ -34,15 +34,24 @@ class AnonymousUser {
       const adjectives = [
         'Умен', 'Бърз', 'Силен', 'Весел', 'Смелен', 'Светъл',
         'Спокоен', 'Оптимист', 'Брилянтен', 'Всеобхватен',
-        'Ловък', 'Прав', 'Бдителен', 'Майстерски', 'Скромен'
+        'Ловък', 'Прав', 'Бдителен', 'Майстерски', 'Скромен',
+        'Остър', 'Модерен', 'Елегантен', 'Энергичен', 'Креативен'
       ];
       const nouns = [
         'Студент', 'Лекар', 'Учен', 'Гений', 'Израелец', 'Мъдрец',
-        'Тигър', 'Феникс', 'Дракон', 'Лъв', 'Вълк', 'Доктор', 'Професор'
+        'Тигър', 'Феникс', 'Дракон', 'Лъв', 'Вълк', 'Доктор', 'Професор',
+        'Инженер', 'Художник', 'Музикант', 'Строител', 'Пилот', 'Капитан', 'Шампион'
       ];
-      const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-      const noun = nouns[Math.floor(Math.random() * nouns.length)];
-      userName = `${adj} ${noun}`;
+      
+      // Генериране на уникално име
+      let newName = '';
+      do {
+        const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+        const noun = nouns[Math.floor(Math.random() * nouns.length)];
+        newName = `${adj} ${noun}`;
+      } while (newName === userName); // Ако случайно съвпадне, генерира ново
+      
+      userName = newName;
       localStorage.setItem('userName', userName);
     }
     return userName;
@@ -226,12 +235,26 @@ class ChatFirebaseREST {
       const now = Date.now();
       
       const activeUsers = {};
+      const inactiveUsers = [];
+
       Object.keys(data || {}).forEach(userId => {
         const user = data[userId];
-        if (now - user.lastSeen < 120000) {
+        if (now - user.lastSeen < 120000) {  // 2 минути
           activeUsers[userId] = user;
+        } else {
+          inactiveUsers.push(userId);
         }
       });
+
+      // Изтрий неактивните потребители
+      for (const userId of inactiveUsers) {
+        const userRef = `${this.baseURL}/active_users/${this.documentId}/${userId}.json`;
+        try {
+          await fetch(userRef, { method: 'DELETE' });
+        } catch (e) {
+          console.warn('Не можах да изтря неактивния потребител:', userId);
+        }
+      }
 
       return activeUsers;
     } catch (error) {
