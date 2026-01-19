@@ -494,9 +494,9 @@ class ChatUIManager {
       if (msg.replyTo && messagesMap[msg.replyTo]) {
         const originalMsg = messagesMap[msg.replyTo];
         replyHTML = `
-          <div style="background: #e8f5e9; border-left: 3px solid #4ade80; padding: 8px; margin-bottom: 8px; font-size: 11px; border-radius: 3px;">
+          <div style="background: #e8f5e9; border-left: 3px solid #4ade80; padding: 8px; margin-bottom: 8px; font-size: 11px; border-radius: 3px; max-width: 100%; overflow: hidden;">
             <div style="color: #666; font-weight: bold; margin-bottom: 4px;">Отговор на ${this.escapeHtml(msg.replyAuthor)}</div>
-            <div style="color: #999; padding: 6px; background: white; border-radius: 3px; max-height: 40px; overflow: hidden;">"${this.escapeHtml(originalMsg.text)}"</div>
+            <div style="color: #999; padding: 6px; background: white; border-radius: 3px; max-height: 40px; overflow: hidden; word-wrap: break-word; word-break: break-word;">"${this.linkifyText(originalMsg.text)}"</div>
           </div>
         `;
       }
@@ -512,7 +512,7 @@ class ChatUIManager {
               <span class="message-time">${this.formatTime(msg.timestamp)}</span>
             </div>
             ${replyHTML}
-            <div class="message-text">${this.escapeHtml(msg.text)}</div>
+            <div class="message-text">${this.linkifyText(msg.text)}</div>
             <div class="message-reactions" data-message-id="${msg.id}"></div>
           </div>
           <button class="message-reply-btn" data-message-id="${msg.id}" style="position: absolute; top: 8px; right: 8px; display: none; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 28px; height: 28px;" title="Отговори">
@@ -661,7 +661,9 @@ class ChatUIManager {
     const oldPicker = document.querySelector('.reaction-picker');
     if (oldPicker) oldPicker.remove();
 
-    const emojis = ['👍', '👎', '😂', '❤️', '😮'];
+    const emojis1 = ['👍', '👎', '😂', '❤️', '😮', '🐐'];
+    const emojis2 = ['А', 'Б', 'В', 'Г', 'Д', 'Е'];
+    
     const picker = document.createElement('div');
     picker.className = 'reaction-picker';
     picker.style.cssText = `
@@ -669,38 +671,69 @@ class ChatUIManager {
       background: white;
       border: 1px solid #ddd;
       border-radius: 8px;
-      padding: 8px;
+      padding: 4px;
       display: flex;
-      gap: 8px;
+      flex-direction: column;
+      gap: 4px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
       z-index: 10000;
     `;
 
-    emojis.forEach(emoji => {
+    const addEmojiButton = (emoji, messageId) => {
       const btn = document.createElement('button');
       btn.textContent = emoji;
       btn.style.cssText = `
         background: none;
         border: none;
-        font-size: 20px;
+        font-size: 16px;
         cursor: pointer;
-        padding: 4px 8px;
+        padding: 2px 4px;
       `;
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
         this.addReaction(messageId, emoji);
         picker.remove();
+        document.removeEventListener('click', closePicker);
       });
-      picker.appendChild(btn);
+      return btn;
+    };
+
+    // Първи ред емоджи
+    const row1 = document.createElement('div');
+    row1.style.cssText = 'display: flex; gap: 4px; justify-content: space-around;';
+    emojis1.forEach(emoji => {
+      row1.appendChild(addEmojiButton(emoji, messageId));
     });
+    picker.appendChild(row1);
+
+    // Втори ред букви
+    const row2 = document.createElement('div');
+    row2.style.cssText = 'display: flex; gap: 4px; justify-content: space-around;';
+    emojis2.forEach(emoji => {
+      row2.appendChild(addEmojiButton(emoji, messageId));
+    });
+    picker.appendChild(row2);
 
     // Позиционирай picker до съобщението
     const msgEl = document.querySelector(`[data-message-id="${messageId}"]`);
     if (msgEl) {
       const rect = msgEl.getBoundingClientRect();
-      picker.style.left = rect.left + 'px';
-      picker.style.top = (rect.top - 50) + 'px';
+      picker.style.left = (rect.left + 50) + 'px';
+      picker.style.top = (rect.top - 60) + 'px';
       document.body.appendChild(picker);
     }
+
+    // Функция за затваряне на picker
+    const closePicker = (e) => {
+      // Ако кликнеш извън picker-а - затвори
+      if (!picker.contains(e.target) && !e.target.closest('[data-message-id]')) {
+        picker.remove();
+        document.removeEventListener('click', closePicker);
+      }
+    };
+    
+    // Добави listener за всеки клик
+    document.addEventListener('click', closePicker);
   }
 
   async addReaction(messageId, emoji) {
@@ -714,6 +747,7 @@ class ChatUIManager {
       });
 
       console.log('✓ Реакция добавена:', emoji);
+      // Веднага обнови UI
       this.loadAndDisplayReactions(messageId);
     } catch (error) {
       console.error('Reaction error:', error);
@@ -728,21 +762,31 @@ class ChatUIManager {
       if (!response.ok) {
         // Няма реакции
         const container = document.querySelector(`[data-message-id="${messageId}"] .message-reactions`);
-        if (container) container.innerHTML = '';
+        if (container) {
+          container.innerHTML = '';
+          console.log('✓ Реакции изчистени за съобщение:', messageId);
+        }
         return;
       }
 
       const reactions = await response.json();
       const container = document.querySelector(`[data-message-id="${messageId}"] .message-reactions`);
       
-      if (!container || !reactions) return;
+      if (!container || !reactions) {
+        console.log('⚠️ Контейнер или реакции не са намерени');
+        return;
+      }
 
       const reactionCounts = {};
       const myReactions = {};
       
+      console.log('📊 Всички реакции от Firebase:', reactions);
+      
       Object.keys(reactions).forEach(emoji => {
-        const userIds = Object.keys(reactions[emoji]);
+        const userIds = Object.keys(reactions[emoji]).filter(userId => reactions[emoji][userId] === true);
         const count = userIds.length;
+        console.log(`  ${emoji}: ${count} потребителя (мен съм ли там: ${userIds.includes(currentUser.userId)})`);
+        
         if (count > 0) {
           reactionCounts[emoji] = count;
           // Провери дали аз съм добавил този emoji
@@ -751,6 +795,13 @@ class ChatUIManager {
           }
         }
       });
+
+      // Ако няма реакции - изчисти контейнера
+      if (Object.keys(reactionCounts).length === 0) {
+        container.innerHTML = '';
+        console.log('✓ Всички реакции махнати');
+        return;
+      }
 
       container.innerHTML = Object.keys(reactionCounts).map(emoji => `
         <button class="reaction-badge" data-emoji="${emoji}" data-message-id="${messageId}" 
@@ -766,11 +817,15 @@ class ChatUIManager {
           const emoji = btn.dataset.emoji;
           const msgId = btn.dataset.messageId;
           
+          console.log(`👆 Кликнал на ${emoji}, аз съм добавил: ${myReactions[emoji]}`);
+          
           // Ако аз съм вече добавил - премахни
           if (myReactions[emoji]) {
+            console.log('🗑️ Махам реакцията:', emoji);
             this.removeReaction(msgId, emoji);
           } else {
             // Ако не съм добавил - добави
+            console.log('➕ Добавям реакцията:', emoji);
             this.addReaction(msgId, emoji);
           }
         });
@@ -784,14 +839,23 @@ class ChatUIManager {
     const reactionRef = `${this.chatFirebase.baseURL}/reactions/${this.chatFirebase.documentId}/${messageId}/${emoji}/${currentUser.userId}.json`;
     
     try {
-      await fetch(reactionRef, {
-        method: 'DELETE'
+      console.log('🗑️ Премахвам реакция:', emoji);
+      
+      // PUT false вместо DELETE - по-надежно!
+      const response = await fetch(reactionRef, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(false)
       });
+      
+      console.log('✓ Реакция маркирана като false:', response.status);
 
-      console.log('✓ Реакция премахната:', emoji);
+      // Обнови веднага локално
       this.loadAndDisplayReactions(messageId);
+      
     } catch (error) {
-      console.error('Remove reaction error:', error);
+      console.error('❌ Грешка при премахване:', error);
+      this.loadAndDisplayReactions(messageId);
     }
   }
 
@@ -833,7 +897,7 @@ class ChatUIManager {
 
       replyIndicator.innerHTML = `
         <div style="color: #666; margin-bottom: 4px; font-weight: bold;">Отговор на ${this.escapeHtml(author)}</div>
-        <div style="color: #999; margin-bottom: 6px; padding: 6px; background: white; border-radius: 3px; max-height: 50px; overflow: hidden;">"${this.escapeHtml(text)}"</div>
+        <div style="color: #999; margin-bottom: 6px; padding: 6px; background: white; border-radius: 3px; max-height: 50px; overflow: hidden; word-wrap: break-word; word-break: break-word;">"${this.escapeHtml(text)}"</div>
         <button onclick="this.closest('.reply-indicator').remove(); this.previousElementSibling.dataset.replyTo = '';" style="background: #999; color: white; border: none; border-radius: 3px; padding: 2px 6px; cursor: pointer; font-size: 11px;">Отмяна</button>
       `;
 
@@ -872,6 +936,15 @@ class ChatUIManager {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  linkifyText(text) {
+    // Разпознаи URL-и и преобразувай ги в линкове
+    const escaped = this.escapeHtml(text);
+    const urlRegex = /(https?:\/\/[^\s<>\[\]{}|\\^`"]*)/g;
+    return escaped.replace(urlRegex, (url) => {
+      return `<a href="${url}" target="_blank" style="color: #4ade80; text-decoration: underline; cursor: pointer;">${url}</a>`;
+    });
   }
 
   destroy() {
