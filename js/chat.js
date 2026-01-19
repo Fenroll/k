@@ -604,9 +604,8 @@ class ChatUIManager {
       return;
     }
 
-    const pathname = window.location.pathname;
-    const match = pathname.match(/\/([a-z0-9-]+)\.html/i);
-    const documentId = match ? match[1] : 'default';
+    // ГЛОБАЛЕН ЧАТ ЗА ВСИЧКИ САЙТОВЕ
+    const documentId = 'global-chat';
 
     let chatManager;
     try {
