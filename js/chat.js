@@ -239,7 +239,7 @@ class ChatFirebaseREST {
 
       Object.keys(data || {}).forEach(userId => {
         const user = data[userId];
-        if (now - user.lastSeen < 120000) {  // 2 минути
+        if (now - user.lastSeen < 60000) {  // 1 минута
           activeUsers[userId] = user;
         } else {
           inactiveUsers.push(userId);
