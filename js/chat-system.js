@@ -1,11 +1,25 @@
 // ============================================
-// REAL-TIME CHAT SYSTEM
+// REAL-TIME CHAT SYSTEM - с FALLBACK
 // ============================================
 
 class ChatSystem {
   constructor(documentId) {
+    console.log('ChatSystem инициализирам за:', documentId);
     this.documentId = documentId || 'default';
-    this.messagesRef = database.ref(`messages/${this.documentId}`);
+    this.useLocalStorage = !database; // Fallback на localStorage ако няма Firebase
+    
+    if (database) {
+      try {
+        this.messagesRef = database.ref(`messages/${this.documentId}`);
+        console.log('Използвам Firebase Database');
+      } catch (error) {
+        console.warn('Firebase ref error:', error);
+        this.useLocalStorage = true;
+      }
+    } else {
+      console.warn('Firebase не е налично - използвам localStorage');
+    }
+    
     this.messages = [];
     this.listeners = [];
   }
@@ -19,13 +33,27 @@ class ChatSystem {
       userName: currentUser.userName,
       userColor: currentUser.color,
       text: text.trim(),
-      timestamp: firebase.database.ServerValue.TIMESTAMP,
+      timestamp: Date.now(),
       id: Date.now() + '_' + Math.random().toString(36).substr(2, 9)
     };
 
     try {
-      await this.messagesRef.push(message);
-      return true;
+      if (this.useLocalStorage) {
+        // Локално съхранение
+        const key = `chat_${this.documentId}`;
+        const messages = JSON.parse(localStorage.getItem(key) || '[]');
+        messages.push(message);
+        localStorage.setItem(key, JSON.stringify(messages.slice(-100))); // Последни 100
+        console.log('Съобщение съхранено локално');
+        
+        // Уведоми слушатели
+        this.listeners.forEach(callback => callback(message));
+        return true;
+      } else {
+        // Firebase
+        await this.messagesRef.push(message);
+        return true;
+      }
     } catch (error) {
       console.error('Error sending message:', error);
       return false;
@@ -34,30 +62,53 @@ class ChatSystem {
 
   // Слушай за нови съобщения
   onMessagesChange(callback) {
-    // Первоначально зареди последните 50 съобщения
-    this.messagesRef
-      .orderByChild('timestamp')
-      .limitToLast(50)
-      .on('value', (snapshot) => {
-        const data = snapshot.val() || {};
-        this.messages = Object.keys(data).map(key => ({
-          ...data[key],
-          key: key
-        }));
-        callback(this.messages);
-      });
+    if (this.useLocalStorage) {
+      // Локално съхранение - зареди от localStorage
+      const key = `chat_${this.documentId}`;
+      const messages = JSON.parse(localStorage.getItem(key) || '[]');
+      this.messages = messages;
+      callback(this.messages);
+      console.log('Зареди', messages.length, 'съобщения от localStorage');
+      
+      // Периодично провери за нови съобщения
+      this.pollInterval = setInterval(() => {
+        const updated = JSON.parse(localStorage.getItem(key) || '[]');
+        if (updated.length !== this.messages.length) {
+          this.messages = updated;
+          callback(this.messages);
+        }
+      }, 500);
+    } else {
+      // Firebase - оригинален код
+      try {
+        this.messagesRef
+          .orderByChild('timestamp')
+          .limitToLast(50)
+          .on('value', (snapshot) => {
+            const data = snapshot.val() || {};
+            this.messages = Object.keys(data).map(key => ({
+              ...data[key],
+              key: key
+            }));
+            callback(this.messages);
+          });
 
-    // Слушай за нови съобщения реално време
-    this.messagesRef.on('child_added', (snapshot) => {
-      const message = snapshot.val();
-      if (message && !this.messages.find(m => m.id === message.id)) {
-        this.messages.push({
-          ...message,
-          key: snapshot.key
+        this.messagesRef.on('child_added', (snapshot) => {
+          const message = snapshot.val();
+          if (message && !this.messages.find(m => m.id === message.id)) {
+            this.messages.push({
+              ...message,
+              key: snapshot.key
+            });
+            this.notifyNewMessage(message);
+          }
         });
-        this.notifyNewMessage(message);
+      } catch (error) {
+        console.error('Firebase error:', error);
+        this.useLocalStorage = true;
+        this.onMessagesChange(callback);
       }
-    });
+    }
   }
 
   // Извести слушатели за ново съобщение
@@ -72,27 +123,46 @@ class ChatSystem {
 
   // Спри слушането
   stop() {
-    this.messagesRef.off();
+    if (this.pollInterval) {
+      clearInterval(this.pollInterval);
+    }
+    if (this.messagesRef) {
+      try {
+        this.messagesRef.off();
+      } catch (error) {
+        console.warn('Error stopping Firebase ref:', error);
+      }
+    }
     this.listeners = [];
   }
 
-  // Изтрий съобщение (само свое или администратор)
+  // Изтрий съобщение
   deleteMessage(messageKey) {
-    this.messagesRef.child(messageKey).remove();
+    if (this.messagesRef) {
+      this.messagesRef.child(messageKey).remove();
+    }
   }
 
   // Чисти стари съобщения (> 24 часа)
   cleanOldMessages() {
-    const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
-    this.messagesRef
-      .orderByChild('timestamp')
-      .endAt(oneDayAgo)
-      .once('value', (snapshot) => {
-        const keys = Object.keys(snapshot.val() || {});
-        keys.forEach(key => {
-          this.messagesRef.child(key).remove();
+    if (this.useLocalStorage) {
+      const key = `chat_${this.documentId}`;
+      const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+      let messages = JSON.parse(localStorage.getItem(key) || '[]');
+      messages = messages.filter(m => m.timestamp > oneDayAgo);
+      localStorage.setItem(key, JSON.stringify(messages));
+    } else if (this.messagesRef) {
+      const oneDayAgo = Date.now() - (24 * 60 * 60 * 1000);
+      this.messagesRef
+        .orderByChild('timestamp')
+        .endAt(oneDayAgo)
+        .once('value', (snapshot) => {
+          const keys = Object.keys(snapshot.val() || {});
+          keys.forEach(key => {
+            this.messagesRef.child(key).remove();
+          });
         });
-      });
+    }
   }
 }
 
@@ -222,7 +292,7 @@ class ChatUIManager {
     const sidebarEl = this.container.querySelector('.chat-active-users');
     if (!sidebarEl) return;
 
-    const usersList = Object.values(users).slice(0, 5); // Primeiro 5
+    const usersList = Object.values(users).slice(0, 5);
     sidebarEl.innerHTML = `
       <div class="active-users-header">Активни сега:</div>
       ${usersList.map(user => `
