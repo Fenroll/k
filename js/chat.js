@@ -288,8 +288,8 @@ class ChatUIManager {
 
       // Polling за активни потребители
       this.chatFirebase.startActiveUsersPolling((data) => {
-        this.updateActiveCount(data);
-        this.updateActiveSidebar(data.users);
+        // Показвай бутон за уведомления в sidebar
+        this.updateNotificationButton(data);
       }, 5000);  // Всеки 5 секунди (вместо 2)
 
       // Listener за уведомления
@@ -399,24 +399,16 @@ class ChatUIManager {
     }
   }
 
-  updateActiveSidebar(users) {
+  updateNotificationButton(data) {
     const sidebarEl = this.container.querySelector('.chat-active-users');
     if (!sidebarEl) return;
 
-    const usersList = Object.values(users).slice(0, 5);
+    // Само показвай бутон за уведомления - не пречи на header
     sidebarEl.innerHTML = `
-      <div class="active-users-header">Уведомления:</div>
-      <button id="toggle-notifications" style="width: 100%; padding: 8px; margin: 8px 0; background: ${this.notificationsDisabled ? '#ff6b6b' : '#4ade80'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold;">
-        ${this.notificationsDisabled ? '🔔 Включи' : '🔕 Отключи'}
-      </button>
-      <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280;">
-        <strong>Активни:</strong><br>
-        ${usersList.map(user => `
-          <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
-            <div style="width: 16px; height: 16px; border-radius: 50%; background-color: ${user.color};"></div>
-            <span style="font-size: 10px;">${user.userName}</span>
-          </div>
-        `).join('')}
+      <div style="padding: 8px;">
+        <button id="toggle-notifications" style="width: 100%; padding: 10px; background: ${this.notificationsDisabled ? '#ff6b6b' : '#4ade80'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">
+          ${this.notificationsDisabled ? '🔔 Включи уведомл.' : '🔕 Отключи уведомл.'}
+        </button>
       </div>
     `;
 
@@ -426,10 +418,28 @@ class ChatUIManager {
       toggleBtn.addEventListener('click', () => {
         this.notificationsDisabled = !this.notificationsDisabled;
         localStorage.setItem(`notificationsDisabled_${this.documentId}`, this.notificationsDisabled);
-        this.updateActiveSidebar(users);
+        this.updateNotificationButton(data);
         console.log('Уведомления:', this.notificationsDisabled ? 'Отключени' : 'Включени');
       });
     }
+  }
+
+  updateActiveSidebar(users) {
+    const sidebarEl = this.container.querySelector('.chat-active-users');
+    if (!sidebarEl) return;
+
+    const usersList = Object.values(users).slice(0, 5);
+    sidebarEl.innerHTML = `
+      <div class="active-users-header">Активни сега:</div>
+      ${usersList.map(user => `
+        <div class="active-user" title="${user.userName}">
+          <div class="active-user-badge" style="background-color: ${user.color}">
+            ${user.userName.charAt(0)}
+          </div>
+          <span>${user.userName}</span>
+        </div>
+      `).join('')}
+    `;
   }
 
   showNotification() {
