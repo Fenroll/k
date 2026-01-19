@@ -28,8 +28,16 @@ class AnonymousUser {
   getOrCreateUserName() {
     let userName = localStorage.getItem('userName');
     if (!userName) {
-      const adjectives = ['Умен', 'Бързо', 'Силен', 'Весел', 'Смелен', 'Светъл'];
-      const nouns = ['Студент', 'Лекар', 'Учен', 'Гений', 'Орел', 'Мудрец'];
+      const adjectives = [
+        'Умен', 'Бързо', 'Силен', 'Весел', 'Смелен', 'Светъл',
+        'Спокойно', 'Оптимисен', 'Брилянтен', 'Всеобхватен',
+        'Ловък', 'Прав', 'Бдителен', 'Майстерски', 'Скромен'
+      ];
+      const nouns = [
+        'Студент', 'Лекар', 'Учен', 'Гений', 'Орел', 'Мудрец',
+        'Тигър', 'Феникс', 'Дракон', 'Лъв', 'Вълк', 'Лис',
+        'Аспиранта', 'Интерна', 'Доктор', 'Професор'
+      ];
       const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
       const noun = nouns[Math.floor(Math.random() * nouns.length)];
       userName = `${adj} ${noun}`;
@@ -125,17 +133,27 @@ class ChatFirebaseREST {
   startPolling(callback, interval = 2000) {
     if (this.isPolling) return;
     this.isPolling = true;
+    let lastCount = 0;
 
     const poll = async () => {
-      const messages = await this.loadMessages();
-      
-      if (messages.length > this.messages.length) {
-        callback(messages);
-        const newMessage = messages[messages.length - 1];
-        this.listeners.forEach(listener => listener(newMessage));
+      try {
+        const messages = await this.loadMessages();
+        
+        // Ако брой съобщения се промени, обнови UI
+        if (messages.length !== lastCount) {
+          callback(messages);
+          lastCount = messages.length;
+          
+          // Ако има ново съобщение, уведоми
+          if (messages.length > 0 && messages.length > lastCount - 1) {
+            const newMessage = messages[messages.length - 1];
+            this.listeners.forEach(listener => listener(newMessage));
+          }
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
       }
       
-      this.messages = messages;
       setTimeout(poll, interval);
     };
 
