@@ -912,7 +912,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
 
   <!-- Chat System Scripts -->
-  <script src="js/chat.js?v=11"></script>
+  <script src="js/chat.js?v=14"></script>
 
   <!-- Chat Widget HTML -->
   <div id="chat-widget" class="chat-widget">
@@ -963,7 +963,12 @@
   .chat-notification-pulse { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background: #22c55e; border-radius: 50%; border: 2px solid white; opacity: 0; transition: opacity 0.3s ease; }
   .chat-icon.has-notification .chat-notification-pulse { animation: pulse 0.6s ease-out; }
   @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
-  .chat-panel { position: fixed; bottom: 90px; right: 20px; width: 380px; height: 500px; background: white; border-radius: 12px; box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+  
+  /* Chat links - зелен цвят */
+  .chat-messages a { color: #4ade80 !important; text-decoration: underline !important; }
+  .chat-messages a:hover { color: #22c55e !important; }
+  
+  .chat-panel { position: fixed; bottom: 90px; right: 20px; width: 400px; height: 500px; background: white; border-radius: 12px; box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
   .chat-panel.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
   .chat-header { padding: 16px; border-bottom: 1px solid var(--chat-border); display: flex; justify-content: space-between; align-items: flex-start; background: linear-gradient(135deg, var(--chat-primary) 0%, #6d28d9 100%); color: white; border-radius: 12px 12px 0 0; }
   .chat-header-title h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; }
@@ -981,7 +986,7 @@
   .message-author { font-weight: 600; font-size: 13px; color: var(--chat-text); }
   .message-time { font-size: 11px; color: var(--chat-text-light); }
   .message-text { font-size: 13px; color: var(--chat-text); word-break: break-word; background: var(--chat-secondary); padding: 8px 10px; border-radius: 8px; line-height: 1.4; }
-  .chat-active-users { width: 120px; padding: 12px 8px; border-left: 1px solid var(--chat-border); overflow-y: auto; background: #fafafa; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+  .chat-active-users { width: 150px; padding: 12px 8px; border-left: 1px solid var(--chat-border); overflow-y: auto; background: #fafafa; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
   .active-users-header { font-size: 11px; font-weight: 600; color: var(--chat-text-light); padding: 0 4px; text-transform: uppercase; }
   .active-user { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--chat-text); padding: 4px; border-radius: 6px; cursor: pointer; transition: background 0.2s; min-width: 0; }
   .active-user:hover { background: var(--chat-secondary); }
