@@ -102,7 +102,9 @@ class ChatSystem {
 
 class ChatUIManager {
   constructor(containerId, documentId) {
+    console.log('ChatUIManager конструктор с ID:', containerId);
     this.container = document.getElementById(containerId);
+    console.log('Container намерен:', !!this.container);
     this.documentId = documentId || 'default';
     this.chatSystem = new ChatSystem(this.documentId);
     this.activeUsersManager = new ActiveUsersManager(this.documentId);
@@ -113,6 +115,7 @@ class ChatUIManager {
   }
 
   init() {
+    console.log('ChatUIManager.init() начало');
     // Маркирай потребител като активен
     this.activeUsersManager.markUserActive();
 
@@ -244,6 +247,10 @@ class ChatUIManager {
   }
 
   toggleChat() {
+    if (!this.container) {
+      console.error('Chat container не е намерен!');
+      return;
+    }
     this.isOpen = !this.isOpen;
     const chatPanel = this.container.querySelector('.chat-panel');
     if (chatPanel) {

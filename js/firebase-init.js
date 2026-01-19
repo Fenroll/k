@@ -9,9 +9,18 @@ const firebaseConfig = {
   appId: "1:876543210:web:1234567890abcdef"
 };
 
+console.log('Инициализирам Firebase...');
+
 // Initialize Firebase
-firebase.initializeApp(firebaseConfig);
+try {
+  firebase.initializeApp(firebaseConfig);
+  console.log('Firebase инициализиран успешно');
+} catch (error) {
+  console.error('Firebase initialization error:', error);
+}
+
 const database = firebase.database();
+console.log('Firebase Database готов');
 
 // ============================================
 // АНОНИМЕН ПОТРЕБИТЕЛ СИСТЕМА
@@ -136,3 +145,6 @@ window.AnonymousUser = AnonymousUser;
 window.ActiveUsersManager = ActiveUsersManager;
 window.currentUser = currentUser;
 window.database = database;
+
+console.log('Firebase Init завършен. currentUser:', currentUser.userName, currentUser.userId);
+console.log('Anonymous User System готов');
