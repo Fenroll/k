@@ -96,50 +96,16 @@ function generateRecentFilesHtml() {
     filesWithStats.sort((a, b) => b.modified - a.modified);
     console.log('Files sorted by modification time');
 
-    // Зареждам предишния индекс на файлове
-    let previousIndex = {};
-    if (fs.existsSync(FILES_INDEX_FILE)) {
-      try {
-        previousIndex = JSON.parse(fs.readFileSync(FILES_INDEX_FILE, 'utf-8'));
-      } catch (e) {
-        console.warn('Could not parse previous index:', e.message);
-      }
-    }
-
-    // Правя карта на текущите файлове (всички типове, но игнорирам .url shortcut файлове)
+    // Правя карта на текущите файлове за индекс (само справка)
     const currentFilesList = {};
     allFiles.forEach(file => {
-      // Игнорирам .url файлове (shortcut файлове)
       if (!file.endsWith('.url')) {
         const relativePath = path.relative(ELEMENTS_DIR, file).replace(/\\/g, '/');
         currentFilesList[relativePath] = true;
       }
     });
 
-    // Намирам добавени файлове
-    let addedFiles = Object.keys(currentFilesList).filter(file => !previousIndex[file]);
-    console.log('Added files (before filter):', addedFiles.length);
-    
-    // Филтрирам файлове със системни имена или разширения
-    const ignorePatterns = ['git', 'html', 'tmp', 'info.md', 'readme.md', '.tmp', '.git', '~$', '.docx'];
-    addedFiles = addedFiles.filter(file => {
-      const lowerFile = file.toLowerCase();
-      return !ignorePatterns.some(pattern => lowerFile.includes(pattern));
-    });
-    console.log('Added files (after filter):', addedFiles.length);
-
-    // Намирам премахнати файлове (от индекса)
-    let removedFiles = Object.keys(previousIndex).filter(file => !currentFilesList[file]);
-    console.log('Removed files (before filter):', removedFiles.length);
-    
-    // Филтрирам файлове със системни имена или разширения
-    removedFiles = removedFiles.filter(file => {
-      const lowerFile = file.toLowerCase();
-      return !ignorePatterns.some(pattern => lowerFile.includes(pattern));
-    });
-    console.log('Removed files (after filter):', removedFiles.length);
-
-    // Запазвам текущия индекс
+    // Запазвам текущия индекс (само за справка)
     fs.writeFileSync(FILES_INDEX_FILE, JSON.stringify(currentFilesList, null, 2), 'utf-8');
 
     // Зареждам folder-name-mappings за правилните имена
@@ -154,99 +120,17 @@ function generateRecentFilesHtml() {
       courseGroups[file.courseName].push(file);
     });
 
-    // Групирам добавени/премахнати файлове по курс
-    const addedByCourse = {};
-    const removedByCourse = {};
-    
-    addedFiles.forEach(file => {
-      const parts = file.split('/');
-      const courseName = parts[0];
-      if (!addedByCourse[courseName]) {
-        addedByCourse[courseName] = [];
-      }
-      addedByCourse[courseName].push(file);
-    });
-
-    removedFiles.forEach(file => {
-      const parts = file.split('/');
-      const courseName = parts[0];
-      if (!removedByCourse[courseName]) {
-        removedByCourse[courseName] = [];
-      }
-      removedByCourse[courseName].push(file);
-    });
-
     console.log('Recent unique files:', Object.keys(courseGroups).length, 'courses');
 
     // ГЕНЕРИРАМ HTML ЗА ПОСЛЕДНИ ПРОМЕНИ - МИНИМАЛЕН ФОРМАТ
+    // Cache-busting с уникален timestamp
     const timestamp = Date.now();
-    let html = `<div style="margin: 20px 0;" data-version="${timestamp}">\n\n`;
+    const randomId = Math.random().toString(36).substr(2, 9);
+    const uniqueVersion = `${timestamp}-${randomId}`;
+    let html = `<div style="margin: 20px 0;" data-version="${uniqueVersion}">\n\n`;
     
-    // ТАБЛИЦА 1: ПОСЛЕДНИТЕ 5 ПРОМЕНЕНИ HTML ФАЙЛОВЕ
+    // ТАБЛИЦА 1: ПОСЛЕДНИТЕ 5 ПРОМЕНЕНИ HTML ФАЙЛОВЕ (всички типове промени)
     html += '<h3>⭐ Последни 5 променени файлове:</h3>\n';
-    
-    // Събирам всички файлове от всички предмети
-    const allRecentFiles = [];
-    Object.keys(courseGroups).forEach(courseName => {
-      courseGroups[courseName].forEach(file => {
-        allRecentFiles.push({...file, courseName});
-      });
-    });
-    
-    // Сортирам по дата и взимам последните 5
-    allRecentFiles.sort((a, b) => b.modified - a.modified);
-    const top5Files = allRecentFiles.slice(0, 5);
-    
-    if (top5Files.length > 0) {
-      html += '<ol style="margin: 10px 0; padding-left: 20px;">\n';
-      
-      top5Files.forEach((file, index) => {
-        // Форматирам име на файла - премахвам "msg", ".html" и начални числа
-        let displayFileName = path.basename(file.path);
-        
-        // Премахни .html разширение
-        if (displayFileName.endsWith('.html')) {
-          displayFileName = displayFileName.slice(0, -5);
-        }
-        
-        // Премахни "-msg-" дял (например "1-msg-Теми" -> "1 - Теми")
-        displayFileName = displayFileName.replace(/-msg-/g, ' - ');
-        
-        // Премахни начални числа с дефис (например "1 - Теми" -> "Теми")
-        const match = displayFileName.match(/^\d+\s+-\s+(.+)$/);
-        if (match) {
-          displayFileName = match[1];
-        }
-        
-        // Взимам папката от пътя
-        const pathParts = file.path.split(path.sep);
-        const course = pathParts[0];
-        const folder = pathParts[1] || 'Root';
-        const displayCourseName = getMappedName(course, nameMappings).replace(/\[АРХИВ\]\s*/, '');
-        
-        const modDate = new Date(file.modified).toLocaleString('bg-BG', {
-          year: 'numeric',
-          month: '2-digit',
-          day: '2-digit',
-          hour: '2-digit',
-          minute: '2-digit'
-        });
-        
-        // Определям статуса на файла
-        const relativePath = file.path.replace(/\\/g, '/');
-        let status = '✏️ Редактиран';
-        
-        if (addedFiles.some(f => f === relativePath)) {
-          status = '✅ Добавен';
-        } else if (removedFiles.some(f => f === relativePath)) {
-          status = '❌ Изтрит';
-        }
-        
-        html += `<li>${displayCourseName} - ${folder} - <strong>${displayFileName}</strong>: ${modDate} ${status}</li>\n`;
-      });
-      
-      html += '</ol>\n\n';
-    }
     
     // Дата на последна актуализация
     const now = new Date();
