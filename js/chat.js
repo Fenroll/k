@@ -261,13 +261,13 @@ class ChatUIManager {
       // Polling за нови съобщения
       this.chatFirebase.startPolling((messages) => {
         this.renderMessages(messages);
-      }, 2000);
+      }, 1000);  // Всеки 1 секунда вместо 2
 
       // Polling за активни потребители
       this.chatFirebase.startActiveUsersPolling((data) => {
         this.updateActiveCount(data);
         this.updateActiveSidebar(data.users);
-      }, 5000);
+      }, 2000);  // Всеки 2 секунди вместо 5
 
       // Listener за уведомления
       this.chatFirebase.addMessageListener((message) => {
