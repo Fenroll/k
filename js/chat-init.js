@@ -4,34 +4,15 @@
 // ============================================
 
 (function initializeChat() {
-  // Чакай за зареждане на Firebase и Chat системата
+  console.log('Chat init начало...');
+  
+  // Чакай за зареждане на Chat системата (Firebase е опционален)
   let attempts = 0;
-  const maxAttempts = 50; // 5 секунди при 100ms интервал
+  const maxAttempts = 30; // 3 секунди при 100ms интервал
 
   function tryInit() {
     attempts++;
     
-    // Проверка за Firebase библиотеката
-    if (typeof firebase === 'undefined') {
-      if (attempts === 1) {
-        console.log('Чакане на Firebase...');
-      }
-      if (attempts < maxAttempts) {
-        setTimeout(tryInit, 100);
-      } else {
-        console.error('Firebase не е зареден след 5 секунди');
-      }
-      return;
-    }
-
-    if (typeof firebase.database === 'undefined') {
-      console.error('Firebase Database не е зареден');
-      if (attempts < maxAttempts) {
-        setTimeout(tryInit, 100);
-      }
-      return;
-    }
-
     // Проверка за Chat системата
     if (typeof ChatUIManager === 'undefined' || typeof currentUser === 'undefined') {
       if (attempts === 1) {
@@ -40,7 +21,7 @@
       if (attempts < maxAttempts) {
         setTimeout(tryInit, 100);
       } else {
-        console.error('Chat система не е зареена след 5 секунди');
+        console.error('Chat система не е зареена след 3 секунди');
       }
       return;
     }
@@ -71,7 +52,8 @@
     let chatManager;
     try {
       chatManager = new ChatUIManager('chat-widget', documentId);
-      console.log('ChatUIManager инициализиран');
+      window.chatManager = chatManager; // Запази в window
+      console.log('✓ ChatUIManager инициализиран успешно');
     } catch (error) {
       console.error('Грешка при инициализиране на ChatUIManager:', error);
       return;
@@ -92,35 +74,36 @@
       chatIcon.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Chat icon clicked');
-        chatManager.toggleChat();
+        console.log('💬 Chat icon clicked');
+        if (window.chatManager) {
+          window.chatManager.toggleChat();
+        }
       });
-      console.log('Chat icon listener добавен');
+      console.log('✓ Chat icon listener добавен');
     } else {
-      console.error('Chat toggle button не е намерен!');
+      console.error('✗ Chat toggle button не е намерен!');
     }
 
     if (chatCloseBtn) {
       chatCloseBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Chat close button clicked');
-        chatManager.toggleChat();
+        console.log('Close button clicked');
+        if (window.chatManager) {
+          window.chatManager.toggleChat();
+        }
       });
-      console.log('Chat close button listener добавен');
+      console.log('✓ Chat close button listener добавен');
     }
 
     // Показывай текущото име на потребителя
     if (currentUserNameEl && currentUser) {
       currentUserNameEl.textContent = currentUser.userName;
-      console.log('User name set:', currentUser.userName);
+      console.log('✓ User name set:', currentUser.userName);
     }
 
-    // Запази chatManager в window за по-лесен достъп
-    window.chatManager = chatManager;
-
-    console.log('Chat система успешно инициализирана за документ:', documentId);
-    console.log('Текущ потребител:', currentUser.userName, `(${currentUser.userId})`);
+    console.log('✓✓✓ Chat система успешно инициализирана за документ:', documentId);
+    console.log('✓ Текущ потребител:', currentUser.userName, `(${currentUser.userId})`);
   }
 
   function getDocumentId() {
