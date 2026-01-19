@@ -573,9 +573,9 @@ class ChatUIManager {
   updateActiveCount(data) {
     const badgeEl = document.querySelector('.chat-badge-count');
     
-    // Покази брой непрочетени съобщения САМО ако уведомленията са включени
+    // Покази брой непрочетени съобщения САМО ако уведомленията са включени И чатът е затворен
     if (badgeEl) {
-      if (this.notificationsDisabled) {
+      if (this.notificationsDisabled || this.isOpen) {
         badgeEl.style.display = 'none';
       } else {
         badgeEl.textContent = this.unreadCount;
