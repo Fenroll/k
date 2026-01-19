@@ -920,5 +920,38 @@ window.resetChat = function() {
   console.log('✅ Ресет завършен! Напиши в консолата: location.reload()');
 };
 
-console.log('💡 Команда: resetChat() - за ресет на име, след това F5');
+window.deleteAllChatMessages = async function(password) {
+  if (!password) {
+    console.error('❌ Парола не е дадена! Използвай: window.deleteAllChatMessages("admin")');
+    return false;
+  }
+
+  if (password !== 'admin') {
+    console.error('❌ ГРЕШНА ПАРОЛА!');
+    return false;
+  }
+
+  try {
+    const baseURL = 'https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app';
+    const messagesRef = `${baseURL}/messages/global-chat.json`;
+    const reactionsRef = `${baseURL}/reactions/global-chat.json`;
+
+    // Изтрий съобщенията
+    const msgResponse = await fetch(messagesRef, { method: 'DELETE' });
+    if (!msgResponse.ok) throw new Error('Грешка при изтриване на съобщенията');
+
+    // Изтрий реакциите
+    const reactResponse = await fetch(reactionsRef, { method: 'DELETE' });
+    if (!reactResponse.ok) throw new Error('Грешка при изтриване на реакциите');
+
+    console.log('✅ ЧАТ ИЗТРИТ УСПЕШНО! Всички съобщения и реакции са премахнати.');
+    console.log('💡 Напиши: location.reload() за да видиш промените');
+    return true;
+  } catch (error) {
+    console.error('❌ Грешка при изтриване на чата:', error);
+    return false;
+  }
+};
+
+console.log('💡 Команди: resetChat() - ресет на име, deleteAllChatMessages("admin") - изтрий чата');
 
