@@ -337,7 +337,10 @@ class ChatUIManager {
   initNotificationButton() {
     // Инициализирай бутон за уведомления един път
     const sidebarEl = this.container.querySelector('.chat-active-users');
-    if (!sidebarEl) return;
+    if (!sidebarEl) {
+      console.error('Sidebar не е намерен!');
+      return;
+    }
 
     sidebarEl.innerHTML = `
       <div style="padding: 8px;">
@@ -348,34 +351,33 @@ class ChatUIManager {
       </div>
     `;
 
+    console.log('Инициализирам бутон за уведомления');
+
     // Добави listener един път
-    const toggleBtn = document.getElementById('toggle-notifications');
+    const toggleBtn = sidebarEl.querySelector('#toggle-notifications');
     if (toggleBtn) {
+      console.log('Бутон намерен, добавяме listener');
       toggleBtn.addEventListener('click', () => {
         this.notificationsDisabled = !this.notificationsDisabled;
         localStorage.setItem(`notificationsDisabled_${this.documentId}`, this.notificationsDisabled);
         // Обнови цвета без да презаписваш HTML
         this.updateNotificationButtonColor();
+        // Обнови иконката (скрий/покажи числото на непрочетени)
+        this.updateActiveCount();
         console.log('Уведомления:', this.notificationsDisabled ? 'Отключени' : 'Включени');
       });
+    } else {
+      console.error('Бутон НЕ е намерен!');
     }
   }
 
   updateNotificationButtonColor() {
     // Обнови само цвета и текста на бутона без да презаписваш HTML
-    const toggleBtn = document.getElementById('toggle-notifications');
+    const toggleBtn = document.querySelector('#toggle-notifications');
     if (toggleBtn) {
       toggleBtn.style.background = this.notificationsDisabled ? '#ff6b6b' : '#4ade80';
       toggleBtn.textContent = this.notificationsDisabled ? '🔔 Включи уведомл.' : '🔕 Отключи уведомл.';
-    }
-  }
-
-  updateNotificationButtonColor() {
-    // Обнови само цвета и текста на бутона без да презаписваш HTML
-    const toggleBtn = document.getElementById('toggle-notifications');
-    if (toggleBtn) {
-      toggleBtn.style.background = this.notificationsDisabled ? '#ff6b6b' : '#4ade80';
-      toggleBtn.textContent = this.notificationsDisabled ? '🔔 Включи уведомл.' : '🔕 Отключи уведомл.';
+      console.log('✓ Бутон обновен');
     }
   }
 
@@ -458,10 +460,14 @@ class ChatUIManager {
   updateActiveCount(data) {
     const badgeEl = document.querySelector('.chat-badge-count');
     
-    // Покази брой непрочетени съобщения вместо активни потребители
+    // Покази брой непрочетени съобщения САМО ако уведомленията са включени
     if (badgeEl) {
-      badgeEl.textContent = this.unreadCount;
-      badgeEl.style.display = this.unreadCount > 0 ? 'flex' : 'none';
+      if (this.notificationsDisabled) {
+        badgeEl.style.display = 'none';
+      } else {
+        badgeEl.textContent = this.unreadCount;
+        badgeEl.style.display = this.unreadCount > 0 ? 'flex' : 'none';
+      }
     }
   }
 
@@ -501,16 +507,8 @@ class ChatUIManager {
   }
 
   showNotification() {
-    // Не показвай уведомление ако са отключени
-    if (this.notificationsDisabled) return;
-
-    const icon = document.querySelector('.chat-icon');
-    if (icon) {
-      icon.classList.add('has-notification');
-      setTimeout(() => {
-        icon.classList.remove('has-notification');
-      }, 3000);
-    }
+    // Не показвай визуална уведомления - само числото на непрочетени
+    // Числото вече се показва от updateActiveCount()
   }
 
   markAsRead() {
