@@ -2087,7 +2087,7 @@
          CHAT SYSTEM - Complete (Firebase REST + UI)
          ============================================ -->
 
-<script src="js/chat.js?v=11"></script>
+<script src="js/chat.js?v=15"></script>
 
 <!-- Chat Widget HTML -->
 <div id="chat-widget" class="chat-widget">
@@ -2131,17 +2131,17 @@
 </div>
 
 <style>
-#chat-widget { --chat-primary: #7c3aed; --chat-secondary: #f3f4f6; --chat-border: #e5e7eb; --chat-text: #1f2937; --chat-text-light: #6b7280; }
+#chat-widget { --chat-primary: #5d4037; --chat-secondary: #efebe9; --chat-border: #bcaaa4; --chat-text: #2c1810; --chat-text-light: #6d4c41; }
 .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 5000; font-family: 'Open Sans', Arial, sans-serif; }
 .chat-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--chat-primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); transition: all 0.3s ease; position: relative; }
-.chat-icon:hover { background: #6d28d9; box-shadow: 0 6px 16px rgba(124, 58, 237, 0.4); transform: scale(1.1); }
+.chat-icon:hover { background: #4e342e; box-shadow: 0 6px 16px rgba(93, 64, 55, 0.5); transform: scale(1.1); }
 .chat-badge-count { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); }
 .chat-notification-pulse { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background: #22c55e; border-radius: 50%; border: 2px solid white; opacity: 0; transition: opacity 0.3s ease; }
 .chat-icon.has-notification .chat-notification-pulse { animation: pulse 0.6s ease-out; }
 @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
-.chat-panel { position: fixed; bottom: 90px; right: 20px; width: 380px; height: 500px; background: white; border-radius: 12px; box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.chat-panel { position: fixed; bottom: 90px; right: 20px; width: 400px; height: 500px; background: white; border-radius: 12px; box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
 .chat-panel.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
-.chat-header { padding: 16px; border-bottom: 1px solid var(--chat-border); display: flex; justify-content: space-between; align-items: flex-start; background: linear-gradient(135deg, var(--chat-primary) 0%, #6d28d9 100%); color: white; border-radius: 12px 12px 0 0; }
+.chat-header { padding: 16px; border-bottom: 1px solid var(--chat-border); display: flex; justify-content: space-between; align-items: flex-start; background: var(--chat-primary); color: white; border-radius: 12px 12px 0 0; }
 .chat-header-title h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; }
 .chat-online-count { font-size: 12px; opacity: 0.9; }
 .chat-close-btn { background: rgba(255, 255, 255, 0.2); border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: background 0.2s; }
