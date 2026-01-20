@@ -181,8 +181,8 @@ class ChatFirebaseREST {
     
     try {
       const messagesRef = ref(this.db, `messages/${this.documentId}`);
-      // Limit to last 100 to prevent lagging
-      const q = query(messagesRef, orderByChild('timestamp'), limitToLast(100));
+      // Limit to last 500 to prevent lagging
+      const q = query(messagesRef, orderByChild('timestamp'), limitToLast(500));
       
       const snapshot = await get(q);
       if (!snapshot.exists()) return [];
@@ -212,7 +212,7 @@ class ChatFirebaseREST {
         const { ref, onValue, query, orderByChild, limitToLast } = this.sdk;
         const messagesRef = ref(this.db, `messages/${this.documentId}`);
         // Realtime Listener
-        const q = query(messagesRef, orderByChild('timestamp'), limitToLast(100));
+        const q = query(messagesRef, orderByChild('timestamp'), limitToLast(500));
 
         onValue(q, (snapshot) => {
             const messages = [];
@@ -671,11 +671,8 @@ class ChatUIManager {
       const replyIndicator = this.container.querySelector('.reply-indicator');
       if (replyIndicator) replyIndicator.remove();
       
-      setTimeout(async () => {
-        const messages = await this.chatFirebase.loadMessages();
-        this.saveToCache(messages);  // Запази в localStorage
-        this.renderMessages(messages);
-      }, 500);
+      // Realtime listener ще се погрижи за обновяването (startPolling)
+      // Премахнахме ръчното презареждане, за да избегнем race conditions
     }
   }
 
