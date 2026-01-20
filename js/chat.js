@@ -250,12 +250,19 @@ class ChatFirebaseREST {
     const connectedRef = ref(this.db, '.info/connected');
 
     try {
+        // По-добра детекция на устройство
+        const isMobile = window.innerWidth <= 768 || 
+                        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
+        console.log('Mobile detection:', isMobile, 'Window width:', window.innerWidth);
+
         onValue(connectedRef, (snap) => {
             if (snap.val() === true) {
                 const userData = {
                     userId: currentUser.userId,
                     userName: currentUser.userName,
                     color: currentUser.color,
+                    device: isMobile ? 'mobile' : 'desktop',
                     lastSeen: serverTimestamp(),
                     isActive: true
                 };
@@ -264,14 +271,20 @@ class ChatFirebaseREST {
             }
         });
 
-        // Heartbeat: Обновявай timestamp на всеки 60 сек, за да не те мислят за изчезнал
+        // Heartbeat: Обновявай timestamp на всеки 30 сек
         setInterval(() => {
              if (this.db) {
-                 update(userRef, { lastSeen: serverTimestamp() }).catch(e => console.error("Heartbeat error", e));
+                 const currentIsMobile = window.innerWidth <= 768 || 
+                               /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+                 
+                 update(userRef, { 
+                     lastSeen: serverTimestamp(),
+                     device: currentIsMobile ? 'mobile' : 'desktop'
+                 }).catch(e => console.error("Heartbeat error", e));
              }
         }, 30000);
 
-        console.log('✓ Потребител маркиран активен (SDK Presence + Heartbeat)');
+        console.log('✓ Потребител маркиран активен (SDK Presence + Heartbeat + Device)');
         return true;
     } catch (error) {
         console.error('Mark active error:', error);
@@ -556,15 +569,33 @@ class ChatUIManager {
     const usersList = document.getElementById('active-users-list');
     if (!usersList) return;
 
+    // Logging active users data for debugging
+    console.log('Mobile/Desktop Users Data:', data.users);
+
     const users = Object.values(data.users || {}).slice(0, 5);
     usersList.innerHTML = `
       <strong>Активни (${data.count}):</strong><br>
-      ${users.map(user => `
+      ${users.map(user => {
+          const isMob = user.device === 'mobile';
+          // Ensure SVG path starts with / to be absolute from root
+          const iconSrc = '/svg/mobile-phone-svgrepo-com.svg';
+          
+          // Debug logs per user
+          // console.log(`User: ${user.userName}, Device: ${user.device}, IsMobile: ${isMob}`);
+
+          const mobileIcon = isMob 
+            ? `<img src="${iconSrc}" alt="📱" style="width: 14px; height: 14px; margin-left: 4px; vertical-align: middle;" title="Mobile">` 
+            : '';
+            
+          return `
         <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
           <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${user.color};"></div>
-          <span style="font-size: 10px;">${user.userName}</span>
+          <span style="font-size: 10px; flex: 1; word-break: break-all; display: flex; align-items: center;" title="Device: ${user.device || 'unknown'}">
+            ${user.userName}
+            ${mobileIcon}
+          </span>
         </div>
-      `).join('')}
+      `}).join('')}
     `;
   }
 
@@ -935,14 +966,28 @@ HeaderOnHeaderOnlineCount(count) {
       return;
     }
 
+    // Debug
+    console.log('Mobile/Desktop Users Data (v2):', data.users);
+
     usersList.innerHTML = `
       <strong>Активни (${activeCount}):</strong><br>
-      ${users.filter(user => user && user.userName && user.color).map(user => `
+      ${users.filter(user => user && user.userName && user.color).map(user => {
+          const isMob = user.device === 'mobile';
+          // Using relative path instead of absolute to support file:// and subfolders
+          const iconSrc = 'svg/mobile-phone-svgrepo-com.svg';
+          const mobileIcon = isMob 
+            ? `<img src="${iconSrc}" alt="📱" style="width: 10px; height: 10px; margin-left: 4px; vertical-align: middle;" title="Mobile">` 
+            : '';
+            
+          return `
         <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
           <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${user.color};"></div>
-          <span style="font-size: 10px;">${user.userName}</span>
+          <span style="font-size: 10px; display: flex; align-items: center;" title="Device: ${user.device || 'unknown'}">
+            ${user.userName}
+            ${mobileIcon}
+          </span>
         </div>
-      `).join('')}
+      `}).join('')}
     `;
   }
 

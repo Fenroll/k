@@ -107,12 +107,45 @@ class ChatFirebaseREST {
   // Обнови активния потребител
   async markUserActive() {
     const userRef = `${this.baseURL}/active_users/${this.documentId}/${currentUser.userId}.json`;
+    const tabId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
     
+    // Helper за управление на табовете в localStorage
+    const updateLocalTabs = () => {
+      try {
+        const key = `chat_tabs_${currentUser.userId}`;
+        let tabs = JSON.parse(localStorage.getItem(key) || '[]');
+        // Изчисти старите табове (по-стари от 60 сек)
+        tabs = tabs.filter(t => t.ts > Date.now() - 60000);
+        
+        // Обнови или добави текущия таб
+        const existing = tabs.find(t => t.id === tabId);
+        if (existing) {
+          existing.ts = Date.now();
+        } else {
+          tabs.push({ id: tabId, ts: Date.now() });
+        }
+        localStorage.setItem(key, JSON.stringify(tabs));
+        return tabs.length;
+      } catch (e) {
+        console.error('Local storage error:', e);
+        return 1;
+      }
+    };
+
+    updateLocalTabs();
+
     try {
+      // По-добра детекция на устройство
+      const isMobile = window.innerWidth <= 768 || 
+                      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      console.log('Mobile detection:', isMobile, 'Window width:', window.innerWidth);
+
       const userData = {
         userId: currentUser.userId,
         userName: currentUser.userName,
         color: currentUser.color,
+        device: isMobile ? 'mobile' : 'desktop',
         lastSeen: Date.now(),
         isActive: true
       };
@@ -123,20 +156,47 @@ class ChatFirebaseREST {
         body: JSON.stringify(userData)
       });
 
-      console.log('✓ Потребител маркиран като активен');
+      console.log('✓ Потребител маркиран като активен (device: ' + userData.device + ')');
 
       // Периодично обнови
       setInterval(async () => {
+        updateLocalTabs(); // Обнови heartbeat на таба
+        
+        // Обновяваме и статуса на устройството периодично, в случай че се промени (напр. resize)
+        const currentIsMobile = window.innerWidth <= 768 || 
+                               /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        
         await fetch(userRef, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lastSeen: Date.now() })
+          body: JSON.stringify({ 
+            lastSeen: Date.now(),
+            device: currentIsMobile ? 'mobile' : 'desktop'
+          })
         });
       }, 30000);
 
       // Махни потребителя щом затвори таба
-      window.addEventListener('beforeunload', async () => {
-        await fetch(userRef, { method: 'DELETE' });
+      window.addEventListener('beforeunload', () => {
+        // Премахни текущия таб от localStorage
+        try {
+            const key = `chat_tabs_${currentUser.userId}`;
+            let tabs = JSON.parse(localStorage.getItem(key) || '[]');
+            tabs = tabs.filter(t => t.id !== tabId && t.ts > Date.now() - 60000);
+            localStorage.setItem(key, JSON.stringify(tabs));
+            
+            // Ако има други активни табове, НЕ трий потребителя от Firebase
+            if (tabs.length > 0) {
+                console.log('Other tabs active, skipping delete');
+                return;
+            }
+        } catch(e) {}
+
+        // Използваме fetch с keepalive за по-сигурно изпращане при затваряне
+        fetch(userRef, { 
+            method: 'DELETE',
+            keepalive: true
+        }).catch(e => console.error(e));
       });
 
       return true;
@@ -333,14 +393,22 @@ class ChatUIManagerREST {
     const usersList = Object.values(users).slice(0, 5);
     sidebarEl.innerHTML = `
       <div class="active-users-header">Активни сега:</div>
-      ${usersList.map(user => `
-        <div class="active-user" title="${user.userName}">
+      ${usersList.map(user => {
+        const isMob = user.device === 'mobile';
+        const deviceIcon = isMob ? '📱' : '💻';
+        return `
+        <div class="active-user" title="${user.userName} (${isMob ? 'Мобилен' : 'Desktop'})">
           <div class="active-user-badge" style="background-color: ${user.color}">
             ${user.userName.charAt(0)}
           </div>
-          <span>${user.userName}</span>
+          <span style="display: flex; flex-direction: column; line-height: 1.2;">
+            <span class="user-name">${user.userName}</span>
+            <span style="font-size: 0.75em; opacity: 0.7; display: flex; align-items: center; gap: 3px;">
+              ${deviceIcon} ${isMob ? 'Mobile' : 'PC'}
+            </span>
+          </span>
         </div>
-      `).join('')}
+      `}).join('')}
     `;
   }
 
