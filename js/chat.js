@@ -886,6 +886,20 @@ class ChatUIManager {
           return;
       }
 
+      // /admin claimcolor #hexcode
+      if (cmd.startsWith('claimcolor ')) {
+          const hexColor = cmd.substring(11).trim();
+          if (hexColor && /^#[0-9A-Fa-f]{6}$/.test(hexColor)) {
+              currentUser.color = hexColor;
+              localStorage.setItem('userColor', hexColor);
+              await this.chatFirebase.markUserActive();
+              alert(`✅ Цветът ви е сменен на: ${hexColor}`);
+          } else {
+              alert('Usage: /admin claimcolor #RRGGBB (например #FF5733)');
+          }
+          return;
+      }
+
       // /admin protect Name Password
       if (cmd.startsWith('protect ')) {
           const parts = cmd.substring(8).split(' ');
