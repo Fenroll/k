@@ -414,8 +414,64 @@ class ChatUIManager {
     this.init();
   }
 
+  fixInputLayout() {
+    const inputArea = this.container.querySelector('.chat-input-area');
+    if (!inputArea) return;
+
+    // 1. Inject CSS for Column Layout if not present
+    if (!document.getElementById('chat-layout-fix')) {
+        const style = document.createElement('style');
+        style.id = 'chat-layout-fix';
+        style.textContent = `
+            .chat-input-area {
+                display: flex !important;
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0 !important;
+            }
+            .chat-controls-row {
+                display: flex !important;
+                align-items: center !important;
+                width: 100% !important;
+                padding-top: 6px;
+                position: relative;
+            }
+            .reply-indicator {
+                width: 100%;
+                box-sizing: border-box;
+                margin-bottom: 4px;
+            }
+        `;
+        document.head.appendChild(style);
+    }
+
+    // 2. Restructure DOM: Move controls into a row if they aren't already
+    const inputField = inputArea.querySelector('.chat-input');
+    
+    // Only proceed if inputField is direct child of inputArea (meaning not wrapped yet)
+    if (inputField && inputField.parentElement === inputArea) {
+        const row = document.createElement('div');
+        row.className = 'chat-controls-row';
+        
+        // Find elements to move
+        const uploadInput = inputArea.querySelector('#image-upload-input');
+        const uploadBtn = inputArea.querySelector('#image-upload-btn');
+        const sendBtn = inputArea.querySelector('.chat-send-btn');
+        
+        // Move them to row
+        if (uploadInput) row.appendChild(uploadInput);
+        if (uploadBtn) row.appendChild(uploadBtn);
+        row.appendChild(inputField); // Input
+        if (sendBtn) row.appendChild(sendBtn);
+        
+        // Append row to inputArea
+        inputArea.appendChild(row);
+    }
+  }
+
   async init() {
     try {
+      this.fixInputLayout();
       // Маркирай потребител активен
       await this.chatFirebase.markUserActive();
 
@@ -834,10 +890,9 @@ class ChatUIManager {
     if (msg.replyTo && messagesMapObj[msg.replyTo]) {
       const originalMsg = messagesMapObj[msg.replyTo];
       replyHTML = `
-        <div style="background: #e8f5e9; border-left: 3px solid #4ade80; padding: 8px; margin-bottom: 8px; font-size: 11px; border-radius: 3px; max-width: 100%; overflow: hidden;">
-          <div style="color: #666; font-weight: bold; margin-bottom: 4px;">Отговор на ${this.escapeHtml(msg.replyAuthor)}</div>
-          <div style="color: #999; padding: 6px; background: white; border-radius: 3px; max-height: 40px; overflow: hidden; word-wrap: break-word; word-break: break-word;">"${this.linkifyText(originalMsg.text)}"</div>
-        </div>
+         <div style="background: #f1f5f9; border-left: 3px solid #cbd5e1; padding: 4px 8px; margin-bottom: 4px; font-size: 11px; border-radius: 4px; opacity: 0.8;">
+           <b>${this.escapeHtml(msg.replyAuthor || 'Someone')}:</b> ${this.linkifyText(originalMsg.text.substring(0, 50))}...
+         </div>
       `;
     }
 
@@ -1201,27 +1256,26 @@ HeaderOnHeaderOnlineCount(count) {
       
       // Добавяй визуална индикация
       const inputArea = this.container.querySelector('.chat-input-area');
+      // Ensure layout is fixed before adding indicator
+      this.fixInputLayout();
+      
       let replyIndicator = inputArea.querySelector('.reply-indicator');
       
       if (!replyIndicator) {
         replyIndicator = document.createElement('div');
         replyIndicator.className = 'reply-indicator';
-        inputArea.insertBefore(replyIndicator, input);
+        inputArea.prepend(replyIndicator);
       }
 
       replyIndicator.style.cssText = `
-        background: #f0f0f0;
-        border-left: 3px solid #4ade80;
-        padding: 8px;
-        margin-bottom: 8px;
-        border-radius: 4px;
-        font-size: 12px;
+        background: #f1f5f9; border-left: 3px solid #3b82f6;
+        padding: 8px; margin-bottom: 8px; border-radius: 4px;
+        font-size: 12px; display: flex; justify-content: space-between; align-items: center;
       `;
 
       replyIndicator.innerHTML = `
-        <div style="color: #666; margin-bottom: 4px; font-weight: bold;">Отговор на ${this.escapeHtml(author)}</div>
-        <div style="color: #999; margin-bottom: 6px; padding: 6px; background: white; border-radius: 3px; max-height: 50px; overflow: hidden; word-wrap: break-word; word-break: break-word;">"${this.escapeHtml(text)}"</div>
-        <button onclick="this.closest('.reply-indicator').remove(); this.previousElementSibling.dataset.replyTo = '';" style="background: #999; color: white; border: none; border-radius: 3px; padding: 2px 6px; cursor: pointer; font-size: 11px;">Отмяна</button>
+        <span>Отговаряш на <b>${this.escapeHtml(author)}</b></span>
+        <button onclick="const input = this.closest('.chat-input-area').querySelector('.chat-input'); if(input) { input.dataset.replyTo=''; input.dataset.replyAuthor=''; } this.closest('.reply-indicator').remove();" style="border:none;background:none;cursor:pointer;font-size:14px;color:#64748b;">✖</button>
       `;
 
       input.focus();

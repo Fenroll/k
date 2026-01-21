@@ -169,6 +169,9 @@
     <button id="fontSizeBtn" class="btn" title="Change Font Size">
       <img src="svg/vscode-codicon_text-size.svg" alt="Change Font Size" width="20" height="20">
     </button>
+    <button id="notes-toggle-btn" class="btn" title="Бележки">
+      <img src="svg/note.svg" alt="Бележки" width="20" height="20">
+    </button>
   </header>
   <main>
     <div id="content" class="markdown-body">Зареждане…</div>
@@ -912,7 +915,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
 
   <!-- Chat System Scripts -->
-  <script src="js/chat.js?v=18"></script>
+  <script src="js/chat.js?v=19"></script>
 
   <!-- Chat Widget HTML -->
   <div id="chat-widget" class="chat-widget">
@@ -955,7 +958,7 @@
   </div>
 
   <!-- Notes Widget HTML -->
-  <div id="notes-widget" class="notes-widget">
+  <!-- <div id="notes-widget" class="notes-widget">
     <div class="notes-panel">
       <div class="notes-header">
         <div class="notes-header-title">
@@ -977,7 +980,7 @@
         </button>
       </div>
     </div>
-  </div>
+  </div> -->
 
   <style>
     /* Notes Widget Styles */
@@ -1014,7 +1017,7 @@
   <script src="js/chat-init.js?v=2"></script>
 
   <!-- Notes Initialization -->
-  <script src="js/notes-init.js?v=1"></script>
+  <script src="js/notes-init.js?v=3"></script>
 
   <style>
   #chat-widget { --chat-primary: #5d4037; --chat-secondary: #efebe9; --chat-border: #bcaaa4; --chat-text: #2c1810; --chat-text-light: #6d4c41; }
