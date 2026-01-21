@@ -819,6 +819,13 @@ class ChatUIManager {
     const users = Object.values(groupedUsers);
     const count = Object.keys(groupedUsers).length;
 
+    // Sort: current user first, then alphabetically
+    users.sort((a, b) => {
+      if (a.isMe) return -1;
+      if (b.isMe) return 1;
+      return a.userName.localeCompare(b.userName);
+    });
+
     usersList.innerHTML = `
       <strong>Активни (${count}):</strong><br>
       ${users.map(user => {
