@@ -245,7 +245,7 @@ class NotesUIManager {
         </div>
         
         <div class="notes-input-area">
-             <input type="text" class="notes-input" placeholder="Напиши бележка..." />
+             <textarea class="notes-input" placeholder="Напиши бележка..." rows="1"></textarea>
              <button class="notes-send-btn">➤</button>
         </div>
     `;
@@ -320,6 +320,8 @@ class NotesUIManager {
             border-radius: 20px;
             outline: none;
             font-size: 14px;
+            resize: none;
+            overflow: hidden;
         }
         .notes-input:focus { border-color: #3b82f6; }
         .notes-send-btn {
@@ -390,7 +392,7 @@ class NotesUIManager {
     inputArea.innerHTML = `
         <div id="notes-reply-preview"></div>
         <div style="display:flex; width:100%; position:relative; gap: 12px;">
-             <input type="text" class="notes-input" placeholder="Напиши бележка..." />
+             <textarea class="notes-input" placeholder="Напиши бележка..." rows="1"></textarea>
              <button class="notes-send-btn">➤</button>
         </div>
     `;
@@ -408,14 +410,24 @@ class NotesUIManager {
         this.db.sendMessage(text, replyTo, replyAuthor).then(success => {
             if(success) {
                 input.value = '';
+                input.style.height = 'auto';
                 this.cancelReply();
             }
         });
     };
     
     sendBtn.addEventListener('click', sendMessage);
-    input.addEventListener('keypress', (e) => {
-        if(e.key === 'Enter') sendMessage();
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+    
+    // Auto-resize textarea
+    input.addEventListener('input', () => {
+        input.style.height = 'auto';
+        input.style.height = (input.scrollHeight) + 'px';
     });
   }
 
@@ -637,8 +649,10 @@ class NotesUIManager {
   }
   
   linkify(text) {
-      // Basic linkify
-      return this.escapeHtml(text).replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:#0ea5e9">$1</a>');
+      // Basic linkify with line break preservation
+      const escaped = this.escapeHtml(text);
+      const withBreaks = escaped.replace(/\n/g, '<br>');
+      return withBreaks.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:#0ea5e9">$1</a>');
   }
 }
 
