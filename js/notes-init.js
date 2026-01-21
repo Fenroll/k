@@ -654,8 +654,17 @@ class NotesUIManager {
         // From md-viewer path
         const pathParam = urlParams.get('path');
         if (pathParam) {
-          const filename = pathParam.split('/').pop().replace(/\.[^.]+$/, '');
-          return 'doc_' + filename.toLowerCase();
+          // Use full path to avoid collisions defined by folder structure
+          let path = decodeURIComponent(pathParam);
+          
+          // Remove 'files/' prefix for cleaner ID
+          path = path.replace(/^files\//, '');
+          
+          // Replace invalid Firebase characters: . # $ [ ] and /
+          // Creating a flat ID like: doc_Folder_Subfolder_Filename_md
+          path = path.replace(/[.#$[\]/]/g, '_');
+          
+          return 'doc_' + path;
         }
         
         const docIdFromUrl = urlParams.get('docId') || urlParams.get('doc');
