@@ -407,6 +407,17 @@ function main() {
   // Get regular courses
   const courses = getAllCourses();
   
+  // Load event info from INFO.md - try to read it directly
+  let eventInfo = '';
+  const eventInfoPath = path.join(ELEMENTS_DIR, 'Актуални събития Event center', 'INFO.md');
+  try {
+    eventInfo = fs.readFileSync(eventInfoPath, 'utf8');
+    console.log('✓ Loaded event info from:', eventInfoPath);
+    console.log('  Event info length:', eventInfo.length, 'characters');
+  } catch (error) {
+    console.log('ℹ Event info file not found or could not be read');
+  }
+  
   // Generate build timestamp
   const buildDate = new Date();
 const dateParts = new Intl.DateTimeFormat('bg-BG', {
@@ -426,6 +437,7 @@ const time = buildDate.toLocaleString('bg-BG', {
   const buildTimestamp = `${date} ${time}`;;
   
   const js = 'const courses = ' + JSON.stringify(courses, null, 2) + ';\n' +
+             'const eventInfo = ' + JSON.stringify(eventInfo) + ';\n' +
              'const buildTimestamp = "' + buildTimestamp + '";\n';
   fs.writeFileSync(OUTPUT_FILE, js, 'utf8');
   console.log('Generated courses:', OUTPUT_FILE);
