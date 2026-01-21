@@ -88,6 +88,12 @@
     header button#editBtn.visible {
       display: inline-flex !important;
     }
+    
+    /* Navigation buttons visible on all devices, pushed to the right */
+    header button#prevH1Btn {
+      margin-left: auto;
+    }
+
     header a.btn:hover { background: #e0e7ff; color: var(--link-hover); }
     main { max-width: 1700px; margin: 0 auto; padding: 3px 3px; flex: 1; width: 100%; margin-top: 25px; }
     
@@ -155,7 +161,7 @@
   <header>
     <h1 id="docTitle">Преглед на документ</h1>
     <a class="btn" href="#" onclick="if (window.opener) { window.close(); } else if (document.referrer) { history.back(); } else { window.close(); } return false;" title="Назад">
-      <img src="svg/material-symbols_outlined_arrow_back.svg" alt="Назад" width="20" height="20">
+      <img src="svg/close-line-svgrepo-com.svg" alt="Назад" width="25" height="25">
     </a>
     <a id="downloadLink" class="btn" href="#" download title="Изтегли">
       <img src="svg/vscode-codicon_text-size.svg" alt="Изтегли" width="20" height="20">
@@ -171,6 +177,12 @@
     </button>
     <button id="notes-toggle-btn" class="btn" title="Бележки">
       <img src="svg/note.svg" alt="Бележки" width="20" height="20">
+    </button>
+    <button id="prevH1Btn" class="btn" title="Предишно заглавие">
+      <img src="svg/arrow-sm-left-svgrepo-com.svg" alt="Предишно" width="20" height="20">
+    </button>
+    <button id="nextH1Btn" class="btn" title="Следващо заглавие">
+      <img src="svg/arrow-sm-right-svgrepo-com.svg" alt="Следващо" width="20" height="20">
     </button>
   </header>
   <main>
@@ -1064,6 +1076,44 @@
         return 0;
       }
       
+      // Button Handlers for Mobile
+      const prevH1Btn = document.getElementById('prevH1Btn');
+      const nextH1Btn = document.getElementById('nextH1Btn');
+
+      if (prevH1Btn) {
+        prevH1Btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          // Update list if needed (in case content changed)
+          if (h1Elements.length === 0) {
+            updateH1List();
+          }
+          if (h1Elements.length === 0) return;
+
+          if (currentH1Index === -1) {
+            currentH1Index = findCurrentH1();
+          }
+          const prevIndex = Math.max(currentH1Index - 1, 0);
+          scrollToH1(prevIndex);
+        });
+      }
+
+      if (nextH1Btn) {
+        nextH1Btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          // Update list if needed (in case content changed)
+          if (h1Elements.length === 0) {
+            updateH1List();
+          }
+          if (h1Elements.length === 0) return;
+
+          if (currentH1Index === -1) {
+            currentH1Index = findCurrentH1();
+          }
+          const nextIndex = Math.min(currentH1Index + 1, h1Elements.length - 1);
+          scrollToH1(nextIndex);
+        });
+      }
+
       // Listen for arrow key presses
       document.addEventListener('keydown', (e) => {
         // Ignore if user is typing in an input field
