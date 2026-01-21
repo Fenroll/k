@@ -4732,8 +4732,12 @@ renderMathInElement(document.body, {
           let tableIterations = 0;
           while (i < lines.length && lines[i].includes('|') && tableIterations < 1000) {
             tableIterations++;
-            const cells = lines[i].split('|').map(c => c.trim()).filter(c => c && !c.match(/^:?-+:?$/));
-            if (cells.length > 0) {
+            const cells = lines[i].split('|').map(c => c.trim()).filter(c => c !== '');
+            
+            // Skip header separator lines (lines where ALL cells are dashes/colons)
+            const isHeaderSeparator = cells.length > 0 && cells.every(c => /^:?-+:?$/.test(c));
+            
+            if (cells.length > 0 && !isHeaderSeparator) {
               tableHtml += '<tr>';
               cells.forEach(cell => {
                 tableHtml += '<td>' + applyInlineFormatting(cell) + '</td>';
@@ -5852,7 +5856,7 @@ renderMathInElement(document.body, {
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
 
   <!-- Chat System Scripts -->
-  <script src="js/chat.js?v=19"></script>
+  <script src="js/chat.js?v=20"></script>
 
   <!-- Chat Widget HTML -->
   <div id="chat-widget" class="chat-widget">
@@ -5932,11 +5936,11 @@ renderMathInElement(document.body, {
   .active-user:hover { background: var(--chat-secondary); }
   .active-user-badge { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 11px; flex-shrink: 0; }
   .active-user span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
-  .chat-input-area { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--chat-border); background: #fafafa; }
-  .chat-input { flex: 1; border: 1px solid var(--chat-border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; transition: all 0.2s; resize: none; }
+  .chat-input-area { display: flex; gap: 12px; padding: 12px; border-top: 1px solid var(--chat-border); background: #fafafa; }
+  .chat-input { flex: 0.98; border: 1px solid var(--chat-border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; transition: all 0.2s; resize: none; }
   .chat-input:focus { border-color: var(--chat-primary); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
   .chat-send-btn { width: 36px; height: 36px; border: none; background: var(--chat-primary); color: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
-  .chat-send-btn:hover { background: #6d28d9; transform: scale(1.05); }
+  .chat-send-btn:hover { transform: scale(1.05); }
   .chat-send-btn:active { transform: scale(0.95); }
   .chat-user-info { padding: 8px 12px; font-size: 11px; color: var(--chat-text-light); border-top: 1px solid var(--chat-border); background: #fafafa; border-radius: 0 0 12px 12px; }
   #current-user-name { color: var(--chat-primary); font-weight: 600; }

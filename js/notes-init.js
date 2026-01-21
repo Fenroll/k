@@ -389,7 +389,7 @@ class NotesUIManager {
     const inputArea = this.container.querySelector('.notes-input-area');
     inputArea.innerHTML = `
         <div id="notes-reply-preview"></div>
-        <div style="display:flex; width:100%; position:relative;">
+        <div style="display:flex; width:100%; position:relative; gap: 12px;">
              <input type="text" class="notes-input" placeholder="Напиши бележка..." />
              <button class="notes-send-btn">➤</button>
         </div>

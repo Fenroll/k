@@ -435,6 +435,7 @@ class ChatUIManager {
                 width: 100% !important;
                 padding-top: 6px;
                 position: relative;
+                gap: 12px !important;
             }
             .reply-indicator {
                 width: 100%;
