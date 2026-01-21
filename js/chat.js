@@ -995,6 +995,10 @@ class ChatUIManager {
       input.value = '';
       input.dataset.replyTo = '';
       input.dataset.replyAuthor = '';
+      
+      // Reset textarea height after sending
+      input.style.height = 'auto';
+      
       input.focus();
       
       // Премахни reply indicator
@@ -1528,8 +1532,11 @@ HeaderOnHeaderOnlineCount(count) {
   linkifyText(text) {
     // Разпознаи URL-и и преобразувай ги в линкове
     const escaped = this.escapeHtml(text);
+    // Първо замени новите редове с <br>
+    const withBreaks = escaped.replace(/\n/g, '<br>');
+    // След това добави линковете
     const urlRegex = /(https?:\/\/[^\s<>\[\]{}|\\^`"]*)/g;
-    return escaped.replace(urlRegex, (url) => {
+    return withBreaks.replace(urlRegex, (url) => {
       return `<a href="${url}" target="_blank" style="color: #4ade80; text-decoration: underline; cursor: pointer;">${url}</a>`;
     });
   }
