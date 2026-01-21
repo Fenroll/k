@@ -204,6 +204,62 @@ class ChatFirebaseREST {
     }
   }
 
+  async bulkUpdate(updates) {
+    await this._ensureInit();
+    const { ref, update } = this.sdk;
+    try {
+        await update(ref(this.db), updates);
+        return true;
+    } catch (error) {
+        console.error('SDK Bulk Update error:', error);
+        return false;
+    }
+  }
+
+  async updateNameMapping(oldName, newName) {
+    await this._ensureInit();
+    const { ref, set } = this.sdk;
+    const mappingRef = ref(this.db, `name_mappings/${oldName}`);
+    try {
+        await set(mappingRef, newName);
+        return true;
+    } catch (error) {
+        console.error('SDK updateNameMapping error:', error);
+        return false;
+    }
+  }
+
+  async getNameMappings() {
+    await this._ensureInit();
+    const { ref, get } = this.sdk;
+    try {
+        const snapshot = await get(ref(this.db, `name_mappings`));
+        return snapshot.exists() ? snapshot.val() : {};
+    } catch(e) { return {}; }
+  }
+
+  async getProtectedNames() {
+    await this._ensureInit();
+    const { ref, get } = this.sdk;
+    try {
+        const snapshot = await get(ref(this.db, `protected_names`));
+        return snapshot.exists() ? snapshot.val() : {};
+    } catch(e) { return {}; }
+  }
+
+  async protectName(name, password) {
+    await this._ensureInit();
+    const { ref, set } = this.sdk;
+    const protectedNameRef = ref(this.db, `protected_names/${name}`);
+    try {
+        await set(protectedNameRef, password); // In a real app, hash the password
+        return true;
+    } catch (error) {
+        console.error('SDK protectName error:', error);
+        return false;
+    }
+  }
+
   startPolling(callback, interval = 2000) {
     if (this.isPolling) return;
     this.isPolling = true;
@@ -478,6 +534,7 @@ class ChatUIManager {
     this.notificationsDisabled = localStorage.getItem(`notificationsDisabled_${documentId}`) !== 'false';
     this.unreadCount = 0;
     this.lastMessages = [];  // Съхранявам предишни съобщения
+    this.userNameMappings = {}; // Карта за стари към нови имена
 
     this.init();
   }
@@ -549,6 +606,11 @@ class ChatUIManager {
       if (!messages || messages.length === 0) {
         messages = await this.chatFirebase.loadMessages();
       }
+      
+      // Зареди мапинги на имена
+      this.userNameMappings = await this.chatFirebase.getNameMappings();
+      this.protectedNames = await this.chatFirebase.getProtectedNames();
+      
       this.saveToCache(messages);
       this.renderMessages(messages);
 
@@ -617,15 +679,24 @@ class ChatUIManager {
 
   attachEventListeners() {
     const sendBtn = this.container.querySelector('.chat-send-btn');
-    const input = this.container.querySelector('.chat-input');
+    const input = this.container.querySelector('.chat-input'); // This is now a textarea
 
     if (sendBtn && input) {
       sendBtn.addEventListener('click', () => this.handleSendMessage());
-      input.addEventListener('keypress', (e) => {
+      
+      // Handle Enter (Send) vs Shift+Enter (New Line)
+      input.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
           this.handleSendMessage();
         }
+      });
+      
+      // Auto-resize textarea
+      input.addEventListener('input', () => {
+         input.style.height = 'auto';
+         input.style.height = (input.scrollHeight) + 'px';
+         // Cap max height if needed via CSS max-height
       });
     }
 
@@ -711,27 +782,56 @@ class ChatUIManager {
         }
     }
 
-    const users = Object.values(allUsers);
-    const count = Object.keys(allUsers).length;
+    // --- НОВА ЛОГИКА ЗА ГРУПИРАНЕ ---
+    const groupedUsers = {};
+    const myId = (typeof currentUser !== 'undefined' && currentUser.userId) ? String(currentUser.userId) : null;
+
+    Object.values(allUsers).forEach(user => {
+        let name = user.userName;
+        // Resolve mapping if available
+        if (this.userNameMappings && this.userNameMappings[name]) {
+            name = this.userNameMappings[name];
+        }
+        
+        // Normalize name (trim spaces) to ensure identical names group together
+        const finalName = name ? name.toString().trim() : 'Anonymous';
+        
+        if (!groupedUsers[finalName]) {
+            groupedUsers[finalName] = {
+                ...user,
+                userName: finalName,
+                isMe: false,
+                hasMobile: false
+            };
+        }
+        
+        // Check if *this* instance of the user is Me
+        if (String(user.userId) === myId) {
+            groupedUsers[finalName].isMe = true;
+        }
+        
+        // Check for mobile
+        if (user.device === 'mobile') {
+             groupedUsers[finalName].hasMobile = true;
+        }
+    });
+
+    const users = Object.values(groupedUsers);
+    const count = Object.keys(groupedUsers).length;
 
     usersList.innerHTML = `
       <strong>Активни (${count}):</strong><br>
       ${users.map(user => {
-          const currentId = (typeof currentUser !== 'undefined' && currentUser.userId) ? String(currentUser.userId) : '';
-          const userId = user.userId ? String(user.userId) : '';
-          const isMe = currentId && userId && (userId === currentId);
+          const isMe = user.isMe;
           
-          const isMob = user.device === 'mobile';
-          const iconSrc = '/svg/mobile-phone-svgrepo-com.svg';
-          
-          const mobileIcon = isMob 
-            ? `<img src="${iconSrc}" alt="📱" style="width: 14px; height: 14px; margin-left: 4px; vertical-align: middle;" title="Mobile">` 
+          const mobileIcon = user.hasMobile
+            ? `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="margin-left: 4px; vertical-align: middle;" title="Mobile device"> <path d="M11.5,0h-7C3.675,0,3,0.675,3,1.5v13C3,15.325,3.675,16,4.5,16h7c0.825,0,1.5-0.675,1.5-1.5v-13C13,0.675,12.325,0,11.5,0z M8,15c-0.553,0-1-0.447-1-1s0.447-1,1-1s1,0.447,1,1S8.553,15,8,15z M12,12H4V2h8V12z" /> </svg>`
             : '';
             
           return `
         <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
           <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${user.color};"></div>
-          <span style="font-size: 10px; flex: 1; word-break: break-all; display: flex; align-items: center; ${isMe ? 'font-weight: bold; color: var(--fg);' : ''}" title="Device: ${user.device || 'unknown'}">
+          <span style="font-size: 10px; flex: 1; word-break: break-all; display: flex; align-items: center; ${isMe ? 'font-weight: bold; color: var(--fg);' : ''}">
             ${user.userName} ${isMe ? ' (Аз)' : ''}
             ${mobileIcon}
           </span>
@@ -772,17 +872,48 @@ class ChatUIManager {
       if (cmd.startsWith('claimname ')) {
           const newName = cmd.substring(10).trim();
           if (newName) {
-              this.claimName(newName);
+              await this.claimName(newName);
           } else {
               alert('Usage: /admin claimname New Name');
           }
           return;
       }
+
+      // /admin protect Name Password
+      if (cmd.startsWith('protect ')) {
+          const parts = cmd.substring(8).split(' ');
+          if (parts.length >= 2) {
+              const name = parts[0].trim();
+              const password = parts.slice(1).join(' ').trim();
+              await this.chatFirebase.protectName(name, password);
+              alert(`Името "${name}" е защитено.`);
+              // Refresh protected names
+              this.protectedNames = await this.chatFirebase.getProtectedNames();
+          } else {
+              alert('Usage: /admin protect Name Password');
+          }
+          return;
+      }
   }
 
-  claimName(newName) {
+  async claimName(newName) {
       if (!newName) return;
+
+      // Check if the name is protected
+      if (this.protectedNames && this.protectedNames[newName]) {
+          const password = prompt(`Името "${newName}" е защитено. Моля, въведете парола:`);
+          if (password !== this.protectedNames[newName]) {
+              alert('Грешна парола.');
+              return;
+          }
+      }
       
+      const oldName = currentUser.userName;
+
+      // Update name mapping in Firebase
+      await this.chatFirebase.updateNameMapping(oldName, newName);
+      this.userNameMappings[oldName] = newName;
+
       // Update global user object
       currentUser.userName = newName;
       
@@ -802,21 +933,36 @@ class ChatUIManager {
   }
 
   async adminRenameUser(oldName, newName) {
-      if (!confirm(`Rename all messages from "${oldName}" to "${newName}"?`)) return;
+      if (!confirm(`Сигурни ли сте, че искате да преименувате всички съобщения от "${oldName}" на "${newName}"?`)) return;
 
+      // 1. Запази мапинга в базата данни
+      await this.chatFirebase.updateNameMapping(oldName, newName);
+
+      // 2. Ъпдейтни съобщенията
       const messages = this.chatFirebase.messages;
       let count = 0;
       
-      // Update each message found locally (but perform update on server)
-      // Ideally we should query server, but iterating local is decent approximation for now
+      const updates = {};
       for (const msg of messages) {
           if (msg.userName === oldName) {
-              await this.chatFirebase.updateMessage(msg.key, { userName: newName });
+              updates[`messages/${this.documentId}/${msg.key}/userName`] = newName;
               count++;
           }
       }
       
-      alert(`Renamed ${count} messages.`);
+      if (count > 0) {
+        await this.chatFirebase.bulkUpdate(updates);
+      }
+      
+      // 3. Обнови локалния кеш за имена
+      this.userNameMappings[oldName] = newName;
+      
+      // 4. Провери дали текущият потребител е преименуван
+      if (currentUser.userName === oldName) {
+          this.claimName(newName);
+      }
+
+      alert(`Преименувани са ${count} съобщения. Моля, презаредете страницата, за да видите всички промени.`);
   }
 
   async handleSendMessage() {
@@ -986,14 +1132,16 @@ class ChatUIManager {
       `;
     }
 
-    const isCurrentUser = msg.userId === currentUser.userId || msg.userName === currentUser.userName;
-    const messageBgColor = msg.userId === currentUser.userId ? '#e0f2fe' : 'var(--chat-secondary)';
+    const resolvedName = this.userNameMappings[msg.userName] || msg.userName;
+
+    const isCurrentUser = msg.userId === currentUser.userId || resolvedName === currentUser.userName;
+    const messageBgColor = isCurrentUser ? '#e0f2fe' : 'var(--chat-secondary)';
 
     const htmlString = `
       <div class="chat-message" data-user-id="${msg.userId}" data-message-id="${msg.id}" data-message-key="${msg.key}" style="position: relative;">
         <div class="message-content">
           <div class="message-header">
-            <span class="message-author">${this.escapeHtml(msg.userName)}</span>
+            <span class="message-author">${this.escapeHtml(resolvedName)}</span>
             <span class="message-time">${this.formatTime(msg.timestamp)}</span>
           </div>
           ${replyHTML}
@@ -1098,43 +1246,8 @@ HeaderOnHeaderOnlineCount(count) {
     }
   }
 
-  updateNotificationButton(data) {
-    // Обнови активни потребители в списъка (без да презаписваш бутона)
-    const usersList = document.getElementById('active-users-list');
-    if (!usersList) return;
+  // updateNotificationButton removed (duplicate logic)
 
-    const users = Object.values(data.users || {}).slice(0, 5);
-    const activeCount = data.count || users.length || 0;
-    
-    if (users.length === 0) {
-      usersList.innerHTML = '';
-      return;
-    }
-
-    // Debug
-    console.log('Mobile/Desktop Users Data (v2):', data.users);
-
-    usersList.innerHTML = `
-      <strong>Активни (${activeCount}):</strong><br>
-      ${users.filter(user => user && user.userName && user.color).map(user => {
-          const isMob = user.device === 'mobile';
-          // Using relative path instead of absolute to support file:// and subfolders
-          const iconSrc = 'svg/mobile-phone-svgrepo-com.svg';
-          const mobileIcon = isMob 
-            ? `<img src="${iconSrc}" alt="📱" style="width: 10px; height: 10px; margin-left: 4px; vertical-align: middle;" title="Mobile">` 
-            : '';
-            
-          return `
-        <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
-          <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${user.color};"></div>
-          <span style="font-size: 10px; display: flex; align-items: center;" title="Device: ${user.device || 'unknown'}">
-            ${user.userName}
-            ${mobileIcon}
-          </span>
-        </div>
-      `}).join('')}
-    `;
-  }
 
   updateActiveSidebar(users) {
     const sidebarEl = this.container.querySelector('.chat-active-users');

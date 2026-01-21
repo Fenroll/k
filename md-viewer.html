@@ -931,7 +931,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
 
   <!-- Chat System Scripts -->
-  <script src="js/chat.js?v=21"></script>
+  <script src="js/chat.js?v=22"></script>
 
   <!-- Chat Widget HTML -->
   <div id="chat-widget" class="chat-widget">
@@ -959,7 +959,12 @@
       </div>
 
       <div class="chat-input-area">
-        <input type="text" class="chat-input" placeholder="Напиши съобщение..." maxlength="500" />
+        <textarea
+          class="chat-input"
+          placeholder="Напиши съобщение..."
+          rows="1"
+          maxlength="500"
+        ></textarea>
         <button class="chat-send-btn" title="Изпрати">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
             <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16151496 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.4429026 C0.994623095,2.08 0.837654326,3.0226 1.15159189,3.97788954 L3.03521743,10.4188814 C3.03521743,10.5759788 3.34915502,10.7330762 3.50612381,10.7330762 L16.6915026,11.5185631 C16.6915026,11.5185631 17.1624089,11.5185631 17.1624089,12.0598639 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"></path>
@@ -967,9 +972,7 @@
         </button>
       </div>
 
-      <div class="chat-user-info">
-        Известен като: <strong id="current-user-name"></strong>
-      </div>
+      <!-- User info removed -->
     </div>
   </div>
 
@@ -1221,7 +1224,7 @@
   .active-user-badge { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 11px; flex-shrink: 0; }
   .active-user span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
   .chat-input-area { display: flex; gap: 12px; padding: 12px; border-top: 1px solid var(--chat-border); background: #fafafa; }
-  .chat-input { flex: 0.98; border: 1px solid var(--chat-border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; transition: all 0.2s; resize: none; }
+  .chat-input { flex: 0.98; border: 1px solid var(--chat-border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; transition: all 0.2s; resize: none; overflow: hidden; }
   .chat-input:focus { border-color: var(--chat-primary); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
   .chat-send-btn { width: 36px; height: 36px; border: none; background: var(--chat-primary); color: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
   .chat-send-btn:hover { transform: scale(1.05); }
