@@ -10,7 +10,6 @@ const ELEMENTS_DIR = path.join(__dirname, 'files');
 const OUTPUT_FILE = path.join(__dirname, 'courses.generated.js');
 const ID_MAPPING_FILE = path.join(__dirname, 'course-ids.json');
 const NAME_MAPPING_FILE = path.join(__dirname, 'folder-name-mappings.json');
-const RECENT_CHANGES_FILE = path.join(__dirname, 'recent-changes.json');
 const FILES_INDEX_FILE = path.join(__dirname, 'files-index.json');
 
 function padId(num) {
@@ -64,214 +63,6 @@ function getAllFiles(dirPath, arrayOfFiles = []) {
   });
 
   return arrayOfFiles;
-}
-
-// Функция за генериране на HTML таблица със последните променени файлове
-function generateRecentFilesHtml() {
-  try {
-    const allFiles = getAllFiles(ELEMENTS_DIR);
-    console.log('Total files found:', allFiles.length);
-    
-    // Филтрирам само HTML файлове в files/ папката
-    const htmlFiles = allFiles.filter(file => file.endsWith('.html'));
-    console.log('HTML files found:', htmlFiles.length);
-
-    // Взимам metadata за всеки файл
-    const filesWithStats = htmlFiles.map(file => {
-      const stats = fs.statSync(file);
-      const relativePath = path.relative(ELEMENTS_DIR, file);
-      const parts = relativePath.split(path.sep);
-      const courseName = parts[0];
-      
-      return {
-        path: relativePath,
-        modified: stats.mtime,
-        size: stats.size,
-        courseName: courseName,
-        isArchived: courseName.startsWith('[АРХИВ]')
-      };
-    });
-
-    // Сортирам по време на модификация (най-новите първо)
-    filesWithStats.sort((a, b) => b.modified - a.modified);
-    console.log('Files sorted by modification time');
-
-    // Правя карта на текущите файлове за индекс (само справка)
-    const currentFilesList = {};
-    allFiles.forEach(file => {
-      if (!file.endsWith('.url')) {
-        const relativePath = path.relative(ELEMENTS_DIR, file).replace(/\\/g, '/');
-        currentFilesList[relativePath] = true;
-      }
-    });
-
-    // Запазвам текущия индекс (само за справка)
-    fs.writeFileSync(FILES_INDEX_FILE, JSON.stringify(currentFilesList, null, 2), 'utf-8');
-
-    // Зареждам folder-name-mappings за правилните имена
-    const nameMappings = loadNameMappings();
-
-    // Групирам файловете по курс (предмет)
-    const courseGroups = {};
-    filesWithStats.forEach(file => {
-      if (!courseGroups[file.courseName]) {
-        courseGroups[file.courseName] = [];
-      }
-      courseGroups[file.courseName].push(file);
-    });
-
-    console.log('Recent unique files:', Object.keys(courseGroups).length, 'courses');
-
-    // ГЕНЕРИРАМ HTML ЗА ПОСЛЕДНИ ПРОМЕНИ - МИНИМАЛЕН ФОРМАТ
-    // Cache-busting с уникален timestamp
-    const timestamp = Date.now();
-    const randomId = Math.random().toString(36).substr(2, 9);
-    const uniqueVersion = `${timestamp}-${randomId}`;
-    let html = `<div style="margin: 20px 0;" data-version="${uniqueVersion}">\n\n`;
-    
-    // ТАБЛИЦА 1: ПОСЛЕДНИТЕ 5 ПРОМЕНЕНИ HTML ФАЙЛОВЕ (всички типове промени)
-    html += '<h3>⭐ Последни 5 променени файлове:</h3>\n';
-    
-    // Дата на последна актуализация
-    const now = new Date();
-    const updateDate = now.toLocaleString('bg-BG');
-    html += `<p style="margin-top: 20px; color: #666; font-size: 0.9em;">📅 Последна актуализация: ${updateDate}</p>\n\n</div>`;
-
-    return html;
-  } catch (error) {
-    console.warn('Warning: Could not generate recent files HTML:', error.message);
-    return '<p style="color: red;">⚠️ Грешка при генериране на таблица</p>';
-  }
-}
-
-// Функция за обновяване на INFO.md със генерираната таблица
-function updateInfoMdWithRecentFiles() {
-  try {
-    const infofMdPath = path.join(__dirname, 'files', 'Актуални събития Event center', 'INFO.md');
-    
-    if (!fs.existsSync(infofMdPath)) {
-      console.warn('Warning: INFO.md not found at', infofMdPath);
-      return;
-    }
-
-    let content = fs.readFileSync(infofMdPath, 'utf-8');
-    
-    // Генерирам HTML за таблицата
-    const tableHtml = generateRecentFilesHtml();
-    
-    // Намирам маркерите за вмъкване
-    const startMarker = '<!-- AUTO_GENERATED_TABLE_START -->';
-    const endMarker = '<!-- AUTO_GENERATED_TABLE_END -->';
-    
-    const startIndex = content.indexOf(startMarker);
-    const endIndex = content.indexOf(endMarker);
-    
-    if (startIndex !== -1 && endIndex !== -1) {
-      // Заменям съдържанието между маркерите
-      const before = content.substring(0, startIndex + startMarker.length);
-      const after = content.substring(endIndex);
-      
-      content = before + '\n' + tableHtml + '\n' + after;
-      
-      fs.writeFileSync(infofMdPath, content, 'utf-8');
-      console.log('✓ Updated INFO.md with recent files table');
-    } else {
-      console.warn('Warning: Could not find auto-generation markers in INFO.md');
-    }
-  } catch (error) {
-    console.warn('Warning: Could not update INFO.md:', error.message);
-  }
-}
-
-// Функция за генериране на JSON със последните променени файлове
-function generateRecentChanges() {
-  try {
-    const allFiles = getAllFiles(ELEMENTS_DIR);
-    
-    // Филтрирам само HTML файлове
-    const htmlFiles = allFiles.filter(file => file.endsWith('.html'));
-
-    // Взимам metadata за всеки файл
-    const filesWithStats = htmlFiles.map(file => {
-      const stats = fs.statSync(file);
-      const relativePath = path.relative(ELEMENTS_DIR, file);
-      return {
-        path: relativePath,
-        modified: stats.mtime,
-        size: stats.size
-      };
-    });
-
-    // Сортирам по време на модификация (най-новите първо)
-    filesWithStats.sort((a, b) => b.modified - a.modified);
-
-    // Зареждам предишния индекс на файлове
-    let previousIndex = {};
-    if (fs.existsSync(FILES_INDEX_FILE)) {
-      try {
-        previousIndex = JSON.parse(fs.readFileSync(FILES_INDEX_FILE, 'utf-8'));
-      } catch (e) {
-        console.log('No previous files index found, creating new one');
-      }
-    }
-
-    // Правя карта на текущите файлове
-    const currentFilesList = {};
-    htmlFiles.forEach(file => {
-      const relativePath = path.relative(ELEMENTS_DIR, file).replace(/\\/g, '/');
-      currentFilesList[relativePath] = true;
-    });
-
-    // Намирам добавени файлове (съществуват в текущ индекс, но не в предишния)
-    const addedFiles = Object.keys(currentFilesList).filter(file => !previousIndex[file]);
-
-    // Намирам премахнати файлове (съществуват в предишния индекс, но не в текущия)
-    const removedFiles = Object.keys(previousIndex).filter(file => !currentFilesList[file]);
-
-    // Запазвам текущия индекс
-    fs.writeFileSync(FILES_INDEX_FILE, JSON.stringify(currentFilesList, null, 2), 'utf-8');
-
-    // Филтрирам MSG файлове за отделна таблица
-    const msgFiles = filesWithStats.filter(file => file.path.includes('msg'));
-    
-    // Взимам последните 5 уникално променени файлове (с дедупликация)
-    const seen = new Set();
-    const recentUnique = [];
-    
-    filesWithStats.forEach(file => {
-      const fileName = path.basename(file.path);
-      if (!seen.has(fileName)) {
-        seen.add(fileName);
-        recentUnique.push(file);
-      }
-      if (recentUnique.length >= 5) return;
-    });
-
-    // Генерирам JSON
-    const jsonData = {
-      generated: new Date().toISOString(),
-      totalHtmlFiles: htmlFiles.length,
-      recentFiles: recentUnique.map(f => ({
-        path: f.path.replace(/\\/g, '/'),
-        modified: f.modified,
-        size: f.size
-      })),
-      msgFiles: msgFiles.slice(0, 5).map(f => ({
-        path: f.path.replace(/\\/g, '/'),
-        modified: f.modified,
-        size: f.size
-      })),
-      addedFiles: addedFiles.slice(0, 10),
-      removedFiles: removedFiles.slice(0, 10)
-    };
-
-    fs.writeFileSync(RECENT_CHANGES_FILE, JSON.stringify(jsonData, null, 2), 'utf-8');
-    console.log('Generated recent changes:', RECENT_CHANGES_FILE);
-    if (addedFiles.length > 0) console.log(`  Added files: ${addedFiles.length}`);
-    if (removedFiles.length > 0) console.log(`  Removed files: ${removedFiles.length}`);
-  } catch (error) {
-    console.warn('Warning: Could not generate recent changes file:', error.message);
-  }
 }
 
 // Save ID mappings to file
@@ -616,17 +407,6 @@ function main() {
   // Get regular courses
   const courses = getAllCourses();
   
-  // Load event info from INFO.md - try to read it directly
-  let eventInfo = '';
-  const eventInfoPath = path.join(ELEMENTS_DIR, 'Актуални събития Event center', 'INFO.md');
-  try {
-    eventInfo = fs.readFileSync(eventInfoPath, 'utf8');
-    console.log('✓ Loaded event info from:', eventInfoPath);
-    console.log('  Event info length:', eventInfo.length, 'characters');
-  } catch (error) {
-    console.log('ℹ Event info file not found or could not be read');
-  }
-  
   // Generate build timestamp
   const buildDate = new Date();
 const dateParts = new Intl.DateTimeFormat('bg-BG', {
@@ -646,17 +426,10 @@ const time = buildDate.toLocaleString('bg-BG', {
   const buildTimestamp = `${date} ${time}`;;
   
   const js = 'const courses = ' + JSON.stringify(courses, null, 2) + ';\n' +
-             'const eventInfo = ' + JSON.stringify(eventInfo) + ';\n' +
              'const buildTimestamp = "' + buildTimestamp + '";\n';
   fs.writeFileSync(OUTPUT_FILE, js, 'utf8');
   console.log('Generated courses:', OUTPUT_FILE);
   console.log('Build timestamp:', buildTimestamp);
-  
-  // Генерирам последни променени файлове
-  generateRecentChanges();
-  
-  // Генерирам HTML таблица и я вмъквам в INFO.md
-  updateInfoMdWithRecentFiles();
 }
 
 main();
