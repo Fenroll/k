@@ -271,18 +271,46 @@ class ChatFirebaseREST {
             }
         });
 
-        // Heartbeat: Обновявай timestamp на всеки 30 сек
-        setInterval(() => {
+        // Function to force update presence
+        const forceUpdate = () => {
              if (this.db) {
                  const currentIsMobile = window.innerWidth <= 768 || 
                                /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
                  
-                 update(userRef, { 
-                     lastSeen: serverTimestamp(),
-                     device: currentIsMobile ? 'mobile' : 'desktop'
-                 }).catch(e => console.error("Heartbeat error", e));
+                 // Use set() or merge with all info to resurrect if missing
+                 const userData = {
+                    userId: currentUser.userId,
+                    userName: currentUser.userName,
+                    color: currentUser.color,
+                    device: currentIsMobile ? 'mobile' : 'desktop',
+                    lastSeen: serverTimestamp(),
+                    isActive: true
+                };
+                
+                // We use update if we just want to touch timestamp, but if checking for absence...
+                // Let's uset update() but with core fields to ensure display works even if resurrected
+                update(userRef, userData).catch(e => console.error("Heartbeat error", e));
              }
-        }, 30000);
+        };
+
+        // Heartbeat: Updated every 45 sec to be safe (client side), server might have timeouts
+        // But to be robust against "disappearing", we include full user info
+        setInterval(forceUpdate, 25000);
+
+        // Also trigger when tab becomes visible
+        document.addEventListener("visibilitychange", () => {
+             if (document.visibilityState === 'visible') {
+                 forceUpdate();
+             }
+        });
+
+        // Hook into user interaction to keep alive actively
+        ['mousedown', 'keydown', 'touchstart'].forEach(evt => {
+            window.addEventListener(evt, () => {
+                // Throttle this? Maybe once every minute of activity?
+                // For now relying on interval is enough
+            }, { passive: true });
+        });
 
         console.log('✓ Потребител маркиран активен (SDK Presence + Heartbeat + Device)');
         return true;
@@ -361,23 +389,63 @@ class ChatFirebaseREST {
   startActiveUsersPolling(callback, interval = 5000) {
     this._ensureInit().then(() => {
         const { ref, onValue } = this.sdk;
+        
+        // Cache previous users for grace period logic
+        let previousUsers = {};
+        const gracePeriodTimes = {}; // Stores timeout timestamps for users who disappeared
+
         onValue(ref(this.db, `active_users/${this.documentId}`), (snapshot) => {
             const usersRaw = snapshot.val() || {};
-            const validUsers = {};
+            const currentValidUsers = {};
+            const now = Date.now();
             
-            // Филтрирай само валидни потребители с име
+            // 1. Identify currently active users from DB
             Object.keys(usersRaw).forEach(key => {
                 const u = usersRaw[key];
-                // Проверка дали записът е обект и има userName
                 if (u && typeof u === 'object' && u.userName) {
-                    validUsers[key] = u;
+                    currentValidUsers[key] = u;
+                    // Reset grace period if they reappear
+                    if (gracePeriodTimes[key]) delete gracePeriodTimes[key];
                 }
             });
+
+            // 2. Check for missing users (who were present before)
+            Object.keys(previousUsers).forEach(key => {
+                if (!currentValidUsers[key]) {
+                    // This user just disappeared. Start grace period if not already started.
+                    if (!gracePeriodTimes[key]) {
+                        // 60 seconds grace period for mobile stability
+                        gracePeriodTimes[key] = now + 60000; 
+                    }
+                }
+            });
+
+            // 3. Construct final list (Current + Grace Period Survivors)
+            const finalUsers = { ...currentValidUsers };
+            
+            Object.keys(gracePeriodTimes).forEach(key => {
+                // If user is missing from current AND grace period not expired
+                if (!currentValidUsers[key]) {
+                    if (now < gracePeriodTimes[key]) {
+                        // Keep them in the list!
+                        finalUsers[key] = { 
+                           ...previousUsers[key], 
+                           // Optional: Add flag to show they might be away?
+                           // isGhost: true 
+                        };
+                    } else {
+                        // Expired, forget them
+                        delete gracePeriodTimes[key];
+                    }
+                }
+            });
+
+            previousUsers = { ...finalUsers };
             
             callback({
-                count: Object.keys(validUsers).length,
-                users: validUsers,
-                usersList: Object.keys(validUsers)
+                count: Object.keys(finalUsers).length,
+                users: finalUsers,
+                usersList: Object.keys(finalUsers)
             });
         });
     });
@@ -626,20 +694,36 @@ class ChatUIManager {
     const usersList = document.getElementById('active-users-list');
     if (!usersList) return;
 
-    // Logging active users data for debugging
-    console.log('Mobile/Desktop Users Data:', data.users);
+    // Ensure current user is always in the list
+    const remoteUsers = data.users || {};
+    const allUsers = { ...remoteUsers };
+    
+    // Add current user if missing (using currentUser global)
+    if (typeof currentUser !== 'undefined' && currentUser.userId) {
+        if (!allUsers[currentUser.userId]) {
+             allUsers[currentUser.userId] = {
+                 userId: currentUser.userId,
+                 userName: currentUser.userName,
+                 color: currentUser.color,
+                 device: window.innerWidth <= 768 ? 'mobile' : 'desktop',
+                 isActive: true
+             };
+        }
+    }
 
-    const users = Object.values(data.users || {}).slice(0, 5);
+    const users = Object.values(allUsers);
+    const count = Object.keys(allUsers).length;
+
     usersList.innerHTML = `
-      <strong>Активни (${data.count}):</strong><br>
+      <strong>Активни (${count}):</strong><br>
       ${users.map(user => {
+          const currentId = (typeof currentUser !== 'undefined' && currentUser.userId) ? String(currentUser.userId) : '';
+          const userId = user.userId ? String(user.userId) : '';
+          const isMe = currentId && userId && (userId === currentId);
+          
           const isMob = user.device === 'mobile';
-          // Ensure SVG path starts with / to be absolute from root
           const iconSrc = '/svg/mobile-phone-svgrepo-com.svg';
           
-          // Debug logs per user
-          // console.log(`User: ${user.userName}, Device: ${user.device}, IsMobile: ${isMob}`);
-
           const mobileIcon = isMob 
             ? `<img src="${iconSrc}" alt="📱" style="width: 14px; height: 14px; margin-left: 4px; vertical-align: middle;" title="Mobile">` 
             : '';
@@ -647,13 +731,18 @@ class ChatUIManager {
           return `
         <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
           <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${user.color};"></div>
-          <span style="font-size: 10px; flex: 1; word-break: break-all; display: flex; align-items: center;" title="Device: ${user.device || 'unknown'}">
-            ${user.userName}
+          <span style="font-size: 10px; flex: 1; word-break: break-all; display: flex; align-items: center; ${isMe ? 'font-weight: bold; color: var(--fg);' : ''}" title="Device: ${user.device || 'unknown'}">
+            ${user.userName} ${isMe ? ' (Аз)' : ''}
             ${mobileIcon}
           </span>
         </div>
       `}).join('')}
     `;
+
+    // Also update header count to be consistent
+    if (this.updateHeaderOnlineCount) {
+        this.updateHeaderOnlineCount(count);
+    }
   }
 
   async handleAdminCommand(commandObj) {

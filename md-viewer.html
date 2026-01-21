@@ -915,7 +915,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
 
   <!-- Chat System Scripts -->
-  <script src="js/chat.js?v=20"></script>
+  <script src="js/chat.js?v=21"></script>
 
   <!-- Chat Widget HTML -->
   <div id="chat-widget" class="chat-widget">
@@ -1018,6 +1018,115 @@
 
   <!-- Notes Initialization -->
   <script src="js/notes-init.js?v=4"></script>
+
+  <!-- H1 Navigation with Arrow Keys -->
+  <script>
+    (function() {
+      let h1Elements = [];
+      let currentH1Index = -1;
+      
+      // Function to update h1 elements list
+      function updateH1List() {
+        h1Elements = Array.from(document.querySelectorAll('#content h1'));
+        console.log('Found', h1Elements.length, 'h1 elements');
+      }
+      
+      // Function to scroll to h1 element
+      function scrollToH1(index) {
+        if (index >= 0 && index < h1Elements.length) {
+          const h1 = h1Elements[index];
+          const headerHeight = document.querySelector('header').offsetHeight || 0;
+          const yOffset = -headerHeight - 20; // Add some extra padding
+          const y = h1.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          
+          window.scrollTo({ top: y, behavior: 'auto' });
+          currentH1Index = index;
+          
+          // Visual feedback - briefly highlight the h1
+          h1.style.transition = 'background-color 0.3s ease';
+          const originalBg = h1.style.backgroundColor;
+          h1.style.backgroundColor = 'rgba(124, 58, 237, 0.1)';
+          setTimeout(() => {
+            h1.style.backgroundColor = originalBg;
+          }, 600);
+        }
+      }
+      
+      // Function to find current h1 based on scroll position
+      function findCurrentH1() {
+        const scrollPosition = window.scrollY + 100; // Offset for header
+        
+        for (let i = h1Elements.length - 1; i >= 0; i--) {
+          if (h1Elements[i].offsetTop <= scrollPosition) {
+            return i;
+          }
+        }
+        return 0;
+      }
+      
+      // Listen for arrow key presses
+      document.addEventListener('keydown', (e) => {
+        // Ignore if user is typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          return;
+        }
+        
+        // Update list if needed (in case content changed)
+        if (h1Elements.length === 0) {
+          updateH1List();
+        }
+        
+        if (h1Elements.length === 0) return;
+        
+        // Right Arrow - next h1
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          if (currentH1Index === -1) {
+            currentH1Index = findCurrentH1();
+          }
+          const nextIndex = Math.min(currentH1Index + 1, h1Elements.length - 1);
+          scrollToH1(nextIndex);
+        }
+        
+        // Left Arrow - previous h1
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          if (currentH1Index === -1) {
+            currentH1Index = findCurrentH1();
+          }
+          const prevIndex = Math.max(currentH1Index - 1, 0);
+          scrollToH1(prevIndex);
+        }
+      });
+      
+      // Initialize h1 list when content loads
+      function initH1Navigation() {
+        setTimeout(() => {
+          updateH1List();
+        }, 500);
+      }
+      
+      // Watch for content changes
+      const contentDiv = document.getElementById('content');
+      if (contentDiv) {
+        const observer = new MutationObserver(() => {
+          updateH1List();
+        });
+        
+        observer.observe(contentDiv, {
+          childList: true,
+          subtree: true
+        });
+      }
+      
+      // Initialize on page load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initH1Navigation);
+      } else {
+        initH1Navigation();
+      }
+    })();
+  </script>
 
   <style>
   #chat-widget { --chat-primary: #5d4037; --chat-secondary: #efebe9; --chat-border: #bcaaa4; --chat-text: #2c1810; --chat-text-light: #6d4c41; }
