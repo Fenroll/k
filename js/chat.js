@@ -299,6 +299,35 @@ class ChatFirebaseREST {
     this.listeners.push(callback);
   }
 
+  async updateColorForAllSessions(newColor) {
+    // Обнови цвета на всички активни сесии с текущото име
+    await this._ensureInit();
+    const { ref, get, update } = this.sdk;
+    const activeUsersRef = ref(this.db, `active_users/${this.documentId}`);
+    
+    try {
+      const snapshot = await get(activeUsersRef);
+      if (!snapshot.exists()) return;
+      
+      const users = snapshot.val();
+      const updates = {};
+      
+      // Намери всички сесии с текущото име
+      Object.keys(users).forEach(userId => {
+        if (users[userId].userName === currentUser.userName) {
+          updates[`active_users/${this.documentId}/${userId}/color`] = newColor;
+        }
+      });
+      
+      if (Object.keys(updates).length > 0) {
+        await update(ref(this.db), updates);
+        console.log(`✓ Обновени ${Object.keys(updates).length} сесии с нов цвят`);
+      }
+    } catch (error) {
+      console.error('Update color error:', error);
+    }
+  }
+
   async markUserActive() {
     await this._ensureInit();
     const { ref, set, update, onDisconnect, serverTimestamp, onValue } = this.sdk;
@@ -892,7 +921,16 @@ class ChatUIManager {
           if (hexColor && /^#[0-9A-Fa-f]{6}$/.test(hexColor)) {
               currentUser.color = hexColor;
               localStorage.setItem('userColor', hexColor);
+              
+              // Обнови всички сесии с това име
+              await this.chatFirebase.updateColorForAllSessions(hexColor);
               await this.chatFirebase.markUserActive();
+              
+              // Force refresh of active users list
+              const activeData = await this.chatFirebase.getActiveUsers();
+              this.updateNotificationButton(activeData);
+              this.updateHeaderOnlineCount(activeData.count);
+              
               alert(`✅ Цветът ви е сменен на: ${hexColor}`);
           } else {
               alert('Usage: /admin claimcolor #RRGGBB (например #FF5733)');
