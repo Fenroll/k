@@ -84,6 +84,8 @@ class ChatFirebaseREST {
     this.messages = [];
     this.listeners = [];
     this.isPolling = false;
+    this.unsubscribers = [];
+    this.heartbeatInterval = null;
     
     // ВАЖНО: Тук трябва да се попълнят вашите данни от Firebase Console!
     this.firebaseConfig = {
@@ -270,7 +272,7 @@ class ChatFirebaseREST {
         // Realtime Listener
         const q = query(messagesRef, orderByChild('timestamp'), limitToLast(500));
 
-        onValue(q, (snapshot) => {
+        const unsubscribe = onValue(q, (snapshot) => {
             const messages = [];
             snapshot.forEach((child) => {
                 const val = child.val();
@@ -292,6 +294,7 @@ class ChatFirebaseREST {
             this.messages = messages;
             callback(messages);
         });
+        this.unsubscribers.push(unsubscribe);
     });
   }
 
@@ -378,9 +381,10 @@ class ChatFirebaseREST {
              }
         };
 
-        // Heartbeat: Updated every 45 sec to be safe (client side), server might have timeouts
+        // Heartbeat: Updated every 25 sec to be safe (client side), server might have timeouts
         // But to be robust against "disappearing", we include full user info
-        setInterval(forceUpdate, 25000);
+        if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
+        this.heartbeatInterval = setInterval(forceUpdate, 25000);
 
         // Also trigger when tab becomes visible
         document.addEventListener("visibilitychange", () => {
@@ -427,6 +431,42 @@ class ChatFirebaseREST {
     }
   }
 
+  async setLastRead(userName, messageId) {
+    if (!userName || !messageId) return false;
+    // Note: Firebase keys can't contain ., $, #, [, ], /, or ASCII control chars 0-31 or 127.
+    // Sanitize userName to be a safe key.
+    const safeUserName = userName.replace(/[.#$[\]/]/g, '_');
+
+    await this._ensureInit();
+    const { ref, set } = this.sdk;
+    const lastReadRef = ref(this.db, `last_read/${this.documentId}/${safeUserName}`);
+    try {
+        await set(lastReadRef, messageId);
+        return true;
+    } catch (error) {
+        console.error('SDK setLastRead error:', error);
+        return false;
+    }
+  }
+
+  startLastReadPolling(userName, callback) {
+    if (!userName) return;
+    const safeUserName = userName.replace(/[.#$[\]/]/g, '_');
+
+    this._ensureInit().then(() => {
+        const { ref, onValue } = this.sdk;
+        const lastReadRef = ref(this.db, `last_read/${this.documentId}/${safeUserName}`);
+
+        const unsubscribe = onValue(lastReadRef, (snapshot) => {
+            const lastReadId = snapshot.val();
+            if (lastReadId) {
+                callback(lastReadId);
+            }
+        });
+        this.unsubscribers.push(unsubscribe);
+    });
+  }
+
   async getReactions(messageId) {
     await this._ensureInit();
     const { ref, get } = this.sdk;
@@ -471,15 +511,33 @@ class ChatFirebaseREST {
     }
   }
 
+  async bulkRemoveReactions(messageId, emoji, userIds) {
+    if (!userIds || userIds.length === 0) return true;
+    await this._ensureInit();
+    const { ref, update } = this.sdk;
+    const updates = {};
+    userIds.forEach(id => {
+        updates[`reactions/${this.documentId}/${messageId}/${emoji}/${id}`] = null;
+    });
+    try {
+        await update(ref(this.db), updates);
+        return true;
+    } catch (e) {
+        console.error("SDK bulkRemoveReactions error:", e);
+        return false;
+    }
+  }
+
   startReactionsPolling(callback) {
     this._ensureInit().then(() => {
         const { ref, onValue } = this.sdk;
         const reactionsRef = ref(this.db, `reactions/${this.documentId}`);
 
-        onValue(reactionsRef, (snapshot) => {
+        const unsubscribe = onValue(reactionsRef, (snapshot) => {
             const reactions = snapshot.val() || {};
             callback(reactions);
         });
+        this.unsubscribers.push(unsubscribe);
     });
   }
 
@@ -491,7 +549,7 @@ class ChatFirebaseREST {
         let previousUsers = {};
         const gracePeriodTimes = {}; // Stores timeout timestamps for users who disappeared
 
-        onValue(ref(this.db, `active_users/${this.documentId}`), (snapshot) => {
+        const unsubscribe = onValue(ref(this.db, `active_users/${this.documentId}`), (snapshot) => {
             const usersRaw = snapshot.val() || {};
             const currentValidUsers = {};
             const now = Date.now();
@@ -545,12 +603,25 @@ class ChatFirebaseREST {
                 usersList: Object.keys(finalUsers)
             });
         });
+        this.unsubscribers.push(unsubscribe);
     });
   }
 
   stop() {
     this.isPolling = false;
     this.listeners = [];
+
+    // Unsubscribe from all listeners
+    this.unsubscribers.forEach(unsub => unsub());
+    this.unsubscribers = [];
+
+    // Clear heartbeat
+    if (this.heartbeatInterval) {
+        clearInterval(this.heartbeatInterval);
+        this.heartbeatInterval = null;
+    }
+
+    console.log('🛑 ChatFirebaseREST спрян.');
   }
 }
 
@@ -577,8 +648,25 @@ class ChatUIManager {
     this.lastMessages = [];  // Съхранявам предишни съобщения
     this.userNameMappings = {}; // Карта за стари към нови имена
     this.reactionsCache = {}; // Кеш за реакции
+    this.activeUsers = {}; // Списък с активни потребители за логика с реакции
 
     this.init();
+  }
+
+  _getMyUserIds() {
+    if (!this.activeUsers || !currentUser.userName) return [currentUser.userId];
+    
+    const myName = currentUser.userName;
+    const myIds = new Set([currentUser.userId]); // Always include current ID
+
+    // Find all other userIds with the same name from the active list
+    for (const userId in this.activeUsers) {
+        const user = this.activeUsers[userId];
+        if (user && user.userName === myName) {
+            myIds.add(userId);
+        }
+    }
+    return Array.from(myIds);
   }
 
   fixInputLayout() {
@@ -690,9 +778,23 @@ class ChatUIManager {
 
       // Polling за активни потребители
       this.chatFirebase.startActiveUsersPolling((data) => {
+        this.activeUsers = data.users || {}; // Запази списъка с потребители
         this.updateNotificationButton(data);
         this.updateHeaderOnlineCount(data.count);
       }, 5000);
+
+      // Синхронизация на прочетени съобщения
+      this.chatFirebase.startLastReadPolling(currentUser.userName, (lastReadId) => {
+        if (lastReadId && lastReadId !== this.lastReadMessageId) {
+          console.log(`🔄 Синхронизиран нов lastReadId: ${lastReadId}`);
+          this.lastReadMessageId = lastReadId;
+          localStorage.setItem(`lastReadMessage_${this.documentId}`, lastReadId);
+          
+          // Преизчисли непрочетените и обнови брояча
+          this.recalculateUnreadCount(this.chatFirebase.messages);
+          this.updateActiveCount();
+        }
+      });
 
       // Listener за уведомления
       this.chatFirebase.addMessageListener((message) => {
@@ -1365,10 +1467,18 @@ class ChatUIManager {
     const messages = this.chatFirebase.messages;
     if (messages.length > 0) {
       const lastMessage = messages[messages.length - 1];
-      this.lastReadMessageId = lastMessage.id;
-      localStorage.setItem(`lastReadMessage_${this.documentId}`, lastMessage.id);
+      const newLastReadId = lastMessage.id;
+
+      // Ако вече е маркирано като прочетено, не прави нищо
+      if (this.lastReadMessageId === newLastReadId) return;
+
+      this.lastReadMessageId = newLastReadId;
+      localStorage.setItem(`lastReadMessage_${this.documentId}`, newLastReadId);
       this.unreadCount = 0;
       this.updateActiveCount();
+      
+      // Синхронизирай с Firebase, за да знаят и другите сесии
+      this.chatFirebase.setLastRead(currentUser.userName, newLastReadId);
     }
   }
 
@@ -1477,15 +1587,18 @@ class ChatUIManager {
 
     const reactionCounts = {};
     const myReactions = {};
+    
+    const myUserIds = this._getMyUserIds(); // Вземи всички мои userId-та
 
     Object.keys(reactionsForMessage).forEach(emoji => {
         const usersObj = reactionsForMessage[emoji] || {};
-        const userIds = Object.keys(usersObj).filter(userId => usersObj[userId] === true);
-        const count = userIds.length;
+        const userIdsWhoReacted = Object.keys(usersObj).filter(userId => usersObj[userId] === true);
+        const count = userIdsWhoReacted.length;
         
         if (count > 0) {
             reactionCounts[emoji] = count;
-            if (userIds.includes(currentUser.userId)) {
+            // Провери дали някое от моите userId-та е реагирало
+            if (userIdsWhoReacted.some(id => myUserIds.includes(id))) {
                 myReactions[emoji] = true;
             }
         }
@@ -1514,11 +1627,21 @@ class ChatUIManager {
         const msgId = btn.dataset.messageId;
         
         const reactionsForMessage = this.reactionsCache ? this.reactionsCache[msgId] : null;
-        const myReaction = reactionsForMessage && reactionsForMessage[emoji] && reactionsForMessage[emoji][currentUser.userId];
+        if (!reactionsForMessage) {
+            this.addReaction(msgId, emoji);
+            return;
+        }
 
-        if (myReaction) {
-          this.removeReaction(msgId, emoji);
+        const myUserIds = this._getMyUserIds();
+        const reactorsForEmoji = reactionsForMessage[emoji] || {};
+        
+        const myReactingIds = myUserIds.filter(id => reactorsForEmoji[id] === true);
+
+        if (myReactingIds.length > 0) {
+          // Премахни всички мои реакции за това емоджи
+          this.chatFirebase.bulkRemoveReactions(msgId, emoji, myReactingIds);
         } else {
+          // Добави нова реакция
           this.addReaction(msgId, emoji);
         }
       });
