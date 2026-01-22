@@ -1138,19 +1138,15 @@ class ChatUIManager {
     const scrollWasAtBottom = this.autoScroll ||
       messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 50;
 
-    // SMART UPDATE: Сравни старите и новите съобщения
-    const oldIds = new Set(this.lastMessages.map(m => m.id));
-    const newIds = new Set(messages.map(m => m.id));
+    // --- ENHANCED DIFFING LOGIC ---
+    const oldMessagesById = new Map(this.lastMessages.map(m => [m.id, m]));
+    const newMessagesById = new Map(messages.map(m => [m.id, m]));
+
+    const addedIds = messages.filter(m => !oldMessagesById.has(m.id)).map(m => m.id);
+    const deletedIds = this.lastMessages.filter(m => !newMessagesById.has(m.id)).map(m => m.id);
     
-    // Откри нови, изтрити и променени съобщения
-    const addedIds = [...newIds].filter(id => !oldIds.has(id));
-    const deletedIds = [...oldIds].filter(id => !newIds.has(id));
-    
-    // Ако е първи път, render всичко
-    if (this.lastMessages.length === 0) {
-      this.fullRenderMessages(messages, messagesContainer);
-    } else if (deletedIds.length > 0) {
-      // INCREMENTAL DELETE
+    // Handle DELETIONS first
+    if (deletedIds.length > 0) {
       deletedIds.forEach(deletedId => {
         const el = messagesContainer.querySelector(`[data-message-id="${deletedId}"]`);
         if (el) {
@@ -1159,8 +1155,35 @@ class ChatUIManager {
           setTimeout(() => el.remove(), 300);
         }
       });
-    } else if (addedIds.length > 0) {
-      // INCREMENTAL ADD
+    }
+
+    // Handle potential UPDATES
+    const potentiallyUpdated = messages.filter(m => oldMessagesById.has(m.id));
+    for (const msg of potentiallyUpdated) {
+        const oldMsg = oldMessagesById.get(msg.id);
+        const oldResolvedName = this.userNameMappings[oldMsg.userName] || oldMsg.userName;
+        const newResolvedName = this.userNameMappings[msg.userName] || msg.userName;
+
+        // Check for changes (e.g., name change)
+        if (oldResolvedName !== newResolvedName) {
+            const msgEl = messagesContainer.querySelector(`[data-message-id="${msg.id}"]`);
+            if (msgEl) {
+                const authorEl = msgEl.querySelector('.message-author');
+                if (authorEl) {
+                    authorEl.textContent = this.escapeHtml(newResolvedName);
+                }
+                const isCurrentUser = msg.userId === currentUser.userId || newResolvedName === currentUser.userName;
+                const messageBgColor = isCurrentUser ? '#e0f2fe' : 'var(--chat-secondary)';
+                const textEl = msgEl.querySelector('.message-text');
+                if(textEl) {
+                    textEl.style.backgroundColor = messageBgColor;
+                }
+            }
+        }
+    }
+
+    // Handle ADDITIONS
+    if (addedIds.length > 0) {
       addedIds.forEach(newId => {
         const msg = messages.find(m => m.id === newId);
         if (msg) {
@@ -1170,17 +1193,15 @@ class ChatUIManager {
         }
       });
     }
+    
+    // Handle initial render
+    if (this.lastMessages.length === 0) {
+      this.fullRenderMessages(messages, messagesContainer);
+    }
+    // --- END OF DIFFING LOGIC ---
 
-    // ROBUST UNREAD CALCULATION
     this.recalculateUnreadCount(messages);
-
-    // The reaction rendering is now handled by the realtime listener.
-    // No need to call it from here anymore.
-
-    // Обнови badge
     this.updateActiveCount();
-
-    // Съхрани за следния път
     this.lastMessages = messages;
 
     if (scrollWasAtBottom) {
