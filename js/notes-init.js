@@ -367,7 +367,7 @@ class NotesUIManager {
         
         /* Message Styles (Copied & Simplified from chat.js) */
         .note-message {
-            position: center;
+            position: relative;
             margin-bottom: 2px;
             transition: background 0.2s;
         }
@@ -542,12 +542,12 @@ class NotesUIManager {
          </div>
          <div class="note-actions">
              <button class="note-action-btn reply-btn" title="Reply">
-                 <img src="svg/reply-svgrepo-com.svg" alt="Reply" style="width: 16px; height: 16px; opacity: 0.7; filter: invert(0.3);">
+                 <img src="svg/reply-svgrepo-com.svg" alt="Reply" style="width: 16px; height: 16px">
              </button>
              <button class="note-action-btn react-btn" title="React">
-                 <img src="svg/reaction-emoji-add-svgrepo-com.svg" alt="Reaction" style="width: 16px; height: 16px; opacity: 0.7;">
+                 <img src="svg/reaction-emoji-add-svgrepo-com.svg" alt="Reaction" style="width: 16px; height: 16px">
              </button>
-             ${isMe ? '<button class="note-action-btn delete-btn" title="Delete"><img src="svg/trash-blank-alt-svgrepo-com.svg" alt="Delete" style="width: 16px; height: 16px; opacity: 0.6;"></button>' : ''}
+             ${isMe ? '<button class="note-action-btn delete-btn" title="Delete"><img src="svg/trash-blank-alt-svgrepo-com.svg" alt="Delete" style="width: 16px; height: 16px"></button>' : ''}
          </div>
       `;
       
