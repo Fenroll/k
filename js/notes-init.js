@@ -201,6 +201,9 @@ class NotesFirebaseREST {
   }
 }
 
+// Cache buster
+const NOTES_VERSION = '20260123_v2';
+
 // ============================================
 // NOTES UI MANAGER
 // ============================================
@@ -238,7 +241,7 @@ class NotesUIManager {
     this.container.innerHTML = `
         <div class="notes-header">
             <span>Бележки за този файл</span>
-            <button class="notes-close-btn">&times;</button>
+            <button class="notes-close-btn">✕</button>
         </div>
         <div class="notes-messages" id="notes-messages-list">
             <!-- Messages go here -->
@@ -253,6 +256,11 @@ class NotesUIManager {
     // Inject CSS
     const css = `
         .notes-widget {
+            /* CSS Variables for consistency with chat.js */
+            --chat-text: #2c1810;
+            --chat-text-light: #6d4c41;
+            --chat-secondary: #efebe9;
+            
             position: fixed;
             bottom: 20px;
             left: 20px;
@@ -276,21 +284,36 @@ class NotesUIManager {
             pointer-events: none;
         }
         .notes-header {
-            padding: 12px 16px;
-            background: #f8fafc;
+            padding: 16px;
+            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
             border-bottom: 1px solid #e2e8f0;
             border-radius: 12px 12px 0 0;
             display: flex;
             justify-content: space-between;
             align-items: center;
             font-weight: 600;
-            color: #1e293b;
+            font-size: 18px;
+            color: white;
         }
         .notes-close-btn {
-            background: none; border: none; font-size: 24px; color: #64748b; cursor: pointer;
-            line-height: 1; padding: 0 4px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            transition: background 0.2s;
+            line-height: 1;
         }
-        .notes-close-btn:hover { color: #ef4444; }
+        .notes-close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
         
         .notes-messages {
             flex: 1;
@@ -299,59 +322,73 @@ class NotesUIManager {
             background: #fff;
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 4px;
         }
         
         .notes-input-area {
             padding: 12px;
-            border-top: 1px solid #e2e8f0;
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            background: #f8fafc;
+            border-top: 1px solid #bcaaa4;
+            background: #fff;
             border-radius: 0 0 12px 12px;
-            flex-direction: column; 
-            align-items: stretch;
+        }
+        .notes-input-row {
+            display: flex;
+            gap: 12px;
+            align-items: flex-end;
         }
         .notes-input {
             flex: 1;
-            padding: 10px 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 20px;
+            padding: 8px 12px;
+            border: 1px solid #bcaaa4;
+            border-radius: 8px;
             outline: none;
-            font-size: 14px;
+            font-size: 13px;
             resize: none;
             overflow: hidden;
+            transition: all 0.2s;
         }
-        .notes-input:focus { border-color: #3b82f6; }
+        .notes-input:focus {
+            border-color: #7c3aed;
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
         .notes-send-btn {
-            background: #3b82f6; color: white; border: none; padding: 8px 12px;
-            border-radius: 50%; width: 36px; height: 36px; cursor: pointer;
+            background: #7c3aed; color: white; border: none; padding: 0;
+            border-radius: 8px; width: 36px; height: 36px; cursor: pointer;
             display: flex; align-items: center; justify-content: center;
-            align-self: flex-end;
-            margin-top: -46px; /* Floating over input */
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .notes-send-btn:hover {
+            transform: scale(1.05);
+        }
+        .notes-send-btn:active {
+            transform: scale(0.95);
         }
         
         /* Message Styles (Copied & Simplified from chat.js) */
         .note-message {
-            position: relative;
-            margin-bottom: 4px;
+            position: center;
+            margin-bottom: 2px;
             transition: background 0.2s;
         }
         .note-message:hover { background: #f8fafc; }
         .note-content {
-            padding: 8px 12px;
+            padding: 10px 10px 10px 10px;
             border-radius: 12px;
-            max-width: 90%;
+            max-width: 100%;
             word-wrap: break-word;
         }
         .note-header {
-            display: flex; justify-content: space-between; margin-bottom: 2px;
-            font-size: 11px; color: #64748b;
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+            margin-bottom: 4px;
         }
-        .note-author { font-weight: 600; }
-        .note-text { font-size: 14px; line-height: 1.4; color: #334155; padding: 6px 8px; border-radius: 8px;}
+        .note-author { font-weight: 600; font-size: 13px; color: var(--chat-text); }
+        .note-time { font-size: 11px; color: var(--chat-text-light); }
+        .note-text { font-size: 13px; line-height: 1.4; color: var(--chat-text); padding: 8px 8px 8px 10px; border-radius: 8px;}
         .note-reactions { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
+        .reaction-badge { font-size: 14px !important; padding: 4px 8px !important; border-radius: 12px !important; }
         
         /* Action buttons */
         .note-actions {
@@ -391,9 +428,13 @@ class NotesUIManager {
     const inputArea = this.container.querySelector('.notes-input-area');
     inputArea.innerHTML = `
         <div id="notes-reply-preview"></div>
-        <div style="display:flex; width:100%; position:relative; gap: 12px;">
+        <div class="notes-input-row">
              <textarea class="notes-input" placeholder="Напиши бележка..." rows="1"></textarea>
-             <button class="notes-send-btn">➤</button>
+             <button class="notes-send-btn" title="Изпрати">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16151496 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.4429026 C0.994623095,2.08 0.837654326,3.0226 1.15159189,3.97788954 L3.03521743,10.4188814 C3.03521743,10.5759788 3.34915502,10.7330762 3.50612381,10.7330762 L16.6915026,11.5185631 C16.6915026,11.5185631 17.1624089,11.5185631 17.1624089,12.0598639 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"></path>
+                </svg>
+             </button>
         </div>
     `;
     
@@ -468,7 +509,8 @@ class NotesUIManager {
   }
   
   createMessageElement(msg, allMessages) {
-      const isMe = msg.userId === currentUser.userId;
+      // Check if message belongs to current user (by userId OR userName like in chat.js)
+      const isMe = msg.userId === currentUser.userId || msg.userName === currentUser.userName;
       const el = document.createElement('div');
       el.className = 'note-message';
       el.dataset.id = msg.id;
@@ -486,22 +528,26 @@ class NotesUIManager {
           }
       }
 
-      const bg = isMe ? '#e0f2fe' : '#f1f5f9';
+      const bg = isMe ? '#e0f2fe' : 'var(--chat-secondary)';
       
       el.innerHTML = `
          <div class="note-content">
              <div class="note-header">
-                 <span class="note-author">${this.escapeHtml(msg.userName)}</span>
-                 <span>${new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</span>
+                <span class="note-author">${this.escapeHtml(msg.userName)}</span>
+                <span class="note-time">${new Date(msg.timestamp).toLocaleTimeString('bg-BG', {hour: '2-digit', minute:'2-digit'})}</span>
              </div>
              ${replyHTML}
              <div class="note-text" style="background:${bg}">${this.linkify(msg.text)}</div>
              <div class="note-reactions" id="reactions-${msg.id}"></div>
          </div>
          <div class="note-actions">
-             <button class="note-action-btn reply-btn" title="Reply">↩</button>
-             <button class="note-action-btn react-btn" title="React">☺</button>
-             ${isMe ? '<button class="note-action-btn delete-btn" title="Delete">🗑</button>' : ''}
+             <button class="note-action-btn reply-btn" title="Reply">
+                 <img src="svg/reply-svgrepo-com.svg" alt="Reply" style="width: 16px; height: 16px; opacity: 0.7; filter: invert(0.3);">
+             </button>
+             <button class="note-action-btn react-btn" title="React">
+                 <img src="svg/reaction-emoji-add-svgrepo-com.svg" alt="Reaction" style="width: 16px; height: 16px; opacity: 0.7;">
+             </button>
+             ${isMe ? '<button class="note-action-btn delete-btn" title="Delete"><img src="svg/trash-blank-alt-svgrepo-com.svg" alt="Delete" style="width: 16px; height: 16px; opacity: 0.6;"></button>' : ''}
          </div>
       `;
       
@@ -621,7 +667,7 @@ class NotesUIManager {
       
       display.innerHTML = Object.keys(reactionCounts).map(emoji => `
           <button class="reaction-badge" data-emoji="${emoji}" data-msgid="${msgId}"
-             style="background:${myReactions[emoji] ? '#93c5fd' : '#f1f5f9'};border:none;border-radius:10px;padding:2px 6px;font-size:11px;margin-right:2px;cursor:pointer;font-weight:${myReactions[emoji] ? 'bold' : 'normal'}">
+             style="background:${myReactions[emoji] ? '#93c5fd' : '#f1f5f9'};border:none;border-radius:12px;padding:4px 8px;font-size:14px;margin-right:4px;cursor:pointer;font-weight:${myReactions[emoji] ? 'bold' : 'normal'}">
              ${emoji} ${reactionCounts[emoji]}
           </button>
       `).join('');

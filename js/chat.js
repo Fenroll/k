@@ -596,6 +596,26 @@ class ChatUIManager {
                 box-sizing: border-box;
                 margin-bottom: 4px;
             }
+            .message-actions {
+                position: absolute;
+                top: 3px;
+                right: 3px;
+                display: none;
+                background: white;
+                border-radius: 6px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+                padding: 2px;
+                gap: 2px;
+            }
+            .chat-message:hover .message-actions {
+                display: flex;
+            }
+            .message-actions button {
+                transition: background 0.2s;
+            }
+            .message-actions button:hover {
+                background: #dbeafe !important;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -1211,15 +1231,17 @@ class ChatUIManager {
           <div class="message-text" style="background-color: ${messageBgColor};">${this.linkifyText(msg.text)}</div>
           <div class="message-reactions" data-message-id="${msg.id}"></div>
         </div>
-        <button class="message-reply-btn" data-message-id="${msg.id}" style="position: absolute; top: 8px; right: 8px; display: none; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 28px; height: 28px;" title="Отговори">
-          <img src="svg/reply-svgrepo-com.svg" alt="Reply" style="width: 100%; height: 100%; opacity: 0.7; filter: invert(0.3);">
-        </button>
-        <button class="message-reaction-btn" data-message-id="${msg.id}" style="position: absolute; top: 8px; right: 36px; display: none; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 28px; height: 28px;" title="Добави реакция">
-          <img src="svg/reaction-emoji-add-svgrepo-com.svg" alt="Reaction" style="width: 100%; height: 100%; opacity: 0.7;">
-        </button>
-        ${isCurrentUser ? `<button class="message-delete-btn" data-message-key="${msg.key}" style="position: absolute; top: 8px; right: 64px; display: none; background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 28px; height: 28px;" title="Изтрий съобщение">
-          <img src="svg/trash-blank-alt-svgrepo-com.svg" alt="Delete" style="width: 100%; height: 100%; opacity: 0.6;">
-        </button>` : ''}
+        <div class="message-actions">
+         <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 24px; height: 24px;" title="Отговори">
+            <img src="svg/reply-svgrepo-com.svg" alt="Reply" style="width: 100%; height: 100%; opacity: 0.7; filter: invert(0.3);">
+          </button>
+           <button class="message-reaction-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 24px; height: 24px;" title="Добави реакция">
+            <img src="svg/reaction-emoji-add-svgrepo-com.svg" alt="Reaction" style="width: 100%; height: 100%; opacity: 0.7;">
+          </button>
+          ${isCurrentUser ? `<button class="message-delete-btn" data-message-key="${msg.key}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 24px; height: 24px;" title="Изтрий съобщение">
+            <img src="svg/trash-blank-alt-svgrepo-com.svg" alt="Delete" style="width: 100%; height: 100%; opacity: 0.6;">
+          </button>` : ''}
+        </div>
       </div>
     `;
 
@@ -1229,22 +1251,7 @@ class ChatUIManager {
   }
 
   attachMessageListeners(msgEl) {
-    msgEl.addEventListener('mouseenter', () => {
-      const btn = msgEl.querySelector('.message-reaction-btn');
-      const replyBtn = msgEl.querySelector('.message-reply-btn');
-      const deleteBtn = msgEl.querySelector('.message-delete-btn');
-      if (btn) btn.style.display = 'block';
-      if (replyBtn) replyBtn.style.display = 'block';
-      if (deleteBtn) deleteBtn.style.display = 'block';
-    });
-    msgEl.addEventListener('mouseleave', () => {
-      const btn = msgEl.querySelector('.message-reaction-btn');
-      const replyBtn = msgEl.querySelector('.message-reply-btn');
-      const deleteBtn = msgEl.querySelector('.message-delete-btn');
-      if (btn) btn.style.display = 'none';
-      if (replyBtn) replyBtn.style.display = 'none';
-      if (deleteBtn) deleteBtn.style.display = 'none';
-    });
+    // Hover effect now handled by CSS (.chat-message:hover .message-actions)
 
     // Добави listener за реакции
     const reactionBtn = msgEl.querySelector('.message-reaction-btn');
@@ -1740,4 +1747,7 @@ window.deleteAllChatMessages = async function(password) {
 };
 
 console.log('💡 Команди: resetChat() - ресет на име');
+
+// Cache buster
+const CHAT_VERSION = '20260122_v2';
 
