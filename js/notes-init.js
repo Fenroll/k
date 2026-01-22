@@ -1,4 +1,74 @@
 // ============================================
+// ANONYMOUS USER (Copied from chat.js for notes)
+// ============================================
+if (typeof window.AnonymousUser === 'undefined') {
+    class AnonymousUser {
+      constructor() {
+        this.userId = this.getOrCreateUserId();
+        this.userName = this.getOrCreateUserName();
+        this.color = this.generateUserColor();
+      }
+
+      getOrCreateUserId() {
+        let userId = localStorage.getItem('userId');
+        if (!userId) {
+          userId = 'user_' + Math.random().toString(36).substr(2, 9);
+          localStorage.setItem('userId', userId);
+        }
+        return userId;
+      }
+
+      getOrCreateUserName() {
+        let userName = localStorage.getItem('userName');
+        if (!userName) {
+          const adjectives = [
+            'Умен', 'Бърз', 'Силен', 'Весел', 'Смелен',
+            'Спокоен', 'Оптимистичен', 'Брилянтен', 'Всеобхватен', 'Бдителен', 'Скромен',
+            'Остър', 'Модерен', 'Елегантен', 'Енергичен', 'Креативен'
+          ];
+          const nouns = [
+            'Студент', 'Лекар', 'Учен', 'Гений', 'Мъдрец',
+            'Тигър', 'Дракон', 'Лъв', 'Вълк', 'Доктор', 'Професор'
+          ];
+          
+          let newName = '';
+          do {
+            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
+            const noun = nouns[Math.floor(Math.random() * nouns.length)];
+            newName = `${adj} ${noun}`;
+          } while (newName === userName);
+          
+          userName = newName;
+          localStorage.setItem('userName', userName);
+        }
+        return userName;
+      }
+
+      generateUserColor() {
+        const colors = [
+          '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE',
+          '#FF8B94', '#6BCB77', '#4D96FF', '#FFD93D', '#6A4C93', '#FF6B9D', '#C06C84',
+          '#FF9671', '#FFC75F', '#F9F871', '#845EC2', '#2C73D2', '#00B0FF', '#FB5607',
+          '#7209B7', '#3A0CA3', '#560BAD', '#B5179E', '#F72585', '#4CC9F0', '#72DDF7',
+      '#90E0EF', '#ADE8F7', '#CAF0F8', '#00D9FF', '#00BBF9', '#0096C7', '#023E8A'
+        ];
+        let color = localStorage.getItem('userColor');
+        if (!color) {
+          color = colors[Math.floor(Math.random() * colors.length)];
+          localStorage.setItem('userColor', color);
+        }
+        return color;
+      }
+    }
+    window.AnonymousUser = AnonymousUser;
+}
+
+if (typeof window.currentUser === 'undefined') {
+    console.log("Notes: currentUser not found from chat.js, creating a new one.");
+    window.currentUser = new window.AnonymousUser();
+}
+
+// ============================================
 // NOTES SYSTEM (Based on Chat System)
 // ============================================
 
@@ -102,33 +172,6 @@ class NotesFirebaseREST {
     }
   }
 
-  async loadMessages() {
-    await this._ensureInit();
-    const { ref, get, query, orderByChild, limitToLast } = this.sdk;
-    
-    try {
-      const messagesRef = ref(this.db, `notes/${this.documentId}`);
-      const q = query(messagesRef, orderByChild('timestamp'), limitToLast(500));
-      
-      const snapshot = await get(q);
-      if (!snapshot.exists()) return [];
-      
-      const data = snapshot.val();
-      const messages = Object.keys(data).map(key => ({
-        ...data[key],
-        key: key,
-        id: key
-      }));
-
-      messages.sort((a, b) => a.timestamp - b.timestamp);
-      this.messages = messages;
-      return messages;
-    } catch (error) {
-      console.error('Notes Load error:', error);
-      return [];
-    }
-  }
-
   startPolling(callback) {
     if (this.isPolling) return;
     this.isPolling = true;
@@ -155,6 +198,16 @@ class NotesFirebaseREST {
     });
   }
 
+  startReactionPolling(callback) {
+    this._ensureInit().then(() => {
+        const { ref, onValue } = this.sdk;
+        const reactionsRef = ref(this.db, `notes_reactions/${this.documentId}`);
+        onValue(reactionsRef, (snapshot) => {
+            callback(snapshot.val() || {});
+        });
+    });
+  }
+
   async deleteMessage(messageKey) {
     await this._ensureInit();
     const { ref, remove } = this.sdk;
@@ -163,15 +216,6 @@ class NotesFirebaseREST {
         await remove(messageRef);
         return true;
     } catch (e) { return false; }
-  }
-
-  async getReactions(messageId) {
-    await this._ensureInit();
-    const { ref, get } = this.sdk;
-    try {
-      const snapshot = await get(ref(this.db, `notes_reactions/${this.documentId}/${messageId}`));
-      return snapshot.exists() ? snapshot.val() : null;
-    } catch (e) { return null; }
   }
 
   async addReaction(messageId, emoji) {
@@ -216,6 +260,7 @@ class NotesUIManager {
     this.isVisible = false;
     this.autoScroll = true;
     this.lastMessages = [];
+    this.reactionsCache = {};
 
     this.init();
   }
@@ -223,11 +268,15 @@ class NotesUIManager {
   async init() {
     this.createUI();
     
-    // Initial Load & Polling
-    const messages = await this.db.loadMessages();
-    this.renderMessages(messages);
+    // Listen for reactions (Realtime)
+    this.db.startReactionPolling((reactions) => {
+        this.reactionsCache = reactions;
+        this.updateReactionsUI();
+    });
     
+    // Listen for messages (Realtime)
     this.db.startPolling((messages) => {
+        this.lastMessages = messages;
         this.renderMessages(messages);
     });
   }
@@ -500,11 +549,6 @@ class NotesUIManager {
           list.appendChild(el);
       });
       
-      // Update reactions
-      messages.forEach(msg => {
-         this.loadReactions(msg.id);
-      });
-      
       if(wasAtBottom) this.scrollToBottom();
   }
   
@@ -538,7 +582,7 @@ class NotesUIManager {
              </div>
              ${replyHTML}
              <div class="note-text" style="background:${bg}">${this.linkify(msg.text)}</div>
-             <div class="note-reactions" id="reactions-${msg.id}"></div>
+             <div class="note-reactions" id="reactions-${msg.id}">${this.generateReactionsHTML(msg.id)}</div>
          </div>
          <div class="note-actions">
              <button class="note-action-btn reply-btn" title="Reply">
@@ -557,6 +601,11 @@ class NotesUIManager {
           e.stopPropagation();
           this.showReactionPicker(msg.id, e.target);
       });
+      
+      const reactionsEl = el.querySelector(`#reactions-${msg.id}`);
+      if (reactionsEl) this.attachReactionListeners(reactionsEl);
+
+
       if(isMe){
           el.querySelector('.delete-btn').addEventListener('click', () => this.db.deleteMessage(msg.key));
       }
@@ -611,7 +660,7 @@ class NotesUIManager {
                btn.textContent = emoji;
                btn.style.cssText = "background:none;border:none;font-size:18px;cursor:pointer;padding:4px;";
                btn.onclick = () => {
-                   this.db.addReaction(msgId, emoji).then(() => this.loadReactions(msgId));
+                   this.db.addReaction(msgId, emoji);
                    picker.remove();
                };
                row.appendChild(btn);
@@ -638,51 +687,58 @@ class NotesUIManager {
        }, 0);
   }
   
-  async loadReactions(msgId) {
-      const display = this.container.querySelector(`#reactions-${msgId}`);
-      if(!display) return;
-      
-      const reactions = await this.db.getReactions(msgId);
-      if(!reactions) {
-          display.innerHTML = '';
-          return;
+  updateReactionsUI() {
+    this.lastMessages.forEach(msg => {
+      const display = this.container.querySelector(`#reactions-${msg.id}`);
+      if (display) {
+        display.innerHTML = this.generateReactionsHTML(msg.id);
+        this.attachReactionListeners(display);
       }
-      
-      const reactionCounts = {};
-      const myReactions = {};
+    });
+  }
 
-      Object.keys(reactions).forEach(emoji => {
-          const users = reactions[emoji];
-          if(users) {
-              const activeUsers = Object.keys(users).filter(uid => users[uid] === true);
-              const count = activeUsers.length;
-              if(count > 0) {
-                  reactionCounts[emoji] = count;
-                  if (activeUsers.includes(currentUser.userId)) {
-                      myReactions[emoji] = true;
-                  }
-              }
+  generateReactionsHTML(msgId) {
+    const reactions = this.reactionsCache[msgId];
+    if (!reactions) return '';
+
+    const reactionCounts = {};
+    const myReactions = {};
+
+    Object.keys(reactions).forEach(emoji => {
+      const users = reactions[emoji];
+      if (users) {
+        const activeUsers = Object.keys(users).filter(uid => users[uid] === true);
+        const count = activeUsers.length;
+        if (count > 0) {
+          reactionCounts[emoji] = count;
+          if (activeUsers.includes(currentUser.userId)) {
+            myReactions[emoji] = true;
           }
-      });
-      
-      display.innerHTML = Object.keys(reactionCounts).map(emoji => `
-          <button class="reaction-badge" data-emoji="${emoji}" data-msgid="${msgId}"
-             style="background:${myReactions[emoji] ? '#93c5fd' : '#f1f5f9'};border:none;border-radius:12px;padding:4px 8px;font-size:14px;margin-right:4px;cursor:pointer;font-weight:${myReactions[emoji] ? 'bold' : 'normal'}">
-             ${emoji} ${reactionCounts[emoji]}
-          </button>
-      `).join('');
+        }
+      }
+    });
 
-      // Add click listeners for toggling
-      display.querySelectorAll('.reaction-badge').forEach(btn => {
+    return Object.keys(reactionCounts).map(emoji => `
+        <button class="reaction-badge" data-emoji="${emoji}" data-msgid="${msgId}"
+           style="background:${myReactions[emoji] ? '#93c5fd' : '#f1f5f9'};border:none;border-radius:12px;padding:4px 8px;font-size:14px;margin-right:4px;cursor:pointer;font-weight:${myReactions[emoji] ? 'bold' : 'normal'}">
+           ${emoji} ${reactionCounts[emoji]}
+        </button>
+    `).join('');
+  }
+
+  attachReactionListeners(el) {
+      el.querySelectorAll('.reaction-badge').forEach(btn => {
           btn.addEventListener('click', (e) => {
               e.stopPropagation();
               const emoji = btn.dataset.emoji;
-              const mId = btn.dataset.msgid;
+              const msgId = btn.dataset.msgid;
               
-              if (myReactions[emoji]) {
-                  this.db.removeReaction(mId, emoji).then(() => this.loadReactions(mId));
+              const myReaction = this.reactionsCache[msgId]?.[emoji]?.[currentUser.userId];
+
+              if (myReaction) {
+                  this.db.removeReaction(msgId, emoji);
               } else {
-                  this.db.addReaction(mId, emoji).then(() => this.loadReactions(mId));
+                  this.db.addReaction(msgId, emoji);
               }
           });
       });

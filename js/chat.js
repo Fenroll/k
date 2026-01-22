@@ -471,6 +471,18 @@ class ChatFirebaseREST {
     }
   }
 
+  startReactionsPolling(callback) {
+    this._ensureInit().then(() => {
+        const { ref, onValue } = this.sdk;
+        const reactionsRef = ref(this.db, `reactions/${this.documentId}`);
+
+        onValue(reactionsRef, (snapshot) => {
+            const reactions = snapshot.val() || {};
+            callback(reactions);
+        });
+    });
+  }
+
   startActiveUsersPolling(callback, interval = 5000) {
     this._ensureInit().then(() => {
         const { ref, onValue } = this.sdk;
@@ -564,6 +576,7 @@ class ChatUIManager {
     this.unreadCount = 0;
     this.lastMessages = [];  // Съхранявам предишни съобщения
     this.userNameMappings = {}; // Карта за стари към нови имена
+    this.reactionsCache = {}; // Кеш за реакции
 
     this.init();
   }
@@ -663,22 +676,17 @@ class ChatUIManager {
       this.saveToCache(messages);
       this.renderMessages(messages);
 
-      // Polling за нови съобщения - SMART CHECK с localStorage
+      // Polling за нови съобщения
       this.chatFirebase.startPolling((messages) => {
         this.saveToCache(messages);
         this.renderMessages(messages);
       }, 2500);
 
-      // Polling за реакции - вече се управлява автоматично от SDK
-      /* 
-      setInterval(async () => {
-        const messages = await this.chatFirebase.loadMessages();
-        this.saveToCache(messages);
-        messages.forEach(msg => {
-          this.loadAndDisplayReactions(msg.id);
-        });
-      }, 1000); 
-      */
+      // Real-time слушател за ВСИЧКИ реакции
+      this.chatFirebase.startReactionsPolling((reactions) => {
+        this.reactionsCache = reactions;
+        this.renderAllReactions();
+      });
 
       // Polling за активни потребители
       this.chatFirebase.startActiveUsersPolling((data) => {
@@ -1166,13 +1174,8 @@ class ChatUIManager {
     // ROBUST UNREAD CALCULATION
     this.recalculateUnreadCount(messages);
 
-    // Обнови реакциите за всяко съобщение (само променените)
-    [...addedIds, ...oldIds].forEach(id => {
-      const msg = messages.find(m => m.id === id);
-      if (msg) {
-        this.loadAndDisplayReactions(msg.id);
-      }
-    });
+    // The reaction rendering is now handled by the realtime listener.
+    // No need to call it from here anymore.
 
     // Обнови badge
     this.updateActiveCount();
@@ -1196,6 +1199,9 @@ class ChatUIManager {
       messagesContainer.appendChild(messageEl);
       this.attachMessageListeners(messageEl);
     });
+
+    // След като всички са в DOM, рендирай реакциите от кеша
+    this.renderAllReactions();
   }
 
   createMessageElement(msg, messagesMap) {
@@ -1220,6 +1226,9 @@ class ChatUIManager {
     const isCurrentUser = msg.userId === currentUser.userId || resolvedName === currentUser.userName;
     const messageBgColor = isCurrentUser ? '#e0f2fe' : 'var(--chat-secondary)';
 
+    // Reactions are now rendered from cache, so the initial div is populated
+    const reactionsHTML = this.getReactionsHTML(msg.id);
+
     const htmlString = `
       <div class="chat-message" data-user-id="${msg.userId}" data-message-id="${msg.id}" data-message-key="${msg.key}" style="position: relative;">
         <div class="message-content">
@@ -1229,7 +1238,7 @@ class ChatUIManager {
           </div>
           ${replyHTML}
           <div class="message-text" style="background-color: ${messageBgColor};">${this.linkifyText(msg.text)}</div>
-          <div class="message-reactions" data-message-id="${msg.id}"></div>
+          <div class="message-reactions" data-message-id="${msg.id}">${reactionsHTML}</div>
         </div>
         <div class="message-actions">
          <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 24px; height: 24px;" title="Отговори">
@@ -1247,6 +1256,8 @@ class ChatUIManager {
 
     const temp = document.createElement('div');
     temp.innerHTML = htmlString;
+    // Attach listeners to reaction badges immediately after creation
+    this.attachReactionBadgeListeners(temp.firstElementChild);
     return temp.firstElementChild;
   }
 
@@ -1434,80 +1445,85 @@ HeaderOnHeaderOnlineCount(count) {
   }
 
   async addReaction(messageId, emoji) {
-    if (await this.chatFirebase.addReaction(messageId, emoji)) {
-      console.log('✓ Реакция добавена:', emoji);
-      this.loadAndDisplayReactions(messageId);
-    }
+    // Just send the data, the listener will update the UI
+    await this.chatFirebase.addReaction(messageId, emoji);
   }
 
-  async loadAndDisplayReactions(messageId) {
-    try {
-      const reactions = await this.chatFirebase.getReactions(messageId);
-      
-      const container = document.querySelector(`[data-message-id="${messageId}"] .message-reactions`);
-      
-      if (!container) return;
+  renderAllReactions() {
+    if (!this.reactionsCache) return;
+    
+    const messageElements = this.container.querySelectorAll('.chat-message[data-message-id]');
+    messageElements.forEach(msgEl => {
+        const messageId = msgEl.dataset.messageId;
+        const reactionsContainer = msgEl.querySelector('.message-reactions');
+        if (reactionsContainer) {
+            reactionsContainer.innerHTML = this.getReactionsHTML(messageId);
+            this.attachReactionBadgeListeners(msgEl);
+        }
+    });
+  }
 
-      if (!reactions) {
-        container.innerHTML = '';
-        return;
-      }
+  getReactionsHTML(messageId) {
+    const reactionsForMessage = this.reactionsCache ? this.reactionsCache[messageId] : null;
+    if (!reactionsForMessage) return '';
 
-      const reactionCounts = {};
-      const myReactions = {};
-      
-      Object.keys(reactions).forEach(emoji => {
-        // Since we are now using SDK and likely storing just true/null, or maybe the OLD data has false
-        // we should handle both.
-        // Structure: reactions[emoji] = { userId1: true, userId2: false, ... }
-        const usersObj = reactions[emoji] || {};
+    const reactionCounts = {};
+    const myReactions = {};
+
+    Object.keys(reactionsForMessage).forEach(emoji => {
+        const usersObj = reactionsForMessage[emoji] || {};
         const userIds = Object.keys(usersObj).filter(userId => usersObj[userId] === true);
         const count = userIds.length;
         
         if (count > 0) {
-          reactionCounts[emoji] = count;
-          if (userIds.includes(currentUser.userId)) {
-            myReactions[emoji] = true;
-          }
+            reactionCounts[emoji] = count;
+            if (userIds.includes(currentUser.userId)) {
+                myReactions[emoji] = true;
+            }
         }
-      });
+    });
       
-      // Ако няма реакции - изчисти контейнера
-      if (Object.keys(reactionCounts).length === 0) {
-        container.innerHTML = '';
-        return;
-      }
+    if (Object.keys(reactionCounts).length === 0) {
+        return '';
+    }
 
-      container.innerHTML = Object.keys(reactionCounts).map(emoji => `
+    return Object.keys(reactionCounts).map(emoji => `
         <button class="reaction-badge" data-emoji="${emoji}" data-message-id="${messageId}" 
           style="background: ${myReactions[emoji] ? '#93c5fd' : '#f0f0f0'}; border: none; border-radius: 12px; padding: 4px 8px; margin-right: 4px; cursor: pointer; font-size: 12px; font-weight: ${myReactions[emoji] ? 'bold' : 'normal'};">
           ${emoji} <span>${reactionCounts[emoji]}</span>
         </button>
       `).join('');
+  }
 
-      // Добави listeners за toggle реакции при клик на badge
-      container.querySelectorAll('.reaction-badge').forEach(btn => {
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const emoji = btn.dataset.emoji;
-          const msgId = btn.dataset.messageId;
-          
-          if (myReactions[emoji]) {
-            this.removeReaction(msgId, emoji);
-          } else {
-            this.addReaction(msgId, emoji);
-          }
-        });
+  attachReactionBadgeListeners(element) {
+    const container = element.querySelector('.message-reactions');
+    if (!container) return;
+
+    container.querySelectorAll('.reaction-badge').forEach(btn => {
+      // Remove old listener to prevent duplicates
+      const newBtn = btn.cloneNode(true);
+      btn.parentNode.replaceChild(newBtn, btn);
+
+      newBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const emoji = newBtn.dataset.emoji;
+        const msgId = newBtn.dataset.messageId;
+        
+        const reactionsForMessage = this.reactionsCache ? this.reactionsCache[msgId] : null;
+        const myReaction = reactionsForMessage && reactionsForMessage[emoji] && reactionsForMessage[emoji][currentUser.userId];
+
+        if (myReaction) {
+          this.removeReaction(msgId, emoji);
+        } else {
+          this.addReaction(msgId, emoji);
+        }
       });
-    } catch (error) {
-      console.error('Load reactions error:', error);
-    }
+    });
   }
 
   async removeReaction(messageId, emoji) {
-    if (await this.chatFirebase.removeReaction(messageId, emoji)) {
-      this.loadAndDisplayReactions(messageId);
-    }
+    // Just send the data, the listener will update the UI
+    await this.chatFirebase.removeReaction(messageId, emoji);
   }
 
   startReply(messageId, messageEl) {
