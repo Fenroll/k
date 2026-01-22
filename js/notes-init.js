@@ -202,7 +202,7 @@ class NotesFirebaseREST {
 }
 
 // Cache buster
-const NOTES_VERSION = '20260123_v2';
+const NOTES_VERSION = '20260123_v3';
 
 // ============================================
 // NOTES UI MANAGER
