@@ -1292,19 +1292,6 @@ class ChatUIManager {
       });
     }
   }
-HeaderOnHeaderOnlineCount(count) {
-    const onlineCountEl = this.container.querySelector('.chat-online-count');
-    if (onlineCountEl) {
-        onlineCountEl.textContent = `🟢 ${count || 1} Online`;
-    }
-  }
-
-  updatelineCount(count) {
-    const onlineCountEl = this.container.querySelector('.chat-online-count');
-    if (onlineCountEl) {
-        onlineCountEl.textContent = `🟢 ${count || 1} Online`;
-    }
-  }
 
   updateHeaderOnlineCount(count) {
     const onlineCountEl = this.container.querySelector('.chat-online-count');
@@ -1500,14 +1487,10 @@ HeaderOnHeaderOnlineCount(count) {
     if (!container) return;
 
     container.querySelectorAll('.reaction-badge').forEach(btn => {
-      // Remove old listener to prevent duplicates
-      const newBtn = btn.cloneNode(true);
-      btn.parentNode.replaceChild(newBtn, btn);
-
-      newBtn.addEventListener('click', (e) => {
+      btn.addEventListener('click', (e) => {
         e.stopPropagation();
-        const emoji = newBtn.dataset.emoji;
-        const msgId = newBtn.dataset.messageId;
+        const emoji = btn.dataset.emoji;
+        const msgId = btn.dataset.messageId;
         
         const reactionsForMessage = this.reactionsCache ? this.reactionsCache[msgId] : null;
         const myReaction = reactionsForMessage && reactionsForMessage[emoji] && reactionsForMessage[emoji][currentUser.userId];
