@@ -192,11 +192,17 @@ class ChatFirebaseREST {
             }
         } catch(e) {}
 
-        // Използваме fetch с keepalive за по-сигурно изпращане при затваряне
-        fetch(userRef, { 
-            method: 'DELETE',
-            keepalive: true
-        }).catch(e => console.error(e));
+        // --- GRACE PERIOD ---
+        // НЕ изтриваме потребителя веднага при затваряне на последния таб.
+        // Вместо това, спираме да изпращаме "heartbeat" ъпдейти (чрез затваряне на таба).
+        // Системата автоматично ще го премахне от списъка с активни потребители
+        // след ~1-2 минути, когато `lastSeen` стане твърде стар.
+        // Това предотвратява бъгове, при които потребителят се изтрива погрешно,
+        // ако има отворени няколко таба.
+        /*
+        // OLD CODE: Immediately deletes the user, which can be buggy.
+        fetch(userRef, { method: 'DELETE', keepalive: true }).catch(e => console.error(e));
+        */
       });
 
       return true;
