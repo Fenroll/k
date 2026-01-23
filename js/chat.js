@@ -282,6 +282,29 @@ class ChatFirebaseREST {
     }
   }
 
+  async forceUpdatePresence() {
+    if (!this.db || !window.currentUser || !window.currentUser.userId) return;
+    
+    const { ref, update, serverTimestamp } = this.sdk;
+    const userRef = ref(this.db, `active_users/${this.documentId}/${window.currentUser.userId}`);
+    
+    const isMobile = window.innerWidth <= 768 || 
+                     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    const userData = {
+        userId: window.currentUser.userId,
+        userName: window.currentUser.userName,
+        color: window.currentUser.color,
+        device: isMobile ? 'mobile' : 'desktop',
+        lastSeen: serverTimestamp(),
+        isActive: true
+    };
+
+    try {
+        await update(userRef, userData);
+    } catch (e) { console.error("Force presence update error", e); }
+  }
+
   async markUserActive() {
     await this._ensureInit();
     const { ref, set, update, onDisconnect, serverTimestamp, onValue } = this.sdk;
@@ -298,9 +321,9 @@ class ChatFirebaseREST {
         onValue(connectedRef, (snap) => {
             if (snap.val() === true) {
                 const userData = {
-                    userId: currentUser.userId,
-                    userName: currentUser.userName,
-                    color: currentUser.color,
+                    userId: window.currentUser.userId,
+                    userName: window.currentUser.userName,
+                    color: window.currentUser.color,
                     device: isMobile ? 'mobile' : 'desktop',
                     lastSeen: serverTimestamp(),
                     isActive: true
@@ -311,26 +334,7 @@ class ChatFirebaseREST {
         });
 
         // Function to force update presence
-        const forceUpdate = () => {
-             if (this.db) {
-                 const currentIsMobile = window.innerWidth <= 768 || 
-                               /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-                 
-                 // Use set() or merge with all info to resurrect if missing
-                 const userData = {
-                    userId: currentUser.userId,
-                    userName: currentUser.userName,
-                    color: currentUser.color,
-                    device: currentIsMobile ? 'mobile' : 'desktop',
-                    lastSeen: serverTimestamp(),
-                    isActive: true
-                };
-                
-                // We use update if we just want to touch timestamp, but if checking for absence...
-                // Let's uset update() but with core fields to ensure display works even if resurrected
-                update(userRef, userData).catch(e => console.error("Heartbeat error", e));
-             }
-        };
+        const forceUpdate = () => this.forceUpdatePresence();
 
         // Heartbeat: Updated every 25 sec to be safe (client side), server might have timeouts
         // But to be robust against "disappearing", we include full user info
@@ -340,7 +344,7 @@ class ChatFirebaseREST {
         // Also trigger when tab becomes visible
         document.addEventListener("visibilitychange", () => {
              if (document.visibilityState === 'visible') {
-                 forceUpdate();
+                 this.forceUpdatePresence();
              }
         });
 
@@ -731,8 +735,8 @@ class ChatUIManager {
       // Listener за уведомления
       this.chatFirebase.addMessageListener((newMessage) => {
         // Check if the message is from the current user
-        const isMyMessage = (currentUser.userId && newMessage.userId === currentUser.userId) ||
-                            (currentUser.legacyChatId && newMessage.userId === currentUser.legacyChatId);
+        const isMyMessage = (window.currentUser.userId && newMessage.userId === window.currentUser.userId) ||
+                            (window.currentUser.legacyChatId && newMessage.userId === window.currentUser.legacyChatId);
 
         // Trigger notification only if chat is closed and message is not from self
         if (!this.isOpen && !isMyMessage) {
@@ -863,7 +867,7 @@ class ChatUIManager {
 
     // Ensure current user is always in the list
     const remoteUsers = data.users || {};
-    const allUsers = { ...remoteUsers };
+    let allUsers = { ...remoteUsers };
     
     // Add current user if missing (using currentUser global)
     if (typeof currentUser !== 'undefined' && currentUser.userId) {
@@ -880,7 +884,7 @@ class ChatUIManager {
 
     // --- НОВА ЛОГИКА ЗА ГРУПИРАНЕ ---
     const groupedUsers = {};
-    const myId = (typeof currentUser !== 'undefined' && currentUser.userId) ? String(currentUser.userId) : null;
+    const myId = (typeof window.currentUser !== 'undefined' && window.currentUser.userId) ? String(window.currentUser.userId) : null;
 
     Object.values(allUsers).forEach(user => {
         let name = user.userName;
@@ -999,7 +1003,7 @@ class ChatUIManager {
   recalculateUnreadCount(messages) {
     // Helper to check if a message is from the current user
     const isMyMessage = (msg) => {
-        return msg.userId === currentUser.userId || (currentUser.legacyChatId && msg.userId === currentUser.legacyChatId);
+        return msg.userId === window.currentUser.userId || (window.currentUser.legacyChatId && msg.userId === window.currentUser.legacyChatId);
     };
 
     if (!this.lastReadMessageId) {
@@ -1101,7 +1105,7 @@ class ChatUIManager {
 
     const resolvedName = this.resolveName(msg.userName);
 
-    const isCurrentUser = (currentUser.userId && msg.userId === currentUser.userId) || (currentUser.legacyChatId && msg.userId === currentUser.legacyChatId);
+    const isCurrentUser = (window.currentUser.userId && msg.userId === window.currentUser.userId) || (window.currentUser.legacyChatId && msg.userId === window.currentUser.legacyChatId);
     const messageBgColor = isCurrentUser ? '#e0f2fe' : 'var(--chat-secondary)'; // Keep visual distinction
 
     // Reactions are now rendered from cache, so the initial div is populated
@@ -1531,6 +1535,27 @@ class ChatUIManager {
 
 (async function initializeChat() {
   console.log('Chat init...');
+
+  // Listen for changes in localStorage to sync user data across tabs
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'loggedInUser' && event.newValue) {
+      try {
+        const newUserData = JSON.parse(event.newValue);
+        // Check if the update is for the currently logged-in user
+        if (window.currentUser && newUserData.uid === window.currentUser.userId) {
+          console.log('User data updated from another tab. Refreshing local state.');
+          
+          // Update the global currentUser object
+          Object.assign(window.currentUser, newUserData);
+          
+          // Force an immediate presence update with the new data (e.g., new color)
+          if (window.chatManager && window.chatManager.chatFirebase) {
+              window.chatManager.chatFirebase.forceUpdatePresence();
+          }
+        }
+      } catch (e) { console.error('Error processing storage event:', e); }
+    }
+  });
 
   // Wait for the user identity to be resolved before doing anything else
   await window.currentUserPromise;

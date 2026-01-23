@@ -1,18 +1,6 @@
 // ============================================
-// ANONYMOUS USER (Copied from chat.js for notes)
+// USER INITIALIZATION (Handled by user-identity.js)
 // ============================================
-if (typeof window.AnonymousUser === 'undefined') {
-    class AnonymousUser {
-      // This class is now defined in js/user-identity.js
-      // This check is a fallback.
-      console.error("AnonymousUser class is not defined. Make sure js/user-identity.js is loaded.");
-    }
-}
-
-if (typeof window.currentUser === 'undefined') {
-    console.log("Notes: currentUser not found from chat.js, creating a new one.");
-    // The currentUser object is now created in `js/user-identity.js` and is globally available.
-}
 
 // ============================================
 // NOTES SYSTEM (Based on Chat System)
@@ -22,6 +10,7 @@ if (typeof window.currentUser === 'undefined') {
 // We use 'notes/' path prefix in Firebase instead of 'messages/'
 
 // ============================================
+// NOTES FIREBASE ADAPTER
 // NOTES FIREBASE ADAPTER
 // ============================================
 
@@ -34,7 +23,7 @@ class NotesFirebaseREST {
     
     // Config from chat.js
     this.firebaseConfig = {
-      apiKey: "API_KEY", 
+      apiKey: "API_KEY", // Replace with your actual API Key
       authDomain: "med-student-chat.firebaseapp.com",
       databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "med-student-chat",
@@ -44,6 +33,7 @@ class NotesFirebaseREST {
     };
 
     this.initSDK();
+    console.log('NotesFirebaseREST: Constructor called for documentId:', documentId);
   }
 
   async initSDK() {
@@ -63,17 +53,20 @@ class NotesFirebaseREST {
         this.sdk = window.firebaseSDK;
         this.initApp();
     } else {
-        console.error("Notes: Firebase SDK not found.");
+        console.error("NotesFirebaseREST: Firebase SDK not found after waiting.");
     }
   }
 
   initApp() {
     try {
       const { initializeApp, getDatabase, getApps } = this.sdk;
-      const app = getApps().length === 0 ? initializeApp(this.firebaseConfig) : getApps()[0];
+      // Ensure we get the correct app instance, or initialize if none exists.
+      // It's safer to get an app by name if multiple apps are possible, but for now, first app is fine.
+      const app = getApps().length === 0 ? initializeApp(this.firebaseConfig, "notesApp") : getApps()[0];
       this.db = getDatabase(app);
+      console.log('NotesFirebaseREST: Firebase App initialized.');
     } catch (e) {
-      console.error("Notes Firebase Init Error:", e);
+      console.error("NotesFirebaseREST: Firebase Init Error:", e);
     }
   }
 
@@ -90,7 +83,7 @@ class NotesFirebaseREST {
     await this._ensureInit();
     const { ref, get } = this.sdk;
     try {
-        const snapshot = await get(ref(this.db, `name_mappings`));
+        const snapshot = await get(ref(this.db, `name_mappings`)); // Assuming name_mappings is global, not per document
         return snapshot.exists() ? snapshot.val() : {};
     } catch(e) { 
         console.error("Notes: Failed to get name mappings", e);
@@ -102,6 +95,7 @@ class NotesFirebaseREST {
     this._ensureInit().then(() => {
         const { ref, onValue } = this.sdk;
         const mappingsRef = ref(this.db, `name_mappings`);
+        console.log('NotesFirebaseREST: Starting name mappings polling.');
         onValue(mappingsRef, (snapshot) => {
             callback(snapshot.val() || {});
         });
@@ -133,6 +127,7 @@ class NotesFirebaseREST {
     try {
       const newMessageRef = push(messagesRef);
       await set(newMessageRef, message);
+      console.log('NotesFirebaseREST: Message sent successfully.');
       return true;
     } catch (error) {
       console.error('Notes Send error:', error);
@@ -160,6 +155,7 @@ class NotesFirebaseREST {
                     timestamp: val.timestamp || Date.now()
                 });
             });
+            console.log('NotesFirebaseREST: Messages updated from polling.');
             this.messages = messages;
             callback(messages);
         });
@@ -170,6 +166,7 @@ class NotesFirebaseREST {
     this._ensureInit().then(() => {
         const { ref, onValue } = this.sdk;
         const reactionsRef = ref(this.db, `notes_reactions/${this.documentId}`);
+        console.log('NotesFirebaseREST: Starting reactions polling.');
         onValue(reactionsRef, (snapshot) => {
             callback(snapshot.val() || {});
         });
@@ -182,8 +179,9 @@ class NotesFirebaseREST {
     try {
         const messageRef = ref(this.db, `notes/${this.documentId}/${messageKey}`);
         await remove(messageRef);
+        console.log('NotesFirebaseREST: Message deleted successfully.');
         return true;
-    } catch (e) { return false; }
+    } catch (e) { console.error('NotesFirebaseREST: Delete message error:', e); return false; }
   }
 
   async addReaction(messageId, emoji) {
@@ -202,10 +200,11 @@ class NotesFirebaseREST {
       if (value) {
           await set(reactionRef, true);
       } else {
-          await set(reactionRef, null);
+          await set(reactionRef, null); // Remove the node to keep DB clean
       }
+      console.log(`NotesFirebaseREST: Reaction ${emoji} for message ${messageId} set to ${value}.`);
       return true;
-    } catch (e) { return false; }
+    } catch (e) { console.error('NotesFirebaseREST: Set reaction error:', e); return false; }
   }
 
   stop() {
@@ -231,6 +230,7 @@ class NotesUIManager {
     this.reactionsCache = {};
     this.userNameMappings = {}; // For showing updated names on old messages
 
+    console.log('NotesUIManager: Constructor called for documentId:', documentId);
     this.init();
   }
 
@@ -238,6 +238,7 @@ class NotesUIManager {
     this.createUI();
     
     // Start polling for name mappings
+    console.log('NotesUIManager: Starting name mappings polling.');
     this.db.startNameMappingsPolling((mappings) => {
         this.userNameMappings = mappings;
         if (this.lastMessages.length > 0) {
@@ -246,12 +247,14 @@ class NotesUIManager {
     });
 
     // Listen for reactions (Realtime)
+    console.log('NotesUIManager: Starting reaction polling.');
     this.db.startReactionPolling((reactions) => {
         this.reactionsCache = reactions;
         this.updateReactionsUI();
     });
     
     // Listen for messages (Realtime)
+    console.log('NotesUIManager: Starting messages polling.');
     this.db.startPolling((messages) => {
         this.lastMessages = messages;
         this.renderMessages(messages);
@@ -276,6 +279,7 @@ class NotesUIManager {
     this.container = document.createElement('div');
     this.container.id = 'notes-widget-container';
     this.container.className = 'notes-widget hidden'; // Hidden by default
+    console.log('NotesUIManager: UI container created and appended to body.');
     
     // UI Structure mimic chat.js but tailored
     this.container.innerHTML = `
@@ -458,6 +462,7 @@ class NotesUIManager {
     document.body.appendChild(this.container);
     
     // Check if toggle button exists, if not, keep hidden forever or remove?
+    console.log('NotesUIManager: Attaching event listeners to UI elements.');
     // User requested "notes-widget is always visible and not needed"
     // So let's double check styles.
     
@@ -468,7 +473,7 @@ class NotesUIManager {
     const inputArea = this.container.querySelector('.notes-input-area');
     inputArea.innerHTML = `
         <div id="notes-reply-preview"></div>
-        <div class="notes-input-row">
+        <div class="notes-input-row" style="display: flex; gap: 12px; align-items: flex-end;">
              <textarea class="notes-input" placeholder="Напиши бележка..." rows="1"></textarea>
              <button class="notes-send-btn" title="Изпрати">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -515,9 +520,11 @@ class NotesUIManager {
   toggle() {
     this.isVisible = !this.isVisible;
     if(this.isVisible) {
+        console.log('NotesUIManager: Toggling notes widget ON.');
         this.container.classList.remove('hidden');
         this.scrollToBottom();
     } else {
+        console.log('NotesUIManager: Toggling notes widget OFF.');
         this.container.classList.add('hidden');
     }
   }
@@ -531,6 +538,7 @@ class NotesUIManager {
       const list = this.container.querySelector('#notes-messages-list');
       if(!list) return;
       
+      console.log('NotesUIManager: Rendering messages.');
       const wasAtBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 50;
       
       list.innerHTML = ''; // Full re-render for simplicity (or can optimize like chat.js)
@@ -613,7 +621,7 @@ class NotesUIManager {
       input.dataset.replyAuthor = msg.userName;
       
       preview.innerHTML = `
-        <div class="reply-indicator">
+        <div class="reply-indicator" style="background: #f1f5f9; border-left: 3px solid #3b82f6; padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
             <span>Replying to <b>${this.escapeHtml(msg.userName)}</b></span>
             <button onclick="window.notesManager.cancelReply()" style="border:none;background:none;cursor:pointer;">✖</button>
         </div>
@@ -625,6 +633,7 @@ class NotesUIManager {
       const input = this.container.querySelector('.notes-input');
       input.dataset.replyTo = '';
       input.dataset.replyAuthor = '';
+      console.log('NotesUIManager: Reply cancelled.');
       this.container.querySelector('#notes-reply-preview').innerHTML = '';
   }
   
@@ -672,6 +681,7 @@ class NotesUIManager {
        setTimeout(() => {
            document.addEventListener('click', function close(e) {
                if(!picker.contains(e.target)) {
+                   console.log('NotesUIManager: Reaction picker closed.');
                    picker.remove();
                    document.removeEventListener('click', close);
                }
@@ -682,6 +692,7 @@ class NotesUIManager {
   updateReactionsUI() {
     this.lastMessages.forEach(msg => {
       const display = this.container.querySelector(`#reactions-${msg.id}`);
+      // console.log('NotesUIManager: Updating reactions for message:', msg.id);
       if (display) {
         display.innerHTML = this.generateReactionsHTML(msg.id);
         this.attachReactionListeners(display);
@@ -793,11 +804,13 @@ class NotesUIManager {
          const btn = document.getElementById('notes-toggle-btn');
          if (!btn) {
             // console.log('📝 Notes Skipped: No toggle button found.');
+            console.log('Notes Init: notes-toggle-btn not found. Notes widget will not be initialized.');
             return;
          }
 
          const docId = getDocumentId();
          console.log('📝 Notes initializing for:', docId);
+         console.log('Notes Init: Document ID:', docId);
          
          window.notesManager = new NotesUIManager(docId);
          

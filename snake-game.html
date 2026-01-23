@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snake Game</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
+    <style>
+        body { background: #f0f2f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
+        .layout { display: flex; min-height: 100vh; }
+        #side-menu { background: #262626; width: 200px; min-width: 200px; max-width: 200px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; }
+        .logo-header { background: #262626; width: 200px; height: 107px; text-align: center; display: flex; align-items: center; justify-content: center; border-bottom: 2px solid #1d1b1b; box-sizing: border-box; }
+        .logo-img { width: 168px; height: 22.55px; object-fit: contain; margin-top: 4px; }
+        .sidebar-nav ul { list-style: none; padding: 0; margin: 0; }
+        .sidebar-nav li { position: relative; }
+        .sidebar-nav a { display: flex; align-items: center; color: #fff !important; text-decoration: none; padding: 16px 12px; font-size: 14px; transition: background 0.2s; gap: 12px; font-weight: 400; }
+        .sidebar-nav li.active a { background: #000; }
+        .sidebar-nav li.active a::before { content: ''; display: block; position: absolute; left: 0; top: 0; width: 4px; height: 100%; background: #C56FD5; }
+        .sidebar-nav a:hover { background: #181818; }
+        .sidebar-nav .svg-icon { width: 26px; height: 26px; flex-shrink: 0; }
+        .main-content { flex: 1; padding: 0 0 0 200px; }
+        .main-header { background: #fff; height: 107px; display: flex; align-items: center; border-bottom: 1px solid #d3cdcd; }
+        .page-title { font-size: 30px; margin-left: 30px; font-family: 'Noto Serif', serif; font-weight: 400; }
+        .game-area { display: flex; justify-content: center; align-items: flex-start; gap: 40px; padding: 30px; flex-wrap: wrap; }
+        
+        #game-container { position: relative; }
+        #game-board { border: 5px solid #333; background-color: #a8db8f; display: block; }
+        #game-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        #start-btn {
+            padding: 12px 24px;
+            font-size: 18px;
+            font-weight: bold;
+            color: #7c3aed;
+            background: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        #start-btn:hover {
+            background: #f3f4f6;
+            transform: scale(1.05);
+        }
+        #game-over-text {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        #final-score-text {
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .leaderboard-container { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); width: 300px; }
+        .leaderboard-container h2 { margin-top: 0; color: #7c3aed; text-align: center; }
+        #leaderboard { list-style: none; padding: 0; }
+        #leaderboard li { display: flex; justify-content: space-between; padding: 8px 12px; border-radius: 4px; margin-bottom: 6px; background: #f3f4f6; font-size: 14px; }
+        #leaderboard li:nth-child(1) { background: #fef3c7; font-weight: bold; }
+        #leaderboard li:nth-child(2) { background: #e5e7eb; }
+        #leaderboard li:nth-child(3) { background: #fde68a; }
+        #leaderboard .score { font-weight: 600; color: #7c3aed; }
+        #score-display { text-align: center; font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #333; }
+
+        @media (max-width: 768px) {
+            .main-content { padding-left: 0; }
+            #side-menu { display: none; } /* Simple hide for this page, can be improved */
+            .game-area { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <div id="side-menu">
+            <div class="logo-header">
+                <a href="https://elearn.mu-varna.bg" target="_blank" rel="noopener noreferrer">
+                    <img src="https://ultra.content.blackboardcdn.com/ultra/static/images/brand/blackboard_logo_white.svg" alt="Logo" class="logo-img">
+                </a>
+            </div>
+            <nav class="sidebar-nav">
+                <ul>
+                    <li><a href="https://elearn.mu-varna.bg/ultra/institution-page"><img class="svg-icon" src="elearn-mu-varna-bg/icon-institution-custom.svg" alt=""><span>Institution Page</span></a></li>
+                    <li><a href="account.html"><img class="svg-icon" src="elearn-mu-varna-bg/icon-profile-custom.svg" alt=""><span>Account</span></a></li>
+                    <li><a href="https://elearn.mu-varna.bg/ultra/stream"><img class="svg-icon" src="elearn-mu-varna-bg/icon-activity-custom.svg" alt=""><span>Activity</span></a></li>
+                    <li><a href="index.html"><img class="svg-icon" src="elearn-mu-varna-bg/icon-courses-book.svg" alt=""><span>Courses</span></a></li>
+                    <li><a href="calendar.html"><img class="svg-icon" src="elearn-mu-varna-bg/icon-calendar-custom.svg" alt=""><span>Calendar</span></a></li>
+                    <li><a href="https://elearn.mu-varna.bg/ultra/messages"><img class="svg-icon" src="elearn-mu-varna-bg/svgexport-8.svg" alt=""><span>Messages</span></a></li>
+                    <li><a href="https://elearn.mu-varna.bg/ultra/grades"><img class="svg-icon" src="elearn-mu-varna-bg/icon-grades-paper.svg" alt=""><span>Grades</span></a></li>
+                    <li><a href="tests.html"><img class="svg-icon" src="elearn-mu-varna-bg/icon-tools-custom.svg" alt=""><span>Tools</span></a></li>
+                    <li class="active"><a href="snake-game.html"><img class="svg-icon" src="elearn-mu-varna-bg/gamepad.svg" alt=""><span>Games</span></a></li>
+                    <li><a href="md-editor.html"><img class="svg-icon" src="elearn-mu-varna-bg/icon-signout-custom.svg" alt=""><span>Sign Out</span></a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Main content -->
+        <div class="main-content">
+            <header class="main-header">
+                <h1 class="page-title">Snake Game</h1>
+            </header>
+
+            <div class="game-area">
+                <div id="game-container">
+                    <div id="score-display">Score: 0</div>
+                    <canvas id="game-board" width="400" height="400"></canvas>
+                    <div id="game-overlay">
+                        <h2 id="game-over-text" style="display:none;">Game Over!</h2>
+                        <p id="final-score-text" style="display:none;"></p>
+                        <button id="start-btn">Start Game</button>
+                    </div>
+                </div>
+                <div class="leaderboard-container">
+                    <h2>🏆 Leaderboard</h2>
+                    <ol id="leaderboard">
+                        <li>Loading...</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase and Game Logic -->
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+    <script src="js/user-identity.js?v=202404231000"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // --- 1. GAME SETUP ---
+            const board = document.getElementById('game-board');
+            const ctx = board.getContext('2d');
+            const scoreDisplay = document.getElementById('score-display');
+            const gameOverlay = document.getElementById('game-overlay');
+            const startBtn = document.getElementById('start-btn');
+            const gameOverText = document.getElementById('game-over-text');
+            const finalScoreText = document.getElementById('final-score-text');
+
+            const gridSize = 20;
+            let snake = [{ x: 10, y: 10 }];
+            let food = {};
+            let score = 0;
+            let dx = 0;
+            let dy = 0;
+            let changingDirection = false;
+            let gameInterval;
+
+            // --- 2. FIREBASE SETUP ---
+            let db;
+            const firebaseConfig = {
+                apiKey: "API_KEY",
+                authDomain: "med-student-chat.firebaseapp.com",
+                databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
+            };
+
+            try {
+                const app = firebase.initializeApp(firebaseConfig);
+                db = firebase.database();
+                console.log("Firebase for Snake Game initialized.");
+                listenForLeaderboardUpdates();
+            } catch (e) {
+                console.error("Firebase init failed:", e);
+                document.getElementById('leaderboard').innerHTML = '<li>Error loading leaderboard.</li>';
+            }
+
+            // Wait for user identity
+            await window.currentUserPromise;
+
+            // --- 3. GAME LOGIC ---
+            function startGame() {
+                gameOverlay.style.display = 'none';
+                snake = [{ x: 10, y: 10 }];
+                score = 0;
+                dx = gridSize;
+                dy = 0;
+                scoreDisplay.textContent = `Score: 0`;
+                generateFood();
+                if (gameInterval) clearInterval(gameInterval);
+                gameInterval = setInterval(main, 150); // Slowed down from 100ms to 150ms
+            }
+
+            function showGameOver() {
+                gameOverText.style.display = 'block';
+                finalScoreText.textContent = `Your Score: ${score}`;
+                finalScoreText.style.display = 'block';
+                startBtn.textContent = 'Play Again';
+                gameOverlay.style.display = 'flex';
+            }
+
+            function main() {
+                if (didGameEnd()) {
+                    clearInterval(gameInterval);
+                    submitScore(window.currentUser.userName, score);
+                    showGameOver();
+                    return;
+                }
+
+                changingDirection = false;
+                clearCanvas();
+                drawFood();
+                moveSnake();
+                drawSnake();
+            }
+
+            function clearCanvas() {
+                ctx.fillStyle = '#a8db8f';
+                ctx.fillRect(0, 0, board.width, board.height);
+                drawGrid();
+            }
+
+            function drawGrid() {
+                ctx.strokeStyle = "#99cc88";
+                for (let x = 0; x < board.width; x += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, 0);
+                    ctx.lineTo(x, board.height);
+                    ctx.stroke();
+                }
+                for (let y = 0; y < board.height; y += gridSize) {
+                    ctx.beginPath();
+                    ctx.moveTo(0, y);
+                    ctx.lineTo(board.width, y);
+                    ctx.stroke();
+                }
+            }
+
+            function drawSnake() {
+                // Draw head
+                ctx.fillStyle = '#3a5a40'; // Darker green for head
+                ctx.strokeStyle = '#2c4231';
+                ctx.fillRect(snake[0].x * gridSize, snake[0].y * gridSize, gridSize, gridSize);
+                ctx.strokeRect(snake[0].x * gridSize, snake[0].y * gridSize, gridSize, gridSize);
+
+                // Draw body
+                for (let i = 1; i < snake.length; i++) {
+                    drawSnakePart(snake[i]);
+                }
+            }
+
+            function drawSnakePart(part) {
+                ctx.fillStyle = '#588157'; // Lighter green for body
+                ctx.strokeStyle = '#3a5a40';
+                ctx.fillRect(part.x * gridSize, part.y * gridSize, gridSize, gridSize);
+                ctx.strokeRect(part.x * gridSize, part.y * gridSize, gridSize, gridSize);
+            }
+
+            function moveSnake() {
+                const head = { x: snake[0].x + dx / gridSize, y: snake[0].y + dy / gridSize };
+                snake.unshift(head);
+
+                const didEatFood = snake[0].x === food.x && snake[0].y === food.y;
+                if (didEatFood) {
+                    score += 10;
+                    scoreDisplay.textContent = `Score: ${score}`;
+                    generateFood();
+                } else {
+                    snake.pop();
+                }
+            }
+
+            function generateFood() {
+                food.x = Math.floor(Math.random() * (board.width / gridSize));
+                food.y = Math.floor(Math.random() * (board.height / gridSize));
+                snake.forEach(part => {
+                    if (part.x === food.x && part.y === food.y) generateFood();
+                });
+            }
+
+            function drawFood() {
+                // Draw a circle for the food
+                ctx.fillStyle = '#d00000';
+                ctx.strokeStyle = '#9d0208';
+                ctx.beginPath();
+                ctx.arc(food.x * gridSize + gridSize / 2, food.y * gridSize + gridSize / 2, gridSize / 2 - 2, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
+
+            function didGameEnd() {
+                for (let i = 4; i < snake.length; i++) {
+                    if (snake[i].x === snake[0].x && snake[i].y === snake[0].y) return true;
+                }
+                const hitLeftWall = snake[0].x < 0;
+                const hitRightWall = snake[0].x > (board.width / gridSize) - 1;
+                const hitTopWall = snake[0].y < 0;
+                const hitBottomWall = snake[0].y > (board.height / gridSize) - 1;
+                return hitLeftWall || hitRightWall || hitTopWall || hitBottomWall;
+            }
+
+            function changeDirection(event) {
+                if (changingDirection) return;
+                changingDirection = true;
+
+                const keyPressed = event.keyCode;
+                const goingUp = dy === -gridSize;
+                const goingDown = dy === gridSize;
+                const goingRight = dx === gridSize;
+                const goingLeft = dx === -gridSize;
+
+                if (keyPressed === 37 && !goingRight) { dx = -gridSize; dy = 0; } // Left
+                if (keyPressed === 38 && !goingDown) { dx = 0; dy = -gridSize; } // Up
+                if (keyPressed === 39 && !goingLeft) { dx = gridSize; dy = 0; }  // Right
+                if (keyPressed === 40 && !goingUp) { dx = 0; dy = gridSize; }   // Down
+            }
+
+            // --- 4. LEADERBOARD LOGIC ---
+            function submitScore(name, score) {
+                if (!db || score === 0) return;
+                const newScoreRef = db.ref('leaderboard').push();
+                newScoreRef.set({
+                    name: name,
+                    score: score,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
+
+            function listenForLeaderboardUpdates() {
+                if (!db) return;
+                const leaderboardRef = db.ref('leaderboard').orderByChild('score').limitToLast(10);
+
+                leaderboardRef.on('value', (snapshot) => {
+                    const leaderboardEl = document.getElementById('leaderboard');
+                    leaderboardEl.innerHTML = '';
+                    const scores = [];
+                    snapshot.forEach(childSnapshot => {
+                        scores.push(childSnapshot.val());
+                    });
+
+                    // Sort descending and display
+                    scores.reverse().forEach(entry => {
+                        const li = document.createElement('li');
+                        const nameSpan = document.createElement('span');
+                        const scoreSpan = document.createElement('span');
+                        nameSpan.textContent = entry.name;
+                        scoreSpan.textContent = entry.score;
+                        scoreSpan.className = 'score';
+                        li.appendChild(nameSpan);
+                        li.appendChild(scoreSpan);
+                        leaderboardEl.appendChild(li);
+                    });
+
+                    if (scores.length === 0) {
+                        leaderboardEl.innerHTML = '<li>No scores yet. Be the first!</li>';
+                    }
+                });
+            }
+
+            // --- 5. START ---
+            startBtn.addEventListener('click', startGame);
+            document.addEventListener("keydown", changeDirection);
+        });
+    </script>
+</body>
+</html>
