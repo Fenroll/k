@@ -6,73 +6,11 @@
 // (Chat system initialized)
 
 // ============================================
-// PART 1: ANONYMOUS USER
+// PART 1: USER INITIALIZATION
 // ============================================
 
-class AnonymousUser {
-  constructor() {
-    this.userId = this.getOrCreateUserId();
-    this.userName = this.getOrCreateUserName();
-    this.color = this.generateUserColor();
-  }
-
-  getOrCreateUserId() {
-    let userId = localStorage.getItem('userId');
-    if (!userId) {
-      userId = 'user_' + Math.random().toString(36).substr(2, 9);
-      localStorage.setItem('userId', userId);
-    }
-    return userId;
-  }
-
-  getOrCreateUserName() {
-    // ОПЦИЯ: Разкомент долу за НОВО име при всяко refresh
-    // localStorage.removeItem('userName');
-    
-    let userName = localStorage.getItem('userName');
-    if (!userName) {
-      const adjectives = [
-        'Умен', 'Бърз', 'Силен', 'Весел', 'Смелен',
-        'Спокоен', 'Оптимистичен', 'Брилянтен', 'Всеобхватен', 'Бдителен', 'Скромен',
-        'Остър', 'Модерен', 'Елегантен', 'Енергичен', 'Креативен'
-      ];
-      const nouns = [
-        'Студент', 'Лекар', 'Учен', 'Гений', 'Мъдрец',
-        'Тигър', 'Дракон', 'Лъв', 'Вълк', 'Доктор', 'Професор'
-      ];
-      
-      // Генериране на уникално име
-      let newName = '';
-      do {
-        const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-        const noun = nouns[Math.floor(Math.random() * nouns.length)];
-        newName = `${adj} ${noun}`;
-      } while (newName === userName); // Ако случайно съвпадне, генерира ново
-      
-      userName = newName;
-      localStorage.setItem('userName', userName);
-    }
-    return userName;
-  }
-
-  generateUserColor() {
-    const colors = [
-      '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE',
-      '#FF8B94', '#6BCB77', '#4D96FF', '#FFD93D', '#6A4C93', '#FF6B9D', '#C06C84',
-      '#FF9671', '#FFC75F', '#F9F871', '#845EC2', '#2C73D2', '#00B0FF', '#FB5607',
-      '#7209B7', '#3A0CA3', '#560BAD', '#B5179E', '#F72585', '#4CC9F0', '#72DDF7',
-      '#90E0EF', '#ADE8F7', '#CAF0F8', '#00D9FF', '#00BBF9', '#0096C7', '#023E8A'
-    ];
-    let color = localStorage.getItem('userColor');
-    if (!color) {
-      color = colors[Math.floor(Math.random() * colors.length)];
-      localStorage.setItem('userColor', color);
-    }
-    return color;
-  }
-}
-
-const currentUser = new AnonymousUser();
+// The `currentUser` object is now created in `js/user-identity.js` and is globally available.
+// This file assumes `user-identity.js` has been loaded.
 
 // ============================================
 // PART 2: FIREBASE REST API
@@ -238,6 +176,19 @@ class ChatFirebaseREST {
         const snapshot = await get(ref(this.db, `name_mappings`));
         return snapshot.exists() ? snapshot.val() : {};
     } catch(e) { return {}; }
+  }
+
+  startNameMappingsPolling(callback) {
+    this._ensureInit().then(() => {
+        const { ref, onValue } = this.sdk;
+        const mappingsRef = ref(this.db, `name_mappings`);
+
+        const unsubscribe = onValue(mappingsRef, (snapshot) => {
+            const mappings = snapshot.val() || {};
+            callback(mappings);
+        });
+        this.unsubscribers.push(unsubscribe);
+    });
   }
 
   async getProtectedNames() {
@@ -544,58 +495,19 @@ class ChatFirebaseREST {
   startActiveUsersPolling(callback, interval = 5000) {
     this._ensureInit().then(() => {
         const { ref, onValue } = this.sdk;
-        
-        // Cache previous users for grace period logic
-        let previousUsers = {};
-        const gracePeriodTimes = {}; // Stores timeout timestamps for users who disappeared
 
         const unsubscribe = onValue(ref(this.db, `active_users/${this.documentId}`), (snapshot) => {
             const usersRaw = snapshot.val() || {};
-            const currentValidUsers = {};
-            const now = Date.now();
-            
-            // 1. Identify currently active users from DB
+            const finalUsers = {};
+
+            // Filter out any invalid or malformed user entries, just in case.
+            // This makes the list reflect the database state directly and instantly.
             Object.keys(usersRaw).forEach(key => {
                 const u = usersRaw[key];
                 if (u && typeof u === 'object' && u.userName) {
-                    currentValidUsers[key] = u;
-                    // Reset grace period if they reappear
-                    if (gracePeriodTimes[key]) delete gracePeriodTimes[key];
+                    finalUsers[key] = u;
                 }
             });
-
-            // 2. Check for missing users (who were present before)
-            Object.keys(previousUsers).forEach(key => {
-                if (!currentValidUsers[key]) {
-                    // This user just disappeared. Start grace period if not already started.
-                    if (!gracePeriodTimes[key]) {
-                        // 60 seconds grace period for mobile stability
-                        gracePeriodTimes[key] = now + 60000; 
-                    }
-                }
-            });
-
-            // 3. Construct final list (Current + Grace Period Survivors)
-            const finalUsers = { ...currentValidUsers };
-            
-            Object.keys(gracePeriodTimes).forEach(key => {
-                // If user is missing from current AND grace period not expired
-                if (!currentValidUsers[key]) {
-                    if (now < gracePeriodTimes[key]) {
-                        // Keep them in the list!
-                        finalUsers[key] = { 
-                           ...previousUsers[key], 
-                           // Optional: Add flag to show they might be away?
-                           // isGhost: true 
-                        };
-                    } else {
-                        // Expired, forget them
-                        delete gracePeriodTimes[key];
-                    }
-                }
-            });
-
-            previousUsers = { ...finalUsers };
             
             callback({
                 count: Object.keys(finalUsers).length,
@@ -667,6 +579,20 @@ class ChatUIManager {
         }
     }
     return Array.from(myIds);
+  }
+
+  resolveName(originalName) {
+    if (!this.userNameMappings || !originalName) return originalName;
+    let currentName = originalName;
+    let resolvedName = this.userNameMappings[currentName];
+    let depth = 0; // safety break for circular dependencies
+    while (resolvedName && depth < 10) {
+        currentName = resolvedName;
+        // Check for the next name in the chain
+        resolvedName = this.userNameMappings[currentName];
+        depth++;
+    }
+    return currentName;
   }
 
   fixInputLayout() {
@@ -758,8 +684,14 @@ class ChatUIManager {
       }
       
       // Зареди мапинги на имена
-      this.userNameMappings = await this.chatFirebase.getNameMappings();
       this.protectedNames = await this.chatFirebase.getProtectedNames();
+
+      this.chatFirebase.startNameMappingsPolling((mappings) => {
+          this.userNameMappings = mappings;
+          if (this.lastMessages.length > 0) {
+              this.renderMessages(this.lastMessages);
+          }
+      });
       
       this.saveToCache(messages);
       this.renderMessages(messages);
@@ -797,9 +729,14 @@ class ChatUIManager {
       });
 
       // Listener за уведомления
-      this.chatFirebase.addMessageListener((message) => {
-        if (!this.isOpen) {
-          this.showNotification();
+      this.chatFirebase.addMessageListener((newMessage) => {
+        // Check if the message is from the current user
+        const isMyMessage = (currentUser.userId && newMessage.userId === currentUser.userId) ||
+                            (currentUser.legacyChatId && newMessage.userId === currentUser.legacyChatId);
+
+        // Trigger notification only if chat is closed and message is not from self
+        if (!this.isOpen && !isMyMessage) {
+            this.showNotification();
         }
       });
 
@@ -1018,140 +955,7 @@ class ChatUIManager {
           if(confirm("⚠ WARNING: This will delete ALL chat history globally! Are you sure?")) {
               await window.deleteAllChatMessages('admin');
           }
-          return;
       }
-
-      // /admin rename OldName: NewName
-      if (cmd.startsWith('rename ')) {
-          const parts = cmd.substring(7).split(':');
-          if (parts.length === 2) {
-              const oldName = parts[0].trim();
-              const newName = parts[1].trim();
-              await this.adminRenameUser(oldName, newName);
-          } else {
-              alert('Usage: /admin rename Old Name: New Name');
-          }
-          return;
-      }
-
-      // /admin claimname New Name
-      if (cmd.startsWith('claimname ')) {
-          const newName = cmd.substring(10).trim();
-          if (newName) {
-              await this.claimName(newName);
-          } else {
-              alert('Usage: /admin claimname New Name');
-          }
-          return;
-      }
-
-      // /admin claimcolor #hexcode
-      if (cmd.startsWith('claimcolor ')) {
-          const hexColor = cmd.substring(11).trim();
-          if (hexColor && /^#[0-9A-Fa-f]{6}$/.test(hexColor)) {
-              currentUser.color = hexColor;
-              localStorage.setItem('userColor', hexColor);
-              
-              // Обнови всички сесии с това име
-              await this.chatFirebase.updateColorForAllSessions(hexColor);
-              await this.chatFirebase.markUserActive();
-              
-              // Force refresh of active users list
-              const activeData = await this.chatFirebase.getActiveUsers();
-              this.updateNotificationButton(activeData);
-              this.updateHeaderOnlineCount(activeData.count);
-              
-              alert(`✅ Цветът ви е сменен на: ${hexColor}`);
-          } else {
-              alert('Usage: /admin claimcolor #RRGGBB (например #FF5733)');
-          }
-          return;
-      }
-
-      // /admin protect Name Password
-      if (cmd.startsWith('protect ')) {
-          const parts = cmd.substring(8).split(' ');
-          if (parts.length >= 2) {
-              const name = parts[0].trim();
-              const password = parts.slice(1).join(' ').trim();
-              await this.chatFirebase.protectName(name, password);
-              alert(`Името "${name}" е защитено.`);
-              // Refresh protected names
-              this.protectedNames = await this.chatFirebase.getProtectedNames();
-          } else {
-              alert('Usage: /admin protect Name Password');
-          }
-          return;
-      }
-  }
-
-  async claimName(newName) {
-      if (!newName) return;
-
-      // Check if the name is protected
-      if (this.protectedNames && this.protectedNames[newName]) {
-          const password = prompt(`Името "${newName}" е защитено. Моля, въведете парола:`);
-          if (password !== this.protectedNames[newName]) {
-              alert('Грешна парола.');
-              return;
-          }
-      }
-      
-      const oldName = currentUser.userName;
-
-      // Update name mapping in Firebase
-      await this.chatFirebase.updateNameMapping(oldName, newName);
-      this.userNameMappings[oldName] = newName;
-
-      // Update global user object
-      currentUser.userName = newName;
-      
-      // Update local storage
-      localStorage.setItem('userName', newName);
-      
-      // Update UI
-      const currentUserNameEl = document.getElementById('current-user-name');
-      if (currentUserNameEl) {
-          currentUserNameEl.textContent = newName;
-      }
-      
-      // Update presence
-      this.chatFirebase.markUserActive();
-      
-      alert(`✅ Успешно сменихте името си на: ${newName}`);
-  }
-
-  async adminRenameUser(oldName, newName) {
-      if (!confirm(`Сигурни ли сте, че искате да преименувате всички съобщения от "${oldName}" на "${newName}"?`)) return;
-
-      // 1. Запази мапинга в базата данни
-      await this.chatFirebase.updateNameMapping(oldName, newName);
-
-      // 2. Ъпдейтни съобщенията
-      const messages = this.chatFirebase.messages;
-      let count = 0;
-      
-      const updates = {};
-      for (const msg of messages) {
-          if (msg.userName === oldName) {
-              updates[`messages/${this.documentId}/${msg.key}/userName`] = newName;
-              count++;
-          }
-      }
-      
-      if (count > 0) {
-        await this.chatFirebase.bulkUpdate(updates);
-      }
-      
-      // 3. Обнови локалния кеш за имена
-      this.userNameMappings[oldName] = newName;
-      
-      // 4. Провери дали текущият потребител е преименуван
-      if (currentUser.userName === oldName) {
-          this.claimName(newName);
-      }
-
-      alert(`Преименувани са ${count} съобщения. Моля, презаредете страницата, за да видите всички промени.`);
   }
 
   async handleSendMessage() {
@@ -1193,8 +997,14 @@ class ChatUIManager {
   }
 
   recalculateUnreadCount(messages) {
+    // Helper to check if a message is from the current user
+    const isMyMessage = (msg) => {
+        return msg.userId === currentUser.userId || (currentUser.legacyChatId && msg.userId === currentUser.legacyChatId);
+    };
+
     if (!this.lastReadMessageId) {
-        this.unreadCount = messages.length;
+        // On first load, count all messages that are not from the current user.
+        this.unreadCount = messages.filter(m => !isMyMessage(m)).length;
         return;
     }
 
@@ -1227,9 +1037,12 @@ class ChatUIManager {
     
     // Calculate unread
     if (readIndex !== -1) {
-        this.unreadCount = Math.max(0, messages.length - readIndex - 1);
+        const newMessages = messages.slice(readIndex + 1);
+        // Count only new messages that are not from the current user
+        this.unreadCount = newMessages.filter(m => !isMyMessage(m)).length;
     } else {
-        this.unreadCount = messages.length; 
+        // Fallback: count all messages not from the current user
+        this.unreadCount = messages.filter(m => !isMyMessage(m)).length;
     }
   }
 
@@ -1240,67 +1053,9 @@ class ChatUIManager {
     const scrollWasAtBottom = this.autoScroll ||
       messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 50;
 
-    // --- ENHANCED DIFFING LOGIC ---
-    const oldMessagesById = new Map(this.lastMessages.map(m => [m.id, m]));
-    const newMessagesById = new Map(messages.map(m => [m.id, m]));
-
-    const addedIds = messages.filter(m => !oldMessagesById.has(m.id)).map(m => m.id);
-    const deletedIds = this.lastMessages.filter(m => !newMessagesById.has(m.id)).map(m => m.id);
-    
-    // Handle DELETIONS first
-    if (deletedIds.length > 0) {
-      deletedIds.forEach(deletedId => {
-        const el = messagesContainer.querySelector(`[data-message-id="${deletedId}"]`);
-        if (el) {
-          el.style.opacity = '0';
-          el.style.transition = 'opacity 0.3s';
-          setTimeout(() => el.remove(), 300);
-        }
-      });
-    }
-
-    // Handle potential UPDATES
-    const potentiallyUpdated = messages.filter(m => oldMessagesById.has(m.id));
-    for (const msg of potentiallyUpdated) {
-        const oldMsg = oldMessagesById.get(msg.id);
-        const oldResolvedName = this.userNameMappings[oldMsg.userName] || oldMsg.userName;
-        const newResolvedName = this.userNameMappings[msg.userName] || msg.userName;
-
-        // Check for changes (e.g., name change)
-        if (oldResolvedName !== newResolvedName) {
-            const msgEl = messagesContainer.querySelector(`[data-message-id="${msg.id}"]`);
-            if (msgEl) {
-                const authorEl = msgEl.querySelector('.message-author');
-                if (authorEl) {
-                    authorEl.textContent = this.escapeHtml(newResolvedName);
-                }
-                const isCurrentUser = msg.userId === currentUser.userId || newResolvedName === currentUser.userName;
-                const messageBgColor = isCurrentUser ? '#e0f2fe' : 'var(--chat-secondary)';
-                const textEl = msgEl.querySelector('.message-text');
-                if(textEl) {
-                    textEl.style.backgroundColor = messageBgColor;
-                }
-            }
-        }
-    }
-
-    // Handle ADDITIONS
-    if (addedIds.length > 0) {
-      addedIds.forEach(newId => {
-        const msg = messages.find(m => m.id === newId);
-        if (msg) {
-          const messageEl = this.createMessageElement(msg, messages);
-          messagesContainer.appendChild(messageEl);
-          this.attachMessageListeners(messageEl);
-        }
-      });
-    }
-    
-    // Handle initial render
-    if (this.lastMessages.length === 0) {
-      this.fullRenderMessages(messages, messagesContainer);
-    }
-    // --- END OF DIFFING LOGIC ---
+    // Always do a full re-render to ensure all data (like names) is up-to-date.
+    // This is simpler and more reliable than complex diffing, matching the working logic from notes-init.js.
+    this.fullRenderMessages(messages, messagesContainer);
 
     this.recalculateUnreadCount(messages);
     this.updateActiveCount();
@@ -1344,10 +1099,10 @@ class ChatUIManager {
       `;
     }
 
-    const resolvedName = this.userNameMappings[msg.userName] || msg.userName;
+    const resolvedName = this.resolveName(msg.userName);
 
-    const isCurrentUser = msg.userId === currentUser.userId || resolvedName === currentUser.userName;
-    const messageBgColor = isCurrentUser ? '#e0f2fe' : 'var(--chat-secondary)';
+    const isCurrentUser = (currentUser.userId && msg.userId === currentUser.userId) || (currentUser.legacyChatId && msg.userId === currentUser.legacyChatId);
+    const messageBgColor = isCurrentUser ? '#e0f2fe' : 'var(--chat-secondary)'; // Keep visual distinction
 
     // Reactions are now rendered from cache, so the initial div is populated
     const reactionsHTML = this.getReactionsHTML(msg.id);
@@ -1459,8 +1214,13 @@ class ChatUIManager {
   }
 
   showNotification() {
-    // Не показвай визуална уведомления - само числото на непрочетени
-    // Числото вече се показва от updateActiveCount()
+    const icon = document.querySelector('.chat-icon');
+    if (icon) {
+      icon.classList.add('has-notification');
+      setTimeout(() => {
+        icon.classList.remove('has-notification');
+      }, 3000);
+    }
   }
 
   markAsRead() {
@@ -1769,21 +1529,25 @@ class ChatUIManager {
 // PART 4: INITIALIZATION
 // ============================================
 
-(function initializeChat() {
+(async function initializeChat() {
   console.log('Chat init...');
+
+  // Wait for the user identity to be resolved before doing anything else
+  await window.currentUserPromise;
   
   let attempts = 0;
   const maxAttempts = 20;
 
   function tryInit() {
     attempts++;
-    
+
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', initChat);
     } else if (attempts < maxAttempts) {
       if (document.getElementById('chat-widget')) {
         initChat();
       } else {
+        // Keep trying if widget is not yet in DOM
         setTimeout(tryInit, 100);
       }
     }
@@ -1835,11 +1599,11 @@ class ChatUIManager {
     }
 
     const currentUserNameEl = document.getElementById('current-user-name');
-    if (currentUserNameEl && currentUser) {
-      currentUserNameEl.textContent = currentUser.userName;
+    if (currentUserNameEl && window.currentUser) {
+      currentUserNameEl.textContent = window.currentUser.userName;
     }
 
-    console.log('Потребител:', currentUser.userName);
+    console.log('Потребител:', window.currentUser.userName);
   }
 
   tryInit();
@@ -1893,4 +1657,3 @@ console.log('💡 Команди: resetChat() - ресет на име');
 
 // Cache buster
 const CHAT_VERSION = '20260122_v2';
-

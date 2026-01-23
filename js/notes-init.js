@@ -3,69 +3,15 @@
 // ============================================
 if (typeof window.AnonymousUser === 'undefined') {
     class AnonymousUser {
-      constructor() {
-        this.userId = this.getOrCreateUserId();
-        this.userName = this.getOrCreateUserName();
-        this.color = this.generateUserColor();
-      }
-
-      getOrCreateUserId() {
-        let userId = localStorage.getItem('userId');
-        if (!userId) {
-          userId = 'user_' + Math.random().toString(36).substr(2, 9);
-          localStorage.setItem('userId', userId);
-        }
-        return userId;
-      }
-
-      getOrCreateUserName() {
-        let userName = localStorage.getItem('userName');
-        if (!userName) {
-          const adjectives = [
-            'Умен', 'Бърз', 'Силен', 'Весел', 'Смелен',
-            'Спокоен', 'Оптимистичен', 'Брилянтен', 'Всеобхватен', 'Бдителен', 'Скромен',
-            'Остър', 'Модерен', 'Елегантен', 'Енергичен', 'Креативен'
-          ];
-          const nouns = [
-            'Студент', 'Лекар', 'Учен', 'Гений', 'Мъдрец',
-            'Тигър', 'Дракон', 'Лъв', 'Вълк', 'Доктор', 'Професор'
-          ];
-          
-          let newName = '';
-          do {
-            const adj = adjectives[Math.floor(Math.random() * adjectives.length)];
-            const noun = nouns[Math.floor(Math.random() * nouns.length)];
-            newName = `${adj} ${noun}`;
-          } while (newName === userName);
-          
-          userName = newName;
-          localStorage.setItem('userName', userName);
-        }
-        return userName;
-      }
-
-      generateUserColor() {
-        const colors = [
-          '#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE',
-          '#FF8B94', '#6BCB77', '#4D96FF', '#FFD93D', '#6A4C93', '#FF6B9D', '#C06C84',
-          '#FF9671', '#FFC75F', '#F9F871', '#845EC2', '#2C73D2', '#00B0FF', '#FB5607',
-          '#7209B7', '#3A0CA3', '#560BAD', '#B5179E', '#F72585', '#4CC9F0', '#72DDF7',
-      '#90E0EF', '#ADE8F7', '#CAF0F8', '#00D9FF', '#00BBF9', '#0096C7', '#023E8A'
-        ];
-        let color = localStorage.getItem('userColor');
-        if (!color) {
-          color = colors[Math.floor(Math.random() * colors.length)];
-          localStorage.setItem('userColor', color);
-        }
-        return color;
-      }
+      // This class is now defined in js/user-identity.js
+      // This check is a fallback.
+      console.error("AnonymousUser class is not defined. Make sure js/user-identity.js is loaded.");
     }
-    window.AnonymousUser = AnonymousUser;
 }
 
 if (typeof window.currentUser === 'undefined') {
     console.log("Notes: currentUser not found from chat.js, creating a new one.");
-    window.currentUser = new window.AnonymousUser();
+    // The currentUser object is now created in `js/user-identity.js` and is globally available.
 }
 
 // ============================================
@@ -138,6 +84,28 @@ class NotesFirebaseREST {
         await new Promise(r => setTimeout(r, 100));
         if (!this.sdk) break; 
     }
+  }
+
+  async getNameMappings() {
+    await this._ensureInit();
+    const { ref, get } = this.sdk;
+    try {
+        const snapshot = await get(ref(this.db, `name_mappings`));
+        return snapshot.exists() ? snapshot.val() : {};
+    } catch(e) { 
+        console.error("Notes: Failed to get name mappings", e);
+        return {}; 
+    }
+  }
+
+  startNameMappingsPolling(callback) {
+    this._ensureInit().then(() => {
+        const { ref, onValue } = this.sdk;
+        const mappingsRef = ref(this.db, `name_mappings`);
+        onValue(mappingsRef, (snapshot) => {
+            callback(snapshot.val() || {});
+        });
+    });
   }
 
   // --- CHANGED PATHS TO 'notes/' ---
@@ -261,6 +229,7 @@ class NotesUIManager {
     this.autoScroll = true;
     this.lastMessages = [];
     this.reactionsCache = {};
+    this.userNameMappings = {}; // For showing updated names on old messages
 
     this.init();
   }
@@ -268,6 +237,14 @@ class NotesUIManager {
   async init() {
     this.createUI();
     
+    // Start polling for name mappings
+    this.db.startNameMappingsPolling((mappings) => {
+        this.userNameMappings = mappings;
+        if (this.lastMessages.length > 0) {
+            this.renderMessages(this.lastMessages);
+        }
+    });
+
     // Listen for reactions (Realtime)
     this.db.startReactionPolling((reactions) => {
         this.reactionsCache = reactions;
@@ -279,6 +256,20 @@ class NotesUIManager {
         this.lastMessages = messages;
         this.renderMessages(messages);
     });
+  }
+
+  resolveName(originalName) {
+    if (!this.userNameMappings || !originalName) return originalName;
+    let currentName = originalName;
+    let resolvedName = this.userNameMappings[currentName];
+    let depth = 0; // safety break for circular dependencies
+    while (resolvedName && depth < 10) {
+        currentName = resolvedName;
+        // Check for the next name in the chain
+        resolvedName = this.userNameMappings[currentName];
+        depth++;
+    }
+    return currentName;
   }
 
   createUI() {
@@ -554,10 +545,11 @@ class NotesUIManager {
   
   createMessageElement(msg, allMessages) {
       // Check if message belongs to current user (by userId OR userName like in chat.js)
-      const isMe = msg.userId === currentUser.userId || msg.userName === currentUser.userName;
+      const isMe = (currentUser.userId && msg.userId === currentUser.userId) || (currentUser.legacyNotesId && msg.userId === currentUser.legacyNotesId);
       const el = document.createElement('div');
       el.className = 'note-message';
       el.dataset.id = msg.id;
+      const resolvedName = this.resolveName(msg.userName);
       
       // Reply content
       let replyHTML = '';
@@ -577,7 +569,7 @@ class NotesUIManager {
       el.innerHTML = `
          <div class="note-content">
              <div class="note-header">
-                <span class="note-author">${this.escapeHtml(msg.userName)}</span>
+                <span class="note-author">${this.escapeHtml(resolvedName)}</span>
                 <span class="note-time">${new Date(msg.timestamp).toLocaleTimeString('bg-BG', {hour: '2-digit', minute:'2-digit'})}</span>
              </div>
              ${replyHTML}
@@ -762,7 +754,7 @@ class NotesUIManager {
 // INITIALIZATION
 // ============================================
 
-(function() {
+(async function() {
     function getDocumentId() {
         // Logic from original notes-init.js to identify file
         const urlParams = new URLSearchParams(window.location.search);
@@ -793,7 +785,10 @@ class NotesUIManager {
         return 'doc_general';
     }
 
-    function init() {
+    async function init() {
+         // Wait for user identity to be resolved
+         await window.currentUserPromise;
+
          // Only init if toggle button exists on page
          const btn = document.getElementById('notes-toggle-btn');
          if (!btn) {

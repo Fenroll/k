@@ -264,12 +264,36 @@ class AccountSystem {
                     userKey = childSnapshot.key;
                 });
 
+                // MIGRATION: If user object is old (no UID field), migrate it to the new structure.
+                if (userData && !userData.uid) {
+                    console.log(`Migrating old user account: ${userKey}`);
+                    const newUid = this.db.ref('site_users').push().key;
+                    
+                    const migratedUserData = {
+                        ...userData,
+                        uid: newUid,
+                        legacyUid: userKey // The old key was the username, which is the legacy ID now.
+                    };
+
+                    const updates = {};
+                    updates[`/site_users/${newUid}`] = migratedUserData;
+                    updates[`/site_users/${userKey}`] = null; // Delete old record
+
+                    await this.db.ref().update(updates);
+
+                    // For the rest of this login session, use the migrated data
+                    userData = migratedUserData;
+                    userKey = newUid;
+                    console.log(`User ${migratedUserData.username} migrated to new UID: ${newUid} with legacy UID: ${migratedUserData.legacyUid}`);
+                }
+
                 const storedPassword = atob(userData.password);
 
                 if (password === storedPassword) {
                     const userColor = userData.color || this.generateRandomColor();
                     // The permanent UID is the key of the record in the database
-                    this.user = { uid: userKey, username: userData.username, displayName: userData.displayName || userData.username, color: userColor, password: storedPassword };
+                    // After migration, userData contains the full new object.
+                    this.user = { ...userData, password: storedPassword, color: userColor };
                     localStorage.setItem('loggedInUser', JSON.stringify(this.user));
                     console.log('Успешен вход:', this.user.username);
 
@@ -396,12 +420,30 @@ class AccountSystem {
         this.hideError('change-displayname-error');
 
         try {
+            const oldDisplayName = this.user.displayName;
+
+            if (oldDisplayName === newDisplayName) {
+                this.updateUI(); // No change needed, just refresh UI and exit
+                return;
+            }
+
             const userRef = this.db.ref(`site_users/${this.user.uid}`);
             await userRef.update({ displayName: newDisplayName });
 
             this.user.displayName = newDisplayName;
             localStorage.setItem('loggedInUser', JSON.stringify(this.user));
-            
+
+            // Update name mappings to handle name changes and reclaiming old names.
+            if (oldDisplayName) {
+                const updates = {};
+                // If the new name was a key in a previous mapping, delete that mapping. This prevents cycles.
+                updates[`/name_mappings/${newDisplayName}`] = null;
+                // Create a mapping from the old name to the new one.
+                updates[`/name_mappings/${oldDisplayName}`] = newDisplayName;
+
+                await this.db.ref().update(updates);
+            }
+
             this.updateUI();
         } catch (error) {
             console.error("Display name change error:", error);

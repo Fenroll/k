@@ -176,72 +176,72 @@
 <body>
 
     <div class="account-container">
-        <a href="index.html" style="display: block; text-align: left; margin-bottom: 1.5rem; color: #6d28d9; text-decoration: none;">← Назад към курсовете</a>
+        <a href="index.html" style="display: block; text-align: left; margin-bottom: 1.5rem; color: #6d28d9; text-decoration: none;">← Back to courses</a>
         <!-- Registration Form -->
         <div id="register-form" class="form-container">
-            <h2>Регистрация</h2>
+            <h2>Registration</h2>
             <div id="register-error" class="error-message"></div>
             <form id="registration-form-element">
                 <div class="form-group">
-                    <label for="register-username">Потребителско име</label>
+                    <label for="register-username">Username</label>
                     <input type="text" id="register-username" required>
                 </div>
                 <div class="form-group">
-                    <label for="register-displayname">Име за показване</label>
+                    <label for="register-displayname">Public Name</label>
                     <input type="text" id="register-displayname" required>
                 </div>
                 <div class="form-group">
-                    <label for="register-password">Парола</label>
+                    <label for="register-password">Password</label>
                     <input type="password" id="register-password" required>
                 </div>
-                <button type="submit" class="btn">Регистрация</button>
+                <button type="submit" class="btn">Registration</button>
             </form>
-            <p class="toggle-link">Имате акаунт? <a id="show-login">Вход</a></p>
+            <p class="toggle-link">Have an account? <a id="show-login">Login</a></p>
         </div>
 
         <!-- Login Form -->
         <div id="login-form" class="form-container">
-            <h2>Вход</h2>
+            <h2>Login</h2>
             <div id="login-error" class="error-message"></div>
             <form id="login-form-element">
                 <div class="form-group">
-                    <label for="login-username">Потребителско име</label>
+                    <label for="login-username">Public Name</label>
                     <input type="text" id="login-username" required>
                 </div>
                 <div class="form-group">
-                    <label for="login-password">Парола</label>
+                    <label for="login-password">Password</label>
                     <input type="password" id="login-password" required>
                 </div>
-                <button type="submit" class="btn">Вход</button>
+                <button type="submit" class="btn">Login</button>
             </form>
-            <p class="toggle-link">Нямате акаунт? <a id="show-register">Регистрация</a></p>
+            <p class="toggle-link">No Account? <a id="show-register">Registration</a></p>
         </div>
 
         <!-- Account Info -->
         <div id="account-info" class="account-info">
-            <h2>Профил</h2>
+            <h2>Profile</h2>
 
-            <h3 class="data-section-title">Лични данни</h3>
+            <h3 class="data-section-title">Personal Data</h3>
             <div class="profile-data-list">
                 <div class="profile-data-item">
-                    <span class="data-label">Потребител (за вход):</span>
+                    <span class="data-label">Username:</span>
                     <span class="data-value" id="user-username"></span>
-                    <button id="show-change-username-btn" class="change-btn">смяна</button>
+                    <button id="show-change-username-btn" class="change-btn">chane</button>
                 </div>
                 <div class="profile-data-item">
-                    <span class="data-label">Име за показване:</span>
+                    <span class="data-label">Public Name:</span>
                     <span class="data-value" id="user-displayname"></span>
-                    <button id="show-change-displayname-btn" class="change-btn">смяна</button>
+                    <button id="show-change-displayname-btn" class="change-btn">chane</button>
                 </div>
                 <div class="profile-data-item">
-                    <span class="data-label">Парола:</span>
+                    <span class="data-label">Password:</span>
                     <span class="data-value password-value" id="user-password">••••••••</span>
-                    <button id="show-change-password-btn" class="change-btn">смяна</button>
+                    <button id="show-change-password-btn" class="change-btn">chane</button>
                 </div>
                 <div class="profile-data-item">
-                    <span class="data-label">Цвят:</span>
+                    <span class="data-label">Color:</span>
                     <span class="data-value color-value" id="user-color-preview"></span>
-                    <button id="show-change-color-btn" class="change-btn">смяна</button>
+                    <button id="show-change-color-btn" class="change-btn">chane</button>
                 </div>
                 <div class="profile-data-item">
                     <span class="data-label">UID:</span>
@@ -249,93 +249,93 @@
                 </div>
             </div>
             <div class="account-footer-actions">
-                <button id="show-delete-account-btn" class="btn btn-danger">Изтрий акаунт</button>
-                <button id="logout-btn" class="btn" style="background-color: #4b5563;">Изход от акаунт</button>
+                <button id="show-delete-account-btn" class="btn btn-danger">Delete Account</button>
+                <button id="logout-btn" class="btn" style="background-color: #4b5563;">Log Out</button>
             </div>
         </div>
 
         <!-- Change Password Form -->
         <div id="change-password-form" class="form-container">
-            <h2>Смяна на парола</h2>
+            <h2>Change Password</h2>
             <div id="change-password-error" class="error-message"></div>
             <form id="change-password-form-element">
                 <div class="form-group">
-                    <label for="new-password">Нова парола</label>
+                    <label for="new-password">New Password</label>
                     <input type="password" id="new-password" required>
                 </div>
                 <div class="form-group">
-                    <label for="confirm-password">Потвърди парола</label>
+                    <label for="confirm-password">Confirm Password</label>
                     <input type="password" id="confirm-password" required>
                 </div>
-                <button type="submit" class="btn">Запази</button>
+                <button type="submit" class="btn">Save</button>
                 <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Отказ</button>
             </form>
         </div>
 
         <!-- Change Username Form -->
         <div id="change-username-form" class="form-container">
-            <h2>Смяна на потребителско име</h2>
+            <h2>Change username</h2>
             <div id="change-username-error" class="error-message"></div>
             <form id="change-username-form-element">
                 <div class="form-group">
-                    <label for="new-username">Ново потребителско име</label>
+                    <label for="new-username">New Username</label>
                     <input type="text" id="new-username" required>
                 </div>
                 <div class="form-group">
-                    <label for="current-password-for-username">Текуща парола (за потвърждение)</label>
+                    <label for="current-password-for-username">Current Password</label>
                     <input type="password" id="current-password-for-username" required>
                 </div>
-                <button type="submit" class="btn">Запази</button>
-                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Отказ</button>
+                <button type="submit" class="btn">Save</button>
+                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Cancel</button>
             </form>
         </div>
 
         <!-- Change Display Name Form -->
         <div id="change-displayname-form" class="form-container">
-            <h2>Смяна на име за показване</h2>
+            <h2>Chane Public Name</h2>
             <div id="change-displayname-error" class="error-message"></div>
             <form id="change-displayname-form-element">
                 <div class="form-group">
-                    <label for="new-displayname">Ново име за показване</label>
+                    <label for="new-displayname">New Public Name</label>
                     <input type="text" id="new-displayname" required>
                 </div>
-                <button type="submit" class="btn">Запази</button>
-                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Отказ</button>
+                <button type="submit" class="btn">Save</button>
+                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Cancel</button>
             </form>
         </div>
 
         <!-- Change Color Form -->
         <div id="change-color-form" class="form-container">
-            <h2>Смяна на цвят</h2>
+            <h2>Change Color</h2>
             <div id="change-color-error" class="error-message"></div>
             <form id="change-color-form-element">
                 <div class="form-group">
-                    <label for="new-color">Избери нов цвят</label>
+                    <label for="new-color">Pick a New Color</label>
                     <input type="color" id="new-color" style="width: 100%; height: 50px;" value="#7c3aed" required>
                 </div>
-                <button type="submit" class="btn">Запази</button>
-                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Отказ</button>
+                <button type="submit" class="btn">Save</button>
+                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Cancel</button>
             </form>
         </div>
 
         <!-- Delete Account Form -->
         <div id="delete-account-form" class="form-container">
-            <h2>Изтриване на акаунт</h2>
-            <p style="text-align: center; color: #ef4444; margin-bottom: 1rem;"><strong>Внимание!</strong> Тази операция е необратима. Всички ваши данни ще бъдат изтрити.</p>
+            <h2>Delete Account</h2>
+            <p style="text-align: center; color: #ef4444; margin-bottom: 1rem;"><strong>Warning!</strong> This operation is irreversible. All your data will be deleted.</p>
             <div id="delete-account-error" class="error-message"></div>
             <form id="delete-account-form-element">
                 <div class="form-group">
-                    <label for="password-for-delete">Въведете паролата си за потвърждение</label>
+                    <label for="password-for-delete">Enter your password to confirm.</label>
                     <input type="password" id="password-for-delete" required>
                 </div>
-                <button type="submit" class="btn btn-danger">Потвърди изтриването</button>
+                <button type="submit" class="btn btn-danger">Confirm deletion</button>
                 <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Отказ</button>
             </form>
         </div>
 
         <!-- Loading Spinner -->
         <div id="loading-spinner" style="text-align: center; display: none;">
-            <p>Зареждане...</p>
+            <p>Loading...</p>
         </div>
     </div>
 
