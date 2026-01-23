@@ -7,7 +7,7 @@ class CurrentUser {
     this.userId = null;
     this.userName = null;
     this.color = null;
-    this.legacyChatId = null;
+    this.legacyChatId = null; // Keep, important for user state
     this.legacyNotesId = null;
     this.password = null; // Needed for account.html
   }
@@ -98,7 +98,7 @@ async function createAndInitUser() {
                     });
                     
                     localStorage.setItem('loggedInUser', JSON.stringify(fullUserObject));
-                    console.log('Identity: Refreshed logged-in user from DB:', user.userName);
+                    // console.log('Identity: Refreshed logged-in user from DB:', user.userName); // Can be removed
                     return user;
                 } else {
                     throw new Error("User not found in database.");
@@ -119,7 +119,7 @@ async function createAndInitUser() {
         legacyChatId: anonymousId,
         legacyNotesId: anonymousId
     });
-    console.log('Identity: Using anonymous user:', user.userName);
+    // console.log('Identity: Using anonymous user:', user.userName); // Can be removed
     return user;
 }
 

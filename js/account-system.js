@@ -73,7 +73,7 @@ class AccountSystem {
                     // Update localStorage with the fresh, correct data.
                     localStorage.setItem('loggedInUser', JSON.stringify(this.user));
                     console.log('Session refreshed from DB for user:', this.user.username);
-                } else {
+                } else { // Keep, error message
                     throw new Error("User not found in database.");
                 }
             } catch (e) {
@@ -229,7 +229,7 @@ class AccountSystem {
                 // For the session, use the decoded password
                 this.user = { ...newUserDbData, password: password };
                 localStorage.setItem('loggedInUser', JSON.stringify(this.user));
-                console.log('Успешна регистрация:', username);
+                // console.log('Успешна регистрация:', username); // Can be removed
             }
         } catch (error) {
             console.error("Registration error:", error);
@@ -295,7 +295,7 @@ class AccountSystem {
                     // After migration, userData contains the full new object.
                     this.user = { ...userData, password: storedPassword, color: userColor };
                     localStorage.setItem('loggedInUser', JSON.stringify(this.user));
-                    console.log('Успешен вход:', this.user.username);
+                    // console.log('Успешен вход:', this.user.username); // Can be removed
 
                     // If user had no color, save the new one to DB
                     if (!userData.color) {
@@ -316,7 +316,7 @@ class AccountSystem {
     async logout() {
         this.user = null;
         localStorage.removeItem('loggedInUser');
-        console.log('Успешен изход.');
+        // console.log('Успешен изход.'); // Can be removed
         this.updateUI();
     }
 

@@ -600,7 +600,7 @@
     
     // Setup summary button - outside IIFE so it always works
     const summaryBtn = document.getElementById('summaryBtn');
-    console.log('Summary button setup starting, button exists:', !!summaryBtn);
+  //  console.log('Summary button setup starting, button exists:', !!summaryBtn);
     
     let originalPath = null;
     let isSummaryMode = false;
@@ -610,7 +610,7 @@
     // Setup button when page loads
     const setupButton = () => {
       if (buttonSetupDone) {
-        console.log('Button already setup, skipping');
+     //   console.log('Button already setup, skipping');
         return;
       }
       buttonSetupDone = true;
@@ -1047,7 +1047,7 @@
       // Function to update h1 elements list
       function updateH1List() {
         h1Elements = Array.from(document.querySelectorAll('#content h1'));
-        console.log('Found', h1Elements.length, 'h1 elements');
+     //   console.log('Found', h1Elements.length, 'h1 elements');
       }
       
       // Function to scroll to h1 element

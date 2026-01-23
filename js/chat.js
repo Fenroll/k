@@ -36,7 +36,7 @@ class ChatFirebaseREST {
       appId: "APP_ID"
     };
 
-    console.log('Using Firebase SDK Wrapper');
+    // console.log('Using Firebase SDK Wrapper'); // Can be removed
     this.initSDK();
   }
 
@@ -66,7 +66,7 @@ class ChatFirebaseREST {
       // Check if app already exists to avoid errors on page reload/navigation
       const app = getApps().length === 0 ? initializeApp(this.firebaseConfig) : getApps()[0];
       this.db = getDatabase(app);
-      console.log('✓ Firebase SDK Initialized');
+      // console.log('✓ Firebase SDK Initialized'); // Can be removed
     } catch (e) {
       console.error("Firebase Init Error:", e);
     }
@@ -240,7 +240,7 @@ class ChatFirebaseREST {
             if (messages.length > this.messages.length && this.messages.length > 0) {
                  const newMessage = messages[messages.length - 1];
                  this.listeners.forEach(listener => listener(newMessage));
-            }
+            } // Can be removed, frequent
 
             this.messages = messages;
             callback(messages);
@@ -274,7 +274,7 @@ class ChatFirebaseREST {
       });
       
       if (Object.keys(updates).length > 0) {
-        await update(ref(this.db), updates);
+        await update(ref(this.db), updates); // Can be removed, less critical
         console.log(`✓ Обновени ${Object.keys(updates).length} сесии с нов цвят`);
       }
     } catch (error) {
@@ -317,7 +317,7 @@ class ChatFirebaseREST {
                         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         console.log('Mobile detection:', isMobile, 'Window width:', window.innerWidth);
-
+        // console.log('Mobile detection:', isMobile, 'Window width:', window.innerWidth); // Can be removed
         onValue(connectedRef, (snap) => {
             if (snap.val() === true) {
                 const userData = {
@@ -416,7 +416,7 @@ class ChatFirebaseREST {
             const lastReadId = snapshot.val();
             if (lastReadId) {
                 callback(lastReadId);
-            }
+            } // Can be removed, frequent
         });
         this.unsubscribers.push(unsubscribe);
     });
@@ -528,7 +528,7 @@ class ChatFirebaseREST {
     this.listeners = [];
 
     // Unsubscribe from all listeners
-    this.unsubscribers.forEach(unsub => unsub());
+    this.unsubscribers.forEach(unsub => unsub()); // Can be removed, internal logic
     this.unsubscribers = [];
 
     // Clear heartbeat
@@ -537,7 +537,7 @@ class ChatFirebaseREST {
         this.heartbeatInterval = null;
     }
 
-    console.log('🛑 ChatFirebaseREST спрян.');
+    // console.log('🛑 ChatFirebaseREST спрян.'); // Can be removed
   }
 }
 
@@ -547,7 +547,7 @@ class ChatFirebaseREST {
 
 class ChatUIManager {
   constructor(containerId, documentId) {
-    console.log('💬 ChatUIManager инициализирам...');
+    // console.log('💬 ChatUIManager инициализирам...'); // Can be removed
     this.container = document.getElementById(containerId);
     if (!this.container) {
       console.error('Container не е намерен:', containerId);
@@ -736,7 +736,7 @@ class ChatUIManager {
       this.chatFirebase.startLastReadPolling(currentUser.userName, (lastReadId) => {
         if (lastReadId && lastReadId !== this.lastReadMessageId) {
           console.log(`🔄 Синхронизиран нов lastReadId: ${lastReadId}`);
-          this.lastReadMessageId = lastReadId;
+          this.lastReadMessageId = lastReadId; // Can be removed, frequent
           localStorage.setItem(`lastReadMessage_${this.documentId}`, lastReadId);
           
           // Преизчисли непрочетените и обнови брояча
@@ -762,7 +762,7 @@ class ChatUIManager {
       // Инициализирай бутон за уведомления един път
       this.initNotificationButton();
       
-      console.log('✓✓✓ ChatUIManager готов');
+      // console.log('✓✓✓ ChatUIManager готов'); // Can be removed
     } catch (error) {
       console.error('Init error:', error);
     }
@@ -844,7 +844,7 @@ class ChatUIManager {
     // Добави listener един път
     const toggleBtn = sidebarEl.querySelector('#toggle-notifications');
     if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => {
+      toggleBtn.addEventListener('click', () => { // Can be removed, internal logic
         this.notificationsDisabled = !this.notificationsDisabled;
         localStorage.setItem(`notificationsDisabled_${this.documentId}`, this.notificationsDisabled);
         // Обнови цвета без да презаписваш HTML
@@ -1520,7 +1520,7 @@ class ChatUIManager {
       input.dataset.replyAuthor = author;
       input.dataset.replyText = text;
       
-      // Добавяй визуална индикация
+      // Добавяй визуална индикация // Can be removed, internal logic
       const inputArea = this.container.querySelector('.chat-input-area');
       // Ensure layout is fixed before adding indicator
       this.fixInputLayout();
@@ -1620,7 +1620,7 @@ class ChatUIManager {
 // ============================================
 
 (async function initializeChat() {
-  console.log('Chat init...');
+  // console.log('Chat init...'); // Can be removed
 
   // Listen for changes in localStorage to sync user data across tabs
   window.addEventListener('storage', (event) => {
@@ -1629,7 +1629,7 @@ class ChatUIManager {
         const newUserData = JSON.parse(event.newValue);
         // Check if the update is for the currently logged-in user
         if (window.currentUser && newUserData.uid === window.currentUser.userId) {
-          console.log('User data updated from another tab. Refreshing local state.');
+          // console.log('User data updated from another tab. Refreshing local state.'); // Can be removed
           
           // Update the global currentUser object
           Object.assign(window.currentUser, newUserData);
@@ -1665,7 +1665,7 @@ class ChatUIManager {
   }
 
   function initChat() {
-    console.log('Инициализирам Chat UI...');
+    // console.log('Инициализирам Chat UI...'); // Can be removed
     
     const chatWidget = document.getElementById('chat-widget');
     if (!chatWidget) {
@@ -1680,7 +1680,7 @@ class ChatUIManager {
     try {
       chatManager = new ChatUIManager('chat-widget', documentId);
       window.chatManager = chatManager;
-      console.log('✓✓✓ Chat система ГОТОВА!');
+    //  console.log('✓✓✓ Chat система ГОТОВА!');
     } catch (error) {
       console.error('Chat init error:', error);
       return;
@@ -1691,7 +1691,7 @@ class ChatUIManager {
       chatIcon.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('💬 Click');
+        // console.log('💬 Click'); // Can be removed
         if (window.chatManager) {
           window.chatManager.toggleChat();
         }
@@ -1714,7 +1714,7 @@ class ChatUIManager {
       currentUserNameEl.textContent = window.currentUser.userName;
     }
 
-    console.log('Потребител:', window.currentUser.userName);
+    // console.log('Потребител:', window.currentUser.userName); // Can be removed
   }
 
   tryInit();
@@ -1764,7 +1764,7 @@ window.deleteAllChatMessages = async function(password) {
   }
 };
 
-console.log('💡 Команди: resetChat() - ресет на име');
+// console.log('💡 Команди: resetChat() - ресет на име');
 
 // Cache buster
 const CHAT_VERSION = '20260122_v2';

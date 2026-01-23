@@ -14,7 +14,7 @@ class ChatFirebaseREST {
     this.lastTimestamp = 0;
     this.isPolling = false;
     console.log('ChatFirebaseREST инициализиран за:', documentId);
-  }
+  } // Keep, important for debugging
 
   // Изпрати съобщение
   async sendMessage(text) {
@@ -37,7 +37,7 @@ class ChatFirebaseREST {
       });
 
       if (response.ok) {
-        console.log('✓ Съобщение изпратено към Firebase');
+        // console.log('✓ Съобщение изпратено към Firebase'); // Can be removed, frequent
         return true;
       } else {
         console.error('Firebase POST error:', response.statusText);
@@ -67,7 +67,7 @@ class ChatFirebaseREST {
       messages.sort((a, b) => a.timestamp - b.timestamp);
       
       this.messages = messages;
-      console.log('Зареди', messages.length, 'съобщения от Firebase');
+      // console.log('Зареди', messages.length, 'съобщения от Firebase'); // Can be removed, frequent
       return messages;
     } catch (error) {
       console.error('Error loading messages:', error);
@@ -140,7 +140,7 @@ class ChatFirebaseREST {
                       /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       
       console.log('Mobile detection:', isMobile, 'Window width:', window.innerWidth);
-
+      // console.log('Mobile detection:', isMobile, 'Window width:', window.innerWidth); // Can be removed
       const userData = {
         userId: currentUser.userId,
         userName: currentUser.userName,
@@ -156,7 +156,7 @@ class ChatFirebaseREST {
         body: JSON.stringify(userData)
       });
 
-      console.log('✓ Потребител маркиран като активен (device: ' + userData.device + ')');
+      // console.log('✓ Потребител маркиран като активен (device: ' + userData.device + ')'); // Can be removed, frequent
 
       // Периодично обнови
       setInterval(async () => {
@@ -187,7 +187,7 @@ class ChatFirebaseREST {
             
             // Ако има други активни табове, НЕ трий потребителя от Firebase
             if (tabs.length > 0) {
-                console.log('Other tabs active, skipping delete');
+                // console.log('Other tabs active, skipping delete'); // Can be removed, internal logic
                 return;
             }
         } catch(e) {}
@@ -264,7 +264,7 @@ class ChatFirebaseREST {
 
 class ChatUIManagerREST {
   constructor(containerId, documentId) {
-    console.log('ChatUIManagerREST инициализирам');
+    // console.log('ChatUIManagerREST инициализирам'); // Can be removed
     this.container = document.getElementById(containerId);
     this.documentId = documentId || 'default';
     this.chatFirebase = new ChatFirebaseREST(this.documentId);
@@ -275,7 +275,7 @@ class ChatUIManagerREST {
   }
 
   async init() {
-    console.log('ChatUIManagerREST.init()');
+    // console.log('ChatUIManagerREST.init()'); // Can be removed
     
     // Маркирай потребител като активен
     await this.chatFirebase.markUserActive();
@@ -303,7 +303,7 @@ class ChatUIManagerREST {
     });
 
     this.attachEventListeners();
-    console.log('✓ ChatUIManagerREST готов');
+    // console.log('✓ ChatUIManagerREST готов'); // Can be removed
   }
 
   attachEventListeners() {

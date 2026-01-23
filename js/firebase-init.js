@@ -6,7 +6,7 @@ class AnonymousUser {
   constructor() {
     this.userId = this.getOrCreateUserId();
     this.userName = this.getOrCreateUserName();
-    this.color = this.generateUserColor();
+    this.color = this.generateUserColor(); // Keep, important for user state
     console.log('✓ AnonymousUser създаден:', this.userName, this.userId);
   }
 
@@ -56,6 +56,6 @@ class AnonymousUser {
 const currentUser = new AnonymousUser();
 
 console.log('===================================');
-console.log('✓ Anonymous User System готов');
+console.log('✓ Anonymous User System готов'); // Keep, important for user state
 console.log('Потребител:', currentUser.userName, '(' + currentUser.userId + ')');
 console.log('===================================');

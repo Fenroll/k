@@ -4,14 +4,14 @@
 
 class ChatSystem {
   constructor(documentId) {
-    console.log('ChatSystem инициализирам за:', documentId);
+    // console.log('ChatSystem инициализирам за:', documentId); // Can be removed
     this.documentId = documentId || 'default';
     this.useLocalStorage = !database; // Fallback на localStorage ако няма Firebase
     
     if (database) {
       try {
         this.messagesRef = database.ref(`messages/${this.documentId}`);
-        console.log('Използвам Firebase Database');
+        // console.log('Използвам Firebase Database'); // Can be removed
       } catch (error) {
         console.warn('Firebase ref error:', error);
         this.useLocalStorage = true;
@@ -43,7 +43,7 @@ class ChatSystem {
         const key = `chat_${this.documentId}`;
         const messages = JSON.parse(localStorage.getItem(key) || '[]');
         messages.push(message);
-        localStorage.setItem(key, JSON.stringify(messages.slice(-100))); // Последни 100
+        localStorage.setItem(key, JSON.stringify(messages.slice(-100))); // Последни 100 // Can be removed
         console.log('Съобщение съхранено локално');
         
         // Уведоми слушатели
@@ -67,7 +67,7 @@ class ChatSystem {
       const key = `chat_${this.documentId}`;
       const messages = JSON.parse(localStorage.getItem(key) || '[]');
       this.messages = messages;
-      callback(this.messages);
+      callback(this.messages); // Can be removed
       console.log('Зареди', messages.length, 'съобщения от localStorage');
       
       // Периодично провери за нови съобщения
@@ -172,9 +172,9 @@ class ChatSystem {
 
 class ChatUIManager {
   constructor(containerId, documentId) {
-    console.log('ChatUIManager конструктор с ID:', containerId);
+    // console.log('ChatUIManager конструктор с ID:', containerId); // Can be removed
     this.container = document.getElementById(containerId);
-    console.log('Container намерен:', !!this.container);
+    // console.log('Container намерен:', !!this.container); // Can be removed
     this.documentId = documentId || 'default';
     this.chatSystem = new ChatSystem(this.documentId);
     this.activeUsersManager = new ActiveUsersManager(this.documentId);
@@ -185,7 +185,7 @@ class ChatUIManager {
   }
 
   init() {
-    console.log('ChatUIManager.init() начало');
+    // console.log('ChatUIManager.init() начало'); // Can be removed
     // Маркирай потребител като активен
     this.activeUsersManager.markUserActive();
 

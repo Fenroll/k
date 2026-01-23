@@ -4,7 +4,7 @@
 // ============================================
 
 (function initializeChat() {
-  console.log('Chat init начало...');
+  // console.log('Chat init начало...'); // Can be removed
   
   // Чакай за зареждане на Chat системата
   let attempts = 0;
@@ -14,14 +14,14 @@
     attempts++;
     
     // Проверка за Chat системата
-    if (typeof ChatUIManagerREST === 'undefined' || typeof currentUser === 'undefined') {
+    if (typeof ChatUIManagerREST === 'undefined' || typeof currentUser === 'undefined') { // Keep, indicates a delay
       if (attempts === 1) {
-        console.log('Чакане на Chat система...');
+        // console.log('Чакане на Chat система...');
       }
       if (attempts < maxAttempts) {
         setTimeout(tryInit, 100);
       } else {
-        console.error('Chat система не е зареена');
+        // console.error('Chat система не е зареена');
       }
       return;
     }
@@ -35,20 +35,20 @@
   }
 
   function initChat() {
-    console.log('Инициализирам chat със Firebase REST...');
+    // console.log('Инициализирам chat със Firebase REST...'); // Can be removed
     
     const chatWidget = document.getElementById('chat-widget');
-    if (!chatWidget) {
+    if (!chatWidget) { // Keep, error message
       console.error('Chat widget не е намерен!');
       return;
     }
 
-    const documentId = getDocumentId();
-    console.log('Document ID:', documentId);
+    const documentId = getDocumentId(); // Keep, important for debugging
+    // console.log('Document ID:', documentId);
 
     let chatManager;
     try {
-      chatManager = new ChatUIManagerREST('chat-widget', documentId);
+      chatManager = new ChatUIManagerREST('chat-widget', documentId); // Keep, success message
       window.chatManager = chatManager;
       console.log('✓✓✓ ChatUIManagerREST инициализиран успешно');
     } catch (error) {
@@ -64,23 +64,23 @@
       chatIcon.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('💬 Chat icon clicked');
+        // console.log('💬 Chat icon clicked'); // Can be removed, frequent
         if (window.chatManager) {
           window.chatManager.toggleChat();
         }
       });
-      console.log('✓ Chat icon listener добавен');
+      // console.log('✓ Chat icon listener добавен'); // Can be removed
     }
 
     if (chatCloseBtn) {
       chatCloseBtn.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        if (window.chatManager) {
+        if (window.chatManager) { // Can be removed
           window.chatManager.toggleChat();
         }
       });
-      console.log('✓ Chat close button listener добавен');
+      // console.log('✓ Chat close button listener добавен'); // Can be removed
     }
 
     if (currentUserNameEl && currentUser) {

@@ -1,24 +1,24 @@
 // Чека се за конплетно вчитување на страната
-console.log('question-creator.js се вчитува...');
+// console.log('question-creator.js се вчитува...'); // Can be removed
 
 function checkAndInitialize() {
-  console.log('Проверка на DOM статус...');
-  console.log('document.readyState:', document.readyState);
+  // console.log('Проверка на DOM статус...'); // Can be removed
+  // console.log('document.readyState:', document.readyState); // Can be removed
   
   if (document.readyState === 'loading') {
     // DOM все още се вчитва
     document.addEventListener('DOMContentLoaded', function() {
-      console.log('DOM готов, инициџализирање на Question Creator...');
+      // console.log('DOM готов, инициџализирање на Question Creator...'); // Can be removed
       setTimeout(function() {
-        console.log('ПРЕДИ инициџализирање - #testTitle съществува ли?', document.getElementById('testTitle'));
+        // console.log('ПРЕДИ инициџализирање - #testTitle съществува ли?', document.getElementById('testTitle')); // Can be removed
         initializeQuestionCreator();
       }, 100);
     });
   } else {
     // DOM е вече готов
-    console.log('DOM е готов веднага, инициџализирање на Question Creator...');
+    // console.log('DOM е готов веднага, инициџализирање на Question Creator...'); // Can be removed
     setTimeout(function() {
-      console.log('ПРЕДИ инициџализирање - #testTitle съществува ли?', document.getElementById('testTitle'));
+      // console.log('ПРЕДИ инициџализирање - #testTitle съществува ли?', document.getElementById('testTitle')); // Can be removed
       initializeQuestionCreator();
     }, 100);
   }
@@ -27,11 +27,10 @@ function checkAndInitialize() {
 checkAndInitialize();
 
 function initializeQuestionCreator() {
-  console.log('========== НАЧАЛО НА ИНИЦИЏАЛИЗИРАЊЕ ==========');
-  console.log('Почнува инициџализирање на Question Creator...');
+ // console.log('========== НАЧАЛО НА ИНИЦИАЛИЗИРАНЕ НА QUESTION CREATOR =========='); // Keep, important for initialization
   
   // Проверка на елементи
-  console.log('Търсене на елементи в DOM...');
+ // console.log('Търсене на елементи в DOM...');
   const questionsContainer = document.getElementById('questionsContainer');
   const addQuestionBtn = document.getElementById('addQuestionBtn');
   const startQCTestBtn = document.getElementById('startQCTestBtn');
@@ -52,27 +51,28 @@ function initializeQuestionCreator() {
   const qcSubmitTestBtn = document.getElementById('qcSubmitTestBtn');
   
   const questionCreatorResultsSection = document.getElementById('questionCreatorResultsSection');
-  const qcScorePercentage = document.getElementById('qcScorePercentage');
-  const qcCorrectAnswers = document.getElementById('qcCorrectAnswers');
-  const qcTotalAnswers = document.getElementById('qcTotalAnswers');
-  const qcDetailedResults = document.getElementById('qcDetailedResults');
-  const qcRestartTestBtn = document.getElementById('qcRestartTestBtn');
-  const qcNewTestBtn = document.getElementById('qcNewTestBtn');
+  const qcScorePercentage = document.getElementById('qcScorePercentage'); // Can be removed
+  const qcCorrectAnswers = document.getElementById('qcCorrectAnswers'); // Can be removed
+  const qcTotalAnswers = document.getElementById('qcTotalAnswers'); // Can be removed
+  const qcDetailedResults = document.getElementById('qcDetailedResults'); // Can be removed
+  const qcRestartTestBtn = document.getElementById('qcRestartTestBtn'); // Can be removed
+  const qcNewTestBtn = document.getElementById('qcNewTestBtn'); // Can be removed
   
   // Проверки
-  console.log('❌ questionsContainer:', questionsContainer);
-  console.log('❌ addQuestionBtn:', addQuestionBtn);
-  console.log('❌ startQCTestBtn:', startQCTestBtn);
-  console.log('❌ questionCountMenu:', questionCountMenu);
-  console.log('❌ qcCustomCount:', qcCustomCount);
-  console.log('❌ questionCreatorTestRunner:', questionCreatorTestRunner);
-  console.log('❌ qcQuestionContainer:', qcQuestionContainer);
-  console.log('❌ qcCurrentQuestion:', qcCurrentQuestion);
-  console.log('❌ qcTotalQuestions:', qcTotalQuestions);
-  console.log('❌ qcPrevQuestionBtn:', qcPrevQuestionBtn);
-  console.log('❌ qcNextQuestionBtn:', qcNextQuestionBtn);
-  console.log('❌ qcSubmitTestBtn:', qcSubmitTestBtn);
-  console.log('❌ questionCreatorResultsSection:', questionCreatorResultsSection);
+  // console.log('❌ questionsContainer:', questionsContainer); // Can be removed
+  // console.log('❌ addQuestionBtn:', addQuestionBtn); // Can be removed
+  // console.log('❌ startQCTestBtn:', startQCTestBtn); // Can be removed
+  // console.log('❌ questionCountMenu:', questionCountMenu); // Can be removed
+  // console.log('❌ qcCustomCount:', qcCustomCount); // Can be removed
+  // console.log('❌ qcAllCount:', qcAllCount); // Can be removed
+  // console.log('❌ questionCreatorTestRunner:', questionCreatorTestRunner); // Can be removed
+  // console.log('❌ qcQuestionContainer:', qcQuestionContainer); // Can be removed
+  // console.log('❌ qcCurrentQuestion:', qcCurrentQuestion); // Can be removed
+  // console.log('❌ qcTotalQuestions:', qcTotalQuestions); // Can be removed
+  // console.log('❌ qcPrevQuestionBtn:', qcPrevQuestionBtn); // Can be removed
+  // console.log('❌ qcNextQuestionBtn:', qcNextQuestionBtn); // Can be removed
+  // console.log('❌ qcSubmitTestBtn:', qcSubmitTestBtn); // Can be removed
+  // console.log('❌ questionCreatorResultsSection:', questionCreatorResultsSection); // Can be removed
   
   if (!startQCTestBtn) {
     console.error('🔴 КРИТИЧНА ГРЕШКА: startQCTestBtn НЕ Е НАМЕРЕН В DOM!');
@@ -81,30 +81,30 @@ function initializeQuestionCreator() {
     return;
   }
   
-  console.log('✅ ВСИЧКИ ЕЛЕМЕНТИ НАМЕРЕНИ!');
+  // console.log('✅ ВСИЧКИ ЕЛЕМЕНТИ НАМЕРЕНИ!'); // Can be removed
   
   // Состояние
   let questions = [];
   let currentQuestionIndex = 0;
   let userAnswers = [];
   let questionCounter = 0;
-  let testQuestions = [];
+  let testQuestions = []; // Can be removed
   
-  // Добави първо въпрос
+  // Добави първо въпрос // Can be removed
   addQuestion('', ['', '', '', ''], 0);
   updateQuestionCountDisplay();
   
   // Event слушатели
-  console.log('✅ Добавяне на event слушатели...');
+ // console.log('✅ Добавяне на event слушатели...');
   
   addQuestionBtn.addEventListener('click', function() {
-    console.log('✅ addQuestionBtn клик');
+    // console.log('✅ addQuestionBtn клик'); // Can be removed
     addQuestion();
     updateQuestionCountDisplay();
   });
   
   startQCTestBtn.addEventListener('click', function() {
-    console.log('🔵 startQCTestBtn клик детектиран!');
+    // console.log('🔵 startQCTestBtn клик детектиран!'); // Can be removed
     console.log('Проверка на форма...');
     
     if (!validateForm()) {
@@ -112,13 +112,13 @@ function initializeQuestionCreator() {
       return;
     }
     
-    console.log('✅ Форма е валидна');
+    // console.log('✅ Форма е валидна'); // Can be removed
     
     // Прочети брой от input поле
     let count = parseInt(qcCustomCount.value);
-    console.log('📝 Стойност от input:', qcCustomCount.value);
-    console.log('📊 Прочетен брой:', count);
-    
+    // console.log('📝 Стойност от input:', qcCustomCount.value); // Can be removed
+    // console.log('📊 Прочетен брой:', count); // Can be removed
+
     // Ако input е празен или 0, използвай всички въпроси
     if (!count || count === 0) {
       count = questions.length;
@@ -134,11 +134,11 @@ function initializeQuestionCreator() {
     
     // Ако числото е по-голямо от броя въпроси, ще повтаря въпросите
     if (count > questions.length) {
-      console.log('📌 Брой ' + count + ' е по-голям от ' + questions.length + ' - въпросите ще се повтарят');
+      // console.log('📌 Брой ' + count + ' е по-голям от ' + questions.length + ' - въпросите ще се повтарят'); // Can be removed
     }
     
-    console.log('✅ Стартиране с брой:', count);
-    startTestWithCount(count);
+    // console.log('✅ Стартиране с брой:', count); // Can be removed
+    startTestWithCount(count); // Keep, important action
   });
   
   qcCustomCount.addEventListener('blur', function() {
@@ -154,50 +154,50 @@ function initializeQuestionCreator() {
   // Премахнати: qcCustomCountBtn event слушател
   
   exportQCBtn.addEventListener('click', function() {
-    console.log('✅ exportQCBtn клик');
+    // console.log('✅ exportQCBtn клик'); // Can be removed
     exportJSON();
   });
   
   clearQCFormBtn.addEventListener('click', function() {
-    console.log('✅ clearQCFormBtn клик');
+    // console.log('✅ clearQCFormBtn клик'); // Can be removed
     clearForm();
     updateQuestionCountDisplay();
   });
   
   importQCFile.addEventListener('change', function(e) {
-    console.log('✅ importQCFile промена');
+    // console.log('✅ importQCFile промена'); // Can be removed
     importJSON(e);
     updateQuestionCountDisplay();
   });
   
   qcPrevQuestionBtn.addEventListener('click', function() {
-    console.log('✅ qcPrevQuestionBtn клик');
+    // console.log('✅ qcPrevQuestionBtn клик'); // Can be removed
     previousQuestion();
   });
   
   qcNextQuestionBtn.addEventListener('click', function() {
-    console.log('✅ qcNextQuestionBtn клик');
+    // console.log('✅ qcNextQuestionBtn клик'); // Can be removed
     nextQuestion();
   });
   
   qcSubmitTestBtn.addEventListener('click', function() {
-    console.log('✅ qcSubmitTestBtn клик');
+    // console.log('✅ qcSubmitTestBtn клик'); // Can be removed
     submitTest();
   });
   
   qcRestartTestBtn.addEventListener('click', function() {
-    console.log('✅ qcRestartTestBtn клик');
+    // console.log('✅ qcRestartTestBtn клик'); // Can be removed
     restartTest();
   });
   
   qcNewTestBtn.addEventListener('click', function() {
-    console.log('✅ qcNewTestBtn клик');
+    // console.log('✅ qcNewTestBtn клик'); // Can be removed
     newTest();
     updateQuestionCountDisplay();
   });
   
-  console.log('========== ВСИЧКИ EVENT СЛУШАТЕЛИ ДОБАВЕНИ =========');
-  console.log('========== ИНИЦИЏАЛИЗИРАЊЕ ЗАВРШЕНО ==========');
+  // console.log('========== ВСИЧКИ EVENT СЛУШАТЕЛИ ДОБАВЕНИ ========='); // Can be removed
+  //console.log('========== ИНИЦИАЛИЗИРАНЕ ЗАВЪРШЕНО =========='); // Keep, important for initialization
   
   function updateQuestionCountDisplay() {
     const totalCount = questions.length;
@@ -378,7 +378,7 @@ function initializeQuestionCreator() {
   }
   
   function validateForm() {
-    console.log('Валидация на форма...');
+    // console.log('Валидация на форма...'); // Can be removed
     
     if (questions.length === 0) {
       alert('Създай поне един въпрос');
@@ -408,7 +408,7 @@ function initializeQuestionCreator() {
   }
   
   function startTestWithCount(selectedCount) {
-    console.log('========== startTest ФУНКЦИЯ АКТИВИРАНА ==========');
+    // console.log('========== startTest ФУНКЦИЯ АКТИВИРАНА =========='); // Can be removed
     console.log('📊 Брой въпроси:', selectedCount);
     
     if (!validateForm()) {
@@ -416,13 +416,13 @@ function initializeQuestionCreator() {
       return;
     }
     
-    console.log('✅ Форма е валидна');
+    // console.log('✅ Форма е валидна'); // Can be removed
     proceedWithQuestionCount(selectedCount);
   }
   
   function showQuestionCountMenu() {
-    console.log('Показване на меню за брой въпроси...');
-    console.log('Проверка на форма...');
+    // console.log('Показване на меню за брой въпроси...'); // Can be removed
+    // console.log('Проверка на форма...'); // Can be removed
     
     if (!validateForm()) {
       console.log('🔴 Форма е невалидна - validateForm() върна false');
@@ -430,13 +430,13 @@ function initializeQuestionCreator() {
     }
     
     console.log('✅ Форма е валидна');
-    // Менюто е винаги видимо, просто скролираме до него
+    // Менюто е винаги видимо, просто скролираме до него // Can be removed
     questionCountMenu.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
   
   
   function proceedWithQuestionCount(selectedCount) {
-    console.log('Продължаване с ' + selectedCount + ' въпроса...');
+    // console.log('Продължаване с ' + selectedCount + ' въпроса...'); // Can be removed
     
     // Ако има повече избрани въпроси отколкото въпроси в теста, повтаряй ги
     let allQuestionsNeeded = [];
@@ -447,30 +447,28 @@ function initializeQuestionCreator() {
     testQuestions = allQuestionsNeeded.slice(0, selectedCount);
     userAnswers = new Array(testQuestions.length).fill(null);
     currentQuestionIndex = 0;
-    
-    console.log('✅ testQuestions:', testQuestions);
-    console.log('✅ userAnswers подготвена:', userAnswers);
+    // console.log('✅ testQuestions:', testQuestions); // Can be removed
+    // console.log('✅ userAnswers подготвена:', userAnswers); // Can be removed
     
     // Запазване на първия въпрос
     const firstQuestion = testQuestions[0];
     qcTotalQuestions.textContent = testQuestions.length;
     
-    console.log('🔵 Скриване на questionCreatorSection...');
-    document.getElementById('questionCreatorSection').classList.add('hidden');    
-    console.log('🔵 Скриване на main-header в тест...');
+    // console.log('🔵 Скриване на questionCreatorSection...'); // Can be removed
+    document.getElementById('questionCreatorSection').classList.add('hidden');
+    // console.log('🔵 Скриване на main-header в тест...'); // Can be removed
     const questionCreatorTestContainer = document.getElementById('questionCreatorTest');
     const testMainHeader = questionCreatorTestContainer.querySelector('.main-header');
     if (testMainHeader) {
       testMainHeader.classList.add('hidden');
     }
-        console.log('🔵 Показване на questionCreatorTestRunner...');
-    questionCreatorTestRunner.classList.remove('hidden');
-    console.log('🔵 Скриване на questionCreatorResultsSection...');
-    questionCreatorResultsSection.classList.add('hidden');
-    
-    console.log('📲 Показване на първия въпрос...');
-    displayCurrentQuestion();
-    console.log('========== startTest ЗАВЕРШЕНА ==========');
+    // console.log('🔵 Показване на questionCreatorTestRunner...'); // Can be removed
+    questionCreatorTestRunner.classList.remove('hidden'); // Can be removed
+    // console.log('🔵 Скриване на questionCreatorResultsSection...'); // Can be removed
+    questionCreatorResultsSection.classList.add('hidden'); // Can be removed
+    // console.log('📲 Показване на първия въпрос...'); // Can be removed
+    displayCurrentQuestion(); // Keep, important action
+    // console.log('========== startTest ЗАВЕРШЕНА =========='); // Can be removed
   }
   
   function displayCurrentQuestion() {
@@ -703,5 +701,5 @@ function initializeQuestionCreator() {
     return shuffled;
   }
   
-  console.log('Question Creator инициџализирање завршено!');
+  //console.log('Question Creator инициџализирање завршено!');
 }
