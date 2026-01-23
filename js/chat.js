@@ -647,6 +647,19 @@ class ChatUIManager {
             .message-actions button:hover {
                 background: #dbeafe !important;
             }
+            .reaction-tooltip {
+                position: fixed;
+                background: #262626;
+                color: white;
+                padding: 6px 10px;
+                border-radius: 6px;
+                font-size: 12px;
+                z-index: 10001;
+                pointer-events: none;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+                max-width: 200px;
+                line-height: 1.5;
+            }
         `;
         document.head.appendChild(style);
     }
@@ -1315,8 +1328,9 @@ class ChatUIManager {
 
     // Функция за затваряне на picker
     const closePicker = (e) => {
-      // Ако кликнеш извън picker-а - затвори
-      if (!picker.contains(e.target) && !e.target.closest('[data-message-id]')) {
+      // Ако кликнеш извън picker-а, затвори го.
+      // Правим изключение за бутоните за реакции, защото те сами управляват показването/скриването.
+      if (!picker.contains(e.target) && !e.target.closest('.message-reaction-btn')) {
         picker.remove();
         document.removeEventListener('click', closePicker);
       }
@@ -1329,6 +1343,70 @@ class ChatUIManager {
   async addReaction(messageId, emoji) {
     // Just send the data, the listener will update the UI
     await this.chatFirebase.addReaction(messageId, emoji);
+  }
+
+  showReactionTooltip(badgeElement) {
+    this.hideReactionTooltip(); // Скрий предишни, ако има
+
+    const messageId = badgeElement.dataset.messageId;
+    const emoji = badgeElement.dataset.emoji;
+
+    if (!this.reactionsCache || !this.reactionsCache[messageId] || !this.reactionsCache[messageId][emoji]) {
+      return;
+    }
+
+    const reactors = this.reactionsCache[messageId][emoji];
+    const reactorIds = Object.keys(reactors).filter(id => reactors[id] === true);
+
+    if (reactorIds.length === 0) {
+      return;
+    }
+
+    // Създай карта на userId -> userName от всички налични източници
+    const userMap = {};
+    // 1. От активните потребители (най-актуални имена)
+    for (const userId in this.activeUsers) {
+        userMap[userId] = this.activeUsers[userId].userName;
+    }
+    // 2. От историята на съобщенията (за офлайн потребители)
+    this.chatFirebase.messages.forEach(msg => {
+        if (!userMap[msg.userId]) {
+            userMap[msg.userId] = msg.userName;
+        }
+    });
+
+    // Преобразувай ID-тата в имена
+    const reactorNames = reactorIds.map(id => {
+        const rawName = userMap[id] || 'Неизвестен';
+        const resolvedName = this.resolveName(rawName);
+        const isMe = this._getMyUserIds().includes(id);
+        // Маркирай текущия потребител
+        return isMe ? `<strong>${this.escapeHtml(resolvedName)} (Аз)</strong>` : this.escapeHtml(resolvedName);
+    }).join('<br>');
+
+    const tooltip = document.createElement('div');
+    tooltip.id = 'reaction-tooltip';
+    tooltip.className = 'reaction-tooltip';
+    tooltip.innerHTML = reactorNames;
+
+    document.body.appendChild(tooltip);
+
+    const badgeRect = badgeElement.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+
+    // Позиционирай над бутона, центрирано
+    let top = badgeRect.top - tooltipRect.height - 5;
+    let left = badgeRect.left + (badgeRect.width / 2) - (tooltipRect.width / 2);
+
+    tooltip.style.left = `${left}px`;
+    tooltip.style.top = `${top}px`;
+  }
+
+  hideReactionTooltip() {
+    const tooltip = document.getElementById('reaction-tooltip');
+    if (tooltip) {
+      tooltip.remove();
+    }
   }
 
   renderAllReactions() {
@@ -1385,7 +1463,7 @@ class ChatUIManager {
     if (!container) return;
 
     container.querySelectorAll('.reaction-badge').forEach(btn => {
-      btn.addEventListener('click', (e) => {
+      btn.addEventListener('click', e => {
         e.stopPropagation();
         const emoji = btn.dataset.emoji;
         const msgId = btn.dataset.messageId;
@@ -1408,6 +1486,14 @@ class ChatUIManager {
           // Добави нова реакция
           this.addReaction(msgId, emoji);
         }
+      });
+
+      // Добави hover слушатели за tooltip
+      btn.addEventListener('mouseenter', e => {
+        this.showReactionTooltip(e.currentTarget);
+      });
+      btn.addEventListener('mouseleave', () => {
+        this.hideReactionTooltip();
       });
     });
   }
