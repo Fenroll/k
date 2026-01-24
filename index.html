@@ -1,13 +1,30 @@
-<!DOCTYPE html>
-<!-- Right-side overlay for course card click -->
-    <div id="rightOverlay" class="right-overlay">
-      <button class="mobile-overlay-close" onclick="closeRightOverlay()">✕</button>
-      <div class="overlay-content" id="overlayContent">
-        <!-- Dynamic content will be injected here -->
-      </div>
-    </div>
-
-    <style>
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Courses</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico?v=2" sizes="any">
+  <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <!-- Marked.js library for Markdown rendering -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    .toggle-btn.selected {
+      background: #111 !important;
+      border-color: #111 !important;
+    }
+    .toggle-btn img {
+      filter: none;
+      transition: filter 0.15s;
+    }
+    .toggle-btn.selected img {
+      filter: brightness(0) invert(1);
+    }
     /* Overlay header styling to match main header */
     .overlay-header {
   background: #fff;
@@ -749,964 +766,7 @@
     opacity: 1;
     max-height: 1000px;
   }
-    </style>
-    <script>
-    // Function to process table rowspans (convert ^ to rowspan)
-    function processTableRowspans(html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const tables = doc.querySelectorAll('table');
-      
-      tables.forEach(table => {
-        const rows = Array.from(table.querySelectorAll('tbody tr'));
-        
-        // Process each column
-        const maxCols = Math.max(...rows.map(row => row.cells.length));
-        
-        for (let colIndex = 0; colIndex < maxCols; colIndex++) {
-          let spanStart = -1;
-          let spanCount = 0;
-          
-          for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-            const cell = rows[rowIndex].cells[colIndex];
-            
-            if (!cell) continue;
-            
-            const cellText = cell.textContent.trim();
-            
-            if (cellText === '^') {
-              // Mark cell for deletion and count span
-              cell.setAttribute('data-delete', 'true');
-              spanCount++;
-            } else {
-              // If we were counting spans, apply rowspan
-              if (spanCount > 0 && spanStart >= 0) {
-                const spanCell = rows[spanStart].cells[colIndex];
-                if (spanCell) {
-                  spanCell.setAttribute('rowspan', spanCount + 1);
-                }
-              }
-              // Reset for next potential span
-              spanStart = rowIndex;
-              spanCount = 0;
-            }
-          }
-          
-          // Handle trailing spans
-          if (spanCount > 0 && spanStart >= 0) {
-            const spanCell = rows[spanStart].cells[colIndex];
-            if (spanCell) {
-              spanCell.setAttribute('rowspan', spanCount + 1);
-            }
-          }
-        }
-        
-        // Remove cells marked for deletion
-        table.querySelectorAll('[data-delete="true"]').forEach(cell => cell.remove());
-      });
-      
-      return doc.body.innerHTML;
-    }
-
-    // Function to process table colspans (convert < to colspan)
-    function processTableColspans(html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const tables = doc.querySelectorAll('table');
-      
-      tables.forEach(table => {
-        const rows = Array.from(table.querySelectorAll('tbody tr'));
-        
-        // Process each row
-        rows.forEach(row => {
-          const cells = Array.from(row.cells);
-          let spanStart = -1;
-          let spanCount = 0;
-          
-          for (let colIndex = 0; colIndex < cells.length; colIndex++) {
-            const cell = cells[colIndex];
-            const cellText = cell.innerHTML.trim();
-            
-            if (cellText === '&lt;') {
-              // Mark cell for deletion and count span
-              cell.setAttribute('data-delete-colspan', 'true');
-              spanCount++;
-            } else {
-              // If we were counting spans, apply colspan
-              if (spanCount > 0 && spanStart >= 0) {
-                const spanCell = cells[spanStart];
-                if (spanCell) {
-                  spanCell.setAttribute('colspan', spanCount + 1);
-                }
-              }
-              // Reset for next potential span
-              spanStart = colIndex;
-              spanCount = 0;
-            }
-          }
-          
-          // Handle trailing spans
-          if (spanCount > 0 && spanStart >= 0) {
-            const spanCell = cells[spanStart];
-            if (spanCell) {
-              spanCell.setAttribute('colspan', spanCount + 1);
-            }
-          }
-        });
-        
-        // Remove cells marked for deletion
-        table.querySelectorAll('[data-delete-colspan="true"]').forEach(cell => cell.remove());
-      });
-      
-      return doc.body.innerHTML;
-    }
-
-    // Function to process table cell alignment (>>text<<, <<text, text>>)
-    function processTableAlignment(html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const tables = doc.querySelectorAll('table');
-      
-      tables.forEach(table => {
-        const allCells = table.querySelectorAll('td, th');
-        
-        allCells.forEach(cell => {
-          let content = cell.innerHTML.trim();
-          
-          // Check for center alignment >>text<<
-          if (content.startsWith('&gt;&gt;') && content.endsWith('&lt;&lt;')) {
-            cell.style.textAlign = 'center';
-            cell.innerHTML = content.slice(8, -8); // Remove &gt;&gt; and &lt;&lt;
-          }
-          // Check for left alignment <<text
-          else if (content.startsWith('&lt;&lt;')) {
-            cell.style.textAlign = 'left';
-            cell.innerHTML = content.slice(8); // Remove &lt;&lt;
-          }
-          // Check for right alignment text>>
-          else if (content.endsWith('&gt;&gt;')) {
-            cell.style.textAlign = 'right';
-            cell.innerHTML = content.slice(0, -8); // Remove &gt;&gt;
-          }
-        });
-      });
-      
-      return doc.body.innerHTML;
-    }
-    
-    // Overlay logic for course cards
-    document.addEventListener('DOMContentLoaded', function() {
-      // Close overlay when clicking outside overlay-content
-      var overlay = document.getElementById('rightOverlay');
-      if (overlay) {
-        overlay.addEventListener('mousedown', function(e) {
-          // Only close if clicking directly on the overlay background, not on content or ribbon/close
-          if (e.target === overlay) {
-            closeRightOverlay();
-          }
-        });
-      }
-      
-      var courseList = document.getElementById('course-org-list');
-      if (courseList) {
-        courseList.querySelectorAll('.element-card').forEach(function(card) {
-          card.style.cursor = 'pointer';
-          card.addEventListener('click', function(e) {
-            openRightOverlayForCard(card);
-            e.stopPropagation();
-          });
-        });
-      }
-    });
-  function openRightOverlayForCard(card) {
-  var overlay = document.getElementById('rightOverlay');
-  var content = document.getElementById('overlayContent');
-  if (overlay && content) {
-    var title = card.querySelector('.course-title')?.textContent || 'Course';
-    var courseId = card.querySelector('.course-id')?.textContent || '';
-    var isArchivedCard = card.style.opacity === '0.75'; // Archived cards have opacity
-    
-    // Find the course - need to check if it's archived or active
-    var courseObj;
-    if (isArchivedCard) {
-      // For archived cards, find in archived courses only
-      courseObj = courses.find(c => c.id === courseId && c.isArchived === true);
-    } else {
-      // For active cards, find in active courses only
-      courseObj = courses.find(c => c.id === courseId && (!c.isArchived || c.isArchived === false));
-    }
-    
-    let customContent = '';
-    
-    // Check if this is "Актуални събития Event center" course - show event info instead
-    if (title.includes('Актуални събит') || title.includes('Event center')) {
-      if (typeof eventInfo !== 'undefined' && eventInfo && eventInfo.trim().length > 0) {
-        customContent = `<div class="event-info-overlay">` + marked.parse(eventInfo) + `</div>`;
-      } else {
-        customContent = '<div style="color:#888;">Няма информация за актуални събития.</div>';
-      }
-    } else {
-      // Render text cards if available
-      if (courseObj && Array.isArray(courseObj.textCards) && courseObj.textCards.length > 0) {
-        customContent += `<div class="text-cards-container">`;
-        courseObj.textCards.forEach(card => {
-          customContent += renderTextCardBig(card);
-        });
-        customContent += `</div>`;
-      }
-      
-      if (courseObj && Array.isArray(courseObj.sections) && courseObj.sections.length > 0) {
-        customContent += `<div style="display:flex; flex-direction:column; gap:18px;">`;
-        courseObj.sections.forEach(section => {
-          // Sort files and folders before rendering
-          sortFilesAndFolders(section);
-          customContent += renderSection(section, 1); // 1 = first level sections (Материали, Колоквиум I, etc.)
-        });
-        customContent += `</div>`;
-      } else if (!courseObj || !courseObj.textCards || courseObj.textCards.length === 0) {
-        customContent = '<div style="color:#888;">Няма съдържание за този курс.</div>';
-      }
-    }
-    
-    // Function to render big text card (folder-style)
-    // Natural sort function for proper number ordering
-    function naturalSort(a, b) {
-      const regex = /(\d+)|(\D+)/g;
-      const aParts = a.match(regex);
-      const bParts = b.match(regex);
-      
-      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
-        const aPart = aParts[i] || '';
-        const bPart = bParts[i] || '';
-        
-        const aNum = parseInt(aPart);
-        const bNum = parseInt(bPart);
-        
-        if (!isNaN(aNum) && !isNaN(bNum)) {
-          if (aNum !== bNum) return aNum - bNum;
-        } else {
-          if (aPart !== bPart) return aPart.localeCompare(bPart);
-        }
-      }
-      return 0;
-    }
-    
-    // Sort files: folders first, then by file type, then natural sort
-    function sortFilesAndFolders(section) {
-      if (section.files && section.files.length > 0) {
-        section.files.sort((a, b) => {
-          // Get file extensions
-          const aExt = a.name.split('.').pop().toLowerCase();
-          const bExt = b.name.split('.').pop().toLowerCase();
-          
-          // First sort by extension (file type)
-          if (aExt !== bExt) {
-            return aExt.localeCompare(bExt);
-          }
-          
-          // Then natural sort by name
-          return naturalSort(a.name.toLowerCase(), b.name.toLowerCase());
-        });
-      }
-      
-      // Sort subsections (folders) with natural sort
-      if (section.subsections && section.subsections.length > 0) {
-        section.subsections.sort((a, b) => {
-          return naturalSort(a.name.toLowerCase(), b.name.toLowerCase());
-        });
-        
-        // Recursively sort nested sections
-        section.subsections.forEach(sub => sortFilesAndFolders(sub));
-      }
-    }
-    
-    // Helper function to remove order prefix (1-, 2-, 1.1-, 2.2-, etc.) and "msg-" from filenames for display
-    function removeOrderPrefix(fileName) {
-      // Remove number prefix (1-, 2-, 1.1-, 2.22-, etc.)
-      let cleaned = fileName.replace(/^[\d.]+-/, '');
-      // Remove "msg-" prefix (case insensitive)
-      cleaned = cleaned.replace(/^msg-/i, '');
-      // Remove file extension
-      cleaned = cleaned.replace(/\.(txt|md|docx|pdf|doc|xls|xlsx|ppt|pptx|jpg|jpeg|png|gif|bmp|webp|svg|zip|rar|7z|log|one|onetoc2|url)$/i, '');
-      return cleaned;
-    }
-    
-    function renderTextCardBig(card) {
-      const title = card.title || 'Без заглавие';
-      const content = card.content || '';
-      const maxLength = 200;
-      const preview = content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
-      const cardId = 'card-' + Math.random().toString(36).substr(2, 9);
-      
-      return `
-        <div class="text-card-big" onclick="showTextCardModal('${cardId}', '${title.replace(/'/g, "\\'")}', this.getAttribute('data-content'));"
-             data-content="${content.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/\n/g, '&#10;')}">
-          <div>
-            <h3 class="text-card-big-title">${title}</h3>
-            <p class="text-card-big-preview">${preview}</p>
-          </div>
-          <svg class="text-card-big-icon" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)">
-            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/>
-          </svg>
-        </div>
-      `;
-    }
-    
-    // Recursive function to render sections and subsections
-    function renderSection(section, level) {
-      // Level 2 (подпапки в Материали) нямат indent, level 3+ имат indent
-      const indent = level === 2 ? 0 : (level > 2 ? (level - 2) * 16 : level * 16);
-      const fileCount = Array.isArray(section.files) ? section.files.length : 0;
-      const hasFiles = fileCount > 0;
-      const hasSubsections = Array.isArray(section.subsections) && section.subsections.length > 0;
-      const hasMany = fileCount > 5;
-      // Level 1 (Материали, Колоквиум I): БЕЗ collapsible - винаги отворени, БЕЗ стрелка
-      // Level 2+ (!!!kolokvium genetika): collapsible - затворени по подразбиране, СЪС стрелка
-      const isCollapsible = level > 1;
-      const sectionId = section.name.replace(/\s+/g, '').replace(/[^\w]/g, '') + '_' + level + '_' + Math.random().toString(36).substr(2, 9);
-      
-      let sectionContent = '';
-      
-      // Level 1 (first sections like "Материали") - card style, БЕЗ collapsible, винаги отворени
-      if (level === 1) {
-        sectionContent += `<section style="background:#f7f4fa; border-radius:10px; padding:16px 18px 10px 18px; box-shadow:0 1px 6px #e3e3e3; margin-bottom:12px;">`;
-        // Title БЕЗ dropdown - винаги отворени
-        sectionContent += `<div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; min-width:0;">`;
-        sectionContent += `<svg width="20" height="20" viewBox="0 0 24 24" fill="#7c3aed" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
-        sectionContent += `<h3 style="margin:0; color:#7c3aed; font-size:1.1em; font-weight:600; word-break:break-word; overflow-wrap:break-word; min-width:0;">${section.name}</h3>`;
-        sectionContent += `</div>`;
-      } 
-      // Nested levels - simple indent style
-      else {
-        sectionContent += `<div style="margin-left:${indent}px; margin-top:10px; margin-bottom:6px;">`;
-        // Title with dropdown arrow for nested folders
-        if (isCollapsible) {
-          // Level 2+ (вложени папки) - затворени по подразбиране
-          sectionContent += `<div style="display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; margin-bottom:8px; min-width:0;" onclick="toggleFileDropdown('${sectionId}')">`;
-          sectionContent += `<span id="arrow-${sectionId}" style="color:#8b5cf6; font-size:0.9em; min-width:10px; transition:all 0.2s ease; flex-shrink:0;">►</span>`;
-          sectionContent += `<svg width="18" height="18" viewBox="0 0 24 24" fill="#8b5cf6" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
-          const label = hasMany ? `${section.name} (${fileCount})` : section.name;
-          sectionContent += `<h4 style="margin:0; color:#8b5cf6; font-size:${1.0 - level * 0.05}em; font-weight:500; flex:1; word-break:break-word; overflow-wrap:break-word; min-width:0;">${label}</h4>`;
-          sectionContent += `</div>`;
-        } else {
-          // Level 1 (основни секции) - БЕЗ стрелка, винаги отворени
-          sectionContent += `<div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">`;
-          sectionContent += `<svg width="18" height="18" viewBox="0 0 24 24" fill="#8b5cf6" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
-          const label = hasMany ? `${section.name} (${fileCount})` : section.name;
-          sectionContent += `<h4 style="margin:0; color:#8b5cf6; font-size:${1.0 - level * 0.05}em; font-weight:500;">${label}</h4>`;
-          sectionContent += `</div>`;
-        }
-      }
-      
-      // Open collapsible container if needed
-      if (isCollapsible) {
-        // Level 2+ са затворени по подразбиране
-        sectionContent += `<div id="files-${sectionId}" style="display:none; margin-top:8px;">`;
-      }
-      
-      // Render msg notes (sticky notes) FIRST
-      if (section.msgNotes && section.msgNotes.length > 0) {
-        section.msgNotes.forEach((note, idx) => {
-          // Skip files with -summary in name
-          if (note.name.toLowerCase().includes('-summary')) return;
-          
-          const noteId = `msg-note-${sectionId}-${idx}`;
-          const isHtml = /\.html$/i.test(note.path || '');
-          sectionContent += `
-            <div class="msg-note ${isHtml ? 'msg-note-html' : ''}" onclick="${isHtml ? `openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;` : `toggleMsgNote('${noteId}')`}" data-note-path="${note.path}" style="${isHtml ? 'background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); cursor: pointer;' : ''}">
-              <div class="msg-note-header">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="${isHtml ? '#7c3aed' : '#f59e0b'}" style="flex-shrink:0;">
-                  <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
-                </svg>
-                <span class="msg-note-title" style="${isHtml ? 'color: #6d28d9;' : ''}">${isHtml ? removeOrderPrefix(note.name).replace(/\.html$/i, '') : removeOrderPrefix(note.name)}</span>
-                ${!isHtml && /\.md$/i.test(note.path || '') ? `<a href="#" title="Отвори на цял екран" onclick="event.stopPropagation(); openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" style="display:inline-flex; align-items:center; justify-content:center; margin-left:auto; margin-right:6px; text-decoration:none; flex-shrink:0;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>
-                </a>` : ''}
-                ${!isHtml ? `<svg class="msg-note-arrow" width="18" height="18" viewBox="0 0 24 24">
-                  <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="#f59e0b"/>
-                </svg>` : ''}
-              </div>
-              <div class="msg-note-content" id="${noteId}" style="display:none;">
-                ${note.type === 'text' ? `<pre>${note.content}</pre>` : (note.type === 'markdown' ? (() => {
-                  // Configure marked for GFM tables
-                  marked.setOptions({
-                    gfm: true,
-                    breaks: false,
-                    tables: true
-                  });
-                  // Parse markdown and fix relative image paths
-                  let html = marked.parse(note.content);
-                  
-                  // Process tables to support rowspan with ^ syntax (only if needed)
-                  if (html.includes('^')) {
-                    html = processTableRowspans(html);
-                  }
-                  
-                  // Process tables to support cell alignment with >>text<<, <<text, text>> (BEFORE colspan!)
-                  if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) {
-                    html = processTableAlignment(html);
-                  }
-                  
-                  // Process tables to support colspan with < syntax (only if needed)
-                  if (html.includes('&lt;')) {
-                    html = processTableColspans(html);
-                  }
-                  
-                  // Get base directory from note path (e.g., "files/Course/Section/")
-                  const basePath = note.path.substring(0, note.path.lastIndexOf('/') + 1);
-                  // Fix relative image paths: any relative path (not starting with http:// or /) -> prepend basePath
-                  let fixedHtml = html.replace(/<img([^>]+)src="(?!https?:\/\/)(?!\/)([^"]+)"/g, 
-                    (match, attrs, src) => `<img${attrs}src="${basePath}${src}"`);
-                  // Add target="_blank" to all links
-                  fixedHtml = fixedHtml.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
-                  return `<div class="markdown-content">${fixedHtml}</div>`;
-                })() : '<p><i>Word файл - отвори за да видиш съдържанието</i><br><a href="' + note.path + '" target="_blank" style="color:#f59e0b;">Отвори файла</a></p>')}
-              </div>
-            </div>
-          `;
-        });
-      }
-      
-      // Render subsections (folders) BEFORE files
-      if (hasSubsections) {
-        section.subsections.forEach(subsection => {
-          // Skip subsections with hidden- prefix or assets folders
-          if (subsection.name.toLowerCase().startsWith('hidden-') || 
-              subsection.name.toLowerCase() === 'assets') return;
-          sectionContent += renderSection(subsection, level + 1);
-        });
-      }
-      
-      // Render files in this section AFTER subsections
-      if (hasFiles) {
-        // Render file list
-        sectionContent += '<ul style="margin:8px 0 4px 0; padding-left:20px; list-style:none;">';
-        section.files.forEach(file => {
-          // Skip files with hidden- prefix or -summary suffix
-          if (file.name.toLowerCase().startsWith('hidden-') || 
-              file.name.toLowerCase().includes('-summary')) return;
-          
-          const fileName = file.name.toLowerCase();
-          let fileIcon = '';
-          // Determine file icon based on extension
-          if (fileName.endsWith('.pdf')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#dc2626" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
-          } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#2563eb" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
-          } else if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#16a34a" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
-          } else if (fileName.endsWith('.ppt') || fileName.endsWith('.pptx')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ea580c" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
-          } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.bmp') || fileName.endsWith('.webp') || fileName.endsWith('.svg')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ec4899" style="flex-shrink:0;"><path d="M19,19H5V5H19M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M13.96,12.29L11.21,15.83L9.25,13.47L6.5,17H17.5L13.96,12.29Z"/></svg>`;
-          } else if (fileName.endsWith('.zip') || fileName.endsWith('.rar') || fileName.endsWith('.7z')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" style="flex-shrink:0;"><path d="M14,17H12V15H10V13H12V15H14M14,9H12V7H10V9H12V7H14M14,13H12V11H10V13H12V11H14M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
-          } else if (fileName.endsWith('.txt') || fileName.endsWith('.log') || fileName.endsWith('.md')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#6b7280" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5M10,19L12,15H9V10H15V15L13,19H10Z"/></svg>`;
-          } else if (fileName.endsWith('.one') || fileName.endsWith('.onetoc2')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#7c2d99" style="flex-shrink:0;"><path d="M19,3H5C3.89,3 3,3.89 3,5V19C3,20.11 3.89,21 5,21H19C20.11,21 21,20.11 21,19V5C21,3.89 20.11,3 19,3M12,17C9.79,17 8,15.21 8,13C8,10.79 9.79,9 12,9C14.21,9 16,10.79 16,13C16,15.21 14.21,17 12,17Z"/></svg>`;
-          } else if (fileName.endsWith('.url')) {
-            // Try to get favicon from the URL if available
-            let faviconUrl = '';
-            if (file.url) {
-              try {
-                const urlObj = new URL(file.url);
-                const hostname = urlObj.hostname.toLowerCase();
-                
-                // Special handling for popular services with custom icons
-                if (hostname.includes('drive.google.com') || hostname.includes('docs.google.com')) {
-                  faviconUrl = 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
-                } else if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
-                  faviconUrl = 'https://www.youtube.com/s/desktop/d743f786/img/favicon_32x32.png';
-                } else if (hostname.includes('github.com')) {
-                  faviconUrl = 'https://github.githubassets.com/favicons/favicon.png';
-                } else if (hostname.includes('blackboard.lol')) {
-                  // Use blackboard.lol favicon for all blackboard.lol subdomains
-                  faviconUrl = 'https://blackboard.lol/favicon.ico';
-                } else {
-                  // Use Google Favicon Service for other domains
-                  faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
-                }
-              } catch (e) {
-                // If URL parsing fails, use default icon
-              }
-            }
-            fileIcon = faviconUrl 
-              ? `<img src="${faviconUrl}" width="18" height="18" style="flex-shrink:0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" /><svg width="18" height="18" viewBox="0 0 24 24" fill="#3b82f6" style="flex-shrink:0;display:none;"><path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>`
-              : `<svg width="18" height="18" viewBox="0 0 24 24" fill="#3b82f6" style="flex-shrink:0;"><path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>`;
-          } else {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#6b7280" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
-          }
-
-          sectionContent += `<li style="margin-bottom:6px; font-size:0.95em; display:flex; align-items:center; gap:8px; min-width:0;">`;
-          sectionContent += fileIcon;
-
-          // Check if it's a .url file
-          if (fileName.endsWith('.url') && file.url) {
-            // Open the URL directly
-            const displayName = file.name.replace('.url', '');
-            sectionContent += `<a href="${file.url}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(displayName)}</a></li>`;
-          } 
-          // Check if it's a viewable Office file (Word, PowerPoint, Excel)
-      else if (fileName.endsWith('.docx') || fileName.endsWith('.pptx') || fileName.endsWith('.ppt') || 
-        fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.doc')) {
-            // Encode the full URL properly with cache busting
-            const timestamp = new Date().getTime();
-            const fileUrlWithCacheBust = `https://fenroll.github.io/k/${file.path}?v=${timestamp}`;
-            const fullUrl = encodeURIComponent(fileUrlWithCacheBust);
-            const viewerUrl = `https://docs.google.com/viewer?url=${fullUrl}&embedded=true`;
-            const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
-            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="${viewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
-          }
-          // Markdown files: open in our full-screen viewer; place eye icon next to title
-          else if (fileName.endsWith('.md')) {
-            const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(file.path)}`;
-            const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
-            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="${mdViewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
-          }
-         else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.bmp') || fileName.endsWith('.webp') || fileName.endsWith('.svg')) {
-  const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z\"/></svg>`;
-  const allImages = section.files.filter(f => /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(f.name));
-  const currentIndex = allImages.findIndex(f => f.name === file.name);
-  window._currentImageList = allImages;
-  sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="#" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0;" onclick="event.preventDefault(); showImageModal('${file.path.replace(/'/g, '\\\'')}','${removeOrderPrefix(file.name).replace(/'/g, '\\\'')}', window._currentImageList, ${currentIndex})" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
 }
-          else {
-            sectionContent += `<a href="${file.path}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a></li>`;
-          }
-        });
-        sectionContent += '</ul>';
-      }
-      
-      // Show "no files" message only inside opened collapsible sections
-      if (isCollapsible && !section.files?.length && !section.subsections?.length) {
-        sectionContent += `<div style="color:#999; font-size:0.95em; font-style:italic; margin-top:4px; padding:8px 0;">Няма файлове</div>`;
-      }
-      
-      // Close collapsible container if needed
-      if (isCollapsible) {
-        sectionContent += `</div>`;
-      }
-      
-      // Close tag based on level
-      if (level === 1) {
-        sectionContent += `</section>`; // Level 1 затваря section тага
-      } else {
-        sectionContent += `</div>`; // Level 2+ затваря div тага
-      }
-      return sectionContent;
-    }
-    content.innerHTML = `
-      <div class="overlay-ribbon">
-        <button class="overlay-close" onclick="closeRightOverlay()">&#10005;</button>
-      </div>
-      <header class="main-header overlay-header">
-        <h1 class="page-title">${title}</h1>
-      </header>
-      <div class="overlay-main-content" style="margin-top:18px;">${customContent}</div>
-    `;
-    overlay.classList.add('open');
-    // Скрий hamburger бутона на мобилни устройства когато overlay е отворен
-    var hamburger = document.getElementById('mobileMenuToggle');
-    if (hamburger && window.innerWidth <= 768) {
-      hamburger.style.opacity = '0';
-      hamburger.style.visibility = 'hidden';
-      hamburger.style.pointerEvents = 'none';
-    }
-  }
-}
-    function closeRightOverlay() {
-      var overlay = document.getElementById('rightOverlay');
-      if (overlay) overlay.classList.remove('open');
-      // Покажи hamburger бутона отново
-      var hamburger = document.getElementById('mobileMenuToggle');
-      if (hamburger && window.innerWidth <= 768) {
-        hamburger.style.opacity = '';
-        hamburger.style.visibility = '';
-        hamburger.style.pointerEvents = '';
-      }
-    }
-    
-    // Close overlay when clicking outside on desktop
-    document.addEventListener('click', function(e) {
-      const overlay = document.getElementById('rightOverlay');
-      const overlayContent = document.getElementById('overlayContent');
-      const modal = document.getElementById('textCardModal');
-      // Only close on desktop (not mobile)
-      if (window.innerWidth > 768 && overlay && overlay.classList.contains('open')) {
-        // Check if click is outside overlay-content and NOT inside modal
-        if (!overlayContent.contains(e.target) && !e.target.closest('.element-card') && !e.target.closest('#textCardModal')) {
-          closeRightOverlay();
-        }
-      }
-    });
-    
-    // Function to toggle msg note content
-    function toggleMsgNote(noteId) {
-      const noteContent = document.getElementById(noteId);
-      const noteElement = noteContent.closest('.msg-note');
-      
-      if (noteContent.style.display === 'none' || noteContent.style.display === '') {
-        noteContent.style.display = 'block';
-        noteElement.classList.add('open');
-        // Wrap any markdown tables with a horizontal scroll container (mobile-friendly)
-        try {
-          const mdRoot = noteContent.querySelector('.markdown-content');
-          if (mdRoot) {
-            mdRoot.querySelectorAll('table').forEach(tbl => {
-              if (!tbl.parentElement.classList.contains('table-scroll')) {
-                const wrap = document.createElement('div');
-                wrap.className = 'table-scroll';
-                tbl.parentElement.insertBefore(wrap, tbl);
-                wrap.appendChild(tbl);
-              }
-            });
-          }
-        } catch (_) { /* noop */ }
-      } else {
-        noteContent.style.display = 'none';
-        noteElement.classList.remove('open');
-      }
-    }
-
-    // Open a markdown msg-note in a full-screen new tab without fetching files
-    function openMdNoteFull(noteId, rawTitle) {
-      try {
-        const contentEl = document.getElementById(noteId);
-        if (!contentEl) return;
-        
-        // Find the parent msg-note element to get the note path
-        const noteElement = contentEl.closest('.msg-note');
-        const notePath = noteElement ? noteElement.getAttribute('data-note-path') : '';
-        const basePath = notePath ? notePath.substring(0, notePath.lastIndexOf('/') + 1) : '';
-        
-        // Check if this is an HTML file - open in md-viewer with content passed via sessionStorage
-        if (notePath && /\.html$/i.test(notePath)) {
-          // Find the HTML content from courses data
-          let htmlContent = '';
-          if (typeof courses !== 'undefined') {
-            outerLoop: for (let course of courses) {
-              for (let section of course.sections) {
-                if (section.msgNotes) {
-                  for (let note of section.msgNotes) {
-                    if (note.path === notePath && note.type === 'html') {
-                      htmlContent = note.content;
-                      break outerLoop;
-                    }
-                  }
-                }
-              }
-            }
-          }
-          
-          if (htmlContent) {
-            // Store in sessionStorage to avoid URL length limits
-            const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            sessionStorage.setItem(sessionKey, htmlContent);
-            sessionStorage.setItem(sessionKey + '_path', notePath);
-            
-            const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&sessionKey=${sessionKey}`;
-            window.open(mdViewerUrl, '_blank');
-          }
-          return;
-        }
-        
-        // For markdown/text files, open in md-viewer or simple window
-        const mdHtmlEl = contentEl.querySelector('.markdown-content');
-        let htmlInner = '';
-        if (mdHtmlEl) {
-          htmlInner = mdHtmlEl.innerHTML;
-        } else {
-          const pre = contentEl.querySelector('pre');
-          htmlInner = pre ? ('<pre>' + pre.textContent.replace(/[&<>]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])) + '</pre>') : contentEl.innerHTML;
-        }
-        
-        // Create a simple window with the content
-        const w = window.open();
-        if (!w) return;
-        w.document.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${rawTitle || 'Документ'}</title>
-            <style>
-              body { font-family: 'Open Sans', Arial, sans-serif; max-width: 1400px; margin: 0 auto; padding: 16px; background: #fafafa; }
-              h1, h2, h3 { color: #333; }
-              a { color: #6d28d9; }
-            </style>
-          </head>
-          <body>
-            <div>${htmlInner}</div>
-          </body>
-          </html>
-        `);
-        w.document.close();
-      } catch (e) { console.error('openMdNoteFull error', e); }
-    }
-    
-    // Function to toggle version info
-    function toggleVersionInfo() {
-      const versionInfo = document.getElementById('versionInfo');
-      if (versionInfo.style.display === 'none') {
-        versionInfo.textContent = (typeof buildTimestamp !== 'undefined' ? buildTimestamp : 'Unknown');
-        versionInfo.style.display = 'inline-block';
-        // Auto-hide after 5 seconds
-        setTimeout(() => {
-          versionInfo.style.display = 'none';
-        }, 5000);
-      } else {
-        versionInfo.style.display = 'none';
-      }
-    }
-    
-    // Function to copy git commands
-    function copyGitCommand(type) {
-      let command = '';
-      if (type === 'main') {
-        command = 'node generate_courses.js; git add .; git commit -m "update"; git push';
-      } else if (type === 'files') {
-        command = 'cd files; git add .; git commit -m "update"; git push; cd ..';
-      }
-      
-      // Copy to clipboard
-      navigator.clipboard.writeText(command).then(() => {
-        // Show temporary notification
-        const versionInfo = document.getElementById('versionInfo');
-        versionInfo.textContent = 'Copied: ' + command;
-        versionInfo.style.display = 'inline-block';
-        setTimeout(() => {
-          versionInfo.style.display = 'none';
-        }, 3000);
-      }).catch(err => {
-        console.error('Failed to copy:', err);
-        alert('Failed to copy command');
-      });
-    }
-    
-    // Function to show text card in modal
-    function showTextCardModal(cardId, title, content) {
-      // Decode HTML entities
-      content = content.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#10;/g, '\n');
-      
-      // Create modal
-      const modal = document.createElement('div');
-      modal.id = 'textCardModal';
-      modal.className = 'text-modal';
-      modal.style.display = 'block';
-      modal.onclick = function(e) {
-        if (e.target === modal) closeTextCardModal();
-      };
-      
-      const modalContent = document.createElement('div');
-      modalContent.className = 'text-modal-content';
-      
-      modalContent.innerHTML = `
-        <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
-        <h2 class="text-modal-title">${title}</h2>
-        <div class="text-modal-body">${content}</div>
-      `;
-      
-      modal.appendChild(modalContent);
-      document.body.appendChild(modal);
-      
-      // Prevent body scroll
-      document.body.style.overflow = 'hidden';
-    }
-    
-    function closeTextCardModal() {
-      const modal = document.getElementById('textCardModal');
-      if (modal) {
-        modal.remove();
-        document.body.style.overflow = '';
-      }
-    }
-    
-    // Close modal on Escape key
-    document.addEventListener('keydown', function(e) {
-      if (e.key === 'Escape') {
-        closeTextCardModal();
-      }
-    });
-    
-    // Keyboard shortcuts for priority HTML files (Ctrl+1, Ctrl+2, Ctrl+3)
-    document.addEventListener('keydown', function(e) {
-      if (e.ctrlKey && (e.key === '1' || e.key === '2' || e.key === '3')) {
-        e.preventDefault();
-        openPriorityHtmlFile(parseInt(e.key));
-      }
-    });
-    
-    // Function to open priority HTML file by number (1, 2, or 3)
-    function openPriorityHtmlFile(priority) {
-      if (typeof htmlPriority === 'undefined' || !htmlPriority[priority]) {
-        console.warn(`Priority HTML file ${priority} not configured`);
-        return;
-      }
-      
-      const filePath = htmlPriority[priority];
-      
-      // Find the HTML content from courses data
-      let htmlContent = '';
-      if (typeof courses !== 'undefined') {
-        outerLoop: for (let course of courses) {
-          for (let section of course.sections) {
-            if (section.msgNotes) {
-              for (let note of section.msgNotes) {
-                if (note.path === filePath && note.type === 'html') {
-                  htmlContent = note.content;
-                  break outerLoop;
-                }
-              }
-            }
-          }
-        }
-      }
-      
-      if (htmlContent) {
-        // Store in sessionStorage
-        const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        sessionStorage.setItem(sessionKey, htmlContent);
-        sessionStorage.setItem(sessionKey + '_path', filePath);
-        
-        const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(filePath)}&sessionKey=${sessionKey}`;
-        window.open(mdViewerUrl, '_blank');
-      } else {
-        console.warn(`HTML content for ${filePath} not found in courses data`);
-      }
-    }
-    
-    // Function to render DOCX files
-    async function renderDocxFile(filePath, fileName) {
-      try {
-        // Fetch the docx file
-        const response = await fetch(filePath);
-        const arrayBuffer = await response.arrayBuffer();
-        
-        // Create modal
-        const modal = document.createElement('div');
-        modal.id = 'textCardModal';
-  modal.className = 'text-modal';
-  modal.style.display = 'block';
-        modal.onclick = function(e) {
-          if (e.target === modal) closeTextCardModal();
-        };
-        
-        const modalContent = document.createElement('div');
-        modalContent.className = 'text-modal-content';
-        modalContent.innerHTML = `
-          <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
-          <h2 class="text-modal-title">${fileName}</h2>
-          <div class="text-modal-body" id="docx-container" style="padding: 20px; background: white; max-height: 70vh; overflow-y: auto;"></div>
-        `;
-        
-        modal.appendChild(modalContent);
-        document.body.appendChild(modal);
-        document.body.style.overflow = 'hidden';
-        
-        // Render the docx file
-        const container = document.getElementById('docx-container');
-        await docx.renderAsync(arrayBuffer, container);
-        
-      } catch (error) {
-        console.error('Error rendering DOCX file:', error);
-        alert('Грешка при зареждане на документа. Моля опитайте отново.');
-      }
-    }
-    
-    // Show image in modal overlay
-    function showImageModal(imgPath, imgName, allImages = [], currentIndex = -1) {
-      closeTextCardModal();
-      const modal = document.createElement('div');
-      modal.id = 'textCardModal';
-      modal.className = 'text-modal';
-      modal.style.display = 'block';
-      modal.onclick = function(e) {
-        if (e.target === modal) closeTextCardModal();
-      };
-      const modalContent = document.createElement('div');
-      modalContent.className = 'text-modal-content';
-      let navHtml = '';
-      if (Array.isArray(allImages) && allImages.length > 1 && currentIndex >= 0) {
-        navHtml = `<div style="display:flex;justify-content:center;gap:24px;margin-top:18px;">
-          <button onclick="event.stopPropagation(); showImageModal('` +
-            allImages[(currentIndex - 1 + allImages.length) % allImages.length].path.replace(/'/g, '\\') + `', '` +
-            allImages[(currentIndex - 1 + allImages.length) % allImages.length].name.replace(/'/g, '\\') + `', window._currentImageList, ((${currentIndex} - 1 + window._currentImageList.length) % window._currentImageList.length))" style="padding:8px 18px;font-size:1.1em;border-radius:6px;border:none;background:#ede9fe;color:#6d28d9;cursor:pointer;">&#8592; Предишна</button>
-          <button onclick="event.stopPropagation(); showImageModal('` +
-            allImages[(currentIndex + 1) % allImages.length].path.replace(/'/g, '\\') + `', '` +
-            allImages[(currentIndex + 1) % allImages.length].name.replace(/'/g, '\\') + `', window._currentImageList, ((${currentIndex} + 1) % window._currentImageList.length))" style="padding:8px 18px;font-size:1.1em;border-radius:6px;border:none;background:#ede9fe;color:#6d28d9;cursor:pointer;">Следваща &#8594;</button>
-        </div>`;
-      }
-      modalContent.innerHTML = `
-        <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
-        <h2 class="text-modal-title" style="text-align:center; margin-bottom:10px; margin-top:2px;">${imgName}</h2>
-        <div class="text-modal-body" style="padding: 0; background: white; max-height: 80vh; min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
-          <img id="modalZoomImg" src="${imgPath}" alt="${imgName}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); margin: 0 auto 16px auto; display: block; transition: transform 0.2s; cursor: zoom-in;" />
-          ${navHtml}
-        </div>
-      `;
-      modal.appendChild(modalContent);
-      document.body.appendChild(modal);
-      document.body.style.overflow = 'hidden';
-      // Add zoom logic after image is in DOM
-      setTimeout(function() {
-        const img = document.getElementById('modalZoomImg');
-        if (!img) return;
-        let scale = 1;
-        let originX = 0.5;
-        let originY = 0.5;
-        img.addEventListener('wheel', function(e) {
-          e.preventDefault();
-          // Zoom in/out
-          if (e.deltaY < 0) {
-            scale = Math.min(scale + 0.15, 5);
-          } else {
-            scale = Math.max(scale - 0.15, 1);
-          }
-          // Zoom to mouse position
-          const rect = img.getBoundingClientRect();
-          originX = ((e.clientX - rect.left) / rect.width) * 100;
-          originY = ((e.clientY - rect.top) / rect.height) * 100;
-          img.style.transformOrigin = `${originX}% ${originY}%`;
-          img.style.transform = `scale(${scale})`;
-          img.style.cursor = scale > 1 ? 'zoom-out' : 'zoom-in';
-        }, { passive: false });
-        img.addEventListener('mouseleave', function() {
-          scale = 1;
-          img.style.transform = 'scale(1)';
-          img.style.cursor = 'zoom-in';
-        });
-      }, 0);
-    }
-    </script>
-
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Courses</title>
-  
-  <!-- Favicon -->
-  <link rel="icon" href="favicon.svg" type="image/svg+xml">
-  
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <!-- Marked.js library for Markdown rendering -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <style>
-    .toggle-btn.selected {
-      background: #111 !important;
-      border-color: #111 !important;
-    }
-    .toggle-btn img {
-      filter: none;
-      transition: filter 0.15s;
-    }
-    .toggle-btn.selected img {
-      filter: brightness(0) invert(1);
-    }
       /* Stray CSS removed */
       /* .toggle-btn.selected { background: #111 !important; border-color: #111 !important; } */
       /* .toggle-btn.selected img { filter: brightness(0) invert(1); } */
@@ -1937,6 +997,14 @@
   <script src="courses.generated.js?v=20260121"></script>
 </head>
 <body>
+<!-- Right-side overlay for course card click -->
+    <div id="rightOverlay" class="right-overlay">
+      <button class="mobile-overlay-close" onclick="closeRightOverlay()">✕</button>
+      <div class="overlay-content" id="overlayContent">
+        <!-- Dynamic content will be injected here -->
+      </div>
+    </div>
+
   <div class="layout">
   <div id="side-menu" class="mode-light hide-in-background themed-background-primary-fill-only left-off-canvas-menu color-selection-live-mode" style="background: #262626; width: 200px; min-width: 200px; max-width: 200px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100;">
       <div class="bb-inner-wrap">
@@ -2121,7 +1189,30 @@
   <div id="dynamic-course-list"></div>
 </div>
 <script>
-// Generate a consistent color based on course ID
+    // Overlay logic for course cards
+    document.addEventListener('DOMContentLoaded', function() {
+      // Close overlay when clicking outside overlay-content
+      var overlay = document.getElementById('rightOverlay');
+      if (overlay) {
+        overlay.addEventListener('mousedown', function(e) {
+          // Only close if clicking directly on the overlay background, not on content or ribbon/close
+          if (e.target === overlay) {
+            closeRightOverlay();
+          }
+        });
+      }
+      
+      var courseList = document.getElementById('course-org-list');
+      if (courseList) {
+        courseList.querySelectorAll('.element-card').forEach(function(card) {
+          card.style.cursor = 'pointer';
+          card.addEventListener('click', function(e) {
+            openRightOverlayForCard(card);
+            e.stopPropagation();
+          });
+        });
+      }
+    });// Generate a consistent color based on course ID
 function generateColorFromId(id, isArchived = false) {
   // Remove any non-numeric characters and convert to number
   const numericId = parseInt(id.replace(/\D/g, ''), 10) || 0;
@@ -2653,6 +1744,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+  // Mobile Menu Logic
   const mobileToggle = document.getElementById('mobileMenuToggle');
   const sidebar = document.getElementById('side-menu');
   const mobileOverlay = document.getElementById('mobileOverlay');
@@ -3224,5 +2316,935 @@ function toggleFileDropdown(sectionId) {
 }
 </style>
 
+    <script>
+    // Function to process table rowspans (convert ^ to rowspan)
+    function processTableRowspans(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const tables = doc.querySelectorAll('table');
+      
+      tables.forEach(table => {
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        
+        // Process each column
+        const maxCols = Math.max(...rows.map(row => row.cells.length));
+        
+        for (let colIndex = 0; colIndex < maxCols; colIndex++) {
+          let spanStart = -1;
+          let spanCount = 0;
+          
+          for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+            const cell = rows[rowIndex].cells[colIndex];
+            
+            if (!cell) continue;
+            
+            const cellText = cell.textContent.trim();
+            
+            if (cellText === '^') {
+              // Mark cell for deletion and count span
+              cell.setAttribute('data-delete', 'true');
+              spanCount++;
+            } else {
+              // If we were counting spans, apply rowspan
+              if (spanCount > 0 && spanStart >= 0) {
+                const spanCell = rows[spanStart].cells[colIndex];
+                if (spanCell) {
+                  spanCell.setAttribute('rowspan', spanCount + 1);
+                }
+              }
+              // Reset for next potential span
+              spanStart = rowIndex;
+              spanCount = 0;
+            }
+          }
+          
+          // Handle trailing spans
+          if (spanCount > 0 && spanStart >= 0) {
+            const spanCell = rows[spanStart].cells[colIndex];
+            if (spanCell) {
+              spanCell.setAttribute('rowspan', spanCount + 1);
+            }
+          }
+        }
+        
+        // Remove cells marked for deletion
+        table.querySelectorAll('[data-delete="true"]').forEach(cell => cell.remove());
+      });
+      
+      return doc.body.innerHTML;
+    }
+
+    // Function to process table colspans (convert < to colspan)
+    function processTableColspans(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const tables = doc.querySelectorAll('table');
+      
+      tables.forEach(table => {
+        const rows = Array.from(table.querySelectorAll('tbody tr'));
+        
+        // Process each row
+        rows.forEach(row => {
+          const cells = Array.from(row.cells);
+          let spanStart = -1;
+          let spanCount = 0;
+          
+          for (let colIndex = 0; colIndex < cells.length; colIndex++) {
+            const cell = cells[colIndex];
+            const cellText = cell.innerHTML.trim();
+            
+            if (cellText === '&lt;') {
+              // Mark cell for deletion and count span
+              cell.setAttribute('data-delete-colspan', 'true');
+              spanCount++;
+            } else {
+              // If we were counting spans, apply colspan
+              if (spanCount > 0 && spanStart >= 0) {
+                const spanCell = cells[spanStart];
+                if (spanCell) {
+                  spanCell.setAttribute('colspan', spanCount + 1);
+                }
+              }
+              // Reset for next potential span
+              spanStart = colIndex;
+              spanCount = 0;
+            }
+          }
+          
+          // Handle trailing spans
+          if (spanCount > 0 && spanStart >= 0) {
+            const spanCell = cells[spanStart];
+            if (spanCell) {
+              spanCell.setAttribute('colspan', spanCount + 1);
+            }
+          }
+        });
+        
+        // Remove cells marked for deletion
+        table.querySelectorAll('[data-delete-colspan="true"]').forEach(cell => cell.remove());
+      });
+      
+      return doc.body.innerHTML;
+    }
+
+    // Function to process table cell alignment (>>text<<, <<text, text>>)
+    function processTableAlignment(html) {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+      const tables = doc.querySelectorAll('table');
+      
+      tables.forEach(table => {
+        const allCells = table.querySelectorAll('td, th');
+        
+        allCells.forEach(cell => {
+          let content = cell.innerHTML.trim();
+          
+          // Check for center alignment >>text<<
+          if (content.startsWith('&gt;&gt;') && content.endsWith('&lt;&lt;')) {
+            cell.style.textAlign = 'center';
+            cell.innerHTML = content.slice(8, -8); // Remove &gt;&gt; and &lt;&lt;
+          }
+          // Check for left alignment <<text
+          else if (content.startsWith('&lt;&lt;')) {
+            cell.style.textAlign = 'left';
+            cell.innerHTML = content.slice(8); // Remove &lt;&lt;
+          }
+          // Check for right alignment text>>
+          else if (content.endsWith('&gt;&gt;')) {
+            cell.style.textAlign = 'right';
+            cell.innerHTML = content.slice(0, -8); // Remove &gt;&gt;
+          }
+        });
+      });
+      
+      return doc.body.innerHTML;
+    }
+    
+    // Overlay logic for course cards
+    document.addEventListener('DOMContentLoaded', function() {
+      // Close overlay when clicking outside overlay-content
+      var overlay = document.getElementById('rightOverlay');
+      if (overlay) {
+        overlay.addEventListener('mousedown', function(e) {
+          // Only close if clicking directly on the overlay background, not on content or ribbon/close
+          if (e.target === overlay) {
+            closeRightOverlay();
+          }
+        });
+      }
+      
+      var courseList = document.getElementById('course-org-list');
+      if (courseList) {
+        courseList.querySelectorAll('.element-card').forEach(function(card) {
+          card.style.cursor = 'pointer';
+          card.addEventListener('click', function(e) {
+            openRightOverlayForCard(card);
+            e.stopPropagation();
+          });
+        });
+      }
+    });
+  function openRightOverlayForCard(card) {
+  var overlay = document.getElementById('rightOverlay');
+  var content = document.getElementById('overlayContent');
+  if (overlay && content) {
+    var title = card.querySelector('.course-title')?.textContent || 'Course';
+    var courseId = card.querySelector('.course-id')?.textContent || '';
+    var isArchivedCard = card.style.opacity === '0.75'; // Archived cards have opacity
+    
+    // Find the course - need to check if it's archived or active
+    var courseObj;
+    if (isArchivedCard) {
+      // For archived cards, find in archived courses only
+      courseObj = courses.find(c => c.id === courseId && c.isArchived === true);
+    } else {
+      // For active cards, find in active courses only
+      courseObj = courses.find(c => c.id === courseId && (!c.isArchived || c.isArchived === false));
+    }
+    
+    let customContent = '';
+    
+    // Check if this is "Актуални събития Event center" course - show event info instead
+    if (title.includes('Актуални събит') || title.includes('Event center')) {
+      if (typeof eventInfo !== 'undefined' && eventInfo && eventInfo.trim().length > 0) {
+        customContent = `<div class="event-info-overlay">` + marked.parse(eventInfo) + `</div>`;
+      } else {
+        customContent = '<div style="color:#888;">Няма информация за актуални събития.</div>';
+      }
+    } else {
+      // Render text cards if available
+      if (courseObj && Array.isArray(courseObj.textCards) && courseObj.textCards.length > 0) {
+        customContent += `<div class="text-cards-container">`;
+        courseObj.textCards.forEach(card => {
+          customContent += renderTextCardBig(card);
+        });
+        customContent += `</div>`;
+      }
+      
+      if (courseObj && Array.isArray(courseObj.sections) && courseObj.sections.length > 0) {
+        customContent += `<div style="display:flex; flex-direction:column; gap:18px;">`;
+        courseObj.sections.forEach(section => {
+          // Sort files and folders before rendering
+          sortFilesAndFolders(section);
+          customContent += renderSection(section, 1); // 1 = first level sections (Материали, Колоквиум I, etc.)
+        });
+        customContent += `</div>`;
+      } else if (!courseObj || !courseObj.textCards || courseObj.textCards.length === 0) {
+        customContent = '<div style="color:#888;">Няма съдържание за този курс.</div>';
+      }
+    }
+    
+    // Function to render big text card (folder-style)
+    // Natural sort function for proper number ordering
+    function naturalSort(a, b) {
+      const regex = /(\d+)|(\D+)/g;
+      const aParts = a.match(regex);
+      const bParts = b.match(regex);
+      
+      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const aPart = aParts[i] || '';
+        const bPart = bParts[i] || '';
+        
+        const aNum = parseInt(aPart);
+        const bNum = parseInt(bPart);
+        
+        if (!isNaN(aNum) && !isNaN(bNum)) {
+          if (aNum !== bNum) return aNum - bNum;
+        } else {
+          if (aPart !== bPart) return aPart.localeCompare(bPart);
+        }
+      }
+      return 0;
+    }
+    
+    // Sort files: folders first, then by file type, then natural sort
+    function sortFilesAndFolders(section) {
+      if (section.files && section.files.length > 0) {
+        section.files.sort((a, b) => {
+          // Get file extensions
+          const aExt = a.name.split('.').pop().toLowerCase();
+          const bExt = b.name.split('.').pop().toLowerCase();
+          
+          // First sort by extension (file type)
+          if (aExt !== bExt) {
+            return aExt.localeCompare(bExt);
+          }
+          
+          // Then natural sort by name
+          return naturalSort(a.name.toLowerCase(), b.name.toLowerCase());
+        });
+      }
+      
+      // Sort subsections (folders) with natural sort
+      if (section.subsections && section.subsections.length > 0) {
+        section.subsections.sort((a, b) => {
+          return naturalSort(a.name.toLowerCase(), b.name.toLowerCase());
+        });
+        
+        // Recursively sort nested sections
+        section.subsections.forEach(sub => sortFilesAndFolders(sub));
+      }
+    }
+    
+    // Helper function to remove order prefix (1-, 2-, 1.1-, 2.2-, etc.) and "msg-" from filenames for display
+    function removeOrderPrefix(fileName) {
+      // Remove number prefix (1-, 2-, 1.1-, 2.22-, etc.)
+      let cleaned = fileName.replace(/^[\d.]+-/, '');
+      // Remove "msg-" prefix (case insensitive)
+      cleaned = cleaned.replace(/^msg-/i, '');
+      // Remove file extension
+      cleaned = cleaned.replace(/\.(txt|md|docx|pdf|doc|xls|xlsx|ppt|pptx|jpg|jpeg|png|gif|bmp|webp|svg|zip|rar|7z|log|one|onetoc2|url)$/i, '');
+      return cleaned;
+    }
+    
+    function renderTextCardBig(card) {
+      const title = card.title || 'Без заглавие';
+      const content = card.content || '';
+      const maxLength = 200;
+      const preview = content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
+      const cardId = 'card-' + Math.random().toString(36).substr(2, 9);
+      
+      return `
+        <div class="text-card-big" onclick="showTextCardModal('${cardId}', '${title.replace(/'/g, "\\'")}', this.getAttribute('data-content'));"
+             data-content="${content.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/\n/g, '&#10;')}">
+          <div>
+            <h3 class="text-card-big-title">${title}</h3>
+            <p class="text-card-big-preview">${preview}</p>
+          </div>
+          <svg class="text-card-big-icon" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)">
+            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/>
+          </svg>
+        </div>
+      `;
+    }
+    
+    // Recursive function to render sections and subsections
+    function renderSection(section, level) {
+      // Level 2 (подпапки в Материали) нямат indent, level 3+ имат indent
+      const indent = level === 2 ? 0 : (level > 2 ? (level - 2) * 16 : level * 16);
+      const fileCount = Array.isArray(section.files) ? section.files.length : 0;
+      const hasFiles = fileCount > 0;
+      const hasSubsections = Array.isArray(section.subsections) && section.subsections.length > 0;
+      const hasMany = fileCount > 5;
+      // Level 1 (Материали, Колоквиум I): БЕЗ collapsible - винаги отворени, БЕЗ стрелка
+      // Level 2+ (!!!kolokvium genetika): collapsible - затворени по подразбиране, СЪС стрелка
+      const isCollapsible = level > 1;
+      const sectionId = section.name.replace(/\s+/g, '').replace(/[^\w]/g, '') + '_' + level + '_' + Math.random().toString(36).substr(2, 9);
+      
+      let sectionContent = '';
+      
+      // Level 1 (first sections like "Материали") - card style, БЕЗ collapsible, винаги отворени
+      if (level === 1) {
+        sectionContent += `<section style="background:#f7f4fa; border-radius:10px; padding:16px 18px 10px 18px; box-shadow:0 1px 6px #e3e3e3; margin-bottom:12px;">`;
+        // Title БЕЗ dropdown - винаги отворени
+        sectionContent += `<div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; min-width:0;">`;
+        sectionContent += `<svg width="20" height="20" viewBox="0 0 24 24" fill="#7c3aed" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+        sectionContent += `<h3 style="margin:0; color:#7c3aed; font-size:1.1em; font-weight:600; word-break:break-word; overflow-wrap:break-word; min-width:0;">${section.name}</h3>`;
+        sectionContent += `</div>`;
+      } 
+      // Nested levels - simple indent style
+      else {
+        sectionContent += `<div style="margin-left:${indent}px; margin-top:10px; margin-bottom:6px;">`;
+        // Title with dropdown arrow for nested folders
+        if (isCollapsible) {
+          // Level 2+ (вложени папки) - затворени по подразбиране
+          sectionContent += `<div style="display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; margin-bottom:8px; min-width:0;" onclick="toggleFileDropdown('${sectionId}')">`;
+          sectionContent += `<span id="arrow-${sectionId}" style="color:#8b5cf6; font-size:0.9em; min-width:10px; transition:all 0.2s ease; flex-shrink:0;">►</span>`;
+          sectionContent += `<svg width="18" height="18" viewBox="0 0 24 24" fill="#8b5cf6" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+          const label = hasMany ? `${section.name} (${fileCount})` : section.name;
+          sectionContent += `<h4 style="margin:0; color:#8b5cf6; font-size:${1.0 - level * 0.05}em; font-weight:500; flex:1; word-break:break-word; overflow-wrap:break-word; min-width:0;">${label}</h4>`;
+          sectionContent += `</div>`;
+        } else {
+          // Level 1 (основни секции) - БЕЗ стрелка, винаги отворени
+          sectionContent += `<div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">`;
+          sectionContent += `<svg width="18" height="18" viewBox="0 0 24 24" fill="#8b5cf6" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+          const label = hasMany ? `${section.name} (${fileCount})` : section.name;
+          sectionContent += `<h4 style="margin:0; color:#8b5cf6; font-size:${1.0 - level * 0.05}em; font-weight:500;">${label}</h4>`;
+          sectionContent += `</div>`;
+        }
+      }
+      
+      // Open collapsible container if needed
+      if (isCollapsible) {
+        // Level 2+ са затворени по подразбиране
+        sectionContent += `<div id="files-${sectionId}" style="display:none; margin-top:8px;">`;
+      }
+      
+      // Render msg notes (sticky notes) FIRST
+      if (section.msgNotes && section.msgNotes.length > 0) {
+        section.msgNotes.forEach((note, idx) => {
+          // Skip files with -summary in name
+          if (note.name.toLowerCase().includes('-summary')) return;
+          
+          const noteId = `msg-note-${sectionId}-${idx}`;
+          const isHtml = /\.html$/i.test(note.path || '');
+          sectionContent += `
+            <div class="msg-note ${isHtml ? 'msg-note-html' : ''}" onclick="${isHtml ? `openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;` : `toggleMsgNote('${noteId}')`}" data-note-path="${note.path}" style="${isHtml ? 'background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); cursor: pointer;' : ''}">
+              <div class="msg-note-header">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="${isHtml ? '#7c3aed' : '#f59e0b'}" style="flex-shrink:0;">
+                  <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
+                </svg>
+                <span class="msg-note-title" style="${isHtml ? 'color: #6d28d9;' : ''}">${isHtml ? removeOrderPrefix(note.name).replace(/\.html$/i, '') : removeOrderPrefix(note.name)}</span>
+                ${!isHtml && /\.md$/i.test(note.path || '') ? `<a href="#" title="Отвори на цял екран" onclick="event.stopPropagation(); openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" style="display:inline-flex; align-items:center; justify-content:center; margin-left:auto; margin-right:6px; text-decoration:none; flex-shrink:0;">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>
+                </a>` : ''}
+                ${!isHtml ? `<svg class="msg-note-arrow" width="18" height="18" viewBox="0 0 24 24">
+                  <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="#f59e0b"/>
+                </svg>` : ''}
+              </div>
+              <div class="msg-note-content" id="${noteId}" style="display:none;">
+                ${note.type === 'text' ? `<pre>${note.content}</pre>` : (note.type === 'markdown' ? (() => {
+                  // Configure marked for GFM tables
+                  marked.setOptions({
+                    gfm: true,
+                    breaks: false,
+                    tables: true
+                  });
+                  // Parse markdown and fix relative image paths
+                  let html = marked.parse(note.content);
+                  
+                  // Process tables to support rowspan with ^ syntax (only if needed)
+                  if (html.includes('^')) {
+                    html = processTableRowspans(html);
+                  }
+                  
+                  // Process tables to support cell alignment with >>text<<, <<text, text>> (BEFORE colspan!)
+                  if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) {
+                    html = processTableAlignment(html);
+                  }
+                  
+                  // Process tables to support colspan with < syntax (only if needed)
+                  if (html.includes('&lt;')) {
+                    html = processTableColspans(html);
+                  }
+                  
+                  // Get base directory from note path (e.g., "files/Course/Section/")
+                  const basePath = note.path.substring(0, note.path.lastIndexOf('/') + 1);
+                  // Fix relative image paths: any relative path (not starting with http:// or /) -> prepend basePath
+                  let fixedHtml = html.replace(/<img([^>]+)src="(?!https?:\/\/)(?!\/)([^"]+)"/g, 
+                    (match, attrs, src) => `<img${attrs}src="${basePath}${src}"`);
+                  // Add target="_blank" to all links
+                  fixedHtml = fixedHtml.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
+                  return `<div class="markdown-content">${fixedHtml}</div>`;
+                })() : '<p><i>Word файл - отвори за да видиш съдържанието</i><br><a href="' + note.path + '" target="_blank" style="color:#f59e0b;">Отвори файла</a></p>')}
+              </div>
+            </div>
+          `;
+        });
+      }
+      
+      // Render subsections (folders) BEFORE files
+      if (hasSubsections) {
+        section.subsections.forEach(subsection => {
+          // Skip subsections with hidden- prefix or assets folders
+          if (subsection.name.toLowerCase().startsWith('hidden-') || 
+              subsection.name.toLowerCase() === 'assets') return;
+          sectionContent += renderSection(subsection, level + 1);
+        });
+      }
+      
+      // Render files in this section AFTER subsections
+      if (hasFiles) {
+        // Render file list
+        sectionContent += '<ul style="margin:8px 0 4px 0; padding-left:20px; list-style:none;">';
+        section.files.forEach(file => {
+          // Skip files with hidden- prefix or -summary suffix
+          if (file.name.toLowerCase().startsWith('hidden-') || 
+              file.name.toLowerCase().includes('-summary')) return;
+          
+          const fileName = file.name.toLowerCase();
+          let fileIcon = '';
+          // Determine file icon based on extension
+          if (fileName.endsWith('.pdf')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#dc2626" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
+          } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#2563eb" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
+          } else if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#16a34a" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
+          } else if (fileName.endsWith('.ppt') || fileName.endsWith('.pptx')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ea580c" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
+          } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.bmp') || fileName.endsWith('.webp') || fileName.endsWith('.svg')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ec4899" style="flex-shrink:0;"><path d="M19,19H5V5H19M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M13.96,12.29L11.21,15.83L9.25,13.47L6.5,17H17.5L13.96,12.29Z"/></svg>`;
+          } else if (fileName.endsWith('.zip') || fileName.endsWith('.rar') || fileName.endsWith('.7z')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#f59e0b" style="flex-shrink:0;"><path d="M14,17H12V15H10V13H12V15H14M14,9H12V7H10V9H12V7H14M14,13H12V11H10V13H12V11H14M20,6H12L10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+          } else if (fileName.endsWith('.txt') || fileName.endsWith('.log') || fileName.endsWith('.md')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#6b7280" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5M10,19L12,15H9V10H15V15L13,19H10Z"/></svg>`;
+          } else if (fileName.endsWith('.one') || fileName.endsWith('.onetoc2')) {
+            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#7c2d99" style="flex-shrink:0;"><path d="M19,3H5C3.89,3 3,3.89 3,5V19C3,20.11 3.89,21 5,21H19C20.11,21 21,20.11 21,19V5C21,3.89 20.11,3 19,3M12,17C9.79,17 8,15.21 8,13C8,10.79 9.79,9 12,9C14.21,9 16,10.79 16,13C16,15.21 14.21,17 12,17Z"/></svg>`;
+          } else if (fileName.endsWith('.url')) {
+            // Try to get favicon from the URL if available
+            let faviconUrl = '';
+            if (file.url) {
+              try {
+                const urlObj = new URL(file.url);
+                const hostname = urlObj.hostname.toLowerCase();
+                
+                // Special handling for popular services with custom icons
+                if (hostname.includes('drive.google.com') || hostname.includes('docs.google.com')) {
+                  faviconUrl = 'https://ssl.gstatic.com/docs/doclist/images/drive_2022q3_32dp.png';
+                } else if (hostname.includes('youtube.com') || hostname.includes('youtu.be')) {
+                  faviconUrl = 'https://www.youtube.com/s/desktop/d743f786/img/favicon_32x32.png';
+                } else if (hostname.includes('github.com')) {
+                  faviconUrl = 'https://github.githubassets.com/favicons/favicon.png';
+                } else if (hostname.includes('blackboard.lol')) {
+                  // Use blackboard.lol favicon for all blackboard.lol subdomains
+                  faviconUrl = 'https://blackboard.lol/favicon.ico';
+                } else {
+                  // Use Google Favicon Service for other domains
+                  faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
+                }
+              } catch (e) {
+                // If URL parsing fails, use default icon
+              }
+            }
+            fileIcon = faviconUrl 
+              ? `<img src="${faviconUrl}" width="18" height="18" style="flex-shrink:0;" onerror="this.style.display='none'; this.nextElementSibling.style.display='inline';" /><svg width="18" height="18" viewBox="0 0 24 24" fill="#3b82f6" style="flex-shrink:0;display:none;"><path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>`
+              : `<svg width="18" height="18" viewBox="0 0 24 24" fill="#3b82f6" style="flex-shrink:0;"><path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>`;
+          }
+
+          sectionContent += `<li style="margin-bottom:6px; font-size:0.95em; display:flex; align-items:center; gap:8px; min-width:0;">`;
+          sectionContent += fileIcon;
+
+          // Check if it's a .url file
+          if (fileName.endsWith('.url') && file.url) {
+            // Open the URL directly
+            const displayName = file.name.replace('.url', '');
+            sectionContent += `<a href="${file.url}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(displayName)}</a></li>`;
+          } 
+          // Check if it's a viewable Office file (Word, PowerPoint, Excel)
+      else if (fileName.endsWith('.docx') || fileName.endsWith('.pptx') || fileName.endsWith('.ppt') || 
+        fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.doc')) {
+            // Encode the full URL properly with cache busting
+            const timestamp = new Date().getTime();
+            const fileUrlWithCacheBust = `https://fenroll.github.io/k/${file.path}?v=${timestamp}`;
+            const fullUrl = encodeURIComponent(fileUrlWithCacheBust);
+            const viewerUrl = `https://docs.google.com/viewer?url=${fullUrl}&embedded=true`;
+            const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
+            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="${viewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
+          }
+          // Markdown files: open in our full-screen viewer; place eye icon next to title
+          else if (fileName.endsWith('.md')) {
+            const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(file.path)}`;
+            const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
+            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="${mdViewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
+          }
+         else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.bmp') || fileName.endsWith('.webp') || fileName.endsWith('.svg')) {
+  const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z\"/></svg>`;
+  const allImages = section.files.filter(f => /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(f.name));
+  const currentIndex = allImages.findIndex(f => f.name === file.name);
+  window._currentImageList = allImages;
+  sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="#" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0;" onclick="event.preventDefault(); showImageModal('${file.path.replace(/'/g, '\\\'')}','${removeOrderPrefix(file.name).replace(/'/g, '\\\'')}', window._currentImageList, ${currentIndex})" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
+}
+          else {
+            sectionContent += `<a href="${file.path}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a></li>`;
+          }
+        });
+        sectionContent += '</ul>';
+      }
+      
+      // Show "no files" message only inside opened collapsible sections
+      if (isCollapsible && !section.files?.length && !section.subsections?.length) {
+        sectionContent += `<div style="color:#999; font-size:0.95em; font-style:italic; margin-top:4px; padding:8px 0;">Няма файлове</div>`;
+      }
+      
+      // Close collapsible container if needed
+      if (isCollapsible) {
+        sectionContent += `</div>`;
+      }
+      
+      // Close tag based on level
+      if (level === 1) {
+        sectionContent += `</section>`; // Level 1 затваря section тага
+      } else {
+        sectionContent += `</div>`; // Level 2+ затваря div тага
+      }
+      return sectionContent;
+    }
+    content.innerHTML = `
+      <div class="overlay-ribbon">
+        <button class="overlay-close" onclick="closeRightOverlay()">&#10005;</button>
+      </div>
+      <header class="main-header overlay-header">
+        <h1 class="page-title">${title}</h1>
+      </header>
+      <div class="overlay-main-content" style="margin-top:18px;">${customContent}</div>
+    `;
+    overlay.classList.add('open');
+    // Скрий hamburger бутона на мобилни устройства когато overlay е отворен
+    var hamburger = document.getElementById('mobileMenuToggle');
+    if (hamburger && window.innerWidth <= 768) {
+      hamburger.style.opacity = '0';
+      hamburger.style.visibility = 'hidden';
+      hamburger.style.pointerEvents = 'none';
+    }
+  }
+}
+    function closeRightOverlay() {
+      var overlay = document.getElementById('rightOverlay');
+      if (overlay) overlay.classList.remove('open');
+      // Покажи hamburger бутона отново
+      var hamburger = document.getElementById('mobileMenuToggle');
+      if (hamburger && window.innerWidth <= 768) {
+        hamburger.style.opacity = '';
+        hamburger.style.visibility = '';
+        hamburger.style.pointerEvents = '';
+      }
+    }
+    
+    // Close overlay when clicking outside on desktop
+    document.addEventListener('click', function(e) {
+      const overlay = document.getElementById('rightOverlay');
+      const overlayContent = document.getElementById('overlayContent');
+      const modal = document.getElementById('textCardModal');
+      // Only close on desktop (not mobile)
+      if (window.innerWidth > 768 && overlay && overlay.classList.contains('open')) {
+        // Check if click is outside overlay-content and NOT inside modal
+        if (!overlayContent.contains(e.target) && !e.target.closest('.element-card') && !e.target.closest('#textCardModal')) {
+          closeRightOverlay();
+        }
+      }
+    });
+    
+    // Function to toggle msg note content
+    function toggleMsgNote(noteId) {
+      const noteContent = document.getElementById(noteId);
+      const noteElement = noteContent.closest('.msg-note');
+      
+      if (noteContent.style.display === 'none' || noteContent.style.display === '') {
+        noteContent.style.display = 'block';
+        noteElement.classList.add('open');
+        // Wrap any markdown tables with a horizontal scroll container (mobile-friendly)
+        try {
+          const mdRoot = noteContent.querySelector('.markdown-content');
+          if (mdRoot) {
+            mdRoot.querySelectorAll('table').forEach(tbl => {
+              if (!tbl.parentElement.classList.contains('table-scroll')) {
+                const wrap = document.createElement('div');
+                wrap.className = 'table-scroll';
+                tbl.parentElement.insertBefore(wrap, tbl);
+                wrap.appendChild(tbl);
+              }
+            });
+          }
+        } catch (_) { /* noop */ }
+      } else {
+        noteContent.style.display = 'none';
+        noteElement.classList.remove('open');
+      }
+    }
+
+    // Open a markdown msg-note in a full-screen new tab without fetching files
+    function openMdNoteFull(noteId, rawTitle) {
+      try {
+        const contentEl = document.getElementById(noteId);
+        if (!contentEl) return;
+        
+        // Find the parent msg-note element to get the note path
+        const noteElement = contentEl.closest('.msg-note');
+        const notePath = noteElement ? noteElement.getAttribute('data-note-path') : '';
+        const basePath = notePath ? notePath.substring(0, notePath.lastIndexOf('/') + 1) : '';
+        
+        // Check if this is an HTML file - open in md-viewer with content passed via sessionStorage
+        if (notePath && /\.html$/i.test(notePath)) {
+          // Find the HTML content from courses data
+          let htmlContent = '';
+          if (typeof courses !== 'undefined') {
+            outerLoop: for (let course of courses) {
+              for (let section of course.sections) {
+                if (section.msgNotes) {
+                  for (let note of section.msgNotes) {
+                    if (note.path === notePath && note.type === 'html') {
+                      htmlContent = note.content;
+                      break outerLoop;
+                    }
+                  }
+                }
+              }
+            }
+          }
+          
+          if (htmlContent) {
+            // Store in sessionStorage to avoid URL length limits
+            const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem(sessionKey, htmlContent);
+            sessionStorage.setItem(sessionKey + '_path', notePath);
+            
+            const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&sessionKey=${sessionKey}`;
+            window.open(mdViewerUrl, '_blank');
+          }
+          return;
+        }
+        
+        // For markdown/text files, open in md-viewer or simple window
+        const mdHtmlEl = contentEl.querySelector('.markdown-content');
+        let htmlInner = '';
+        if (mdHtmlEl) {
+          htmlInner = mdHtmlEl.innerHTML;
+        } else {
+          const pre = contentEl.querySelector('pre');
+          htmlInner = pre ? ('<pre>' + pre.textContent.replace(/[&<>]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])) + '</pre>') : contentEl.innerHTML;
+        }
+        
+        // Create a simple window with the content
+        const w = window.open();
+        if (!w) return;
+        w.document.write(`
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>${rawTitle || 'Документ'}</title>
+            <style>
+              body { font-family: 'Open Sans', Arial, sans-serif; max-width: 1400px; margin: 0 auto; padding: 16px; background: #fafafa; }
+              h1, h2, h3 { color: #333; }
+              a { color: #6d28d9; }
+            </style>
+          </head>
+          <body>
+            <div>${htmlInner}</div>
+          </body>
+          </html>
+        `);
+        w.document.close();
+      } catch (e) { console.error('openMdNoteFull error', e); }
+    }
+    
+    // Function to toggle version info
+    function toggleVersionInfo() {
+      const versionInfo = document.getElementById('versionInfo');
+      if (versionInfo.style.display === 'none') {
+        versionInfo.textContent = (typeof buildTimestamp !== 'undefined' ? buildTimestamp : 'Unknown');
+        versionInfo.style.display = 'inline-block';
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+          versionInfo.style.display = 'none';
+        }, 5000);
+      } else {
+        versionInfo.style.display = 'none';
+      }
+    }
+    
+    // Function to copy git commands
+    function copyGitCommand(type) {
+      let command = '';
+      if (type === 'main') {
+        command = 'node generate_courses.js; git add .; git commit -m "update"; git push';
+      } else if (type === 'files') {
+        command = 'cd files; git add .; git commit -m "update"; git push; cd ..';
+      }
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(command).then(() => {
+        // Show temporary notification
+        const versionInfo = document.getElementById('versionInfo');
+        versionInfo.textContent = 'Copied: ' + command;
+        versionInfo.style.display = 'inline-block';
+        setTimeout(() => {
+          versionInfo.style.display = 'none';
+        }, 3000);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy command');
+      });
+    }
+    
+    // Function to show text card in modal
+    function showTextCardModal(cardId, title, content) {
+      // Decode HTML entities
+      content = content.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#10;/g, '\n');
+      
+      // Create modal
+      const modal = document.createElement('div');
+      modal.id = 'textCardModal';
+      modal.className = 'text-modal';
+      modal.style.display = 'block';
+      modal.onclick = function(e) {
+        if (e.target === modal) closeTextCardModal();
+      };
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'text-modal-content';
+      
+      modalContent.innerHTML = `
+        <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
+        <h2 class="text-modal-title">${title}</h2>
+        <div class="text-modal-body">${content}</div>
+      `;
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+      
+      // Prevent body scroll
+      document.body.style.overflow = 'hidden';
+    }
+    
+    function closeTextCardModal() {
+      const modal = document.getElementById('textCardModal');
+      if (modal) {
+        modal.remove();
+        document.body.style.overflow = '';
+      }
+    }
+    
+    // Close modal on Escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        closeTextCardModal();
+      }
+    });
+    
+    // Keyboard shortcuts for priority HTML files (Ctrl+1, Ctrl+2, Ctrl+3)
+    document.addEventListener('keydown', function(e) {
+      if (e.ctrlKey && (e.key === '1' || e.key === '2' || e.key === '3')) {
+        e.preventDefault();
+        openPriorityHtmlFile(parseInt(e.key));
+      }
+    });
+    
+    // Function to open priority HTML file by number (1, 2, or 3)
+    function openPriorityHtmlFile(priority) {
+      if (typeof htmlPriority === 'undefined' || !htmlPriority[priority]) {
+        console.warn(`Priority HTML file ${priority} not configured`);
+        return;
+      }
+      
+      const filePath = htmlPriority[priority];
+      
+      // Find the HTML content from courses data
+      let htmlContent = '';
+      if (typeof courses !== 'undefined') {
+        outerLoop: for (let course of courses) {
+          for (let section of course.sections) {
+            if (section.msgNotes) {
+              for (let note of section.msgNotes) {
+                if (note.path === filePath && note.type === 'html') {
+                  htmlContent = note.content;
+                  break outerLoop;
+                }
+              }
+            }
+          }
+        }
+      }
+      
+      if (htmlContent) {
+        // Store in sessionStorage
+        const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        sessionStorage.setItem(sessionKey, htmlContent);
+        sessionStorage.setItem(sessionKey + '_path', filePath);
+        
+        const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(filePath)}&sessionKey=${sessionKey}`;
+        window.open(mdViewerUrl, '_blank');
+      } else {
+        console.warn(`HTML content for ${filePath} not found in courses data`);
+      }
+    }
+    
+    // Function to render DOCX files
+    async function renderDocxFile(filePath, fileName) {
+      try {
+        // Fetch the docx file
+        const response = await fetch(filePath);
+        const arrayBuffer = await response.arrayBuffer();
+        
+        // Create modal
+        const modal = document.createElement('div');
+        modal.id = 'textCardModal';
+  modal.className = 'text-modal';
+  modal.style.display = 'block';
+        modal.onclick = function(e) {
+          if (e.target === modal) closeTextCardModal();
+        };
+        
+        const modalContent = document.createElement('div');
+        modalContent.className = 'text-modal-content';
+        modalContent.innerHTML = `
+          <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
+          <h2 class="text-modal-title">${fileName}</h2>
+          <div class="text-modal-body" id="docx-container" style="padding: 20px; background: white; max-height: 70vh; overflow-y: auto;"></div>
+        `;
+        
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        document.body.style.overflow = 'hidden';
+        
+        // Render the docx file
+        const container = document.getElementById('docx-container');
+        await docx.renderAsync(arrayBuffer, container);
+        
+      } catch (error) {
+        console.error('Error rendering DOCX file:', error);
+        alert('Грешка при зареждане на документа. Моля опитайте отново.');
+      }
+    }
+    
+    // Show image in modal overlay
+    function showImageModal(imgPath, imgName, allImages = [], currentIndex = -1) {
+      closeTextCardModal();
+      const modal = document.createElement('div');
+      modal.id = 'textCardModal';
+      modal.className = 'text-modal';
+      modal.style.display = 'block';
+      modal.onclick = function(e) {
+        if (e.target === modal) closeTextCardModal();
+      };
+      const modalContent = document.createElement('div');
+      modalContent.className = 'text-modal-content';
+      let navHtml = '';
+      if (Array.isArray(allImages) && allImages.length > 1 && currentIndex >= 0) {
+        navHtml = `<div style="display:flex;justify-content:center;gap:24px;margin-top:18px;">
+          <button onclick="event.stopPropagation(); showImageModal('` +
+            allImages[(currentIndex - 1 + allImages.length) % allImages.length].path.replace(/'/g, '\\') + `', '` +
+            allImages[(currentIndex - 1 + allImages.length) % allImages.length].name.replace(/'/g, '\\') + `', window._currentImageList, ((${currentIndex} - 1 + window._currentImageList.length) % window._currentImageList.length))" style="padding:8px 18px;font-size:1.1em;border-radius:6px;border:none;background:#ede9fe;color:#6d28d9;cursor:pointer;">&#8592; Предишна</button>
+          <button onclick="event.stopPropagation(); showImageModal('` +
+            allImages[(currentIndex + 1) % allImages.length].path.replace(/'/g, '\\') + `', '` +
+            allImages[(currentIndex + 1) % allImages.length].name.replace(/'/g, '\\') + `', window._currentImageList, ((${currentIndex} + 1) % window._currentImageList.length))" style="padding:8px 18px;font-size:1.1em;border-radius:6px;border:none;background:#ede9fe;color:#6d28d9;cursor:pointer;">Следваща &#8594;</button>
+        </div>`;
+      }
+      modalContent.innerHTML = `
+        <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
+        <h2 class="text-modal-title" style="text-align:center; margin-bottom:10px; margin-top:2px;">${imgName}</h2>
+        <div class="text-modal-body" style="padding: 0; background: white; max-height: 80vh; min-height: 60vh; display: flex; flex-direction: column; justify-content: center; align-items: center;">
+          <img id="modalZoomImg" src="${imgPath}" alt="${imgName}" style="max-width: 100%; max-height: 65vh; border-radius: 8px; box-shadow: 0 2px 16px rgba(0,0,0,0.12); margin: 0 auto 16px auto; display: block; transition: transform 0.2s; cursor: zoom-in;" />
+          ${navHtml}
+        </div>
+      `;
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+      document.body.style.overflow = 'hidden';
+      // Add zoom logic after image is in DOM
+      setTimeout(function() {
+        const img = document.getElementById('modalZoomImg');
+        if (!img) return;
+        let scale = 1;
+        let originX = 0.5;
+        let originY = 0.5;
+        img.addEventListener('wheel', function(e) {
+          e.preventDefault();
+          // Zoom in/out
+          if (e.deltaY < 0) {
+            scale = Math.min(scale + 0.15, 5);
+          } else {
+            scale = Math.max(scale - 0.15, 1);
+          }
+          // Zoom to mouse position
+          const rect = img.getBoundingClientRect();
+          originX = ((e.clientX - rect.left) / rect.width) * 100;
+          originY = ((e.clientY - rect.top) / rect.height) * 100;
+          img.style.transformOrigin = `${originX}% ${originY}%`;
+          img.style.transform = `scale(${scale})`;
+          img.style.cursor = scale > 1 ? 'zoom-out' : 'zoom-in';
+        }, { passive: false });
+        img.addEventListener('mouseleave', function() {
+          scale = 1;
+          img.style.transform = 'scale(1)';
+          img.style.cursor = 'zoom-in';
+        });
+      }, 0);
+    }
+    </script>
+
 </body>
 </html>
+
