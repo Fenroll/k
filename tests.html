@@ -6,8 +6,7 @@
   <title>Фармакологичен Тест - Medical University Varna</title>
   
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   
   <style>
     /* Ensure consistent sizing across the app */
@@ -124,9 +123,9 @@
     }
     
     .logo-img {
-      width: 168px !important;
+      width: 200px !important;
       height: 22.55px !important;
-      min-width: 168px !important;
+      min-width: 200px !important;
       min-height: 22.55px !important;
       max-width: 168px !important;
       max-height: 22.55px !important;
@@ -205,6 +204,11 @@
       flex-shrink: 0;
       fill: #222 !important;
       stroke: #222 !important;
+    }
+    
+    /* Make messages icon white */
+    .sidebar-nav a[href*="messages"] .svg-icon {
+      filter: brightness(0) invert(1);
     }
     
       .sidebar-footer-links {
@@ -1028,62 +1032,62 @@
       <div class="bb-inner-wrap">
         <div class="logo-header">
           <a href="https://elearn.mu-varna.bg" target="_blank" rel="noopener noreferrer">
-            <img src="https://ultra.content.blackboardcdn.com/ultra/static/images/brand/blackboard_logo_white.svg" alt="Blackboard-Medical University Varna" class="logo-img">
+            <img src="https://ultra.content.blackboardcdn.com/ultra/static/images/brand/blackboard_logo_white.svg" alt="Fan Site" class="logo-img">
           </a>
         </div>
         <nav class="sidebar-nav" aria-label="Main">
           <ul class="off-canvas-list" id="base_tools">
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/institution-page">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-institution-custom.svg" alt="Institution Page" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-institution.svg" alt="Institution Page" />
                 <span class="link-text">Institution Page</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="account.html">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-profile-custom.svg" alt="Profile" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg" alt="Account" />
                 <span class="link-text">Account</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/stream">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-activity-custom.svg" alt="Activity" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-activity.svg" alt="Activity" />
                 <span class="link-text">Activity</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="index.html">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-courses-book.svg" alt="Courses" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg" alt="Courses" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="calendar.html">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-calendar-custom.svg" alt="Calendar" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg" alt="Calendar" />
                 <span class="link-text">Calendar</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/messages">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/svgexport-8.svg" alt="Messages" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-messages.svg" alt="Messages" />
                 <span class="link-text">Messages</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/grades">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-grades-paper.svg" alt="Grades" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-grades.svg" alt="Grades" />
                 <span class="link-text">Grades</span>
               </a>
             </li>
             <li class="base-navigation-button active">
               <a class="base-navigation-button-content" href="tests.html">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-tools-custom.svg" alt="Tools" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="md-editor.html">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-signout-custom.svg" alt="Sign Out" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg" alt="Sign Out" />
                 <span class="link-text">Sign Out</span>
               </a>
             </li>

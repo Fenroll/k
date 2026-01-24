@@ -1,0 +1,20 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="edgeStyleGradient" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#0c59a4;stop-opacity:1" />
+      <stop offset="45%" style="stop-color:#1198ad;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#26c21a;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <rect width="512" height="512" rx="110" fill="url(#edgeStyleGradient)" />
+
+  <g transform="translate(16, 16) scale(7.5)">
+    <path d="M41.02,51H23c-0.552,0-1-0.448-1-1c0-0.149,0.032-0.291,0.091-0.418l4.792-20.191 C24.479,27.701,23,24.945,23,22c0-4.962,4.037-9,9-9s9,4.038,9,9c0,2.945-1.479,5.701-3.883,7.391l4.792,20.191 c0.059,0.127,0.091,0.269,0.091,0.418C42.02,50.552,41.572,51,41.02,51z" 
+          fill="none" 
+          stroke="#FFFFFF" 
+          stroke-width="3.5" 
+          stroke-linejoin="round"
+          stroke-linecap="round"/>
+  </g>
+</svg>

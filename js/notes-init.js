@@ -476,7 +476,7 @@ class NotesUIManager {
         <div class="notes-input-row" style="display: flex; gap: 12px; align-items: flex-end;">
              <textarea class="notes-input" placeholder="Напиши бележка..." rows="1"></textarea>
              <button class="notes-send-btn" title="Изпрати">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
                   <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16151496 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.4429026 C0.994623095,2.08 0.837654326,3.0226 1.15159189,3.97788954 L3.03521743,10.4188814 C3.03521743,10.5759788 3.34915502,10.7330762 3.50612381,10.7330762 L16.6915026,11.5185631 C16.6915026,11.5185631 17.1624089,11.5185631 17.1624089,12.0598639 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"></path>
                 </svg>
              </button>
@@ -586,12 +586,12 @@ class NotesUIManager {
          </div>
          <div class="note-actions">
              <button class="note-action-btn reply-btn" title="Reply">
-                 <img src="svg/reply-svgrepo-com.svg" alt="Reply" style="width: 16px; height: 16px">
+                 <img src="svg/chat/icon-reply.svg" alt="Reply" style="width: 16px; height: 16px">
              </button>
              <button class="note-action-btn react-btn" title="React">
-                 <img src="svg/reaction-emoji-add-svgrepo-com.svg" alt="Reaction" style="width: 16px; height: 16px">
+                 <img src="svg/chat/icon-reaction.svg" alt="Reaction" style="width: 16px; height: 16px">
              </button>
-             ${isMe ? '<button class="note-action-btn delete-btn" title="Delete"><img src="svg/trash-blank-alt-svgrepo-com.svg" alt="Delete" style="width: 16px; height: 16px"></button>' : ''}
+             ${isMe ? '<button class="note-action-btn delete-btn" title="Delete"><img src="svg/chat/icon-delete.svg" alt="Delete" style="width: 16px; height: 16px"></button>' : ''}
          </div>
       `;
       

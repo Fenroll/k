@@ -1688,16 +1688,13 @@
   <title>Courses</title>
   
   <!-- Favicon -->
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link rel="shortcut icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/42761-1d7134afcf37578a.css">
   <!-- Marked.js library for Markdown rendering -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <link rel="stylesheet" type="text/css" href="https://ultra.content.blackboardcdn.com/ultra/uiv3902.1.0-rel.18_6d19913/33651-1d7134afcf37578a.css">
   <style>
     .toggle-btn.selected {
       background: #111 !important;
@@ -1860,16 +1857,9 @@
       box-sizing: content-box;
     }
     .logo-img {
-      width: 168px !important;
-      height: 22.55px !important;
-      min-width: 168px !important;
-      min-height: 22.55px !important;
-      max-width: 168px !important;
-      max-height: 22.55px !important;
+      width: 150px !important;
+      height: 40px !important;
       object-fit: contain;
-      margin: 0 !important;
-      display: block;
-      box-sizing: content-box;
     }
     .sidebar-nav ul {
       list-style: none;
@@ -1934,6 +1924,11 @@
   fill: #222 !important;
   stroke: #222 !important;
     }
+
+    /* Make messages icon white */
+    .sidebar-nav a[href*="messages"] .svg-icon {
+      filter: brightness(0) invert(1);
+    }
     .sidebar, .sidebar * {
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
@@ -1946,63 +1941,63 @@
   <div id="side-menu" class="mode-light hide-in-background themed-background-primary-fill-only left-off-canvas-menu color-selection-live-mode" style="background: #262626; width: 200px; min-width: 200px; max-width: 200px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100;">
       <div class="bb-inner-wrap">
         <div class="logo-header">
-          <a href="https://elearn.mu-varna.bg" target="_blank" rel="noopener noreferrer">
-            <img src="https://ultra.content.blackboardcdn.com/ultra/static/images/brand/blackboard_logo_white.svg" alt="Blackboard-Medical University Varna" class="logo-img makeStyleslogoContainer-0-2-5 makeStyleslogoHref-0-2-4">
+          <a href="index.html">
+            <img class="logo-img" src="svg/logo-studyboard.svg" alt="StudyBoard">
           </a>
         </div>
         <nav class="sidebar-nav" aria-label="Main">
           <ul class="off-canvas-list" id="base_tools">
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/institution-page">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-institution-custom.svg" alt="Institution Page" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-institution.svg" alt="Institution Page" />
                 <span class="link-text">Institution Page</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="account.html">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-profile-custom.svg" alt="Profile" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg" alt="Account" />
                 <span class="link-text">Account</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/stream">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-activity-custom.svg" alt="Activity" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-activity.svg" alt="Activity" />
                 <span class="link-text">Activity</span>
               </a>
             </li>
             <li class="base-navigation-button active">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/course">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-courses-book.svg" alt="Courses" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg" alt="Courses" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="calendar.html">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-calendar-custom.svg" alt="Calendar" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg" alt="Calendar" />
                 <span class="link-text">Calendar</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/messages">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/svgexport-8.svg" alt="Messages" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-messages.svg" alt="Messages" />
                 <span class="link-text">Messages</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="https://elearn.mu-varna.bg/ultra/messages">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-grades-paper.svg" alt="Grades" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-grades.svg" alt="Grades" />
                 <span class="link-text">Grades</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="tests.html">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-tools-custom.svg" alt="Tools" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="md-editor.html">
-                <img class="svg-icon" width="22" height="22" src="elearn-mu-varna-bg/icon-signout-custom.svg" alt="Sign Out" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg" alt="Sign Out" />
                 <span class="link-text">Sign Out</span>
               </a>
             </li>
@@ -2024,11 +2019,11 @@
   <div class="filter-toggle-buttons" style="display: flex; align-items: center; height: 42px; margin-right: -15px;">
     <div style="position: relative; display: flex;">
       <button class="toggle-btn left-btn selected" type="button" style="width: 33px; height: 33px; border: 1.5px solid #bdbdbd; border-right: none; background: #fff; display: flex; align-items: center; justify-content: center; border-radius: 0; outline: none; cursor: pointer;">
-        <img src="elearn-mu-varna-bg/svgexport-13.svg" width="18" height="18" alt="Toggle 1" />
+        <img src="svg/icon-sorta.svg" width="18" height="18" alt="Toggle 1" />
       </button>
       <div style="position:absolute; top:0; bottom:0; left:50%; width:1px; background:#bdbdbd; transform:translateX(-50%);"></div>
       <button class="toggle-btn right-btn" type="button" style="width: 33px; height: 33px; border: 1.5px solid #bdbdbdbd; border-left: none; background: #fff; display: flex; align-items: center; justify-content: center; border-radius: 0; outline: none; cursor: pointer;">
-        <img src="elearn-mu-varna-bg/svgexport-14.svg" width="18" height="18" alt="Toggle 2" />
+        <img src="svg/icon-sortb.svg" width="18" height="18" alt="Toggle 2" />
       </button>
     </div>
   </style>
@@ -2052,7 +2047,7 @@
     <div class="filter-search-input-wrapper">
       <input id="courses-overview-filter-search" type="text" class="filter-search-input" placeholder=" " />
       <span class="filter-search-icon" style="left:10px;top:calc(50% + 5px);transform:translateY(-50%);pointer-events:none;position:absolute;z-index:2;">
-          <img src="elearn-mu-varna-bg/svgexport-15.svg" width="18" height="18" alt="Search" />
+          <img src="svg/icon-search.svg" width="18" height="18" alt="Search" />
       </span>
     </div>
   </div>
@@ -2340,7 +2335,7 @@ document.addEventListener('DOMContentLoaded', function() {
   body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
     .layout { display: flex; min-height: 100vh; }
   .logo-header { background: #262626; height: 107px; min-height: 107px; max-height: 107px; text-align: center; border-bottom: 2px solid #1d1b1b; padding: 0; display: flex; align-items: center; justify-content: center; }
-    .logo-img { width: 168px; margin-top: 3px; }
+    .logo-img { width: 200px; margin-top: 3px; }
     .sidebar-profile {
       margin-left: 8px;
       font-weight: 500;

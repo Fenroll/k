@@ -834,7 +834,7 @@ class ChatUIManager {
     sidebarEl.innerHTML = `
       <div style="padding: 8px;">
         <button id="toggle-notifications" style="width: 100%; padding: 10px; background: ${this.notificationsDisabled ? '#ff6b6b' : '#4ade80'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          <img src="svg/${this.notificationsDisabled ? 'bell-slash-svgrepo-com.svg' : 'bell-alt-svgrepo-com.svg'}" alt="Уведомления" style="width: 16px; height: 16px; filter: invert(1);">
+          <img src="svg/chat/${this.notificationsDisabled ? 'icon-notifications-disabled.svg' : 'icon-notifications-enabled.svg'}" alt="Уведомления" style="width: 16px; height: 16px; filter: invert(1);">
           <span>${this.notificationsDisabled ? 'Изключени' : 'Включени'}</span>
         </button>
         <div id="active-users-list" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280;"></div>
@@ -864,7 +864,7 @@ class ChatUIManager {
       toggleBtn.style.background = this.notificationsDisabled ? '#ff6b6b' : '#4ade80';
       const img = toggleBtn.querySelector('img');
       if (img) {
-        img.src = `svg/${this.notificationsDisabled ? 'bell-slash-svgrepo-com.svg' : 'bell-alt-svgrepo-com.svg'}`;
+        img.src = `svg/chat/${this.notificationsDisabled ? 'icon-notifications-disabled.svg' : 'icon-notifications-enabled.svg'}`;
       }
       const span = toggleBtn.querySelector('span');
       if (span) {
@@ -1137,13 +1137,13 @@ class ChatUIManager {
         </div>
         <div class="message-actions">
          <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 24px; height: 24px;" title="Отговори">
-            <img src="svg/reply-svgrepo-com.svg" alt="Reply" style="width: 100%; height: 100%; opacity: 0.7; filter: invert(0.3);">
+            <img src="svg/chat/icon-reply.svg" alt="Reply" style="width: 100%; height: 100%; opacity: 0.7; filter: invert(0.3);">
           </button>
            <button class="message-reaction-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 24px; height: 24px;" title="Добави реакция">
-            <img src="svg/reaction-emoji-add-svgrepo-com.svg" alt="Reaction" style="width: 100%; height: 100%; opacity: 0.7;">
+            <img src="svg/chat/icon-reaction.svg" alt="Reaction" style="width: 100%; height: 100%; opacity: 0.7;">
           </button>
           ${isCurrentUser ? `<button class="message-delete-btn" data-message-key="${msg.key}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 4px; width: 24px; height: 24px;" title="Изтрий съобщение">
-            <img src="svg/trash-blank-alt-svgrepo-com.svg" alt="Delete" style="width: 100%; height: 100%; opacity: 0.6;">
+            <img src="svg/chat/icon-delete.svg" alt="Delete" style="width: 100%; height: 100%; opacity: 0.6;">
           </button>` : ''}
         </div>
       </div>
