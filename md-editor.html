@@ -771,6 +771,30 @@
       background: rgba(66, 165, 245, 0.3);
     }
 
+    /* Table cell focus/selection indicator */
+    #editor table td:focus,
+    #editor table th:focus {
+      outline: 2px solid #7c3aed;
+      outline-offset: -2px;
+      background: rgba(124, 58, 237, 0.05);
+    }
+
+    /* Table row hover effect */
+    #editor table tr:hover {
+      background: rgba(124, 58, 237, 0.03);
+    }
+
+    /* Row/column hover indicators */
+    #editor table {
+      --hover-row: -1;
+      --hover-col: -1;
+    }
+
+    /* Table row positioning */
+    #editor table tr {
+      position: relative;
+    }
+
     @media (max-width: 768px) {
       .toolbar {
         padding: 8px 12px;
@@ -1040,7 +1064,6 @@
     <div class="toolbar-group" style="position: relative;">
       <button id="tableBtn" title="Insert Table"><img src="svg/md-editor/icon-table.svg" alt="Table" class="toolbar-icon"></button>
       <button id="editTableBtn" title="Edit table with Tables Generator"><img src="svg/md-editor/icon-edit-table.svg" alt="Edit Table" class="toolbar-icon"></button>
-      <button id="tableOptionsBtn" title="Table Options" class="table-options-trigger"><img src="svg/md-editor/icon-table-options.svg" alt="Table Options" class="toolbar-icon"></button>
       <!-- Table Options Dropdown Menu -->
       <div id="tableOptionsMenu" class="table-options-menu" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 220px; white-space: nowrap;">
       <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg"  alt="Table" class="toolbar-icon"> Insert row above</div>
@@ -1107,6 +1130,23 @@
     <div id="editor" contenteditable="true" spellcheck="false">
       <p>Start typing here...</p>
     </div>
+  </div>
+
+  <!-- Table context menu -->
+  <div id="tableContextMenu" class="table-context-menu">
+    <button id="addRowBefore"><img src="svg/md-editor/icon-add.svg" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Row Above</button>
+    <button id="addRowAfter"><img src="svg/md-editor/icon-add.svg" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Row Below</button>
+    <button id="deleteRow"><img src="svg/md-editor/icon-deleteTable.svg" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Row</button>
+    <hr style="margin: 4px 0; border: none; border-top: 1px solid #e5e7eb;">
+    <button id="addColBefore"><img src="svg/md-editor/icon-add.svg" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Column Before</button>
+    <button id="addColAfter"><img src="svg/md-editor/icon-add.svg" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Column After</button>
+    <button id="deleteCol"><img src="svg/md-editor/icon-deleteTable.svg" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Column</button>
+    <hr style="margin: 4px 0; border: none; border-top: 1px solid #e5e7eb;">
+    <button id="mergeCells"><img src="svg/md-editor/icon-cell-merge.svg" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Merge Cells</button>
+    <button id="splitCell"><img src="svg/md-editor/icon-split-cells.svg" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Split Cell</button>
+    <button id="setCellBg"><img src="svg/md-editor/icon-table-colors.svg" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Cell Background</button>
+    <hr style="margin: 4px 0; border: none; border-top: 1px solid #e5e7eb;">
+    <button id="deleteTableCtx"><img src="svg/md-editor/icon-deleteTable.svg" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Table</button>
   </div>
 
 
@@ -1285,6 +1325,56 @@
       <div class="modal-footer">
         <button id="cancelChecklistBtn">Cancel</button>
         <button class="primary" id="confirmChecklistBtn">Insert</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table Creation Modal -->
+  <div id="tableModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Create Table</h2>
+        <span class="close" id="closeTableModalBtn">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 20px;">
+          <label for="tableRowsInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Number of Rows (body rows, not including header)</label>
+          <input type="number" id="tableRowsInput" value="3" min="1" max="20" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+        </div>
+        <div style="margin-bottom: 20px;">
+          <label for="tableColsInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Number of Columns</label>
+          <input type="number" id="tableColsInput" value="3" min="1" max="20" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelTableBtn">Cancel</button>
+        <button class="primary" id="confirmTableBtn">Create Table</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Merge Cells Modal -->
+  <div id="mergeCellsModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <div class="modal-header">
+        <h2>Merge Cells</h2>
+        <span class="close" id="closeMergeCellsModalBtn">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p style="margin-bottom: 16px; color: #6b7280;">Select merge direction:</p>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <button id="mergeRightBtn" style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; background: white; transition: all 0.2s;">
+            <div style="font-size: 24px; margin-bottom: 4px;">→</div>
+            <div>Merge Right</div>
+          </button>
+          <button id="mergeDownBtn" style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; background: white; transition: all 0.2s;">
+            <div style="font-size: 24px; margin-bottom: 4px;">↓</div>
+            <div>Merge Down</div>
+          </button>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelMergeBtn">Cancel</button>
       </div>
     </div>
   </div>
@@ -1694,35 +1784,47 @@
       document.getElementById('checklistCountInput').focus();
     }
 
+    // Variable to store cursor position when opening table modal
+    let savedTableRange = null;
+
     function insertTable() {
-      const rows = prompt('Number of rows:', '3');
-      const cols = prompt('Number of columns:', '3');
-      if (rows && cols) {
-        const rowNum = parseInt(rows);
-        const colNum = parseInt(cols);
-        let table = '<table><thead><tr>';
-        for (let i = 0; i < colNum; i++) {
-          table += '<th>Header ' + (i + 1) + '</th>';
-        }
-        table += '</tr></thead><tbody>';
-        for (let i = 0; i < rowNum - 1; i++) {
-          table += '<tr>';
-          for (let j = 0; j < colNum; j++) {
-            table += '<td> </td>';
-          }
-          table += '</tr>';
-        }
-        table += '</tbody></table>';
-        
-        const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-          const range = selection.getRangeAt(0);
-          const fragment = document.createRange().createContextualFragment(table);
-          range.insertNode(fragment);
-        }
-        saveToHistory();
+      // CRITICAL: Save current cursor position BEFORE opening modal
+      // This must happen before any focus changes
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        savedTableRange = selection.getRangeAt(0).cloneRange();
+      } else {
+        alert('Please click in the editor first');
+        return;
       }
-      editor.focus();
+      
+      // Open the table modal
+      const tableModal = document.getElementById('tableModal');
+      tableModal.style.display = 'flex';
+      
+      // Focus on rows input after a tiny delay to ensure modal is rendered
+      setTimeout(() => {
+        document.getElementById('tableRowsInput').focus();
+      }, 10);
+    }
+
+    // Function to actually create the table
+    function createTableHTML(rows, cols) {
+      let table = '<table><thead><tr>';
+      for (let i = 0; i < cols; i++) {
+        table += '<th>Header ' + (i + 1) + '</th>';
+      }
+      table += '</tr></thead><tbody>';
+      // rows parameter is the number of body rows (not including header)
+      for (let i = 0; i < rows; i++) {
+        table += '<tr>';
+        for (let j = 0; j < cols; j++) {
+          table += '<td> </td>';
+        }
+        table += '</tr>';
+      }
+      table += '</tbody></table>';
+      return table;
     }
 
     // Advanced table functions
@@ -1761,6 +1863,24 @@
           selection.addRange(range);
         }
       }
+    }
+
+    // Helper to set cursor in a specific table cell
+    function setCursorInCell(cell) {
+      if (!cell) return;
+      
+      const selection = window.getSelection();
+      const range = document.createRange();
+      
+      // Set cursor at the beginning of the cell
+      range.selectNodeContents(cell);
+      range.collapse(true);
+      
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      // Update last table cell
+      lastTableCell = cell;
     }
 
     function getTableFromCell(cell) {
@@ -2271,6 +2391,7 @@
     
     // Track when cursor enters/leaves table
     editor.addEventListener('click', () => {
+      
       const selection = window.getSelection();
       if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
@@ -2278,15 +2399,6 @@
         while (node && node !== editor) {
           if (node.tagName === 'TABLE') {
             lastTableContext = node;
-            // Also save the current cell
-            let cellNode = range.startContainer;
-            while (cellNode && cellNode !== node) {
-              if (cellNode.tagName === 'TD' || cellNode.tagName === 'TH') {
-                lastTableCell = cellNode;
-                return;
-              }
-              cellNode = cellNode.parentNode;
-            }
             return;
           }
           node = node.parentNode;
@@ -2298,31 +2410,6 @@
     
     document.getElementById('tableBtn').addEventListener('click', () => {
       insertTable();
-    });
-
-    document.getElementById('tableOptionsBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      
-      // Use stored table context
-      if (!lastTableContext) {
-        const notification = document.createElement('div');
-        notification.textContent = '⚠️ Position cursor in a table first';
-        notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #f59e0b; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-          notification.style.transition = 'opacity 0.3s';
-          notification.style.opacity = '0';
-          setTimeout(() => notification.remove(), 300);
-        }, 2000);
-        return;
-      }
-      
-      const menu = document.getElementById('tableOptionsMenu');
-      if (menu) {
-        menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
-      }
     });
 
     document.getElementById('linkBtn').addEventListener('click', () => {
@@ -2341,24 +2428,6 @@
       if (historyIndex > 0) {
         historyIndex--;
         editor.innerHTML = history[historyIndex];
-      }
-    });
-
-    // Close table options menu
-    function closeTableMenu() {
-      const menu = document.getElementById('tableOptionsMenu');
-      if (menu) {
-        menu.style.display = 'none';
-      }
-      editor.focus();
-    }
-
-    // Close menu when clicking outside
-    document.addEventListener('click', (e) => {
-      const menu = document.getElementById('tableOptionsMenu');
-      const btn = document.getElementById('tableOptionsBtn');
-      if (menu && !menu.contains(e.target) && !btn.contains(e.target)) {
-        menu.style.display = 'none';
       }
     });
 
@@ -3201,22 +3270,22 @@
       max-width: 1550px; 
       margin: 0.5rem auto; 
       padding: 0 1rem; 
-      line-height: 1.8; 
+      line-height: 1.6; 
       color: #1f2937; 
     }
     h1, h2, h3, h4 { 
       font-weight: 600; 
       margin-top: 0.8em;
-      margin-bottom: 0.3em;
+      margin-bottom: 0.15em;
       color: ${savedHeadingColor};
     }
     h1 { font-size: 1.5em; }
     h2 { font-size: 1.3em; }
-    h3 { font-size: 1.1em; }
-    h4 { font-size: 1.05em; }
+    h3 { font-size: 1.1em; margin-bottom: 0.1em; }
+    h4 { font-size: 1.05em; margin-bottom: 0.1em; }
     h3 + h4 { margin-top: 0.3em; }
     p { 
-      margin: 0.7em 0; 
+      margin: 0.3em 0; 
       white-space: pre-wrap;
     }
     p + ul, p + ol { margin-top: -0.5em; }
@@ -3226,10 +3295,24 @@
       margin-top: 0.1em; 
     }
     ul, ol { 
-      margin: 0.3em 0; 
+      margin: 0.5em 0; 
       padding-left: 1.5em; 
+      list-style-position: outside;
     }
-    li { margin: 0.15em 0; }
+    li { margin: 0.2em 0; }
+    li p {
+      margin: 0;
+      padding: 0;
+      display: inline;
+    }
+    li > ul, li > ol {
+      margin: 0.3em 0 0 0;
+      padding-left: 1.5em;
+    }
+    ul ul, ul ol, ol ul, ol ol {
+      margin-top: 0.2em;
+      padding-left: 1.5em;
+    }
     ul ul { list-style-type: circle; }
     ul ul ul { list-style-type: square; }
     strong { font-weight: 600; }
@@ -3596,6 +3679,276 @@ renderMathInElement(document.body, {
       
       saveToHistory();
       editor.focus();
+    });
+
+    // Table modal events
+    const tableModal = document.getElementById('tableModal');
+    
+    document.getElementById('closeTableModalBtn').addEventListener('click', () => {
+      tableModal.style.display = 'none';
+    });
+    
+    document.getElementById('cancelTableBtn').addEventListener('click', () => {
+      tableModal.style.display = 'none';
+    });
+    
+    tableModal.addEventListener('click', (e) => {
+      if (e.target.id === 'tableModal') {
+        tableModal.style.display = 'none';
+      }
+    });
+    
+    document.getElementById('confirmTableBtn').addEventListener('click', () => {
+      const rows = parseInt(document.getElementById('tableRowsInput').value) || 3;
+      const cols = parseInt(document.getElementById('tableColsInput').value) || 3;
+      
+      const tableHTML = createTableHTML(rows, cols);
+      
+      // Use saved range from before modal was opened
+      const range = savedTableRange || document.getSelection().getRangeAt(0);
+      const fragment = document.createRange().createContextualFragment(tableHTML);
+      range.insertNode(fragment);
+      
+      // Add a line break after table for spacing
+      const br = document.createElement('br');
+      range.setStartAfter(fragment.lastChild);
+      range.insertNode(br);
+      
+      // Move cursor after the br
+      range.setStartAfter(br);
+      range.collapse(true);
+      
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+      
+      // Clear saved range
+      savedTableRange = null;
+      
+      // Close modal and reset
+      tableModal.style.display = 'none';
+      document.getElementById('tableRowsInput').value = '3';
+      document.getElementById('tableColsInput').value = '3';
+      
+      saveToHistory();
+      editor.focus();
+    });
+
+    // Table context menu functionality
+    const tableContextMenu = document.getElementById('tableContextMenu');
+    let contextMenuCell = null;
+
+    // Show context menu on right-click in table
+    editor.addEventListener('contextmenu', (e) => {
+      let node = e.target;
+      
+      // Check if click is inside a table cell
+      while (node && node !== editor) {
+        if (node.tagName === 'TD' || node.tagName === 'TH') {
+          e.preventDefault();
+          
+          contextMenuCell = node;
+          
+          // Position the context menu
+          tableContextMenu.style.left = e.pageX + 'px';
+          tableContextMenu.style.top = e.pageY + 'px';
+          tableContextMenu.classList.add('active');
+          
+          return;
+        }
+        node = node.parentNode;
+      }
+    });
+
+    // Hide context menu on click outside
+    document.addEventListener('click', () => {
+      tableContextMenu.classList.remove('active');
+    });
+
+    // Context menu actions
+    document.getElementById('addRowBefore').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const table = contextMenuCell.closest('table');
+        const row = contextMenuCell.closest('tr');
+        const newRow = document.createElement('tr');
+        const colCount = row.cells.length;
+        
+        for (let i = 0; i < colCount; i++) {
+          newRow.appendChild(document.createElement('td'));
+        }
+        row.parentNode.insertBefore(newRow, row);
+        saveToHistory();
+      }
+      tableContextMenu.classList.remove('active');
+    });
+
+    document.getElementById('addRowAfter').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const row = contextMenuCell.closest('tr');
+        const newRow = document.createElement('tr');
+        const colCount = row.cells.length;
+        
+        for (let i = 0; i < colCount; i++) {
+          newRow.appendChild(document.createElement('td'));
+        }
+        row.parentNode.insertBefore(newRow, row.nextSibling);
+        saveToHistory();
+      }
+      tableContextMenu.classList.remove('active');
+    });
+
+    document.getElementById('deleteRow').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const row = contextMenuCell.closest('tr');
+        row.remove();
+        saveToHistory();
+      }
+      tableContextMenu.classList.remove('active');
+    });
+
+    document.getElementById('addColBefore').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const table = contextMenuCell.closest('table');
+        const colIndex = contextMenuCell.cellIndex;
+        
+        table.querySelectorAll('tr').forEach(row => {
+          const newCell = document.createElement(row.querySelector('th') ? 'th' : 'td');
+          newCell.textContent = ' ';
+          row.insertBefore(newCell, row.cells[colIndex]);
+        });
+        saveToHistory();
+      }
+      tableContextMenu.classList.remove('active');
+    });
+
+    document.getElementById('addColAfter').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const table = contextMenuCell.closest('table');
+        const colIndex = contextMenuCell.cellIndex;
+        
+        table.querySelectorAll('tr').forEach(row => {
+          const newCell = document.createElement(row.querySelector('th') ? 'th' : 'td');
+          newCell.textContent = ' ';
+          row.insertBefore(newCell, row.cells[colIndex + 1]);
+        });
+        saveToHistory();
+      }
+      tableContextMenu.classList.remove('active');
+    });
+
+    document.getElementById('deleteCol').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const table = contextMenuCell.closest('table');
+        const colIndex = contextMenuCell.cellIndex;
+        
+        table.querySelectorAll('tr').forEach(row => {
+          if (row.cells[colIndex]) row.deleteCell(colIndex);
+        });
+        saveToHistory();
+      }
+      tableContextMenu.classList.remove('active');
+    });
+
+    document.getElementById('mergeCells').addEventListener('click', () => {
+      if (contextMenuCell) {
+        // Open merge cells modal
+        const mergeCellsModal = document.getElementById('mergeCellsModal');
+        mergeCellsModal.style.display = 'flex';
+      }
+      tableContextMenu.classList.remove('active');
+    });
+
+    // Merge Cells Modal events
+    const mergeCellsModal = document.getElementById('mergeCellsModal');
+    
+    document.getElementById('closeMergeCellsModalBtn').addEventListener('click', () => {
+      mergeCellsModal.style.display = 'none';
+    });
+    
+    document.getElementById('cancelMergeBtn').addEventListener('click', () => {
+      mergeCellsModal.style.display = 'none';
+    });
+    
+    mergeCellsModal.addEventListener('click', (e) => {
+      if (e.target.id === 'mergeCellsModal') {
+        mergeCellsModal.style.display = 'none';
+      }
+    });
+
+    document.getElementById('mergeRightBtn').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const row = contextMenuCell.closest('tr');
+        const cellIndex = contextMenuCell.cellIndex;
+        const nextCell = row.cells[cellIndex + 1];
+        
+        if (nextCell) {
+          contextMenuCell.textContent = (contextMenuCell.textContent + ' ' + nextCell.textContent).trim();
+          const colspan = parseInt(contextMenuCell.getAttribute('colspan')) || 1;
+          contextMenuCell.setAttribute('colspan', colspan + 1);
+          nextCell.remove();
+          saveToHistory();
+        } else {
+          alert('No cell to the right to merge with');
+        }
+      }
+      mergeCellsModal.style.display = 'none';
+    });
+
+    document.getElementById('mergeDownBtn').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const currentRow = contextMenuCell.closest('tr');
+        const nextRow = currentRow.nextElementSibling;
+        const cellIndex = contextMenuCell.cellIndex;
+        
+        if (nextRow && nextRow.cells[cellIndex]) {
+          const cellBelow = nextRow.cells[cellIndex];
+          contextMenuCell.textContent = (contextMenuCell.textContent + ' ' + cellBelow.textContent).trim();
+          const rowspan = parseInt(contextMenuCell.getAttribute('rowspan')) || 1;
+          contextMenuCell.setAttribute('rowspan', rowspan + 1);
+          cellBelow.remove();
+          saveToHistory();
+        } else {
+          alert('No cell below to merge with');
+        }
+      }
+      mergeCellsModal.style.display = 'none';
+    });
+
+    document.getElementById('splitCell').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const colspan = parseInt(contextMenuCell.getAttribute('colspan')) || 1;
+        
+        if (colspan > 1) {
+          const row = contextMenuCell.closest('tr');
+          contextMenuCell.setAttribute('colspan', colspan - 1);
+          const newCell = document.createElement('td');
+          row.insertBefore(newCell, contextMenuCell.nextSibling);
+          saveToHistory();
+        }
+      }
+      tableContextMenu.classList.remove('active');
+    });
+
+    document.getElementById('setCellBg').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const color = prompt('Enter background color (hex):', '#FAF594');
+        if (color) {
+          contextMenuCell.style.backgroundColor = color;
+          saveToHistory();
+        }
+      }
+      tableContextMenu.classList.remove('active');
+    });
+
+    document.getElementById('deleteTableCtx').addEventListener('click', () => {
+      if (contextMenuCell) {
+        const table = contextMenuCell.closest('table');
+        if (confirm('Delete entire table?')) {
+          table.remove();
+          saveToHistory();
+        }
+      }
+      tableContextMenu.classList.remove('active');
     });
 
     document.getElementById('clearBtn').addEventListener('click', () => {
@@ -4031,7 +4384,7 @@ renderMathInElement(document.body, {
         }
       }
       
-      // Handle Tab/Shift+Tab for list indentation
+      // Handle Tab/Shift+Tab for list indentation or table navigation
       if (e.key === 'Tab') {
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
@@ -4039,7 +4392,59 @@ renderMathInElement(document.body, {
         const range = selection.getRangeAt(0);
         let node = range.startContainer;
         
-        // Find if we're in a list item
+        // First check if we're in a table cell
+        while (node && node !== editor) {
+          if (node.nodeType === 1 && (node.tagName === 'TD' || node.tagName === 'TH')) {
+            e.preventDefault();
+            
+            const currentCell = node;
+            const row = currentCell.closest('tr');
+            const table = currentCell.closest('table');
+            
+            if (e.shiftKey) {
+              // Navigate to previous cell
+              const prevCell = currentCell.previousElementSibling;
+              if (prevCell) {
+                setCursorInCell(prevCell);
+              } else {
+                // Go to previous row, last cell
+                const prevRow = row.previousElementSibling;
+                if (prevRow) {
+                  const lastCell = prevRow.cells[prevRow.cells.length - 1];
+                  setCursorInCell(lastCell);
+                }
+              }
+            } else {
+              // Navigate to next cell
+              const nextCell = currentCell.nextElementSibling;
+              if (nextCell) {
+                setCursorInCell(nextCell);
+              } else {
+                // Go to next row, first cell
+                const nextRow = row.nextElementSibling;
+                if (nextRow) {
+                  setCursorInCell(nextRow.cells[0]);
+                } else {
+                  // We're at the last cell - add a new row
+                  const tbody = table.querySelector('tbody');
+                  const newRow = document.createElement('tr');
+                  const colCount = row.cells.length;
+                  for (let i = 0; i < colCount; i++) {
+                    newRow.appendChild(document.createElement('td'));
+                  }
+                  tbody.appendChild(newRow);
+                  setCursorInCell(newRow.cells[0]);
+                  saveToHistory();
+                }
+              }
+            }
+            return;
+          }
+          node = node.parentNode;
+        }
+        
+        // If not in table, check for list item
+        node = range.startContainer;
         while (node && node !== editor) {
           if (node.nodeType === 1 && node.tagName === 'LI') {
             e.preventDefault();
@@ -4049,6 +4454,52 @@ renderMathInElement(document.body, {
               document.execCommand('indent', false, null);
             }
             saveToHistory();
+            return;
+          }
+          node = node.parentNode;
+        }
+      }
+      
+      // Handle arrow keys for table navigation
+      if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+        const selection = window.getSelection();
+        if (!selection.rangeCount) return;
+        
+        const range = selection.getRangeAt(0);
+        let node = range.startContainer;
+        
+        // Check if we're in a table cell
+        while (node && node !== editor) {
+          if (node.nodeType === 1 && (node.tagName === 'TD' || node.tagName === 'TH')) {
+            // Only handle if cursor is at edge of cell
+            const atStart = range.startOffset === 0;
+            const atEnd = range.startOffset === (node.textContent || '').length;
+            
+            const currentCell = node;
+            const row = currentCell.closest('tr');
+            const cellIndex = currentCell.cellIndex;
+            
+            if (e.key === 'ArrowLeft' && atStart && e.ctrlKey) {
+              e.preventDefault();
+              const prevCell = currentCell.previousElementSibling;
+              if (prevCell) setCursorInCell(prevCell);
+            } else if (e.key === 'ArrowRight' && atEnd && e.ctrlKey) {
+              e.preventDefault();
+              const nextCell = currentCell.nextElementSibling;
+              if (nextCell) setCursorInCell(nextCell);
+            } else if (e.key === 'ArrowUp' && e.ctrlKey) {
+              e.preventDefault();
+              const prevRow = row.previousElementSibling;
+              if (prevRow && prevRow.cells[cellIndex]) {
+                setCursorInCell(prevRow.cells[cellIndex]);
+              }
+            } else if (e.key === 'ArrowDown' && e.ctrlKey) {
+              e.preventDefault();
+              const nextRow = row.nextElementSibling;
+              if (nextRow && nextRow.cells[cellIndex]) {
+                setCursorInCell(nextRow.cells[cellIndex]);
+              }
+            }
             return;
           }
           node = node.parentNode;
@@ -4200,6 +4651,12 @@ renderMathInElement(document.body, {
 
     // Save to history on input and detect "---" for horizontal rule
     editor.addEventListener('input', () => {
+      // Debounced history save (don't save on every keystroke)
+      clearTimeout(editor.historyTimeout);
+      editor.historyTimeout = setTimeout(() => {
+        saveToHistory();
+      }, 500);
+      
       // CRITICAL: Convert unwanted <div> elements to <p> tags to prevent font size issues
       // Only convert top-level divs that are not part of special structures (tables, etc)
       const unwantedDivs = editor.querySelectorAll(':scope > div');
@@ -4227,14 +4684,6 @@ renderMathInElement(document.body, {
           p.remove();
         }
       });
-      
-      if (editor.textContent.trim().length > 0) {
-        // Debounce history saving
-        clearTimeout(editor.historyTimeout);
-        editor.historyTimeout = setTimeout(() => {
-          saveToHistory();
-        }, 1000);
-      }
       
       // Auto-convert "---" to horizontal rule and "~~~" to dashed divider
       const selection = window.getSelection();

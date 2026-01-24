@@ -779,6 +779,11 @@ class NotesUIManager {
           // Remove 'files/' prefix for cleaner ID
           path = path.replace(/^files\//, '');
           
+          // CRITICAL: Remove [АРХИВ] prefix to keep same notes when archiving courses
+          // This allows notes from "Рентгенология" and "[АРХИВ] Рентгенология" to be the same
+          path = path.replace(/\[АРХИВ\]\s*/g, '');
+          path = path.replace(/\[ARCHIVE\]\s*/g, '');
+          
           // Replace invalid Firebase characters: . # $ [ ] and /
           // Creating a flat ID like: doc_Folder_Subfolder_Filename_md
           path = path.replace(/[.#$[\]/]/g, '_');
