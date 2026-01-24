@@ -1,160 +1,809 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Markdown Editor</title>
-    <!-- Include the Quill library -->
-    <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
-    <style>
-        body { font-family: sans-serif; }
-        .container {
-            max-width: 900px;
-            margin: 2rem auto;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Markdown Editor - WYSIWYG</title>
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.ico?v=2" sizes="any">
+  <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <!-- KaTeX CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+  <!-- Include the Quill library -->
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+    }
 
-        /* Custom styles for Quill editor content */
-        .ql-editor { 
-            font-family: "Open Sans", Arial, sans-serif; 
-            line-height: 1.8; 
-            color: #1f2937;
-            min-height: 60vh; 
-            border: 1px solid #ccc;
-            white-space: pre-wrap;
-        }
-        .ql-editor h1, .ql-editor h2, .ql-editor h3, .ql-editor h4 { 
-            font-weight: 600; 
-            margin-top: 0.8em;
-            margin-bottom: 0.3em;
-            color: #7c2d12;
-        }
-        .ql-editor h1 { font-size: 1.5em; }
-        .ql-editor h2 { font-size: 1.3em; }
-        .ql-editor h3 { font-size: 1.1em; }
-        .ql-editor h4 { font-size: 1.05em; }
-        .ql-editor p { 
-            margin: 0.7em 0; 
-        }
-        .ql-editor ul, .ql-editor ol { 
-            margin: 0.3em 0; 
-            padding-left: 1.5em; 
-        }
-        .ql-editor li { margin: 0.15em 0; }
-        .ql-editor ul ul { list-style-type: circle; }
-        .ql-editor ul ul ul { list-style-type: square; }
-        .ql-editor code { 
-            background: rgba(146, 64, 14, 0.1); 
-            padding: 2px 6px; 
-            border-radius: 3px; 
-            font-family: "Courier New", monospace; 
-            font-size: 0.9em; 
-        }
-        .ql-editor pre {
-            background: rgba(255, 255, 255, 0.5);
-            padding: 12px;
-            border-radius: 4px;
-            overflow-x: auto;
-            margin: 0.5em 0;
-            font-family: "Courier New", monospace;
-        }
-        .ql-editor blockquote {
-            border-left: 3px solid #f59e0b;
-            padding-left: 1em;
-            margin: 0.5em 0;
-            font-style: italic;
-            color: #78350f;
-        }
-        .ql-editor table { 
-            border-collapse: collapse; 
-            margin: 0.75em 0; 
-            width: 100%; 
-        }
-        .ql-editor th, .ql-editor td { 
-            border: 1px solid rgba(146, 64, 14, 0.35); 
-            padding: 6px 10px; 
-            text-align: left; 
-        }
-        .ql-editor thead th { 
-            background: rgba(196, 127, 9, 0.08); 
-            font-weight: 600; 
-        }
-        .ql-editor tbody tr:nth-child(odd) { 
-            background: rgba(146, 64, 14, 0.03); 
-        }
-        .ql-editor a { 
-            color: #f59e0b; 
-        }
-    </style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Open Sans', Arial, sans-serif;
+      background: #fafafa;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* SuperDoc-inspired Minimal Toolbar */
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: #ffffff;
+      border-bottom: 1px solid #e0e0e0;
+      padding: 10px 16px;
+      display: flex;
+      gap: 0;
+      align-items: center;
+      flex-wrap: wrap;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    .toolbar-group {
+      display: flex;
+      gap: 0;
+      align-items: center;
+      padding: 0;
+      background: transparent;
+      border-radius: 0;
+      border: none;
+      border-right: 1px solid #e0e0e0;
+    }
+
+    .toolbar-group:last-child {
+      border-right: none;
+    }
+
+    .toolbar-group:hover {
+      background: transparent;
+      border-color: #e0e0e0;
+    }
+
+    .toolbar button {
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      color: #4a4a4a;
+      border-radius: 0;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-weight: 400;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      position: relative;
+      overflow: hidden;
+      height: 36px;
+      min-width: 36px;
+    }
+
+    .toolbar button img {
+      width: 21px;
+      height: 21px;
+      stroke-width: 1.5;
+      flex-shrink: 0;
+    }
+
+    /* UpToDate icon - larger size only */
+    #uptodateBtn img {
+      width: 29px;
+      height: 29px;
+    }
+
+    #shortcutsBtn img {
+      width: 23px;
+      height: 23px;
+    }
+
+    #ulBtn img {
+      width: 23px;
+      height: 23px;
+    }
+
+    #olBtn img {
+      width: 24px;
+      height: 24px;
+    }
+
+    .toolbar button::before {
+      display: none;
+    }
+
+    .toolbar button:hover {
+      background: #f5f5f5;
+      color: #1a1a1a;
+    }
+
+    .toolbar button:active {
+      background: #ececec;
+    }
+
+    .toolbar button.active {
+      background: #e8e8e8;
+      color: #1a1a1a;
+      font-weight: 500;
+    }
+
+    .toolbar-icon {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+    }
+
+    /* Table options dropdown menu */
+    .table-options-menu {
+      background: #ffffff;
+      border: 1px solid #d0d0d0;
+      border-radius: 4px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      min-width: 220px;
+      padding: 6px 0;
+    }
+
+    .table-menu-item {
+      padding: 10px 16px;
+      cursor: pointer;
+      font-size: 0.95em;
+      color: #4a4a4a;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background-color 0.15s ease;
+    }
+
+    .table-menu-item:hover {
+      background-color: #f0f0f0;
+      color: #1a1a1a;
+    }
+
+    .table-options-trigger {
+      padding: 8px 6px !important;
+      min-width: 32px;
+      font-size: 16px;
+    }
+
+    .toolbar select {
+      padding: 8px 12px;
+      border: none;
+      background: transparent;
+      color: #4b5563;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.9em;
+      font-family: 'Open Sans', Arial, sans-serif;
+      font-weight: 500;
+      transition: all 0.2s;
+      height: 36px;
+    }
+
+    .toolbar select:hover {
+      background: rgba(146, 64, 14, 0.08);
+      color: #92400e;
+    }
+
+    /* Main editor container */
+    .editor-container {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Quill editor styling - adapt md-editor.html styles */
+    #editor-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .ql-container {
+      flex: 1;
+      overflow-y: auto;
+      background: #fff;
+    }
+
+    .ql-editor { 
+      font-family: 'Open Sans', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: #1f2937;
+      padding: 12px 200px;
+      word-wrap: break-word;
+      -webkit-user-select: text;
+      user-select: text;
+    }
+
+    /* Markdown content styling to match md-editor.html */
+    .ql-editor h1,
+    .ql-editor h2,
+    .ql-editor h3,
+    .ql-editor h4 {
+      color: #92400e;
+      margin-top: 0.8em;
+      margin-bottom: 0.15em;
+      font-weight: 600;
+    }
+
+    .ql-editor h1 { font-size: 1.5em; color: #000000; }
+    .ql-editor h2 { font-size: 1.3em; color: #000000; }
+    .ql-editor h3 { font-size: 1.1em; color: #000000; margin-bottom: 0.1em; }
+    .ql-editor h4 { font-size: 1.05em; color: #000000; margin-bottom: 0.1em; }
+
+    .ql-editor p {
+      margin: 0.3em 0;
+      white-space: pre-wrap;
+    }
+
+    .ql-editor ul, .ql-editor ol {
+      margin: 0.5em 0;
+      padding-left: 1.5em;
+      list-style-position: outside;
+    }
+
+    .ql-editor li {
+      margin: 0.2em 0;
+      padding: 0;
+      display: list-item;
+    }
+
+    .ql-editor li p {
+      margin: 0;
+      padding: 0;
+      display: inline;
+    }
+
+    .ql-editor li > ul,
+    .ql-editor li > ol {
+      margin: 0.3em 0 0 0;
+      padding-left: 1.5em;
+    }
+
+    .ql-editor ul ul, .ql-editor ul ol,
+    .ql-editor ol ul, .ql-editor ol ol {
+      margin-top: 0.2em;
+      padding-left: 1.5em;
+    }
+
+    .ql-editor ul ul {
+      list-style-type: circle;
+    }
+
+    .ql-editor ul ul ul {
+      list-style-type: square;
+    }
+
+    .ql-editor strong {
+      font-weight: 600;
+    }
+
+    .ql-editor em {
+      font-style: italic;
+    }
+
+    .ql-editor code {
+      background: rgba(146, 64, 14, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: 'Courier New', monospace;
+      font-size: 0.9em;
+    }
+
+    .ql-editor pre {
+      background: rgba(255, 255, 255, 0.5);
+      padding: 12px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 0.5em 0;
+      font-family: 'Courier New', monospace;
+    }
+
+    .ql-editor pre code {
+      background: none;
+      padding: 0;
+    }
+
+    .ql-editor blockquote {
+      border-left: 3px solid #f59e0b;
+      padding-left: 1em;
+      margin: 0.5em 0;
+      font-style: italic;
+      color: #78350f;
+    }
+
+    .ql-editor a {
+      color: #f59e0b;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .ql-editor a:hover {
+      color: #d97706;
+    }
+
+    .ql-editor table {
+      border-collapse: collapse;
+      margin: 0.75em 0;
+      width: 100%;
+      table-layout: auto;
+    }
+
+    .ql-editor th,
+    .ql-editor td {
+      border: 1px solid rgba(146, 64, 14, 0.35);
+      padding: 6px 10px;
+      text-align: left;
+      vertical-align: top;
+      height: 24px;
+      line-height: 1.2;
+    }
+
+    .ql-editor thead th {
+      background: rgba(196, 127, 9, 0.08);
+      font-weight: 600;
+    }
+
+    .ql-editor tbody tr:nth-child(odd) {
+      background: rgba(146, 64, 14, 0.03);
+    }
+
+    /* Hide Quill's default toolbar - we'll use custom toolbar */
+    .ql-toolbar {
+      display: none;
+    }
+
+    /* Modal styles */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal.open {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 600px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 25px rgba(0,0,0,0.15);
+    }
+
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #e5e7eb;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      color: #1f2937;
+      font-size: 1.2em;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: #6b7280;
+    }
+
+    .close-btn:hover {
+      color: #1f2937;
+    }
+
+    .modal-body {
+      flex: 1;
+      overflow: auto;
+      padding: 16px 20px;
+    }
+
+    .modal-footer {
+      padding: 16px 20px;
+      border-top: 1px solid #e5e7eb;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .modal-footer button {
+      padding: 8px 16px;
+      border: 1px solid #d1d5db;
+      background: #fff;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.9em;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .modal-footer button:hover {
+      background: #f3f4f6;
+    }
+
+    .modal-footer button.primary {
+      background: #92400e;
+      color: #fff;
+      border-color: #92400e;
+    }
+
+    .modal-footer button.primary:hover {
+      background: #b8520d;
+    }
+
+    @media (max-width: 768px) {
+      .toolbar {
+        padding: 8px 12px;
+      }
+
+      .toolbar button {
+        padding: 5px 8px;
+        font-size: 0.85em;
+      }
+
+      .ql-editor {
+        padding: 16px;
+      }
+    }
+  </style>
 </head>
 <body>
-
-<div class="container">
-    <h2>Quill Editor (Paste Markdown directly)</h2>
-
-    <!-- Create the toolbar container -->
-    <div id="toolbar-container">
-        <span class="ql-formats">
-            <select class="ql-header">
-                <option value="1">Heading 1</option>
-                <option value="2">Heading 2</option>
-                <option value="3">Heading 3</option>
-                <option selected>Normal</option>
-            </select>
-        </span>
-        <span class="ql-formats">
-            <button class="ql-bold"></button>
-            <button class="ql-italic"></button>
-            <button class="ql-underline"></button>
-            <button class="ql-strike"></button>
-        </span>
-        <span class="ql-formats">
-            <button class="ql-list" value="ordered"></button>
-            <button class="ql-list" value="bullet"></button>
-            <button class="ql-blockquote"></button>
-            <button class="ql-code-block"></button>
-        </span>
-        <span class="ql-formats">
-            <button class="ql-link"></button>
-            <button class="ql-image"></button>
-        </span>
-        <span class="ql-formats">
-            <button class="ql-clean"></button>
-        </span>
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-group" style="position: relative; display: inline-block;">
+      <button id="formatToggleBtn" title="Format"><img src="svg/md-editor/icon-format.svg" alt="Format" class="toolbar-icon"></button>
+      <div id="formatOptions" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 180px;">
+        <div class="format-option" data-format="p" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
+          <img src="svg/md-editor/icon-format.svg" alt="Normal" class="toolbar-icon">
+          <span>Normal</span>
+        </div>
+        <div class="format-option" data-format="h1" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
+          <img src="svg/md-editor/icon-h1.svg" alt="H1" class="toolbar-icon">
+          <span>Heading 1</span>
+        </div>
+        <div class="format-option" data-format="h2" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
+          <img src="svg/md-editor/icon-h2.svg" alt="H2" class="toolbar-icon">
+          <span>Heading 2</span>
+        </div>
+        <div class="format-option" data-format="h3" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
+          <img src="svg/md-editor/icon-h3.svg" alt="H3" class="toolbar-icon">
+          <span>Heading 3</span>
+        </div>
+        <div class="format-option" data-format="h4" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
+          <img src="svg/md-editor/icon-h4.svg" alt="H4" class="toolbar-icon">
+          <span>Heading 4</span>
+        </div>
+      </div>
     </div>
 
-    <!-- Create the editor container -->
+    <div class="toolbar-group">
+      <button id="boldBtn" title="Bold (Ctrl+B)"><img src="svg/md-editor/icon-bold.svg" alt="Bold" class="toolbar-icon"></button>
+      <button id="italicBtn" title="Italic (Ctrl+I)"><img src="svg/md-editor/icon-italic.svg" alt="Italic" class="toolbar-icon"></button>
+      <button id="underlineBtn" title="Underline (Ctrl+U)"><img src="svg/md-editor/icon-underline.svg" alt="Underline" class="toolbar-icon"></button>
+      <button id="strikeBtn" title="Strikethrough"><img src="svg/md-editor/icon-strikethrough.svg" alt="Strikethrough" class="toolbar-icon"></button>
+    </div>
+
+    <div class="toolbar-group">
+      <button id="ulBtn" title="Unordered List (Ctrl+Shift+U)"><img src="svg/md-editor/icon-unordered.svg" alt="Unordered List" class="toolbar-icon"></button>
+      <button id="olBtn" title="Ordered List (Ctrl+Shift+O)"><img src="svg/md-editor/icon-ordered.svg" alt="Ordered List" class="toolbar-icon"></button>
+    </div>
+
+    <div class="toolbar-group">
+      <button id="quoteBtn" title="Quote (Ctrl+Q)"><img src="svg/md-editor/icon-quote.svg" alt="Quote" class="toolbar-icon"></button>
+      <button id="linkBtn" title="Link"><img src="svg/md-editor/icon-link.svg" alt="Link" class="toolbar-icon"></button>
+      <button id="imageBtn" title="Add Image"><img src="svg/md-editor/icon-image.svg" alt="Image" class="toolbar-icon"></button>
+    </div>
+
+    <div class="toolbar-group">
+      <button id="undoBtn" title="Undo (Ctrl+Z)"><img src="svg/md-editor/icon-undo.svg" alt="Undo" class="toolbar-icon"></button>
+      <button id="redoBtn" title="Redo (Ctrl+Y)"><img src="svg/md-editor/icon-redo.svg" alt="Redo" class="toolbar-icon"></button>
+    </div>
+
+    <div class="toolbar-group">
+      <button id="downloadBtn" title="Download as .html file"><img src="svg/md-editor/icon-download.svg" alt="Download" class="toolbar-icon"></button>
+      <button id="clearBtn" title="Clear all content"><img src="svg/md-editor/icon-clear.svg" alt="Clear" class="toolbar-icon"></button>
+      <button id="shortcutsBtn" title="Show keyboard shortcuts"><img src="svg/md-editor/icon-shortcuts.svg" alt="Shortcuts" class="toolbar-icon"></button>
+    </div>
+  </div>
+
+  <!-- Hidden file input for local file opening -->
+  <input type="file" id="fileInput" accept=".md,.txt,.html" style="display:none;">
+
+  <!-- Editor -->
+  <div class="editor-container">
     <div id="editor-container"></div>
+  </div>
 
-    <div style="margin-top: 2rem;">
-        <button onclick="getHtml()">Get HTML Output</button>
-        <h3>HTML Output:</h3>
-        <pre><code id="html-output"></code></pre>
+  <!-- Shortcuts modal -->
+  <div class="modal" id="shortcutsModal">
+    <div class="modal-content" style="max-width: 600px;">
+      <div class="modal-header">
+        <h2>Keyboard Shortcuts</h2>
+        <button class="close-btn" id="closeShortcutsBtn">✕</button>
+      </div>
+      <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
+        <h3>Formatting</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 8px 0;"><strong>Ctrl+B</strong> - Bold</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+I</strong> - Italic</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+U</strong> - Underline</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+S</strong> - Save/Download file</li>
+        </ul>
+        <h3>Headings & Paragraphs</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 8px 0;"><strong>Ctrl+0</strong> - Normal paragraph</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+1</strong> - Heading 1</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+2</strong> - Heading 2</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+3</strong> - Heading 3</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+4</strong> - Heading 4</li>
+        </ul>
+        <h3>Lists & Blocks</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 8px 0;"><strong>Ctrl+Shift+U</strong> - Unordered list</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+Shift+O</strong> - Ordered list</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+Q</strong> - Blockquote</li>
+        </ul>
+        <h3>Undo/Redo</h3>
+        <ul style="list-style: none; padding: 0;">
+          <li style="margin: 8px 0;"><strong>Ctrl+Z</strong> - Undo</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+Y</strong> or <strong>Ctrl+Shift+Z</strong> - Redo</li>
+        </ul>
+      </div>
+      <div class="modal-footer">
+        <button class="primary" id="closeShortcutsBtn2">Close</button>
+      </div>
     </div>
-
-</div>
+  </div>
 
     <!-- Include the Quill library -->
     <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
-    <!-- Include the Showdown library -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/showdown/2.1.0/showdown.min.js"></script>
 
     <!-- Initialize Quill editor and add logic -->
     <script>
+        // Initialize Quill without default toolbar (we use custom toolbar)
         var quill = new Quill('#editor-container', {
             modules: {
-                toolbar: '#toolbar-container'
+                toolbar: false,
+                history: {
+                    delay: 1000,
+                    maxStack: 100,
+                    userOnly: false
+                }
             },
             theme: 'snow'
         });
 
-        const converter = new showdown.Converter({
-            ghCompatibleHeaderId: true,
-            simpleLineBreaks: false, // Prevents <br> for single newlines
-            simplifiedAutoLink: true,
-            strikethrough: true,
-            tables: true,
-            tasklists: true
-        });
+        // Apply inline formatting (bold, italic, code, links, images)
+        function applyInlineFormatting(text) {
+            // Images must be processed before links
+            text = text.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
+                return `<img src="${src}" alt="${alt}" data-original-src="${src}" style="max-width:100%; height:auto;">`;
+            });
+            text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/__(.*?)__/g, '<u>$1</u>');
+            text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
+            text = text.replace(/`(.*?)`/g, '<code>$1</code>');
+            text = text.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+            // Handle <br> tags
+            text = text.replace(/<br\s*\/?>/gi, '<br>');
+            return text;
+        }
+
+        // Process a block of list lines and create proper nested HTML
+        function processListBlock(lines, startIndex) {
+            let i = startIndex;
+            let html = '';
+            let iterations = 0;
+            const MAX_ITERATIONS = 1000;
+            
+            // Simple approach: build list recursively by level
+            function processListAtLevel(startIdx, minLevel) {
+                let idx = startIdx;
+                let result = '';
+                let currentTag = null;
+                
+                while (idx < lines.length && iterations < MAX_ITERATIONS) {
+                    iterations++;
+                    const line = lines[idx];
+                    
+                    if (!line.trim()) {
+                        idx++;
+                        continue;
+                    }
+                    
+                    const match = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)$/);
+                    if (!match) break;
+                    
+                    const indent = match[1].length;
+                    const level = Math.floor(indent / 2);
+                    const marker = match[2];
+                    const content = match[3];
+                    const tag = /^\d+\.$/.test(marker) ? 'ol' : 'ul';
+                    
+                    // If level is less than minLevel, stop and return
+                    if (level < minLevel) break;
+                    
+                    // If level is greater than minLevel, recursively process nested list
+                    if (level > minLevel) {
+                        const nested = processListAtLevel(idx, level);
+                        result += nested.html;
+                        idx = nested.nextIdx;
+                        continue;
+                    }
+                    
+                    // Same level
+                    if (currentTag !== tag) {
+                        if (currentTag) result += '</' + currentTag + '>';
+                        currentTag = tag;
+                        result += '<' + tag + '>';
+                    }
+                    
+                    result += '<li>' + applyInlineFormatting(content) + '</li>';
+                    idx++;
+                }
+                
+                if (currentTag) result += '</' + currentTag + '>';
+                return { html: result, nextIdx: idx };
+            }
+            
+            const listResult = processListAtLevel(startIndex, 0);
+            return { html: listResult.html, nextIndex: listResult.nextIdx };
+        }
+
+        // Markdown to HTML conversion with proper nested lists (same as md-editor.html)
+        function markdownToHtml(markdown) {
+            let html = '';
+            const lines = markdown.split(/\r?\n/);
+            let i = 0;
+            let iterations = 0;
+            const MAX_ITERATIONS = 10000; // Safety limit
+            
+            while (i < lines.length && iterations < MAX_ITERATIONS) {
+                iterations++;
+                const line = lines[i];
+                
+                // Skip empty lines
+                if (!line.trim()) {
+                    i++;
+                    continue;
+                }
+                
+                // Headings
+                if (line.startsWith('#### ')) {
+                    html += '<h4>' + applyInlineFormatting(line.substring(5)) + '</h4>';
+                    i++;
+                } else if (line.startsWith('### ')) {
+                    html += '<h3>' + applyInlineFormatting(line.substring(4)) + '</h3>';
+                    i++;
+                } else if (line.startsWith('## ')) {
+                    html += '<h2>' + applyInlineFormatting(line.substring(3)) + '</h2>';
+                    i++;
+                } else if (line.startsWith('# ')) {
+                    html += '<h1>' + applyInlineFormatting(line.substring(2)) + '</h1>';
+                    i++;
+                }
+                // Blockquote
+                else if (line.startsWith('> ')) {
+                    html += '<blockquote>' + applyInlineFormatting(line.substring(2)) + '</blockquote>';
+                    i++;
+                }
+                // Horizontal rule
+                else if (line.trim() === '---' || line.trim() === '***' || line.trim() === '___') {
+                    html += '<hr>';
+                    i++;
+                }
+                // Lists - use processListBlock for proper nesting
+                else if (line.match(/^\s*[-*]\s+/) || line.match(/^\s*\d+\.\s+/)) {
+                    const oldI = i;
+                    const listResult = processListBlock(lines, i);
+                    html += listResult.html;
+                    i = listResult.nextIndex;
+                    
+                    // Safety check: make sure i moved forward
+                    if (i <= oldI) {
+                        console.error('processListBlock did not advance! Breaking to prevent infinite loop.');
+                        i = oldI + 1; // Force advance
+                    }
+                }
+                // Tables
+                else if (line.includes('|')) {
+                    let tableHtml = '<table><tbody>';
+                    let tableIterations = 0;
+                    while (i < lines.length && lines[i].includes('|') && tableIterations < 1000) {
+                        tableIterations++;
+                        const cells = lines[i].split('|').map(c => c.trim()).filter(c => c !== '');
+                        
+                        // Skip header separator lines (lines where ALL cells are dashes/colons)
+                        const isHeaderSeparator = cells.length > 0 && cells.every(c => /^:?-+:?$/.test(c));
+                        
+                        if (cells.length > 0 && !isHeaderSeparator) {
+                            tableHtml += '<tr>';
+                            cells.forEach(cell => {
+                                tableHtml += '<td>' + applyInlineFormatting(cell) + '</td>';
+                            });
+                            tableHtml += '</tr>';
+                        }
+                        i++;
+                    }
+                    tableHtml += '</tbody></table>';
+                    html += tableHtml;
+                }
+                // Paragraphs
+                else {
+                    html += '<p>' + applyInlineFormatting(line) + '</p>';
+                    i++;
+                }
+            }
+            
+            if (iterations >= MAX_ITERATIONS) {
+                console.error('markdownToHtml: MAX_ITERATIONS reached! Returning partial HTML.');
+            }
+            
+            return html;
+        }
+
+        // Function to clean empty paragraphs from Quill editor
+        function cleanEmptyParagraphs() {
+            const editorElement = quill.root;
+            const emptyParagraphs = editorElement.querySelectorAll('p');
+            
+            // Collect paragraphs to remove (to avoid modifying collection while iterating)
+            const toRemove = [];
+            
+            emptyParagraphs.forEach(p => {
+                const textContent = p.textContent.trim();
+                const innerHTML = p.innerHTML.trim();
+                
+                // Check if paragraph is empty or contains only <br> tags
+                const hasOnlyBr = /^<br\s*\/?>(\s*<br\s*\/?>)*$/i.test(innerHTML);
+                const isEmpty = textContent === '' && innerHTML === '';
+                const isEmptyOrOnlyBr = isEmpty || hasOnlyBr || innerHTML === '<br>' || innerHTML === '<br/>';
+                
+                // Don't remove if it contains important elements
+                const hasImportantContent = p.querySelector('img, input, table, ul, ol, h1, h2, h3, h4, h5, h6, blockquote, code, pre');
+                
+                if (isEmptyOrOnlyBr && !hasImportantContent) {
+                    // Only remove if it's not between list items (to preserve list structure)
+                    const prevSibling = p.previousElementSibling;
+                    const nextSibling = p.nextElementSibling;
+                    const isBetweenListItems = (prevSibling && (prevSibling.tagName === 'LI' || prevSibling.tagName === 'UL' || prevSibling.tagName === 'OL')) &&
+                                              (nextSibling && (nextSibling.tagName === 'LI' || nextSibling.tagName === 'UL' || nextSibling.tagName === 'OL'));
+                    
+                    if (!isBetweenListItems) {
+                        toRemove.push(p);
+                    }
+                }
+            });
+            
+            // Remove collected empty paragraphs
+            toRemove.forEach(p => p.remove());
+        }
 
         // Listen for paste events to convert markdown
         quill.root.addEventListener('paste', (event) => {
@@ -168,25 +817,144 @@
                 // Stop the default paste behavior
                 event.preventDefault();
 
-                // Convert markdown to HTML
-                const html = converter.makeHtml(pastedText);
+                // Convert markdown to HTML using the same logic as md-editor.html
+                let html = markdownToHtml(pastedText);
 
-                // Clean the HTML to remove empty paragraphs that can be generated from blank lines
-                const cleanHtml = html.replace(/<p>\s*(<br\s*\/?>)?\s*<\/p>/g, '');
+                // Clean the HTML to remove empty paragraphs (same as md-editor.html)
+                html = html.replace(/<p>\s*<\/p>/gi, '');
+                html = html.replace(/<p><br\s*\/?><\/p>/gi, '');
+                html = html.replace(/<p>\s*<br\s*\/?>\s*<\/p>/gi, '');
 
                 // Get the current selection to paste at the right place
                 const range = quill.getSelection(true);
                 
                 // Insert the converted HTML
-                quill.clipboard.dangerouslyPasteHTML(range.index, cleanHtml);
+                quill.clipboard.dangerouslyPasteHTML(range.index, html);
+                
+                // Clean up empty paragraphs after Quill processes the HTML
+                // Use multiple timeouts to catch Quill's internal processing
+                setTimeout(() => {
+                    cleanEmptyParagraphs();
+                }, 0);
+                setTimeout(() => {
+                    cleanEmptyParagraphs();
+                }, 50);
+                setTimeout(() => {
+                    cleanEmptyParagraphs();
+                }, 200);
             }
             // If it's not markdown, let Quill handle it
         });
+        
+        // Also clean empty paragraphs on text changes (in case Quill adds them later)
+        quill.on('text-change', () => {
+            // Debounce to avoid performance issues
+            clearTimeout(quill.cleanupTimeout);
+            quill.cleanupTimeout = setTimeout(() => {
+                cleanEmptyParagraphs();
+            }, 100);
+        });
 
-        function getHtml() {
+        // Toolbar button handlers (basic implementation)
+        // Format toggle
+        document.getElementById('formatToggleBtn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const options = document.getElementById('formatOptions');
+            if (options) {
+                options.style.display = options.style.display === 'none' ? 'block' : 'none';
+            }
+        });
+
+        // Close format options when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('#formatToggleBtn') && !e.target.closest('#formatOptions')) {
+                const options = document.getElementById('formatOptions');
+                if (options) options.style.display = 'none';
+            }
+        });
+
+        // Format options
+        document.querySelectorAll('.format-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const format = option.dataset.format;
+                const range = quill.getSelection(true);
+                if (range) {
+                    quill.formatLine(range.index, range.length, format, true);
+                }
+                document.getElementById('formatOptions').style.display = 'none';
+            });
+        });
+
+        // Bold, Italic, Underline, Strike
+        document.getElementById('boldBtn')?.addEventListener('click', () => {
+            quill.format('bold', !quill.getFormat().bold);
+        });
+        document.getElementById('italicBtn')?.addEventListener('click', () => {
+            quill.format('italic', !quill.getFormat().italic);
+        });
+        document.getElementById('underlineBtn')?.addEventListener('click', () => {
+            quill.format('underline', !quill.getFormat().underline);
+        });
+        document.getElementById('strikeBtn')?.addEventListener('click', () => {
+            quill.format('strike', !quill.getFormat().strike);
+        });
+
+        // Lists
+        document.getElementById('ulBtn')?.addEventListener('click', () => {
+            quill.format('list', 'bullet');
+        });
+        document.getElementById('olBtn')?.addEventListener('click', () => {
+            quill.format('list', 'ordered');
+        });
+
+        // Quote
+        document.getElementById('quoteBtn')?.addEventListener('click', () => {
+            quill.format('blockquote', true);
+        });
+
+        // Undo/Redo
+        document.getElementById('undoBtn')?.addEventListener('click', () => {
+            quill.history.undo();
+        });
+        document.getElementById('redoBtn')?.addEventListener('click', () => {
+            quill.history.redo();
+        });
+
+        // Clear
+        document.getElementById('clearBtn')?.addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all content?')) {
+                quill.setText('');
+            }
+        });
+
+        // Download
+        document.getElementById('downloadBtn')?.addEventListener('click', () => {
             const html = quill.root.innerHTML;
-            document.getElementById('html-output').textContent = html;
-        }
+            const blob = new Blob([`<!DOCTYPE html>\n<html>\n<head><meta charset="UTF-8"></head>\n<body>\n${html}\n</body>\n</html>`], { type: 'text/html' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'document.html';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        // Shortcuts modal
+        const shortcutsModal = document.getElementById('shortcutsModal');
+        document.getElementById('shortcutsBtn')?.addEventListener('click', () => {
+            shortcutsModal.classList.add('open');
+        });
+        document.getElementById('closeShortcutsBtn')?.addEventListener('click', () => {
+            shortcutsModal.classList.remove('open');
+        });
+        document.getElementById('closeShortcutsBtn2')?.addEventListener('click', () => {
+            shortcutsModal.classList.remove('open');
+        });
+        shortcutsModal?.addEventListener('click', (e) => {
+            if (e.target === shortcutsModal) {
+                shortcutsModal.classList.remove('open');
+            }
+        });
     </script>
 
 </body>

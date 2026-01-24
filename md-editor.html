@@ -4401,6 +4401,28 @@ renderMathInElement(document.body, {
       selection.removeAllRanges();
       selection.addRange(range);
       
+      // CRITICAL: Clean up empty paragraphs (<p><br></p> or <p></p>) that browser may add
+      // Do this immediately after paste, before input event
+      const emptyParagraphs = editor.querySelectorAll('p');
+      emptyParagraphs.forEach(p => {
+        // Check if paragraph is empty (only whitespace or just <br>)
+        const textContent = p.textContent.trim();
+        const hasOnlyBr = p.children.length === 1 && p.querySelector('br') && textContent === '';
+        const isEmpty = textContent === '' && !p.querySelector('img, input, table, ul, ol, h1, h2, h3, h4, h5, h6, blockquote');
+        
+        if (isEmpty || hasOnlyBr) {
+          // Only remove if it's not between list items (to preserve list structure)
+          const prevSibling = p.previousElementSibling;
+          const nextSibling = p.nextElementSibling;
+          const isBetweenListItems = (prevSibling && (prevSibling.tagName === 'LI' || prevSibling.tagName === 'UL' || prevSibling.tagName === 'OL')) &&
+                                    (nextSibling && (nextSibling.tagName === 'LI' || nextSibling.tagName === 'UL' || nextSibling.tagName === 'OL'));
+          
+          if (!isBetweenListItems) {
+            p.remove();
+          }
+        }
+      });
+      
       // Trigger input event to save history
       editor.dispatchEvent(new Event('input', { bubbles: true }));
     });
