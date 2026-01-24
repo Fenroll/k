@@ -1,33 +1,38 @@
 <svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="edgeStyleGradient" x1="0%" y1="100%" x2="100%" y2="0%">
-      <!-- Долу вляво – много дълбоко синьо -->
-      <stop offset="0%" style="stop-color:#062f7c;stop-opacity:1" />
-
-      <!-- Рязък преход – наситен cyan -->
-      <stop offset="42%" style="stop-color:#087f99;stop-opacity:1" />
-
-      <!-- Punch stop – усилва контраста -->
-      <stop offset="70%" style="stop-color:#159a4f;stop-opacity:1" />
-
-      <!-- Горе вдясно – ярък, но тъмен lime -->
-      <stop offset="100%" style="stop-color:#a6dd1a;stop-opacity:1" />
+      <stop offset="0%" stop-color="#062f7c"/>
+      <stop offset="42%" stop-color="#087f99"/>
+      <stop offset="70%" stop-color="#159a4f"/>
+      <stop offset="100%" stop-color="#a6dd1a"/>
     </linearGradient>
   </defs>
 
-  <rect width="512" height="512" rx="110" fill="url(#edgeStyleGradient)" />
+  <!-- Background -->
+  <rect width="512" height="512" rx="110" fill="url(#edgeStyleGradient)"/>
 
-  <g transform="translate(16, 16) scale(7.5)">
-    <path d="M41.02,51H23c-0.552,0-1-0.448-1-1c0-0.149,0.032-0.291,0.091-0.418
-             l4.792-20.191C24.479,27.701,23,24.945,23,22
-             c0-4.962,4.037-9,9-9s9,4.038,9,9
-             c0,2.945-1.479,5.701-3.883,7.391l4.792,20.191
-             c0.059,0.127,0.091,0.269,0.091,0.418
-             C42.02,50.552,41.572,51,41.02,51z"
-          fill="none"
-          stroke="#FFFFFF"
-          stroke-width="3.5"
-          stroke-linejoin="round"
-          stroke-linecap="round"/>
+  <!-- Icon (scaled up & centered) -->
+  <g transform="translate(256 256) scale(1.25) translate(-256 -256)" fill="white">
+
+    <!-- Cap top -->
+    <polygon points="256,120 80,200 256,280 432,200"/>
+
+    <!-- Cap body -->
+    <path
+      d="M160 220
+         L160 320
+         L256 360
+         L352 320
+         L352 220"
+      fill="none"
+      stroke="white"
+      stroke-width="20"
+      stroke-linejoin="round"
+    />
+
+    <!-- Tassel -->
+    <rect x="400" y="200" width="20" height="140"/>
+    <circle cx="410" cy="350" r="25"/>
+
   </g>
 </svg>

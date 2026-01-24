@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Markdown Viewer</title>
+  <title>Course Viewer</title>
   <!-- Favicon -->
   <link rel="icon" href="favicon.ico?v=2" sizes="any">
-  <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=7" type="image/svg+xml">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
@@ -990,7 +990,7 @@
             sessionStorage.setItem('editFilePath', filePath);
             
             // Navigate to md-editor
-            window.location.href = `md-editor.html?editMode=true`;
+            window.location.href = `text-editor.html?editMode=true`;
           } else {
             alert('Не беше намерено содържанието на файла. Файлът може да не е включен в courses.generated.js');
           }
