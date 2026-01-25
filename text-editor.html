@@ -385,77 +385,37 @@
       color: inherit;
     }
 
-    .heading-color-btn {
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .heading-color-btn:hover:not(.active) {
-      transform: scale(1.1);
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .heading-color-btn.active {
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
-      transform: scale(1.05);
-    }
-
-    .heading-color-btn.active:hover {
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
-      transform: scale(1.05);
-    }
-
-    .heading-color-btn:focus,
-    .heading-color-btn:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3) !important;
-      transform: scale(1.05) !important;
-    }
-
-    .text-color-btn {
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-
-    .text-color-btn:hover:not(.active) {
-      transform: scale(1.1);
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .text-color-btn.active {
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
-      transform: scale(1.05);
-    }
-
-    .text-color-btn.active:hover {
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
-      transform: scale(1.05);
-    }
-
-    .text-color-btn:focus,
-    .text-color-btn:focus-visible {
-      outline: none;
-      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3) !important;
-      transform: scale(1.05) !important;
-    }
-
+    .heading-color-btn,
+    .text-color-btn,
     .highlight-color-btn {
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
+    .heading-color-btn:hover:not(.active),
+    .text-color-btn:hover:not(.active),
     .highlight-color-btn:hover:not(.active) {
       transform: scale(1.1);
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
     }
 
+    .heading-color-btn.active,
+    .text-color-btn.active,
     .highlight-color-btn.active {
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
       transform: scale(1.05);
     }
 
+    .heading-color-btn.active:hover,
+    .text-color-btn.active:hover,
     .highlight-color-btn.active:hover {
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
       transform: scale(1.05);
     }
 
+    .heading-color-btn:focus,
+    .heading-color-btn:focus-visible,
+    .text-color-btn:focus,
+    .text-color-btn:focus-visible,
     .highlight-color-btn:focus,
     .highlight-color-btn:focus-visible {
       outline: none;
@@ -468,6 +428,9 @@
       margin: 0.75em 0;
       width: 100%;
       table-layout: auto;
+      position: relative;
+      --hover-row: -1;
+      --hover-col: -1;
     }
 
     #editor th,
@@ -740,11 +703,6 @@
     }
 
     /* Table resize functionality */
-    #editor table {
-      border-collapse: collapse;
-      margin: 10px 0;
-      position: relative;
-    }
 
     #editor table td,
     #editor table th {
@@ -785,10 +743,6 @@
     }
 
     /* Row/column hover indicators */
-    #editor table {
-      --hover-row: -1;
-      --hover-col: -1;
-    }
 
     /* Table row positioning */
     #editor table tr {
@@ -1561,7 +1515,60 @@
 
   <script>
     const editor = document.getElementById('editor');
-    
+
+    function showNotification(message, type = 'success') {
+      const notification = document.createElement('div');
+      notification.textContent = message;
+      
+      const colors = {
+        success: '#10b981',
+        warning: '#f59e0b',
+        error: '#ef4444',
+        info: '#3b82f6'
+      };
+      
+      notification.style.cssText = `
+        position: fixed;
+        top: 70px;
+        right: 20px;
+        background-color: ${colors[type] || colors.info};
+        color: white;
+        padding: 12px 18px;
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 2000;
+        font-size: 14px;
+        opacity: 0;
+        transform: translateX(20px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Animate in
+      setTimeout(() => {
+        notification.style.opacity = '1';
+        notification.style.transform = 'translateX(0)';
+      }, 10);
+      
+          // Animate out and remove
+          setTimeout(() => {
+            notification.style.opacity = '0';
+            notification.style.transform = 'translateX(20px)';
+            setTimeout(() => notification.remove(), 300);
+          }, 3000);
+        }
+      
+        function setupSimpleButton(buttonId, command) {
+          const button = document.getElementById(buttonId);
+          if (button) {
+            button.addEventListener('click', () => {
+              document.execCommand(command, false, null);
+              saveToHistory();
+              editor.focus();
+            });
+          }
+        }    
     // ========================================
     // 1. HEADER ENTER KEY LOGIC
     // ========================================
@@ -2341,59 +2348,15 @@
       });
     });
 
-    document.getElementById('boldBtn').addEventListener('click', () => {
-      document.execCommand('bold', false, null);
-      saveToHistory();
-      editor.focus();
-    });
-
-    document.getElementById('italicBtn').addEventListener('click', () => {
-      document.execCommand('italic', false, null);
-      saveToHistory();
-      editor.focus();
-    });
-
-    document.getElementById('underlineBtn').addEventListener('click', () => {
-      document.execCommand('underline', false, null);
-      saveToHistory();
-      editor.focus();
-    });
-
-    document.getElementById('strikeBtn').addEventListener('click', () => {
-      document.execCommand('strikethrough', false, null);
-      saveToHistory();
-      editor.focus();
-    });
-
-    document.getElementById('subscriptBtn').addEventListener('click', () => {
-      document.execCommand('subscript', false, null);
-      saveToHistory();
-      editor.focus();
-    });
-
-    document.getElementById('superscriptBtn').addEventListener('click', () => {
-      document.execCommand('superscript', false, null);
-      saveToHistory();
-      editor.focus();
-    });
-
-    document.getElementById('alignLeftBtn').addEventListener('click', () => {
-      document.execCommand('justifyLeft', false, null);
-      saveToHistory();
-      editor.focus();
-    });
-
-    document.getElementById('alignCenterBtn').addEventListener('click', () => {
-      document.execCommand('justifyCenter', false, null);
-      saveToHistory();
-      editor.focus();
-    });
-
-    document.getElementById('alignRightBtn').addEventListener('click', () => {
-      document.execCommand('justifyRight', false, null);
-      saveToHistory();
-      editor.focus();
-    });
+    setupSimpleButton('boldBtn', 'bold');
+    setupSimpleButton('italicBtn', 'italic');
+    setupSimpleButton('underlineBtn', 'underline');
+    setupSimpleButton('strikeBtn', 'strikethrough');
+    setupSimpleButton('subscriptBtn', 'subscript');
+    setupSimpleButton('superscriptBtn', 'superscript');
+    setupSimpleButton('alignLeftBtn', 'justifyLeft');
+    setupSimpleButton('alignCenterBtn', 'justifyCenter');
+    setupSimpleButton('alignRightBtn', 'justifyRight');
 
     document.getElementById('indentBtn').addEventListener('click', () => {
       const selection = window.getSelection();
@@ -2414,16 +2377,7 @@
       }
       
       // If not in list, show notification
-      const notification = document.createElement('div');
-      notification.textContent = '⚠️ Indent works only in lists';
-      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #f59e0b; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.style.transition = 'opacity 0.3s';
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 300);
-      }, 2000);
+      showNotification('⚠️ Indent works only in lists', 'warning');
     });
 
     document.getElementById('outdentBtn').addEventListener('click', () => {
@@ -2445,16 +2399,7 @@
       }
       
       // If not in list, show notification
-      const notification = document.createElement('div');
-      notification.textContent = '⚠️ Outdent works only in lists';
-      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #f59e0b; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.style.transition = 'opacity 0.3s';
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 300);
-      }, 2000);
+      showNotification('⚠️ Outdent works only in lists', 'warning');
     });
 
     document.getElementById('ulBtn').addEventListener('click', () => {
@@ -3225,16 +3170,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       document.getElementById('htmlEditorModal').style.display = 'none';
       
       // Show confirmation
-      const notification = document.createElement('div');
-      notification.textContent = '✅ HTML updated successfully!';
-      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
-      document.body.appendChild(notification);
-      
-      setTimeout(() => {
-        notification.style.transition = 'opacity 0.3s';
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 300);
-      }, 2000);
+      showNotification('✅ HTML updated successfully!', 'success');
     });
 
     // HTML Editor Close
@@ -4668,22 +4604,6 @@ renderMathInElement(document.body, {
           if (historyIndex < history.length - 1) {
             historyIndex++;
             editor.innerHTML = history[historyIndex];
-          }
-        } else if (e.key === 'm' || e.key === 'M' || e.key === 'М' || e.key === 'м') {
-          if (e.shiftKey) {
-            e.preventDefault();
-            // Remove text color (reset to black)
-            const selection = window.getSelection();
-            if (selection.toString() && editor.contains(selection.anchorNode)) {
-              document.execCommand('foreColor', false, 'rgb(31, 41, 55)');
-              saveToHistory();
-            }
-          } else {
-            e.preventDefault();
-            // Apply last used text color
-            const lastColor = localStorage.getItem('textEditorTextColor') || '#1f2937';
-            applyFormatting('color', lastColor);
-            saveToHistory();
           }
         } else if ((e.key === 'c' || e.key === 'C' || e.key === 'С' || e.key === 'с') && e.altKey) {
           e.preventDefault();
