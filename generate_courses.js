@@ -463,18 +463,15 @@ function main() {
   });
   const buildTimestamp = `${date} ${time}`;
 
-  // Write JS file
-  const js = 'const courses = ' + JSON.stringify(courses, null, 2) + '\n' +
+  // Write JS file with version at the top
+  const js = 'window.coursesVersion = "' + version + '";\n' +
+             'const courses = ' + JSON.stringify(courses, null, 2) + '\n' +
              'const eventInfo = ' + JSON.stringify(eventInfo) + '\n' +
              'const buildTimestamp = "' + buildTimestamp + '";\n';
   fs.writeFileSync(OUTPUT_FILE, js, 'utf8');
   console.log('Generated courses:', OUTPUT_FILE);
   console.log('Build timestamp:', buildTimestamp);
-
-  // Write version file for cache busting
-  const versionFile = path.join(__dirname, 'courses.version.json');
-  fs.writeFileSync(versionFile, JSON.stringify({ version }, null, 2), 'utf8');
-  console.log('Wrote version file:', versionFile, 'version:', version);
+  console.log('coursesVersion:', version);
 }
 
 main();
