@@ -270,9 +270,12 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-    flex: 1;
+    flex: 1 1 0%;
     padding-top: 2px;
     justify-content: center;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
   }
     @media (max-width: 600px) {
       .element-details {
@@ -281,7 +284,10 @@
       }
       .element-details-content {
         width: 100%;
+        min-width: 0;
+        max-width: 100%;
         white-space: normal;
+        flex: 1 1 0%;
       }
     }
   .course-title {
@@ -876,7 +882,7 @@
           align-items: flex-start;
           justify-content: center; /* Changed from flex-start to center */
           text-align: left;
-          padding: 0 12px 0 0;
+          padding: 0 0px 0 0;
           gap: 2px;
           box-sizing: border-box;
           flex: 1 1 0;
