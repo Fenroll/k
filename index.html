@@ -273,7 +273,7 @@
     flex: 1 1 0%;
     padding-top: 2px;
     justify-content: center;
-    width: 100%;
+    width: auto; /* Let flexbox handle the width */
     min-width: 0;
     box-sizing: border-box;
   }
@@ -283,19 +283,16 @@
         align-items: stretch;
       }
       .element-details-content {
-        width: 100%;
-        min-width: 0;
-        max-width: 100%;
-        white-space: normal;
-        flex: 1 1 0%;
+        /* `width: auto` is inherited from the 768px breakpoint. */
+        white-space: normal; /* Allow text to wrap */
       }
     }
   .course-title {
     font-size: 15px !important;
     line-height: 1.25 !important;
     white-space: normal !important;
-    word-break: break-all !important; /* Changed from normal to break-all for stronger overflow prevention */
-    overflow-wrap: break-word !important;
+    word-break: normal !important; /* Use overflow-wrap for better text flow */
+    overflow-wrap: break-word !important; /* This will handle long words correctly */
     max-width: 100%;
     font-weight: 600 !important;
     margin-bottom: 2px !important;
@@ -1269,12 +1266,8 @@ function renderCourseList() {
             <div class="course-id" style="margin-bottom:8px; font-weight:450; text-shadow:0.5px 0 0 #888;">${course.id}</div>
             <div class="course-title" style="font-weight:450; text-shadow:0.5px 0 0 #888;">${course.title}</div>
             <div class="course-custom-text">${course.customText}</div>
-            </div>
           </div>
-          <button class="favorite" title="Add to your favorites">
-            <svg class="svg-icon small-icon" focusable="false" aria-hidden="true">
-            </svg>
-          </button>
+        </div>
       `;
       // Apply the color as border-left style
       card.style.borderLeft = "8px solid " + borderColor;
@@ -3218,4 +3211,3 @@ function toggleFileDropdown(sectionId) {
     <script src="js/presence.js"></script>
 </body>
 </html>
-
