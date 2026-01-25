@@ -3,6 +3,23 @@
 <head>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+  <script>
+    // Firebase configuration (extracted from js/chat.js)
+    const firebaseConfig = {
+      apiKey: "API_KEY", // Замени с твоя API Key
+      authDomain: "med-student-chat.firebaseapp.com",
+      databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "med-student-chat",
+      storageBucket: "med-student-chat.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    // Initialize Firebase if not already initialized
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  </script>
   <script src="js/auth-guard.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,7 +38,7 @@
   
   <script src="schedule-data.js"></script>
   <style>
-  body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
+  body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; overflow-y: scroll; }
   .layout { display: flex; min-height: 100vh; }
   
   /* Sidebar styling */
@@ -176,6 +193,8 @@
     padding: 24px;
     margin-top: 24px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    min-height: 50px; /* Add this to reserve space */
+    transition: opacity 0.3s ease-in-out; /* Add for smooth transition */
   }
   
   .info-panel-content {
@@ -280,7 +299,7 @@
     font-size: 16px;
     font-weight: 600;
     color: #374151;
-    min-width: 280px;
+    width: 320px; /* Changed from min-width to fixed width to prevent CLS */
     text-align: center;
   }
   
@@ -467,7 +486,9 @@
 
   /* Modal overlay */
   .modal-overlay {
-    display: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease;
     position: fixed;
     top: 0;
     left: 0;
@@ -475,12 +496,12 @@
     bottom: 0;
     background: rgba(0,0,0,0.6);
     z-index: 5000;
-    -webkit-backdrop-filter: blur(4px);
-    backdrop-filter: blur(4px);
   }
   
   .modal-overlay.open {
-    display: flex;
+    opacity: 1;
+    visibility: visible;
+    display: flex; /* Keep display: flex for centering */
     align-items: center;
     justify-content: center;
   }
@@ -701,6 +722,8 @@
     max-height: 70vh;
     overflow-y: auto;
     padding-right: 8px;
+    content-visibility: auto; /* Optimize rendering of off-screen content */
+    contain-intrinsic-size: 1px 500px; /* Estimated initial size to prevent layout shifts */
   }
   
   #modalAdditionalInfo::-webkit-scrollbar {
@@ -1211,7 +1234,7 @@
         </table>
         
         <!-- Current Information Panel -->
-        <div id="currentInfoPanel" class="info-panel">
+        <div id="currentInfoPanel" class="info-panel" style="opacity: 0; visibility: hidden; pointer-events: none;">
           <div class="info-panel-content" id="infoContent">
             <!-- Markdown content will be loaded here -->
           </div>
@@ -1338,6 +1361,17 @@
         // Generate weeks from template and overrides
         scheduleByWeek = generateWeeksFromTemplate(scheduleData);
         semesterConfig = scheduleData.semester;
+
+        // Pre-parse additionalInfo for exams
+        if (scheduleData.exams && Array.isArray(scheduleData.exams)) {
+          scheduleData.exams.forEach(exam => {
+            if (exam.additionalInfo) {
+              exam.additionalInfoHtml = marked.parse(exam.additionalInfo);
+            } else {
+              exam.additionalInfoHtml = '';
+            }
+          });
+        }
         
         // Find and set current week based on today's date
         currentWeekIndex = findCurrentWeekIndex();
@@ -1360,20 +1394,28 @@
         const dbRef = firebase.database().ref('scheduleNotes/content');
         const snapshot = await dbRef.once('value');
         const markdown = snapshot.val();
+        const currentInfoPanel = document.getElementById('currentInfoPanel');
 
         if (markdown) {
           const html = marked.parse(markdown);
           document.getElementById('infoContent').innerHTML = html;
-          document.getElementById('currentInfoPanel').style.display = 'block'; // Ensure panel is visible
+          currentInfoPanel.style.opacity = '1'; // Show
+          currentInfoPanel.style.visibility = 'visible';
+          currentInfoPanel.style.pointerEvents = 'auto'; // Re-enable interactions
         } else {
           // If no content in Firebase, hide the panel
           document.getElementById('infoContent').innerHTML = ''; // Clear content
-          document.getElementById('currentInfoPanel').style.display = 'none';
+          currentInfoPanel.style.opacity = '0'; // Hide
+          currentInfoPanel.style.visibility = 'hidden';
+          currentInfoPanel.style.pointerEvents = 'none'; // Disable interactions
         }
       } catch (error) {
         console.error('Error loading current info from Firebase:', error);
         // Hide panel if there's an error fetching from Firebase
-        document.getElementById('currentInfoPanel').style.display = 'none';
+        const currentInfoPanel = document.getElementById('currentInfoPanel');
+        currentInfoPanel.style.opacity = '0'; // Hide on error
+        currentInfoPanel.style.visibility = 'hidden';
+        currentInfoPanel.style.pointerEvents = 'none';
       }
     }
     
@@ -1447,25 +1489,30 @@
       const template = config.template || [];
       const overrides = config.overrides || {};
       
+      // Pre-parse additionalInfo for template events
+      const processedTemplate = template.map(item => ({
+        ...item,
+        additionalInfoHtml: item.additionalInfo ? marked.parse(item.additionalInfo) : ''
+      }));
+
       config.weeks.forEach((week, index) => {
         const weekNumber = index + 1;
-        let schedule = JSON.parse(JSON.stringify(template)); // Deep copy
+        let schedule = JSON.parse(JSON.stringify(processedTemplate)); // Deep copy the processed template
         
         // Apply overrides for this week if they exist
         if (overrides[weekNumber]) {
           overrides[weekNumber].forEach(override => {
+            // Pre-parse additionalInfo for overrides too
+            const overrideHtml = override.additionalInfo ? marked.parse(override.additionalInfo) : '';
             if (override.removeDay) {
-              // Remove all items for this day
               schedule = schedule.filter(item => item.day !== override.removeDay);
             } else if (override.remove) {
-              // Remove the matching item
               schedule = schedule.filter(item => 
                 !(item.day === override.day && 
                   item.subject === override.subject && 
                   item.startTime === override.startTime)
               );
             } else if (override.changes) {
-              // Check if item should be removed
               if (override.changes.removed === true) {
                 schedule = schedule.filter(item => 
                   !(item.day === override.day && 
@@ -1473,20 +1520,25 @@
                     item.startTime === override.startTime)
                 );
               } else {
-                // Modify existing item
-                const index = schedule.findIndex(item => 
+                const itemIndex = schedule.findIndex(item => 
                   item.day === override.day && 
                   item.subject === override.subject && 
                   item.startTime === override.startTime
                 );
-                if (index !== -1) {
-                  // Apply changes
-                  Object.assign(schedule[index], override.changes);
+                if (itemIndex !== -1) {
+                  // Apply changes and update additionalInfoHtml if additionalInfo is changed
+                  Object.assign(schedule[itemIndex], override.changes);
+                  if (override.changes.additionalInfo !== undefined) {
+                      schedule[itemIndex].additionalInfoHtml = override.changes.additionalInfo ? marked.parse(override.changes.additionalInfo) : '';
+                  }
                 }
               }
             } else {
-              // Add new item
-              schedule.push(override);
+              // Add new item, including pre-parsed HTML
+              schedule.push({
+                ...override,
+                additionalInfoHtml: overrideHtml
+              });
             }
           });
         }
@@ -1593,11 +1645,22 @@
       const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
       const currentDay = getCurrentDay();
       const tbody = document.getElementById('scheduleBody');
-      tbody.innerHTML = ''; // Clear existing content
       
+      // Clear existing content efficiently
+      while (tbody.firstChild) {
+          tbody.removeChild(tbody.firstChild);
+      }
+      
+      // Use a DocumentFragment to minimize DOM manipulations
+      const fragment = document.createDocumentFragment();
+
       // Get current week's schedule
       const currentWeek = scheduleByWeek[currentWeekIndex];
-      if (!currentWeek) return;
+      if (!currentWeek) {
+          // Append fragment even if empty
+          tbody.appendChild(fragment);
+          return;
+      }
       
       const scheduleData = currentWeek.schedule;
       
@@ -1664,8 +1727,9 @@
           
           row.appendChild(td);
         });
-        tbody.appendChild(row);
+        fragment.appendChild(row); // Append to fragment instead of tbody
       }
+      tbody.appendChild(fragment); // Append fragment to tbody once
     }
     
     // Change week
@@ -1832,8 +1896,8 @@
     function showExamModal(exam) {
       const examAdditionalInfo = document.getElementById('examAdditionalInfo');
       
-      if (exam.additionalInfo && exam.additionalInfo.trim()) {
-        examAdditionalInfo.innerHTML = marked.parse(exam.additionalInfo);
+      if (exam.additionalInfoHtml) {
+        examAdditionalInfo.innerHTML = exam.additionalInfoHtml;
       } else {
         examAdditionalInfo.innerHTML = 'Няма добавена информация.';
       }
@@ -1951,9 +2015,9 @@
       const additionalInfoElement = document.getElementById('modalAdditionalInfo');
       const additionalInfoRow = document.getElementById('modalAdditionalInfoRow');
       
-      if (event.additionalInfo) {
-        additionalInfoElement.innerHTML = marked.parse(event.additionalInfo);
-        additionalInfoRow.style.display = 'flex';  // Променено на flex
+      if (event.additionalInfoHtml) {
+        additionalInfoElement.innerHTML = event.additionalInfoHtml;
+        additionalInfoRow.style.display = 'flex';
       } else {
         additionalInfoRow.style.display = 'none';
       }

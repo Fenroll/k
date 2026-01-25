@@ -25,16 +25,7 @@ class ChatFirebaseREST {
     this.unsubscribers = [];
     this.heartbeatInterval = null;
     
-    // ВАЖНО: Тук трябва да се попълнят вашите данни от Firebase Console!
-    this.firebaseConfig = {
-      apiKey: "API_KEY", // Замени с твоя API Key
-      authDomain: "med-student-chat.firebaseapp.com",
-      databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "med-student-chat",
-      storageBucket: "med-student-chat.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
-    };
+    // Firebase is now initialized globally by calendar.html, so no need for config here.
 
     // console.log('Using Firebase SDK Wrapper'); // Can be removed
     this.initSDK();
@@ -46,19 +37,18 @@ class ChatFirebaseREST {
         this.initApp(firebase);
         return;
     } else {
-        console.error("Firebase SDK not loaded globally. Please ensure firebase-app-compat.js and firebase-database-compat.js are loaded BEFORE chat.js");
-        // Optionally, throw an error or handle this case more gracefully.
+        console.error("Firebase SDK not loaded globally. Please ensure firebase-app-compat.js and firebase-database-compat.js are loaded BEFORE chat.js and firebase.initializeApp() is called.");
     }
   }
 
   initApp(firebaseInstance) {
     try {
-      // Check if app already exists to avoid errors on page reload/navigation
-      const app = firebaseInstance.apps.length === 0 ? firebaseInstance.initializeApp(this.firebaseConfig) : firebaseInstance.app();
+      // Assume app is already initialized globally. Just get the default app.
+      const app = firebaseInstance.app();
       this.db = firebaseInstance.database();
       // console.log('✓ Firebase SDK Initialized'); // Can be removed
     } catch (e) {
-      console.error("Firebase Init Error:", e);
+      console.error("Firebase Init Error: Ensure Firebase is initialized globally in the HTML.", e);
     }
   }
 
