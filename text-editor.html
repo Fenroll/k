@@ -203,8 +203,8 @@
     }
 
     .toolbar select:hover {
-      background: rgba(146, 64, 14, 0.08);
-      color: #92400e;
+      background: rgba(88, 129, 87, 0.08);
+      color: #588157;
     }
 
     /* Main editor container */
@@ -240,7 +240,7 @@
     #editor h2,
     #editor h3,
     #editor h4 {
-      color: #92400e;
+      color: #588157;
       margin-top: 0.8em;
       margin-bottom: 0.15em;
       font-weight: 600;
@@ -435,7 +435,7 @@
 
     #editor th,
     #editor td {
-      border: 1px solid rgba(146, 64, 14, 0.35);
+      border: 1px solid rgba(2, 2, 2, 0.35);
       padding: 6px 10px;
       text-align: left;
       vertical-align: top;
@@ -444,12 +444,12 @@
     }
 
     #editor thead th {
-      background: rgba(196, 127, 9, 0.08);
+      background: rgba(88, 129, 87, 0.13);
       font-weight: 600;
     }
 
-    #editor tbody tr:nth-child(odd) {
-      background: rgba(146, 64, 14, 0.03);
+    #editor tbody tr:nth-child(even) {
+      background: rgba(88, 129, 87, 0.06); /* Very very slight tint of #588157 */
     }
 
     /* Raw code modal */
@@ -460,7 +460,7 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background: #92400e;
+      background: #588157;
       color: #fff;
       border: none;
       cursor: pointer;
@@ -474,7 +474,7 @@
     }
 
     .raw-code-btn:hover {
-      background: #b8520d;
+      background: #588157;
       box-shadow: 0 6px 16px rgba(0,0,0,0.2);
       transform: scale(1.1);
     }
@@ -576,13 +576,13 @@
     }
 
     .modal-footer button.primary {
-      background: #92400e;
+      background: #588157;
       color: #fff;
-      border-color: #92400e;
+      border-color: #588157;
     }
 
     .modal-footer button.primary:hover {
-      background: #b8520d;
+      background: #588157;
     }
 
     /* File list styles */
@@ -630,14 +630,14 @@
     /* Course group header */
     .course-header {
       padding: 10px 16px;
-      background: #f59e0b;
+      background: #588157;
       color: #fff;
       font-weight: 600;
       font-size: 0.95em;
       position: sticky;
       top: 0;
       z-index: 1;
-      border-bottom: 2px solid #d97706;
+      border-bottom: 2px solid #166534;
     }
 
     .course-header.hidden {
@@ -648,17 +648,17 @@
       display: none;
     }
     .modal-footer button.primary:hover {
-      background: #b8520d;
+      background: #588157;
     }
 
     /* Keyboard shortcuts hint */
     .shortcuts-hint {
       padding: 8px 12px;
-      background: #fef3c7;
-      border: 1px solid #fcd34d;
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
       border-radius: 4px;
       font-size: 0.85em;
-      color: #78350f;
+      color: #166534;
       margin-left: auto;
     }
 
@@ -732,14 +732,14 @@
     /* Table cell focus/selection indicator */
     #editor table td:focus,
     #editor table th:focus {
-      outline: 2px solid #7c3aed;
+      outline: 2px solid #588157;
       outline-offset: -2px;
-      background: rgba(124, 58, 237, 0.05);
+      background: rgba(88, 129, 87, 0.05);
     }
 
     /* Table row hover effect */
     #editor table tr:hover {
-      background: rgba(124, 58, 237, 0.03);
+      /* background: none; */ /* Removed per user request */
     }
 
     /* Row/column hover indicators */
@@ -1017,7 +1017,8 @@
           <div id="textStandardColors" class="standard-colors-row"></div>
           <div style="padding: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px; display: flex; gap: 8px; align-items: center;">
             <button id="removeTextColorBtn" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; flex: 1;">Remove Color</button>
-            <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px;">
+            <input type="text" id="textColorHexInput" placeholder="#1f2937" style="width: 80px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-family: monospace; font-size: 12px;">
+            <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px; padding: 2px;">
           </div>
         </div>
       </div>
@@ -1030,7 +1031,7 @@
           <button class="heading-color-btn" data-color="#1f2937" title="Dark Gray" style="background-color: #1f2937; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
           <button class="heading-color-btn" data-color="#1e40af" title="Deep Blue" style="background-color: #1e40af; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
           <button class="heading-color-btn" data-color="#7c2d12" title="Deep Orange" style="background-color: #7c2d12; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#65a30d" title="Lime Green" style="background-color: #65a30d; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="heading-color-btn" data-color="#588157" title="Lime Green" style="background-color: #588157; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
           <button class="heading-color-btn" data-color="#7e22ce" title="Purple" style="background-color: #7e22ce; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
         </div>
       </div>
@@ -1045,7 +1046,8 @@
           <div id="highlightStandardColors" class="standard-colors-row"></div>
           <div style="padding: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px; display: flex; gap: 8px; align-items: center;">
             <button id="removeHighlightBtn" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; flex: 1;">Remove Highlight</button>
-            <input type="color" id="highlightColorControl" value="#ffeb3b" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px;">
+            <input type="text" id="highlightColorHexInput" placeholder="#ffeb3b" style="width: 80px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-family: monospace; font-size: 12px;">
+            <input type="color" id="highlightColorControl" value="#ffeb3b" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px; padding: 2px;">
           </div>
         </div>
       </div>
@@ -1288,7 +1290,7 @@
           <input type="text" id="fileNameInput" placeholder="e.g., ХОББ, Белодробен карцином" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
         </div>
         <div style="padding: 10px; background: #f3f4f6; border-radius: 4px; font-size: 0.9em; color: #4b5563;">
-          <strong>Preview:</strong> <span id="fileNamePreview" style="color: #92400e; font-family: monospace;">document.html</span>
+          <strong>Preview:</strong> <span id="fileNamePreview" style="color: #588157; font-family: monospace;">document.html</span>
         </div>
       </div>
       <div class="modal-footer">
@@ -1464,7 +1466,7 @@
       <div class="modal-body">
         <!-- Tabs for combining mode -->
         <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
-          <button id="combineLocalTab" class="combine-tab-btn active" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid #7c3aed; color: #7c3aed; font-weight: 500;">Локални файлове</button>
+          <button id="combineLocalTab" class="combine-tab-btn active" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid #588157; color: #588157; font-weight: 500;">Локални файлове</button>
           <button id="combineCourseTab" class="combine-tab-btn" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280; font-weight: 500;">От курсове</button>
         </div>
 
@@ -1525,7 +1527,7 @@
       
       const colors = {
         success: '#10b981',
-        warning: '#f59e0b',
+        warning: '#588157',
         error: '#ef4444',
         info: '#3b82f6'
       };
@@ -1575,7 +1577,7 @@
     // ========================================
     // 1. HEADER ENTER KEY LOGIC
     // ========================================
-    editor.addEventListener('keydown', (e) => {
+    /* editor.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         const selection = window.getSelection();
         if (selection.rangeCount === 0) return;
@@ -1613,7 +1615,7 @@
           node = node.parentNode;
         }
       }
-    });
+    }); */
     
     // ========================================
     // 2. PROFESSIONAL COLOR PICKER INITIALIZATION
@@ -2000,6 +2002,22 @@
     // Variable to store cursor position when opening table modal
     let savedTableRange = null;
 
+    function saveSelection() {
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        return selection.getRangeAt(0).cloneRange();
+      }
+      return null;
+    }
+
+    function restoreSelection(range) {
+      if (range) {
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+
     function insertTable() {
       // CRITICAL: Save current cursor position BEFORE opening modal
       // This must happen before any focus changes
@@ -2291,7 +2309,7 @@
       
       // Create <hr> with dashed style
       const hr = document.createElement('hr');
-      hr.style.cssText = 'border: none; border-top: 2px dashed #8B6F47;';
+      hr.style.cssText = 'border: none; border-top: 2px dashed #73a372;';
       
       range.insertNode(hr);
       range.setStartAfter(hr);
@@ -2441,7 +2459,7 @@
       link.href = url.trim();
       link.textContent = selectedText;
       link.style.textDecoration = 'underline';
-      link.style.textDecorationColor = '#f59e0b';
+      link.style.textDecorationColor = '#588157';
       
       // Insert link
       range.deleteContents();
@@ -2607,10 +2625,7 @@
       
       if (isHidden) {
         // Save current selection
-        const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-          savedTextColorSelection = selection.getRangeAt(0).cloneRange();
-        }
+        savedTextColorSelection = saveSelection();
       }
       
       // Close highlight picker if open
@@ -2623,32 +2638,48 @@
     document.addEventListener('click', (e) => {
       const textColorOptions = document.getElementById('textColorOptions');
       const textColorToggleBtn = document.getElementById('textColorToggleBtn');
-      if (!textColorOptions.contains(e.target) && !textColorToggleBtn.contains(e.target)) {
+      if (textColorOptions && !textColorOptions.contains(e.target) && !textColorToggleBtn.contains(e.target)) {
         textColorOptions.style.display = 'none';
       }
     });
 
     // Text Color Control - Custom color picker
-    document.getElementById('textColorControl').addEventListener('input', (e) => {
+    const textColorControl = document.getElementById('textColorControl');
+    const textColorHexInput = document.getElementById('textColorHexInput');
+
+    textColorControl.addEventListener('mousedown', () => {
+        savedTextColorSelection = saveSelection();
+    });
+    textColorHexInput.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        savedTextColorSelection = saveSelection();
+    });
+
+    textColorControl.addEventListener('input', (e) => {
       const color = e.target.value;
-      // Restore selection if saved
+      textColorHexInput.value = color;
       if (savedTextColorSelection) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedTextColorSelection);
+        restoreSelection(savedTextColorSelection);
       }
       applyFormatting('color', color);
+    });
+
+    textColorHexInput.addEventListener('change', (e) => {
+      let color = e.target.value.trim();
+      if (!color.startsWith('#')) {
+        color = '#' + color;
+      }
+      if (/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
+        textColorControl.value = color;
+        textColorControl.dispatchEvent(new Event('input', { bubbles: true }));
+      }
     });
 
     // Remove Text Color Button
     document.getElementById('removeTextColorBtn').addEventListener('click', (e) => {
       e.preventDefault();
-      
-      // Restore selection if saved
       if (savedTextColorSelection) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedTextColorSelection);
+        restoreSelection(savedTextColorSelection);
       }
       
       const selection = window.getSelection();
@@ -2687,39 +2718,24 @@
         e.preventDefault();
         const color = btn.dataset.color;
         
-        // Update CSS for all headings with higher specificity
         const style = document.createElement('style');
         style.id = 'heading-color-style';
         const existingStyle = document.getElementById('heading-color-style');
         if (existingStyle) existingStyle.remove();
         
         style.textContent = `
-          #editor h1, 
-          #editor h2, 
-          #editor h3, 
-          #editor h4 { 
-            color: ${color} !important; 
-          }
+          #editor h1, #editor h2, #editor h3, #editor h4 { color: ${color} !important; }
         `;
         document.head.appendChild(style);
         
-        // Also apply directly to existing headers
         const headers = document.querySelectorAll('#editor h1, #editor h2, #editor h3, #editor h4');
-        headers.forEach(h => {
-          h.style.color = color;
-        });
+        headers.forEach(h => h.style.color = color);
         
-        // Update active button
         document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         
-        // Save to localStorage
         localStorage.setItem('textEditorHeadingColor', color);
-        
-        // Close dropdown
         document.getElementById('headingColorOptions').style.display = 'none';
-        
-        // Remove focus to hide hover state
         btn.blur();
       });
     });
@@ -2732,16 +2748,10 @@
       const isHidden = highlightOptions.style.display === 'none' || !highlightOptions.style.display;
       
       if (isHidden) {
-        // Save current selection
-        const selection = window.getSelection();
-        if (selection.rangeCount > 0) {
-          savedHighlightSelection = selection.getRangeAt(0).cloneRange();
-        }
+        savedHighlightSelection = saveSelection();
       }
       
-      // Close text color picker if open
       document.getElementById('textColorOptions').style.display = 'none';
-      
       highlightOptions.style.display = isHidden ? 'block' : 'none';
     });
 
@@ -2749,32 +2759,48 @@
     document.addEventListener('click', (e) => {
       const highlightOptions = document.getElementById('highlightOptions');
       const highlightToggleBtn = document.getElementById('highlightToggleBtn');
-      if (!highlightOptions.contains(e.target) && !highlightToggleBtn.contains(e.target)) {
+      if (highlightOptions && !highlightOptions.contains(e.target) && !highlightToggleBtn.contains(e.target)) {
         highlightOptions.style.display = 'none';
       }
     });
 
     // Highlight Control - Custom color picker
-    document.getElementById('highlightColorControl').addEventListener('input', (e) => {
+    const highlightColorControl = document.getElementById('highlightColorControl');
+    const highlightColorHexInput = document.getElementById('highlightColorHexInput');
+
+    highlightColorControl.addEventListener('mousedown', () => {
+        savedHighlightSelection = saveSelection();
+    });
+    highlightColorHexInput.addEventListener('mousedown', (e) => {
+        e.stopPropagation();
+        savedHighlightSelection = saveSelection();
+    });
+
+    highlightColorControl.addEventListener('input', (e) => {
       const color = e.target.value;
-      // Restore selection if saved
+      highlightColorHexInput.value = color;
       if (savedHighlightSelection) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedHighlightSelection);
+        restoreSelection(savedHighlightSelection);
       }
       applyFormatting('highlight', color);
+    });
+    
+    highlightColorHexInput.addEventListener('change', (e) => {
+        let color = e.target.value.trim();
+        if (!color.startsWith('#')) {
+            color = '#' + color;
+        }
+        if (/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
+            highlightColorControl.value = color;
+            highlightColorControl.dispatchEvent(new Event('input', { bubbles: true }));
+        }
     });
 
     // Remove Highlight Button
     document.getElementById('removeHighlightBtn').addEventListener('click', (e) => {
       e.preventDefault();
-      
-      // Restore selection if saved
       if (savedHighlightSelection) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedHighlightSelection);
+        restoreSelection(savedHighlightSelection);
       }
       
       const selection = window.getSelection();
@@ -3479,11 +3505,11 @@ localStorage.setItem('textEditorContent', htmlContent);
       padding: 0;
     }
     blockquote {
-      border-left: 3px solid #f59e0b;
+      border-left: 3px solid #588157;
       padding-left: 1em;
       margin: 0.5em 0;
       font-style: italic;
-      color: #78350f;
+      color: #166534;
     }
     table { 
       border-collapse: collapse; 
@@ -3492,7 +3518,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       table-layout: auto;
     }
     th, td { 
-      border: 1px solid rgba(146, 64, 14, 0.35); 
+      border: 1px solid rgba(2, 2, 2, 0.2);
       padding: 6px 10px; 
       text-align: left; 
       vertical-align: top;
@@ -3500,19 +3526,19 @@ localStorage.setItem('textEditorContent', htmlContent);
       line-height: 1.2;
     }
     thead th { 
-      background: rgba(196, 127, 9, 0.08); 
+      background: rgba(88, 129, 87, 0.13); 
       font-weight: 600; 
     }
-    tbody tr:nth-child(odd) { 
-      background: rgba(146, 64, 14, 0.03); 
+    tbody tr:nth-child(even) { 
+      background: rgba(88, 129, 87, 0.06); 
     }
     img { 
       max-width: 100%; 
       height: auto; 
     }
-    a { 
-      color: #f59e0b; 
-      text-decoration: underline; 
+    a {
+      color: inherit; /* Changed to inherit */
+      text-decoration: underline;
     }
     a:hover {
       color: #d97706;
@@ -4140,7 +4166,7 @@ renderMathInElement(document.body, {
         .replace(/>/g, '&gt;');
       
       // Headers (h1-h4)
-      highlighted = highlighted.replace(/^(#{1,4})\s+(.*)$/gm, '<span style="color: #92400e; font-weight: 600;">$1</span> <span style="color: #78350f; font-weight: 600;">$2</span>');
+      highlighted = highlighted.replace(/^(#{1,4})\s+(.*)$/gm, '<span style="color: #588157; font-weight: 600;">$1</span> <span style="color: #588157; font-weight: 600;">$2</span>');
       
       // Bold **text**
       highlighted = highlighted.replace(/\*\*([^*]+)\*\*/g, '<span style="color: #1f2937; font-weight: 600;">**</span><span style="color: #374151; font-weight: 600;">$1</span><span style="color: #1f2937; font-weight: 600;">**</span>');
@@ -4158,22 +4184,22 @@ renderMathInElement(document.body, {
       highlighted = highlighted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<span style="color: #2563eb;">[</span><span style="color: #3b82f6;">$1</span><span style="color: #2563eb;">](</span><span style="color: #60a5fa; text-decoration: underline;">$2</span><span style="color: #2563eb;">)</span>');
       
       // Images ![alt](url)
-      highlighted = highlighted.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<span style="color: #7c3aed;">![</span><span style="color: #8b5cf6;">$1</span><span style="color: #7c3aed;">](</span><span style="color: #a78bfa; text-decoration: underline;">$2</span><span style="color: #7c3aed;">)</span>');
+      highlighted = highlighted.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<span style="color: #588157;">![</span><span style="color: #588157;">$1</span><span style="color: #588157;">](</span><span style="color: #588157; text-decoration: underline;">$2</span><span style="color: #588157;">)</span>');
       
       // Unordered list - keep original - or * marker
-      highlighted = highlighted.replace(/^(\s*)([-*])\s+(.*)$/gm, '$1<span style="color: #f59e0b; font-weight: 600;">$2</span> <span style="color: #374151;">$3</span>');
+      highlighted = highlighted.replace(/^(\s*)([-*])\s+(.*)$/gm, '$1<span style="color: #588157; font-weight: 600;">$2</span> <span style="color: #374151;">$3</span>');
       
       // Ordered list
-      highlighted = highlighted.replace(/^(\s*)(\d+)\.\s+(.*)$/gm, '$1<span style="color: #f59e0b; font-weight: 600;">$2.</span> <span style="color: #374151;">$3</span>');
+      highlighted = highlighted.replace(/^(\s*)(\d+)\.\s+(.*)$/gm, '$1<span style="color: #588157; font-weight: 600;">$2.</span> <span style="color: #374151;">$3</span>');
       
       // Blockquote
-      highlighted = highlighted.replace(/^(&gt;)\s+(.*)$/gm, '<span style="color: #d97706; font-weight: 600;">$1</span> <span style="color: #92400e; font-style: italic;">$2</span>');
+      highlighted = highlighted.replace(/^(&gt;)\s+(.*)$/gm, '<span style="color: #d97706; font-weight: 600;">$1</span> <span style="color: #588157; font-style: italic;">$2</span>');
       
       // Horizontal rule
       highlighted = highlighted.replace(/^---+$/gm, '<span style="color: #6b7280;">---</span>');
       
       // Dashed divider (topic separator)
-      highlighted = highlighted.replace(/^~~~+$/gm, '<span style="color: #8B6F47; border-bottom: 2px dashed #8B6F47; display: inline-block; padding-bottom: 2px;">~~~</span>');
+      highlighted = highlighted.replace(/^~~~+$/gm, '<span style="color: #73a372; border-bottom: 2px dashed #73a372; display: inline-block; padding-bottom: 2px;">~~~</span>');
       
       return highlighted;
     }
@@ -4722,7 +4748,7 @@ renderMathInElement(document.body, {
             } else if (text === '~~~' && node.tagName === 'P') {
               // Replace this paragraph with dashed <hr>
               const hr = document.createElement('hr');
-              hr.style.cssText = 'border: none; border-top: 2px dashed #8B6F47;';
+              hr.style.cssText = 'border: none; border-top: 2px dashed #73a372;';
               node.parentNode.replaceChild(hr, node);
               
               // Create new paragraph after hr and focus there
@@ -6053,8 +6079,8 @@ renderMathInElement(document.body, {
       currentCombineMode = 'local';
       combineLocalPanel.style.display = 'block';
       combineCoursePanel.style.display = 'none';
-      combineLocalTab.style.color = '#7c3aed';
-      combineLocalTab.style.borderBottomColor = '#7c3aed';
+      combineLocalTab.style.color = '#588157';
+      combineLocalTab.style.borderBottomColor = '#588157';
       combineCourseTab.style.color = '#6b7280';
       combineCourseTab.style.borderBottomColor = 'transparent';
     });
@@ -6065,8 +6091,8 @@ renderMathInElement(document.body, {
       combineCoursePanel.style.display = 'block';
       combineLocalTab.style.color = '#6b7280';
       combineLocalTab.style.borderBottomColor = 'transparent';
-      combineCourseTab.style.color = '#7c3aed';
-      combineCourseTab.style.borderBottomColor = '#7c3aed';
+      combineCourseTab.style.color = '#588157';
+      combineCourseTab.style.borderBottomColor = '#588157';
       renderCourseFilesList();
     });
 
@@ -6209,7 +6235,7 @@ renderMathInElement(document.body, {
           margin-bottom: 8px;
           cursor: pointer;
           user-select: none;
-          ${isSelected ? 'background: #eef2ff; border-color: #7c3aed;' : ''}
+          ${isSelected ? 'background: #eef2ff; border-color: #588157;' : ''}
         `;
 
         const checkbox = document.createElement('input');
@@ -6265,10 +6291,10 @@ renderMathInElement(document.body, {
           
           // Add separator between files (but not after the last one)
           if (i < uploadedFiles.length - 1) {
-            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #73a372;">';
             combinedHtml += '<p><br></p>';
             combinedHtml += '<p><br></p>';
-            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #73a372;">';
           }
         }
 
@@ -6299,10 +6325,10 @@ renderMathInElement(document.body, {
           
           // Add separator between files
           if (i < selectedCourseFiles.length - 1) {
-            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #73a372;">';
             combinedHtml += '<p><br></p>';
             combinedHtml += '<p><br></p>';
-            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #73a372;">';
           }
         }
 
@@ -6384,57 +6410,52 @@ renderMathInElement(document.body, {
   </div>
 
   <style>
-  #chat-widget { --chat-primary: #5d4037; --chat-secondary: #efebe9; --chat-border: #bcaaa4; --chat-text: #2c1810; --chat-text-light: #6d4c41; }
-  .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 5000; font-family: 'Open Sans', Arial, sans-serif; }
-  .chat-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--chat-primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); transition: all 0.3s ease; position: relative; }
-  .chat-icon:hover { background: #4e342e; box-shadow: 0 6px 16px rgba(93, 64, 55, 0.5); transform: scale(1.1); }
-  .chat-badge-count { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); }
-  .chat-notification-pulse { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background: #22c55e; border-radius: 50%; border: 2px solid white; opacity: 0; transition: opacity 0.3s ease; }
-  .chat-icon.has-notification .chat-notification-pulse { animation: pulse 0.6s ease-out; }
-  @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
-  
-  /* Chat links - зелен цвят */
-  .chat-messages a { color: #4ade80 !important; text-decoration: underline !important; }
-  .chat-messages a:hover { color: #22c55e !important; }
-  
-  .chat-panel { position: fixed; bottom: 90px; right: 20px; width: 400px; height: 500px; background: white; border-radius: 12px; box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-  .chat-panel.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
-  .chat-header { padding: 16px; border-bottom: 1px solid var(--chat-border); display: flex; justify-content: space-between; align-items: flex-start; background: var(--chat-primary); color: white; border-radius: 12px 12px 0 0; }
-  .chat-header-title h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; }
-  .chat-online-count { font-size: 12px; opacity: 0.9; }
-  .chat-close-btn { background: rgba(255, 255, 255, 0.2); border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: background 0.2s; }
-  .chat-close-btn:hover { background: rgba(255, 255, 255, 0.3); }
-  .chat-container { display: flex; flex: 1; min-height: 0; gap: 0; }
-  .chat-messages-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-  .chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
-  .chat-message { display: flex; gap: 8px; animation: slideIn 0.3s ease; }
-  @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-  .message-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; flex-shrink: 0; }
-  .message-content { flex: 1; display: flex; flex-direction: column; gap: 2px; }
-  .message-header { display: flex; gap: 8px; align-items: baseline; }
-  .message-author { font-weight: 600; font-size: 13px; color: var(--chat-text); }
-  .message-time { font-size: 11px; color: var(--chat-text-light); }
-  .message-text { font-size: 13px; color: var(--chat-text); word-break: break-word; background: var(--chat-secondary); padding: 8px 10px; border-radius: 8px; line-height: 1.4; }
-  .chat-active-users { width: 150px; padding: 12px 8px; border-left: 1px solid var(--chat-border); overflow-y: auto; background: #fafafa; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-  .active-users-header { font-size: 11px; font-weight: 600; color: var(--chat-text-light); padding: 0 4px; text-transform: uppercase; }
-  .active-user { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--chat-text); padding: 4px; border-radius: 6px; cursor: pointer; transition: background 0.2s; min-width: 0; }
-  .active-user:hover { background: var(--chat-secondary); }
-  .active-user-badge { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 11px; flex-shrink: 0; }
-  .active-user span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
-  .chat-input-area { display: flex; gap: 12px; padding: 12px; border-top: 1px solid var(--chat-border); background: #fafafa; }
-  .chat-input { flex: 0.98; border: 1px solid var(--chat-border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; transition: all 0.2s; resize: none; overflow: hidden; }
-  .chat-input:focus { border-color: var(--chat-primary); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
-  .chat-send-btn { width: 36px; height: 36px; border: none; background: var(--chat-primary); color: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
-  .chat-send-btn:hover { transform: scale(1.05); }
-  .chat-send-btn:active { transform: scale(0.95); }
-  .chat-user-info { padding: 8px 12px; font-size: 11px; color: var(--chat-text-light); border-top: 1px solid var(--chat-border); background: #fafafa; border-radius: 0 0 12px 12px; }
-  #current-user-name { color: var(--chat-primary); font-weight: 600; }
-  @media (max-width: 600px) { .chat-panel { width: calc(100vw - 40px); height: calc(100vh - 120px); bottom: 100px; right: 20px; left: 20px; max-width: none; } .chat-active-users { display: none; } .chat-widget { bottom: 10px; right: 10px; } .chat-icon { width: 48px; height: 48px; } }
-  .chat-messages::-webkit-scrollbar, .chat-active-users::-webkit-scrollbar { width: 6px; }
-  .chat-messages::-webkit-scrollbar-track, .chat-active-users::-webkit-scrollbar-track { background: transparent; }
-  .chat-messages::-webkit-scrollbar-thumb, .chat-active-users::-webkit-scrollbar-thumb { background: var(--chat-border); border-radius: 3px; }
-  .chat-messages::-webkit-scrollbar-thumb:hover, .chat-active-users::-webkit-scrollbar-thumb:hover { background: var(--chat-text-light); }
-  </style>
+#chat-widget { --chat-primary: #588157; --chat-secondary: #f0ede2; --chat-border: #a3b18a; --chat-text: #000000; --chat-text-light: #000000; }
+.chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 5000; font-family: 'Open Sans', Arial, sans-serif; }
+.chat-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--chat-primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); transition: all 0.3s ease; position: relative; }
+.chat-icon:hover { background: #588157; box-shadow: 0 6px 16px #f0ede2; transform: scale(1.1); }
+.chat-badge-count { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); }
+.chat-notification-pulse { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background: #22c55e; border-radius: 50%; border: 2px solid white; opacity: 0; transition: opacity 0.3s ease; }
+.chat-icon.has-notification .chat-notification-pulse { animation: pulse 0.6s ease-out; }
+@keyframes pulse { 0% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.5); } }
+.chat-panel { position: fixed; bottom: 90px; right: 20px; width: 400px; height: 500px; background: white; border-radius: 12px; box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+.chat-panel.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
+.chat-header { padding: 16px; border-bottom: 1px solid var(--chat-border); display: flex; justify-content: space-between; align-items: flex-start; background: var(--chat-primary); color: white; border-radius: 12px 12px 0 0; }
+.chat-header-title h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; }
+.chat-online-count { font-size: 12px; opacity: 0.9; }
+.chat-close-btn { background: rgba(255, 255, 255, 0.2); border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: background 0.2s; }
+.chat-close-btn:hover { background: rgba(255, 255, 255, 0.3); }
+.chat-container { display: flex; flex: 1; min-height: 0; gap: 0; }
+.chat-messages-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
+.chat-message { display: flex; gap: 8px; animation: slideIn 0.3s ease; }
+@keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.message-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; flex-shrink: 0; }
+.message-content { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+.message-header { display: flex; gap: 8px; align-items: baseline; }
+.message-author { font-weight: 600; font-size: 13px; color: var(--chat-text); }
+.message-time { font-size: 11px; color: var(--chat-text-light); }
+.message-text { font-size: 13px; color: var(--chat-text); word-break: break-word; background: #f0ede2; padding: 8px 10px; border-radius: 8px; line-height: 1.4; }
+.chat-active-users { width: 150px; padding: 12px 8px; border-left: 1px solid var(--chat-border); overflow-y: auto; background: #fafafa; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.active-users-header { font-size: 11px; font-weight: 600; color: var(--chat-text-light); padding: 0 4px; text-transform: uppercase; }
+.active-user { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--chat-text); padding: 4px; border-radius: 6px; cursor: pointer; transition: background 0.2s; min-width: 0; }
+.active-user:hover { background: var(--chat-secondary); }
+.active-user-badge { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 11px; flex-shrink: 0; }
+.active-user span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-size: 11px; }
+.chat-input-area { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--chat-border); background: #fafafa; }
+.chat-input { flex: 1; border: 1px solid var(--chat-border); border-radius: 8px; padding: 8px 12px; font-size: 13px; font-family: inherit; outline: none; transition: all 0.2s; resize: none; }
+.chat-input:focus { border-color: var(--chat-primary); box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1); }
+.chat-send-btn { width: 36px; height: 36px; border: none; background: var(--chat-primary); color: white; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; }
+.chat-send-btn:hover { transform: scale(1.05); }
+.chat-send-btn:active { transform: scale(0.95); }
+.chat-user-info { padding: 8px 12px; font-size: 11px; color: var(--chat-text-light); border-top: 1px solid var(--chat-border); background: #fafafa; border-radius: 0 0 12px 12px; }
+#current-user-name { color: var(--chat-primary); font-weight: 600; }
+@media (max-width: 600px) { .chat-panel { width: calc(100vw - 40px); height: calc(100vh - 120px); bottom: 100px; right: 20px; left: 20px; max-width: none; } .chat-active-users { display: none; } .chat-widget { bottom: 10px; right: 10px; } .chat-icon { width: 48px; height: 48px; } }
+.chat-messages::-webkit-scrollbar, .chat-active-users::-webkit-scrollbar { width: 6px; }
+.chat-messages::-webkit-scrollbar-track, .chat-active-users::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb, .chat-active-users::-webkit-scrollbar-thumb { background: var(--chat-border); border-radius: 3px; }
+.chat-messages::-webkit-scrollbar-thumb:hover, .chat-active-users::-webkit-scrollbar-thumb:hover { background: var(--chat-text-light); }
+</style>
 </body>
 
 </html>

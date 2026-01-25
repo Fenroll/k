@@ -46,7 +46,18 @@ function loadNameMappings() {
 
 // Apply name mapping if exists
 function getMappedName(folderName, nameMappings) {
+  if (nameMappings[folderName] && typeof nameMappings[folderName] === 'object') {
+    return nameMappings[folderName].title || folderName;
+  }
   return nameMappings[folderName] || folderName;
+}
+
+// Helper function to get custom text from mappings
+function getCustomText(folderName, nameMappings) {
+  if (nameMappings[folderName] && typeof nameMappings[folderName] === 'object') {
+    return nameMappings[folderName].customText || '';
+  }
+  return '';
 }
 
 // Рекурсивна функция за получаване на всички файлове
@@ -96,6 +107,14 @@ function readTextFile(filePath) {
   }
 }
 
+function replaceColors(content) {
+  return content
+    .replace(/#7c2d12/g, '#3a5a40')
+    .replace(/rgba\(146, 64, 14, 0\.1\)/g, 'rgba(218, 215, 205, 0.3)')
+    .replace(/#f59e0b/g, '#a3b18a')
+    .replace(/#78350f/g, '#3a5a40');
+}
+
 // Read URL from .url file
 function readUrlFile(filePath) {
   try {
@@ -127,7 +146,15 @@ function getAllCourses() {
   // Clean up ID mappings - remove entries for courses that no longer exist
   const originalCount = Object.keys(idMappings).length;
   Object.keys(idMappings).forEach(courseTitle => {
-    if (!subjects.includes(courseTitle)) {
+    // Check if the subject (stripped of archive prefix) still exists
+    let strippedCourseTitle = courseTitle;
+    if (strippedCourseTitle.startsWith('[АРХИВ] ')) {
+      strippedCourseTitle = strippedCourseTitle.replace('[АРХИВ] ', '');
+    }
+    if (!subjects.some(s => {
+      if (s.startsWith('[АРХИВ] ')) return s.replace('[АРХИВ] ', '') === strippedCourseTitle;
+      return s === strippedCourseTitle;
+    })) {
       console.log(`Removing ID for deleted course: ${courseTitle} (ID: ${idMappings[courseTitle]})`);
       delete idMappings[courseTitle];
     }
@@ -157,25 +184,38 @@ function getAllCourses() {
   const nextId = { value: nextIdValue };
 
   const courses = subjects.map((subject) => {
-    const subjectPath = path.join(ELEMENTS_DIR, subject);
+    const originalSubjectName = subject; // Store original subject name
+    let subjectForMapping = subject;
+    let isArchivedFolder = false;
+
+    // Check if the folder name indicates an archived course
+    if (subject.startsWith('[АРХИВ] ')) {
+      subjectForMapping = subject.replace('[АРХИВ] ', ''); // Strip prefix for mapping
+      isArchivedFolder = true;
+    }
+
+    const subjectPath = path.join(ELEMENTS_DIR, originalSubjectName); // Use original subject for path
     
     // Get or assign stable ID for this course
-    const { id } = getOrAssignId(subject, idMappings, nextId);
+    const { id } = getOrAssignId(subjectForMapping, idMappings, nextId); // Use stripped subject for ID mapping
     
-    // Apply name mapping for the course title
-    const displayTitle = getMappedName(subject, nameMappings);
+    // Apply name mapping for the course title and get custom text
+    const displayTitle = getMappedName(subjectForMapping, nameMappings);
+    const customText = getCustomText(subjectForMapping, nameMappings);
     
     const sections = fs.readdirSync(subjectPath, { withFileTypes: true })
       .filter(dirent => dirent.isDirectory())
       .map(dirent => dirent.name)
       .map(section => {
         const sectionPath = path.join(subjectPath, section);
-  return processSection(section, sectionPath, `files/${subject}/${section}`, nameMappings);
+  return processSection(section, sectionPath, `files/${originalSubjectName}/${section}`, nameMappings);
       });
     
     return {
       id: id,
       title: displayTitle,
+      customText: customText,
+      isArchived: isArchivedFolder, // Set isArchived flag here
       sections
     };
   });
@@ -266,6 +306,7 @@ function getAllCourses() {
           let content = '';
           if (fileExt === '.txt' || fileExt === '.md' || fileExt === '.html') {
             content = readTextFile(filePath);
+            content = replaceColors(content);
           }
           
           msgNotes.push({
@@ -323,24 +364,11 @@ function getAllCourses() {
     return result;
   }
   
-  // Save updated mappings
-  saveIdMappings(idMappings);
+  // The rest of the function remains the same, but the archiving logic is now based on isArchived flag
   
-  // Separate active and archived courses
-  const activeCourses = [];
-  const archivedCourses = [];
-  
-  courses.forEach(course => {
-    if (course.title.startsWith('[АРХИВ]')) {
-      // Remove [АРХИВ] prefix from display title for archived courses
-      course.title = course.title.replace('[АРХИВ] ', '');
-      course.isArchived = true;
-      archivedCourses.push(course);
-    } else {
-      course.isArchived = false;
-      activeCourses.push(course);
-    }
-  });
+  // Separate active and archived courses based on the isArchived flag
+  const activeCourses = courses.filter(course => !course.isArchived);
+  const archivedCourses = courses.filter(course => course.isArchived);
   
   // Sort active courses by ID number
   activeCourses.sort((a, b) => {
@@ -365,14 +393,12 @@ function getAllCourses() {
   });
   
   // Update idMappings with new IDs
-  if (Object.keys(courseIdMap).length > 0) {
-    Object.keys(idMappings).forEach(courseTitle => {
-      const oldId = idMappings[courseTitle];
-      if (courseIdMap[oldId]) {
-        idMappings[courseTitle] = courseIdMap[oldId];
-      }
-    });
-  }
+  Object.keys(idMappings).forEach(mappedSubject => {
+    const oldId = idMappings[mappedSubject];
+    if (courseIdMap[oldId]) {
+      idMappings[mappedSubject] = courseIdMap[oldId];
+    }
+  });
   
   // Sort archived courses by ID number
   archivedCourses.sort((a, b) => {
@@ -393,7 +419,7 @@ function getAllCourses() {
     }
   });
   
-  // Save updated mappings after defragmentation
+  // Save updated mappings after all defragmentation
   saveIdMappings(idMappings);
   
   console.log('Active courses after defragmentation:', activeCourses.map(c => `${c.id}: ${c.title}`).join(', '));

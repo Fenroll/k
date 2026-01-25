@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
   <script src="js/auth-guard.js"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -98,7 +100,7 @@
     top: 0;
     width: 4px;
     height: 100%;
-    background: #C56FD5;
+    background: #588157; /* Fern */
   }
   
   .sidebar-nav a:hover {
@@ -158,7 +160,7 @@
   .page-title {
     font-size: 30px !important;
     margin-left: 30px !important;
-    font-family: 'Noto Serif', serif;
+    font-family: 'Open Sans', serif;
     font-weight: 400;  /* Променено от 700 (bold) на 400 (normal) */
   }
   
@@ -197,7 +199,7 @@
   
   .info-panel-content h3 {
     font-size: 16px;
-    color: #7c3aed;
+    color: #588157;
     margin: 16px 0 8px 0;
     font-weight: 600;
   }
@@ -248,7 +250,7 @@
   }
   
   .week-btn {
-    background: #7c3aed;
+    background: #588157;
     color: #fff;
     border: none;
     padding: 10px 20px;
@@ -263,7 +265,7 @@
   }
   
   .week-btn:hover {
-    background: #6d28d9;
+    background: #344e41;
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(124,58,237,0.3);
   }
@@ -283,7 +285,7 @@
   }
   
   .week-number {
-    color: #7c3aed;
+    color: #588157;
     font-size: 14px;
     display: block;
     margin-top: 4px;
@@ -301,13 +303,13 @@
   }
   
   .schedule-table thead th {
-    background: #7c3aed;
+    background: #588157;
     color: #fff;
     padding: 16px 12px;
     text-align: center;
     font-weight: 600;
     font-size: 15px;
-    border-right: 1px solid #6d28d9;
+    border-right: 1px solid #344e41;
   }
   
   .schedule-table thead th .date-label {
@@ -347,7 +349,7 @@
     border-left: 4px solid #2563eb;
   }
   
-  .schedule-item.type-exercise:hover {http://127.0.0.1:5500/calendar.html
+  .schedule-item.type-exercise:hover {
     transform: translateY(-2px);
     box-shadow: 0 3px 8px rgba(37,99,235,0.35);
   }
@@ -373,7 +375,7 @@
   
   /* ImportantLecture - gradient between exercise blue and lecture gray */
   .schedule-item.type-important-lecture {
-    background: linear-gradient(135deg, #e5e7eb 0%, #a3a4f8 110%);
+    background: linear-gradient(135deg, #e5e7eb 0%, #dad7cd 110%);
     border-left: 4px solid #646c7e;
   }
   
@@ -386,19 +388,22 @@
     color: #374151;
   }
   
-  /* Колоквиум - vibrant purple */
-  .schedule-item.type-exam {
-    background: linear-gradient(135deg, #e9d5ff 0%, #d8b4fe 100%);
-    border-left: 4px solid #a855f7;
+ .schedule-item.type-exam {
+    /* Използваме по-светъл и наситен корал за по-добър контраст */
+    background: linear-gradient(135deg, #e2aa98 0%, #d87060 100%);
+    border-left: 4px solid #b34d41;
   }
   
   .schedule-item.type-exam:hover {
     transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(168,85,247,0.4);
+    /* Сянката е по-мека, за да не изглежда мръсно върху маслинения фон */
+    box-shadow: 0 4px 12px rgba(179, 77, 65, 0.4);
   }
   
   .schedule-item.type-exam .schedule-subject {
-    color: #7e22ce;
+    /* Текстът вече е в по-тъмен, „керемиден“ нюанс за перфектна четимост */
+    color: #7a2f26;
+    font-weight: 700;
   }
 
   /* Поправка на Колоквиум - orange/amber */
@@ -419,7 +424,7 @@
   /* Тест - vibrant green */
   .schedule-item.type-test {
     background: linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%);
-    border-left: 4px solid #10b981;
+    border-left: 4px solid #732c2c;
   }
   
   .schedule-item.type-test:hover {
@@ -533,7 +538,7 @@
     border-radius: 12px;
     padding: 12px 14px 14px 14px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-left: 4px solid #7c3aed;
+    border-left: 4px solid #588157;
     cursor: pointer;
     transition: all 0.2s ease;
   }
@@ -550,7 +555,7 @@
   }
   
   .exam-card-title {
-    color: #7c3aed;
+    color: #588157;
     font-size: 16px;
     font-weight: 700;
     margin: 0;
@@ -644,15 +649,15 @@
   
   .modal-title {
     margin: 0 0 8px 0;
-    color: #7c3aed;
+    color: #588157;
     font-size: 1.8em;
     font-weight: 700;
   }
   
   .modal-type {
     display: inline-block;
-    background: #ede9fe;
-    color: #6d28d9;
+    background: #dad7cd;
+    color: #344e41;
     padding: 4px 12px;
     border-radius: 4px;
     font-size: 0.9em;
@@ -675,7 +680,7 @@
     flex-shrink: 0;
     width: 20px;
     height: 20px;
-    fill: #7c3aed;
+    fill: #588157;
   }
   
   .modal-info-label {
@@ -1114,7 +1119,19 @@
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="text-editor.html">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg" alt="Editor" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Editor</span>
+              </a>
+            </li>
+            <li class="base-navigation-button" id="admin-button" style="display: none;">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Admin Panel</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="#" onclick="handleLogout()">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg" alt="Sign Out" />
                 <span class="link-text">Sign Out</span>
               </a>
@@ -1147,7 +1164,7 @@
           </button>
           
           <div class="week-info">
-            <div id="weekDateRange">Седмица 1</div>
+            <div id="weekDateRange">Седмица 1<span style="color: #588157;"></span></div>
             <span class="week-number" id="weekNumber">4 ноември - 8 ноември 2025</span>
           </div>
           
@@ -1339,15 +1356,23 @@
     // Load current information from Markdown file
     async function loadCurrentInfo() {
       try {
-        const response = await fetch('schedule-notes.md');
-        if (response.ok) {
-          const markdown = await response.text();
+        // Fetch content from Firebase Realtime Database
+        const dbRef = firebase.database().ref('scheduleNotes/content');
+        const snapshot = await dbRef.once('value');
+        const markdown = snapshot.val();
+
+        if (markdown) {
           const html = marked.parse(markdown);
           document.getElementById('infoContent').innerHTML = html;
+          document.getElementById('currentInfoPanel').style.display = 'block'; // Ensure panel is visible
+        } else {
+          // If no content in Firebase, hide the panel
+          document.getElementById('infoContent').innerHTML = ''; // Clear content
+          document.getElementById('currentInfoPanel').style.display = 'none';
         }
       } catch (error) {
-        console.error('Error loading current info:', error);
-        // Hide panel if file doesn't exist
+        console.error('Error loading current info from Firebase:', error);
+        // Hide panel if there's an error fetching from Firebase
         document.getElementById('currentInfoPanel').style.display = 'none';
       }
     }
@@ -1724,8 +1749,8 @@
         return; // Skip normal rendering
       } else if (weekType === 'exam') {
         // Exam period - show special screen
-        weekDateRangeEl.textContent = '📝 Изпитна сесия';
-        weekDateRangeEl.style.color = '#7c3aed';
+        weekDateRangeEl.textContent = 'Изпитна сесия';
+        weekDateRangeEl.style.color = '#588157';
         
         // Hide table, show exam screen
         scheduleTable.style.display = 'none';
@@ -1758,7 +1783,7 @@
         
         // Normal week - show week number from semester start
         weekDateRangeEl.textContent = `Седмица ${actualWeekNumber}`;
-        weekDateRangeEl.style.color = '#374151';
+        weekDateRangeEl.style.color = '#588157';
       }
       
       // Show date range
@@ -1941,6 +1966,24 @@
       document.body.style.overflow = '';
     }
     
+    function handleLogout() {
+      localStorage.removeItem('loggedInUser');
+      window.location.href = 'login.html';
+    }
+
+    // Admin button visibility logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const adminButton = document.getElementById('admin-button');
+      if (adminButton && window.currentUserPromise) {
+        window.currentUserPromise.then(user => {
+          if (user && user.isAdmin) {
+            adminButton.style.display = 'list-item'; // Or 'block', depending on parent element
+          }
+        }).catch(error => {
+          console.error("Error checking admin status for button visibility:", error);
+        });
+      }
+    });
     // Render exams list
     function renderExams() {
       const examsList = document.getElementById('examsList');
@@ -2100,7 +2143,7 @@
 <!-- Chat Widget HTML -->
 <div id="chat-widget" class="chat-widget">
   <button class="chat-icon" id="chat-toggle" title="Отвори чат">
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2">
       <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
     </svg>
     <span class="chat-badge-count" style="display: none;">0</span>
@@ -2143,10 +2186,10 @@
 </div>
 
 <style>
-#chat-widget { --chat-primary: #5d4037; --chat-secondary: #efebe9; --chat-border: #bcaaa4; --chat-text: #2c1810; --chat-text-light: #6d4c41; }
+#chat-widget { --chat-primary: #588157; --chat-secondary: #f0ede2; --chat-border: #a3b18a; --chat-text: #000000; --chat-text-light: #000000; }
 .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 5000; font-family: 'Open Sans', Arial, sans-serif; }
 .chat-icon { width: 56px; height: 56px; border-radius: 50%; background: var(--chat-primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3); transition: all 0.3s ease; position: relative; }
-.chat-icon:hover { background: #4e342e; box-shadow: 0 6px 16px rgba(93, 64, 55, 0.5); transform: scale(1.1); }
+.chat-icon:hover { background: #588157; box-shadow: 0 6px 16px #f0ede2; transform: scale(1.1); }
 .chat-badge-count { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; border: 2px solid white; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3); }
 .chat-notification-pulse { position: absolute; top: -6px; right: -6px; width: 16px; height: 16px; background: #22c55e; border-radius: 50%; border: 2px solid white; opacity: 0; transition: opacity 0.3s ease; }
 .chat-icon.has-notification .chat-notification-pulse { animation: pulse 0.6s ease-out; }
@@ -2168,7 +2211,7 @@
 .message-header { display: flex; gap: 8px; align-items: baseline; }
 .message-author { font-weight: 600; font-size: 13px; color: var(--chat-text); }
 .message-time { font-size: 11px; color: var(--chat-text-light); }
-.message-text { font-size: 13px; color: var(--chat-text); word-break: break-word; background: var(--chat-secondary); padding: 8px 10px; border-radius: 8px; line-height: 1.4; }
+.message-text { font-size: 13px; color: var(--chat-text); word-break: break-word; background: #f0ede2; padding: 8px 10px; border-radius: 8px; line-height: 1.4; }
 .chat-active-users { width: 150px; padding: 12px 8px; border-left: 1px solid var(--chat-border); overflow-y: auto; background: #fafafa; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
 .active-users-header { font-size: 11px; font-weight: 600; color: var(--chat-text-light); padding: 0 4px; text-transform: uppercase; }
 .active-user { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--chat-text); padding: 4px; border-radius: 6px; cursor: pointer; transition: background 0.2s; min-width: 0; }

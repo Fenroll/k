@@ -123,7 +123,7 @@
       display: none;
       align-items: center;
       justify-content: center;
-      background: #c46dd8;
+      background: #a3b18a;
       color: #fff;
       height: 48px;
       position: absolute;
@@ -144,7 +144,7 @@
       width: 0;
       height: 0;
       border-left: 28px solid transparent;
-      border-top: 22px solid #7c3aed;
+      border-top: 22px solid #588157;
       z-index: -1;
     }
     .right-overlay.open .overlay-ribbon {
@@ -207,7 +207,7 @@
     .event-info-overlay h1 {
       font-size: 22px;
       margin: 0 0 12px 0;
-      color: #1565c0;
+      color: #588157;
       font-weight: 600;
       border-bottom: 2px solid #1565c0;
       padding-bottom: 8px;
@@ -215,7 +215,7 @@
     .event-info-overlay h2 {
       font-size: 18px;
       margin: 16px 0 8px 0;
-      color: #1565c0;
+      color: #588157;
       font-weight: 600;
     }
     .event-info-overlay ul {
@@ -385,7 +385,7 @@
 }
 
 .text-card-big {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: #588157;
   border-radius: 16px;
   padding: 24px;
   min-height: 180px;
@@ -399,16 +399,7 @@
   overflow: hidden;
 }
 
-.text-card-big::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%);
-  pointer-events: none;
-}
+
 
 .text-card-big:hover {
   transform: translateY(-8px) scale(1.03);
@@ -501,7 +492,7 @@
 
 .text-modal-title {
   margin: 0 0 24px 0;
-  color: #7c3aed;
+  color: #588157;
   font-size: 1.8em;
   font-weight: 700;
 }
@@ -515,7 +506,7 @@
 
 /* MSG Notes - Full width sticky note style */
 .msg-note {
-  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  background: #cbdfb2;
   border-left: 4px solid #f59e0b;
   border-radius: 8px;
   padding: 10px 14px;
@@ -533,7 +524,7 @@
 }
 
 .msg-note-html {
-  border-left: 4px solid #7c3aed !important;
+  border-left: 4px solid #588157 !important;
   box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15) !important;
 }
 
@@ -801,25 +792,36 @@
   }
   body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
     .base-courses-header-container { background: #262626; color: #fff; padding: 1rem; }
-  .page-title { font-size: 30px !important; margin-left: 30px !important; font-family: 'Noto Serif', serif; font-weight: 700; }
+  .page-title { font-size: 30px !important; margin-left: 30px !important; font-family: 'Open Sans', serif; font-weight: 700; }
     .course-org-list { margin: 2rem 23px 2rem 33px; }
+    #dynamic-course-list {
+      display: block; /* Changed from grid */
+    }
     .element-card {
   background: #fff;
-  margin-bottom: 14px;
-  display: flex;
-  align-items: stretch;
-  border-left: 10px solid #1976d2;
-  width: calc(100% - 25px);
-  height: 105px;
-  outline: 1.5px solid #d3cdcd;
-  outline-offset: -1.5px;
+  border-left: 8px solid #1976d2;
+  border-top: 1px solid #ccc;
+  border-right: 1px solid #ccc;
+  border-bottom: 1px solid #ccc;
+  width: 100%;
+  
+  height: 60px;
   position: relative;
-  border-bottom: none;
   z-index: 0;
   margin-right: 0;
   max-width: none;
   padding: 0;
-  margin-left: 0;
+  border-radius: 3px; /* Changed from 0 to 3px */
+  margin-bottom: 10px;
+    }
+    .element-card::after {
+        content: '';
+        position: absolute;
+        left: 0px; /* Positioned at the end of the 8px border */
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background-color: #ccc;
     }
     .element-card:hover::after {
   content: '';
@@ -838,30 +840,33 @@
       background-position: center;
     }
     .element-details {
-          padding: 0.6rem 1.2rem 0.6rem 0.8rem;
-          flex: 1;
           display: flex;
           flex-direction: row;
-          justify-content: space-between;
+          justify-content: flex-start;
           align-items: center;
-          height: 100%;
           text-align: left;
+          padding-right: 4rem;
+          padding-left: 10px; /* Added for separator */
+          width: 100%;
+          height: 100%;
+          box-sizing: border-box;
     }
         .element-details-content {
           display: flex;
           flex-direction: column;
-          align-items: flex-start;
-          flex: 1;
-          min-width: 0;
+          align-items: flex-start; /* Changed from center */
+          text-align: left; /* Changed from center */
           position: relative;
-          top: -10px;
+          padding: 0 1.2rem 0 0.8rem;
+          gap: 2px; /* Added */
         }
         .element-details .favorite {
           margin-left: 24px;
           align-self: flex-start;
         }
-  .course-title { font-size: 14px; color: #262626; text-decoration: none; font-weight: 525; }
-  .course-id { color: #888888; font-size: 14px; margin-bottom: 0.5rem; font-weight: 525; }
+  .course-title { font-size: 20px; color: #262626; text-decoration: none; font-weight: 525; }
+  .course-custom-text { font-size: 12px; color: #666; }
+  .course-id { color: #888888; font-size: 14px; margin-bottom: 0.5rem; font-weight: 525; display: none !important; }
   .status-bar { margin-top: 0.5rem; font-size: 0.88rem; display: flex; align-items: center; gap: 8px; }
   .status-divider { display: inline-block; width: 1.5px; height: 16px; background: #444; margin: 0 8px; border-radius: 1px; vertical-align: middle; }
   .status-open { font-size: 12px; font-weight: 400; color: #666666; }
@@ -876,7 +881,15 @@
   height: 100%;
   padding: 0 1.2rem;
     }
-    .favorite { background: none; border: none; cursor: pointer; margin-left: 8px; }
+    .favorite { 
+        background: none; 
+        border: none; 
+        cursor: pointer; 
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        z-index: 2;
+    }
     .base-footer { background: #262626; color: #fff; padding: 1.2rem 1rem; text-align: center; font-size: 1em; border-top: 1px solid #222; }
   .base-footer .footer-links { display: inline-block; margin-left: 1.5em; font-size: 12px !important; }
   .base-footer .footer-links a { font-size: 12px !important; }
@@ -963,7 +976,7 @@
       top: 0;
       width: 4px;
       height: 100%;
-      background: #C56FD5;
+      background: #588157;
       border-radius: 0;
     }
     .sidebar-nav a:hover {
@@ -1067,8 +1080,20 @@
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg" alt="Sign Out" />
-                <span class="link-text">Sign Out</span>
+                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg" alt="Editor" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Editor</span>
+              </a>
+            </li>
+            <li class="base-navigation-button" id="admin-button" style="display: none;">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Admin Panel</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="#" onclick="handleLogout()">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg" alt="Logout" />
+                <span class="link-text">Logout</span>
               </a>
             </li>
           </ul>
@@ -1085,109 +1110,10 @@
       <header class="main-header">
         <h1 class="page-title">Courses</h1>
       </header>
-      <section class="filter-bar">
-  <div class="filter-toggle-buttons" style="display: flex; align-items: center; height: 42px; margin-right: -15px;">
-    <div style="position: relative; display: flex;">
-      <button class="toggle-btn left-btn selected" type="button" style="width: 33px; height: 33px; border: 1.5px solid #bdbdbd; border-right: none; background: #fff; display: flex; align-items: center; justify-content: center; border-radius: 0; outline: none; cursor: pointer;">
-        <img src="svg/icon-sorta.svg" width="18" height="18" alt="Toggle 1" />
-      </button>
-      <div style="position:absolute; top:0; bottom:0; left:50%; width:1px; background:#bdbdbd; transform:translateX(-50%);"></div>
-      <button class="toggle-btn right-btn" type="button" style="width: 33px; height: 33px; border: 1.5px solid #bdbdbdbd; border-left: none; background: #fff; display: flex; align-items: center; justify-content: center; border-radius: 0; outline: none; cursor: pointer;">
-        <img src="svg/icon-sortb.svg" width="18" height="18" alt="Toggle 2" />
-      </button>
-    </div>
-  </style>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const leftBtn = document.querySelector('.toggle-btn.left-btn');
-      const rightBtn = document.querySelector('.toggle-btn.right-btn');
-      leftBtn.addEventListener('click', function() {
-        leftBtn.classList.add('selected');
-        rightBtn.classList.remove('selected');
-      });
-      rightBtn.addEventListener('click', function() {
-        rightBtn.classList.add('selected');
-        leftBtn.classList.remove('selected');
-      });
-    });
-  </script>
-  </div>
-  <div class="filter-search-group">
-    <span class="filter-label">Search your courses</span>
-    <div class="filter-search-input-wrapper">
-      <input id="courses-overview-filter-search" type="text" class="filter-search-input" placeholder=" " />
-      <span class="filter-search-icon" style="left:10px;top:calc(50% + 5px);transform:translateY(-50%);pointer-events:none;position:absolute;z-index:2;">
-          <img src="svg/icon-search.svg" width="18" height="18" alt="Search" />
-      </span>
-    </div>
-  </div>
-  <div class="filter-select-group">
-    <span class="filter-label">Terms</span>
-    <div class="filter-select-wrapper">
-      <svg class="filter-select-arrow arrow-down" width="18" height="18" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-      <svg class="filter-select-arrow arrow-up" width="18" height="18" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
-      <select id="courses-overview-filter-terms" class="filter-select">
-        <option>All Terms</option>
-      </select>
-    </div>
-  </div>
-  <div class="filter-select-group">
-    <span class="filter-label">Filters</span>
-    <div class="filter-select-wrapper">
-    <svg class="filter-select-arrow arrow-down" width="18" height="18" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-    <svg class="filter-select-arrow arrow-up" width="18" height="18" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
-    <select id="courses-overview-filter-filters" class="filter-select">
-      <option>All courses</option>
-       <option>Courses I am taking</option>
-        <option>Open courses</option>
-         <option>Completed courses</option>
-    </select>
-  </div>
-  </div>
-  <div class="filter-select-group" style="flex-direction: row; align-items: center;">
-    <div class="filter-select-wrapper" style="flex:1;">
-    <select id="courses-overview-filter-pagesize" class="filter-select">
-      <option selected>25</option>
-      <option>50</option>
-      <option>100</option>
-    </select>
-    <div class="filter-select-divider"></div>
-    <svg class="filter-select-arrow arrow-down" width="18" height="18" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z"/></svg>
-    <svg class="filter-select-arrow arrow-up" width="18" height="18" viewBox="0 0 24 24"><path d="M7 14l5-5 5 5z"/></svg>
-  <style>
-    .filter-select-wrapper {
-      overflow: visible;
-      position: relative;
-    }
-    .filter-select-divider {
-      position: absolute;
-      top: 20%;
-      bottom: 20%;
-      right: 36px;
-      width: 1.5px;
-      background: #ccc;
-      z-index: 3;
-      border-radius: 2px;
-      height: 60%;
-      content: '';
-      display: block;
-    }
-    #courses-overview-filter-pagesize.filter-select {
-         border-color: #bbb;
-         box-shadow: 0 0 0 0 #ddd;
-    }
-    .filter-select-wrapper .filter-select-arrow {
-      right: 10px;
-      max-width: 18px;
-    }
-  </style>
-  </div>
-    <span style="margin-left: 8px; color: #444; font-size: 0.95em;">items per page</span>
-  </div>
-</section>
-<div id="results-count" style="font-size: 14px; color: #444; font-weight: 400; margin: 0 0 1.2rem 36px; font-family: 'Open Sans', Arial, sans-serif !important; text-shadow:0.5px 0 0 #888;">5 results</div>
+
+
   <div class="course-org-list" id="course-org-list">
-  <div class="others-label" style="font-size: 1.18em; color: #222; font-weight: 400; margin-bottom: 0.5rem; margin-left: 2px; font-family: 'Open Sans', Arial, sans-serif !important;">Others</div>
+    
   <div id="dynamic-course-list"></div>
 </div>
 <script>
@@ -1221,19 +1147,19 @@ function generateColorFromId(id, isArchived = false) {
   
   // Predefined color palette for better aesthetics
   const colors = [
-    '#1976d2', // Blue
+    '#588157', // Fern
     '#43a047', // Green
     '#fbc02d', // Yellow
-    '#8e24aa', // Purple
+    '#588157', // Fern
     '#e53935', // Red
     '#ff5722', // Orange
     '#009688', // Teal
     '#795548', // Brown
     '#607d8b', // Blue Grey
     '#f57c00', // Orange (darker)
-    '#7b1fa2', // Purple (darker)
+    '#3a5a40', // Hunter Green
     '#388e3c', // Green (darker)
-    '#1565c0', // Blue (darker)
+    '#3a5a40', // Hunter Green
     '#c62828', // Red (darker)
     '#00695c', // Teal (darker)
     '#5d4037'  // Brown (darker)
@@ -1308,24 +1234,17 @@ function renderCourseList() {
         <div class="element-details">
           <div class="element-details-content">
             <div class="course-id" style="margin-bottom:8px; font-weight:450; text-shadow:0.5px 0 0 #888;">${course.id}</div>
-            <div class="course-title" style="margin-bottom:8px; font-weight:450; text-shadow:0.5px 0 0 #888;">${course.title}</div>
-            <div class="status-bar" style="margin-top:0;gap:2px;line-height:1.2;display:flex;align-items:center;">
-              <span class="status-open">Open</span>
-              <span class="status-divider" style="margin:0 3px;"></span>
-              <span class="status-instructors">Multiple Instructors</span>
-              <span class="status-divider" style="margin:0 3px;"></span>
-              <span class="status-moreinfo">More info</span>
+            <div class="course-title" style="font-weight:450; text-shadow:0.5px 0 0 #888;">${course.title}</div>
+            <div class="course-custom-text">${course.customText}</div>
             </div>
           </div>
           <button class="favorite" title="Add to your favorites">
             <svg class="svg-icon small-icon" focusable="false" aria-hidden="true">
             </svg>
           </button>
-        </div>
       `;
-      
       // Apply the color as border-left style
-      card.style.borderLeft = "10px solid " + borderColor;
+      card.style.borderLeft = "8px solid " + borderColor;
       
       list.appendChild(card);
     });
@@ -1334,12 +1253,13 @@ function renderCourseList() {
     if (archivedCourses.length > 0) {
       const separator = document.createElement('div');
       separator.className = 'archive-separator';
+      separator.style.gridColumn = '1 / -1';
       list.appendChild(separator);
       
       const archiveLabel = document.createElement('div');
       archiveLabel.className = 'others-label';
-      archiveLabel.style.cssText = 'font-size: 1.18em; color: #222; font-weight: 400; margin-bottom: 0.5rem; margin-left: 2px; font-family: "Open Sans", Arial, sans-serif !important;';
-      archiveLabel.textContent = 'Архив';
+      archiveLabel.style.cssText = 'font-size: 1.5em; color: #222; font-weight: 400; margin-bottom: 0.5rem; margin-left: 2px; font-family: "Open Sans", Arial, sans-serif !important; grid-column: 1 / -1;';
+      archiveLabel.textContent = 'Archived Courses';
       list.appendChild(archiveLabel);
       
       // Render archived courses
@@ -1355,24 +1275,18 @@ function renderCourseList() {
           <div class="element-details">
             <div class="element-details-content">
               <div class="course-id" style="margin-bottom:8px; font-weight:450; text-shadow:0.5px 0 0 #888;">${course.id}</div>
-              <div class="course-title" style="margin-bottom:8px; font-weight:450; text-shadow:0.5px 0 0 #888;">${course.title}</div>
-              <div class="status-bar" style="margin-top:0;gap:2px;line-height:1.2;display:flex;align-items:center;">
-                <span class="status-open">Archived</span>
-                <span class="status-divider" style="margin:0 3px;"></span>
-                <span class="status-instructors">Multiple Instructors</span>
-                <span class="status-divider" style="margin:0 3px;"></span>
-                <span class="status-moreinfo">More info</span>
+              <div class="course-title" style="font-weight:450; text-shadow:0.5px 0 0 #888;">${course.title}</div>
+              <div class="course-custom-text">${course.customText}</div>
               </div>
             </div>
             <button class="favorite" title="Add to your favorites">
               <svg class="svg-icon small-icon" focusable="false" aria-hidden="true">
               </svg>
             </button>
-          </div>
         `;
         
         // Apply the color as border-left style
-        card.style.borderLeft = "10px solid " + borderColor;
+        card.style.borderLeft = "8px solid " + borderColor;
         
         list.appendChild(card);
       });
@@ -1419,6 +1333,25 @@ document.addEventListener('DOMContentLoaded', function() {
       });
       updateResultsCount();
     }
+    function handleLogout() {
+      localStorage.removeItem('loggedInUser');
+      window.location.href = 'login.html';
+    }
+
+    // Admin button visibility logic
+    document.addEventListener('DOMContentLoaded', function() {
+      const adminButton = document.getElementById('admin-button');
+      if (adminButton && window.currentUserPromise) {
+        window.currentUserPromise.then(user => {
+          if (user && user.isAdmin) {
+            adminButton.style.display = 'list-item'; // Or 'block', depending on parent element
+          }
+        }).catch(error => {
+          console.error("Error checking admin status for button visibility:", error);
+        });
+      }
+    });
+
     if (searchInput) {
       searchInput.addEventListener('input', filterCourses);
     }
@@ -1537,7 +1470,7 @@ document.addEventListener('DOMContentLoaded', function() {
       vertical-align: middle;
     }
     .filter-select:focus {
-      border-color: #1976d2;
+      border-color: #588157;
     }
     .filter-select-arrow {
       position: absolute;
@@ -1904,11 +1837,11 @@ function toggleFileDropdown(sectionId) {
    ============================================ */
 
 #chat-widget {
-  --chat-primary: #5d4037;
-  --chat-secondary: #efebe9;
-  --chat-border: #bcaaa4;
-  --chat-text: #2c1810;
-  --chat-text-light: #6d4c41;
+  --chat-primary: #588157;
+  --chat-secondary: #f0ede2;
+  --chat-border: #a3b18a;
+  --chat-text: #000000;
+  --chat-text-light: #000000;
 }
 
 /* Container */
@@ -1932,13 +1865,13 @@ function toggleFileDropdown(sectionId) {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+  box-shadow: 0 4px 12px rgba(58, 90, 64, 0.3);
   transition: all 0.3s ease;
   position: relative;
 }
 
 .chat-icon:hover {
-  background: #4e342e;
+  background: #344e41;
   box-shadow: 0 6px 16px rgba(93, 64, 55, 0.5);
   transform: scale(1.1);
 }
@@ -2640,8 +2573,8 @@ function toggleFileDropdown(sectionId) {
         sectionContent += `<section style="background:#f7f4fa; border-radius:10px; padding:16px 18px 10px 18px; box-shadow:0 1px 6px #e3e3e3; margin-bottom:12px;">`;
         // Title БЕЗ dropdown - винаги отворени
         sectionContent += `<div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; min-width:0;">`;
-        sectionContent += `<svg width="20" height="20" viewBox="0 0 24 24" fill="#7c3aed" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
-        sectionContent += `<h3 style="margin:0; color:#7c3aed; font-size:1.1em; font-weight:600; word-break:break-word; overflow-wrap:break-word; min-width:0;">${section.name}</h3>`;
+        sectionContent += `<svg width="20" height="20" viewBox="0 0 24 24" fill="#588157" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+        sectionContent += `<h3 style="margin:0; color:#588157; font-size:1.1em; font-weight:600; word-break:break-word; overflow-wrap:break-word; min-width:0;">${section.name}</h3>`;
         sectionContent += `</div>`;
       } 
       // Nested levels - simple indent style
@@ -2681,14 +2614,14 @@ function toggleFileDropdown(sectionId) {
           const noteId = `msg-note-${sectionId}-${idx}`;
           const isHtml = /\.html$/i.test(note.path || '');
           sectionContent += `
-            <div class="msg-note ${isHtml ? 'msg-note-html' : ''}" onclick="${isHtml ? `openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;` : `toggleMsgNote('${noteId}')`}" data-note-path="${note.path}" style="${isHtml ? 'background: linear-gradient(135deg, #ddd6fe 0%, #c4b5fd 100%); cursor: pointer;' : ''}">
+            <div class="msg-note ${isHtml ? 'msg-note-html' : ''}" onclick="${isHtml ? `openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;` : `toggleMsgNote('${noteId}')`}" data-note-path="${note.path}">
               <div class="msg-note-header">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="${isHtml ? '#7c3aed' : '#f59e0b'}" style="flex-shrink:0;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="${isHtml ? '#588157' : '#f59e0b'}" style="flex-shrink:0;">
                   <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
                 </svg>
-                <span class="msg-note-title" style="${isHtml ? 'color: #6d28d9;' : ''}">${isHtml ? removeOrderPrefix(note.name).replace(/\.html$/i, '') : removeOrderPrefix(note.name)}</span>
+                <span class="msg-note-title" style="${isHtml ? 'color: #588157;' : ''}">${isHtml ? removeOrderPrefix(note.name).replace(/\.html$/i, '') : removeOrderPrefix(note.name)}</span>
                 ${!isHtml && /\.md$/i.test(note.path || '') ? `<a href="#" title="Отвори на цял екран" onclick="event.stopPropagation(); openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" style="display:inline-flex; align-items:center; justify-content:center; margin-left:auto; margin-right:6px; text-decoration:none; flex-shrink:0;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#588157" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>
                 </a>` : ''}
                 ${!isHtml ? `<svg class="msg-note-arrow" width="18" height="18" viewBox="0 0 24 24">
                   <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="#f59e0b"/>
@@ -2811,7 +2744,7 @@ function toggleFileDropdown(sectionId) {
           if (fileName.endsWith('.url') && file.url) {
             // Open the URL directly
             const displayName = file.name.replace('.url', '');
-            sectionContent += `<a href="${file.url}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(displayName)}</a></li>`;
+            sectionContent += `<a href="${file.url}" target="_blank" style="color:#588157; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#588157'; this.style.textDecoration='underline'" onmouseout="this.style.color='#588157'; this.style.textDecoration='none'">${removeOrderPrefix(displayName)}</a></li>`;
           } 
           // Check if it's a viewable Office file (Word, PowerPoint, Excel)
       else if (fileName.endsWith('.docx') || fileName.endsWith('.pptx') || fileName.endsWith('.ppt') || 
@@ -2821,24 +2754,24 @@ function toggleFileDropdown(sectionId) {
             const fileUrlWithCacheBust = `https://fenroll.github.io/k/${file.path}?v=${timestamp}`;
             const fullUrl = encodeURIComponent(fileUrlWithCacheBust);
             const viewerUrl = `https://docs.google.com/viewer?url=${fullUrl}&embedded=true`;
-            const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
-            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="${viewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
+            const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#588157" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
+            sectionContent += `<a href="${file.path}" download style="color:#588157; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#588157'; this.style.textDecoration='underline'" onmouseout="this.style.color='#588157'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="${viewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#588157'" onmouseout="this.querySelector('svg').style.fill='#588157'">${eyeIcon}</a></li>`;
           }
           // Markdown files: open in our full-screen viewer; place eye icon next to title
           else if (fileName.endsWith('.md')) {
             const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(file.path)}`;
-            const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
-            sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="${mdViewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
+            const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#588157" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
+            sectionContent += `<a href="${file.path}" download style="color:#588157; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#588157'; this.style.textDecoration='underline'" onmouseout="this.style.color='#588157'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="${mdViewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#588157'" onmouseout="this.querySelector('svg').style.fill='#588157'">${eyeIcon}</a></li>`;
           }
          else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.bmp') || fileName.endsWith('.webp') || fileName.endsWith('.svg')) {
-  const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#6d28d9" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z\"/></svg>`;
+  const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#588157" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z\"/></svg>`;
   const allImages = section.files.filter(f => /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(f.name));
   const currentIndex = allImages.findIndex(f => f.name === file.name);
   window._currentImageList = allImages;
-  sectionContent += `<a href="${file.path}" download style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="#" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0;" onclick="event.preventDefault(); showImageModal('${file.path.replace(/'/g, '\\\'')}','${removeOrderPrefix(file.name).replace(/'/g, '\\\'')}', window._currentImageList, ${currentIndex})" onmouseover="this.querySelector('svg').style.fill='#7c3aed'" onmouseout="this.querySelector('svg').style.fill='#6d28d9'">${eyeIcon}</a></li>`;
+  sectionContent += `<a href="${file.path}" download style="color:#588157; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#588157'; this.style.textDecoration='underline'" onmouseout="this.style.color='#588157'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="#" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0;" onclick="event.preventDefault(); showImageModal('${file.path.replace(/'/g, '\\\'')}','${removeOrderPrefix(file.name).replace(/'/g, '\\\'')}', window._currentImageList, ${currentIndex})" onmouseover="this.querySelector('svg').style.fill='#588157'" onmouseout="this.querySelector('svg').style.fill='#588157'">${eyeIcon}</a></li>`;
 }
           else {
-            sectionContent += `<a href="${file.path}" target="_blank" style="color:#6d28d9; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#7c3aed'; this.style.textDecoration='underline'" onmouseout="this.style.color='#6d28d9'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a></li>`;
+            sectionContent += `<a href="${file.path}" target="_blank" style="color:#588157; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#588157'; this.style.textDecoration='underline'" onmouseout="this.style.color='#588157'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a></li>`;
           }
         });
         sectionContent += '</ul>';
@@ -3000,7 +2933,7 @@ function toggleFileDropdown(sectionId) {
             <style>
               body { font-family: 'Open Sans', Arial, sans-serif; max-width: 1400px; margin: 0 auto; padding: 16px; background: #fafafa; }
               h1, h2, h3 { color: #333; }
-              a { color: #6d28d9; }
+              a { color: #588157; }
             </style>
           </head>
           <body>
@@ -3198,10 +3131,10 @@ function toggleFileDropdown(sectionId) {
         navHtml = `<div style="display:flex;justify-content:center;gap:24px;margin-top:18px;">
           <button onclick="event.stopPropagation(); showImageModal('` +
             allImages[(currentIndex - 1 + allImages.length) % allImages.length].path.replace(/'/g, '\\') + `', '` +
-            allImages[(currentIndex - 1 + allImages.length) % allImages.length].name.replace(/'/g, '\\') + `', window._currentImageList, ((${currentIndex} - 1 + window._currentImageList.length) % window._currentImageList.length))" style="padding:8px 18px;font-size:1.1em;border-radius:6px;border:none;background:#ede9fe;color:#6d28d9;cursor:pointer;">&#8592; Предишна</button>
+            allImages[(currentIndex - 1 + allImages.length) % allImages.length].name.replace(/'/g, '\\') + `', window._currentImageList, ((${currentIndex} - 1 + window._currentImageList.length) % window._currentImageList.length))" style="padding:8px 18px;font-size:1.1em;border-radius:6px;border:none;background:#dad7cd;color:#588157;cursor:pointer;">&#8592; Предишна</button>
           <button onclick="event.stopPropagation(); showImageModal('` +
             allImages[(currentIndex + 1) % allImages.length].path.replace(/'/g, '\\') + `', '` +
-            allImages[(currentIndex + 1) % allImages.length].name.replace(/'/g, '\\') + `', window._currentImageList, ((${currentIndex} + 1) % window._currentImageList.length))" style="padding:8px 18px;font-size:1.1em;border-radius:6px;border:none;background:#ede9fe;color:#6d28d9;cursor:pointer;">Следваща &#8594;</button>
+            allImages[(currentIndex + 1) % allImages.length].name.replace(/'/g, '\\') + `', window._currentImageList, ((${currentIndex} + 1) % window._currentImageList.length))" style="padding:8px 18px;font-size:1.1em;border-radius:6px;border:none;background:#dad7cd;color:#588157;cursor:pointer;">Следваща &#8594;</button>
         </div>`;
       }
       modalContent.innerHTML = `
