@@ -2789,8 +2789,8 @@ function toggleFileDropdown(sectionId) {
                 } else if (hostname.includes('github.com')) {
                   faviconUrl = 'https://github.githubassets.com/favicons/favicon.png';
                 } else if (hostname.includes('blackboard.lol')) {
-                  // Use blackboard.lol favicon for all blackboard.lol subdomains
-                  faviconUrl = 'https://blackboard.lol/favicon.ico';
+                  // Use favicon.svg from root for all blackboard.lol subdomains as requested
+                  faviconUrl = 'favicon.svg';
                 } else {
                   // Use Google Favicon Service for other domains
                   faviconUrl = `https://www.google.com/s2/favicons?domain=${hostname}&sz=32`;
