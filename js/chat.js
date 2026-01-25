@@ -492,7 +492,7 @@ class ChatUIManager {
     this.isOpen = false;
     this.autoScroll = true;
     this.lastReadMessageId = localStorage.getItem(`lastReadMessage_${documentId}`) || null;
-    this.notificationsDisabled = localStorage.getItem(`notificationsDisabled_${documentId}`) !== 'false';
+    this.notificationsDisabled = localStorage.getItem(`notificationsDisabled_${documentId}`) === 'true';
     this.unreadCount = 0;
     this.lastMessages = [];  // Съхранявам предишни съобщения
     this.userNameMappings = {}; // Карта за стари към нови имена
@@ -686,7 +686,7 @@ class ChatUIManager {
 
         // Trigger notification only if chat is closed and message is not from self
         if (!this.isOpen && !isMyMessage) {
-            this.showNotification();
+            // this.showNotification(); // Removed: user requested to remove notification animation
         }
       });
 
