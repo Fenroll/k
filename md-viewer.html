@@ -251,8 +251,49 @@
       .markdown-body { font-size: 0.83em; font-weight: 300; }
       .table-scroll table { font-size: 0.83em; }
     }
+    /* Responsive images: prevent too small images on mobile */
+    .markdown-body img {
+      max-width: 100%;
+      min-width: 150px;
+      width: auto;
+      height: auto;
+      display: block;
+      margin: 0.5em auto;
+    }
+    @media (max-width: 500px) {
+      .markdown-body img {
+        min-width: 80px;
+      }
+    }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script>
+    // Configure marked.js to handle custom image width
+    marked.use({
+      renderer: {
+        image(href, title, text) {
+          let dataWidth = '';
+
+          if (title) {
+            const widthMatch = title.match(/width=(\d+)%/);
+            if (widthMatch && widthMatch[1]) {
+              style = `max-width:${widthMatch[1]}%; min-width:150px; height:auto;`;
+              dataWidth = ` data-width="${widthMatch[1]}"`;
+            }
+          }
+          // Remove the custom width from the title so it doesn't show as a tooltip
+          const cleanTitle = title ? title.replace(/width=\d+%/g, '').trim() : '';
+
+          // Add data-original-src for consistency if not already an online image
+          const dataOriginalSrc = (href.startsWith('http://') || href.startsWith('https://'))
+            ? `data-original-src="${href}"`
+            : '';
+
+          return `<img src="${href}" alt="${text}" style="${style}"${dataWidth}${dataOriginalSrc}${cleanTitle ? ` title="${cleanTitle}"` : ''}>`;
+        }
+      }
+    });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
 </head>

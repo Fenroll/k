@@ -2999,7 +2999,7 @@
         };
         
         // Update page title
-        document.title = fileName + ' — Markdown Editor';
+        document.title = fileName + ' — Text Editor';
       };
       reader.readAsText(file);
       
@@ -3292,7 +3292,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       };
       
       // Update page title
-      document.title = cleanName + ' — Markdown Editor';
+      document.title = cleanName + ' — Text Editor';
     }
 
     // Close file browser modal
@@ -3341,13 +3341,14 @@ localStorage.setItem('textEditorContent', htmlContent);
       // Clean the name: remove .html, .md, .txt extensions
       const cleanName = name.replace(/\.(html|md|txt)$/i, '');
       
+
       // Get content
       let editorContent = editor.innerHTML;
-      
+
       // CRITICAL FIX: Process lists BEFORE doing any cleanup
       const contentDiv = document.createElement('div');
       contentDiv.innerHTML = editorContent;
-      
+
       // Step 1: Clean up list structure first - ensure proper nesting
       // Process each list to fix any broken structures
       contentDiv.querySelectorAll('ul, ol').forEach(list => {
@@ -3355,32 +3356,28 @@ localStorage.setItem('textEditorContent', htmlContent);
         Array.from(list.children).forEach(li => {
           if (li.tagName === 'LI') {
             let html = li.innerHTML;
-            
             // Remove ONLY leading and trailing <br> tags in the TEXT content
             // BUT preserve <br> tags before nested lists
             // First, check if there's a nested list
             const hasNestedList = li.querySelector('ul, ol') !== null;
-            
             if (hasNestedList) {
               // If has nested list, only remove trailing <br> after the nested list
-              html = html.replace(/<br\s*\/?>\s*$/gi, '');
+              html = html.replace(/<br\s*\/?>(\s*)$/gi, '');
             } else {
               // If no nested list, remove both leading and trailing <br>
-              html = html.replace(/^<br\s*\/?>/gi, '');
-              html = html.replace(/<br\s*\/?>\s*$/gi, '');
+              html = html.replace(/^<br\s*\/?/gi, '');
+              html = html.replace(/<br\s*\/?>(\s*)$/gi, '');
             }
-            
             li.innerHTML = html;
           }
         });
       });
-      
       editorContent = contentDiv.innerHTML;
-      
+
       // Step 2: Create a temporary container
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = editorContent;
-      
+
       // Step 3: Remove hidden elements
       const removeHiddenElements = (element) => {
         const nodesToRemove = [];
@@ -3392,10 +3389,9 @@ localStorage.setItem('textEditorContent', htmlContent);
         });
         nodesToRemove.reverse().forEach(n => n.remove());
       };
-      
       removeHiddenElements(tempDiv);
       editorContent = tempDiv.innerHTML;
-      
+
       // Step 4: VERY CAREFULLY remove only COMPLETELY EMPTY <p> tags
       // Do NOT remove <p> tags that contain any content or are near lists
       let prevContent;
@@ -3403,23 +3399,27 @@ localStorage.setItem('textEditorContent', htmlContent);
       do {
         prevContent = editorContent;
         iterations++;
-        
         // Only remove <p> tags that are completely empty
         editorContent = editorContent.replace(/<p>\s*<\/p>/g, '');
-        
         // Only remove <p> with just <br> tags (these are spacing)
         editorContent = editorContent.replace(/<p><br\s*\/?><\/p>/g, '');
-        editorContent = editorContent.replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, '');
-        
+        editorContent = editorContent.replace(/<p>\s*<br\s*\/?>(\s*)<\/p>/g, '');
         // DO NOT try to remove <p> containing text or formatting
         // This breaks lists completely
-        
       } while (editorContent !== prevContent && iterations < 2);
-      
+
       // Step 5: Fix image paths
       editorContent = editorContent.replace(/src="[^"]*?(assets\/[^"]*)"(?=[^>]*>)/g, 'src="$1"');
       editorContent = editorContent.replace(/(<img[^>]*src="([^"]*?)"[^>]*)data-original-src="[^"]*?"(?=[^>]*>)/g, '$1data-original-src="$2"');
       editorContent = editorContent.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
+
+      // Step 6: Sanitize <style> blocks: rewrite global img { ... } to .markdown-body img { ... }
+      const styleSanitizeDiv = document.createElement('div');
+      styleSanitizeDiv.innerHTML = editorContent;
+      styleSanitizeDiv.querySelectorAll('style').forEach(styleEl => {
+        styleEl.textContent = styleEl.textContent.replace(/(^|\s)img\s*\{/g, '.markdown-body img {');
+      });
+      editorContent = styleSanitizeDiv.innerHTML;
       
       // Get heading color from localStorage
       const savedHeadingColor = localStorage.getItem('textEditorHeadingColor') || '#000000';
@@ -3532,10 +3532,7 @@ localStorage.setItem('textEditorContent', htmlContent);
     tbody tr:nth-child(even) { 
       background: rgba(88, 129, 87, 0.06); 
     }
-    img { 
-      max-width: 100%; 
-      height: auto; 
-    }
+    /* Image styles are handled by inline styles and data-width attributes */
     a {
       color: inherit; /* Changed to inherit */
       text-decoration: underline;
@@ -3564,7 +3561,6 @@ localStorage.setItem('textEditorContent', htmlContent);
     }
     @media (max-width: 768px) {
       body {
-        max-width: 100%;
         margin: 0.5rem 0;
         padding: 0 0.5rem;
         font-size: 16px;
@@ -3700,7 +3696,7 @@ renderMathInElement(document.body, {
       img.style.maxWidth = imageSize + '%';
       img.style.height = 'auto';
       img.style.display = 'block';
-      img.style.minWidth = '100px';
+       img.style.minWidth = '300px'; // Removed
       img.setAttribute('data-original-src', imgSrc);
       img.setAttribute('data-width', imageSize);
       
@@ -5018,24 +5014,14 @@ renderMathInElement(document.body, {
             return '[' + processChildren(node, insideListItem, depth) + '](' + (node.href || '#') + ')';
           } else if (tag === 'img') {
             const alt = node.getAttribute('alt') || '';
-            
-            // Generate path from alt text (all images are in assets/ folder)
-            // If alt is "ДН", generate "assets/ДН.png"
-            let src = '';
-            if (alt) {
-              // Try to detect file extension from src if it's not base64
-              let ext = '.png'; // default
-              if (node.src && !node.src.startsWith('data:')) {
-                const match = node.src.match(/\.([a-z]+)$/i);
-                if (match) ext = '.' + match[1];
-              }
-              src = 'assets/' + alt + ext;
+            // Prefer data-original-src for local files, fall back to src for URLs
+            const src = node.getAttribute('data-original-src') || node.src;
+            const width = node.getAttribute('data-width'); // This should now be reliable from the editor's insertion logic
+            let titleAttribute = '';
+            if (width) {
+              titleAttribute = ` "width=${width}%"`; // Embed width information in the title part of markdown image
             }
-            
-            // Skip if no alt text (can't generate filename)
-            if (!src) return '';
-            
-            return '![' + alt + '](' + src + ')';
+            return `![${alt}](${src}${titleAttribute})`;
           } else if (tag === 'blockquote') {
             return '> ' + processChildren(node, false, depth).trim() + '\n';
           } else if (tag === 'ul') {
@@ -5343,14 +5329,35 @@ renderMathInElement(document.body, {
     // Apply inline formatting (bold, italic, code, links, images)
     function applyInlineFormatting(text) {
       // Images must be processed before links
-      text = text.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
-        // If we have a base path and src is relative, create absolute path for display
-        if (globalImageBasePath && !src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('data:') && !src.startsWith('file://')) {
-          const absoluteSrc = globalImageBasePath + src;
-          return `<img src="${absoluteSrc}" alt="${alt}" data-original-src="${src}" style="max-width:100%; height:auto;">`;
+      // Regex updated to capture optional title attribute
+      text = text.replace(/!\[(.*?)\]\((.*?)(?: "(.*?)")?\)/g, (match, alt, src, title) => {
+        let style = 'max-width:100%; height:auto; min-width:300px;'; // Default and min-width
+        let dataWidth = '';
+
+        if (title) {
+          const widthMatch = title.match(/width=(\d+)%/);
+          if (widthMatch && widthMatch[1]) {
+            style = `max-width:${widthMatch[1]}%; min-width:300px; height:auto;`; // min-width removed
+            dataWidth = ` data-width="${widthMatch[1]}"`;
+          }
         }
-        // Always preserve the original src in data-original-src
-        return `<img src="${src}" alt="${alt}" data-original-src="${src}" style="max-width:100%; height:auto;">`;
+
+        // If we have a base path and src is relative, create absolute path for display
+        let finalSrc = src;
+        if (globalImageBasePath && !(src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:') || src.startsWith('file://'))) {
+          finalSrc = globalImageBasePath + src;
+        }
+
+        // Add data-original-src for consistency if not already an online image
+        const dataOriginalSrc = (src.startsWith('http://') || src.startsWith('https://'))
+          ? `data-original-src="${src}"`
+          : `data-original-src="${src}"`; // Always store original src
+
+        // Scope image CSS to .markdown-body img in exported HTML (not global img)
+        // This is only for when generating <style> blocks for export, not for inline images
+        // If you have export logic that writes <style>img{...}</style>, change it to .markdown-body img{...}
+
+        return `<img src="${finalSrc}" alt="${alt}" style="${style}"${dataWidth}${dataOriginalSrc}>`;
       });
       text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       text = text.replace(/__(.*?)__/g, '<u>$1</u>');
@@ -5413,7 +5420,7 @@ renderMathInElement(document.body, {
             
             // Update page title
             const cleanName = fileName.replace(/\.(md|txt|html)$/i, '').replace(/^\d+(\.\d+)?-/, '').replace(/^msg-/i, '');
-            document.title = cleanName + ' — Markdown Editor';
+            document.title = cleanName + ' — Text Editor';
             
             // Clear sessionStorage
             sessionStorage.removeItem('editFileContent');
@@ -5467,7 +5474,7 @@ renderMathInElement(document.body, {
           // Update page title
           if (filePath) {
             const fileName = filePath.split('/').pop();
-            document.title = fileName.replace(/\.(md|txt)$/i, '').replace(/^\d+-/, '').replace(/^msg-/i, '') + ' — Markdown Editor';
+            document.title = fileName.replace(/\.(md|txt)$/i, '').replace(/^\d+-/, '').replace(/^msg-/i, '') + ' — Text Editor';
           }
           
           // Clear URL parameters to prevent auto-reload on refresh
@@ -5590,7 +5597,7 @@ renderMathInElement(document.body, {
             historyIndex = 0;
             
             // Update page title
-            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' — Markdown Editor';
+            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' — Text Editor';
           })
           .catch(err => {
             const isFile = window.location.protocol === 'file:';
