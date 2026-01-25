@@ -432,7 +432,7 @@ function getAllCourses() {
 function main() {
   // Get regular courses
   const courses = getAllCourses();
-  
+
   // Load event info from INFO.md - try to read it directly
   let eventInfo = '';
   const eventInfoPath = path.join(ELEMENTS_DIR, 'Актуални събития Event center', 'INFO.md');
@@ -443,31 +443,38 @@ function main() {
   } catch (error) {
     console.log('ℹ Event info file not found or could not be read');
   }
-  
-  // Generate build timestamp
+
+  // Generate build timestamp and version (YYYYMMDD)
   const buildDate = new Date();
-const dateParts = new Intl.DateTimeFormat('bg-BG', {
-  day: '2-digit',
-  month: '2-digit',
-  year: 'numeric'
-}).formatToParts(buildDate);
+  const pad = n => n.toString().padStart(2, '0');
+  const version = `${buildDate.getFullYear()}${pad(buildDate.getMonth() + 1)}${pad(buildDate.getDate())}`;
 
-const date = `${dateParts.find(p => p.type === 'day').value}.${dateParts.find(p => p.type === 'month').value}.${dateParts.find(p => p.type === 'year').value}`;
+  // For display
+  const dateParts = new Intl.DateTimeFormat('bg-BG', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
+  }).formatToParts(buildDate);
+  const date = `${dateParts.find(p => p.type === 'day').value}.${dateParts.find(p => p.type === 'month').value}.${dateParts.find(p => p.type === 'year').value}`;
+  const time = buildDate.toLocaleString('bg-BG', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+  const buildTimestamp = `${date} ${time}`;
 
-// Часът остава същият
-const time = buildDate.toLocaleString('bg-BG', {
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false
-});
-  const buildTimestamp = `${date} ${time}`;;
-  
-  const js = 'const courses = ' + JSON.stringify(courses, null, 2) + ';\n' +
-             'const eventInfo = ' + JSON.stringify(eventInfo) + ';\n' +
+  // Write JS file
+  const js = 'const courses = ' + JSON.stringify(courses, null, 2) + '\n' +
+             'const eventInfo = ' + JSON.stringify(eventInfo) + '\n' +
              'const buildTimestamp = "' + buildTimestamp + '";\n';
   fs.writeFileSync(OUTPUT_FILE, js, 'utf8');
   console.log('Generated courses:', OUTPUT_FILE);
   console.log('Build timestamp:', buildTimestamp);
+
+  // Write version file for cache busting
+  const versionFile = path.join(__dirname, 'courses.version.json');
+  fs.writeFileSync(versionFile, JSON.stringify({ version }, null, 2), 'utf8');
+  console.log('Wrote version file:', versionFile, 'version:', version);
 }
 
 main();

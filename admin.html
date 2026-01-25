@@ -330,7 +330,15 @@
 
     </style>
 
-    <script src="courses.generated.js?v=20260125"></script>
+        <script>
+            fetch('courses.version.json')
+                .then(r => r.json())
+                .then(v => {
+                    const s = document.createElement('script');
+                    s.src = 'courses.generated.js?v=' + v.version;
+                    document.head.appendChild(s);
+                });
+        </script>
     <script src="js/admin.js?v=20260125"></script>
     <script src="js/schedule-notes-admin.js"></script>
 </body>

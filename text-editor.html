@@ -1276,7 +1276,7 @@
   <div id="saveFileModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
-        <h2>Save Markdown File</h2>
+        <h2>Save Text File</h2>
         <span class="close" id="closeSaveModalBtn">&times;</span>
       </div>
       <div class="modal-body">
@@ -1513,7 +1513,15 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260121"></script>
+  <script>
+    fetch('courses.version.json')
+      .then(r => r.json())
+      .then(v => {
+        const s = document.createElement('script');
+        s.src = 'courses.generated.js?v=' + v.version;
+        document.head.appendChild(s);
+      });
+  </script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js"></script>

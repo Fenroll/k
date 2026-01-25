@@ -1029,7 +1029,15 @@
 }
   </style>
   <script src="html-priority.js"></script>
-  <script src="courses.generated.js?v=20260121"></script>
+  <script>
+    fetch('courses.version.json')
+      .then(r => r.json())
+      .then(v => {
+        const s = document.createElement('script');
+        s.src = 'courses.generated.js?v=' + v.version;
+        document.head.appendChild(s);
+      });
+  </script>
 </head>
 <body>
 <!-- Right-side overlay for course card click -->
