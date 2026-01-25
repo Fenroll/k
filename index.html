@@ -263,6 +263,11 @@
     display: flex;
     align-items: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    max-width: 100%; /* Added to prevent overflow on mobile */
+    box-sizing: border-box; /* Added to include padding in width calculation */
+  }
+  .element-details {
+    padding-right: 10px !important; /* Adjust padding for mobile */
   }
   .element-details-content {
     padding-top: 2px; /* Small vertical adjustment */
@@ -307,9 +312,7 @@
     line-height: 1.2 !important;
     color: #666666 !important;
   }
-  .favorite {
-    display: none !important;
-  }
+
   
   .mobile-overlay-close {
     position: fixed;
@@ -877,13 +880,7 @@
           width: auto;
           max-width: none;
       }
-        .element-details .favorite {
-          margin-left: auto;
-          align-self: center;
-          position: static;
-          width: auto;
-          min-width: 0;
-      }
+
   .course-title { font-size: 20px; color: #262626; text-decoration: none; font-weight: 525; }
   .course-custom-text { font-size: 12px; color: #666; }
   .course-id { color: #888888; font-size: 14px; margin-bottom: 0.5rem; font-weight: 525; display: none !important; }
@@ -901,16 +898,7 @@
   height: 100%;
   padding: 0 1.2rem;
     }
-    .favorite { 
-        background: none; 
-        border: none; 
-        cursor: pointer; 
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        z-index: 2;
-    }
-    .base-footer { background: #262626; color: #fff; padding: 1.2rem 1rem; text-align: center; font-size: 1em; border-top: 1px solid #222; }
+        .base-footer { background: #262626; color: #fff; padding: 1.2rem 1rem; text-align: center; font-size: 1em; border-top: 1px solid #222; }
   .base-footer .footer-links { display: inline-block; margin-left: 1.5em; font-size: 12px !important; }
   .base-footer .footer-links a { font-size: 12px !important; }
   .base-footer a { color: #cdcdcd; margin: 0 0.7em; text-decoration: none; }
@@ -1130,9 +1118,7 @@
       <header class="main-header">
         <h1 class="page-title">Courses</h1>
       </header>
-
-
-  <div class="course-org-list" id="course-org-list">
+ <div class="course-org-list" id="course-org-list">
     
   <div id="dynamic-course-list"></div>
 </div>
@@ -1295,10 +1281,6 @@ function renderCourseList() {
               <div class="course-custom-text">${course.customText}</div>
               </div>
             </div>
-            <button class="favorite" title="Add to your favorites">
-              <svg class="svg-icon small-icon" focusable="false" aria-hidden="true">
-              </svg>
-            </button>
         `;
         
         // Apply the color as border-left style
@@ -1330,10 +1312,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // Simple search system for filtering cards by name
     const searchInput = document.getElementById('courses-overview-filter-search');
     const courseList = document.getElementById('course-org-list');
-    const resultsCount = document.getElementById('results-count');
     function updateResultsCount() {
       const visible = courseList.querySelectorAll('.element-card:not([style*="display: none"])').length;
-      resultsCount.textContent = visible + (visible === 1 ? ' result' : ' results');
     }
     function filterCourses() {
       const val = searchInput.value.trim().toLowerCase();
@@ -2780,7 +2760,7 @@ function toggleFileDropdown(sectionId) {
             sectionContent += `<a href="${file.path}" download style="color:#588157; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#588157'; this.style.textDecoration='underline'" onmouseout="this.style.color='#588157'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a><a href="${mdViewerUrl}" target="_blank" title="Преглед" style="display:inline-flex; align-items:center; justify-content:center; margin-left:6px; text-decoration:none; flex-shrink:0; position: static !important;" onmouseover="this.querySelector('svg').style.fill='#588157'" onmouseout="this.querySelector('svg').style.fill='#588157'">${eyeIcon}</a></li>`;
           }
          else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.bmp') || fileName.endsWith('.webp') || fileName.endsWith('.svg')) {
-  const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#588157" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z\"/></svg>`;
+  const eyeIcon = `<svg width="16" height="16" viewBox="0 0 24 24" fill="#588157" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>`;
   const allImages = section.files.filter(f => /\.(jpg|jpeg|png|gif|bmp|webp|svg)$/i.test(f.name));
   const currentIndex = allImages.findIndex(f => f.name === file.name);
   window._currentImageList = allImages;
