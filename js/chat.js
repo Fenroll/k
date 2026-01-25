@@ -254,124 +254,17 @@ class ChatFirebaseREST {
   }
 
   async updateColorForAllSessions(newColor) {
-    // Обнови цвета на всички активни сесии с текущото име
-    await this._ensureInit();
-    const { ref, get, update } = this.sdk;
-    const activeUsersRef = ref(this.db, `active_users/${this.documentId}`);
-    
-    try {
-      const snapshot = await get(activeUsersRef);
-      if (!snapshot.exists()) return;
-      
-      const users = snapshot.val();
-      const updates = {};
-      
-      // Намери всички сесии с текущото име
-      Object.keys(users).forEach(userId => {
-        if (users[userId].userName === currentUser.userName) {
-          updates[`active_users/${this.documentId}/${userId}/color`] = newColor;
-        }
-      });
-      
-      if (Object.keys(updates).length > 0) {
-        await update(ref(this.db), updates); // Can be removed, less critical
-        console.log(`✓ Обновени ${Object.keys(updates).length} сесии с нов цвят`);
-      }
-    } catch (error) {
-      console.error('Update color error:', error);
-    }
+    // This functionality is mostly for updating the *chat-specific* presence entry,
+    // which we are removing. So this function can be removed or adapted.
+    // For now, removing.
+    console.warn("updateColorForAllSessions is no longer relevant with site-wide presence.");
   }
 
-  async forceUpdatePresence() {
-    if (!this.db || !window.currentUser || !window.currentUser.userId) return;
-    
-    const { ref, update, serverTimestamp } = this.sdk;
-    const userRef = ref(this.db, `active_users/${this.documentId}/${window.currentUser.userId}`);
-    
-    const isMobile = window.innerWidth <= 768 || 
-                     /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  // forceUpdatePresence removed
 
-    const userData = {
-        userId: window.currentUser.userId,
-        userName: window.currentUser.userName,
-        color: window.currentUser.color,
-        device: isMobile ? 'mobile' : 'desktop',
-        lastSeen: serverTimestamp(),
-        isActive: true
-    };
+  // markUserActive removed
 
-    try {
-        await update(userRef, userData);
-    } catch (e) { console.error("Force presence update error", e); }
-  }
-
-  async markUserActive() {
-    await this._ensureInit();
-    const { ref, set, update, onDisconnect, serverTimestamp, onValue } = this.sdk;
-    const userRef = ref(this.db, `active_users/${this.documentId}/${currentUser.userId}`);
-    const connectedRef = ref(this.db, '.info/connected');
-
-    try {
-        // По-добра детекция на устройство
-        const isMobile = window.innerWidth <= 768 || 
-                        /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
-        console.log('Mobile detection:', isMobile, 'Window width:', window.innerWidth);
-        // console.log('Mobile detection:', isMobile, 'Window width:', window.innerWidth); // Can be removed
-        onValue(connectedRef, (snap) => {
-            if (snap.val() === true) {
-                const userData = {
-                    userId: window.currentUser.userId,
-                    userName: window.currentUser.userName,
-                    color: window.currentUser.color,
-                    device: isMobile ? 'mobile' : 'desktop',
-                    lastSeen: serverTimestamp(),
-                    isActive: true
-                };
-                onDisconnect(userRef).remove();
-                set(userRef, userData);
-            }
-        });
-
-        // Function to force update presence
-        const forceUpdate = () => this.forceUpdatePresence();
-
-        // Heartbeat: Updated every 25 sec to be safe (client side), server might have timeouts
-        // But to be robust against "disappearing", we include full user info
-        if (this.heartbeatInterval) clearInterval(this.heartbeatInterval);
-        this.heartbeatInterval = setInterval(forceUpdate, 25000);
-
-        // Also trigger when tab becomes visible
-        document.addEventListener("visibilitychange", () => {
-             if (document.visibilityState === 'visible') {
-                 this.forceUpdatePresence();
-             }
-        });
-
-        // Hook into user interaction to keep alive actively
-        ['mousedown', 'keydown', 'touchstart'].forEach(evt => {
-            window.addEventListener(evt, () => {
-                // Throttle this? Maybe once every minute of activity?
-                // For now relying on interval is enough
-            }, { passive: true });
-        });
-
-        console.log('✓ Потребител маркиран активен (SDK Presence + Heartbeat + Device)');
-        return true;
-    } catch (error) {
-        console.error('Mark active error:', error);
-        return false;
-    }
-  }
-
-  async getActiveUsers() {
-    await this._ensureInit();
-    const { ref, get } = this.sdk;
-    try {
-        const snapshot = await get(ref(this.db, `active_users/${this.documentId}`));
-        return snapshot.exists() ? snapshot.val() : {};
-    } catch(e) { return {}; }
-  }
+  // getActiveUsers removed
 
   async deleteMessage(messageKey) {
     await this._ensureInit();
@@ -496,30 +389,70 @@ class ChatFirebaseREST {
     });
   }
 
-  startActiveUsersPolling(callback, interval = 5000) {
+  startSiteWidePresencePolling(callback) {
     this._ensureInit().then(() => {
         const { ref, onValue } = this.sdk;
+        const onlineUsersRef = ref(this.db, 'online_users');
+        const siteUsersRef = ref(this.db, 'site_users');
 
-        const unsubscribe = onValue(ref(this.db, `active_users/${this.documentId}`), (snapshot) => {
-            const usersRaw = snapshot.val() || {};
-            const finalUsers = {};
+        let allSiteUsers = {}; // Cache for user profiles
+        let allOnlineData = {}; // Cache for online presence
 
-            // Filter out any invalid or malformed user entries, just in case.
-            // This makes the list reflect the database state directly and instantly.
-            Object.keys(usersRaw).forEach(key => {
-                const u = usersRaw[key];
-                if (u && typeof u === 'object' && u.userName) {
-                    finalUsers[key] = u;
+        const processAndCallback = () => {
+            const groupedUsers = {};
+            // Group online devices by UID and count them
+            for (const uid in allOnlineData) {
+                const devices = allOnlineData[uid];
+                const deviceIds = Object.keys(devices);
+                const deviceCount = deviceIds.length;
+                let hasMobile = false;
+
+                if (deviceCount > 0) {
+                    // Check if any device for this user is mobile
+                    hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
+                    
+                    const userProfile = allSiteUsers[uid];
+                    if (userProfile) {
+                        groupedUsers[uid] = {
+                            userId: uid,
+                            userName: userProfile.displayName || userProfile.username, // Use displayName, fallback to username
+                            color: userProfile.color,
+                            deviceCount: deviceCount,
+                            hasMobile: hasMobile
+                        };
+                    } else {
+                        // Fallback for users not found in site_users (e.g., deleted accounts)
+                        groupedUsers[uid] = {
+                            userId: uid,
+                            userName: `Unknown User (${uid})`,
+                            color: '#cccccc',
+                            deviceCount: deviceCount,
+                            hasMobile: hasMobile
+                        };
+                    }
                 }
-            });
-            
+            }
+
             callback({
-                count: Object.keys(finalUsers).length,
-                users: finalUsers,
-                usersList: Object.keys(finalUsers)
+                count: Object.keys(groupedUsers).length,
+                users: groupedUsers,
+                usersList: Object.keys(groupedUsers)
             });
+        };
+
+        // Listen for all site users (for username and color)
+        const unsubscribeSiteUsers = onValue(siteUsersRef, (snapshot) => {
+            allSiteUsers = snapshot.val() || {};
+            processAndCallback(); // Recalculate and update when user profiles change
         });
-        this.unsubscribers.push(unsubscribe);
+        this.unsubscribers.push(unsubscribeSiteUsers);
+
+        // Listen for online presence data
+        const unsubscribeOnlineUsers = onValue(onlineUsersRef, (snapshot) => {
+            allOnlineData = snapshot.val() || {};
+            processAndCallback(); // Recalculate and update when online status changes
+        });
+        this.unsubscribers.push(unsubscribeOnlineUsers);
     });
   }
 
@@ -691,8 +624,7 @@ class ChatUIManager {
   async init() {
     try {
       this.fixInputLayout();
-      // Маркирай потребител активен
-      await this.chatFirebase.markUserActive();
+      // await this.chatFirebase.markUserActive(); // Removed - using site-wide presence.js
 
       // Зареди първоначални съобщения - от localStorage или Firebase
       let messages = this.loadFromCache();
@@ -725,12 +657,13 @@ class ChatUIManager {
         this.renderAllReactions();
       });
 
-      // Polling за активни потребители
-      this.chatFirebase.startActiveUsersPolling((data) => {
-        this.activeUsers = data.users || {}; // Запази списъка с потребители
+      // New site-wide presence polling
+      this.chatFirebase.startSiteWidePresencePolling((data) => {
+        // data.users is now an object like { uid: { userId, userName, color, deviceCount, hasMobile } }
+        this.activeUsers = data.users || {}; // Cache the user-centric data
         this.updateNotificationButton(data);
         this.updateHeaderOnlineCount(data.count);
-      }, 5000);
+      });
 
       // Синхронизация на прочетени съобщения
       this.chatFirebase.startLastReadPolling(currentUser.userName, (lastReadId) => {
@@ -874,76 +807,37 @@ class ChatUIManager {
   }
 
   updateNotificationButton(data) {
-    // Обнови активни потребители в списъка (без да презаписваш бутона)
-    const usersList = document.getElementById('active-users-list');
-    if (!usersList) return;
+    const usersListEl = document.getElementById('active-users-list');
+    if (!usersListEl) return;
 
-    // Ensure current user is always in the list
-    const remoteUsers = data.users || {};
-    let allUsers = { ...remoteUsers };
-    
-    // Add current user if missing (using currentUser global)
-    if (typeof currentUser !== 'undefined' && currentUser.userId) {
-        if (!allUsers[currentUser.userId]) {
-             allUsers[currentUser.userId] = {
-                 userId: currentUser.userId,
-                 userName: currentUser.userName,
-                 color: currentUser.color,
-                 device: window.innerWidth <= 768 ? 'mobile' : 'desktop',
-                 isActive: true
-             };
-        }
-    }
+    // data.users is already an object of user-centric data:
+    // { uid: { userId, userName, color, deviceCount, hasMobile } }
+    let users = Object.values(data.users || {});
+    const count = data.count || 0; // Use count directly from data
 
-    // --- НОВА ЛОГИКА ЗА ГРУПИРАНЕ ---
-    const groupedUsers = {};
     const myId = (typeof window.currentUser !== 'undefined' && window.currentUser.userId) ? String(window.currentUser.userId) : null;
 
-    Object.values(allUsers).forEach(user => {
+    // Map and sort users
+    users.forEach(user => {
+        // Resolve name mapping
         let name = user.userName;
-        // Resolve mapping if available
         if (this.userNameMappings && this.userNameMappings[name]) {
             name = this.userNameMappings[name];
         }
-        
-        // Normalize name (trim spaces) to ensure identical names group together
-        const finalName = name ? name.toString().trim() : 'Anonymous';
-        
-        if (!groupedUsers[finalName]) {
-            groupedUsers[finalName] = {
-                ...user,
-                userName: finalName,
-                isMe: false,
-                hasMobile: false
-            };
-        }
-        
-        // Check if *this* instance of the user is Me
-        if (String(user.userId) === myId) {
-            groupedUsers[finalName].isMe = true;
-        }
-        
-        // Check for mobile
-        if (user.device === 'mobile') {
-             groupedUsers[finalName].hasMobile = true;
-        }
+        user.userName = name; // Update with resolved name
+        user.isMe = (String(user.userId) === myId); // Check if current user
     });
 
-    const users = Object.values(groupedUsers);
-    const count = Object.keys(groupedUsers).length;
-
-    // Sort: current user first, then alphabetically
+    // Sort: current user first, then alphabetically by userName
     users.sort((a, b) => {
-      if (a.isMe) return -1;
-      if (b.isMe) return 1;
+      if (a.isMe && !b.isMe) return -1;
+      if (!a.isMe && b.isMe) return 1;
       return a.userName.localeCompare(b.userName);
     });
 
-    usersList.innerHTML = `
+    usersListEl.innerHTML = `
       <strong>Активни (${count}):</strong><br>
       ${users.map(user => {
-          const isMe = user.isMe;
-          
           const mobileIcon = user.hasMobile
             ? `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="margin-left: 4px; vertical-align: middle;" title="Mobile device"> <path d="M11.5,0h-7C3.675,0,3,0.675,3,1.5v13C3,15.325,3.675,16,4.5,16h7c0.825,0,1.5-0.675,1.5-1.5v-13C13,0.675,12.325,0,11.5,0z M8,15c-0.553,0-1-0.447-1-1s0.447-1,1-1s1,0.447,1,1S8.553,15,8,15z M12,12H4V2h8V12z" /> </svg>`
             : '';
@@ -951,8 +845,8 @@ class ChatUIManager {
           return `
         <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
           <div style="width: 12px; height: 12px; border-radius: 50%; background-color: ${user.color};"></div>
-          <span style="font-size: 10px; flex: 1; word-break: break-all; display: flex; align-items: center; ${isMe ? 'font-weight: bold; color: var(--fg);' : ''}">
-            ${user.userName} ${isMe ? ' (Аз)' : ''}
+          <span style="font-size: 10px; flex: 1; word-break: break-all; display: flex; align-items: center; ${user.isMe ? 'font-weight: bold; color: var(--fg);' : ''}">
+            ${user.userName} ${user.isMe ? ' (Аз)' : ''}
             ${mobileIcon}
           </span>
         </div>

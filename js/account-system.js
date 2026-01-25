@@ -18,23 +18,31 @@ class AccountSystem {
     }
 
     async init() {
-        // Assign DOM elements here to ensure the DOM is ready
-        this.registerForm = document.getElementById('register-form');
-        this.loginForm = document.getElementById('login-form');
-        this.accountInfo = document.getElementById('account-info');
-        this.loadingSpinner = document.getElementById('loading-spinner');
-        // New forms
-        this.changePasswordForm = document.getElementById('change-password-form');
-        this.changeUsernameForm = document.getElementById('change-username-form');
-        this.changeDisplaynameForm = document.getElementById('change-displayname-form');
-        this.changeColorForm = document.getElementById('change-color-form');
-        this.deleteAccountForm = document.getElementById('delete-account-form');
+        const isLoginPage = window.location.pathname.endsWith('login.html');
+        const isAccountPage = window.location.pathname.endsWith('account.html');
 
-        if (!this.registerForm || !this.loginForm || !this.accountInfo || !this.loadingSpinner || 
-            !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm ||
-            !this.deleteAccountForm
-        ) {
-            console.error("Account system UI elements not found in the DOM. Aborting initialization.");
+        this.loadingSpinner = document.getElementById('loading-spinner');
+
+        if (isLoginPage) {
+            this.loginForm = document.getElementById('login-form');
+            if (!this.loginForm || !this.loadingSpinner) {
+                console.error("Login page UI elements not found. Aborting.");
+                return;
+            }
+        } else if (isAccountPage) {
+            this.accountInfo = document.getElementById('account-info');
+            this.changePasswordForm = document.getElementById('change-password-form');
+            this.changeUsernameForm = document.getElementById('change-username-form');
+            this.changeDisplaynameForm = document.getElementById('change-displayname-form');
+            this.changeColorForm = document.getElementById('change-color-form');
+            this.deleteAccountForm = document.getElementById('delete-account-form');
+
+            if (!this.accountInfo || !this.loadingSpinner || !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm || !this.deleteAccountForm) {
+                console.error("Account page UI elements not found. Aborting.");
+                return;
+            }
+        } else {
+            // Not on a page this script should manage
             return;
         }
 
@@ -113,73 +121,91 @@ class AccountSystem {
     }
 
     attachEventListeners() {
-        document.getElementById('show-login').addEventListener('click', () => this.showForm('login'));
-        document.getElementById('show-register').addEventListener('click', () => this.showForm('register'));
+        const isLoginPage = window.location.pathname.endsWith('login.html');
+        const isAccountPage = window.location.pathname.endsWith('account.html');
 
-        document.getElementById('registration-form-element').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = document.getElementById('register-username').value;
-            const displayName = document.getElementById('register-displayname').value;
-            const password = document.getElementById('register-password').value;
-            this.register(username, displayName, password);
-        });
+        if (isLoginPage) {
+            const loginFormElement = document.getElementById('login-form-element');
+            if (loginFormElement) {
+                loginFormElement.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('login-username').value;
+                    const password = document.getElementById('login-password').value;
+                    this.login(username, password);
+                });
+            }
+        } else if (isAccountPage) {
+            const showLoginBtn = document.getElementById('show-login');
+            if (showLoginBtn) {
+                showLoginBtn.addEventListener('click', () => this.showForm('login'));
+            }
 
-        document.getElementById('login-form-element').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-            this.login(username, password);
-        });
+            const showRegisterBtn = document.getElementById('show-register');
+            if (showRegisterBtn) {
+                showRegisterBtn.addEventListener('click', () => this.showForm('register'));
+            }
 
-        document.getElementById('logout-btn').addEventListener('click', () => this.logout());
-        document.getElementById('show-delete-account-btn').addEventListener('click', () => this.showForm('delete-account'));
+            const registerFormElement = document.getElementById('registration-form-element');
+            if (registerFormElement) {
+                registerFormElement.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    const username = document.getElementById('register-username').value;
+                    const displayName = document.getElementById('register-displayname').value;
+                    const password = document.getElementById('register-password').value;
+                    this.register(username, displayName, password);
+                });
+            }
 
-        // Show action forms
-        document.getElementById('show-change-password-btn').addEventListener('click', () => this.showForm('change-password'));
-        document.getElementById('show-change-username-btn').addEventListener('click', () => this.showForm('change-username'));
-        document.getElementById('show-change-displayname-btn').addEventListener('click', () => this.showForm('change-displayname'));
-        document.getElementById('show-change-color-btn').addEventListener('click', () => {
-            document.getElementById('new-color').value = this.user.color || '#7c3aed';
-            this.showForm('change-color');
-        });
+            document.getElementById('logout-btn').addEventListener('click', () => this.logout());
+            document.getElementById('show-delete-account-btn').addEventListener('click', () => this.showForm('delete-account'));
 
-        // Cancel buttons
-        document.querySelectorAll('.cancel-action-btn').forEach(btn => {
-            btn.addEventListener('click', () => this.showForm('account'));
-        });
+            // Show action forms
+            document.getElementById('show-change-password-btn').addEventListener('click', () => this.showForm('change-password'));
+            document.getElementById('show-change-username-btn').addEventListener('click', () => this.showForm('change-username'));
+            document.getElementById('show-change-displayname-btn').addEventListener('click', () => this.showForm('change-displayname'));
+            document.getElementById('show-change-color-btn').addEventListener('click', () => {
+                document.getElementById('new-color').value = this.user.color || '#7c3aed';
+                this.showForm('change-color');
+            });
 
-        // Form submissions for actions
-        document.getElementById('change-password-form-element').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newPassword = document.getElementById('new-password').value;
-            const confirmPassword = document.getElementById('confirm-password').value;
-            this.changePassword(newPassword, confirmPassword);
-        });
+            // Cancel buttons
+            document.querySelectorAll('.cancel-action-btn').forEach(btn => {
+                btn.addEventListener('click', () => this.showForm('account'));
+            });
 
-        document.getElementById('change-username-form-element').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newUsername = document.getElementById('new-username').value;
-            const password = document.getElementById('current-password-for-username').value;
-            this.changeUsername(newUsername, password);
-        });
+            // Form submissions for actions
+            document.getElementById('change-password-form-element').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newPassword = document.getElementById('new-password').value;
+                const confirmPassword = document.getElementById('confirm-password').value;
+                this.changePassword(newPassword, confirmPassword);
+            });
 
-        document.getElementById('change-displayname-form-element').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newDisplayName = document.getElementById('new-displayname').value;
-            this.changeDisplayName(newDisplayName);
-        });
+            document.getElementById('change-username-form-element').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newUsername = document.getElementById('new-username').value;
+                const password = document.getElementById('current-password-for-username').value;
+                this.changeUsername(newUsername, password);
+            });
 
-        document.getElementById('change-color-form-element').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const newColor = document.getElementById('new-color').value;
-            this.changeColor(newColor);
-        });
+            document.getElementById('change-displayname-form-element').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newDisplayName = document.getElementById('new-displayname').value;
+                this.changeDisplayName(newDisplayName);
+            });
 
-        document.getElementById('delete-account-form-element').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const password = document.getElementById('password-for-delete').value;
-            this.deleteAccount(password);
-        });
+            document.getElementById('change-color-form-element').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newColor = document.getElementById('new-color').value;
+                this.changeColor(newColor);
+            });
+
+            document.getElementById('delete-account-form-element').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const password = document.getElementById('password-for-delete').value;
+                this.deleteAccount(password);
+            });
+        }
     }
 
     async register(username, displayName, password) {
@@ -295,7 +321,17 @@ class AccountSystem {
                     // After migration, userData contains the full new object.
                     this.user = { ...userData, password: storedPassword, color: userColor };
                     localStorage.setItem('loggedInUser', JSON.stringify(this.user));
-                    // console.log('Успешен вход:', this.user.username); // Can be removed
+
+                    // Device tracking
+                    let deviceId = localStorage.getItem('deviceId');
+                    if (!deviceId) {
+                        deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
+                        localStorage.setItem('deviceId', deviceId);
+                    }
+                    const deviceRef = this.db.ref(`site_users/${userKey}/devices/${deviceId}`);
+                    deviceRef.set({ lastLogin: Date.now() });
+
+                    window.location.href = 'index.html'; // Redirect to home page
 
                     // If user had no color, save the new one to DB
                     if (!userData.color) {
@@ -316,8 +352,7 @@ class AccountSystem {
     async logout() {
         this.user = null;
         localStorage.removeItem('loggedInUser');
-        // console.log('Успешен изход.'); // Can be removed
-        this.updateUI();
+        window.location.href = 'login.html';
     }
 
     async changePassword(newPassword, confirmPassword) {
@@ -511,50 +546,53 @@ class AccountSystem {
     // --- UI Helper Functions ---
 
     updateUI() {
-        this.loadingSpinner.style.display = 'none';
+        if (this.loadingSpinner) this.loadingSpinner.style.display = 'none';
+        
+        const isLoginPage = window.location.pathname.endsWith('login.html');
+        const isAccountPage = window.location.pathname.endsWith('account.html');
+
         if (this.user) {
-            document.getElementById('user-displayname').textContent = this.user.displayName || 'Няма';
-            document.getElementById('user-username').textContent = this.user.username || 'Няма';
-            document.getElementById('user-password').textContent = this.user.password || '••••••••';
-            document.getElementById('user-uid').textContent = this.user.uid || 'Няма';
-            const colorPreview = document.getElementById('user-color-preview');
-            if (colorPreview) {
-                colorPreview.style.backgroundColor = this.user.color || '#ccc';
+            if (isAccountPage) {
+                document.getElementById('user-displayname').textContent = this.user.displayName || 'Няма';
+                document.getElementById('user-username').textContent = this.user.username || 'Няма';
+                document.getElementById('user-password').textContent = this.user.password || '••••••••';
+                document.getElementById('user-uid').textContent = this.user.uid || 'Няма';
+                const colorPreview = document.getElementById('user-color-preview');
+                if (colorPreview) {
+                    colorPreview.style.backgroundColor = this.user.color || '#ccc';
+                }
+                this.showForm('account');
             }
-            this.showForm('account');
         } else {
-            this.showForm('login');
+            if (isLoginPage) {
+                this.showForm('login');
+            }
         }
     }
 
     showForm(formId) {
-        // Hide all forms first
-        this.registerForm.style.display = 'none';
-        this.loginForm.style.display = 'none';
-        this.accountInfo.style.display = 'none';
-        this.changePasswordForm.style.display = 'none';
-        this.changeUsernameForm.style.display = 'none';
-        this.changeDisplaynameForm.style.display = 'none';
-        this.changeColorForm.style.display = 'none';
-        this.deleteAccountForm.style.display = 'none';
+        const isLoginPage = window.location.pathname.endsWith('login.html');
+        const isAccountPage = window.location.pathname.endsWith('account.html');
 
-        // Show the correct one
-        if (formId === 'register') {
-            this.registerForm.style.display = 'block';
-        } else if (formId === 'login') {
-            this.loginForm.style.display = 'block';
-        } else if (formId === 'account') {
-            this.accountInfo.style.display = 'block';
-        } else if (formId === 'change-password') {
-            this.changePasswordForm.style.display = 'block';
-        } else if (formId === 'change-username') {
-            this.changeUsernameForm.style.display = 'block';
-        } else if (formId === 'change-displayname') {
-            this.changeDisplaynameForm.style.display = 'block';
-        } else if (formId === 'change-color') {
-            this.changeColorForm.style.display = 'block';
-        } else if (formId === 'delete-account') {
-            this.deleteAccountForm.style.display = 'block';
+        if (isLoginPage) {
+            if (this.loginForm) this.loginForm.style.display = 'none';
+            if (formId === 'login' && this.loginForm) {
+                this.loginForm.style.display = 'block';
+            }
+        } else if (isAccountPage) {
+            if (this.accountInfo) this.accountInfo.style.display = 'none';
+            if (this.changePasswordForm) this.changePasswordForm.style.display = 'none';
+            if (this.changeUsernameForm) this.changeUsernameForm.style.display = 'none';
+            if (this.changeDisplaynameForm) this.changeDisplaynameForm.style.display = 'none';
+            if (this.changeColorForm) this.changeColorForm.style.display = 'none';
+            if (this.deleteAccountForm) this.deleteAccountForm.style.display = 'none';
+            
+            if (formId === 'account' && this.accountInfo) this.accountInfo.style.display = 'block';
+            else if (formId === 'change-password' && this.changePasswordForm) this.changePasswordForm.style.display = 'block';
+            else if (formId === 'change-username' && this.changeUsernameForm) this.changeUsernameForm.style.display = 'block';
+            else if (formId === 'change-displayname' && this.changeDisplaynameForm) this.changeDisplaynameForm.style.display = 'block';
+            else if (formId === 'change-color' && this.changeColorForm) this.changeColorForm.style.display = 'block';
+            else if (formId === 'delete-account' && this.deleteAccountForm) this.deleteAccountForm.style.display = 'block';
         }
     }
 

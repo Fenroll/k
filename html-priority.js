@@ -29,8 +29,51 @@ function convertAbsoluteToRelativePath(absolutePath) {
   return absolutePath;
 }
 
-const htmlPriority = {
-  1: 'files/Рентгенология/Изпит/1-msg-Теми.html',
-  2: 'files/Клинична Генетика/Изпит/2-msg-Въпроси.html',  // Replace with your second priority file
-  3: 'files/Клинична Генетика/Изпит/1-msg-Теми.html'     // Replace with your third priority file
-};
+// Firebase initialization and data fetching for htmlPriority
+(function() {
+  const firebaseConfig = {
+    apiKey: "API_KEY",
+    authDomain: "med-student-chat.firebaseapp.com",
+    databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
+    projectId: "med-student-chat",
+    storageBucket: "med-student-chat.appspot.com",
+    messagingSenderId: "SENDER_ID",
+    appId: "APP_ID"
+  };
+
+  let app;
+  if (firebase.apps.length === 0) {
+    app = firebase.initializeApp(firebaseConfig);
+  } else {
+    app = firebase.app();
+  }
+  const db = firebase.database();
+
+  window.htmlPriorityPromise = db.ref('/settings/html_priority').once('value')
+    .then(snapshot => {
+      const data = snapshot.val();
+      if (data) {
+        window.htmlPriority = data;
+      } else {
+        // Default values if not found in Firebase
+        window.htmlPriority = {
+          1: 'files/Рентгеология/Изпит/1-msg-Теми.html',
+          2: 'files/Клинична Генетика/Изпит/2-msg-Въпроси.html',
+          3: 'files/Клинична Генетика/Изпит/1-msg-Теми.html'
+        };
+        // Save default to Firebase if it doesn't exist
+        db.ref('/settings/html_priority').set(window.htmlPriority);
+      }
+      return window.htmlPriority;
+    })
+    .catch(error => {
+      console.error("Error fetching htmlPriority from Firebase:", error);
+      // Fallback to hardcoded defaults in case of error
+      window.htmlPriority = {
+        1: 'files/Рентгеология/Изпит/1-msg-Теми.html',
+        2: 'files/Клинична Генетика/Изпит/2-msg-Въпроси.html',
+        3: 'files/Клинична Генетика/Изпит/1-msg-Теми.html'
+      };
+      return window.htmlPriority;
+    });
+})();

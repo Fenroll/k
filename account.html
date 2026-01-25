@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
+    <script src="js/auth-guard.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
@@ -180,46 +181,9 @@
 <body>
 
     <div class="account-container">
-        <a href="index.html" style="display: block; text-align: left; margin-bottom: 1.5rem; color: #6d28d9; text-decoration: none;">← Back to courses</a>
-        <!-- Registration Form -->
-        <div id="register-form" class="form-container">
-            <h2>Registration</h2>
-            <div id="register-error" class="error-message"></div>
-            <form id="registration-form-element">
-                <div class="form-group">
-                    <label for="register-username">Username</label>
-                    <input type="text" id="register-username" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-displayname">Public Name</label>
-                    <input type="text" id="register-displayname" required>
-                </div>
-                <div class="form-group">
-                    <label for="register-password">Password</label>
-                    <input type="password" id="register-password" required>
-                </div>
-                <button type="submit" class="btn">Registration</button>
-            </form>
-            <p class="toggle-link">Have an account? <a id="show-login">Login</a></p>
-        </div>
 
-        <!-- Login Form -->
-        <div id="login-form" class="form-container">
-            <h2>Login</h2>
-            <div id="login-error" class="error-message"></div>
-            <form id="login-form-element">
-                <div class="form-group">
-                    <label for="login-username">Username</label>
-                    <input type="text" id="login-username" required>
-                </div>
-                <div class="form-group">
-                    <label for="login-password">Password</label>
-                    <input type="password" id="login-password" required>
-                </div>
-                <button type="submit" class="btn">Login</button>
-            </form>
-            <p class="toggle-link">No Account? <a id="show-register">Registration</a></p>
-        </div>
+
+
 
         <!-- Account Info -->
         <div id="account-info" class="account-info">
@@ -272,7 +236,7 @@
                     <input type="password" id="confirm-password" required>
                 </div>
                 <button type="submit" class="btn">Save</button>
-                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Отказ</button>
+                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Cancel</button>
             </form>
         </div>
 
@@ -349,6 +313,7 @@
 
     <!-- Нашият скрипт за акаунти -->
     <script src="./js/account-system.js?v=202404231000"></script>
+    <script src="js/presence.js"></script>
     <script>
         // Тъй като скриптовете са в края на <body>, DOM е готов и предходните скриптове са заредени.
         (async function() {
