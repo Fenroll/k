@@ -383,27 +383,127 @@
         });
 
 
-        // Online Users Logic
-        const onlineUsersRef = db.ref('online_users');
-        onlineUsersRef.on('value', (snapshot) => {
+        // Online Users Logic - Refactored to include guest users
+        const siteUsersRef = db.ref('site_users');
+        const onlineUsersRef = db.ref('online_users'); // Authenticated users
+        const onlineGuestsRef = db.ref('online_guests'); // Guest users
+
+        let allSiteUsers = {};
+        let allOnlineAuthData = {};
+        let allOnlineGuestData = {};
+
+        function processAndDisplayOnlineUsers() {
             onlineUsersContainer.innerHTML = '<ul></ul>';
-            const onlineUsers = snapshot.val();
-            if (onlineUsers) {
-                for (const uid in onlineUsers) {
-                    const devices = onlineUsers[uid];
-                    const deviceCount = Object.keys(devices).length;
-                    
-                    usersRef.child(uid).once('value', (userSnapshot) => {
-                        const user = userSnapshot.val();
-                        if (user) {
-                            const li = document.createElement('li');
-                            li.id = `online-user-${uid}`;
-                            li.innerHTML = `${user.username} - ${deviceCount} device(s) online`;
-                            onlineUsersContainer.querySelector('ul').appendChild(li);
-                        }
-                    });
+            const ul = onlineUsersContainer.querySelector('ul');
+            const allOnline = {}; // Consolidated list of all online users
+
+            // Add authenticated online users
+            for (const uid in allOnlineAuthData) {
+                const devices = allOnlineAuthData[uid];
+                const deviceCount = Object.keys(devices).length;
+                let hasMobile = false;
+                if (deviceCount > 0) {
+                    hasMobile = Object.values(devices).some(device => device.isMobile === true);
+                }
+
+                const userProfile = allSiteUsers[uid];
+                if (userProfile) {
+                    allOnline[uid] = {
+                        userId: uid,
+                        userName: userProfile.displayName || userProfile.username,
+                        color: userProfile.color,
+                        deviceCount: deviceCount,
+                        hasMobile: hasMobile,
+                        isGuest: false
+                    };
+                } else {
+                    // Fallback for authenticated users whose profile might be missing
+                    allOnline[uid] = {
+                        userId: uid,
+                        userName: `Unknown User (${uid})`,
+                        color: '#cccccc',
+                        deviceCount: deviceCount,
+                        hasMobile: hasMobile,
+                        isGuest: false
+                    };
                 }
             }
+
+            // Add guest online users
+            for (const guestId in allOnlineGuestData) {
+                const devices = allOnlineGuestData[guestId];
+                const deviceCount = Object.keys(devices).length;
+                let hasMobile = false;
+                if (deviceCount > 0) {
+                    hasMobile = Object.values(devices).some(device => device.isMobile === true);
+                }
+
+                // Guest userName is stored directly in deviceData by presence.js
+                const sampleDeviceData = devices[Object.keys(devices)[0]]; // Get data from one device
+                const guestUserName = sampleDeviceData.userName || `Guest-${guestId.substring(6, 10)}`;
+
+                allOnline[guestId] = {
+                    userId: guestId,
+                    userName: guestUserName,
+                    color: '#9E9E9E', // Default grey for guests
+                    deviceCount: deviceCount,
+                    hasMobile: hasMobile,
+                    isGuest: true
+                };
+            }
+
+            // Convert to array and sort
+            const sortedOnlineUsers = Object.values(allOnline).sort((a, b) => {
+                const currentAdminId = window.currentUser ? window.currentUser.userId : null;
+
+                // 1. Current Admin always on top
+                if (currentAdminId && a.userId === currentAdminId) return -1;
+                if (currentAdminId && b.userId === currentAdminId) return 1;
+
+                // 2. Guests next (if not the admin)
+                if (a.isGuest && !b.isGuest) return -1;
+                if (!a.isGuest && b.isGuest) return 1;
+                
+                // 3. Then alphabetically by userName
+                return a.userName.localeCompare(b.userName);
+            });
+
+            if (sortedOnlineUsers.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = 'No users currently online.';
+                ul.appendChild(li);
+                return;
+            }
+
+            sortedOnlineUsers.forEach(onlineUser => {
+                const li = document.createElement('li');
+                const userType = onlineUser.isGuest ? '' : ''; // Removed "(Guest)" for guest users
+                const mobileIcon = onlineUser.hasMobile ? ' 📱' : '';
+                li.id = `online-user-${onlineUser.userId}`;
+                li.innerHTML = `
+                    <span style="color: ${onlineUser.color}; font-weight: bold;">${onlineUser.userName}</span>
+                    ${userType}${mobileIcon} - ${onlineUser.deviceCount} device(s) online
+                `;
+                ul.appendChild(li);
+            });
+        }
+
+        // Listen for changes in site_users (for user details)
+        siteUsersRef.on('value', (snapshot) => {
+            allSiteUsers = snapshot.val() || {};
+            processAndDisplayOnlineUsers();
+        });
+
+        // Listen for changes in authenticated online users
+        onlineUsersRef.on('value', (snapshot) => {
+            allOnlineAuthData = snapshot.val() || {};
+            processAndDisplayOnlineUsers();
+        });
+
+        // Listen for changes in guest online users
+        onlineGuestsRef.on('value', (snapshot) => {
+            allOnlineGuestData = snapshot.val() || {};
+            processAndDisplayOnlineUsers();
         });
     });
 })();

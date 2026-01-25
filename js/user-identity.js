@@ -63,13 +63,16 @@ class CurrentUser {
 async function createAndInitUser() {
     const user = new CurrentUser();
     const loggedInUserStr = localStorage.getItem('loggedInUser');
+    const urlParams = new URLSearchParams(window.location.search);
+    const guestMode = urlParams.get('guest') === 'true';
 
+    // Handle authenticated user
     if (loggedInUserStr) {
         let sessionData;
         try {
             sessionData = JSON.parse(loggedInUserStr);
         } catch (e) {
-            console.error("Failed to parse loggedInUser, falling back to anonymous.", e);
+            console.error("Failed to parse loggedInUser, falling back to anonymous or guest.", e);
             localStorage.removeItem('loggedInUser');
         }
 
@@ -94,11 +97,12 @@ async function createAndInitUser() {
                         color: fullUserObject.color,
                         legacyChatId: fullUserObject.legacyChatId || null,
                         legacyNotesId: fullUserObject.legacyNotesId || null,
-                        ...fullUserObject
+                        ...fullUserObject,
+                        isGuest: false
                     });
                     
                     localStorage.setItem('loggedInUser', JSON.stringify(fullUserObject));
-                    // console.log('Identity: Refreshed logged-in user from DB:', user.userName); // Can be removed
+                    console.log('Identity: Refreshed logged-in user from DB:', user);
                     return user;
                 } else {
                     throw new Error("User not found in database.");
@@ -110,7 +114,35 @@ async function createAndInitUser() {
         }
     }
 
-    // Fallback to anonymous user
+    // Handle guest user
+    if (guestMode) {
+        let guestId = sessionStorage.getItem('guestId');
+        if (!guestId) {
+            guestId = 'guest_' + Math.random().toString(36).substr(2, 9);
+            sessionStorage.setItem('guestId', guestId);
+        }
+        
+        // Generate a random color for guest if not present
+        let guestColor = sessionStorage.getItem('guestColor');
+        if (!guestColor) {
+            guestColor = user.generateAnonymousColor(); // Re-use anonymous color generator
+            sessionStorage.setItem('guestColor', guestColor);
+        }
+
+        user._populate({
+            userId: guestId,
+            userName: `Guest-${guestId.substring(6, 10)}`, // e.g., Guest-cd23
+            color: guestColor,
+            isGuest: true,
+            // Guests don't have legacy IDs in this context
+            legacyChatId: null, 
+            legacyNotesId: null
+        });
+        console.log('Identity: Using guest user:', user);
+        return user;
+    }
+
+    // Fallback to anonymous user if no logged-in user and not in guest mode
     const anonymousId = user.getOrCreateAnonymousId();
     user._populate({
         userId: anonymousId,
@@ -119,7 +151,7 @@ async function createAndInitUser() {
         legacyChatId: anonymousId,
         legacyNotesId: anonymousId
     });
-    // console.log('Identity: Using anonymous user:', user.userName); // Can be removed
+    console.log('Identity: Using anonymous user:', user);
     return user;
 }
 
@@ -127,6 +159,7 @@ async function createAndInitUser() {
 if (typeof window.currentUserPromise === 'undefined') {
     window.currentUserPromise = createAndInitUser().then(user => {
         window.currentUser = user;
+        console.log('Global currentUser set:', window.currentUser);
         return user;
     });
 }

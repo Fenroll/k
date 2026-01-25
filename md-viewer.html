@@ -6,11 +6,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
   <!-- Favicon -->
-  <link rel="icon" href="favicon.ico?v=2" sizes="any">
   <link rel="icon" href="favicon.svg?v=7" type="image/svg+xml">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+  
+  <!-- Firebase SDKs - Moved to head and using compat versions -->
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+  
   <style>
     :root {
       --bg: #fafafa;
@@ -1011,19 +1015,17 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260121"></script>
+  <script src="courses.generated.js?v=20260125"></script>
 
   <!-- ============================================
        CHAT SYSTEM - Firebase & Notes
        ============================================ -->
 
-  <!-- Firebase Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
+
   
-<script src="js/user-identity.js?v=202404231000"></script>
-  <script src="js/chat.js?v=202404231000"></script>
-  <script src="js/presence.js"></script>
+<script src="js/user-identity.js?v=20260125"></script>
+  <script src="js/chat.js?v=20260125"></script>
+  <script src="js/presence.js?v=20260125"></script>
 
   <!-- Chat Widget HTML -->
   <div id="chat-widget" class="chat-widget">
@@ -1128,7 +1130,7 @@
   <script src="js/chat-init.js?v=202404231000"></script>
 
   <!-- Notes Initialization -->
-  <script src="js/notes-init.js?v=202404231000"></script>
+  <script src="js/notes-init.js?v=20260125"></script>
 
   <!-- H1 Navigation with Arrow Keys -->
   <script>

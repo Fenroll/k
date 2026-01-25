@@ -37,33 +37,20 @@ class NotesFirebaseREST {
   }
 
   async initSDK() {
-    if (window.firebaseSDK) {
-      this.sdk = window.firebaseSDK;
-      this.initApp();
-      return;
-    }
-    // Wait for main chat to load SDK or load it ourselves if needed
-    // Assuming chat.js is present and loads SDK
-    let attempts = 0;
-    while (!window.firebaseSDK && attempts < 50) {
-        await new Promise(r => setTimeout(r, 100));
-        attempts++;
-    }
-    if (window.firebaseSDK) {
-        this.sdk = window.firebaseSDK;
-        this.initApp();
-    } else { // Keep error message
-        console.error("NotesFirebaseREST: Firebase SDK not found after waiting.");
+    // If the global firebase object is already available, use it.
+    if (typeof firebase !== 'undefined') {
+        this.initApp(firebase);
+        return;
+    } else {
+        console.error("NotesFirebaseREST: Firebase SDK not loaded globally. Please ensure firebase-app-compat.js and firebase-database-compat.js are loaded BEFORE notes-init.js");
     }
   }
 
-  initApp() {
+  initApp(firebaseInstance) {
     try {
-      const { initializeApp, getDatabase, getApps } = this.sdk;
-      // Ensure we get the correct app instance, or initialize if none exists.
-      // It's safer to get an app by name if multiple apps are possible, but for now, first app is fine.
-      const app = getApps().length === 0 ? initializeApp(this.firebaseConfig, "notesApp") : getApps()[0];
-      this.db = getDatabase(app); // Keep for initial debugging
+      // Check if app already exists to avoid errors on page reload/navigation
+      const app = firebaseInstance.apps.length === 0 ? firebaseInstance.initializeApp(this.firebaseConfig, "notesApp") : firebaseInstance.app();
+      this.db = firebaseInstance.database();
       // console.log('NotesFirebaseREST: Firebase App initialized.');
     } catch (e) {
       console.error("NotesFirebaseREST: Firebase Init Error:", e);
@@ -72,18 +59,20 @@ class NotesFirebaseREST {
 
   async _ensureInit() {
     if (this.db) return;
-    await this.initSDK();
-    while (!this.db) {
-        await new Promise(r => setTimeout(r, 100));
-        if (!this.sdk) break; 
+    // If initSDK didn't run or failed, try again with global firebase.
+    // This provides a fallback if initSDK was called prematurely or firebase wasn't ready.
+    if (typeof firebase !== 'undefined' && !this.db) {
+        this.initApp(firebase);
+        if (this.db) return; // If successful now
     }
+    // If still not initialized, something is wrong.
+    throw new Error("NotesFirebaseREST: Firebase not initialized. Check SDK loading and configuration.");
   }
 
   async getNameMappings() {
     await this._ensureInit();
-    const { ref, get } = this.sdk;
     try {
-        const snapshot = await get(ref(this.db, `name_mappings`));
+        const snapshot = await firebase.database().ref(`name_mappings`).once('value');
         return snapshot.exists() ? snapshot.val() : {};
     } catch(e) { 
         console.error("Notes: Failed to get name mappings", e);
@@ -93,10 +82,9 @@ class NotesFirebaseREST {
 
   startNameMappingsPolling(callback) {
     this._ensureInit().then(() => {
-        const { ref, onValue } = this.sdk;
-        const mappingsRef = ref(this.db, `name_mappings`);
+        const mappingsRef = firebase.database().ref(`name_mappings`);
         // console.log('NotesFirebaseREST: Starting name mappings polling.');
-        onValue(mappingsRef, (snapshot) => {
+        mappingsRef.on('value', (snapshot) => {
             callback(snapshot.val() || {});
         });
     });
@@ -108,15 +96,14 @@ class NotesFirebaseREST {
     if (!text.trim()) return false;
     await this._ensureInit();
 
-    const { ref, push, set, serverTimestamp } = this.sdk;
-    const messagesRef = ref(this.db, `notes/${this.documentId}`);
+    const messagesRef = firebase.database().ref(`notes/${this.documentId}`);
     
     const message = {
       userId: currentUser.userId,
       userName: currentUser.userName,
       userColor: currentUser.color,
       text: text.trim(),
-      timestamp: serverTimestamp(),
+      timestamp: firebase.database.ServerValue.TIMESTAMP,
     };
 
     if (replyTo && replyAuthor) {
@@ -125,8 +112,8 @@ class NotesFirebaseREST {
     }
 
     try {
-      const newMessageRef = push(messagesRef);
-      await set(newMessageRef, message); // Can be removed, frequent
+      const newMessageRef = messagesRef.push();
+      await newMessageRef.set(message); // Can be removed, frequent
       // console.log('NotesFirebaseREST: Message sent successfully.');
       return true;
     } catch (error) {
@@ -140,11 +127,10 @@ class NotesFirebaseREST {
     this.isPolling = true;
 
     this._ensureInit().then(() => {
-        const { ref, onValue, query, orderByChild, limitToLast } = this.sdk;
-        const messagesRef = ref(this.db, `notes/${this.documentId}`);
-        const q = query(messagesRef, orderByChild('timestamp'), limitToLast(500));
+        const messagesRef = firebase.database().ref(`notes/${this.documentId}`);
+        const q = messagesRef.orderByChild('timestamp').limitToLast(500);
 
-        onValue(q, (snapshot) => {
+        q.on('value', (snapshot) => {
             const messages = [];
             snapshot.forEach((child) => {
                 const val = child.val();
@@ -164,10 +150,9 @@ class NotesFirebaseREST {
 
   startReactionPolling(callback) {
     this._ensureInit().then(() => {
-        const { ref, onValue } = this.sdk;
-        const reactionsRef = ref(this.db, `notes_reactions/${this.documentId}`); // Can be removed, less critical
+        const reactionsRef = firebase.database().ref(`notes_reactions/${this.documentId}`); // Can be removed, less critical
         // console.log('NotesFirebaseREST: Starting reactions polling.');
-        onValue(reactionsRef, (snapshot) => {
+        reactionsRef.on('value', (snapshot) => {
             callback(snapshot.val() || {});
         });
     });
@@ -175,10 +160,9 @@ class NotesFirebaseREST {
 
   async deleteMessage(messageKey) {
     await this._ensureInit();
-    const { ref, remove } = this.sdk;
     try {
-        const messageRef = ref(this.db, `notes/${this.documentId}/${messageKey}`); // Can be removed, less critical
-        await remove(messageRef);
+        const messageRef = firebase.database().ref(`notes/${this.documentId}/${messageKey}`); // Can be removed, less critical
+        await messageRef.remove();
         // console.log('NotesFirebaseREST: Message deleted successfully.');
         return true;
     } catch (e) { console.error('NotesFirebaseREST: Delete message error:', e); return false; }
@@ -194,13 +178,12 @@ class NotesFirebaseREST {
 
   async setReaction(messageId, emoji, value) {
     await this._ensureInit();
-    const { ref, set } = this.sdk;
     try {
-      const reactionRef = ref(this.db, `notes_reactions/${this.documentId}/${messageId}/${emoji}/${currentUser.userId}`);
+      const reactionRef = firebase.database().ref(`notes_reactions/${this.documentId}/${messageId}/${emoji}/${currentUser.userId}`);
       if (value) {
-          await set(reactionRef, true);
+          await reactionRef.set(true);
       } else {
-          await set(reactionRef, null); // Remove the node to keep DB clean // Can be removed, frequent
+          await reactionRef.set(null); // Remove the node to keep DB clean // Can be removed, frequent
       }
       // console.log(`NotesFirebaseREST: Reaction ${emoji} for message ${messageId} set to ${value}.`);
       return true;
