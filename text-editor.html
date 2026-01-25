@@ -1241,9 +1241,9 @@
       </div>
       <div class="modal-body">
         <div style="margin-bottom: 16px;">
-          <label for="imageNameInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Image File Name</label>
-          <input type="text" id="imageNameInput" placeholder="e.g., photo.png" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
-          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">File must exist in assets/ folder</div>
+          <label for="imageNameInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Image File Name or URL</label>
+          <input type="text" id="imageNameInput" placeholder="e.g., photo.png or https://example.com/photo.jpg" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">For local files, they must exist in assets/ folder</div>
         </div>
         <div style="margin-bottom: 16px;">
           <label for="imageAltInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Alt Text (Description)</label>
@@ -3666,13 +3666,21 @@ renderMathInElement(document.body, {
       const imageSize = document.getElementById('imageSizeInput').value || 100;
 
       if (!imageName) {
-        alert('Please enter image file name');
+        alert('Please enter image file name or URL');
         return;
       }
       
-      // Auto-add .png extension if missing
-      if (!imageName.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
-        imageName = imageName + '.png';
+      const isUrl = imageName.startsWith('http://') || imageName.startsWith('https://');
+
+      let imgSrc;
+      if (isUrl) {
+        imgSrc = imageName;
+      } else {
+        // Auto-add .png extension if missing and not a URL
+        if (!imageName.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
+          imageName = imageName + '.png';
+        }
+        imgSrc = 'assets/' + imageName;
       }
       
       // Use saved range if available, otherwise get current selection
@@ -3687,12 +3695,13 @@ renderMathInElement(document.body, {
       }
       
       const img = document.createElement('img');
-      img.src = 'assets/' + imageName;
+      img.src = imgSrc;
       img.alt = imageAlt || imageName;
       img.style.maxWidth = imageSize + '%';
       img.style.height = 'auto';
       img.style.display = 'block';
-      img.setAttribute('data-original-src', 'assets/' + imageName);
+      img.style.minWidth = '100px';
+      img.setAttribute('data-original-src', imgSrc);
       img.setAttribute('data-width', imageSize);
       
       range.insertNode(img);
