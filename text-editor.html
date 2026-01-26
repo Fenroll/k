@@ -314,9 +314,14 @@
       margin-top: 0.1em;
     }
 
-    /* Reduce space between h3 and h4 */
+    /* Reduce space between consecutive headings */
+    #editor h1 + h2,
+    #editor h1 + h3,
+    #editor h1 + h4,
+    #editor h2 + h3,
+    #editor h2 + h4,
     #editor h3 + h4 {
-      margin-top: 0.3em;
+      margin-top: 0.2em;
     }
 
     #editor ul,
@@ -3445,7 +3450,7 @@ localStorage.setItem('textEditorContent', htmlContent);
     h2 { font-size: 1.3em; }
     h3 { font-size: 1.1em; margin-bottom: 0.1em; }
     h4 { font-size: 1.05em; margin-bottom: 0.1em; }
-    h3 + h4 { margin-top: 0.3em; }
+    h1 + h2, h1 + h3, h1 + h4, h2 + h3, h2 + h4, h3 + h4 { margin-top: 0.2em; }
     p { 
       margin: 0.3em 0; 
       white-space: pre-wrap;
@@ -3651,7 +3656,9 @@ localStorage.setItem('textEditorContent', htmlContent);
               inOl = false;
             }
             if (line.trim()) {
-              html.push(line);
+              html.push(line + '<br>');
+            } else {
+              html.push('<br>');
             }
           }
         }
@@ -3668,10 +3675,10 @@ localStorage.setItem('textEditorContent', htmlContent);
           .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
         
         result = result
-          .replace(/<\/ul>(.)/g, '</ul><br>$1')
-          .replace(/<\/ol>(.)/g, '</ol><br>$1')
-          .replace(/(.)<ul>/g, '$1<br><ul>')
-          .replace(/(.)<ol>/g, '$1<br><ol>');
+          .replace(/<br><ul>/g, '<ul>')
+          .replace(/<br><ol>/g, '<ol>')
+          .replace(/<\/ul><br>/g, '</ul>')
+          .replace(/<\/ol><br>/g, '</ol>');
         
         return result;
       }
@@ -4093,8 +4100,11 @@ renderMathInElement(document.body, {
             html.push('</ol>');
             inOl = false;
           }
+          // Add regular text line (preserve empty lines as <br>)
           if (line.trim()) {
-            html.push(line);
+            html.push(line + '<br>');
+          } else {
+            html.push('<br>');
           }
         }
       }
@@ -4103,7 +4113,7 @@ renderMathInElement(document.body, {
       if (inUl) html.push('</ul>');
       if (inOl) html.push('</ol>');
       
-      // Join - don't add newlines between list elements
+      // Join without adding extra spacing
       let result = html.join('')
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/__(.+?)__/g, '<strong>$1</strong>')
@@ -4112,12 +4122,12 @@ renderMathInElement(document.body, {
         .replace(/`(.+?)`/g, '<code>$1</code>')
         .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
       
-      // Add <br> only between non-list blocks
+      // Clean up extra <br> before/after lists
       result = result
-        .replace(/<\/ul>(.)/g, '</ul><br>$1')
-        .replace(/<\/ol>(.)/g, '</ol><br>$1')
-        .replace(/(.)<ul>/g, '$1<br><ul>')
-        .replace(/(.)<ol>/g, '$1<br><ol>');
+        .replace(/<br><ul>/g, '<ul>')
+        .replace(/<br><ol>/g, '<ol>')
+        .replace(/<\/ul><br>/g, '</ul>')
+        .replace(/<\/ol><br>/g, '</ol>');
       
       return result;
     }

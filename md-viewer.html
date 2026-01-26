@@ -1397,7 +1397,9 @@
             inOl = false;
           }
           if (line.trim()) {
-            html.push(line);
+            html.push(line + '<br>');
+          } else {
+            html.push('<br>');
           }
         }
       }
@@ -1414,10 +1416,10 @@
         .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
       
       result = result
-        .replace(/<\/ul>(.)/g, '</ul><br>$1')
-        .replace(/<\/ol>(.)/g, '</ol><br>$1')
-        .replace(/(.)<ul>/g, '$1<br><ul>')
-        .replace(/(.)<ol>/g, '$1<br><ol>');
+        .replace(/<br><ul>/g, '<ul>')
+        .replace(/<br><ol>/g, '<ol>')
+        .replace(/<\/ul><br>/g, '</ul>')
+        .replace(/<\/ol><br>/g, '</ol>');
       
       return result;
     }
