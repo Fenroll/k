@@ -429,6 +429,43 @@ function getAllCourses() {
   return [...activeCourses, ...archivedCourses];
 }
 
+function updateHtmlFiles(version) {
+  // HTML files that need cache-busting updates
+  const htmlFiles = [
+    path.join(__dirname, 'index.html'),
+    path.join(__dirname, 'md-viewer.html'),
+    path.join(__dirname, 'md-editor.html'),
+    path.join(__dirname, 'text-editor.html'),
+    path.join(__dirname, 'admin.html')
+  ];
+
+  htmlFiles.forEach(filePath => {
+    if (!fs.existsSync(filePath)) {
+      console.log(`⚠ Skipping ${path.basename(filePath)} - file not found`);
+      return;
+    }
+
+    try {
+      let content = fs.readFileSync(filePath, 'utf8');
+      
+      // Replace courses.generated.js script tags with dynamic versioning
+      // Match patterns like: <script src="courses.generated.js?v=20260125"></script>
+      const scriptPattern = /<script src="courses\.generated\.js(?:\?v=[0-9]+)?"><\/script>/g;
+      const newScriptTag = `<script src="courses.generated.js?v=${version}"></script>`;
+      
+      if (scriptPattern.test(content)) {
+        content = content.replace(scriptPattern, newScriptTag);
+        fs.writeFileSync(filePath, content, 'utf8');
+        console.log(`✓ Updated ${path.basename(filePath)} with version ${version}`);
+      } else {
+        console.log(`⚠ No courses.generated.js script tag found in ${path.basename(filePath)}`);
+      }
+    } catch (error) {
+      console.error(`✗ Error updating ${path.basename(filePath)}:`, error.message);
+    }
+  });
+}
+
 function main() {
   // Get regular courses
   const courses = getAllCourses();
@@ -444,10 +481,12 @@ function main() {
     console.log('ℹ Event info file not found or could not be read');
   }
 
-  // Generate build timestamp and version (YYYYMMDD)
+  // Generate build timestamp and version (YYYYMMDD + time-based hash for uniqueness)
   const buildDate = new Date();
   const pad = n => n.toString().padStart(2, '0');
-  const version = `${buildDate.getFullYear()}${pad(buildDate.getMonth() + 1)}${pad(buildDate.getDate())}`;
+  const dateStr = `${buildDate.getFullYear()}${pad(buildDate.getMonth() + 1)}${pad(buildDate.getDate())}`;
+  const timeHash = (buildDate.getHours() * 3600 + buildDate.getMinutes() * 60 + buildDate.getSeconds()).toString(36);
+  const version = `${dateStr}${timeHash}`;
 
   // For display
   const dateParts = new Intl.DateTimeFormat('bg-BG', {
@@ -472,6 +511,16 @@ function main() {
   console.log('Generated courses:', OUTPUT_FILE);
   console.log('Build timestamp:', buildTimestamp);
   console.log('coursesVersion:', version);
+
+  // Save version to JSON file for external reference
+  const versionData = { version, timestamp: buildTimestamp };
+  const VERSION_FILE = path.join(__dirname, 'courses.version.json');
+  fs.writeFileSync(VERSION_FILE, JSON.stringify(versionData, null, 2), 'utf8');
+  console.log('✓ Saved version to:', VERSION_FILE);
+
+  // Update HTML files with new version
+  console.log('\nUpdating HTML files...');
+  updateHtmlFiles(version);
 }
 
 main();
