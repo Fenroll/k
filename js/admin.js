@@ -227,6 +227,45 @@
 
         // --- Event Listeners ---
 
+        // Register function
+        async function register(username, displayName, password) {
+            hideError('register-error');
+            
+            if (!username || !displayName || !password) {
+                showError('register-error', 'All fields are required');
+                return;
+            }
+
+            try {
+                const usersRef = db.ref('site_users');
+                const snapshot = await usersRef.orderByChild('username').equalTo(username).once('value');
+                
+                if (snapshot.exists()) {
+                    showError('register-error', 'Username already exists');
+                    return;
+                }
+
+                const newUserRef = usersRef.push();
+                const uid = newUserRef.key;
+                const randomColor = generateRandomColor();
+
+                await newUserRef.set({
+                    username: username,
+                    displayName: displayName,
+                    password: password,
+                    color: randomColor,
+                    isAdmin: false,
+                    createdAt: Date.now()
+                });
+
+                showNotification(`Account created successfully! Username: ${username}`);
+                document.getElementById('registration-form-element').reset();
+            } catch (error) {
+                console.error('Registration error:', error);
+                showError('register-error', 'Failed to create account: ' + error.message);
+            }
+        }
+
         // Registration form
         if(registrationForm) {
             registrationForm.addEventListener('submit', (e) => {

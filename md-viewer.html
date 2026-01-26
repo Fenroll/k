@@ -246,24 +246,44 @@
     pre { background: var(--bg); padding: 12px; border-radius: 6px; overflow-x: auto; border: 1px solid var(--border); color: var(--fg); }
     code { background: var(--bg); padding: 2px 6px; border-radius: 4px; color: var(--fg); }
 
+    /* Note styles for viewing exported HTML files */
+    .markdown-body .editor-note {
+      text-decoration: underline dotted #a3b18a;
+      cursor: help;
+      position: relative;
+    }
+
+    #noteTooltipViewer {
+      position: absolute;
+      display: none;
+      background-color: #f0f7f0;
+      color: #1f2937;
+      padding: 8px 12px;
+      border-radius: 4px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      max-width: 500px;
+      word-wrap: break-word;
+      z-index: 10000;
+      font-size: 0.9em;
+      line-height: 1.4;
+      border: 1px solid #588157;
+    #noteTooltipViewer ul, #noteTooltipViewer ol {
+      margin: 0 !important;
+      padding-left: 20px !important;
+    }
+    #noteTooltipViewer li {
+      margin: 0 0 0.1em 0 !important;
+      padding: 0 !important;
+      line-height: 1.2 !important;
+    }
+    #noteTooltipViewer li:last-child {
+      margin-bottom: 0 !important;
+    }
+
     @media (max-width: 768px) {
       main { padding: 12px; }
       .markdown-body { font-size: 0.83em; font-weight: 300; }
       .table-scroll table { font-size: 0.83em; }
-    }
-    /* Responsive images: prevent too small images on mobile */
-    .markdown-body img {
-      max-width: 100%;
-      min-width: 150px;
-      width: auto;
-      height: auto;
-      display: block;
-      margin: 0.5em auto;
-    }
-    @media (max-width: 500px) {
-      .markdown-body img {
-        min-width: 80px;
-      }
     }
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -277,7 +297,7 @@
           if (title) {
             const widthMatch = title.match(/width=(\d+)%/);
             if (widthMatch && widthMatch[1]) {
-              style = `max-width:${widthMatch[1]}%; min-width:150px; height:auto;`;
+              style = `max-width:${widthMatch[1]}%; height:auto;`; // min-width removed
               dataWidth = ` data-width="${widthMatch[1]}"`;
             }
           }
@@ -1318,6 +1338,132 @@
         initH1Navigation();
       }
     })();
+  </script>
+
+  <script>
+    // Note tooltip functionality for viewing exported HTML files
+    let noteTooltip = null;
+
+    function createNoteTooltipViewer() {
+      if (!noteTooltip) {
+        noteTooltip = document.createElement('div');
+        noteTooltip.id = 'noteTooltipViewer';
+        document.body.appendChild(noteTooltip);
+      }
+    }
+
+    function parseNoteMarkdown(text) {
+      if (!text) return '';
+      
+      let lines = text.split('\n');
+      let html = [];
+      let inUl = false;
+      let inOl = false;
+      
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        
+        if (/^\s*[-*]\s+(.+)/.test(line)) {
+          if (!inUl) {
+            if (inOl) {
+              html.push('</ol>');
+              inOl = false;
+            }
+            html.push('<ul>');
+            inUl = true;
+          }
+          let match = line.match(/^\s*[-*]\s+(.+)/);
+          html.push('<li>' + match[1] + '</li>');
+        }
+        else if (/^\s*\d+\.\s+(.+)/.test(line)) {
+          if (!inOl) {
+            if (inUl) {
+              html.push('</ul>');
+              inUl = false;
+            }
+            html.push('<ol>');
+            inOl = true;
+          }
+          let match = line.match(/^\s*\d+\.\s+(.+)/);
+          html.push('<li>' + match[1] + '</li>');
+        }
+        else {
+          if (inUl) {
+            html.push('</ul>');
+            inUl = false;
+          }
+          if (inOl) {
+            html.push('</ol>');
+            inOl = false;
+          }
+          if (line.trim()) {
+            html.push(line);
+          }
+        }
+      }
+      
+      if (inUl) html.push('</ul>');
+      if (inOl) html.push('</ol>');
+      
+      let result = html.join('')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/__(.+?)__/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/_(.+?)_/g, '<em>$1</em>')
+        .replace(/\`(.+?)\`/g, '<code>$1</code>')
+        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
+      
+      result = result
+        .replace(/<\/ul>(.)/g, '</ul><br>$1')
+        .replace(/<\/ol>(.)/g, '</ol><br>$1')
+        .replace(/(.)<ul>/g, '$1<br><ul>')
+        .replace(/(.)<ol>/g, '$1<br><ol>');
+      
+      return result;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      createNoteTooltipViewer();
+
+      // Event delegation on the content area
+      document.addEventListener('mouseover', (e) => {
+        if (e.target.classList && e.target.classList.contains('editor-note')) {
+          const noteContent = e.target.dataset.note;
+          if (noteContent && noteTooltip) {
+            noteTooltip.innerHTML = parseNoteMarkdown(noteContent);
+            noteTooltip.style.display = 'block';
+            const rect = e.target.getBoundingClientRect();
+            noteTooltip.style.left = `${rect.left + window.scrollX}px`;
+            noteTooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
+          }
+        }
+      });
+
+      document.addEventListener('mouseout', (e) => {
+        if (e.target.classList && e.target.classList.contains('editor-note')) {
+          if (noteTooltip) {
+            setTimeout(() => {
+              if (!noteTooltip.matches(':hover')) {
+                noteTooltip.style.display = 'none';
+              }
+            }, 100);
+          }
+        }
+      });
+
+      // Hide tooltip when mouse leaves it
+      document.addEventListener('mouseover', (e) => {
+        if (e.target === noteTooltip) {
+          // Keep it visible
+        }
+      });
+
+      document.addEventListener('mouseout', (e) => {
+        if (e.target === noteTooltip) {
+          noteTooltip.style.display = 'none';
+        }
+      });
+    });
   </script>
 
   <style>

@@ -368,16 +368,24 @@
     }
 
     #editor blockquote {
-      border-left: 3px solid #f59e0b;
+      border-left: 3px solid #6ea56e;
       padding-left: 1em;
       margin: 0.5em 0;
       font-style: italic;
-      color: #78350f;
+      color: #3e7e3c;
     }
+
+    .editor-note {
+      text-decoration: underline dotted #a3b18a; /* ~Dry Sage dotted underline */
+      cursor: help; /* Indicate hoverable element */
+      position: relative; /* Needed for tooltip positioning */
+    }
+
+
 
     #editor a {
       color: inherit;
-      text-decoration: underline;
+      text-decoration: underline wavy #74b673;
       cursor: pointer;
     }
 
@@ -1098,6 +1106,7 @@
 
       <button id="linkBtn" title="Link"><img src="svg/md-editor/icon-link.svg" alt="Bold" class="toolbar-icon"></button>
       <button id="imageBtn" title="Add Image"><img src="svg/md-editor/icon-image.svg" alt="Image" class="toolbar-icon"></button>
+      <button id="noteBtn" title="Add Note"><img src="svg/md-editor/icon-note.svg" alt="Note" class="toolbar-icon"></button>
       <button id="hrBtn" title="Horizontal Line"><svg width="18" height="18" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32s-14.33-32-32-32H64c-17.67 0-32 14.33-32 32z"/></svg></button>
       <button id="dashedLineBtn" title="Topic Divider (Dashed Line)"><img src="svg/md-editor/icon-dashed-line.svg" alt="Dashed Line" class="toolbar-icon"></button>
     </div>
@@ -1268,6 +1277,30 @@
       <div class="modal-footer">
         <button id="cancelImageBtn">Cancel</button>
         <button class="primary" id="insertImageBtn">Insert Image</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add Note Modal -->
+  <div id="noteModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Add Note</h2>
+        <span class="close" id="closeNoteModalBtn">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 16px;">
+          <label for="noteSelectedTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Selected Text</label>
+          <input type="text" id="noteSelectedTextInput" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; background-color: #f3f4f6;" readonly>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label for="noteTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Note Content</label>
+          <textarea id="noteTextInput" placeholder="Paste your note content here..." style="width: 100%; height: 150px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: 'Open Sans', Arial, sans-serif; resize: vertical;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelNoteBtn">Cancel</button>
+        <button class="primary" id="insertNoteBtn">Save Note</button>
       </div>
     </div>
   </div>
@@ -2454,12 +2487,12 @@
       const selectedText = selection.toString();
       const range = selection.getRangeAt(0);
       
-      // Create link with underline
+      // Create link with wavy underline
       const link = document.createElement('a');
       link.href = url.trim();
       link.textContent = selectedText;
-      link.style.textDecoration = 'underline';
-      link.style.textDecorationColor = '#588157';
+      link.style.textDecoration = 'underline wavy';
+      link.style.textDecorationColor = '#74b673';
       
       // Insert link
       range.deleteContents();
@@ -3338,47 +3371,15 @@ localStorage.setItem('textEditorContent', htmlContent);
         return;
       }
       
-      // Clean the name: remove .html, .md, .txt extensions
       const cleanName = name.replace(/\.(html|md|txt)$/i, '');
       
+      let editorContentForBody = editor.innerHTML;
 
-      // Get content
-      let editorContent = editor.innerHTML;
-
-      // CRITICAL FIX: Process lists BEFORE doing any cleanup
-      const contentDiv = document.createElement('div');
-      contentDiv.innerHTML = editorContent;
-
-      // Step 1: Clean up list structure first - ensure proper nesting
-      // Process each list to fix any broken structures
-      contentDiv.querySelectorAll('ul, ol').forEach(list => {
-        // For each list, go through its direct <li> children
-        Array.from(list.children).forEach(li => {
-          if (li.tagName === 'LI') {
-            let html = li.innerHTML;
-            // Remove ONLY leading and trailing <br> tags in the TEXT content
-            // BUT preserve <br> tags before nested lists
-            // First, check if there's a nested list
-            const hasNestedList = li.querySelector('ul, ol') !== null;
-            if (hasNestedList) {
-              // If has nested list, only remove trailing <br> after the nested list
-              html = html.replace(/<br\s*\/?>(\s*)$/gi, '');
-            } else {
-              // If no nested list, remove both leading and trailing <br>
-              html = html.replace(/^<br\s*\/?/gi, '');
-              html = html.replace(/<br\s*\/?>(\s*)$/gi, '');
-            }
-            li.innerHTML = html;
-          }
-        });
-      });
-      editorContent = contentDiv.innerHTML;
-
-      // Step 2: Create a temporary container
+      // Create a temporary container
       const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = editorContent;
+      tempDiv.innerHTML = editorContentForBody;
 
-      // Step 3: Remove hidden elements
+      // Remove hidden elements
       const removeHiddenElements = (element) => {
         const nodesToRemove = [];
         element.querySelectorAll('*').forEach(node => {
@@ -3390,41 +3391,34 @@ localStorage.setItem('textEditorContent', htmlContent);
         nodesToRemove.reverse().forEach(n => n.remove());
       };
       removeHiddenElements(tempDiv);
-      editorContent = tempDiv.innerHTML;
+      editorContentForBody = tempDiv.innerHTML;
 
-      // Step 4: VERY CAREFULLY remove only COMPLETELY EMPTY <p> tags
-      // Do NOT remove <p> tags that contain any content or are near lists
+      // VERY CAREFULLY remove only COMPLETELY EMPTY <p> tags
       let prevContent;
       let iterations = 0;
       do {
-        prevContent = editorContent;
+        prevContent = editorContentForBody;
         iterations++;
-        // Only remove <p> tags that are completely empty
-        editorContent = editorContent.replace(/<p>\s*<\/p>/g, '');
-        // Only remove <p> with just <br> tags (these are spacing)
-        editorContent = editorContent.replace(/<p><br\s*\/?><\/p>/g, '');
-        editorContent = editorContent.replace(/<p>\s*<br\s*\/?>(\s*)<\/p>/g, '');
-        // DO NOT try to remove <p> containing text or formatting
-        // This breaks lists completely
-      } while (editorContent !== prevContent && iterations < 2);
+        editorContentForBody = editorContentForBody.replace(/<p>\s*<\/p>/g, '');
+        editorContentForBody = editorContentForBody.replace(/<p><br\s*\/?><\/p>/g, '');
+        editorContentForBody = editorContentForBody.replace(/<p>\s*<br\s*\/?>(\s*)<\/p>/g, '');
+      } while (editorContentForBody !== prevContent && iterations < 2);
 
-      // Step 5: Fix image paths
-      editorContent = editorContent.replace(/src="[^"]*?(assets\/[^"]*)"(?=[^>]*>)/g, 'src="$1"');
-      editorContent = editorContent.replace(/(<img[^>]*src="([^"]*?)"[^>]*)data-original-src="[^"]*?"(?=[^>]*>)/g, '$1data-original-src="$2"');
-      editorContent = editorContent.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
+      // Fix image paths
+      editorContentForBody = editorContentForBody.replace(/src="[^"]*?(assets\/[^"]*)"(?=[^>]*>)/g, 'src="$1"');
+      editorContentForBody = editorContentForBody.replace(/(<img[^>]*src="([^"]*?)"[^>]*)data-original-src="[^"]*?"(?=[^>]*>)/g, '$1data-original-src="$2"');
+      editorContentForBody = editorContentForBody.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
 
-      // Step 6: Sanitize <style> blocks: rewrite global img { ... } to .markdown-body img { ... }
+      // Sanitize <style> blocks
       const styleSanitizeDiv = document.createElement('div');
-      styleSanitizeDiv.innerHTML = editorContent;
+      styleSanitizeDiv.innerHTML = editorContentForBody;
       styleSanitizeDiv.querySelectorAll('style').forEach(styleEl => {
         styleEl.textContent = styleEl.textContent.replace(/(^|\s)img\s*\{/g, '.markdown-body img {');
       });
-      editorContent = styleSanitizeDiv.innerHTML;
-      
-      // Get heading color from localStorage
+      editorContentForBody = styleSanitizeDiv.innerHTML;
+
       const savedHeadingColor = localStorage.getItem('textEditorHeadingColor') || '#000000';
       
-      // Create standalone HTML file with embedded content
       const htmlDoc = `<!DOCTYPE html>
 <html lang="bg">
 <head>
@@ -3445,7 +3439,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       font-weight: 600; 
       margin-top: 0.8em;
       margin-bottom: 0.15em;
-      color: ${savedHeadingColor};
+      color: \${savedHeadingColor};
     }
     h1 { font-size: 1.65em; }
     h2 { font-size: 1.3em; }
@@ -3538,7 +3532,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       text-decoration: underline;
     }
     a:hover {
-      color: #d97706;
+      color: #74b673;
     }
     /* Keep <p> tags inside list items on same line (as they appear in editor) */
     li p {
@@ -3574,10 +3568,145 @@ localStorage.setItem('textEditorContent', htmlContent);
       table { font-size: 0.9em; }
       th, td { padding: 4px 6px; }
     }
+    .editor-note {
+      text-decoration: underline dotted #a3b18a;
+      cursor: help;
+      position: relative;
+    }
+    .note-tooltip {
+      display: none;
+      position: absolute;
+      background-color: #f0f7f0;
+      color: #1f2937;
+      border: 1px solid #588157;
+      border-radius: 4px;
+      padding: 8px 12px;
+      max-width: 500px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      z-index: 10000;
+      font-size: 0.9em;
+      line-height: 1.4;
+      word-wrap: break-word;
+    .note-tooltip ul, .note-tooltip ol {
+      margin: 0 !important;
+      padding-left: 20px !important;
+    }
+    .note-tooltip li {
+      margin: 0 0 0.1em 0 !important;
+      padding: 0 !important;
+      line-height: 1.2 !important;
+    }
+    .note-tooltip li:last-child {
+      margin-bottom: 0 !important;
+    }
   </style>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const tooltip = document.createElement('div');
+      tooltip.className = 'note-tooltip';
+      document.body.appendChild(tooltip);
+
+      function parseNoteMarkdown(text) {
+        if (!text) return '';
+        
+        let lines = text.split('\n');
+        let html = [];
+        let inUl = false;
+        let inOl = false;
+        
+        for (let i = 0; i < lines.length; i++) {
+          let line = lines[i];
+          
+          if (/^\s*[-*]\s+(.+)/.test(line)) {
+            if (!inUl) {
+              if (inOl) {
+                html.push('</ol>');
+                inOl = false;
+              }
+              html.push('<ul>');
+              inUl = true;
+            }
+            let match = line.match(/^\s*[-*]\s+(.+)/);
+            html.push('<li>' + match[1] + '</li>');
+          }
+          else if (/^\s*\d+\.\s+(.+)/.test(line)) {
+            if (!inOl) {
+              if (inUl) {
+                html.push('</ul>');
+                inUl = false;
+              }
+              html.push('<ol>');
+              inOl = true;
+            }
+            let match = line.match(/^\s*\d+\.\s+(.+)/);
+            html.push('<li>' + match[1] + '</li>');
+          }
+          else {
+            if (inUl) {
+              html.push('</ul>');
+              inUl = false;
+            }
+            if (inOl) {
+              html.push('</ol>');
+              inOl = false;
+            }
+            if (line.trim()) {
+              html.push(line);
+            }
+          }
+        }
+        
+        if (inUl) html.push('</ul>');
+        if (inOl) html.push('</ol>');
+        
+        let result = html.join('')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/__(.+?)__/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/_(.+?)_/g, '<em>$1</em>')
+          .replace(/\`(.+?)\`/g, '<code>$1</code>')
+          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
+        
+        result = result
+          .replace(/<\/ul>(.)/g, '</ul><br>$1')
+          .replace(/<\/ol>(.)/g, '</ol><br>$1')
+          .replace(/(.)<ul>/g, '$1<br><ul>')
+          .replace(/(.)<ol>/g, '$1<br><ol>');
+        
+        return result;
+      }
+
+      document.body.addEventListener('mouseover', function(e) {
+        if (e.target.classList.contains('editor-note')) {
+          const note = e.target.dataset.note;
+          if (note) {
+            tooltip.innerHTML = parseNoteMarkdown(note);
+            tooltip.style.display = 'block';
+            const rect = e.target.getBoundingClientRect();
+            tooltip.style.left = rect.left + 'px';
+            tooltip.style.top = (rect.bottom + 5) + 'px';
+          }
+        }
+      });
+
+      document.body.addEventListener('mouseout', function(e) {
+        if (e.target.classList.contains('editor-note')) {
+          setTimeout(() => {
+            if (!tooltip.matches(':hover')) {
+              tooltip.style.display = 'none';
+            }
+          }, 100);
+        }
+      });
+
+      tooltip.addEventListener('mouseleave', function() {
+        tooltip.style.display = 'none';
+      });
+    });
+  <\/script>
 </head>
 <body>
-${editorContent}
+${editorContentForBody}
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"><\/script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"><\/script>
 <script>
@@ -3639,6 +3768,8 @@ renderMathInElement(document.body, {
         document.getElementById('imageModal').style.display = 'none';
       }
     });
+
+
 
 
 
@@ -3732,6 +3863,306 @@ renderMathInElement(document.body, {
       if (e.key === 'Enter') {
         e.preventDefault();
         document.getElementById('insertImageBtn').click();
+      }
+    });
+
+    // Note modal events
+    let savedNoteSelection = null; // Stores the Range of selected text
+    let uniqueNoteIdCounter = 0; // Simple counter for unique IDs
+    let noteTooltip = null; // Stores the tooltip element
+    let currentEditingNoteSpan = null; // Stores the <span> element being edited
+
+    document.getElementById('noteBtn').addEventListener('click', () => {
+      const selection = window.getSelection();
+      if (selection.rangeCount === 0 || selection.toString().length === 0) {
+        showNotification('Please select text in the editor first to add a note.', 'warning');
+        return;
+      }
+      savedNoteSelection = selection.getRangeAt(0).cloneRange();
+      currentEditingNoteSpan = null; // Reset for new note creation
+      
+      const noteModal = document.getElementById('noteModal');
+      document.getElementById('noteSelectedTextInput').value = selection.toString(); // Set selected text
+      document.getElementById('noteTextInput').value = ''; // Clear previous note
+      document.getElementById('insertNoteBtn').textContent = 'Save Note'; // Reset button text
+      noteModal.style.display = 'flex';
+      document.getElementById('noteTextInput').focus();
+    });
+    
+    document.getElementById('closeNoteModalBtn').addEventListener('click', () => {
+      document.getElementById('noteModal').style.display = 'none';
+      savedNoteSelection = null;
+      currentEditingNoteSpan = null;
+    });
+    
+    document.getElementById('cancelNoteBtn').addEventListener('click', () => {
+      document.getElementById('noteModal').style.display = 'none';
+      savedNoteSelection = null;
+      currentEditingNoteSpan = null;
+    });
+    
+    document.getElementById('noteModal').addEventListener('click', (e) => {
+      if (e.target.id === 'noteModal') {
+        document.getElementById('noteModal').style.display = 'none';
+        savedNoteSelection = null;
+        currentEditingNoteSpan = null;
+      }
+    });
+
+    document.getElementById('insertNoteBtn').addEventListener('click', () => {
+      const noteText = document.getElementById('noteTextInput').value.trim();
+      const selectedTextContent = document.getElementById('noteSelectedTextInput').value;
+
+      if (!noteText) {
+        showNotification('Please enter some text for the note.', 'warning');
+        return;
+      }
+
+      if (currentEditingNoteSpan) {
+        // Editing existing note
+        currentEditingNoteSpan.dataset.note = noteText;
+        // The text content of the span does not change during edit
+        showNotification('Note updated successfully!', 'success');
+        
+        // Save reference to the note span before clearing
+        const editedNoteSpan = currentEditingNoteSpan;
+        
+        document.getElementById('noteTextInput').value = '';
+        document.getElementById('noteModal').style.display = 'none';
+        savedNoteSelection = null;
+        currentEditingNoteSpan = null;
+        
+        saveToHistory();
+        
+        // Restore cursor position after the edited note span
+        requestAnimationFrame(() => {
+          const range = document.createRange();
+          range.setStartAfter(editedNoteSpan);
+          range.collapse(true);
+          
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+          
+          editor.focus();
+        });
+      } else {
+        // Creating new note
+        if (!savedNoteSelection) {
+          showNotification('No text selected to attach the note to.', 'error');
+          return;
+        }
+
+        const selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(savedNoteSelection);
+
+        // Create a unique ID for this note span
+        const noteId = `note-${Date.now()}-${uniqueNoteIdCounter++}`;
+
+        const noteSpan = document.createElement('span');
+        noteSpan.classList.add('editor-note'); // Add class for styling
+        noteSpan.dataset.note = noteText;
+        noteSpan.id = noteId;
+        noteSpan.textContent = selectedTextContent;
+        
+        // Ensure the selection is not empty before attempting to surround contents
+        if (savedNoteSelection.toString().length > 0) {
+          savedNoteSelection.deleteContents(); // Remove the selected text
+          savedNoteSelection.insertNode(noteSpan); // Insert the wrapped span
+        } else {
+          // If selection was empty, just insert the span with selected text as content
+          savedNoteSelection.insertNode(noteSpan);
+        }
+        
+        showNotification('Note added successfully!', 'success');
+        
+        document.getElementById('noteTextInput').value = '';
+        document.getElementById('noteModal').style.display = 'none';
+        savedNoteSelection = null;
+        currentEditingNoteSpan = null;
+        
+        saveToHistory();
+        
+        // Restore cursor position after the note span - use requestAnimationFrame for better timing
+        requestAnimationFrame(() => {
+          const range = document.createRange();
+          range.setStartAfter(noteSpan);
+          range.collapse(true);
+          
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+          
+          editor.focus();
+        });
+      }
+    });
+
+    // Note tooltip creation and handling
+    function createNoteTooltip() {
+      noteTooltip = document.createElement('div');
+      noteTooltip.id = 'noteTooltip';
+      noteTooltip.style.cssText = `
+        position: absolute;
+        display: none;
+        background-color: #f0f7f0;
+        color: #1f2937;
+        padding: 8px 12px;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        max-width: 500px;
+        word-wrap: break-word;
+        z-index: 1000;
+        font-size: 0.9em;
+        line-height: 1.4;
+        border: 1px solid #588157; /* ~Fern */
+      `;
+      noteTooltip.id = 'noteTooltip';
+      
+      // Add styles for compact lists in tooltips
+      if (!document.getElementById('note-tooltip-list-styles')) {
+        const style = document.createElement('style');
+        style.id = 'note-tooltip-list-styles';
+        style.textContent = `
+          #noteTooltip ul, #noteTooltip ol {
+            margin: 0 !important;
+            padding-left: 20px !important;
+          }
+          #noteTooltip li {
+            margin: 0 0 0.1em 0 !important;
+            padding: 0 !important;
+            line-height: 1.2 !important;
+          }
+          #noteTooltip li:last-child {
+            margin-bottom: 0 !important;
+          }
+        `;
+        document.head.appendChild(style);
+      }
+      
+      document.body.appendChild(noteTooltip);
+    }
+
+    // Simple markdown parser for note tooltips
+    function parseNoteMarkdown(text) {
+      if (!text) return '';
+      
+      // Split by lines for list processing
+      let lines = text.split('\n');
+      let html = [];
+      let inUl = false;
+      let inOl = false;
+      
+      for (let i = 0; i < lines.length; i++) {
+        let line = lines[i];
+        
+        // Check for unordered list items
+        if (/^\s*[-*]\s+(.+)/.test(line)) {
+          if (!inUl) {
+            if (inOl) {
+              html.push('</ol>');
+              inOl = false;
+            }
+            html.push('<ul>');
+            inUl = true;
+          }
+          let match = line.match(/^\s*[-*]\s+(.+)/);
+          html.push('<li>' + match[1] + '</li>');
+        }
+        // Check for ordered list items
+        else if (/^\s*\d+\.\s+(.+)/.test(line)) {
+          if (!inOl) {
+            if (inUl) {
+              html.push('</ul>');
+              inUl = false;
+            }
+            html.push('<ol>');
+            inOl = true;
+          }
+          let match = line.match(/^\s*\d+\.\s+(.+)/);
+          html.push('<li>' + match[1] + '</li>');
+        }
+        else {
+          // Close any open lists
+          if (inUl) {
+            html.push('</ul>');
+            inUl = false;
+          }
+          if (inOl) {
+            html.push('</ol>');
+            inOl = false;
+          }
+          if (line.trim()) {
+            html.push(line);
+          }
+        }
+      }
+      
+      // Close any remaining open lists
+      if (inUl) html.push('</ul>');
+      if (inOl) html.push('</ol>');
+      
+      // Join - don't add newlines between list elements
+      let result = html.join('')
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/__(.+?)__/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>')
+        .replace(/_(.+?)_/g, '<em>$1</em>')
+        .replace(/`(.+?)`/g, '<code>$1</code>')
+        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
+      
+      // Add <br> only between non-list blocks
+      result = result
+        .replace(/<\/ul>(.)/g, '</ul><br>$1')
+        .replace(/<\/ol>(.)/g, '</ol><br>$1')
+        .replace(/(.)<ul>/g, '$1<br><ul>')
+        .replace(/(.)<ol>/g, '$1<br><ol>');
+      
+      return result;
+    }
+
+    editor.addEventListener('mouseover', (e) => {
+      if (e.target && e.target.classList.contains('editor-note')) {
+        const noteSpan = e.target;
+        const noteContent = noteSpan.dataset.note;
+        
+        if (noteContent) {
+          if (!noteTooltip) {
+            createNoteTooltip();
+          }
+          noteTooltip.innerHTML = parseNoteMarkdown(noteContent);
+          noteTooltip.style.display = 'block';
+
+          const rect = noteSpan.getBoundingClientRect();
+          noteTooltip.style.left = `${rect.left + window.scrollX}px`;
+          noteTooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
+        }
+      }
+    });
+
+    editor.addEventListener('mouseout', (e) => {
+      if (noteTooltip && e.target && e.target.classList.contains('editor-note')) {
+        noteTooltip.style.display = 'none';
+      }
+    });
+
+    // Initial tooltip creation on load
+    document.addEventListener('DOMContentLoaded', createNoteTooltip);
+
+    // Add double-click listener to edit existing notes
+    editor.addEventListener('dblclick', (e) => {
+      const target = e.target;
+      if (target && target.classList.contains('editor-note')) {
+        currentEditingNoteSpan = target;
+        savedNoteSelection = null; // Clear saved selection as we are editing an existing element
+
+        const noteModal = document.getElementById('noteModal');
+        document.getElementById('noteSelectedTextInput').value = target.textContent;
+        document.getElementById('noteTextInput').value = target.dataset.note;
+        document.getElementById('insertNoteBtn').textContent = 'Update Note'; // Change button text
+        noteModal.style.display = 'flex';
+        document.getElementById('noteTextInput').focus();
       }
     });
 
@@ -4198,7 +4629,7 @@ renderMathInElement(document.body, {
       highlighted = highlighted.replace(/^(\s*)(\d+)\.\s+(.*)$/gm, '$1<span style="color: #588157; font-weight: 600;">$2.</span> <span style="color: #374151;">$3</span>');
       
       // Blockquote
-      highlighted = highlighted.replace(/^(&gt;)\s+(.*)$/gm, '<span style="color: #d97706; font-weight: 600;">$1</span> <span style="color: #588157; font-style: italic;">$2</span>');
+      highlighted = highlighted.replace(/^(&gt;)\s+(.*)$/gm, '<span style="color: #74b673; font-weight: 600;">$1</span> <span style="color: #588157; font-style: italic;">$2</span>');
       
       // Horizontal rule
       highlighted = highlighted.replace(/^---+$/gm, '<span style="color: #6b7280;">---</span>');
@@ -4326,66 +4757,6 @@ renderMathInElement(document.body, {
       
       alert('Моля, позиционирай курсора в списък');
     }
-
-    // Double-click to edit list item numbers
-    editor.addEventListener('dblclick', (e) => {
-      // Find if we're in an OL li
-      let li = e.target.closest('li');
-      
-      if (li && li.parentNode && li.parentNode.tagName === 'OL') {
-        e.preventDefault();
-        
-        // Find the current position in the list
-        const ol = li.parentNode;
-        const items = Array.from(ol.children);
-        const currentIndex = items.indexOf(li);
-        const currentNumber = currentIndex + 1;
-        
-        // Prompt user for new number
-        const newNumber = prompt(`Промени номера на list item (текущо: ${currentNumber}):`, currentNumber.toString());
-        
-        if (newNumber !== null && newNumber.trim() !== '') {
-          const num = parseInt(newNumber);
-          if (!isNaN(num) && num > 0) {
-            // Store the custom number as data attribute
-            li.setAttribute('data-ol-number', num);
-            
-            // Apply custom CSS if not already applied
-            if (!document.getElementById('custom-ol-numbers')) {
-              const style = document.createElement('style');
-              style.id = 'custom-ol-numbers';
-              style.textContent = `
-                ol li[data-ol-number] {
-                  list-style: none;
-                  counter-increment: none;
-                }
-                ol li[data-ol-number]::before {
-                  content: attr(data-ol-number) ". ";
-                  font-weight: inherit;
-                }
-              `;
-              document.head.appendChild(style);
-            }
-            
-            saveToHistory();
-            
-            // Show notification
-            const notification = document.createElement('div');
-            notification.textContent = `✓ Номер на list item промънен на ${num}`;
-            notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-              notification.style.transition = 'opacity 0.3s';
-              notification.style.opacity = '0';
-              setTimeout(() => notification.remove(), 300);
-            }, 2000);
-          } else {
-            alert('Моля, въведи положително число');
-          }
-        }
-      }
-    });
 
     // Keyboard shortcuts
     editor.addEventListener('keydown', (e) => {
@@ -4847,6 +5218,12 @@ renderMathInElement(document.body, {
         // Also remove font-related attributes
         el.removeAttribute('size');
         el.removeAttribute('face');
+
+        // CRITICAL: Remove editor-note spans and replace with their text content
+        if (el.classList.contains('editor-note')) {
+          const textNode = document.createTextNode(el.textContent);
+          el.parentNode.replaceChild(textNode, el);
+        }
       });
       
       // CRITICAL: Convert any unwanted <div> elements to <p>
@@ -5008,6 +5385,9 @@ renderMathInElement(document.body, {
             return '*' + processChildren(node, insideListItem, depth) + '*';
           } else if (tag === 'u') {
             return '__' + processChildren(node, insideListItem, depth) + '__';
+          } else if (tag === 'span' && node.classList.contains('editor-note')) {
+            // Handle editor-note spans: just return their text content
+            return processChildren(node, insideListItem, depth);
           } else if (tag === 'code') {
             return '`' + processChildren(node, insideListItem, depth) + '`';
           } else if (tag === 'a') {
@@ -5889,8 +6269,8 @@ renderMathInElement(document.body, {
       const link = document.createElement('a');
       link.href = '#' + selectedAnchor;
       link.textContent = linkText;
-      link.style.color = '#2563eb';
-      link.style.textDecoration = 'underline';
+      link.style.textDecoration = 'underline wavy';
+      link.style.textDecorationColor = '#74b673';
       link.style.cursor = 'pointer';
 
       // Insert at saved cursor position
