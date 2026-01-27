@@ -156,7 +156,6 @@ class AccountSystem {
                 });
             }
 
-            document.getElementById('logout-btn').addEventListener('click', () => this.logout());
             document.getElementById('show-delete-account-btn').addEventListener('click', () => this.showForm('delete-account'));
 
             // Show action forms

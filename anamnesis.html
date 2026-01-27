@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anamnesis - CourseVault</title>
+    
+    <!-- Scripts -->
+    <script src="js/auth-guard.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+    <script src="js/user-identity.js?v=20260127"></script>
+    
+    <!-- Fonts & Icons -->
+    <link rel="icon" href="favicon.svg?v=7" type="image/svg+xml">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <style>
+        body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar Styling (Exact match from calendar.html) */
+        #side-menu {
+            background: #262626;
+            width: 200px;
+            min-width: 200px;
+            max-width: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 3200; /* High z-index for mobile */
+            transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+        }
+        
+        .logo-header {
+            background: #262626;
+            width: 200px !important;
+            height: 107px !important;
+            min-width: 200px !important;
+            min-height: 107px !important;
+            max-width: 200px !important;
+            max-height: 107px !important;
+            text-align: center;
+            border-bottom: none;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
+            flex: 0 0 107px !important;
+            box-sizing: content-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 2px solid #1d1b1b;
+        }
+        
+        .logo-img {
+            width: 240px !important;
+            height: 50px !important;
+            object-fit: contain;
+            padding-left: 70px !important;    
+            padding-top: 4px !important;
+        }
+        
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            color: #fff !important;
+            text-decoration: none;
+            padding: 16px 28px 16px 12px;
+            font-size: 14px;
+            transition: background 0.2s;
+            gap: 12px;
+            background: transparent;
+            font-weight: 400;
+            position: relative;
+            border-radius: 0;
+            flex-direction: row;
+        }
+        
+        .sidebar-nav .active a {
+            background: #000000;
+        }
+        
+        .sidebar-nav .active a::before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: #588157; /* Fern */
+        }
+        
+        .sidebar-nav a:hover {
+            background: #181818;
+        }
+        
+        .sidebar-nav .svg-icon {
+            width: 26px;
+            height: 26px;
+            flex-shrink: 0;
+            margin-right: -2px;
+            margin-left: -2px;
+            margin-top: -2px;
+            margin-bottom: -2px;
+        }
+        
+        .sidebar-footer-links {
+            position: absolute;
+            left: 12px;
+            bottom: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5px;
+            font-size: 12px;
+            color: #cdcdcd;
+        }
+        
+        .sidebar-footer-item {
+            font-size: 12px;
+            color: #cdcdcd;
+            cursor: default;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding-left: 200px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #f5f5f5;
+        }
+
+        .anamnesis-layout {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Patient List Panel */
+        .patient-list-panel {
+            width: 320px;
+            background: #fff;
+            border-right: 1px solid #ddd;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+        .panel-header {
+            padding: 16px;
+            border-bottom: 1px solid #eee;
+            background: #fafafa;
+            /* Adjust for mobile menu button */
+            padding-left: 16px; 
+        }
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: 'Open Sans', sans-serif;
+            margin-top: 10px;
+        }
+        .patient-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0;
+            margin: 0;
+            list-style: none;
+        }
+        .patient-item {
+            padding: 16px;
+            border-bottom: 1px solid #f0f0f0;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .patient-item:hover { background: #f9f9f9; }
+        .patient-item.selected { background: #e8f5e9; border-left: 4px solid #588157; }
+        .patient-name { font-weight: 600; color: #333; margin-bottom: 4px; font-size: 15px; }
+        .patient-meta { font-size: 12px; color: #888; display: flex; justify-content: space-between; }
+
+        /* Workspace Panel */
+        .workspace-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            background: #f9f9f9;
+        }
+        .workspace-header {
+            padding: 16px 32px;
+            background: #fff;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .workspace-title { margin: 0; font-size: 1.5rem; color: #333; font-weight: 600; font-family: 'Noto Serif', serif; }
+        .new-btn {
+            background: #588157;
+            color: #fff;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Open Sans', sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .new-btn:hover { background: #4a6d49; }
+
+        .workspace-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 32px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        /* Mobile Visibility Helpers */
+        .mobile-visible { display: none; }
+        @media (max-width: 900px) {
+            .mobile-visible { display: flex !important; }
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 0;
+            overflow: hidden; /* Hide all overflow on desktop */
+            white-space: nowrap;
+        }
+        @media (max-width: 900px) {
+            .tabs {
+                overflow-x: auto; /* Allow horizontal scroll on mobile */
+                padding-bottom: 5px;
+            }
+        }
+        .tab-btn {
+            background: none;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            border-bottom: 4px solid transparent;
+            margin-bottom: -2px;
+            font-family: 'Open Sans', sans-serif;
+            flex: 0 0 auto;
+        }
+        .tab-btn.active {
+            color: #588157;
+            border-bottom-color: #588157;
+        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Forms */
+        .module-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        .form-section {
+            margin-bottom: 32px;
+        }
+        .form-section h3 {
+            color: #588157;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+        .form-section h4 {
+            color: #444;
+            font-size: 16px;
+            margin: 16px 0 8px 0;
+            font-weight: 600;
+        }
+        .form-row { display: flex; gap: 20px; margin-bottom: 16px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 200px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 13px; color: #555; }
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+            font-size: 14px;
+        }
+        .form-control:focus { border-color: #588157; outline: none; }
+        textarea.form-control { min-height: 80px; resize: vertical; line-height: 1.5; }
+        
+        .section-header-large {
+            font-size: 22px;
+            font-weight: 700;
+            color: #222;
+            margin: 40px 0 20px 0;
+            font-family: 'Noto Serif', serif;
+            border-bottom: 2px solid #588157;
+            padding-bottom: 10px;
+        }
+
+        /* View Mode */
+        .anamnesis-card {
+            background: #fff;
+            border-radius: 8px;
+            margin-bottom: 32px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+        .anamnesis-header-bar {
+            background: #f1f8e9;
+            padding: 16px 24px;
+            border-bottom: 1px solid #c5e1a5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .author-badge { 
+            background: #588157; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; 
+        }
+        .date-badge { color: #555; font-size: 13px; }
+        .anamnesis-view-content { padding: 32px; }
+        .view-section { margin-bottom: 24px; }
+        .view-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
+        .view-value { font-size: 15px; color: #333; line-height: 1.6; white-space: pre-wrap; }
+        .view-value.empty { color: #ccc; font-style: italic; }
+        
+        /* Grid for Status View */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
+        }
+        .status-item {
+            background: #fafafa;
+            padding: 16px;
+            border-radius: 6px;
+            border: 1px solid #eee;
+        }
+
+        /* Utilities */
+        .hidden { display: none !important; }
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(255,255,255,0.9);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 2000;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3; border-top: 4px solid #588157;
+            border-radius: 50%; width: 40px; height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        
+        /* =========================================
+           MOBILE OPTIMIZATIONS
+           ========================================= */
+        
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 44px;
+            height: 44px;
+            background: #fff;
+            border: none;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            z-index: 3300;
+            padding: 0;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        .mobile-menu-toggle span {
+            display: block;
+            width: 26px;
+            height: 3px;
+            background: #222;
+            margin: 4px 0;
+            border-radius: 2px;
+        }
+        #side-menu.mobile-open {
+            transform: translateX(0);
+        }
+        #side-menu.mobile-open ~ .mobile-menu-toggle {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .mobile-back-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: #588157;
+            cursor: pointer;
+            padding: 8px;
+            margin-right: 10px;
+        }
+
+        @media (max-width: 900px) {
+            /* Main Layout */
+            .main-content {
+                padding-left: 0;
+            }
+            #side-menu {
+                transform: translateX(-100%);
+                box-shadow: 2px 0 16px rgba(0,0,0,0.18);
+            }
+            
+            .mobile-menu-toggle {
+                display: flex;
+            }
+
+            /* Adjust header to account for toggle button */
+            .panel-header {
+                padding-left: 70px; /* Space for button */
+            }
+
+            /* Stacked Panels Logic */
+            .patient-list-panel {
+                width: 100%;
+                display: flex;
+            }
+            .workspace-panel {
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                width: 100%;
+                z-index: 200; /* Above list */
+                display: none; /* Hidden by default */
+            }
+            .workspace-panel.active {
+                display: flex;
+            }
+            
+            /* Form Improvements */
+            .module-container {
+                padding: 16px;
+            }
+            .workspace-content {
+                padding: 0;
+            }
+            .workspace-header {
+                padding: 12px 16px;
+            }
+            .workspace-title {
+                font-size: 1.2rem;
+            }
+            .mobile-back-btn {
+                display: block;
+            }
+            
+            /* Form Elements */
+            .form-row {
+                flex-direction: column;
+                gap: 12px;
+            }
+            .form-group {
+                min-width: 0;
+                width: 100%;
+                flex: none; /* Reset flex */
+            }
+            
+            /* Cards */
+            .anamnesis-view-content {
+                padding: 16px;
+            }
+            .anamnesis-header-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+            
+            /* Tab scroll fix */
+            .tabs {
+                padding-bottom: 5px; /* space for scrollbar */
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Mobile Menu Toggle -->
+    <button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Отвори меню">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+    <div class="sidemenu-overlay" id="sidemenuOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:3100;"></div>
+
+    <!-- Sidebar (Structure from calendar.html) -->
+    <div id="side-menu">
+        <div class="logo-header">
+            <a href="index.html">
+                <img class="logo-img" src="svg/logo-coursebook.svg" alt="StudyBoard">
+            </a>
+        </div>
+        
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="base-navigation-button">
+                    <a href="https://elearn.mu-varna.bg/ultra/course">
+                        <img class="svg-icon" src="svg/icon-blackboard.svg" style="filter: brightness(0) invert(1);">
+                        <span>Blackboard</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="account.html">
+                        <img class="svg-icon" src="svg/icon-account.svg">
+                        <span>Account</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="index.html"> <!-- Link back to Courses -->
+                        <img class="svg-icon" src="svg/icon-courses.svg">
+                        <span>Courses</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button active">
+                    <a href="anamnesis.html">
+                        <img class="svg-icon" src="svg/icon-editor.svg" style="filter: brightness(0) invert(1);">
+                        <span>Anamnesis</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="calendar.html">
+                        <img class="svg-icon" src="svg/icon-calendar.svg">
+                        <span>Calendar</span>
+                    </a>
+                </li>
+                 <li class="base-navigation-button">
+                    <a href="tests.html">
+                        <img class="svg-icon" src="svg/icon-tools.svg">
+                        <span>Tools</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="text-editor.html">
+                        <img class="svg-icon" src="svg/icon-editor.svg" style="filter: brightness(0) invert(1);">
+                        <span>Editor</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button" id="admin-button" style="display: none;">
+                    <a href="admin.html">
+                        <img class="svg-icon" src="svg/icon-admin.svg" style="filter: brightness(0) invert(1);">
+                        <span>Admin Panel</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="#" onclick="handleLogout()">
+                        <img class="svg-icon" src="svg/icon-signout.svg">
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+        
+        <div class="sidebar-footer-links">
+            <span class="sidebar-footer-item">Privacy</span>
+            <span class="sidebar-footer-item">Terms</span>
+            <span class="sidebar-footer-item">Accessibility</span>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <div class="anamnesis-layout">
+            
+            <!-- List Panel -->
+            <div class="patient-list-panel" id="patientListPanel">
+                <div class="panel-header">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h2 style="margin:0; color:#333; font-size: 18px;">Пациенти</h2>
+                        <button id="btn-new-mobile-list" class="new-btn mobile-visible" style="padding: 6px 12px; font-size: 14px;">
+                            <span class="material-icons" style="font-size: 18px;">add</span>
+                        </button>
+                    </div>
+                    <input type="text" id="patient-search" class="search-box" placeholder="Търсене...">
+                </div>
+                <ul id="patient-list" class="patient-list"></ul>
+            </div>
+
+            <!-- Workspace Panel -->
+            <div class="workspace-panel" id="workspacePanel">
+                <div class="workspace-header">
+                    <div style="display: flex; align-items: center;">
+                        <button id="btn-back-mobile" class="mobile-back-btn" type="button">
+                            <span class="material-icons" style="font-size: 24px;">arrow_back</span>
+                        </button>
+                        <h1 id="workspace-title" class="workspace-title">Нова Анамнеза</h1>
+                    </div>
+                    <button id="btn-new-anamnesis" class="new-btn">
+                        <span class="material-icons" style="font-size: 18px;">add</span> <span class="btn-text">Нова</span>
+                    </button>
+                </div>
+
+                <div class="workspace-content">
+                    
+                    <!-- FORM VIEW -->
+                    <div id="view-form">
+                        <form id="anamnesis-form">
+                            
+                            <div class="module-container">
+                                <div class="tabs">
+                                    <button type="button" class="tab-btn active" onclick="switchTab('tab-anamnesis')">Анамнеза</button>
+                                    <button type="button" class="tab-btn" onclick="switchTab('tab-status')">Статус Презенс</button>
+                                </div>
+
+                                <!-- TAB 1: ANAMNESIS -->
+                                <div id="tab-anamnesis" class="tab-content active">
+                                    
+                                    <div class="form-section">
+                                        <h3>1. Въведение и Паспортни Данни</h3>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Име</label>
+                                                <input type="text" name="name" class="form-control" required placeholder="Три имена">
+                                            </div>
+                                            <div class="form-group" style="flex: 0 0 100px;">
+                                                <label>Години</label>
+                                                <input type="number" name="age" class="form-control" placeholder="Възраст">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Местоживеене</label>
+                                                <input type="text" name="address" class="form-control" placeholder="Населено място">
+                                            </div>
+                                            <div class="form-group" style="flex: 0 0 120px;">
+                                                <label>Пол</label>
+                                                <select name="gender" class="form-control">
+                                                    <option value="M">Мъж</option>
+                                                    <option value="F">Женат</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Прием в Клиниката ("Постъпва за... с оплаквания...")</label>
+                                            <textarea name="admission_note" class="form-control" placeholder="Постъпва за пореден път в клиниката със следните оплаквания..."></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h3>2. Anamnesis morbi (Сегашно състояние)</h3>
+                                        <div class="form-group">
+                                            <label>Основно Оплакване</label>
+                                            <textarea name="complaint" class="form-control" placeholder="Причина за търсене на помощ"></textarea>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Хронология и Прогрес</label>
+                                                <textarea name="chronology" class="form-control" placeholder="Начало, продължителност, развитие..."></textarea>
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Лечение и Предишни Епизоди</label>
+                                                <textarea name="history_treatment" class="form-control" placeholder="Предишно лечение, подобни епизоди..."></textarea>
+                                            </div>
+                                        </div>
+                                        
+                                        <h4>Детайли по Симптоми</h4>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Болка</label><input type="text" name="sym_pain" class="form-control" placeholder="Локализация, характер..."></div>
+                                            <div class="form-group"><label>Кашлица</label><input type="text" name="sym_cough" class="form-control" placeholder="Суха/Влажна, храчки..."></div>
+                                            <div class="form-group"><label>Задух</label><input type="text" name="sym_dyspnea" class="form-control" placeholder="При усилие/покой..."></div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Кръвно Налягане</label><input type="text" name="sym_bp_hist" class="form-control" placeholder="Стойности, кризи..."></div>
+                                            <div class="form-group"><label>Пулс</label><input type="text" name="sym_pulse" class="form-control" placeholder="уд/мин..."></div>
+                                            <div class="form-group"><label>Температура</label><input type="text" name="sym_temp" class="form-control" placeholder="Градуси, втрисване..."></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h3>3. Anamnesis vitae (Минали заболявания)</h3>
+                                        <div class="form-group">
+                                            <label>Прекарани Заболявания и Операции</label>
+                                            <textarea name="past_diseases" class="form-control" placeholder="Диабет, хепатит, туберкулоза, пневмонии..."></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Придружаващи заболявания</label>
+                                            <textarea name="concomitant_diseases" class="form-control" placeholder="Хронични заболявания..."></textarea>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Медикаменти (Настоящ и минал прием)</label>
+                                            <textarea name="medications" class="form-control" placeholder="Списък лекарства..."></textarea>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h3>4. Социална и Фамилна</h3>
+                                        <div class="form-row">
+                                            <div class="form-group">
+                                                <label>Навици (Тютюнопушене, Алкохол)</label>
+                                                <input type="text" name="habits" class="form-control" placeholder="Пакетогодини, алкохол...">
+                                            </div>
+                                            <div class="form-group">
+                                                <label>Алергии</label>
+                                                <input type="text" name="allergies" class="form-control" placeholder="Храни, медикаменти...">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Фамилна История</label>
+                                            <textarea name="family_history" class="form-control" placeholder="Наследствени болести, родители..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- TAB 2: STATUS PRAESENS -->
+                                <div id="tab-status" class="tab-content">
+
+                                    <div class="form-section">
+                                        <h3>1. Общо състояние</h3>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Общ вид</label><input type="text" name="st_general" class="form-control" value="Отговаря на възрастта"></div>
+                                            <div class="form-group"><label>Съзнание</label><input type="text" name="st_consciousness" class="form-control" value="Ясно, ориентиран"></div>
+                                            <div class="form-group"><label>Положение</label><input type="text" name="st_posture" class="form-control" value="Активно"></div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Кожа и Лигавици</label><input type="text" name="st_skin" class="form-control" value="Розови, запазен тургор"></div>
+                                            <div class="form-group"><label>Лимфни възли</label><input type="text" name="st_lymph" class="form-control" value="Не се палпират увеличени"></div>
+                                            <div class="form-group"><label>Походка</label><input type="text" name="st_gait" class="form-control" value="Запазена"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h3>2. Глава и Шия</h3>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Глава/Очи</label><input type="text" name="st_head" class="form-control" value="Правилна конфигурация, зеници реагиращи"></div>
+                                            <div class="form-group"><label>Устна кухина/Език</label><input type="text" name="st_mouth" class="form-control" value="Влажен, необложен език, розови тонзили"></div>
+                                            <div class="form-group"><label>Шия/Щитовидна</label><input type="text" name="st_neck" class="form-control" value="Свободно подвижна, не се палпира щитовидна"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h3>3. Дихателна система</h3>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Оглед/Гръден кош</label><input type="text" name="st_resp_inspect" class="form-control" value="Симетричен, диафрагмално дишане"></div>
+                                            <div class="form-group"><label>Перкусия/Палпация</label><input type="text" name="st_resp_palp" class="form-control" value="Ясен перкуторен тон, запазен фремитус"></div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Аускултация</label>
+                                            <input type="text" name="st_resp_auscult" class="form-control" value="Везикуларно дишане, без хрипове">
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h3>4. Сърдечно-съдова система</h3>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Оглед и Палпация</label><input type="text" name="st_cardio_inspect_palp" class="form-control" value="Без патологични пулсации, ictus cordis в 5-то м.р."></div>
+                                            <div class="form-group"><label>Перкусия (Граници)</label><input type="text" name="st_cardio_percussion" class="form-control" value="Нормални граници на сърдечно притъпление"></div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Аускултация</label><input type="text" name="st_cardio_auscultation" class="form-control" value="Ритмична дейност, ясни тонове, без шумове"></div>
+                                            <div class="form-group"><label>Шиен венозен застой</label><input type="text" name="st_cardio_jvd" class="form-control" value="Не се установява"></div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>АН (RR)</label><input type="text" name="st_bp" class="form-control" placeholder="120/80 mmHg"></div>
+                                            <div class="form-group"><label>Пулс</label><input type="text" name="st_pulse" class="form-control" placeholder="72 уд/мин"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h3>5. Корем</h3>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Оглед</label><input type="text" name="st_abd_inspect" class="form-control" value="На нивото на гръдния кош, симетричен, участва в дишането"></div>
+                                            <div class="form-group"><label>Аускултация</label><input type="text" name="st_abd_auscult" class="form-control" value="Умерена чревна перисталтика"></div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Перкусия</label><input type="text" name="st_abd_percuss" class="form-control" value="Тимпаничен перкуторен тон"></div>
+                                        </div>
+                                        <h4>Палпация</h4>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Повърхностна</label><input type="text" name="st_abd_palp_super" class="form-control" value="Мекоеластични коремни стени, без болезненост и дефанс"></div>
+                                            <div class="form-group"><label>Дълбока</label><input type="text" name="st_abd_palp_deep" class="form-control" value="Не се установяват туморни маси или болезненост"></div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Чернодробна област</label><input type="text" name="st_abd_liver" class="form-control" value="Сагитален размер 10 см, долен ръб еластичен, под ребрена дъга"></div>
+                                            <div class="form-group"><label>Слезка</label><input type="text" name="st_abd_spleen" class="form-control" value="Надлъжен размер 7 см, не се палпира"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h3>6. Други</h3>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Бъбреци (Succ. Renalis)</label><input type="text" name="st_kidney" class="form-control" value="Отрицателен двустранно"></div>
+                                            <div class="form-group"><label>Крайници/Отоци</label><input type="text" name="st_limbs" class="form-control" value="Без отоци, запазени пулсации"></div>
+                                        </div>
+                                    </div>
+
+                                </div>
+
+                                <div style="text-align: right; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
+                                    <button type="submit" class="new-btn" style="font-size: 1.2rem; padding: 14px 40px; display: inline-flex; width: 100%; justify-content: center; box-sizing: border-box;">
+                                        <span class="material-icons" style="margin-right:8px;">save</span> Запази Анамнеза
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- DISPLAY VIEW -->
+                    <div id="view-display" class="hidden">
+                        <div id="anamnesis-container">
+                            <!-- Cards will be injected here -->
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <script src="js/anamnesis.js?v=20260127_v3"></script>
+    <script>
+        function handleLogout() {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = 'login.html';
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
+            document.getElementById(tabId).classList.add('active');
+            // Find button triggering this and add active
+            const btns = document.querySelectorAll('.tab-btn');
+            if (tabId === 'tab-anamnesis') btns[0].classList.add('active');
+            if (tabId === 'tab-status') btns[1].classList.add('active');
+        }
+
+        // Admin button check
+        document.addEventListener('DOMContentLoaded', function() {
+            const adminButton = document.getElementById('admin-button');
+            if (adminButton && window.currentUserPromise) {
+            window.currentUserPromise.then(user => {
+                if (user && user.isAdmin) {
+                adminButton.style.display = 'list-item';
+                }
+            }).catch(error => {
+                console.error("Error checking admin status:", error);
+            });
+            }
+        });
+    </script>
+</body>
+</html>
