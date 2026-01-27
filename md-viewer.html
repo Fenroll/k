@@ -139,7 +139,7 @@
     }
 
     /* Links */
-    .markdown-body a { color: var(--link); text-decoration: underline; }
+    .markdown-body a { color: var(--link); text-decoration: underline; text-decoration-skip-ink: none; }
     .markdown-body a:hover { color: var(--link-hover); }
     
     /* Bold text */
@@ -249,6 +249,8 @@
     /* Note styles for viewing exported HTML files */
     .markdown-body .editor-note {
       text-decoration: underline dotted #a3b18a;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 2px;
       cursor: help;
       position: relative;
     }

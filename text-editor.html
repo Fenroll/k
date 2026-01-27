@@ -382,6 +382,8 @@
 
     .editor-note {
       text-decoration: underline dotted #a3b18a; /* ~Dry Sage dotted underline */
+      text-decoration-thickness: 2px;
+      text-underline-offset: 2px;
       cursor: help; /* Indicate hoverable element */
       position: relative; /* Needed for tooltip positioning */
     }
@@ -391,6 +393,7 @@
     #editor a {
       color: inherit;
       text-decoration: underline wavy #74b673;
+      text-decoration-skip-ink: none;
       cursor: pointer;
     }
 
@@ -2497,6 +2500,7 @@
       link.href = url.trim();
       link.textContent = selectedText;
       link.style.textDecoration = 'underline wavy';
+      link.style.textDecorationSkipInk = 'none';
       link.style.textDecorationColor = '#74b673';
       
       // Insert link
@@ -3575,6 +3579,8 @@ localStorage.setItem('textEditorContent', htmlContent);
     }
     .editor-note {
       text-decoration: underline dotted #a3b18a;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 2px;
       cursor: help;
       position: relative;
     }
@@ -6280,6 +6286,7 @@ renderMathInElement(document.body, {
       link.href = '#' + selectedAnchor;
       link.textContent = linkText;
       link.style.textDecoration = 'underline wavy';
+      link.style.textDecorationSkipInk = 'none';
       link.style.textDecorationColor = '#74b673';
       link.style.cursor = 'pointer';
 
