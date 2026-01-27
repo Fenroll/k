@@ -5,6 +5,7 @@
   
   // Get initial version from courses.generated.js if available, or fetch it
   let currentVersion = window.coursesVersion || null;
+  let dismissedVersion = null; // Track version dismissed by user
 
   async function checkVersion() {
     try {
@@ -15,7 +16,10 @@
       const latestVersion = data.version;
       
       if (currentVersion && latestVersion && latestVersion !== currentVersion) {
-        showUpdateNotification();
+        // Only show if user hasn't dismissed this specific version
+        if (latestVersion !== dismissedVersion) {
+          showUpdateNotification(latestVersion);
+        }
       } else if (!currentVersion) {
         // First load if window.coursesVersion wasn't set (e.g. race condition)
         currentVersion = latestVersion;
@@ -25,7 +29,7 @@
     }
   }
 
-  function showUpdateNotification() {
+  function showUpdateNotification(version) {
     // Check if notification already exists
     if (document.getElementById('update-notification')) return;
 
@@ -62,7 +66,7 @@
     notification.innerHTML = `
       <div style="display:flex;align-items:center;justify-content:space-between;">
         <strong style="font-size:1.1em;">New Content Available!</strong>
-        <button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;padding:0 4px;">&times;</button>
+        <button id="update-close-btn" style="background:none;border:none;color:white;font-size:20px;cursor:pointer;padding:0 4px;">&times;</button>
       </div>
       <div style="font-size:0.95em;line-height:1.4;">
         Site content has been updated. Please refresh to see the latest changes.
@@ -90,18 +94,31 @@
 
     document.body.appendChild(notification);
     
-    // Attach event listener to the button
+    // Attach event listener to the refresh button
     document.getElementById('update-refresh-btn').addEventListener('click', function() {
       if (window.location.pathname.includes('md-viewer.html')) {
         // Remove sessionKey and loadFromHash to force fetch from server
         const url = new URL(window.location.href);
         url.searchParams.delete('sessionKey');
         url.searchParams.delete('loadFromHash');
-        // Reload with new URL
-        window.location.href = url.toString();
+        
+        const newUrl = url.toString();
+        // If URL changed (params were removed), navigate to new URL
+        if (newUrl !== window.location.href) {
+          window.location.href = newUrl;
+        } else {
+          // If URL is same (no params to remove), force hard reload
+          window.location.reload(true);
+        }
       } else {
         window.location.reload(true);
       }
+    });
+
+    // Attach event listener to the close button
+    document.getElementById('update-close-btn').addEventListener('click', function() {
+      dismissedVersion = version; // Remember this version was dismissed
+      notification.remove();
     });
   }
 
