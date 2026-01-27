@@ -96,32 +96,7 @@
     
     // Attach event listener to the refresh button
     document.getElementById('update-refresh-btn').addEventListener('click', function() {
-      if (window.location.pathname.includes('md-viewer.html')) {
-        // Manually parse and clean query string to preserve encoding of 'path'
-        const search = window.location.search.substring(1);
-        const params = search.split('&').filter(p => p);
-        const newParams = [];
-        let changed = false;
-
-        for (const p of params) {
-          const key = p.split('=')[0];
-          if (key === 'sessionKey' || key === 'loadFromHash') {
-            changed = true;
-          } else {
-            newParams.push(p);
-          }
-        }
-
-        if (changed) {
-          const newSearch = newParams.length > 0 ? '?' + newParams.join('&') : '';
-          window.location.href = window.location.pathname + newSearch + window.location.hash;
-        } else {
-          // If URL is same (no params to remove), force hard reload
-          window.location.reload(true);
-        }
-      } else {
-        window.location.reload(true);
-      }
+      window.location.reload(true);
     });
 
     // Attach event listener to the close button

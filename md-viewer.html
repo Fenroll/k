@@ -1079,7 +1079,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260127drm"></script>
+  <script src="courses.generated.js?v=20260127e0q"></script>
 
   <!-- ============================================
        CHAT SYSTEM - Firebase & Notes
@@ -1519,5 +1519,109 @@
 .chat-messages::-webkit-scrollbar-thumb:hover, .chat-active-users::-webkit-scrollbar-thumb:hover { background: var(--chat-text-light); }
 </style>
 <script src="js/version-check.js"></script>
+<!-- Hydration Script: Ensures fresh content on reload even if sessionKey is present -->
+<script>
+  (function() {
+    // Only run if courses data is available
+    if (typeof courses === 'undefined') return;
+
+    function getParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
+    const path = getParam('path');
+    if (!path) return;
+
+    const decodedPath = decodeURIComponent(path);
+    const normalizedPath = decodedPath.replace(/\\/g, '/');
+
+    // Recursive search function
+    function findFileInCourses(fileList) {
+      for (const course of fileList) {
+        if (course.sections) {
+          for (const section of course.sections) {
+            const result = searchSection(section);
+            if (result) return result;
+          }
+        }
+      }
+      return null;
+    }
+
+    function searchSection(section) {
+      if (section.files) {
+        for (const file of section.files) {
+          if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) {
+            return file;
+          }
+        }
+      }
+      if (section.msgNotes) {
+        for (const note of section.msgNotes) {
+          if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) {
+            return note;
+          }
+        }
+      }
+      if (section.subsections) {
+        for (const subsection of section.subsections) {
+          const result = searchSection(subsection);
+          if (result) return result;
+        }
+      }
+      return null;
+    }
+
+    // Attempt to find the file in the fresh courses data
+    const fileData = findFileInCourses(courses);
+
+    // If we found the file and it has content (e.g. msgNote), force update the view
+    // This overrides whatever might have been loaded from stale sessionStorage
+    if (fileData && fileData.content) {
+      console.log('Hydrating content from fresh courses data for:', normalizedPath);
+      
+      const root = document.getElementById('content');
+      let html;
+
+      if (fileData.type === 'html' || fileData.content.includes('<!DOCTYPE')) {
+         const parser = new DOMParser();
+         const doc = parser.parseFromString(fileData.content, 'text/html');
+         // Extract CSS... (simplified for hydration, assuming styles already loaded or we just replace body)
+         // For robustness, we re-run the style extraction logic briefly if needed, 
+         // but for text notes, usually body innerHTML is enough.
+         html = doc.body.innerHTML;
+      } else {
+         // Re-parse markdown
+         html = marked.parse(fileData.content);
+         html = html.replace(/<p>~~~<\/p>/g, '<hr style="border: none; border-top: 2px dashed #8B6F47;">');
+         if (html.includes('^')) html = processTableRowspans(html);
+         if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) html = processTableAlignment(html);
+         if (html.includes('&lt;')) html = processTableColspans(html);
+      }
+
+      root.innerHTML = html;
+
+      // Re-run KaTeX
+      if (typeof renderMathInElement !== 'undefined') {
+        renderMathInElement(root, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+      }
+
+      // Re-wrap tables
+      root.querySelectorAll('table').forEach(tbl => {
+        if(!tbl.parentElement.classList.contains('table-scroll')){
+          const wrap = document.createElement('div');
+          wrap.className = 'table-scroll';
+          tbl.parentElement.insertBefore(wrap, tbl);
+          wrap.appendChild(tbl);
+        }
+      });
+      
+      root.querySelectorAll('a').forEach(a => a.target = '_blank');
+    }
+  })();
+</script>
 </body>
 </html>
