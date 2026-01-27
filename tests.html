@@ -61,7 +61,7 @@
       font-size: 30px !important;
       margin: 0;
       margin-left: 30px !important;
-      font-family: 'Noto Serif', serif;
+      font-family: 'Open Sans', Arial, sans-serif;
       font-weight: 400;
       color: #262626;
       white-space: nowrap;
@@ -126,12 +126,13 @@
     
     .logo-img {
       width: 240px !important;
-      height: 40px !important;
+      height: 50px !important;
       padding-left: 70px !important;  
       object-fit: contain;
       margin: 0 !important;
       display: block;
       box-sizing: content-box;
+      padding-top: 1px !important;
     }
     
     .sidebar-nav ul {
@@ -186,12 +187,6 @@
       background: #181818;
     }
 
-    .sidebar-nav .base-navigation-button-content {
-      border-radius: 0;
-      background: inherit;
-      color: inherit;
-      padding-left: 12px;
-    }
     
     .sidebar-nav .svg-icon {
       width: 26px;
@@ -1036,67 +1031,50 @@
         <nav class="sidebar-nav" aria-label="Main">
           <ul class="off-canvas-list" id="base_tools">
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/institution-page">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-institution.svg" alt="Institution Page" />
-                <span class="link-text">Institution Page</span>
+               <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/course">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg" alt="blackboard" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Blackboard</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="account.html">
+              <a href="account.html">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg" alt="Account" />
                 <span class="link-text">Account</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/stream">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-activity.svg" alt="Activity" />
-                <span class="link-text">Activity</span>
-              </a>
-            </li>
-            <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="index.html">
+              <a href="index.html">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg" alt="Courses" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="calendar.html">
+              <a href="calendar.html">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg" alt="Calendar" />
                 <span class="link-text">Calendar</span>
               </a>
             </li>
-            <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/messages">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-messages.svg" alt="Messages" />
-                <span class="link-text">Messages</span>
-              </a>
-            </li>
-            <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/grades">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-grades.svg" alt="Grades" />
-                <span class="link-text">Grades</span>
-              </a>
-            </li>
             <li class="base-navigation-button active">
-              <a class="base-navigation-button-content" href="tests.html">
+              <a href="tests.html">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="text-editor.html">
+              <a href="text-editor.html">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg" alt="Editor" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Editor</span>
               </a>
             </li>
             <li class="base-navigation-button" id="admin-button" style="display: none;">
-              <a class="base-navigation-button-content" href="admin.html">
+              <a href="admin.html">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Admin Panel</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content" href="#" onclick="handleLogout()">
+              <a href="#" onclick="handleLogout()">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg" alt="Logout" />
                 <span class="link-text">Logout</span>
               </a>
