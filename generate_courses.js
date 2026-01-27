@@ -450,7 +450,7 @@ function updateHtmlFiles(version) {
       
       // Replace courses.generated.js script tags with dynamic versioning
       // Match patterns like: <script src="courses.generated.js?v=20260125"></script>
-      const scriptPattern = /<script src="courses\.generated\.js(?:\?v=[0-9]+)?"><\/script>/g;
+      const scriptPattern = /<script src="courses\.generated\.js(?:\?v=[a-zA-Z0-9]+)?"><\/script>/g;
       const newScriptTag = `<script src="courses.generated.js?v=${version}"></script>`;
       
       if (scriptPattern.test(content)) {
