@@ -303,12 +303,15 @@
         #fileListContainer li {
             padding: 0.25rem 0.5rem;
             border-bottom: 1px solid #2a2a2a;
-            cursor: pointer;
+            cursor: default;
         }
         #fileListContainer li:last-child {
             border-bottom: none;
         }
-        #fileListContainer li:hover {
+        #fileListContainer .file-item {
+            cursor: pointer;
+        }
+        #fileListContainer .file-item:hover {
             background-color: #2a2a2a;
         }
         #fileListContainer .course-header {
@@ -340,7 +343,7 @@
 
     </style>
 
-        <script src="courses.generated.js?v=20260127x5z"></script>
+        <script src="courses.generated.js?v=2026012714qw"></script>
     <script src="js/admin.js?v=20260125"></script>
     <script src="js/schedule-notes-admin.js"></script>
     <script src="js/version-check.js"></script>

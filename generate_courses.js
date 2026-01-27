@@ -505,9 +505,9 @@ function main() {
 
   // Write JS file with version at the top
   const js = 'window.coursesVersion = "' + version + '";\n' +
-             'const courses = ' + JSON.stringify(courses, null, 2) + '\n' +
-             'const eventInfo = ' + JSON.stringify(eventInfo) + '\n' +
-             'const buildTimestamp = "' + buildTimestamp + '";\n';
+             'window.courses = ' + JSON.stringify(courses, null, 2) + ';\n' +
+             'window.eventInfo = ' + JSON.stringify(eventInfo) + ';\n' +
+             'window.buildTimestamp = "' + buildTimestamp + '";\n';
   fs.writeFileSync(OUTPUT_FILE, js, 'utf8');
   console.log('Generated courses:', OUTPUT_FILE);
   console.log('Build timestamp:', buildTimestamp);

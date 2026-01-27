@@ -331,14 +331,19 @@
 
         resetPasswordBtn.onclick = async () => {
             const uid = document.getElementById('edit-user-uid').value;
+            if (!uid) {
+                showError('edit-user-error', 'User ID is missing.');
+                return;
+            }
             const newPassword = generateRandomPassword();
             try {
                 await db.ref(`site_users/${uid}`).update({
                     password: btoa(newPassword)
                 });
-                showNotification(`Password reset successfully. New password: ${newPassword}`);
+                prompt("Password reset successfully. Please copy the new password:", newPassword);
+                modal.style.display = 'none';
             } catch (error) {
-                showError('edit-user-error', 'Failed to reset password.');
+                showError('edit-user-error', 'Failed to reset password: ' + (error.message || error));
                 console.error(error);
             }
         };
