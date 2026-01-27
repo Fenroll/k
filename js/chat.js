@@ -1181,6 +1181,13 @@ class ChatUIManager {
     }
   }
 
+  scrollToBottom() {
+    const messagesContainer = this.container.querySelector('.chat-messages');
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+  }
+
   showReactionPicker(messageId) {
     // Премахни стар picker ако съществува
     const oldPicker = document.querySelector('.reaction-picker');
@@ -1485,6 +1492,11 @@ class ChatUIManager {
         
         // Маркирай съобщенията като прочетени
         this.markAsRead();
+
+        // Превърти до долу веднага и след малко закъснение (заради анимацията)
+        this.scrollToBottom();
+        setTimeout(() => this.scrollToBottom(), 100);
+        setTimeout(() => this.scrollToBottom(), 300);
       }
     }
   }

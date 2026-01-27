@@ -451,7 +451,17 @@ class ChatUIManagerREST {
       if (this.isOpen) {
         const input = this.container.querySelector('.chat-input');
         if (input) input.focus();
+        
+        this.scrollToBottom();
+        setTimeout(() => this.scrollToBottom(), 100);
       }
+    }
+  }
+
+  scrollToBottom() {
+    const messagesContainer = this.container.querySelector('.chat-messages');
+    if (messagesContainer) {
+      messagesContainer.scrollTop = messagesContainer.scrollHeight;
     }
   }
 
