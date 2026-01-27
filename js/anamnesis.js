@@ -253,9 +253,19 @@
             ]);
             sContent += genS('6. Пикочо-полова и Двигателна', [{key: 'st_kidney', label: 'Бъбречни области'}, {key: 'st_limbs', label: 'Крайници и стави'}]);
 
-            if(sContent) html += renderModuleHeader('Статус Презенс') + sContent;
+            if (sContent) {
+                html += renderModuleHeader('Статус Презенс');
+                html += sContent;
+            }
 
-            html += `</div>`;
+            // MODULE 3: NOTES (Conditional)
+            const notesValue = record.patient_notes || record.notes; // Проверка и за двата варианта на името
+            if (notesValue && notesValue.trim() !== "") {
+                html += renderModuleHeader('Записки');
+                html += renderGroup(renderField('Допълнителни бележки', notesValue));
+            }
+
+            html += `</div>`; // Close card content
             card.innerHTML = html;
             if(isAuthor) {
                 card.querySelector('.edit-btn').onclick = () => editRecord(record);

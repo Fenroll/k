@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anamnesis - CourseVault</title>
+    <title>Anamnesis</title>
     
     <!-- Scripts -->
     <script src="js/auth-guard.js"></script>
@@ -634,6 +634,7 @@
                                 <div class="tabs">
                                     <button type="button" class="tab-btn active" onclick="switchTab('tab-anamnesis')">Анамнеза</button>
                                     <button type="button" class="tab-btn" onclick="switchTab('tab-status')">Статус Презенс</button>
+                                    <button type="button" class="tab-btn" onclick="switchTab('tab-notes')">Записки</button>
                                 </div>
 
                                 <!-- TAB 1: ANAMNESIS -->
@@ -817,6 +818,16 @@
 
                                 </div>
 
+                                <!-- TAB 3: NOTES -->
+                                <div id="tab-notes" class="tab-content">
+                                    <div class="form-section">
+                                        <div class="form-group">
+                                            <label>Допълнителни бележки и коментари</label>
+                                            <textarea name="patient_notes" class="form-control" style="min-height: 300px;" placeholder="Въведете вашите записки тук..."></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <div style="text-align: right; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
                                     <button type="submit" class="new-btn" style="font-size: 1.2rem; padding: 14px 40px; display: inline-flex; width: 100%; justify-content: center; box-sizing: border-box;">
                                         <span class="material-icons" style="margin-right:8px;">save</span> Запази Анамнеза
@@ -855,10 +866,14 @@
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
             
             document.getElementById(tabId).classList.add('active');
-            // Find button triggering this and add active
+            
+            // Find and activate the correct button
             const btns = document.querySelectorAll('.tab-btn');
-            if (tabId === 'tab-anamnesis') btns[0].classList.add('active');
-            if (tabId === 'tab-status') btns[1].classList.add('active');
+            btns.forEach(btn => {
+                if (btn.getAttribute('onclick').includes(tabId)) {
+                    btn.classList.add('active');
+                }
+            });
         }
 
         // Admin button check
