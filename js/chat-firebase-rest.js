@@ -14,7 +14,7 @@ class ChatFirebaseREST {
     this.lastTimestamp = 0;
     this.isPolling = false;
     console.log('ChatFirebaseREST инициализиран за:', documentId);
-  } // Keep, important for debugging
+  }
 
   // Изпрати съобщение
   async sendMessage(text) {
@@ -158,9 +158,18 @@ class ChatFirebaseREST {
 
       // console.log('✓ Потребител маркиран като активен (device: ' + userData.device + ')'); // Can be removed, frequent
 
-      // Периодично обнови
+      // Периодично обнови - САМО ако потребителят е активен
       setInterval(async () => {
         updateLocalTabs(); // Обнови heartbeat на таба
+        
+        // Провери дали потребителят е активен (ако presence.js е заредено)
+        const isUserActive = window.userActivityState?.isActive() ?? true; // Default true за обратна съвместимост
+        
+        // ВАЖНО: Обновяваме lastSeen САМО ако потребителят е активен
+        if (!isUserActive) {
+          console.log('⏸ User inactive - skipping lastSeen update');
+          return;
+        }
         
         // Обновяваме и статуса на устройството периодично, в случай че се промени (напр. resize)
         const currentIsMobile = window.innerWidth <= 768 || 
@@ -171,9 +180,11 @@ class ChatFirebaseREST {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
             lastSeen: Date.now(),
-            device: currentIsMobile ? 'mobile' : 'desktop'
+            device: currentIsMobile ? 'mobile' : 'desktop',
+            isActive: true
           })
         });
+        console.log('✓ User active - updated lastSeen');
       }, 30000);
 
       // Махни потребителя щом затвори таба
