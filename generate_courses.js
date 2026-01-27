@@ -436,7 +436,8 @@ function updateHtmlFiles(version) {
     path.join(__dirname, 'md-viewer.html'),
     path.join(__dirname, 'md-editor.html'),
     path.join(__dirname, 'text-editor.html'),
-    path.join(__dirname, 'admin.html')
+    path.join(__dirname, 'admin.html'),
+    path.join(__dirname, 'account.html')
   ];
 
   htmlFiles.forEach(filePath => {
