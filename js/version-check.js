@@ -96,7 +96,10 @@
     
     // Attach event listener to the refresh button
     document.getElementById('update-refresh-btn').addEventListener('click', function() {
-      window.location.reload(true);
+      // Force refresh of the main HTML file by adding a timestamp to the URL
+      const url = new URL(window.location.href);
+      url.searchParams.set('v', Date.now());
+      window.location.href = url.toString();
     });
 
     // Attach event listener to the close button

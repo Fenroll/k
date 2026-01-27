@@ -753,7 +753,15 @@
           const hint = isFile
             ? '<br><small>Съвет: Отвори сайта през локален HTTP сървър (напр. VS Code Live Server), тъй като браузърите блокират fetch от file://</small>'
             : '';
-          document.getElementById('content').innerHTML = '<p style="color:#b91c1c">Грешка при зареждане: '+(err && err.message ? err.message : err)+'</p>'+hint;
+          
+          // If 404, don't show error yet - wait for hydration script to check courses data
+          if (err.message.includes('404')) {
+            console.log('Fetch returned 404, waiting for hydration check...');
+            document.getElementById('content').setAttribute('data-fetch-failed', 'true');
+            // Keep "Зареждане..." visible
+          } else {
+            document.getElementById('content').innerHTML = '<p style="color:#b91c1c">Грешка при зареждане: '+(err && err.message ? err.message : err)+'</p>'+hint;
+          }
         });
     })();
     
@@ -1079,7 +1087,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260127e32"></script>
+  <script src="courses.generated.js?v=20260127ea9"></script>
 
   <!-- ============================================
        CHAT SYSTEM - Firebase & Notes
