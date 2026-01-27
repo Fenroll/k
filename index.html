@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/auth-guard.js"></script>
@@ -731,6 +731,11 @@
   min-width: 560px; /* ensure horizontal scroll for many columns on mobile */
 }
 
+/* Utility Class for toggling visibility */
+.hidden {
+  display: none !important;
+}
+
 /* Mobile tweaks for markdown readability */
 @media (max-width: 768px) {
   /* Slightly smaller and lighter text on mobile for better fit */
@@ -772,37 +777,123 @@
     max-height: 1000px;
   }
 }
-      /* Stray CSS removed */
-      /* .toggle-btn.selected { background: #111 !important; border-color: #111 !important; } */
-      /* .toggle-btn.selected img { filter: brightness(0) invert(1); } */
-  .filter-select-group:last-of-type .filter-select-wrapper {
-    box-shadow: none !important;
-  }
-  .filter-bar {
+
+/* Filter Bar Styles */
+.filter-bar {
   display: flex;
   align-items: flex-end;
-  gap: 18px;
-  /* Ensure all filter boxes are the same width */
-  }
-  .filter-search-group,
-  .filter-select-group:not(:last-of-type) {
-    min-width: 0;
-    flex: 1 1 0;
-    max-width: none;
-    box-sizing: border-box;
-  }
-  .filter-search-group {
-  flex: 1 1 0;
+  gap: 34px;
+  background: #f5f5f5;
+  padding: 18px 37px 18px 35px;
+  border-bottom: none;
+}
+.filter-search-group,
+.filter-select-group {
+  position: relative;
+  margin-top: 18px;
+}
+.filter-search-group {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 220px;
+}
+.filter-select-group {
+  display: flex;
+  flex-direction: column;
+  min-width: 140px;
+  position: relative;
+}
+/* Ensure all filter boxes are the same width behavior */
+.filter-search-group,
+.filter-select-group:not(:last-of-type) {
   min-width: 0;
+  flex: 1 1 0;
   max-width: none;
-  .filter-bar .filter-search-group,
-  .filter-bar .filter-select-group:not(:last-of-type) {
-    flex-basis: 0;
-    flex-grow: 1;
-    max-width: none;
-    min-width: 0;
-  }
-  }
+  box-sizing: border-box;
+}
+.filter-label {
+  position: absolute;
+  top: -0.8em;
+  left: 12px;
+  background: #f5f5f5;
+  padding: 0 4px;
+  font-size: 0.85em;
+  color: #888;
+  font-weight: normal;
+  font-family: 'Open Sans', Arial, sans-serif;
+  z-index: 2;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+.filter-search-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+}
+.filter-search-icon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  pointer-events: none;
+  z-index: 2;
+}
+.filter-search-input,
+.filter-select {
+  width: 100%;
+  height: 42px;
+  line-height: 46px;
+  padding: 10px 12px 10px 40px;
+  border: 1.5px solid #444;
+  border-radius: 0 !important;
+  font-size: 1em;
+  font-family: 'Open Sans', Arial, sans-serif;
+  background: #fff;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  margin-bottom: 0;
+  margin-top: 2px;
+  transition: border 0.2s;
+  box-sizing: border-box;
+  display: block;
+}
+.filter-select {
+  padding: 10px 32px 10px 12px;
+  font-family: 'Roboto', Arial, sans-serif;
+  vertical-align: middle;
+}
+.filter-search-input:focus,
+.filter-select:focus {
+  border-color: #588157;
+}
+.filter-select-group:last-of-type .filter-select-wrapper {
+  box-shadow: none !important;
+}
+.filter-select-arrow {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  fill: #000;
+  z-index: 2;
+  opacity: 1;
+  display: block;
+}
+.filter-select-arrow.arrow-up {
+  opacity: 0;
+}
+.filter-select-wrapper:has(.filter-select:focus) .arrow-down {
+  opacity: 0;
+}
+.filter-select-wrapper:has(.filter-select:focus) .arrow-up {
+  opacity: 1;
+}
+
   body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
     .base-courses-header-container { background: #262626; color: #fff; padding: 1rem; }
   .page-title { font-size: 30px !important; margin-left: 30px !important; font-family: 'Open Sans', serif; font-weight: 700; }
@@ -1232,6 +1323,8 @@ function renderCourseList() {
     activeCourses.forEach(course => {
       const card = document.createElement('div');
       card.className = 'element-card';
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
       
       // Generate color based on course ID
       const borderColor = generateColorFromId(course.id);
@@ -1248,6 +1341,14 @@ function renderCourseList() {
       // Apply the color as border-left style
       card.style.borderLeft = "8px solid " + borderColor;
       
+      // Add keyboard support
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openRightOverlayForCard(card);
+        }
+      });
+
       list.appendChild(card);
     });
     
@@ -1269,6 +1370,8 @@ function renderCourseList() {
         const card = document.createElement('div');
         card.className = 'element-card';
         card.style.opacity = '0.75';
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
         
         // Generate color based on course ID with isArchived flag for different palette
         const borderColor = generateColorFromId(course.id, true);
@@ -1285,6 +1388,14 @@ function renderCourseList() {
         
         // Apply the color as border-left style
         card.style.borderLeft = "8px solid " + borderColor;
+        
+        // Add keyboard support
+        card.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            openRightOverlayForCard(card);
+          }
+        });
         
         list.appendChild(card);
       });
@@ -3176,8 +3287,9 @@ function toggleFileDropdown(sectionId) {
     }
     </script>
 
-    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/presence.js"></script>
-</body>
-</html>
+      <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+      <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+      <script src="js/presence.js"></script>
+      <script src="js/version-check.js"></script>
+    </body>
+    </html>
