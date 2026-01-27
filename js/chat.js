@@ -498,6 +498,7 @@ class ChatUIManager {
     this.userNameMappings = {}; // Карта за стари към нови имена
     this.reactionsCache = {}; // Кеш за реакции
     this.activeUsers = {}; // Списък с активни потребители за логика с реакции
+    this.showMembers = localStorage.getItem(`showMembers_${this.documentId}`) !== 'false'; // Default to true if not set
 
     this.init();
   }
@@ -692,6 +693,12 @@ class ChatUIManager {
 
       this.attachEventListeners();
       
+      // Приложи начално състояние на списъка с членове
+      const chatPanel = this.container.querySelector('.chat-panel');
+      if (chatPanel && this.showMembers) {
+        chatPanel.classList.add('show-members');
+      }
+      
       // Инициализирай бутон за уведомления един път
       this.initNotificationButton();
       
@@ -747,6 +754,27 @@ class ChatUIManager {
     }
 
     const messagesContainer = this.container.querySelector('.chat-messages');
+    
+    // Members toggle logic
+    const membersToggle = this.container.querySelector('#chat-members-toggle');
+    const chatPanel = this.container.querySelector('.chat-panel');
+    if (membersToggle && chatPanel) {
+      membersToggle.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const isMobile = window.innerWidth <= 600;
+        
+        if (isMobile) {
+          // На мобилен просто превключваме без записване
+          chatPanel.classList.toggle('show-members');
+        } else {
+          // На десктоп превключваме и записваме състоянието
+          this.showMembers = !chatPanel.classList.contains('show-members');
+          chatPanel.classList.toggle('show-members');
+          localStorage.setItem(`showMembers_${this.documentId}`, this.showMembers);
+        }
+      });
+    }
+
     if (messagesContainer) {
       messagesContainer.addEventListener('scroll', () => {
         const isAtBottom =
@@ -1085,7 +1113,7 @@ class ChatUIManager {
   updateHeaderOnlineCount(count) {
     const onlineCountEl = this.container.querySelector('.chat-online-count');
     if (onlineCountEl) {
-        onlineCountEl.textContent = `🟢 ${count || 1} Online`;
+        onlineCountEl.textContent = `Активни: ${count || 1}`;
     }
   }
 
@@ -1453,7 +1481,7 @@ class ChatUIManager {
       chatPanel.classList.toggle('open', this.isOpen);
       if (this.isOpen) {
         const input = this.container.querySelector('.chat-input');
-        if (input) input.focus();
+        // if (input) input.focus(); // Removed to prevent keyboard popup on mobile
         
         // Маркирай съобщенията като прочетени
         this.markAsRead();

@@ -6347,6 +6347,7 @@ renderMathInElement(document.body, {
       <div class="chat-header">
         <div class="chat-header-title">
           <div style="font-size: 18px; font-weight: bold; margin: 0;">Чат</div>
+          <span class="chat-online-count" style="font-size: 13px;">Активни: 1</span>
         </div>
         <button class="chat-close-btn" id="chat-close" title="Затвори чат">✕</button>
       </div>
@@ -6389,9 +6390,29 @@ renderMathInElement(document.body, {
 .chat-panel.open { opacity: 1; pointer-events: auto; transform: translateY(0); }
 .chat-header { padding: 16px; border-bottom: 1px solid var(--chat-border); display: flex; justify-content: space-between; align-items: flex-start; background: var(--chat-primary); color: white; border-radius: 12px 12px 0 0; }
 .chat-header-title h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; }
-.chat-online-count { font-size: 12px; opacity: 0.9; }
-.chat-close-btn { background: rgba(255, 255, 255, 0.2); border: none; color: white; font-size: 20px; cursor: pointer; padding: 0; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border-radius: 6px; transition: background 0.2s; }
-.chat-close-btn:hover { background: rgba(255, 255, 255, 0.3); }
+.chat-online-count { font-size: 12px; opacity: 0.9; display: none; }
+.chat-header-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+#chat-members-toggle {
+  position: relative;
+}
+
+.chat-panel:not(.show-members) #chat-members-toggle::after {
+  content: "";
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  width: 2px;
+  height: 70%;
+  background: white;
+  transform: translateX(-50%) rotate(-45deg);
+  border-radius: 1px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+
+.chat-close-btn {
 .chat-container { display: flex; flex: 1; min-height: 0; gap: 0; }
 .chat-messages-wrapper { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .chat-messages { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 8px; }
@@ -6403,7 +6424,8 @@ renderMathInElement(document.body, {
 .message-author { font-weight: 600; font-size: 13px; color: var(--chat-text); }
 .message-time { font-size: 11px; color: var(--chat-text-light); }
 .message-text { font-size: 13px; color: var(--chat-text); word-break: break-word; background: #f0ede2; padding: 8px 10px; border-radius: 8px; line-height: 1.4; }
-.chat-active-users { width: 150px; padding: 12px 8px; border-left: 1px solid var(--chat-border); overflow-y: auto; background: #fafafa; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.chat-active-users { width: 150px; padding: 12px 8px; border-left: 1px solid var(--chat-border); overflow-y: auto; background: #fafafa; display: none; flex-direction: column; gap: 8px; min-width: 0; }
+.chat-panel.show-members .chat-active-users { display: flex; }
 .active-users-header { font-size: 11px; font-weight: 600; color: var(--chat-text-light); padding: 0 4px; text-transform: uppercase; }
 .active-user { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--chat-text); padding: 4px; border-radius: 6px; cursor: pointer; transition: background 0.2s; min-width: 0; }
 .active-user:hover { background: var(--chat-secondary); }
@@ -6417,7 +6439,7 @@ renderMathInElement(document.body, {
 .chat-send-btn:active { transform: scale(0.95); }
 .chat-user-info { padding: 8px 12px; font-size: 11px; color: var(--chat-text-light); border-top: 1px solid var(--chat-border); background: #fafafa; border-radius: 0 0 12px 12px; }
 #current-user-name { color: var(--chat-primary); font-weight: 600; }
-@media (max-width: 600px) { .chat-panel { width: calc(100vw - 40px); height: calc(100vh - 120px); bottom: 100px; right: 20px; left: 20px; max-width: none; } .chat-active-users { display: none; } .chat-widget { bottom: 10px; right: 10px; } .chat-icon { width: 48px; height: 48px; } }
+@media (max-width: 600px) { .chat-panel { width: calc(100vw - 40px); height: 65vh; bottom: 100px; right: 20px; left: 20px; max-width: none; } .chat-panel.show-members .chat-active-users { display: flex; position: absolute; right: 0; top: 75px; bottom: 67px; z-index: 10; box-shadow: -2px 0 10px rgba(0,0,0,0.1); } .chat-online-count { display: block; } .chat-active-users { display: none; } .chat-widget { bottom: 10px; right: 10px; } .chat-icon { width: 48px; height: 48px; } }
 .chat-messages::-webkit-scrollbar, .chat-active-users::-webkit-scrollbar { width: 6px; }
 .chat-messages::-webkit-scrollbar-track, .chat-active-users::-webkit-scrollbar-track { background: transparent; }
 .chat-messages::-webkit-scrollbar-thumb, .chat-active-users::-webkit-scrollbar-thumb { background: var(--chat-border); border-radius: 3px; }
