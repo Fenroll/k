@@ -53,10 +53,6 @@
       gap: 8px;
     `;
 
-    const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
-    const shortcut = isMac ? 'Cmd+R' : 'Ctrl+R';
-    const hardShortcut = isMac ? 'Cmd+Shift+R' : 'Ctrl+Shift+R';
-    
     // Check if we are in md-viewer or other sub-pages
     const isViewer = window.location.pathname.includes('md-viewer.html');
     const additionalInstruction = isViewer 
@@ -70,10 +66,6 @@
       </div>
       <div style="font-size:0.95em;line-height:1.4;">
         Site content has been updated. Please refresh to see the latest changes.
-      </div>
-      <div style="font-size:0.85em;opacity:0.9;background:rgba(0,0,0,0.1);padding:6px;border-radius:4px;">
-        Desktop: Press <b>${shortcut}</b> or <b>${hardShortcut}</b><br>
-        Mobile: Pull down to refresh
       </div>
       ${additionalInstruction ? `<div style="font-size:0.9em;margin-top:4px;">${additionalInstruction}</div>` : ''}
       <button id="update-refresh-btn" style="margin-top:8px;background:white;color:#dc2626;border:none;padding:8px;border-radius:4px;font-weight:bold;cursor:pointer;">Refresh Now</button>

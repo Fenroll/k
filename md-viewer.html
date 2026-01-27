@@ -749,20 +749,101 @@
           }
         })
         .catch(err => {
-          const isFile = window.location.protocol === 'file:';
-          const hint = isFile
-            ? '<br><small>Съвет: Отвори сайта през локален HTTP сървър (напр. VS Code Live Server), тъй като браузърите блокират fetch от file://</small>'
-            : '';
+          console.warn('Initial fetch failed, attempting to recover from courses data:', err);
           
-          // If 404, don't show error yet - wait for hydration script to check courses data
-          if (err.message.includes('404')) {
-            console.log('Fetch returned 404, waiting for hydration check...');
-            document.getElementById('content').setAttribute('data-fetch-failed', 'true');
-            // Keep "Зареждане..." visible
-          } else {
-            document.getElementById('content').innerHTML = '<p style="color:#b91c1c">Грешка при зареждане: '+(err && err.message ? err.message : err)+'</p>'+hint;
-          }
-        });
+          const contentDiv = document.getElementById('content');
+          // Don't show error yet, keep "Зареждане..." or show a softer message if needed
+          // contentDiv.textContent = 'Зареждане от локални данни...'; 
+
+          // Polling mechanism to wait for courses.generated.js
+          let attempts = 0;
+          const maxAttempts = 50; // 5 seconds (50 * 100ms)
+          
+          const pollCourses = setInterval(() => {
+            attempts++;
+            
+            if (typeof courses !== 'undefined') {
+              clearInterval(pollCourses);
+              recoverContentFromCourses();
+            } else if (attempts >= maxAttempts) {
+              clearInterval(pollCourses);
+              showError(err);
+            }
+          }, 100);
+
+          function recoverContentFromCourses() {
+            const path = getParam('path');
+            if (!path) { showError(err); return; }
+            
+            const decodedPath = decodeURIComponent(path);
+            const normalizedPath = decodedPath.replace(/\\/g, '/');
+            
+            // Search logic (duplicated for resilience inside this closure)
+            let fileData = null;
+            
+            // Helper to search sections
+            const searchSection = (section) => {
+              if (section.files) {
+                for (const file of section.files) {
+                  if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) return file;
+                }
+              }
+              if (section.msgNotes) {
+                for (const note of section.msgNotes) {
+                  if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) return note;
+                }
+              }
+              if (section.subsections) {
+                for (const subsection of section.subsections) {
+                  const result = searchSection(subsection);
+                  if (result) return result;
+                }
+              }
+              return null;
+            };
+
+            for (const course of courses) {
+              if (course.sections) {
+                for (const section of course.sections) {
+                  const result = searchSection(section);
+                  if (result) {
+                    fileData = result;
+                    break;
+                  }
+                }
+              }
+              if (fileData) break;
+            }
+
+            if (fileData && fileData.content) {
+              console.log('Successfully recovered content from courses data');
+              // Render content
+              let html;
+              if (fileData.type === 'html' || fileData.content.includes('<!DOCTYPE')) {
+                 const parser = new DOMParser();
+                 const doc = parser.parseFromString(fileData.content, 'text/html');
+                 const styles = doc.head.querySelectorAll('style');
+                 let cssContent = '';
+                 styles.forEach(style => { cssContent += style.textContent; });
+                 if (cssContent) {
+                    const styleTag = document.createElement('style');
+                    cssContent = cssContent.replace(/;(?!important)/g, ' !important;');
+                    styleTag.textContent = cssContent;
+                    document.head.appendChild(styleTag);
+                 }
+                 html = doc.body.innerHTML;
+              } else {
+                 html = marked.parse(fileData.content);
+                 html = html.replace(/<p>~~~<\/p>/g, '<hr style="border: none; border-top: 2px dashed #8B6F47;">');
+                 if (html.includes('^')) html = processTableRowspans(html);
+                 if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) html = processTableAlignment(html);
+                 if (html.includes('&lt;')) html = processTableColspans(html);
+              }
+              
+              contentDiv.innerHTML = html;
+              
+              if (typeof renderMathInElement !== 'undefined') {
+                try { renderMathInElement(contentDiv, { delimiters: [{left: '$', right: '$', display: true}, {left: '
     })();
     
     // Setup summary button - outside IIFE so it always works
@@ -1087,7 +1168,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260127eh2"></script>
+  <script src="courses.generated.js?v=20260127emi"></script>
 
   <!-- ============================================
        CHAT SYSTEM - Firebase & Notes
