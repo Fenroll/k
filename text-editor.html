@@ -384,6 +384,7 @@
       text-decoration: underline dotted #a3b18a; /* ~Dry Sage dotted underline */
       text-decoration-thickness: 2px;
       text-underline-offset: 2px;
+      text-decoration-skip-ink: none;
       cursor: help; /* Indicate hoverable element */
       position: relative; /* Needed for tooltip positioning */
     }
@@ -393,6 +394,8 @@
     #editor a {
       color: inherit;
       text-decoration: underline wavy #74b673;
+      text-decoration-thickness: 2px;
+      text-underline-offset: 2px;
       text-decoration-skip-ink: none;
       cursor: pointer;
     }
@@ -1554,7 +1557,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260127thy"></script>
+  <script src="courses.generated.js?v=20260127x5z"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js"></script>
@@ -3581,6 +3584,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       text-decoration: underline dotted #a3b18a;
       text-decoration-thickness: 2px;
       text-underline-offset: 2px;
+      text-decoration-skip-ink: none;
       cursor: help;
       position: relative;
     }
