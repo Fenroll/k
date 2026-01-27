@@ -72,7 +72,7 @@
         Mobile: Pull down to refresh
       </div>
       ${additionalInstruction ? `<div style="font-size:0.9em;margin-top:4px;">${additionalInstruction}</div>` : ''}
-      <button onclick="window.location.reload(true)" style="margin-top:8px;background:white;color:#dc2626;border:none;padding:8px;border-radius:4px;font-weight:bold;cursor:pointer;">Refresh Now</button>
+      <button id="update-refresh-btn" style="margin-top:8px;background:white;color:#dc2626;border:none;padding:8px;border-radius:4px;font-weight:bold;cursor:pointer;">Refresh Now</button>
     `;
 
     // Add keyframe animation style if not present
@@ -89,6 +89,20 @@
     }
 
     document.body.appendChild(notification);
+    
+    // Attach event listener to the button
+    document.getElementById('update-refresh-btn').addEventListener('click', function() {
+      if (window.location.pathname.includes('md-viewer.html')) {
+        // Remove sessionKey and loadFromHash to force fetch from server
+        const url = new URL(window.location.href);
+        url.searchParams.delete('sessionKey');
+        url.searchParams.delete('loadFromHash');
+        // Reload with new URL
+        window.location.href = url.toString();
+      } else {
+        window.location.reload(true);
+      }
+    });
   }
 
   // Initial check (delay slightly to ensure currentVersion is populated if loaded via script)

@@ -651,7 +651,10 @@
         const absoluteUrl = (window.location.origin && window.location.origin !== 'null')
           ? new URL(encodedPath, window.location.origin).href
           : encodedPath;
-        contentPromise = fetch(absoluteUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
+        
+        // Add cache buster to ensure fresh content
+        const fetchUrl = absoluteUrl + (absoluteUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
+        contentPromise = fetch(fetchUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
       }
 
       contentPromise.then(content => {
@@ -1076,7 +1079,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260127cgi"></script>
+  <script src="courses.generated.js?v=20260127cug"></script>
 
   <!-- ============================================
        CHAT SYSTEM - Firebase & Notes
