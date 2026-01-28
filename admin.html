@@ -6,6 +6,8 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=20260125"></script>
     <script src="js/admin-guard.js?v=20260125"></script>
+    <script src="schedule-data.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <link rel="icon" href="favicon.svg?v=7" type="image/svg+xml">
@@ -76,6 +78,13 @@
         .btn:hover {
             background: #7a9a6a;
         }
+        .btn-secondary {
+            background-color: #444;
+            color: #e0e0e0;
+        }
+        .btn-secondary:hover {
+            background-color: #555;
+        }
         .error-message {
             color: #cf6679;
             background: rgba(207, 102, 121, 0.1);
@@ -122,6 +131,146 @@
             text-decoration: none;
             display: inline-block;
             text-align: center;
+        }
+
+        /* Visual Editor Styles */
+        #visual-editor-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #242222;
+            z-index: 1050;
+            overflow-y: auto;
+            padding: 2rem;
+            box-sizing: border-box;
+        }
+        .ve-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            border-bottom: 1px solid #333;
+            padding-bottom: 1rem;
+        }
+        .ve-header h2 {
+            margin: 0;
+            border: none;
+        }
+        .week-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 24px;
+            background: #1e1e1e;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .week-info {
+            text-align: center;
+            color: #e0e0e0;
+        }
+        .schedule-table {
+            width: 100%;
+            background: #1e1e1e;
+            border-collapse: collapse;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            table-layout: fixed;
+        }
+        .schedule-table th {
+            background: #588157;
+            color: #fff;
+            padding: 16px 12px;
+            border-right: 1px solid #344e41;
+        }
+        .schedule-table td {
+            padding: 8px;
+            border: 1px solid #333;
+            vertical-align: top;
+            min-height: 80px;
+            width: 20%;
+            position: relative; /* For add button */
+        }
+        .schedule-table td:hover {
+            background-color: #2a2a2a;
+        }
+        .schedule-item {
+            border-radius: 6px;
+            padding: 8px 10px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            color: #121212; /* Text color for items */
+        }
+        /* Item types - simplified colors for admin */
+        .type-exercise { background: #91c3fd; border-left: 4px solid #2563eb; }
+        .type-lecture { background: #e5e7eb; border-left: 4px solid #9ca3af; }
+        .type-important-lecture { background: #dad7cd; border-left: 4px solid #646c7e; }
+        .type-exam { background: #d87060; border-left: 4px solid #b34d41; }
+        .type-makeup { background: #fdba74; border-left: 4px solid #f97316; }
+        .type-test { background: #6ee7b7; border-left: 4px solid #732c2c; }
+        .type-colloquium { background: #fdba74; border-left: 4px solid #f97316; } /* Added Colloquium mapping */
+
+        .schedule-subject { font-weight: 600; font-size: 13px; }
+        .schedule-time { font-size: 11px; opacity: 0.8; }
+        
+        .add-event-btn-cell {
+            display: none;
+            width: 100%;
+            padding: 4px;
+            background: #333;
+            color: #888;
+            border: 1px dashed #555;
+            text-align: center;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 8px;
+            border-radius: 4px;
+        }
+        .schedule-table td:hover .add-event-btn-cell {
+            display: block;
+        }
+        .add-event-btn-cell:hover {
+            background: #444;
+            color: #fff;
+        }
+
+        /* Visual Editor Modal */
+        #ve-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+        }
+        .ve-modal-content {
+            background-color: #1e1e1e;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 400px;
+            border: 1px solid #444;
+        }
+        .ve-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .ve-modal-header h3 {
+            margin: 0;
+            color: #588157;
         }
     </style>
 </head>
@@ -183,6 +332,21 @@
                 </div>
                 <button type="submit" class="btn">Save HTML Priorities</button>
             </form>
+        </div>
+
+        <div class="admin-module">
+            <h2>Schedule Data (JSON)</h2>
+            <div id="schedule-json-error" class="error-message"></div>
+            <div class="form-group">
+                <label for="schedule-json-editor">JSON Content</label>
+                <textarea id="schedule-json-editor" style="width: 100%; min-height: 300px; padding: 0.75rem; border: 1px solid #444; border-radius: 8px; background-color: #333; color: #e0e0e0; box-sizing: border-box; font-family: monospace; font-size: 13px;" spellcheck="false"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button id="load-schedule-json" class="btn btn-secondary" style="flex: 1;">Load from Firebase</button>
+                <button id="import-schedule-default" class="btn btn-secondary" style="flex: 1;">Import Default</button>
+                <button id="open-visual-editor" class="btn" style="flex: 1; background-color: #444; color: white;">Visual Editor</button>
+            </div>
+            <button id="save-schedule-json" class="btn" style="margin-top: 10px;">Save JSON</button>
         </div>
 
         <div class="admin-module">
@@ -343,9 +507,176 @@
 
     </style>
 
-        <script src="courses.generated.js?v=202601288th"></script>
+    <!-- Visual Editor Container -->
+    <div id="visual-editor-container">
+        <div class="ve-header">
+            <h2>Visual Schedule Editor</h2>
+            <div style="display: flex; gap: 10px;">
+                <button id="manage-exams-btn" class="btn" style="width: auto; background-color: #d87060;">Manage Exams</button>
+                <button id="close-visual-editor" class="btn btn-secondary" style="width: auto;">Close & Back</button>
+            </div>
+        </div>
+
+        <div class="week-selector">
+            <button class="btn btn-secondary" style="width: auto;" onclick="changeWeekAdmin(-1)">Previous Week</button>
+            <div class="week-info" id="ve-week-info">Week 1</div>
+            <button class="btn btn-secondary" style="width: auto;" onclick="changeWeekAdmin(1)">Next Week</button>
+        </div>
+
+        <table class="schedule-table" id="ve-schedule-table">
+            <thead>
+                <tr>
+                    <th>Monday</th>
+                    <th>Tuesday</th>
+                    <th>Wednesday</th>
+                    <th>Thursday</th>
+                    <th>Friday</th>
+                </tr>
+            </thead>
+            <tbody id="ve-schedule-body">
+                <!-- Schedule items will be rendered here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Edit/Add Event Modal -->
+    <div id="ve-modal">
+        <div class="ve-modal-content">
+            <div class="ve-modal-header">
+                <h3 id="ve-modal-title">Edit Event</h3>
+                <span style="cursor: pointer; font-size: 24px;" onclick="closeVeModal()">×</span>
+            </div>
+            <form id="ve-event-form">
+                <div class="form-group">
+                    <label>Subject (Short)</label>
+                    <input type="text" id="ve-subject" required>
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="ve-fullname">
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="ve-type" style="width: 100%; padding: 8px; background: #333; color: #e0e0e0; border: 1px solid #444; border-radius: 8px;">
+                        <option value="Лекция">Lecture</option>
+                        <option value="Упражнение">Exercise</option>
+                        <option value="Важна лекция">Important Lecture</option>
+                        <option value="Колоквиум">Colloquium</option>
+                        <option value="Тест">Test</option>
+                    </select>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Start Time</label>
+                        <input type="text" id="ve-start" placeholder="00:00" required>
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>End Time</label>
+                        <input type="text" id="ve-end" placeholder="00:00">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Teacher</label>
+                    <input type="text" id="ve-teacher">
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label>Room</label>
+                        <input type="text" id="ve-room">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label>Floor</label>
+                        <input type="text" id="ve-floor">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Additional Info (Markdown)</label>
+                    <textarea id="ve-info" style="width: 100%; height: 80px; background: #333; color: #e0e0e0; border: 1px solid #444; border-radius: 8px; padding: 8px;"></textarea>
+                </div>
+            </form>
+            <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                <button type="button" id="ve-delete-btn" class="btn" style="background-color: #cf6679; width: auto;">Delete</button>
+                <button type="button" id="ve-save-btn" class="btn" style="width: auto;">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Exam Manager Modal -->
+    <div id="exam-modal" style="display: none; position: fixed; z-index: 2100; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); align-items: center; justify-content: center;">
+        <div class="ve-modal-content" style="width: 600px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="ve-modal-header">
+                <h3>Exam Manager</h3>
+                <span style="cursor: pointer; font-size: 24px;" onclick="closeExamModal()">×</span>
+            </div>
+            
+            <!-- List View -->
+            <div id="exam-list-view" style="flex: 1; overflow-y: auto;">
+                <button id="add-exam-btn" class="btn" style="margin-bottom: 1rem;">+ Add New Exam</button>
+                <ul id="exam-list" style="list-style: none; padding: 0;">
+                    <!-- Exams rendered here -->
+                </ul>
+            </div>
+
+            <!-- Edit View (Hidden by default) -->
+            <div id="exam-edit-view" style="display: none; flex: 1; overflow-y: auto;">
+                <form id="exam-form">
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <input type="text" id="ex-subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Full Name</label>
+                        <input type="text" id="ex-fullname">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Exam Date (YYYY-MM-DD)</label>
+                            <input type="text" id="ex-date" placeholder="2026-01-01">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Exam Time</label>
+                            <input type="text" id="ex-time" placeholder="09:00">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" id="ex-location">
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Retake Date</label>
+                            <input type="text" id="ex-retake-date">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>Retake Time</label>
+                            <input type="text" id="ex-retake-time">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Additional Info (Markdown)</label>
+                        <textarea id="ex-info" style="width: 100%; height: 100px; background: #333; color: #e0e0e0; border: 1px solid #444; border-radius: 8px; padding: 8px;"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="ex-calc"> Enable Calculator (Pharmacology 1 logic)
+                        </label>
+                    </div>
+                </form>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button type="button" id="ex-cancel-btn" class="btn btn-secondary" style="width: auto;">Cancel</button>
+                    <div>
+                        <button type="button" id="ex-delete-btn" class="btn" style="background-color: #cf6679; width: auto; margin-right: 10px;">Delete</button>
+                        <button type="button" id="ex-save-btn" class="btn" style="width: auto;">Save Exam</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="courses.generated.js?v=20260128brx"></script>
     <script src="js/admin.js?v=20260125"></script>
     <script src="js/schedule-notes-admin.js"></script>
+    <script src="js/admin-visual-editor.js"></script>
     <script src="js/version-check.js"></script>
 </body>
 </html>

@@ -1343,16 +1343,34 @@
     let currentWeekIndex = 0;
     let semesterConfig = null;
 
-    // Use data from the global scheduleData variable
-    document.addEventListener('DOMContentLoaded', function() {
-      if (typeof scheduleData !== 'undefined') {
+    // Use data from Firebase or fallback to global scheduleData variable
+    document.addEventListener('DOMContentLoaded', async function() {
+      let activeScheduleData = typeof scheduleData !== 'undefined' ? scheduleData : null;
+
+      try {
+        const snapshot = await firebase.database().ref('/settings/scheduleData').once('value');
+        if (snapshot.exists()) {
+          console.log('Using schedule data from Firebase');
+          activeScheduleData = snapshot.val();
+        } else {
+          console.log('Using local schedule data (default)');
+        }
+      } catch (error) {
+        console.error('Error fetching schedule from Firebase:', error);
+      }
+
+      if (activeScheduleData) {
+        // Update the global variable if needed for other functions relying on it (like renderExams)
+        // Ideally we should refactor renderExams to take data as argument, but for now:
+        window.scheduleData = activeScheduleData;
+
         // Generate weeks from template and overrides
-        scheduleByWeek = generateWeeksFromTemplate(scheduleData);
-        semesterConfig = scheduleData.semester;
+        scheduleByWeek = generateWeeksFromTemplate(activeScheduleData);
+        semesterConfig = activeScheduleData.semester;
 
         // Pre-parse additionalInfo for exams
-        if (scheduleData.exams && Array.isArray(scheduleData.exams)) {
-          scheduleData.exams.forEach(exam => {
+        if (activeScheduleData.exams && Array.isArray(activeScheduleData.exams)) {
+          activeScheduleData.exams.forEach(exam => {
             if (exam.additionalInfo) {
               exam.additionalInfoHtml = marked.parse(exam.additionalInfo);
             } else {
