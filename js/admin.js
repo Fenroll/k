@@ -353,7 +353,6 @@
         const scheduleJsonEditor = document.getElementById('schedule-json-editor');
         const loadScheduleJsonBtn = document.getElementById('load-schedule-json');
         const saveScheduleJsonBtn = document.getElementById('save-schedule-json');
-        const importScheduleDefaultBtn = document.getElementById('import-schedule-default');
         const scheduleJsonRef = db.ref('/settings/scheduleData');
 
         // Load from Firebase
@@ -389,54 +388,6 @@
                 } else {
                     showError('schedule-json-error', 'Failed to save schedule data: ' + error.message);
                 }
-            }
-        });
-
-        // Import Default (from window.scheduleData)
-        importScheduleDefaultBtn.addEventListener('click', () => {
-            if (window.scheduleData) { // Note: scheduleData is defined as const in schedule-data.js, but accessible in global scope if not in module
-                // Wait, const in global scope is NOT on window. But since it's a script tag without type=module, it IS global.
-                // Let's check schedule-data.js again. It's `const scheduleData = ...`
-                // In browser context, top-level const/let are NOT attached to window but are global.
-                // We should access it directly as `scheduleData` or try `window.scheduleData` if we change it.
-                // However, `scheduleData` variable should be available in this closure if it's global.
-                // But admin.js is wrapped in an IIFE. Global variables are accessible.
-                try {
-                    // Try accessing the global variable directly. Since we are inside an IIFE, we rely on scope chain.
-                    // However, to be safe and clear, let's try `window.scheduleData` if I change schedule-data.js or just `scheduleData`
-                    // Actually, let's look at how I included it. <script src="schedule-data.js"></script>
-                    // So `scheduleData` is a global variable.
-                    
-                    // But wait, `const` in global scope does NOT become a property of `window`.
-                    // So `window.scheduleData` will be undefined if I don't change `schedule-data.js`.
-                    // I should probably change `schedule-data.js` to assign to window or use `var`.
-                    
-                    // For now, I'll assume I can access `scheduleData` directly.
-                    // But since I am in `admin.js`, and `schedule-data.js` is loaded before, `scheduleData` should be available.
-                    
-                    // Let's modify the code to check if it's defined.
-                    // Since I can't easily check for variable existence without ReferenceError if it's not on window...
-                    // I will check `typeof scheduleData`.
-                    
-                    if (typeof scheduleData !== 'undefined') {
-                         scheduleJsonEditor.value = JSON.stringify(scheduleData, null, 2);
-                         showNotification('Default schedule data imported into editor.');
-                         hideError('schedule-json-error');
-                    } else {
-                         showError('schedule-json-error', 'Default schedule data not available (scheduleData is undefined).');
-                    }
-                } catch(e) {
-                     showError('schedule-json-error', 'Error accessing default schedule data: ' + e.message);
-                }
-            } else {
-                 // Fallback if I changed it to window.scheduleData
-                 if (typeof scheduleData !== 'undefined') {
-                     scheduleJsonEditor.value = JSON.stringify(scheduleData, null, 2);
-                     showNotification('Default schedule data imported into editor.');
-                     hideError('schedule-json-error');
-                 } else {
-                     showError('schedule-json-error', 'Default schedule data not available.');
-                 }
             }
         });
 

@@ -1108,7 +1108,7 @@
 }
   </style>
   <script src="html-priority.js"></script>
-  <script src="courses.generated.js?v=20260128l5d"></script>
+  <script src="courses.generated.js?v=202601281bk2"></script>
 </head>
 <body>
 <!-- Right-side overlay for course card click -->
@@ -2749,17 +2749,17 @@ function toggleFileDropdown(sectionId) {
         if (isCollapsible) {
           // Level 2+ (вложени папки) - затворени по подразбиране
           sectionContent += `<div style="display:flex; align-items:center; gap:6px; cursor:pointer; user-select:none; margin-bottom:8px; min-width:0;" onclick="toggleFileDropdown('${sectionId}')">`;
-          sectionContent += `<span id="arrow-${sectionId}" style="color:#8b5cf6; font-size:0.9em; min-width:10px; transition:all 0.2s ease; flex-shrink:0;">►</span>`;
-          sectionContent += `<svg width="18" height="18" viewBox="0 0 24 24" fill="#8b5cf6" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+          sectionContent += `<span id="arrow-${sectionId}" style="color:#588157; font-size:0.9em; min-width:10px; transition:all 0.2s ease; flex-shrink:0;">►</span>`;
+          sectionContent += `<svg width="18" height="18" viewBox="0 0 24 24" fill="#588157" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
           const label = hasMany ? `${section.name} (${fileCount})` : section.name;
-          sectionContent += `<h4 style="margin:0; color:#8b5cf6; font-size:${1.0 - level * 0.05}em; font-weight:500; flex:1; word-break:break-word; overflow-wrap:break-word; min-width:0;">${label}</h4>`;
+          sectionContent += `<h4 style="margin:0; color:#588157; font-size:${1.0 - level * 0.05}em; font-weight:500; flex:1; word-break:break-word; overflow-wrap:break-word; min-width:0;">${label}</h4>`;
           sectionContent += `</div>`;
         } else {
           // Level 1 (основни секции) - БЕЗ стрелка, винаги отворени
           sectionContent += `<div style="display:flex; align-items:center; gap:6px; margin-bottom:8px;">`;
-          sectionContent += `<svg width="18" height="18" viewBox="0 0 24 24" fill="#8b5cf6" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
+          sectionContent += `<svg width="18" height="18" viewBox="0 0 24 24" fill="#588157" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
           const label = hasMany ? `${section.name} (${fileCount})` : section.name;
-          sectionContent += `<h4 style="margin:0; color:#8b5cf6; font-size:${1.0 - level * 0.05}em; font-weight:500;">${label}</h4>`;
+          sectionContent += `<h4 style="margin:0; color:#588157; font-size:${1.0 - level * 0.05}em; font-weight:500;">${label}</h4>`;
           sectionContent += `</div>`;
         }
       }

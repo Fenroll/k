@@ -36,7 +36,6 @@
   <!-- Markdown parser -->
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
   
-  <script src="schedule-data.js"></script>
   <style>
   body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; overflow-y: scroll; }
   .layout { display: flex; min-height: 100vh; }
@@ -304,8 +303,8 @@
     font-size: 16px;
     font-weight: 600;
     color: #374151;
-    width: 320px; /* Changed from min-width to fixed width to prevent CLS */
     text-align: center;
+    padding: 0 10px; /* Minimal padding */
   }
   
   .week-number {
@@ -315,177 +314,240 @@
     margin-top: 4px;
   }
   
-  /* Schedule table */
-  .schedule-table {
-    width: 100%;
+  /* Vertical Schedule Grid Styles */
+  :root {
+    --col-dust-grey: #dad7cd;
+    --col-dry-sage: #a3b18a;
+    --col-fern: #588157;
+    --col-hunter: #3a5a40;
+    --col-pine: #344e41;
+    
+    --time-col-width: 40px; /* Compact time column */
+    --slot-height: 16px; /* 15 min slot height */
+  }
+
+  .calendar-wrapper {
     background: #fff;
-    border-collapse: collapse;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-radius: 8px;
+    border-radius: 8px; /* Reduced from 16px */
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    max-width: 100%;
+    margin: 0 auto;
+    border: 1px solid #d3cdcd;
+    /* Force clipping of sticky elements */
+    mask-image: radial-gradient(white, black); 
+    -webkit-mask-image: -webkit-radial-gradient(white, black);
     overflow: hidden;
-    table-layout: fixed; /* Фиксира широчината на колоните */
+  }
+
+  .calendar-grid {
+    display: grid;
+    /* Time col + 5 days */
+    grid-template-columns: var(--time-col-width) repeat(5, 1fr);
+    grid-auto-rows: var(--slot-height);
+    position: relative;
+    background: #fff;
+    border-radius: 8px; /* Apply to grid directly */
+    overflow: hidden;
+    
+    /* Vertical Lines using gradient */
+    /* Time col is fixed, days are 1fr. This is hard to gradient perfectly with mix. */
+    /* Fallback: use a repeating-linear-gradient that assumes approx width or just use JS for lines? */
+    /* Let's use box-shadow on columns? No. */
   }
   
-  .schedule-table thead th {
-    background: #588157;
-    color: #fff;
-    padding: 16px 12px;
-    text-align: center;
+  /* Vertical Line Helper Class */
+  .vertical-line {
+      grid-row: 4 / -1; /* Start after header */
+      border-right: 1px solid #f4f4f4;
+      pointer-events: none;
+      z-index: 1;
+  }
+
+  /* Header (Days) */
+  .header-cell {
+    background-color: var(--col-fern);
+    color: white;
     font-weight: 600;
-    font-size: 15px;
-    border-right: 1px solid #344e41;
-  }
-  
-  .schedule-table thead th .date-label {
-    display: block;
-    font-size: 12px;
-    font-weight: 400;
-    margin-top: 4px;
-    opacity: 0.9;
-  }
-  
-  .schedule-table thead th:last-child {
-    border-right: none;
-  }
-  
-  .schedule-table tbody td {
-    padding: 8px;
-    border: 1px solid #e5e7eb;
     text-align: center;
-    vertical-align: top;
-    min-height: 80px;
-    width: 20%; /* Всяка колона е 20% (5 колони = 100%) */
+    padding: 12px 4px; /* Reduced from 16px */
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    grid-row: 1 / span 3; /* Reduced from span 4 */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px; /* Reduced from 15px */
+    border-right: 1px solid rgba(255,255,255,0.2);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    line-height: 1.2;
+    isolation: isolate;
   }
   
-  /* Schedule item card */
-  .schedule-item {
-    border-radius: 6px;
-    padding: 8px 10px;
-    margin-bottom: 6px;
+  .header-cell.time-header {
+    background-color: var(--col-pine);
+    z-index: 101;
+    left: 0; 
+  }
+  
+  /* Explicit Column Assignment for Headers to prevent shifts */
+  .calendar-grid > .header-cell:nth-child(1) { grid-column: 1; } /* Time */
+  .calendar-grid > .header-cell:nth-child(2) { grid-column: 2; } /* Mon */
+  .calendar-grid > .header-cell:nth-child(3) { grid-column: 3; } /* Tue */
+  .calendar-grid > .header-cell:nth-child(4) { grid-column: 4; } /* Wed */
+  .calendar-grid > .header-cell:nth-child(5) { grid-column: 5; } /* Thu */
+  .calendar-grid > .header-cell:nth-child(6) { grid-column: 6; } /* Fri */
+
+  /* Time Labels */
+  .time-label {
+    grid-column: 1;
+    text-align: right;
+    padding-right: 4px;
+    color: #888;
+    font-size: 10px;
+    position: relative;
+    border-right: 1px solid #eee;
+    pointer-events: none;
+  }
+
+  /* Grid Lines */
+  .grid-line {
+    grid-column: 2 / -1;
+    border-top: 1px solid #f4f4f4;
+    pointer-events: none;
+  }
+  
+  .grid-line.hour-marker {
+    border-top: 1px solid #e0e0e0;
+  }
+
+  /* Event Card */
+  .event-card {
+    margin: 1px 2px;
+    padding: 4px 6px;
+    border-radius: 4px;
+    font-size: 13px; /* Increased base size */
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    line-height: 1.2;
     cursor: pointer;
-    transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: transform 0.1s;
+    z-index: 5;
   }
   
-  /* Упражнение - vibrant blue */
-  .schedule-item.type-exercise {
+  .event-card:hover {
+    transform: scale(1.02);
+    z-index: 15;
+  }
+
+  .event-title {
+    font-weight: 700;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 15px; /* Increased from 13px */
+  }
+  
+  .title-desktop { display: inline; }
+  .title-mobile { display: none; }
+
+  .event-time {
+    font-size: 13px; /* Increased from 11px */
+    opacity: 0.9;
+    white-space: nowrap;
+  }
+  
+  .event-location {
+    font-size: 13px; /* Increased from 11px */
+    font-style: italic;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 2px;
+  }
+
+  /* Types */
+  .type-exercise {
     background: linear-gradient(135deg, #dbeafe 0%, #91c3fd 100%);
-    border-left: 4px solid #2563eb;
-  }
-  
-  .schedule-item.type-exercise:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(37,99,235,0.35);
-  }
-  
-  .schedule-item.type-exercise .schedule-subject {
+    border-left: 3px solid #2563eb;
     color: #1e40af;
   }
   
-  /* Лекция - boring/neutral colors */
-  .schedule-item.type-lecture {
+  .type-lecture {
     background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-    border-left: 4px solid #9ca3af;
-  }
-  
-  .schedule-item.type-lecture:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(156,163,175,0.25);
-  }
-  
-  .schedule-item.type-lecture .schedule-subject {
+    border-left: 3px solid #9ca3af;
     color: #4b5563;
   }
   
-  /* ImportantLecture - gradient between exercise blue and lecture gray */
-  .schedule-item.type-important-lecture {
+  .type-important-lecture {
     background: linear-gradient(135deg, #e5e7eb 0%, #dad7cd 110%);
-    border-left: 4px solid #646c7e;
-  }
-  
-  .schedule-item.type-important-lecture:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(107,114,128,0.3);
-  }
-  
-  .schedule-item.type-important-lecture .schedule-subject {
+    border-left: 3px solid #646c7e;
     color: #374151;
   }
   
- .schedule-item.type-exam {
-    /* Използваме по-светъл и наситен корал за по-добър контраст */
+  .type-exam {
     background: linear-gradient(135deg, #e2aa98 0%, #d87060 100%);
-    border-left: 4px solid #b34d41;
-  }
-  
-  .schedule-item.type-exam:hover {
-    transform: translateY(-2px);
-    /* Сянката е по-мека, за да не изглежда мръсно върху маслинения фон */
-    box-shadow: 0 4px 12px rgba(179, 77, 65, 0.4);
-  }
-  
-  .schedule-item.type-exam .schedule-subject {
-    /* Текстът вече е в по-тъмен, „керемиден“ нюанс за перфектна четимост */
+    border-left: 3px solid #b34d41;
     color: #7a2f26;
-    font-weight: 700;
-  }
-
-  /* Поправка на Колоквиум - orange/amber */
-  .schedule-item.type-makeup {
-    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
-    border-left: 4px solid #f97316;
   }
   
-  .schedule-item.type-makeup:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(249,115,22,0.4);
-  }
-  
-  .schedule-item.type-makeup .schedule-subject {
-    color: #c2410c;
-  }
-  
-  /* Тест - vibrant green */
-  .schedule-item.type-test {
+  .type-test {
     background: linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%);
-    border-left: 4px solid #732c2c;
-  }
-  
-  .schedule-item.type-test:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 3px 8px rgba(16,185,129,0.4);
-  }
-  
-  .schedule-item.type-test .schedule-subject {
+    border-left: 3px solid #732c2c;
     color: #047857;
   }
-
-  /* Highlight - добавя светещ ефект */
-  .schedule-item.highlight {
-    box-shadow: 0 0 12px rgba(255, 193, 7, 0.6), 0 2px 8px rgba(0,0,0,0.1) !important;
-    border-right: 3px solid #fbbf24;
-  }
   
-  .schedule-item:last-child {
-    margin-bottom: 0;
-  }
-  
-  .schedule-subject {
-    font-weight: 600;
-    font-size: 14px;
-    margin-bottom: 4px;
-  }
-  
-  .schedule-time {
-    font-size: 12px;
-    color: #6b7280;
-    font-weight: 500;
+  .type-makeup {
+    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+    border-left: 3px solid #f97316;
+    color: #c2410c;
   }
 
-  /* Current day highlight */
-  .schedule-table td.current-day {
-    background-color: #d2e3fc; /* много светло синьо */
+  /* Compact mode for mobile */
+  @media (max-width: 768px) {
+    .title-desktop { display: none; }
+    .title-mobile { display: inline; }
+    .event-title { font-size: 14px; } /* Increased from 12px */
+    .event-time { font-size: 12px; } /* Increased from 10px */
+    .event-location { display: none; } 
+    
+    /* Dynamic scaling for short events on mobile */
+    .short-event {
+        justify-content: center;
+        line-height: 1;
+        padding: 1px 2px;
+    }
+    .short-event .event-title { font-size: 11px; margin-bottom: 0; }
+    .short-event .event-time { font-size: 9px; }
+    
+    /* Tiny events (1 slot / 15 mins) - Single line layout */
+    .tiny-event {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 2px;
+    }
+    .tiny-event .event-title { font-size: 10px; width: auto; margin-bottom: 0; }
+    .tiny-event .event-time { font-size: 8px; margin-left: 4px; }
+    
+    :root {
+       --time-col-width: 35px;
+       --slot-height: 11px; /* Significantly reduced height from 16px */
+    }
+    
+           .calendar-wrapper {
+              margin-bottom: 80px; /* Force white space at the bottom */
+              border-left: none;
+              border-right: none;
+           }    
+    .event-card {
+       padding: 1px 3px; /* Tighter padding for shorter rows */
+    }
   }
+
   
 
 
@@ -721,14 +783,13 @@
   }
   
   #modalAdditionalInfo {
-    color: #374151;  /* По-тъмен сив от другите */
-    font-weight: 500;
-    font-size: 14px;
+    text-decoration: underline;
     max-height: 70vh;
     overflow-y: auto;
-    padding-right: 8px;
-    content-visibility: auto; /* Optimize rendering of off-screen content */
-    contain-intrinsic-size: 1px 500px; /* Estimated initial size to prevent layout shifts */
+  }
+  
+  #modalAdditionalInfo p {
+    margin: 0;
   }
   
   #modalAdditionalInfo::-webkit-scrollbar {
@@ -928,21 +989,32 @@
     }
     
     .week-selector {
-      flex-wrap: wrap;
-      gap: 12px;
-      padding: 12px;
+      flex-wrap: nowrap;
+      gap: 10px;
+      padding: 12px 8px;
+      justify-content: center;
     }
     
     .week-btn {
       font-size: 13px;
       padding: 8px 12px;
+      min-width: auto;
+      flex-shrink: 0;
     }
     
     .week-info {
       text-align: center;
-      min-width: 100%;
-      order: -1;
-      margin-bottom: 8px;
+      min-width: 0;
+      width: auto;
+      order: 0;
+      margin-bottom: 0;
+      font-size: 15px; /* Restored close to original */
+      flex: 0 1 auto;
+    }
+    
+    .week-number {
+      font-size: 13px; /* Restored close to original */
+      white-space: nowrap;
     }
     
     .schedule-table {
@@ -1211,20 +1283,16 @@
           </div>
         </div>
 
-        <table class="schedule-table" id="scheduleTable">
-          <thead>
-            <tr id="scheduleHeader">
-              <th>ПОН<br><span class="date-label"></span></th>
-              <th>ВТ<br><span class="date-label"></span></th>
-              <th>СР<br><span class="date-label"></span></th>
-              <th>ЧЕТ<br><span class="date-label"></span></th>
-              <th>ПЕТ<br><span class="date-label"></span></th>
-            </tr>
-          </thead>
-          <tbody id="scheduleBody">
-            <!-- Schedule will be rendered here -->
-          </tbody>
-        </table>
+        <div id="scheduleGrid" class="calendar-grid">
+          <!-- Header Row -->
+          <div class="header-cell time-header"></div>
+          <div class="header-cell">ПОН</div>
+          <div class="header-cell">ВТ</div>
+          <div class="header-cell">СР</div>
+          <div class="header-cell">ЧЕТ</div>
+          <div class="header-cell">ПЕТ</div>
+          <!-- Grid Content will be injected by JS -->
+        </div>
         
         <!-- Current Information Panel -->
         <div id="currentInfoPanel" class="info-panel" style="opacity: 0; visibility: hidden; pointer-events: none;">
@@ -1343,58 +1411,49 @@
   </div>
 
   <script>
-    // Schedule data loaded from schedule-data.js
+    // Schedule data loaded from Firebase
     let scheduleByWeek = [];
     let currentWeekIndex = 0;
-    let semesterConfig = null;
+    
+    // Global variable to store loaded data for helpers
+    window.scheduleData = null;
 
-    // Use data from Firebase or fallback to global scheduleData variable
     document.addEventListener('DOMContentLoaded', async function() {
-      let activeScheduleData = typeof scheduleData !== 'undefined' ? scheduleData : null;
-
       try {
         const snapshot = await firebase.database().ref('/settings/scheduleData').once('value');
         if (snapshot.exists()) {
-          console.log('Using schedule data from Firebase');
-          activeScheduleData = snapshot.val();
+          const activeScheduleData = snapshot.val();
+          window.scheduleData = activeScheduleData;
+
+          // Generate weeks from template and overrides
+          scheduleByWeek = generateWeeksFromTemplate(activeScheduleData);
+
+          // Pre-parse additionalInfo for exams
+          if (activeScheduleData.exams && Array.isArray(activeScheduleData.exams)) {
+            activeScheduleData.exams.forEach(exam => {
+              if (exam.additionalInfo) {
+                exam.additionalInfoHtml = marked.parse(exam.additionalInfo);
+              } else {
+                exam.additionalInfoHtml = '';
+              }
+            });
+          }
+          
+          // Find and set current week based on today's date
+          currentWeekIndex = findCurrentWeekIndex();
+          
+          renderSchedule();
+          updateWeekInfo();
+          
+          // Load current information from Markdown file
+          loadCurrentInfo();
         } else {
-          console.log('Using local schedule data (default)');
+          console.error('No schedule data found in Firebase');
+          document.querySelector('.schedule-container').innerHTML = '<p style="text-align:center; padding: 20px;">Няма намерено разписание в базата данни.</p>';
         }
       } catch (error) {
         console.error('Error fetching schedule from Firebase:', error);
-      }
-
-      if (activeScheduleData) {
-        // Update the global variable if needed for other functions relying on it (like renderExams)
-        // Ideally we should refactor renderExams to take data as argument, but for now:
-        window.scheduleData = activeScheduleData;
-
-        // Generate weeks from template and overrides
-        scheduleByWeek = generateWeeksFromTemplate(activeScheduleData);
-        semesterConfig = activeScheduleData.semester;
-
-        // Pre-parse additionalInfo for exams
-        if (activeScheduleData.exams && Array.isArray(activeScheduleData.exams)) {
-          activeScheduleData.exams.forEach(exam => {
-            if (exam.additionalInfo) {
-              exam.additionalInfoHtml = marked.parse(exam.additionalInfo);
-            } else {
-              exam.additionalInfoHtml = '';
-            }
-          });
-        }
-        
-        // Find and set current week based on today's date
-        currentWeekIndex = findCurrentWeekIndex();
-        
-        renderSchedule();
-        updateWeekInfo();
-        
-        // Load current information from Markdown file
-        loadCurrentInfo();
-      } else {
-        console.error('Schedule data not loaded');
-        alert('Грешка при зареждане на разписанието.');
+        document.querySelector('.schedule-container').innerHTML = '<p style="text-align:center; padding: 20px;">Грешка при зареждане на разписанието. Моля, опитайте по-късно.</p>';
       }
     });
     
@@ -1435,28 +1494,46 @@
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Reset time to midnight
       
-      // Check if today is in Christmas break - show exam period instead
-      if (semesterConfig && semesterConfig.christmasBreak) {
-        const christmasStart = new Date(semesterConfig.christmasBreak.start);
-        const christmasEnd = new Date(semesterConfig.christmasBreak.end);
+      const semConfig = getSemesterConfigForDate(today);
+      
+      // Special Check: If today is in an Exam Period, force find the exam week
+      if (semConfig && semConfig.examPeriod) {
+          const examStart = new Date(semConfig.examPeriod.start);
+          const examEnd = new Date(semConfig.examPeriod.end);
+          examStart.setHours(0,0,0,0);
+          examEnd.setHours(0,0,0,0);
+          
+          if (today >= examStart && today <= examEnd) {
+              // Find the week that starts on (or closest before?) the exam start
+              // The weeks array usually has an entry for the Exam Start date.
+              const examStartIndex = scheduleByWeek.findIndex(w => {
+                  const wStart = new Date(w.startDate);
+                  wStart.setHours(0,0,0,0);
+                  return wStart.getTime() === examStart.getTime();
+              });
+              
+              if (examStartIndex !== -1) {
+                  return examStartIndex;
+              }
+          }
+      }
+      
+      // Check if today is in Christmas break
+      if (semConfig && semConfig.christmasBreak) {
+        const christmasStart = new Date(semConfig.christmasBreak.start);
+        const christmasEnd = new Date(semConfig.christmasBreak.end);
         christmasStart.setHours(0, 0, 0, 0);
         christmasEnd.setHours(0, 0, 0, 0);
         
         if (today >= christmasStart && today <= christmasEnd) {
-          // Find exam period week
-          for (let i = 0; i < scheduleByWeek.length; i++) {
-            const weekStart = new Date(scheduleByWeek[i].startDate);
-            weekStart.setHours(0, 0, 0, 0);
-            
-            if (semesterConfig.examPeriod) {
-              const examStart = new Date(semesterConfig.examPeriod.start);
-              examStart.setHours(0, 0, 0, 0);
-              
-              if (weekStart >= examStart) {
-                return i; // Return first exam week
-              }
-            }
-          }
+             // Return index of the week that contains or precedes the break
+             // Or better, if we have a "Christmas" week entry (we do: Dec 24)
+             const xmasIndex = scheduleByWeek.findIndex(w => {
+                  const wStart = new Date(w.startDate);
+                  wStart.setHours(0,0,0,0);
+                  return wStart.getTime() === christmasStart.getTime();
+             });
+             if (xmasIndex !== -1) return xmasIndex;
         }
       }
       
@@ -1485,30 +1562,67 @@
       }
       
       // If today is before first week, return 0
-      const firstWeek = new Date(scheduleByWeek[0].startDate);
-      if (targetDate < firstWeek) {
-        return 0;
+      if (scheduleByWeek.length > 0) {
+        const firstWeek = new Date(scheduleByWeek[0].startDate);
+        if (targetDate < firstWeek) {
+          return 0;
+        }
       }
       
       // If today is after all weeks, return last week
-      return scheduleByWeek.length - 1;
+      return Math.max(0, scheduleByWeek.length - 1);
     }
     
     // Generate schedule for all weeks from template
     function generateWeeksFromTemplate(config) {
       const weeks = [];
-      const template = config.template || [];
       const overrides = config.overrides || {};
       
-      // Pre-parse additionalInfo for template events
-      const processedTemplate = template.map(item => ({
-        ...item,
-        additionalInfoHtml: item.additionalInfo ? marked.parse(item.additionalInfo) : ''
-      }));
+      // Pre-parse additionalInfo for templates
+      const processedTemplates = {};
+      
+      // Check if templates object exists AND has keys. If empty, try legacy fallback.
+      if (config.templates && Object.keys(config.templates).length > 0) {
+        // New structure
+        Object.keys(config.templates).forEach(sem => {
+          processedTemplates[sem] = config.templates[sem].map(item => ({
+            ...item,
+            additionalInfoHtml: item.additionalInfo ? marked.parse(item.additionalInfo) : ''
+          }));
+        });
+      } else {
+        // Fallback for legacy structure (or empty templates object)
+        const template = config.template || [];
+        processedTemplates['winter'] = template.map(item => ({
+          ...item,
+          additionalInfoHtml: item.additionalInfo ? marked.parse(item.additionalInfo) : ''
+        }));
+        processedTemplates['summer'] = [];
+      }
 
       config.weeks.forEach((week, index) => {
         const weekNumber = index + 1;
-        let schedule = JSON.parse(JSON.stringify(processedTemplate)); // Deep copy the processed template
+        const weekStartDateStr = week.startDate;
+        
+        // Determine semester using string comparison
+        let semesterKey = 'winter';
+        if (config.semesters) {
+            // Sort keys by start date to find the correct range
+            const keys = Object.keys(config.semesters).sort((a, b) => config.semesters[a].startDate.localeCompare(config.semesters[b].startDate));
+            for (const key of keys) {
+                if (weekStartDateStr >= config.semesters[key].startDate) {
+                    semesterKey = key;
+                }
+            }
+        } else if (config.semesters && config.semesters.summer) {
+             // Fallback for simple case if keys iteration fails
+             if (weekStartDateStr >= config.semesters.summer.startDate) {
+                 semesterKey = 'summer';
+             }
+        }
+        
+        const currentTemplate = processedTemplates[semesterKey] || [];
+        let schedule = JSON.parse(JSON.stringify(currentTemplate)); // Deep copy
         
         // Apply overrides for this week if they exist
         if (overrides[weekNumber]) {
@@ -1557,46 +1671,82 @@
         weeks.push({
           weekNumber: weekNumber,
           startDate: week.startDate,
-          schedule: schedule
+          schedule: schedule,
+          semester: semesterKey
         });
       });
       
       return weeks;
     }
     
+    // Helper to get semester config for a specific date
+    function getSemesterConfigForDate(dateStr) {
+      // Normalize date string to YYYY-MM-DD for string comparison if passed as Date object or timestamp
+      let dateString = dateStr;
+      if (dateStr instanceof Date) {
+          const offset = dateStr.getTimezoneOffset() * 60000;
+          dateString = new Date(dateStr.getTime() - offset).toISOString().split('T')[0];
+      } else if (typeof dateStr === 'string' && dateStr.includes('T')) {
+          dateString = dateStr.split('T')[0];
+      }
+
+      const data = window.scheduleData;
+      
+      if (!data) return null;
+      
+      if (data.semesters) {
+        // Sort keys by start date to find the correct range
+        const keys = Object.keys(data.semesters).sort((a, b) => data.semesters[a].startDate.localeCompare(data.semesters[b].startDate));
+        let selectedSem = data.semesters.winter; // Default to first/winter
+        
+        for (const key of keys) {
+            if (dateString >= data.semesters[key].startDate) {
+                selectedSem = data.semesters[key];
+            }
+        }
+        return selectedSem;
+      }
+      
+      return data.semester; // Legacy fallback
+    }
+
     // Calculate week number from semester start
     function getWeekNumberFromSemesterStart(dateStr) {
-      if (!semesterConfig) return 1;
+      const semConfig = getSemesterConfigForDate(dateStr);
+      if (!semConfig) return 1;
       
       const weekDate = new Date(dateStr);
-      const semesterStart = new Date(semesterConfig.startDate);
+      const semesterStart = new Date(semConfig.startDate);
       
       // Calculate difference in days
       const diffTime = weekDate - semesterStart;
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
       
       // Calculate week number (starting from 1)
-      return Math.floor(diffDays / 7) + 1;
+      const weekNum = Math.floor(diffDays / 7) + 1;
+      return weekNum > 0 ? weekNum : 1;
     }
     
     // Check if date is in Christmas break
     function isChristmasBreak(dateStr) {
-      if (!semesterConfig || !semesterConfig.christmasBreak) return false;
+      const semConfig = getSemesterConfigForDate(dateStr);
+      if (!semConfig || !semConfig.christmasBreak) return false;
       
       const date = new Date(dateStr);
-      const breakStart = new Date(semesterConfig.christmasBreak.start);
-      const breakEnd = new Date(semesterConfig.christmasBreak.end);
+      const breakStart = new Date(semConfig.christmasBreak.start);
+      const breakEnd = new Date(semConfig.christmasBreak.end);
       
       return date >= breakStart && date <= breakEnd;
     }
     
     // Check if date is in exam period
     function isExamPeriod(dateStr) {
-      if (!semesterConfig || !semesterConfig.examPeriod) return false;
+      const semConfig = getSemesterConfigForDate(dateStr);
+      if (!semConfig || !semConfig.examPeriod) return false;
       
       const date = new Date(dateStr);
-      const examStart = new Date(semesterConfig.examPeriod.start);
-      const examEnd = new Date(semesterConfig.examPeriod.end);
+      const examStart = new Date(semConfig.examPeriod.start);
+      const examEnd = new Date(semConfig.examPeriod.end);
       
       return date >= examStart && date <= examEnd;
     }
@@ -1608,18 +1758,59 @@
       return 'normal';
     }
 
-    // Render schedule table
-    // Helper function to format time
+    // Helper function to format time for display
     function formatTime(startTime, endTime) {
+      if (!startTime || !endTime) return '';
       // Remove leading zero from hours for display
       const formatHour = (time) => {
         const [hours, minutes] = time.split(':');
         return `${parseInt(hours)}:${minutes}`;
       };
-      
       return `${formatHour(startTime)}-${formatHour(endTime)}`;
     }
-    
+
+    // Helper: Time string ("HH:MM") to minutes from midnight
+    function timeToMinutes(timeStr) {
+      if (!timeStr) return 0;
+      const [h, m] = timeStr.split(':').map(Number);
+      return h * 60 + m;
+    }
+
+    // Helper: Calculate start/end hour based on events
+    function calculateDynamicRange(events) {
+      let earliestMin = 24 * 60;
+      let latestMin = 0;
+      let hasEvents = false;
+
+      events.forEach(ev => {
+        if (!ev.startTime || !ev.endTime) return;
+        hasEvents = true;
+        const start = timeToMinutes(ev.startTime);
+        const end = timeToMinutes(ev.endTime);
+        if (start < earliestMin) earliestMin = start;
+        if (end > latestMin) latestMin = end;
+      });
+
+      if (!hasEvents) return { startHour: 8, endHour: 18 }; // Default
+
+      // Round down start to nearest hour
+      let startHour = Math.floor(earliestMin / 60);
+
+      // Round up end to next :30 increment
+      // If ends before XX:30, snap to XX:30. 
+      // If ends at or after XX:30, snap to (XX+1):30.
+      let baseHour = Math.floor(latestMin / 60);
+      let mins = latestMin % 60;
+      let endHour;
+      if (mins < 30) {
+          endHour = baseHour + 0.5;
+      } else {
+          endHour = baseHour + 1.5;
+      }
+      
+      return { startHour, endHour };
+    }
+
     // Get current day of week (ПОН, ВТ, etc.) or Monday if weekend
     // Returns null if we're viewing a different week than current
     function getCurrentDay() {
@@ -1633,7 +1824,7 @@
       const weekStart = new Date(currentWeek.startDate);
       weekStart.setHours(0, 0, 0, 0);
       const weekEnd = new Date(weekStart);
-      weekEnd.setDate(weekEnd.getDate() + 4); // Friday
+      weekEnd.setDate(weekEnd.getDate() + 6); // End of week (Sunday)
       
       // If today is not in this week, don't highlight anything
       if (today < weekStart || today > weekEnd) {
@@ -1651,96 +1842,194 @@
       // Otherwise return the current day (Monday=1 -> index 0)
       return days[dayIndex - 1];
     }
-    
+
     function renderSchedule() {
+      const grid = document.getElementById('scheduleGrid');
       const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
       const currentDay = getCurrentDay();
-      const tbody = document.getElementById('scheduleBody');
       
-      // Clear existing content efficiently
-      while (tbody.firstChild) {
-          tbody.removeChild(tbody.firstChild);
-      }
+      // Clear existing content (keep headers 0-5)
+      // Headers are static in HTML now, but date labels need update?
+      // Wait, I replaced the table which had date labels in TH.
+      // The new grid has static headers "ПОН", "ВТ"...
+      // I need to update headers with dates if I want to keep that feature.
+      // Let's first clear dynamic content.
       
-      // Use a DocumentFragment to minimize DOM manipulations
-      const fragment = document.createDocumentFragment();
+      // Remove all elements that are NOT header-cell
+      const dynamicElements = grid.querySelectorAll('.time-label, .grid-line, .event-card, .vertical-line');
+      dynamicElements.forEach(el => el.remove());
 
-      // Get current week's schedule
+      // Update Dates in Headers
+      const headerCells = grid.querySelectorAll('.header-cell:not(.time-header)');
       const currentWeek = scheduleByWeek[currentWeekIndex];
-      if (!currentWeek) {
-          // Append fragment even if empty
-          tbody.appendChild(fragment);
-          return;
-      }
       
+      if (!currentWeek) return; // Should not happen if data loaded
+
+      // Update Header Dates
+      if (currentWeek.startDate) {
+          const startDate = new Date(currentWeek.startDate);
+          headerCells.forEach((cell, i) => {
+              const date = new Date(startDate);
+              date.setDate(date.getDate() + i);
+              const d = date.getDate();
+              const m = date.getMonth() + 1;
+              const dateStr = `${d}.${m < 10 ? '0' + m : m}`;
+              // Using divs for flex column layout
+              cell.innerHTML = `<div>${days[i]}</div><div style="font-weight:400; font-size: 0.9em; opacity: 0.9; margin-top: 2px;">${dateStr}</div>`;
+              
+              // Highlight current day
+              if (days[i] === currentDay) {
+                  cell.style.backgroundColor = 'var(--col-pine)'; // Darker highlight
+              } else {
+                  cell.style.backgroundColor = ''; // Reset (uses CSS default)
+              }
+          });
+      }
+
+      // Check for Exam View
+      if (currentWeek.type === 'exam') {
+          // Hide grid, show exam list
+          grid.style.display = 'none';
+          document.getElementById('examScreen').style.display = 'block';
+          return; // RenderExams called by updateWeekInfo
+      } else {
+          grid.style.display = 'grid';
+          document.getElementById('examScreen').style.display = 'none';
+      }
+
       const scheduleData = currentWeek.schedule;
+      const { startHour, endHour } = calculateDynamicRange(scheduleData);
       
-      // Group events by day
-      const eventsByDay = {};
-      days.forEach(day => {
-        eventsByDay[day] = scheduleData
-          .filter(item => item.day === day && item.startTime !== '00:00')
-          .sort((a, b) => a.startTime.localeCompare(b.startTime));
+      const stepMinutes = 15;
+      const totalMinutes = (endHour - startHour) * 60;
+      const totalRows = totalMinutes / stepMinutes;
+
+      // 1. Generate Grid Background (Lines & Time Labels)
+      
+      const gridEndRow = totalRows + 5; // Calculate end row explicitly
+
+      // Vertical Lines (Col 3 to 6)
+      for (let c = 3; c <= 6; c++) {
+          const vLine = document.createElement('div');
+          vLine.className = 'vertical-line';
+          vLine.style.gridColumn = c;
+          vLine.style.gridRow = `1 / ${gridEndRow}`; // Explicit span
+          vLine.style.borderLeft = '1px solid #f4f4f4';
+          grid.appendChild(vLine);
+      }
+
+      for (let i = 0; i <= totalRows; i++) {
+          const rowNum = i + 4; // Revert to +4 (directly under header)
+          const currentMin = (startHour * 60) + (i * stepMinutes);
+          
+          if (currentMin % 60 === 0) {
+              const hour = Math.floor(currentMin / 60);
+              const timeLabel = document.createElement('div');
+              timeLabel.className = 'time-label';
+              timeLabel.style.gridRow = rowNum;
+              timeLabel.innerText = `${hour.toString().padStart(2, '0')}:00`;
+              grid.appendChild(timeLabel);
+
+              const line = document.createElement('div');
+              line.className = 'grid-line hour-marker';
+              line.style.gridRow = rowNum;
+              grid.appendChild(line);
+          } else {
+              const line = document.createElement('div');
+              line.className = 'grid-line';
+              line.style.gridRow = rowNum;
+              grid.appendChild(line);
+          }
+      }
+
+      // 2. Render Events
+      scheduleData.forEach(ev => {
+          if (!ev.startTime || !ev.endTime) return;
+          if (ev.startTime === '00:00') return; 
+
+          const dayIndex = days.indexOf(ev.day);
+          if (dayIndex === -1) return;
+
+          const startMins = timeToMinutes(ev.startTime);
+          const endMins = timeToMinutes(ev.endTime);
+          const duration = endMins - startMins;
+
+          const startOffset = startMins - (startHour * 60);
+          
+          // Row Calculation
+          const slotIndex = Math.floor(startOffset / stepMinutes);
+          const remainderMinutes = startOffset % stepMinutes;
+          
+          // Revert to +4 offset
+          const rowStart = Math.max(4, slotIndex + 4);
+          const rowSpan = Math.ceil(duration / stepMinutes);
+          
+          const pixelOffsetRatio = remainderMinutes / stepMinutes;
+
+          const el = document.createElement('div');
+          
+          const typeMap = {
+            'Упражнение': 'type-exercise',
+            'Лекция': 'type-lecture',
+            'Важна лекция': 'type-important-lecture',
+            'ImportantLecture': 'type-important-lecture',
+            'Колоквиум': 'type-exam',
+            'Поправка на Колоквиум': 'type-makeup',
+            'Тест': 'type-test'
+          };
+          const typeClass = typeMap[ev.type] || 'type-lecture';
+          
+          el.className = `event-card ${typeClass}`;
+          if (ev.highlight) el.classList.add('highlight');
+          
+          // Apply dynamic scaling classes based on duration (rowSpan)
+          if (rowSpan === 1) {
+              el.classList.add('tiny-event');
+          } else if (rowSpan === 2) {
+              el.classList.add('short-event');
+          }
+
+          el.style.gridColumn = dayIndex + 2; 
+          el.style.gridRowStart = rowStart;
+          el.style.gridRowEnd = `span ${rowSpan}`;
+          
+          // Precision positioning using relative top
+          if (pixelOffsetRatio > 0) {
+             el.style.position = 'relative';
+             el.style.top = `calc(var(--slot-height) * ${pixelOffsetRatio})`;
+          }
+
+          const infoIndicator = ev.additionalInfo ? '*' : '';
+          const titleDesktop = ev.fullName || ev.subject;
+          const titleMobile = ev.subject;
+          
+          // --- Smart Logic for Building/Room (Handles Old and New Schema) ---
+          let b = ev.building;
+          let r = ev.room;
+          let f = ev.floor;
+          if (!b && f) {
+              b = ev.room;
+              r = ev.floor;
+          }
+          
+          // Construct location HTML: Building \n Room for desktop
+          const locationHtml = `
+              ${b ? `<div>${b}</div>` : ''}
+              ${r ? `<div>${r}</div>` : ''}
+          `;
+
+          el.innerHTML = `
+              <div class="event-title">
+                <span class="title-desktop">${titleDesktop}${infoIndicator}</span>
+                <span class="title-mobile">${titleMobile}${infoIndicator}</span>
+              </div>
+              <div class="event-time">${ev.startTime}-${ev.endTime}</div>
+              <div class="event-location">${locationHtml}</div>
+          `;
+          
+          el.onclick = () => openModal(ev);
+          grid.appendChild(el);
       });
-      
-      // Find maximum number of events in a day
-      const maxEvents = Math.max(...days.map(day => eventsByDay[day].length));
-      
-      // Map type to CSS class
-      function getTypeClass(type) {
-        const typeMap = {
-          'Упражнение': 'type-exercise',
-          'Лекция': 'type-lecture',
-          'Важна лекция': 'type-important-lecture',
-          'ImportantLecture': 'type-important-lecture',
-          'Колоквиум': 'type-exam',
-          'Поправка на Колоквиум': 'type-makeup',
-          'Тест': 'type-test'
-        };
-        return typeMap[type] || 'type-lecture';
-      }
-      
-      // Create rows
-      for (let i = 0; i < maxEvents; i++) {
-        const row = document.createElement('tr');
-        days.forEach(day => {
-          const td = document.createElement('td');
-          
-          // Add current-day class if this is today
-          if (day === currentDay) {
-            td.classList.add('current-day');
-          }
-          
-          const event = eventsByDay[day][i];
-          
-          if (event) {
-            // Generate time display from startTime and endTime
-            const displayTime = event.time || formatTime(event.startTime, event.endTime);
-            
-            // Add info indicator if additionalInfo exists
-            const infoIndicator = event.additionalInfo ? '<span style="color: #000000; font-weight: bold; margin-left: 4px;">*</span>' : '';
-            
-            const item = document.createElement('div');
-            item.className = 'schedule-item ' + getTypeClass(event.type);
-            
-            // Add highlight class if event has highlight property
-            if (event.highlight) {
-              item.classList.add('highlight');
-            }
-            
-            item.innerHTML = `
-              <div class="schedule-subject">${event.subject}${infoIndicator}</div>
-              <div class="schedule-time">${displayTime}</div>
-            `;
-            item.onclick = () => openModal(event);
-            td.appendChild(item);
-          }
-          
-          row.appendChild(td);
-        });
-        fragment.appendChild(row); // Append to fragment instead of tbody
-      }
-      tbody.appendChild(fragment); // Append fragment to tbody once
     }
     
     // Change week
@@ -1758,6 +2047,8 @@
       const currentWeek = scheduleByWeek[currentWeekIndex];
       if (!currentWeek) return;
       
+      const semesterConfig = getSemesterConfigForDate(currentWeek.startDate);
+
       // Parse start date
       const startDate = new Date(currentWeek.startDate);
       let endDate = new Date(startDate);
@@ -1793,7 +2084,7 @@
       // Get special screens
       const christmasScreen = document.getElementById('christmasScreen');
       const examScreen = document.getElementById('examScreen');
-      const scheduleTable = document.getElementById('scheduleTable');
+      const scheduleGrid = document.getElementById('scheduleGrid');
       
       if (weekType === 'christmas') {
         // Christmas break - show special screen
@@ -1801,24 +2092,26 @@
         weekDateRangeEl.style.color = '#dc2626';
         
         // Hide table, show Christmas screen
-        scheduleTable.style.display = 'none';
+        scheduleGrid.style.display = 'none';
         examScreen.style.display = 'none';
         christmasScreen.style.display = 'block';
         
         // Show full Christmas break range
-        const christmasStart = new Date(semesterConfig.christmasBreak.start);
-        const christmasEnd = new Date(semesterConfig.christmasBreak.end);
-        const christmasStartDay = christmasStart.getDate();
-        const christmasStartMonth = months[christmasStart.getMonth()];
-        const christmasStartYear = christmasStart.getFullYear();
-        const christmasEndDay = christmasEnd.getDate();
-        const christmasEndMonth = months[christmasEnd.getMonth()];
-        const christmasEndYear = christmasEnd.getFullYear();
-        
-        if (christmasStartMonth === christmasEndMonth && christmasStartYear === christmasEndYear) {
-          weekNumberEl.textContent = `${christmasStartDay} - ${christmasEndDay} ${christmasStartMonth} ${christmasStartYear}`;
-        } else {
-          weekNumberEl.textContent = `${christmasStartDay} ${christmasStartMonth} ${christmasStartYear} - ${christmasEndDay} ${christmasEndMonth} ${christmasEndYear}`;
+        if (semesterConfig && semesterConfig.christmasBreak) {
+            const christmasStart = new Date(semesterConfig.christmasBreak.start);
+            const christmasEnd = new Date(semesterConfig.christmasBreak.end);
+            const christmasStartDay = christmasStart.getDate();
+            const christmasStartMonth = months[christmasStart.getMonth()];
+            const christmasStartYear = christmasStart.getFullYear();
+            const christmasEndDay = christmasEnd.getDate();
+            const christmasEndMonth = months[christmasEnd.getMonth()];
+            const christmasEndYear = christmasEnd.getFullYear();
+            
+            if (christmasStartMonth === christmasEndMonth && christmasStartYear === christmasEndYear) {
+            weekNumberEl.textContent = `${christmasStartDay} - ${christmasEndDay} ${christmasStartMonth} ${christmasStartYear}`;
+            } else {
+            weekNumberEl.textContent = `${christmasStartDay} ${christmasStartMonth} ${christmasStartYear} - ${christmasEndDay} ${christmasEndMonth} ${christmasEndYear}`;
+            }
         }
         
         return; // Skip normal rendering
@@ -1828,31 +2121,33 @@
         weekDateRangeEl.style.color = '#588157';
         
         // Hide table, show exam screen
-        scheduleTable.style.display = 'none';
+        scheduleGrid.style.display = 'none';
         christmasScreen.style.display = 'none';
         examScreen.style.display = 'block';
         
         // Render exams
-        renderExams();
+        renderExams(semesterConfig ? semesterConfig.examPeriod : null);
         
         // Show full month range
-        const examStart = new Date(semesterConfig.examPeriod.start);
-        const examEnd = new Date(semesterConfig.examPeriod.end);
-        const examStartDay = examStart.getDate();
-        const examStartMonth = months[examStart.getMonth()];
-        const examEndDay = examEnd.getDate();
-        const examEndMonth = months[examEnd.getMonth()];
-        
-        if (examStartMonth === examEndMonth) {
-          weekNumberEl.textContent = `${examStartDay} - ${examEndDay} ${examStartMonth} ${year}`;
-        } else {
-          weekNumberEl.textContent = `${examStartDay} ${examStartMonth} - ${examEndDay} ${examEndMonth} ${year}`;
+        if (semesterConfig && semesterConfig.examPeriod) {
+            const examStart = new Date(semesterConfig.examPeriod.start);
+            const examEnd = new Date(semesterConfig.examPeriod.end);
+            const examStartDay = examStart.getDate();
+            const examStartMonth = months[examStart.getMonth()];
+            const examEndDay = examEnd.getDate();
+            const examEndMonth = months[examEnd.getMonth()];
+            
+            if (examStartMonth === examEndMonth) {
+            weekNumberEl.textContent = `${examStartDay} - ${examEndDay} ${examStartMonth} ${year}`;
+            } else {
+            weekNumberEl.textContent = `${examStartDay} ${examStartMonth} - ${examEndDay} ${examEndMonth} ${year}`;
+            }
         }
         
         return; // Skip normal rendering
       } else {
         // Normal week - show table, hide special screens
-        scheduleTable.style.display = 'table';
+        scheduleGrid.style.display = 'grid';
         christmasScreen.style.display = 'none';
         examScreen.style.display = 'none';
         
@@ -1997,23 +2292,30 @@
 
     // Open modal with event details
     function openModal(event) {
-      // Use fullName if available, otherwise use subject
       const displayName = event.fullName || event.subject;
       document.getElementById('modalSubject').textContent = displayName;
       document.getElementById('modalType').textContent = event.type || '-';
       
-      // Generate time from startTime and endTime
       const displayTime = event.time || formatTime(event.startTime, event.endTime);
       document.getElementById('modalTime').textContent = displayTime;
       
-      document.getElementById('modalBuilding').textContent = event.building || 'Не е посочена';
+      // --- Smart Logic for Building/Room (Handles Old and New Schema) ---
+      let building = event.building;
+      let room = event.room;
+      let floor = event.floor;
       
-      // Handle room and floor
-      const room = event.room || 'Не е посочена';
-      const floor = event.floor;
-      document.getElementById('modalRoom').textContent = room;
+      // If building is missing but floor exists, it's the old schema:
+      // old room -> building, old floor -> room
+      if (!building && floor) {
+          building = event.room;
+          room = event.floor;
+          floor = null; // Floor is now integrated into room in old entries
+      }
       
-      // Only show floor if it's not empty and not "-"
+      document.getElementById('modalBuilding').textContent = building || 'Не е посочена';
+      document.getElementById('modalRoom').textContent = room || 'Не е посочена';
+      
+      // Only show floor if it's explicitly provided (new/separate field cases)
       if (floor && floor !== '-' && floor !== '') {
         document.getElementById('modalFloorText').textContent = ` (Етаж ${floor})`;
       } else {
@@ -2022,7 +2324,6 @@
       
       document.getElementById('modalTeacher').textContent = event.teacher || 'Не е посочен';
       
-      // Handle additional info
       const additionalInfoElement = document.getElementById('modalAdditionalInfo');
       const additionalInfoRow = document.getElementById('modalAdditionalInfoRow');
       
@@ -2060,17 +2361,39 @@
       }
     });
     // Render exams list
-    function renderExams() {
+    function renderExams(examPeriod) {
       const examsList = document.getElementById('examsList');
       if (!scheduleData.exams || scheduleData.exams.length === 0) {
         examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">Няма информация за изпити.</p>';
         return;
       }
       
+      let examsToShow = scheduleData.exams;
+      
+      // Filter if period is provided
+      if (examPeriod && examPeriod.start && examPeriod.end) {
+          const start = new Date(examPeriod.start);
+          const end = new Date(examPeriod.end);
+          start.setHours(0,0,0,0);
+          end.setHours(0,0,0,0);
+          
+          examsToShow = examsToShow.filter(exam => {
+              if (!exam.examDate) return false;
+              const d = new Date(exam.examDate);
+              d.setHours(0,0,0,0);
+              return d >= start && d <= end;
+          });
+      }
+      
+      if (examsToShow.length === 0) {
+          examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">Няма изпити за този период.</p>';
+          return;
+      }
+      
       const months = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 
                       'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
       
-      examsList.innerHTML = scheduleData.exams.map(exam => {
+      examsList.innerHTML = examsToShow.map(exam => {
         // Format exam date
         const examDate = new Date(exam.examDate);
         const examDay = examDate.getDate();

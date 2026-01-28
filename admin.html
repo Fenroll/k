@@ -6,7 +6,6 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=20260125"></script>
     <script src="js/admin-guard.js?v=20260125"></script>
-    <script src="schedule-data.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -272,6 +271,90 @@
             margin: 0;
             color: #588157;
         }
+
+        /* Exam Card Styles (Dark Mode for Admin) */
+        .exam-card {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 12px 14px 14px 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border-left: 4px solid #d87060; /* Adjusted for dark mode contrast */
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            color: #e0e0e0;
+        }
+        .exam-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            transform: translateY(-2px);
+        }
+        .exam-card-header {
+            margin-bottom: 10px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #333;
+        }
+        .exam-card-title {
+            color: #d87060;
+            font-size: 16px;
+            font-weight: 700;
+            margin: 0;
+        }
+        .exam-section {
+            margin-bottom: 10px;
+        }
+        .exam-section-title {
+            color: #bbb;
+            font-size: 15px;
+            font-weight: 700;
+            margin: 6px 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .exam-section-icon {
+            width: 20px;
+            height: 20px;
+            fill: currentColor;
+        }
+        .exam-info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+        .exam-info-item {
+            display: flex;
+            flex-direction: column;
+            padding: 4px 8px;
+            background: #2a2a2a;
+            border-radius: 4px;
+        }
+        .exam-info-label {
+            color: #888;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 3px;
+            text-transform: uppercase;
+        }
+        .exam-info-value {
+            color: #fff;
+            font-size: 13.5px;
+            font-weight: 500;
+        }
+        /* Admin-specific edit button for card */
+        .exam-card-edit-btn {
+            width: 100%;
+            padding: 8px;
+            margin-top: 10px;
+            background: #333;
+            border: 1px solid #d87060;
+            border-radius: 4px;
+            cursor: pointer;
+            color: #d87060;
+            font-weight: 600;
+        }
+        .exam-card-edit-btn:hover {
+            background: #3a2a2a;
+        }
     </style>
 </head>
 <body>
@@ -343,7 +426,6 @@
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                 <button id="load-schedule-json" class="btn btn-secondary" style="flex: 1;">Load from Firebase</button>
-                <button id="import-schedule-default" class="btn btn-secondary" style="flex: 1;">Import Default</button>
                 <button id="open-visual-editor" class="btn" style="flex: 1; background-color: #444; color: white;">Visual Editor</button>
             </div>
             <button id="save-schedule-json" class="btn" style="margin-top: 10px;">Save JSON</button>
@@ -512,15 +594,23 @@
         <div class="ve-header">
             <h2>Visual Schedule Editor</h2>
             <div style="display: flex; gap: 10px;">
-                <button id="manage-exams-btn" class="btn" style="width: auto; background-color: #d87060;">Manage Exams</button>
+                <button id="manage-semesters-btn" class="btn" style="width: auto; background-color: #588157;">Manage Semesters</button>
                 <button id="close-visual-editor" class="btn btn-secondary" style="width: auto;">Close & Back</button>
             </div>
         </div>
 
         <div class="week-selector">
-            <button class="btn btn-secondary" style="width: auto;" onclick="changeWeekAdmin(-1)">Previous Week</button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <select id="ve-mode-selector" style="padding: 8px; border-radius: 4px; background: #333; color: white; border: 1px solid #555;">
+                    <option value="schedule">View Schedule</option>
+                    <option value="template-winter">Edit Template: Winter</option>
+                    <option value="template-summer">Edit Template: Summer</option>
+                </select>
+            </div>
+            <button id="ve-prev-week-btn" class="btn btn-secondary" style="width: auto;" onclick="changeWeekAdmin(-1)">Previous Week</button>
             <div class="week-info" id="ve-week-info">Week 1</div>
-            <button class="btn btn-secondary" style="width: auto;" onclick="changeWeekAdmin(1)">Next Week</button>
+            <button id="ve-next-week-btn" class="btn btn-secondary" style="width: auto;" onclick="changeWeekAdmin(1)">Next Week</button>
+            <button id="ve-edit-week-btn" class="btn btn-secondary" style="width: auto; margin-left: 10px;">Edit Week Date</button>
         </div>
 
         <table class="schedule-table" id="ve-schedule-table">
@@ -537,6 +627,17 @@
                 <!-- Schedule items will be rendered here -->
             </tbody>
         </table>
+
+        <!-- Exam Editor View (Replaces table during exam weeks) -->
+        <div id="ve-exam-editor" style="display: none;">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <h3 style="color: #d87060;">Exam Season</h3>
+                <button id="ve-add-exam-btn" class="btn" style="width: auto; background-color: #d87060;">+ Add Exam to this Session</button>
+            </div>
+            <div id="ve-exam-list" style="display: grid; gap: 20px; max-width: 900px; margin: 0 auto;">
+                <!-- Exam cards will be rendered here -->
+            </div>
+        </div>
     </div>
 
     <!-- Edit/Add Event Modal -->
@@ -581,12 +682,12 @@
                 </div>
                 <div style="display: flex; gap: 10px;">
                     <div class="form-group" style="flex: 1;">
-                        <label>Room</label>
-                        <input type="text" id="ve-room">
+                        <label>Building</label>
+                        <input type="text" id="ve-building-input">
                     </div>
                     <div class="form-group" style="flex: 1;">
-                        <label>Floor</label>
-                        <input type="text" id="ve-floor">
+                        <label>Room</label>
+                        <input type="text" id="ve-room-input">
                     </div>
                 </div>
                 <div class="form-group">
@@ -673,10 +774,110 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=20260128l5d"></script>
+    <!-- Semester Manager Modal -->
+    <div id="semester-modal" style="display: none; position: fixed; z-index: 2150; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); align-items: center; justify-content: center;">
+        <div class="ve-modal-content" style="width: 500px; max-height: 90vh; overflow-y: auto;">
+            <div class="ve-modal-header">
+                <h3>Manage Semesters</h3>
+                <span style="cursor: pointer; font-size: 24px;" onclick="closeSemesterModal()">×</span>
+            </div>
+            
+            <div id="semester-list-view">
+                <ul id="semester-list" style="list-style: none; padding: 0; margin-bottom: 20px;"></ul>
+                <button id="add-semester-btn" class="btn">+ Add Semester</button>
+            </div>
+
+            <div id="semester-edit-view" style="display: none;">
+                <form id="semester-form">
+                    <div class="form-group">
+                        <label>ID (e.g., winter, summer)</label>
+                        <input type="text" id="sem-id" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Display Name</label>
+                        <input type="text" id="sem-name" required>
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Start Date</label>
+                            <input type="text" id="sem-start" placeholder="YYYY-MM-DD" required>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>End Date</label>
+                            <input type="text" id="sem-end" placeholder="YYYY-MM-DD" required>
+                        </div>
+                    </div>
+                    
+                    <h4>Exam Period</h4>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Start</label>
+                            <input type="text" id="sem-exam-start" placeholder="YYYY-MM-DD">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>End</label>
+                            <input type="text" id="sem-exam-end" placeholder="YYYY-MM-DD">
+                        </div>
+                    </div>
+
+                    <h4>Break (Optional)</h4>
+                    <div style="display: flex; gap: 10px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>Start</label>
+                            <input type="text" id="sem-break-start" placeholder="YYYY-MM-DD">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>End</label>
+                            <input type="text" id="sem-break-end" placeholder="YYYY-MM-DD">
+                        </div>
+                    </div>
+                </form>
+                <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+                    <button type="button" id="sem-cancel-btn" class="btn btn-secondary" style="width: auto;">Cancel</button>
+                    <div>
+                        <button type="button" id="sem-delete-btn" class="btn" style="background-color: #cf6679; width: auto; margin-right: 10px;">Delete</button>
+                        <button type="button" id="sem-save-btn" class="btn" style="width: auto;">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Week Date Editor Modal -->
+    <div id="week-date-modal" style="display: none; position: fixed; z-index: 2200; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.8); align-items: center; justify-content: center;">
+        <div class="ve-modal-content" style="width: 400px;">
+            <div class="ve-modal-header">
+                <h3>Edit Week Date</h3>
+                <span style="cursor: pointer; font-size: 24px;" onclick="closeWeekDateModal()">×</span>
+            </div>
+            <form id="week-date-form">
+                <div class="form-group">
+                    <label>Week Start Date (YYYY-MM-DD)</label>
+                    <input type="text" id="wd-start" required>
+                </div>
+                <div class="form-group">
+                    <label>Week End Date (Optional - for Exam periods)</label>
+                    <input type="text" id="wd-end" placeholder="YYYY-MM-DD">
+                </div>
+                <div class="form-group">
+                    <label>Type</label>
+                    <select id="wd-type" style="width: 100%; padding: 8px; background: #333; color: #e0e0e0; border: 1px solid #444; border-radius: 8px;">
+                        <option value="normal">Normal</option>
+                        <option value="exam">Exam Season</option>
+                        <option value="christmas">Christmas Break</option>
+                    </select>
+                </div>
+            </form>
+            <div style="display: flex; justify-content: flex-end; margin-top: 20px;">
+                <button type="button" id="wd-cancel-btn" class="btn btn-secondary" style="width: auto; margin-right: 10px;">Cancel</button>
+                <button type="button" id="wd-save-btn" class="btn" style="width: auto;">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="courses.generated.js?v=202601281bk2"></script>
     <script src="js/admin.js?v=20260125"></script>
     <script src="js/schedule-notes-admin.js"></script>
     <script src="js/admin-visual-editor.js"></script>
-    <script src="js/version-check.js"></script>
 </body>
 </html>
