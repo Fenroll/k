@@ -182,7 +182,7 @@
     font-size: 30px !important;
     margin-left: 30px !important;
     font-family: 'Open Sans', serif;
-    font-weight: 400;  /* Променено от 700 (bold) на 400 (normal) */
+    font-weight: 400;
   }
   
   /* Schedule container */
@@ -265,7 +265,7 @@
     align-items: center;
     justify-content: center;
     gap: 20px;
-    margin-bottom: 24px;
+    margin-bottom: 12px; /* Reduced from 24px */
     background: #fff;
     padding: 16px 24px;
     border-radius: 8px;
@@ -976,13 +976,31 @@
     }
     
     .main-header {
-      justify-content: flex-start;
-      padding-left: 75px;
-      padding-right: 12px;
+      display: flex;
+      height: 60px;
+      justify-content: center;
+      align-items: center;
+      padding: 0 !important;
+      width: 100% !important;
+    }
+    
+    .page-title {
+      font-size: 22px !important;
+      margin: 0 !important;
+      text-align: center;
+      width: 100%;
+    }
+    
+    #weekDateRange {
+      font-size: 14px;
+    }
+    
+    .event-time {
+      font-size: 9px !important;
     }
     
     .schedule-container {
-      margin: 1rem 12px;
+      margin: 0.5rem 12px;
       overflow-x: auto;
       max-width: 100%;
       -webkit-overflow-scrolling: touch;
@@ -991,25 +1009,35 @@
     .week-selector {
       flex-wrap: nowrap;
       gap: 10px;
-      padding: 12px 8px;
+      padding: 6px 8px; /* Reduced vertical padding from 12px */
       justify-content: center;
+      align-items: center;
+      margin-bottom: 8px; /* Reduced margin to grid */
     }
     
     .week-btn {
       font-size: 13px;
-      padding: 8px 12px;
+      width: 44px; /* Fixed width for symmetry */
+      height: 44px; /* Square touch target */
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       min-width: auto;
       flex-shrink: 0;
+    }
+    
+    .btn-text-label {
+      display: none;
     }
     
     .week-info {
       text-align: center;
       min-width: 0;
-      width: auto;
+      flex: 1; /* Take all space between symmetric buttons */
       order: 0;
       margin-bottom: 0;
-      font-size: 15px; /* Restored close to original */
-      flex: 0 1 auto;
+      font-size: 15px; 
     }
     
     .week-number {
@@ -1245,10 +1273,10 @@
         <!-- Week selector -->
         <div class="week-selector">
           <button class="week-btn" id="prevWeekBtn" onclick="changeWeek(-1)">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z"/>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Предишна
+            <span class="btn-text-label">Предишна</span>
           </button>
           
           <div class="week-info">
@@ -1257,9 +1285,9 @@
           </div>
           
           <button class="week-btn" id="nextWeekBtn" onclick="changeWeek(1)">
-            Следваща
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"/>
+            <span class="btn-text-label">Следваща</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
         </div>
@@ -1276,7 +1304,7 @@
 
         <!-- Exam period screen -->
         <div id="examScreen" style="display: none;">
-          <div style="padding: 40px 20px;">
+          <div style="padding: 10px 20px;">
             <div id="examsList" style="display: grid; gap: 20px; max-width: 900px; margin: 0 auto;">
               <!-- Exams will be rendered here by JavaScript -->
             </div>
