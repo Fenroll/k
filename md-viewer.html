@@ -1165,7 +1165,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260128brx"></script>
+  <script src="courses.generated.js?v=20260128e1r"></script>
 
   <!-- ============================================
        CHAT SYSTEM - Firebase & Notes
@@ -1352,7 +1352,7 @@
           if (currentH1Index === -1) {
             currentH1Index = findCurrentH1();
           }
-          const prevIndex = Math.max(currentH1Index - 1, 0);
+          const prevIndex = (currentH1Index - 1 + h1Elements.length) % h1Elements.length;
           scrollToH1(prevIndex);
         });
       }
@@ -1369,7 +1369,7 @@
           if (currentH1Index === -1) {
             currentH1Index = findCurrentH1();
           }
-          const nextIndex = Math.min(currentH1Index + 1, h1Elements.length - 1);
+          const nextIndex = (currentH1Index + 1) % h1Elements.length;
           scrollToH1(nextIndex);
         });
       }
@@ -1394,7 +1394,7 @@
           if (currentH1Index === -1) {
             currentH1Index = findCurrentH1();
           }
-          const nextIndex = Math.min(currentH1Index + 1, h1Elements.length - 1);
+          const nextIndex = (currentH1Index + 1) % h1Elements.length;
           scrollToH1(nextIndex);
         }
         
@@ -1404,7 +1404,7 @@
           if (currentH1Index === -1) {
             currentH1Index = findCurrentH1();
           }
-          const prevIndex = Math.max(currentH1Index - 1, 0);
+          const prevIndex = (currentH1Index - 1 + h1Elements.length) % h1Elements.length;
           scrollToH1(prevIndex);
         }
       });
