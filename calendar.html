@@ -156,6 +156,11 @@
     cursor: default;
   }
   
+  .sidebar-footer-item:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
+  
   /* Main content */
   .main-content {
     flex: 1;
@@ -1150,9 +1155,9 @@
           </ul>
         </nav>
         <div class="sidebar-footer-links">
-          <span class="sidebar-footer-item">Privacy</span>
-          <span class="sidebar-footer-item">Terms</span>
-          <span class="sidebar-footer-item">Accessibility</span>
+          <span class="sidebar-footer-item" onclick="showPrivacyModal()" style="cursor: pointer;">Privacy</span>
+          <span class="sidebar-footer-item" onclick="toggleVersionInfo()" style="cursor: pointer;">Version</span>
+          <span id="versionInfo" style="display: none; position: absolute; left: 100%; bottom: 0; margin-left: 20px; padding: 3px 20px; background: #333; color: white; border-radius: 6px; font-size: 0.85em; white-space: normal; box-shadow: 0 2px 10px rgba(0,0,0,0.3); max-width: calc(100vw - 280px);"></span>
         </div>
       </div>
     </div>
@@ -2354,5 +2359,48 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js"></script>
 <script src="js/version-check.js"></script>
-    </body>
+    <!-- Privacy Modal -->
+<div id="privacyModal" class="modal-overlay" style="display: none; align-items: center; justify-content: center;">
+  <div class="modal-content" style="max-width: 500px;">
+    <button class="modal-close" onclick="closePrivacyModal()">×</button>
+    <h2 class="modal-title">Privacy & Data Storage</h2>
+    <div style="color: #374151; font-size: 14px; line-height: 1.6;">
+      <p style="margin: 0 0 12px 0;">This application stores data locally on your device to ensure functionality. Here is what we store:</p>
+      <ul style="margin: 0 0 12px 0; padding-left: 24px;">
+        <li style="margin-bottom: 8px;"><strong>Authentication:</strong> We store your unique User ID and Session Token to keep you logged in.</li>
+        <li style="margin-bottom: 8px;"><strong>Device ID:</strong> A random identifier is generated for this browser to manage active sessions security.</li>
+        <li style="margin-bottom: 0;"><strong>Preferences:</strong> Settings such as font size or theme choices are saved for your convenience.</li>
+      </ul>
+      <p style="margin: 0;"><strong>Note:</strong> This data is strictly necessary for the application to function. We do not use cookies for advertising, tracking, or analytics. No data is shared with third parties.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPrivacyModal() {
+  const modal = document.getElementById('privacyModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closePrivacyModal() {
+  const modal = document.getElementById('privacyModal');
+  if (modal) {
+    modal.style.display = 'none';
+    modal.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+}
+
+// Close modal when clicking outside
+document.getElementById('privacyModal').addEventListener('click', function(e) {
+  if (e.target === this) {
+    closePrivacyModal();
+  }
+});
+</script>
+</body>
     </html>

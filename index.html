@@ -1108,7 +1108,7 @@
 }
   </style>
   <script src="html-priority.js"></script>
-  <script src="courses.generated.js?v=20260128jhw"></script>
+  <script src="courses.generated.js?v=20260128l5d"></script>
 </head>
 <body>
 <!-- Right-side overlay for course card click -->
@@ -1186,9 +1186,8 @@
           </ul>
         </nav>
         <div class="sidebar-footer-links">
-          <span class="sidebar-footer-item" onclick="copyGitCommand('main')" style="cursor: pointer;">Privacy</span>
-          <span class="sidebar-footer-item" onclick="copyGitCommand('files')" style="cursor: pointer;">Terms</span>
-          <span class="sidebar-footer-item" onclick="toggleVersionInfo()" style="cursor: pointer;">Accessibility</span>
+          <span class="sidebar-footer-item" onclick="showPrivacyModal()" style="cursor: pointer;">Privacy</span>
+          <span class="sidebar-footer-item" onclick="toggleVersionInfo()" style="cursor: pointer;">Version</span>
           <span id="versionInfo" style="display: none; position: absolute; left: 100%; bottom: 0; margin-left: 20px; padding: 3px 20px; background: #333; color: white; border-radius: 6px; font-size: 0.85em; white-space: normal; box-shadow: 0 2px 10px rgba(0,0,0,0.3); max-width: calc(100vw - 280px);"></span>
         </div>
       </div>
@@ -1626,6 +1625,10 @@ document.addEventListener('DOMContentLoaded', function() {
       outline: none;
       display: block;
     }
+  .sidebar-footer-item:hover {
+    color: #fff;
+    text-decoration: underline;
+  }
   .sidebar-footer-links a:hover {
     text-decoration: underline;
     color: #fff;
@@ -3346,5 +3349,47 @@ function toggleFileDropdown(sectionId) {
       <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
       <script src="js/presence.js"></script>
       <script src="js/version-check.js"></script>
+<!-- Privacy Modal -->
+<div id="privacyModal" class="text-modal" style="display: none;">
+  <div class="text-modal-content" style="max-width: 500px;">
+    <span class="text-modal-close" onclick="closePrivacyModal()">&times;</span>
+    <h2 class="text-modal-title">Privacy & Data Storage</h2>
+    <div class="text-modal-body" style="white-space: normal; line-height: 1.6;">
+      <p style="margin: 0 0 12px 0;">This application stores data locally on your device to ensure functionality. Here is what we store:</p>
+      <ul style="margin: 0 0 12px 0; padding-left: 24px;">
+        <li style="margin-bottom: 8px;"><strong>Authentication:</strong> We store your unique User ID and Session Token to keep you logged in.</li>
+        <li style="margin-bottom: 8px;"><strong>Device ID:</strong> A random identifier is generated for this browser to manage active sessions security.</li>
+        <li style="margin-bottom: 0;"><strong>Preferences:</strong> Settings such as font size or theme choices are saved for your convenience.</li>
+      </ul>
+      <p style="margin: 0;"><strong>Note:</strong> This data is strictly necessary for the application to function. We do not use cookies for advertising, tracking, or analytics. No data is shared with third parties.</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function showPrivacyModal() {
+  const modal = document.getElementById('privacyModal');
+  if (modal) {
+    modal.style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closePrivacyModal() {
+  const modal = document.getElementById('privacyModal');
+  if (modal) {
+    modal.style.display = 'none';
+    document.body.style.overflow = '';
+  }
+}
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+  const modal = document.getElementById('privacyModal');
+  if (event.target === modal) {
+    closePrivacyModal();
+  }
+});
+</script>
     </body>
     </html>
