@@ -1,0 +1,196 @@
+/* mobile-nav.css */
+@media (max-width: 768px) {
+    /* Hide existing mobile toggle and sidebar */
+    .mobile-menu-toggle {
+        display: none !important;
+    }
+    
+    #side-menu {
+        display: none !important;
+    }
+
+    /* Adjust main content to prevent overlap */
+    .main-content {
+        padding-left: 0 !important;
+        /* Increased from 70px to 90px to prevent clipping */
+        padding-bottom: 90px !important;
+    }
+
+    .main-header {
+        display: none !important;
+    }
+
+    /* Hide the desktop overlay close button if it interferes */
+    .mobile-overlay-close {
+        bottom: auto;
+        top: 18px; 
+    }
+
+    /* Reposition Chat Widget on Mobile */
+    #chat-widget {
+        bottom: 80px !important; /* Above the 60px nav bar + some spacing */
+        right: 16px !important;
+        z-index: 10000 !important; /* Ensure it stays on top of bottom nav */
+    }
+    
+    /* Ensure chat widget sub-elements are visible */
+    .chat-widget, .chat-icon {
+        display: flex !important;
+    }
+
+    .overlay-content {
+        padding-top: 20px !important;
+        padding-bottom: 100px !important;
+    }
+
+
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+    display: none;
+}
+
+.others-menu-overlay {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .bottom-nav {
+        display: flex;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 60px;
+        background: #ffffff;
+        border-top: 1px solid #e0e0e0;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+        z-index: 9999;
+        justify-content: space-around;
+        align-items: center;
+        padding-bottom: env(safe-area-inset-bottom);
+        box-sizing: content-box;
+    }
+    
+    .bottom-nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        color: #888;
+        font-size: 11px;
+        flex: 1;
+        height: 100%;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 4px 0 0 0;
+        font-family: 'Open Sans', sans-serif;
+    }
+    
+    .bottom-nav-item.active {
+        color: #588157;
+    }
+    
+    .bottom-nav-item img, .bottom-nav-item svg {
+        width: 24px;
+        height: 24px;
+        margin-bottom: 4px;
+    }
+    
+    /* 
+       Icon Color Normalization:
+       Some icons are white (courses, calendar), some are black (anamnesis).
+       We want them all to be Grey (#888) when inactive, and Green (#588157) when active.
+    */
+
+    /* Step 1: Force all icons to Black first */
+    .bottom-nav-item img {
+        filter: brightness(0); /* White -> Black, Black -> Black */
+        opacity: 0.6; /* Black -> Grey */
+        transition: filter 0.2s, opacity 0.2s;
+    }
+    
+    /* Step 2: Colorize active icons to Green */
+    .bottom-nav-item.active img {
+        opacity: 1;
+        /* Filter to turn Black into #588157 */
+        /* Generated using https://codepen.io/sosuke/pen/Pjoqqp */
+        filter: invert(48%) sepia(13%) saturate(1478%) hue-rotate(63deg) brightness(95%) contrast(87%);
+    }
+    
+    /* For the Inline SVG "Others" icon */
+    .bottom-nav-item svg {
+        fill: #888;
+    }
+    
+    .bottom-nav-item.active svg {
+        fill: #588157;
+    }
+
+    /* Others Menu */
+    .others-menu-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 9998;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+    
+    .others-menu-overlay.open {
+        display: block;
+        opacity: 1;
+    }
+    
+    .others-menu-content {
+        position: absolute;
+        bottom: 70px;
+        right: 10px;
+        width: 220px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+        overflow: hidden;
+        transform: translateY(20px);
+        transition: transform 0.2s cubic-bezier(0.1, 0.7, 1.0, 0.1);
+        padding: 8px 0;
+    }
+    
+    .others-menu-overlay.open .others-menu-content {
+        transform: translateY(0);
+    }
+    
+    .others-menu-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 16px;
+        text-decoration: none;
+        color: #333;
+        font-size: 14px;
+        transition: background 0.1s;
+        font-family: 'Open Sans', sans-serif;
+    }
+    
+    .others-menu-item:active {
+        background: #f5f5f5;
+    }
+    
+    .others-menu-item img {
+        width: 20px;
+        height: 20px;
+        margin-right: 12px;
+        
+        /* Normalize menu icons to dark grey */
+        /* Account/Tools are white stroke -> need to be black */
+        /* Blackboard is black -> brightness(0) keeps it black */
+        filter: brightness(0); 
+        opacity: 0.7;
+    }
+}

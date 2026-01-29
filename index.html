@@ -1108,7 +1108,8 @@
 }
   </style>
   <script src="html-priority.js"></script>
-  <script src="courses.generated.js?v=202601281cm3"></script>
+  <script src="courses.generated.js?v=2026012915zl"></script>
+  <link rel="stylesheet" href="css/mobile-nav.css">
 </head>
 <body>
 <!-- Right-side overlay for course card click -->
@@ -1196,6 +1197,7 @@
       <header class="main-header">
         <h1 class="page-title">Courses</h1>
       </header>
+
  <div class="course-org-list" id="course-org-list">
     
   <div id="dynamic-course-list"></div>
@@ -1700,12 +1702,7 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 
-<!-- Hamburger button for mobile -->
-<button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Отвори меню">
-  <span></span>
-  <span></span>
-  <span></span>
-</button>
+
 <div class="mobile-overlay" id="mobileOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:3000;"></div>
 <div class="sidemenu-overlay" id="sidemenuOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:transparent;z-index:50;"></div>
 
@@ -3391,5 +3388,6 @@ document.addEventListener('click', function(event) {
   }
 });
 </script>
+<script src="js/mobile-nav.js"></script>
     </body>
     </html>
