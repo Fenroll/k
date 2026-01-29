@@ -180,7 +180,7 @@
             const dateStr = formatDate(record.timestamp, true);
             const isAuthor = currentUser && (record.authorId === currentUser.userId);
 
-            const renderModuleHeader = (t) => `<h2 style="text-align:center; color:#3a5a40; font-size:24px; margin:40px 0 20px 0; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid #588157; padding-bottom:10px;">${t}</h2>`;
+            const renderModuleHeader = (t) => `<h2 style="text-align:center; color:#3a5a40; font-size:24px; margin:15px 0 20px 0; text-transform:uppercase; letter-spacing:1px; border-bottom:2px solid #588157; padding-bottom:10px;">${t}</h2>`;
             const renderSectionHeader = (t) => `<h3 style="text-align:left; color:#588157; font-size:18px; margin:30px 0 15px 0; font-weight:700; border-bottom:1px solid #eee; padding-bottom:5px;">${t}</h3>`;
             const renderField = (l, v) => {
                 if (!v) return '';

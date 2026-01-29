@@ -11,7 +11,6 @@
     if (page === 'index.html' || page === '') activeTab = 'courses';
     else if (page.includes('anamnesis')) activeTab = 'anamnesis';
     else if (page.includes('calendar')) activeTab = 'calendar';
-    else if (page.includes('tests')) activeTab = 'tools';
     
     // HTML Structure
     const navHTML = `
@@ -27,10 +26,6 @@
         <a href="calendar.html" class="bottom-nav-item ${activeTab === 'calendar' ? 'active' : ''}">
             <img src="svg/icon-calendar.svg" alt="Calendar">
             <span>Calendar</span>
-        </a>
-        <a href="tests.html" class="bottom-nav-item ${activeTab === 'tools' ? 'active' : ''}">
-            <img src="svg/icon-tools.svg" alt="Tools">
-            <span>Tools</span>
         </a>
         <div class="bottom-nav-item" id="others-toggle">
             <svg viewBox="0 0 24 24" width="24" height="24">

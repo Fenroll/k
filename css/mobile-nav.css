@@ -43,7 +43,61 @@
         padding-bottom: 100px !important;
     }
 
+    /* Center Anamnesis Panel Header on Mobile */
+    .panel-header {
+        padding-left: 16px !important; /* Remove the 70px padding for the deleted toggle */
+        text-align: center;
+    }
+    
+    /* Center the flex container inside panel-header */
+    .panel-header > div {
+        justify-content: center !important;
+    }
+    
+    /* Center the title specifically if needed */
+    .panel-header h2 {
+        text-align: center;
+        width: 100%;
+    }
 
+    /* Hide the 'New' button in the workspace header on mobile */
+    #btn-new-anamnesis {
+        display: none !important;
+    }
+
+    /* Anamnesis Clipping Fixes */
+    /* Ensure the fixed workspace panel stops ABOVE the bottom nav */
+    .workspace-panel {
+        bottom: 65px !important; /* Leave space for bottom nav */
+    }
+
+    /* Add scroll padding to lists so last items aren't hidden */
+    .patient-list {
+        padding-bottom: 80px !important;
+    }
+
+    .workspace-content {
+        padding-bottom: 100px !important;
+    }
+    
+    /* Ensure full height forms are accessible */
+    .module-container {
+        margin-bottom: 80px !important;
+    }
+
+    /* Fix Anamnesis Header Bar on Mobile */
+    /* Restore row layout for better density */
+    .anamnesis-header-bar {
+        flex-direction: row !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        padding: 12px 16px !important;
+        gap: 0 !important;
+    }
+
+    .anamnesis-view-content {
+        padding-top: 5px !important;
+    }
 }
 
 /* Bottom Navigation */
