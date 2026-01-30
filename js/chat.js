@@ -433,50 +433,59 @@ class ChatFirebaseREST {
         let allOnlineGuestData = {}; // Cache for guest users online presence
 
         const processAndCallback = () => {
-            const groupedUsers = {};
-            const now = Date.now();
-            const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes for mobile
-            const FLICKER_BUFFER = 5000; // 5 seconds to bridge page reloads
+                const groupedUsers = {};
+                const now = Date.now();
+                const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes
 
-            const isUserOnline = (devices) => {
-                return Object.values(devices).some(device => {
-                    // 1. Truly active
-                    if (device.isActive === true) return true;
-                    
-                    // 2. Grace period for mobile devices
-                    if (device.isMobile) {
-                        if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) return true;
-                        if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) return true;
-                    }
-                    
-                    // 3. Desktop transition grace period
-                    if (!device.isMobile && device.offlineAt && (now - device.offlineAt) < 5000) {
-                        return true;
-                    }
+                const isUserOnline = (devices) => {
+                    return Object.values(devices).some(device => {
+                        // 1. Truly active
+                        if (device.isActive === true) return true;
+                        
+                        // 2. Grace period for mobile devices
+                        if (device.isMobile) {
+                            if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) return true;
+                            if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) return true;
+                        }
+                        
+                        // 3. Desktop transition grace period (5 seconds)
+                        if (!device.isMobile && device.offlineAt && (now - device.offlineAt) < 5000) {
+                            return true;
+                        }
 
-                    return false;
-                });
-            };
-
-            // 1. Collect all users who are currently "officially" online
-            const officiallyOnlineUids = new Set();
+                        return false;
+                    });
+                };
 
             // Process Authenticated Users
             for (const uid in allOnlineAuthData) {
                 const devices = allOnlineAuthData[uid];
                 if (isUserOnline(devices)) {
-                    officiallyOnlineUids.add(uid);
+                    const deviceIds = Object.keys(devices);
+                    const deviceCount = deviceIds.length;
+                    const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
                     
                     const userProfile = allSiteUsers[uid];
-                    groupedUsers[uid] = {
-                        userId: uid,
-                        userName: userProfile ? (userProfile.displayName || userProfile.username) : `User (${uid})`,
-                        color: userProfile ? userProfile.color : '#cccccc',
-                        avatar: userProfile ? userProfile.avatar : null,
-                        deviceCount: Object.keys(devices).length,
-                        hasMobile: Object.values(devices).some(d => d.isMobile === true),
-                        isGuest: false
-                    };
+                    if (userProfile) {
+                        groupedUsers[uid] = {
+                            userId: uid,
+                            userName: userProfile.displayName || userProfile.username,
+                            color: userProfile.color,
+                            avatar: userProfile.avatar,
+                            deviceCount: deviceCount,
+                            hasMobile: hasMobile,
+                            isGuest: false
+                        };
+                    } else {
+                        groupedUsers[uid] = {
+                            userId: uid,
+                            userName: `Unknown User (${uid})`,
+                            color: '#cccccc',
+                            deviceCount: deviceCount,
+                            hasMobile: hasMobile,
+                            isGuest: false
+                        };
+                    }
                 }
             }
 
@@ -484,41 +493,21 @@ class ChatFirebaseREST {
             for (const guestId in allOnlineGuestData) {
                 const devices = allOnlineGuestData[guestId];
                 if (isUserOnline(devices)) {
-                    officiallyOnlineUids.add(guestId);
+                    const deviceIds = Object.keys(devices);
+                    const deviceCount = deviceIds.length;
+                    const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
                     
-                    const sampleDeviceData = devices[Object.keys(devices)[0]]; 
+                    const sampleDeviceData = devices[deviceIds[0]]; 
                     const guestUserName = sampleDeviceData.userName || `Guest-${guestId.substring(6, 10)}`;
 
                     groupedUsers[guestId] = {
                         userId: guestId,
                         userName: guestUserName,
                         color: '#9E9E9E',
-                        deviceCount: Object.keys(devices).length,
-                        hasMobile: Object.values(devices).some(d => d.isMobile === true),
+                        deviceCount: deviceCount,
+                        hasMobile: hasMobile,
                         isGuest: true
                     };
-                }
-            }
-
-            // 2. Update recentPresence cache for everyone officially online
-            officiallyOnlineUids.forEach(uid => {
-                this.recentPresence[uid] = {
-                    timestamp: now,
-                    data: groupedUsers[uid]
-                };
-            });
-
-            // 3. Include users from cache who were seen in the last FLICKER_BUFFER seconds
-            for (const uid in this.recentPresence) {
-                if (!groupedUsers[uid]) {
-                    const lastSeen = this.recentPresence[uid];
-                    if (now - lastSeen.timestamp < FLICKER_BUFFER) {
-                        // User is in buffer - keep them in the list
-                        groupedUsers[uid] = lastSeen.data;
-                    } else {
-                        // Buffer expired
-                        delete this.recentPresence[uid];
-                    }
                 }
             }
 
@@ -799,19 +788,43 @@ class ChatUIManager {
       });
 
       // New site-wide presence polling
-      this.chatFirebase.startSiteWidePresencePolling((data) => {
-        // Cache user data
-        this.activeUsers = data.users || {};
+      // New site-wide presence polling
+      this.chatFirebase.startSiteWidePresencePolling(((data) => {
+        const now = Date.now();
+        const FLICKER_BUFFER = 5000; // 5 seconds
+        
+        // 1. Update cache with currently active users
+        Object.keys(data.users).forEach(uid => {
+            this.recentPresence[uid] = {
+                timestamp: now,
+                data: data.users[uid]
+            };
+        });
+
+        // 2. Build final list including those in buffer
+        const finalUsers = {};
+        for (const uid in this.recentPresence) {
+            const entry = this.recentPresence[uid];
+            if (now - entry.timestamp < FLICKER_BUFFER) {
+                finalUsers[uid] = entry.data;
+            } else {
+                delete this.recentPresence[uid];
+            }
+        }
+
+        this.activeUsers = finalUsers;
         this.userProfiles = data.allUsers || {};
         
-        // Re-render messages to update avatars/names now that reconciliation is flicker-free
+        // Update UI
+        this.updateActiveSidebar(this.activeUsers);
+        
+        // Re-render messages
         if (this.lastMessages.length > 0) {
             this.renderMessages(this.lastMessages);
         }
 
-        this.updateNotificationButton(data);
-        this.updateHeaderOnlineCount(data.count);
-      });
+        this.updateHeaderOnlineCount(Object.keys(this.activeUsers).length);
+      }).bind(this));
 
       // Typing indicators polling
       this.chatFirebase.startTypingPolling((activeTyping) => {
@@ -1931,17 +1944,26 @@ class ChatUIManager {
     const sidebarEl = this.container.querySelector('.chat-active-users');
     if (!sidebarEl) return;
 
-    const usersList = Object.values(users).slice(0, 5);
+    const usersList = Object.values(users);
     sidebarEl.innerHTML = `
-      <div class="active-users-header">Active now:</div>
-      ${usersList.map(user => `
-        <div class="active-user" title="${user.userName}">
-          <div class="active-user-badge" style="background-color: ${user.color}">
-            ${user.userName.charAt(0)}
+      <div class="active-users-header">Active users:</div>
+      ${usersList.map(user => {
+        const initial = (user.userName || "?").charAt(0).toUpperCase();
+        const hasAvatar = user.avatar && typeof user.avatar === 'string' && user.avatar.length > 5;
+        
+        return `
+          <div class="active-user" title="${user.userName}">
+            ${hasAvatar ? `
+              <img src="${user.avatar}" class="active-user-badge" style="object-fit: cover; border: none;">
+            ` : `
+              <div class="active-user-badge" style="background-color: ${user.color || '#ccc'}">
+                ${initial}
+              </div>
+            `}
+            <span>${user.userName}</span>
           </div>
-          <span>${user.userName}</span>
-        </div>
-      `).join('')}
+        `;
+      }).join('')}
     `;
   }
 
