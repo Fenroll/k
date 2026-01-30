@@ -287,7 +287,24 @@
                 const user = users[uid];
                 const displayName = user.displayName || user.username;
                 const deviceCount = user.devices ? Object.keys(user.devices).length : 0;
-                html += `<li>${user.username} (${displayName}) - ${deviceCount} device(s) <button class="edit-user-btn" data-uid="${uid}">Edit</button></li>`;
+                
+                // Avatar HTML
+                let avatarHtml;
+                if (user.avatar) {
+                    avatarHtml = `<img src="${user.avatar}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; margin-right:8px; vertical-align:middle; border:1px solid #444;">`;
+                } else {
+                    avatarHtml = `<span style="display:inline-block; width:24px; height:24px; border-radius:50%; background-color:${user.color || '#ccc'}; color:white; text-align:center; line-height:24px; font-size:12px; font-weight:bold; margin-right:8px; vertical-align:middle;">${(user.username || "?").charAt(0).toUpperCase()}</span>`;
+                }
+
+                html += `<li style="display:flex; align-items:center; padding:8px;">
+                    ${avatarHtml}
+                    <div style="flex:1;">
+                        <span style="font-weight:bold; color:${user.color || '#ccc'};">${user.username}</span> 
+                        <span style="color:#888;">(${displayName})</span>
+                        <span style="font-size:0.8em; color:#666; margin-left:10px;">${deviceCount} device(s)</span>
+                    </div>
+                    <button class="edit-user-btn" data-uid="${uid}">Edit</button>
+                </li>`;
             }
             html += '</ul>';
             allUsersContainer.innerHTML = html;
@@ -499,6 +516,7 @@
                         userId: uid,
                         userName: userProfile.displayName || userProfile.username,
                         color: userProfile.color,
+                        avatar: userProfile.avatar, // Add avatar
                         deviceCount: deviceCount,
                         hasMobile: hasMobile,
                         isGuest: false
@@ -566,10 +584,22 @@
                 const li = document.createElement('li');
                 const userType = onlineUser.isGuest ? '' : ''; // Removed "(Guest)" for guest users
                 const mobileIcon = onlineUser.hasMobile ? ' 📱' : '';
+                
+                // Avatar HTML
+                let avatarHtml;
+                if (onlineUser.avatar) {
+                    avatarHtml = `<img src="${onlineUser.avatar}" style="width:20px; height:20px; border-radius:50%; object-fit:cover; margin-right:8px; vertical-align:middle;">`;
+                } else {
+                    avatarHtml = `<span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:${onlineUser.color}; color:white; text-align:center; line-height:20px; font-size:10px; font-weight:bold; margin-right:8px; vertical-align:middle;">${onlineUser.userName.charAt(0).toUpperCase()}</span>`;
+                }
+
                 li.id = `online-user-${onlineUser.userId}`;
                 li.innerHTML = `
-                    <span style="color: ${onlineUser.color}; font-weight: bold;">${onlineUser.userName}</span>
-                    ${userType}${mobileIcon} - ${onlineUser.deviceCount} device(s) online
+                    <div style="display:flex; align-items:center;">
+                        ${avatarHtml}
+                        <span style="color: ${onlineUser.color}; font-weight: bold;">${onlineUser.userName}</span>
+                        <span style="margin-left:8px; font-size:0.9em; color:#888;">${userType}${mobileIcon} - ${onlineUser.deviceCount} device(s) online</span>
+                    </div>
                 `;
                 ul.appendChild(li);
             });

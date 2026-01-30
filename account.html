@@ -206,6 +206,11 @@
                     <button id="show-change-password-btn" class="change-btn">change</button>
                 </div>
                 <div class="profile-data-item">
+                    <span class="data-label">Avatar:</span>
+                    <img id="user-avatar-preview" src="" style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover; margin-left: 0.5rem; border: 1px solid #ddd; background: #eee;">
+                    <button id="show-change-avatar-btn" class="change-btn">change</button>
+                </div>
+                <div class="profile-data-item">
                     <span class="data-label">Color:</span>
                     <span class="data-value color-value" id="user-color-preview"></span>
                     <button id="show-change-color-btn" class="change-btn">change</button>
@@ -219,6 +224,21 @@
                 <button id="show-delete-account-btn" class="btn btn-danger">Delete Account</button>
                 <button onclick="window.location.href='index.html'" class="btn" style="background-color: #262626;">Go back</button>
             </div>
+        </div>
+
+        <!-- Change Avatar Form -->
+        <div id="change-avatar-form" class="form-container">
+            <h2>Change Avatar</h2>
+            <div id="change-avatar-error" class="error-message"></div>
+            <form id="change-avatar-form-element">
+                <div class="form-group">
+                    <label for="new-avatar-file">Upload Image</label>
+                    <input type="file" id="new-avatar-file" accept="image/*" required style="padding: 10px; background: white; border: 1px solid #ccc; width: 100%;">
+                    <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Images will be resized to 150x150px.</p>
+                </div>
+                <button type="submit" class="btn">Save</button>
+                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Cancel</button>
+            </form>
         </div>
 
         <!-- Change Password Form -->

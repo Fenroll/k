@@ -35,6 +35,7 @@ class AccountSystem {
             this.changeUsernameForm = document.getElementById('change-username-form');
             this.changeDisplaynameForm = document.getElementById('change-displayname-form');
             this.changeColorForm = document.getElementById('change-color-form');
+            this.changeAvatarForm = document.getElementById('change-avatar-form');
             this.deleteAccountForm = document.getElementById('delete-account-form');
 
             if (!this.accountInfo || !this.loadingSpinner || !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm || !this.deleteAccountForm) {
@@ -42,7 +43,6 @@ class AccountSystem {
                 return;
             }
         } else {
-            // Not on a page this script should manage
             return;
         }
 
@@ -118,7 +118,7 @@ class AccountSystem {
             this.showError('register-error', e.message || 'Грешка при инициализация на системата.');
             this.showError('login-error', e.message || 'Грешка при инициализация на системата.');
         }
-    }
+    } 
 
     attachEventListeners() {
         const isLoginPage = window.location.pathname.endsWith('login.html');
@@ -166,6 +166,7 @@ class AccountSystem {
                 document.getElementById('new-color').value = this.user.color || '#7c3aed';
                 this.showForm('change-color');
             });
+            document.getElementById('show-change-avatar-btn').addEventListener('click', () => this.showForm('change-avatar'));
 
             // Cancel buttons
             document.querySelectorAll('.cancel-action-btn').forEach(btn => {
@@ -197,6 +198,14 @@ class AccountSystem {
                 e.preventDefault();
                 const newColor = document.getElementById('new-color').value;
                 this.changeColor(newColor);
+            });
+            
+            document.getElementById('change-avatar-form-element').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const fileInput = document.getElementById('new-avatar-file');
+                if (fileInput.files.length > 0) {
+                    this.changeAvatar(fileInput.files[0]);
+                }
             });
 
             document.getElementById('delete-account-form-element').addEventListener('submit', (e) => {
@@ -510,6 +519,79 @@ class AccountSystem {
         }
     }
 
+    async changeAvatar(file) {
+        if (!file) {
+            this.showError('change-avatar-error', 'Моля, изберете изображение.');
+            return;
+        }
+        
+        // 2MB limit check
+        if (file.size > 2 * 1024 * 1024) {
+            this.showError('change-avatar-error', 'Файлът е твърде голям (макс 2MB).');
+            return;
+        }
+
+        this.loadingSpinner.style.display = 'block';
+        this.showForm(null);
+        this.hideError('change-avatar-error');
+
+        try {
+            // Resize image logic
+            const resizedBase64 = await new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (readerEvent) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+                        const maxSize = 150;
+
+                        if (width > height) {
+                            if (width > maxSize) {
+                                height *= maxSize / width;
+                                width = maxSize;
+                            }
+                        } else {
+                            if (height > maxSize) {
+                                width *= maxSize / height;
+                                height = maxSize;
+                            }
+                        }
+                        
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        
+                        // Compress to JPEG 0.8
+                        resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    };
+                    img.onerror = reject;
+                    img.src = readerEvent.target.result;
+                };
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            });
+
+            // Save to Firebase
+            const userRef = this.db.ref(`site_users/${this.user.uid}`);
+            await userRef.update({ avatar: resizedBase64 });
+
+            this.user.avatar = resizedBase64;
+            localStorage.setItem('loggedInUser', JSON.stringify(this.user));
+            
+            this.updateUI();
+
+        } catch (error) {
+            console.error("Avatar change error:", error);
+            this.showError('change-avatar-error', 'Възникна грешка при качване.');
+            this.showForm('change-avatar');
+        } finally {
+            this.loadingSpinner.style.display = 'none';
+        }
+    }
+
     async deleteAccount(password) {
         if (!password) {
             this.showError('delete-account-error', 'Моля, въведете паролата си.');
@@ -556,10 +638,17 @@ class AccountSystem {
                 document.getElementById('user-username').textContent = this.user.username || 'Няма';
                 document.getElementById('user-password').textContent = this.user.password || '••••••••';
                 document.getElementById('user-uid').textContent = this.user.uid || 'Няма';
+                
                 const colorPreview = document.getElementById('user-color-preview');
                 if (colorPreview) {
                     colorPreview.style.backgroundColor = this.user.color || '#ccc';
                 }
+
+                const avatarPreview = document.getElementById('user-avatar-preview');
+                if (avatarPreview) {
+                    avatarPreview.src = this.user.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjY2NjIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PHBhdGggZD0iTTEyIDE2cy0yLTItNC0ybTggMHMtMiAyLTQgMiIvPjwvc3ZnPg=='; // Simple placeholder
+                }
+
                 this.showForm('account');
             }
         } else {
@@ -584,6 +673,7 @@ class AccountSystem {
             if (this.changeUsernameForm) this.changeUsernameForm.style.display = 'none';
             if (this.changeDisplaynameForm) this.changeDisplaynameForm.style.display = 'none';
             if (this.changeColorForm) this.changeColorForm.style.display = 'none';
+            if (this.changeAvatarForm) this.changeAvatarForm.style.display = 'none';
             if (this.deleteAccountForm) this.deleteAccountForm.style.display = 'none';
             
             if (formId === 'account' && this.accountInfo) this.accountInfo.style.display = 'block';
@@ -591,6 +681,7 @@ class AccountSystem {
             else if (formId === 'change-username' && this.changeUsernameForm) this.changeUsernameForm.style.display = 'block';
             else if (formId === 'change-displayname' && this.changeDisplaynameForm) this.changeDisplaynameForm.style.display = 'block';
             else if (formId === 'change-color' && this.changeColorForm) this.changeColorForm.style.display = 'block';
+            else if (formId === 'change-avatar' && this.changeAvatarForm) this.changeAvatarForm.style.display = 'block';
             else if (formId === 'delete-account' && this.deleteAccountForm) this.deleteAccountForm.style.display = 'block';
         }
     }
