@@ -106,7 +106,7 @@
                 isGuest: isGuest,
                 userName: currentUserName,
                 isActive: true,
-                lastActivity: Date.now()
+                lastActivity: firebase.database.ServerValue.TIMESTAMP
             };
             window.userStatusDatabaseRef.set(deviceData);
             console.log('Presence: User is ACTIVE');
@@ -114,7 +114,7 @@
             // Mark as inactive (but still connected)
             window.userStatusDatabaseRef.update({
                 isActive: false,
-                lastInactive: Date.now()
+                lastInactive: firebase.database.ServerValue.TIMESTAMP
             });
             console.log('Presence: User is INACTIVE (idle or tab hidden)');
         }
@@ -142,13 +142,14 @@
                 isGuest: isGuest,
                 userName: currentUserName,
                 isActive: isUserActive && isPageVisible,
-                lastActivity: Date.now()
+                lastActivity: firebase.database.ServerValue.TIMESTAMP
             };
             console.log('Presence: Setting initial presence for UID:', currentUid, 'isGuest:', isGuest, 'isActive:', deviceData.isActive);
 
             userStatusDatabaseRef.onDisconnect().update({
                 isActive: false,
-                offlineAt: firebase.database.ServerValue.TIMESTAMP
+                offlineAt: firebase.database.ServerValue.TIMESTAMP,
+                lastInactive: firebase.database.ServerValue.TIMESTAMP
             }).then(function() {
                 userStatusDatabaseRef.set(deviceData);
             });

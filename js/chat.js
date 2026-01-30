@@ -425,98 +425,102 @@ class ChatFirebaseREST {
   startSiteWidePresencePolling(callback) {
     this._ensureInit().then(() => {
         const onlineUsersRef = firebase.database().ref('online_users');
-        const onlineGuestsRef = firebase.database().ref('online_guests'); // New: reference for guest users
+        const onlineGuestsRef = firebase.database().ref('online_guests');
         const siteUsersRef = firebase.database().ref('site_users');
+        const offsetRef = firebase.database().ref(".info/serverTimeOffset");
 
-        let allSiteUsers = {};     // Cache for user profiles
-        let allOnlineAuthData = {}; // Cache for authenticated users online presence
-        let allOnlineGuestData = {}; // Cache for guest users online presence
+        let serverTimeOffset = 0;
+        offsetRef.on("value", (snap) => {
+            serverTimeOffset = snap.val() || 0;
+        });
+
+        let allSiteUsers = {};     
+        let allOnlineAuthData = {}; 
+        let allOnlineGuestData = {}; 
 
         const processAndCallback = () => {
                 const groupedUsers = {};
-                const now = Date.now();
-                const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes
+                const now = Date.now() + serverTimeOffset;
+                const GRACE_PERIOD = 30 * 1000; // 30 seconds
 
                 const isUserOnline = (devices) => {
                     return Object.values(devices).some(device => {
                         // 1. Truly active
                         if (device.isActive === true) return true;
                         
-                        // 2. Grace period for mobile devices
-                        if (device.isMobile) {
-                            if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) return true;
-                            if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) return true;
-                        }
-                        
-                        // 3. Desktop transition grace period (5 seconds)
-                        if (!device.isMobile && device.offlineAt && (now - device.offlineAt) < 5000) {
+                        // 2. Grace period for backgrounded tabs or disconnected devices
+                        if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) {
                             return true;
                         }
-
+                        if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) {
+                            return true;
+                        }
+                        
                         return false;
                     });
                 };
 
-            // Process Authenticated Users
-            for (const uid in allOnlineAuthData) {
-                const devices = allOnlineAuthData[uid];
-                if (isUserOnline(devices)) {
-                    const deviceIds = Object.keys(devices);
-                    const deviceCount = deviceIds.length;
-                    const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
-                    
-                    const userProfile = allSiteUsers[uid];
-                    if (userProfile) {
-                        groupedUsers[uid] = {
-                            userId: uid,
-                            userName: userProfile.displayName || userProfile.username,
-                            color: userProfile.color,
-                            avatar: userProfile.avatar,
+                // ... (rest of processing)
+                // Process Authenticated Users
+                for (const uid in allOnlineAuthData) {
+                    const devices = allOnlineAuthData[uid];
+                    if (isUserOnline(devices)) {
+                        const deviceIds = Object.keys(devices);
+                        const deviceCount = deviceIds.length;
+                        const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
+                        
+                        const userProfile = allSiteUsers[uid];
+                        if (userProfile) {
+                            groupedUsers[uid] = {
+                                userId: uid,
+                                userName: userProfile.displayName || userProfile.username,
+                                color: userProfile.color,
+                                avatar: userProfile.avatar,
+                                deviceCount: deviceCount,
+                                hasMobile: hasMobile,
+                                isGuest: false
+                            };
+                        } else {
+                            groupedUsers[uid] = {
+                                userId: uid,
+                                userName: `Unknown User (${uid})`,
+                                color: '#cccccc',
+                                deviceCount: deviceCount,
+                                hasMobile: hasMobile,
+                                isGuest: false
+                            };
+                        }
+                    }
+                }
+
+                // Process Guest Users
+                for (const guestId in allOnlineGuestData) {
+                    const devices = allOnlineGuestData[guestId];
+                    if (isUserOnline(devices)) {
+                        const deviceIds = Object.keys(devices);
+                        const deviceCount = deviceIds.length;
+                        const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
+                        
+                        const sampleDeviceData = devices[deviceIds[0]]; 
+                        const guestUserName = sampleDeviceData.userName || `Guest-${guestId.substring(6, 10)}`;
+
+                        groupedUsers[guestId] = {
+                            userId: guestId,
+                            userName: guestUserName,
+                            color: '#9E9E9E',
                             deviceCount: deviceCount,
                             hasMobile: hasMobile,
-                            isGuest: false
-                        };
-                    } else {
-                        groupedUsers[uid] = {
-                            userId: uid,
-                            userName: `Unknown User (${uid})`,
-                            color: '#cccccc',
-                            deviceCount: deviceCount,
-                            hasMobile: hasMobile,
-                            isGuest: false
+                            isGuest: true
                         };
                     }
                 }
-            }
 
-            // Process Guest Users
-            for (const guestId in allOnlineGuestData) {
-                const devices = allOnlineGuestData[guestId];
-                if (isUserOnline(devices)) {
-                    const deviceIds = Object.keys(devices);
-                    const deviceCount = deviceIds.length;
-                    const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
-                    
-                    const sampleDeviceData = devices[deviceIds[0]]; 
-                    const guestUserName = sampleDeviceData.userName || `Guest-${guestId.substring(6, 10)}`;
-
-                    groupedUsers[guestId] = {
-                        userId: guestId,
-                        userName: guestUserName,
-                        color: '#9E9E9E',
-                        deviceCount: deviceCount,
-                        hasMobile: hasMobile,
-                        isGuest: true
-                    };
-                }
-            }
-
-            callback({
-                count: Object.keys(groupedUsers).length,
-                users: groupedUsers,
-                usersList: Object.keys(groupedUsers),
-                allUsers: allSiteUsers
-            });
+                callback({
+                    count: Object.keys(groupedUsers).length,
+                    users: groupedUsers,
+                    usersList: Object.keys(groupedUsers),
+                    allUsers: allSiteUsers
+                });
         };
 
         // Run cleanup/refresh every 30 seconds to handle grace period expirations
@@ -589,7 +593,6 @@ class ChatUIManager {
     this.reactionsCache = {}; // Кеш за реакции
     this.activeUsers = {}; // Списък с активни потребители за логика с реакции
     this.activeTyping = {}; // State for typing indicators
-    this.recentPresence = {}; // Cache for recently online users to prevent flickering
     this.showMembers = localStorage.getItem(`showMembers_${this.documentId}`) === 'true'; // Default to false if not set
 
     this.init();
@@ -788,43 +791,19 @@ class ChatUIManager {
       });
 
       // New site-wide presence polling
-      // New site-wide presence polling
-      this.chatFirebase.startSiteWidePresencePolling(((data) => {
-        const now = Date.now();
-        const FLICKER_BUFFER = 5000; // 5 seconds
-        
-        // 1. Update cache with currently active users
-        Object.keys(data.users).forEach(uid => {
-            this.recentPresence[uid] = {
-                timestamp: now,
-                data: data.users[uid]
-            };
-        });
-
-        // 2. Build final list including those in buffer
-        const finalUsers = {};
-        for (const uid in this.recentPresence) {
-            const entry = this.recentPresence[uid];
-            if (now - entry.timestamp < FLICKER_BUFFER) {
-                finalUsers[uid] = entry.data;
-            } else {
-                delete this.recentPresence[uid];
-            }
-        }
-
-        this.activeUsers = finalUsers;
+      this.chatFirebase.startSiteWidePresencePolling((data) => {
+        // Cache user data
+        this.activeUsers = data.users || {};
         this.userProfiles = data.allUsers || {};
         
-        // Update UI
-        this.updateActiveSidebar(this.activeUsers);
-        
-        // Re-render messages
+        // Re-render messages to update avatars/names now that reconciliation is flicker-free
         if (this.lastMessages.length > 0) {
             this.renderMessages(this.lastMessages);
         }
 
-        this.updateHeaderOnlineCount(Object.keys(this.activeUsers).length);
-      }).bind(this));
+        this.updateNotificationButton(data);
+        this.updateHeaderOnlineCount(data.count);
+      });
 
       // Typing indicators polling
       this.chatFirebase.startTypingPolling((activeTyping) => {
@@ -1944,26 +1923,17 @@ class ChatUIManager {
     const sidebarEl = this.container.querySelector('.chat-active-users');
     if (!sidebarEl) return;
 
-    const usersList = Object.values(users);
+    const usersList = Object.values(users).slice(0, 5);
     sidebarEl.innerHTML = `
-      <div class="active-users-header">Active users:</div>
-      ${usersList.map(user => {
-        const initial = (user.userName || "?").charAt(0).toUpperCase();
-        const hasAvatar = user.avatar && typeof user.avatar === 'string' && user.avatar.length > 5;
-        
-        return `
-          <div class="active-user" title="${user.userName}">
-            ${hasAvatar ? `
-              <img src="${user.avatar}" class="active-user-badge" style="object-fit: cover; border: none;">
-            ` : `
-              <div class="active-user-badge" style="background-color: ${user.color || '#ccc'}">
-                ${initial}
-              </div>
-            `}
-            <span>${user.userName}</span>
+      <div class="active-users-header">Active now:</div>
+      ${usersList.map(user => `
+        <div class="active-user" title="${user.userName}">
+          <div class="active-user-badge" style="background-color: ${user.color}">
+            ${user.userName.charAt(0)}
           </div>
-        `;
-      }).join('')}
+          <span>${user.userName}</span>
+        </div>
+      `).join('')}
     `;
   }
 
