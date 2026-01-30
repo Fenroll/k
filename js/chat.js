@@ -2910,7 +2910,9 @@ class ChatUIManager {
   gap: 8px;
   min-width: 0;
   align-self: stretch;
-  margin-top: -1px; /* Overlap with header border to close gap */
+  margin-top: -10px; /* Pull it up significantly */
+  position: relative;
+  z-index: 5;
 }
 .chat-panel.show-members .chat-active-users {
   display: flex;

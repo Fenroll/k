@@ -437,7 +437,10 @@ function updateHtmlFiles(version) {
     path.join(__dirname, 'md-editor.html'),
     path.join(__dirname, 'text-editor.html'),
     path.join(__dirname, 'admin.html'),
-    path.join(__dirname, 'account.html')
+    path.join(__dirname, 'account.html'),
+    path.join(__dirname, 'tests.html'),
+    path.join(__dirname, 'calendar.html'),
+    path.join(__dirname, 'anamnesis.html')
   ];
 
   htmlFiles.forEach(filePath => {
@@ -448,18 +451,31 @@ function updateHtmlFiles(version) {
 
     try {
       let content = fs.readFileSync(filePath, 'utf8');
+      let updated = false;
       
-      // Replace courses.generated.js script tags with dynamic versioning
-      // Match patterns like: <script src="courses.generated.js?v=20260125"></script>
-      const scriptPattern = /<script src="courses\.generated\.js(?:\?v=[a-zA-Z0-9]+)?"><\/script>/g;
-      const newScriptTag = `<script src="courses.generated.js?v=${version}"></script>`;
+      // 1. Replace courses.generated.js script tags
+      const coursesPattern = /<script src="courses\.generated\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
+      const newCoursesTag = `<script src="courses.generated.js?v=${version}"></script>`;
       
-      if (scriptPattern.test(content)) {
-        content = content.replace(scriptPattern, newScriptTag);
+      if (coursesPattern.test(content)) {
+        content = content.replace(coursesPattern, newCoursesTag);
+        updated = true;
+      }
+
+      // 2. Replace js/chat.js script tags
+      const chatPattern = /<script src="js\/chat\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
+      const newChatTag = `<script src="js/chat.js?v=${version}"></script>`;
+      
+      if (chatPattern.test(content)) {
+        content = content.replace(chatPattern, newChatTag);
+        updated = true;
+      }
+      
+      if (updated) {
         fs.writeFileSync(filePath, content, 'utf8');
         console.log(`✓ Updated ${path.basename(filePath)} with version ${version}`);
       } else {
-        console.log(`⚠ No courses.generated.js script tag found in ${path.basename(filePath)}`);
+        console.log(`⚠ No versioned script tags found in ${path.basename(filePath)}`);
       }
     } catch (error) {
       console.error(`✗ Error updating ${path.basename(filePath)}:`, error.message);
