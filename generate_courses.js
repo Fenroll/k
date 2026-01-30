@@ -470,6 +470,24 @@ function updateHtmlFiles(version) {
         content = content.replace(chatPattern, newChatTag);
         updated = true;
       }
+
+      // 3. Replace js/account-system.js script tags
+      const accountPattern = /<script src="(?:\.\/)?js\/account-system\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
+      const newAccountTag = `<script src="./js/account-system.js?v=${version}"></script>`;
+      
+      if (accountPattern.test(content)) {
+        content = content.replace(accountPattern, newAccountTag);
+        updated = true;
+      }
+
+      // 4. Replace js/auth-guard.js script tags
+      const guardPattern = /<script src="js\/auth-guard\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
+      const newGuardTag = `<script src="js/auth-guard.js?v=${version}"></script>`;
+      
+      if (guardPattern.test(content)) {
+        content = content.replace(guardPattern, newGuardTag);
+        updated = true;
+      }
       
       if (updated) {
         fs.writeFileSync(filePath, content, 'utf8');

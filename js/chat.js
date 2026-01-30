@@ -434,16 +434,29 @@ class ChatFirebaseREST {
 
         const processAndCallback = () => {
             const groupedUsers = {};
+            const now = Date.now();
+            const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes
+
+            const isUserOnline = (devices) => {
+                return Object.values(devices).some(device => {
+                    // Standard online check
+                    if (device.isActive === true) return true;
+                    
+                    // Grace period for mobile: if device is mobile and disconnected recently
+                    if (device.isMobile && device.offlineAt) {
+                        return (now - device.offlineAt) < GRACE_PERIOD;
+                    }
+                    return false;
+                });
+            };
 
             // Process Authenticated Users
             for (const uid in allOnlineAuthData) {
                 const devices = allOnlineAuthData[uid];
-                const deviceIds = Object.keys(devices);
-                const deviceCount = deviceIds.length;
-                let hasMobile = false;
-
-                if (deviceCount > 0) {
-                    hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
+                if (isUserOnline(devices)) {
+                    const deviceIds = Object.keys(devices);
+                    const deviceCount = deviceIds.length;
+                    const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
                     
                     const userProfile = allSiteUsers[uid];
                     if (userProfile) {
@@ -451,13 +464,12 @@ class ChatFirebaseREST {
                             userId: uid,
                             userName: userProfile.displayName || userProfile.username,
                             color: userProfile.color,
-                            avatar: userProfile.avatar, // Add avatar
+                            avatar: userProfile.avatar,
                             deviceCount: deviceCount,
                             hasMobile: hasMobile,
                             isGuest: false
                         };
                     } else {
-                        // Fallback for users not found in site_users (e.g., deleted accounts)
                         groupedUsers[uid] = {
                             userId: uid,
                             userName: `Unknown User (${uid})`,
@@ -473,21 +485,18 @@ class ChatFirebaseREST {
             // Process Guest Users
             for (const guestId in allOnlineGuestData) {
                 const devices = allOnlineGuestData[guestId];
-                const deviceIds = Object.keys(devices);
-                const deviceCount = deviceIds.length;
-                let hasMobile = false;
-
-                if (deviceCount > 0) {
-                    hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
+                if (isUserOnline(devices)) {
+                    const deviceIds = Object.keys(devices);
+                    const deviceCount = deviceIds.length;
+                    const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
                     
-                    // Guest userName is stored directly in deviceData by presence.js
                     const sampleDeviceData = devices[deviceIds[0]]; 
                     const guestUserName = sampleDeviceData.userName || `Guest-${guestId.substring(6, 10)}`;
 
                     groupedUsers[guestId] = {
                         userId: guestId,
                         userName: guestUserName,
-                        color: '#9E9E9E', // Default grey color for guests
+                        color: '#9E9E9E',
                         deviceCount: deviceCount,
                         hasMobile: hasMobile,
                         isGuest: true
@@ -789,12 +798,12 @@ class ChatUIManager {
 
       // Синхронизация на прочетени съобщения
       this.chatFirebase.startLastReadPolling(currentUser.userName, (lastReadId) => {
-        if (lastReadId && lastReadId !== this.lastReadMessageId) {
-          console.log(`🔄 Синхронизиран нов lastReadId: ${lastReadId}`);
-          this.lastReadMessageId = lastReadId; // Can be removed, frequent
+        // Only update if the new ID is "greater" (newer) than what we have
+        if (lastReadId && (!this.lastReadMessageId || lastReadId > this.lastReadMessageId)) {
+          console.log(`🔄 Synchronized newer lastReadId: ${lastReadId}`);
+          this.lastReadMessageId = lastReadId;
           localStorage.setItem(`lastReadMessage_${this.documentId}`, lastReadId);
           
-          // Преизчисли непрочетените и обнови брояча
           this.recalculateUnreadCount(this.chatFirebase.messages);
           this.updateActiveCount();
         }
@@ -1267,6 +1276,18 @@ class ChatUIManager {
 
     const success = await this.chatFirebase.sendMessage(text, replyTo, replyAuthor);
     if (success) {
+      // Find the last message in history (which should be the one just sent)
+      // Note: startPolling will bring it in, but we can optimistically update
+      // so the unread count stays 0 for our own messages.
+      const messages = this.chatFirebase.messages;
+      if (messages.length > 0) {
+          const lastMsg = messages[messages.length - 1];
+          // We don't have the NEW id yet because push() happened inside sendMessage,
+          // but we can mark our current view as "up to date".
+          this.unreadCount = 0;
+          this.updateActiveCount();
+      }
+
       input.value = '';
       input.dataset.replyTo = '';
       input.dataset.replyAuthor = '';
@@ -1327,9 +1348,10 @@ class ChatUIManager {
     // Calculate unread
     let unreadMessages = [];
     if (readIndex !== -1) {
+        // Only count messages that are NOT mine AND are newer than my last read marker
         unreadMessages = messages.slice(readIndex + 1).filter(m => !isMyMessage(m));
     } else {
-        // Fallback: count all messages not from the current user
+        // Fallback: count all messages NOT mine
         unreadMessages = messages.filter(m => !isMyMessage(m));
     }
 
@@ -1932,18 +1954,17 @@ class ChatUIManager {
 
     const messages = this.chatFirebase.messages;
     if (messages.length > 0) {
+      // Always mark up to the absolute last message in the list
       const lastMessage = messages[messages.length - 1];
       const newLastReadId = lastMessage.id;
 
-      // Ако вече е маркирано като прочетено, не прави нищо
-      if (this.lastReadMessageId === newLastReadId) return;
-
+      // Update local state
       this.lastReadMessageId = newLastReadId;
       localStorage.setItem(`lastReadMessage_${this.documentId}`, newLastReadId);
       this.unreadCount = 0;
       this.updateActiveCount();
       
-      // Синхронизирай с Firebase, за да знаят и другите сесии
+      // Synchronize with Firebase
       this.chatFirebase.setLastRead(currentUser.userName, newLastReadId);
     }
   }
@@ -2388,6 +2409,14 @@ class ChatUIManager {
                 (u.displayName || u.userName || u.username || "").toLowerCase() === lowerName
             );
             if (activeUser && activeUser.color) userColor = activeUser.color;
+        }
+
+        // If STILL not found, check message history (fallback for offline users not in allUsers)
+        if (userColor === '#3a5a40' && this.chatFirebase && this.chatFirebase.messages) {
+            const lastMsg = [...this.chatFirebase.messages].reverse().find(m => 
+                (m.userName || "").toLowerCase() === lowerName
+            );
+            if (lastMsg && lastMsg.userColor) userColor = lastMsg.userColor;
         }
 
         if (isMe) {
@@ -2909,10 +2938,6 @@ class ChatUIManager {
   flex-direction: column;
   gap: 8px;
   min-width: 0;
-  align-self: stretch;
-  margin-top: -10px; /* Pull it up significantly */
-  position: relative;
-  z-index: 5;
 }
 .chat-panel.show-members .chat-active-users {
   display: flex;
@@ -3084,8 +3109,10 @@ class ChatUIManager {
     right: 0;
     top: 75px;
     bottom: 67px;
-    z-index: 10;
+    z-index: 15;
     box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    margin-top: -10px;
+    align-self: stretch;
   }
   .chat-online-count {
     display: none !important;

@@ -146,7 +146,10 @@
             };
             console.log('Presence: Setting initial presence for UID:', currentUid, 'isGuest:', isGuest, 'isActive:', deviceData.isActive);
 
-            userStatusDatabaseRef.onDisconnect().remove().then(function() {
+            userStatusDatabaseRef.onDisconnect().update({
+                isActive: false,
+                offlineAt: firebase.database.ServerValue.TIMESTAMP
+            }).then(function() {
                 userStatusDatabaseRef.set(deviceData);
             });
         });
