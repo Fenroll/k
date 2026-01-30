@@ -432,97 +432,102 @@ class ChatFirebaseREST {
         let allOnlineAuthData = {}; // Cache for authenticated users online presence
         let allOnlineGuestData = {}; // Cache for guest users online presence
 
-        let debounceTimer;
         const processAndCallback = () => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                const groupedUsers = {};
-                const now = Date.now();
-                const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes
+            const groupedUsers = {};
+            const now = Date.now();
+            const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes for mobile
+            const FLICKER_BUFFER = 5000; // 5 seconds to bridge page reloads
 
-                const isUserOnline = (devices) => {
-                    return Object.values(devices).some(device => {
-                        // 1. Truly active
-                        if (device.isActive === true) return true;
-                        
-                        // 2. Grace period for mobile devices
-                        if (device.isMobile) {
-                            if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) return true;
-                            if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) return true;
-                        }
-                        
-                        // 3. Desktop transition grace period (very short, e.g. 5 seconds)
-                        // This handles page reloads/navigation on desktop
-                        if (!device.isMobile && device.offlineAt && (now - device.offlineAt) < 5000) {
-                            return true;
-                        }
-
-                        return false;
-                    });
-                };
-
-                // ... (rest of processing)
-                // Process Authenticated Users
-                for (const uid in allOnlineAuthData) {
-                    const devices = allOnlineAuthData[uid];
-                    if (isUserOnline(devices)) {
-                        const deviceIds = Object.keys(devices);
-                        const deviceCount = deviceIds.length;
-                        const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
-                        
-                        const userProfile = allSiteUsers[uid];
-                        if (userProfile) {
-                            groupedUsers[uid] = {
-                                userId: uid,
-                                userName: userProfile.displayName || userProfile.username,
-                                color: userProfile.color,
-                                avatar: userProfile.avatar,
-                                deviceCount: deviceCount,
-                                hasMobile: hasMobile,
-                                isGuest: false
-                            };
-                        } else {
-                            groupedUsers[uid] = {
-                                userId: uid,
-                                userName: `Unknown User (${uid})`,
-                                color: '#cccccc',
-                                deviceCount: deviceCount,
-                                hasMobile: hasMobile,
-                                isGuest: false
-                            };
-                        }
+            const isUserOnline = (devices) => {
+                return Object.values(devices).some(device => {
+                    // 1. Truly active
+                    if (device.isActive === true) return true;
+                    
+                    // 2. Grace period for mobile devices
+                    if (device.isMobile) {
+                        if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) return true;
+                        if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) return true;
                     }
-                }
-
-                // Process Guest Users
-                for (const guestId in allOnlineGuestData) {
-                    const devices = allOnlineGuestData[guestId];
-                    if (isUserOnline(devices)) {
-                        const deviceIds = Object.keys(devices);
-                        const deviceCount = deviceIds.length;
-                        const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
-                        
-                        const sampleDeviceData = devices[deviceIds[0]]; 
-                        const guestUserName = sampleDeviceData.userName || `Guest-${guestId.substring(6, 10)}`;
-
-                        groupedUsers[guestId] = {
-                            userId: guestId,
-                            userName: guestUserName,
-                            color: '#9E9E9E',
-                            deviceCount: deviceCount,
-                            hasMobile: hasMobile,
-                            isGuest: true
-                        };
+                    
+                    // 3. Desktop transition grace period
+                    if (!device.isMobile && device.offlineAt && (now - device.offlineAt) < 5000) {
+                        return true;
                     }
-                }
 
-                callback({
-                    count: Object.keys(groupedUsers).length,
-                    users: groupedUsers,
-                    usersList: Object.keys(groupedUsers),
-                    allUsers: allSiteUsers
+                    return false;
                 });
-            }, 2000); // 2 second debounce
+            };
+
+            // 1. Collect all users who are currently "officially" online
+            const officiallyOnlineUids = new Set();
+
+            // Process Authenticated Users
+            for (const uid in allOnlineAuthData) {
+                const devices = allOnlineAuthData[uid];
+                if (isUserOnline(devices)) {
+                    officiallyOnlineUids.add(uid);
+                    
+                    const userProfile = allSiteUsers[uid];
+                    groupedUsers[uid] = {
+                        userId: uid,
+                        userName: userProfile ? (userProfile.displayName || userProfile.username) : `User (${uid})`,
+                        color: userProfile ? userProfile.color : '#cccccc',
+                        avatar: userProfile ? userProfile.avatar : null,
+                        deviceCount: Object.keys(devices).length,
+                        hasMobile: Object.values(devices).some(d => d.isMobile === true),
+                        isGuest: false
+                    };
+                }
+            }
+
+            // Process Guest Users
+            for (const guestId in allOnlineGuestData) {
+                const devices = allOnlineGuestData[guestId];
+                if (isUserOnline(devices)) {
+                    officiallyOnlineUids.add(guestId);
+                    
+                    const sampleDeviceData = devices[Object.keys(devices)[0]]; 
+                    const guestUserName = sampleDeviceData.userName || `Guest-${guestId.substring(6, 10)}`;
+
+                    groupedUsers[guestId] = {
+                        userId: guestId,
+                        userName: guestUserName,
+                        color: '#9E9E9E',
+                        deviceCount: Object.keys(devices).length,
+                        hasMobile: Object.values(devices).some(d => d.isMobile === true),
+                        isGuest: true
+                    };
+                }
+            }
+
+            // 2. Update recentPresence cache for everyone officially online
+            officiallyOnlineUids.forEach(uid => {
+                this.recentPresence[uid] = {
+                    timestamp: now,
+                    data: groupedUsers[uid]
+                };
+            });
+
+            // 3. Include users from cache who were seen in the last FLICKER_BUFFER seconds
+            for (const uid in this.recentPresence) {
+                if (!groupedUsers[uid]) {
+                    const lastSeen = this.recentPresence[uid];
+                    if (now - lastSeen.timestamp < FLICKER_BUFFER) {
+                        // User is in buffer - keep them in the list
+                        groupedUsers[uid] = lastSeen.data;
+                    } else {
+                        // Buffer expired
+                        delete this.recentPresence[uid];
+                    }
+                }
+            }
+
+            callback({
+                count: Object.keys(groupedUsers).length,
+                users: groupedUsers,
+                usersList: Object.keys(groupedUsers),
+                allUsers: allSiteUsers
+            });
         };
 
         // Run cleanup/refresh every 30 seconds to handle grace period expirations
@@ -595,6 +600,7 @@ class ChatUIManager {
     this.reactionsCache = {}; // Кеш за реакции
     this.activeUsers = {}; // Списък с активни потребители за логика с реакции
     this.activeTyping = {}; // State for typing indicators
+    this.recentPresence = {}; // Cache for recently online users to prevent flickering
     this.showMembers = localStorage.getItem(`showMembers_${this.documentId}`) === 'true'; // Default to false if not set
 
     this.init();
