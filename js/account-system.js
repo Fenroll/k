@@ -564,8 +564,20 @@ class AccountSystem {
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         
-                        // Compress to JPEG 0.8
-                        resolve(canvas.toDataURL('image/jpeg', 0.8));
+                        // Compress to JPEG 0.6
+                        let dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                        
+                        // Fallback: If still too large (> 50KB), shrink even more
+                        if (dataUrl.length > 50000) {
+                            const smallerMaxSize = 100;
+                            const scale = smallerMaxSize / Math.max(width, height);
+                            canvas.width = width * scale;
+                            canvas.height = height * scale;
+                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                            dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                        }
+                        
+                        resolve(dataUrl);
                     };
                     img.onerror = reject;
                     img.src = readerEvent.target.result;
