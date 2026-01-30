@@ -1165,7 +1165,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260130rzy"></script>
+  <script src="courses.generated.js?v=20260130xrs"></script>
 
   <!-- ============================================
        CHAT SYSTEM - Firebase & Notes
@@ -1455,55 +1455,75 @@
       
       let lines = text.split('\n');
       let html = [];
-      let inUl = false;
-      let inOl = false;
+      let stack = [];
       
       for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
         
-        if (/^\s*[-*]\s+(.+)/.test(line)) {
-          if (!inUl) {
-            if (inOl) {
-              html.push('</ol>');
-              inOl = false;
+        let indentMatch = line.match(/^(\s*)/);
+        let indent = indentMatch ? indentMatch[1].length : 0;
+        let content = line.trim();
+        
+        let isUl = /^[-*]\s+(.+)/.test(content);
+        let isOl = /^\d+\.\s+(.+)/.test(content);
+        
+        if (isUl || isOl) {
+          let listType = isUl ? 'ul' : 'ol';
+          let match = isUl ? content.match(/^[-*]\s+(.+)/) : content.match(/^\d+\.\s+(.+)/);
+          let itemText = match[1];
+          
+          if (stack.length === 0) {
+            stack.push({ type: listType, indent: indent });
+            html.push('<' + listType + '>');
+          } else {
+            let last = stack[stack.length - 1];
+            
+            if (indent > last.indent) {
+              stack.push({ type: listType, indent: indent });
+              html.push('<' + listType + '>');
+            } else if (indent < last.indent) {
+              while (stack.length > 0 && stack[stack.length - 1].indent > indent) {
+                let closed = stack.pop();
+                html.push('</' + closed.type + '>');
+              }
+              if (stack.length === 0 || stack[stack.length - 1].indent !== indent) {
+                 stack.push({ type: listType, indent: indent });
+                 html.push('<' + listType + '>');
+              } else if (stack[stack.length - 1].type !== listType) {
+                 let closed = stack.pop();
+                 html.push('</' + closed.type + '>');
+                 stack.push({ type: listType, indent: indent });
+                 html.push('<' + listType + '>');
+              }
+            } else {
+              if (last.type !== listType) {
+                let closed = stack.pop();
+                html.push('</' + closed.type + '>');
+                stack.push({ type: listType, indent: indent });
+                html.push('<' + listType + '>');
+              }
             }
-            html.push('<ul>');
-            inUl = true;
           }
-          let match = line.match(/^\s*[-*]\s+(.+)/);
-          html.push('<li>' + match[1] + '</li>');
-        }
-        else if (/^\s*\d+\.\s+(.+)/.test(line)) {
-          if (!inOl) {
-            if (inUl) {
-              html.push('</ul>');
-              inUl = false;
-            }
-            html.push('<ol>');
-            inOl = true;
+          html.push('<li>' + itemText + '</li>');
+        } else {
+          if (content !== '') {
+             while (stack.length > 0) {
+               let closed = stack.pop();
+               html.push('</' + closed.type + '>');
+             }
           }
-          let match = line.match(/^\s*\d+\.\s+(.+)/);
-          html.push('<li>' + match[1] + '</li>');
-        }
-        else {
-          if (inUl) {
-            html.push('</ul>');
-            inUl = false;
-          }
-          if (inOl) {
-            html.push('</ol>');
-            inOl = false;
-          }
-          if (line.trim()) {
-            html.push(line + '<br>');
+          if (content) {
+            html.push(content + '<br>');
           } else {
             html.push('<br>');
           }
         }
       }
       
-      if (inUl) html.push('</ul>');
-      if (inOl) html.push('</ol>');
+      while (stack.length > 0) {
+        let closed = stack.pop();
+        html.push('</' + closed.type + '>');
+      }
       
       let result = html.join('')
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')

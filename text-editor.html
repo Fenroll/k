@@ -246,10 +246,10 @@
       font-weight: 600;
     }
 
-    #editor h1 { font-size: 1.65em; color: #000000; }
-    #editor h2 { font-size: 1.3em; color: #000000; }
-    #editor h3 { font-size: 1.1em; color: #000000; margin-bottom: 0.1em; }
-    #editor h4 { font-size: 1.05em; color: #000000; margin-bottom: 0.1em; }
+    #editor h1 { font-size: 1.65em; color: #588157; }
+    #editor h2 { font-size: 1.3em; color: #588157; }
+    #editor h3 { font-size: 1.1em; color: #588157; margin-bottom: 0.1em; }
+    #editor h4 { font-size: 1.05em; color: #588157; margin-bottom: 0.1em; }
 
     #editor p {
       margin: 0.3em 0;
@@ -1557,7 +1557,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260130rzy"></script>
+  <script src="courses.generated.js?v=20260130xrs"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js"></script>
@@ -2950,9 +2950,9 @@
           btn.classList.add('active');
         }
       } else {
-        // If no saved color, activate the default (Black)
+        // If no saved color, activate the default (Lime Green)
         document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
-        const defaultBtn = document.querySelector('.heading-color-btn[data-color="#000000"]');
+        const defaultBtn = document.querySelector('.heading-color-btn[data-color="#588157"]');
         if (defaultBtn) {
           defaultBtn.classList.add('active');
           // Apply default heading color
@@ -2963,7 +2963,7 @@
             #editor h2, 
             #editor h3, 
             #editor h4 { 
-              color: #000000 !important; 
+              color: #588157 !important; 
             }
           `;
           document.head.appendChild(style);
@@ -2971,7 +2971,7 @@
           // Also apply directly to existing headers
           const headers = document.querySelectorAll('#editor h1, #editor h2, #editor h3, #editor h4');
           headers.forEach(h => {
-            h.style.color = '#000000';
+            h.style.color = '#588157';
           });
         }
       }
@@ -3429,7 +3429,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       });
       editorContentForBody = styleSanitizeDiv.innerHTML;
 
-      const savedHeadingColor = localStorage.getItem('textEditorHeadingColor') || '#000000';
+      const savedHeadingColor = localStorage.getItem('textEditorHeadingColor') || '#588157';
       
       const htmlDoc = `<!DOCTYPE html>
 <html lang="bg">
@@ -3626,55 +3626,75 @@ localStorage.setItem('textEditorContent', htmlContent);
         
         let lines = text.split('\n');
         let html = [];
-        let inUl = false;
-        let inOl = false;
+        let stack = [];
         
         for (let i = 0; i < lines.length; i++) {
           let line = lines[i];
           
-          if (/^\s*[-*]\s+(.+)/.test(line)) {
-            if (!inUl) {
-              if (inOl) {
-                html.push('</ol>');
-                inOl = false;
+          let indentMatch = line.match(/^(\s*)/);
+          let indent = indentMatch ? indentMatch[1].length : 0;
+          let content = line.trim();
+          
+          let isUl = /^[-*]\s+(.+)/.test(content);
+          let isOl = /^\d+\.\s+(.+)/.test(content);
+          
+          if (isUl || isOl) {
+            let listType = isUl ? 'ul' : 'ol';
+            let match = isUl ? content.match(/^[-*]\s+(.+)/) : content.match(/^\d+\.\s+(.+)/);
+            let itemText = match[1];
+            
+            if (stack.length === 0) {
+              stack.push({ type: listType, indent: indent });
+              html.push('<' + listType + '>');
+            } else {
+              let last = stack[stack.length - 1];
+              
+              if (indent > last.indent) {
+                stack.push({ type: listType, indent: indent });
+                html.push('<' + listType + '>');
+              } else if (indent < last.indent) {
+                while (stack.length > 0 && stack[stack.length - 1].indent > indent) {
+                  let closed = stack.pop();
+                  html.push('</' + closed.type + '>');
+                }
+                if (stack.length === 0 || stack[stack.length - 1].indent !== indent) {
+                   stack.push({ type: listType, indent: indent });
+                   html.push('<' + listType + '>');
+                } else if (stack[stack.length - 1].type !== listType) {
+                   let closed = stack.pop();
+                   html.push('</' + closed.type + '>');
+                   stack.push({ type: listType, indent: indent });
+                   html.push('<' + listType + '>');
+                }
+              } else {
+                if (last.type !== listType) {
+                  let closed = stack.pop();
+                  html.push('</' + closed.type + '>');
+                  stack.push({ type: listType, indent: indent });
+                  html.push('<' + listType + '>');
+                }
               }
-              html.push('<ul>');
-              inUl = true;
             }
-            let match = line.match(/^\s*[-*]\s+(.+)/);
-            html.push('<li>' + match[1] + '</li>');
-          }
-          else if (/^\s*\d+\.\s+(.+)/.test(line)) {
-            if (!inOl) {
-              if (inUl) {
-                html.push('</ul>');
-                inUl = false;
-              }
-              html.push('<ol>');
-              inOl = true;
+            html.push('<li>' + itemText + '</li>');
+          } else {
+            if (content !== '') {
+               while (stack.length > 0) {
+                 let closed = stack.pop();
+                 html.push('</' + closed.type + '>');
+               }
             }
-            let match = line.match(/^\s*\d+\.\s+(.+)/);
-            html.push('<li>' + match[1] + '</li>');
-          }
-          else {
-            if (inUl) {
-              html.push('</ul>');
-              inUl = false;
-            }
-            if (inOl) {
-              html.push('</ol>');
-              inOl = false;
-            }
-            if (line.trim()) {
-              html.push(line + '<br>');
+            if (content) {
+              html.push(content + '<br>');
             } else {
               html.push('<br>');
             }
           }
         }
         
-        if (inUl) html.push('</ul>');
-        if (inOl) html.push('</ol>');
+        while (stack.length > 0) {
+          let closed = stack.pop();
+          html.push('</' + closed.type + '>');
+        }
         
         let result = html.join('')
           .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
@@ -4065,65 +4085,95 @@ renderMathInElement(document.body, {
     function parseNoteMarkdown(text) {
       if (!text) return '';
       
-      // Split by lines for list processing
       let lines = text.split('\n');
       let html = [];
-      let inUl = false;
-      let inOl = false;
+      let stack = []; // Stack of { type: 'ul'|'ol', indent: number }
       
       for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
         
-        // Check for unordered list items
-        if (/^\s*[-*]\s+(.+)/.test(line)) {
-          if (!inUl) {
-            if (inOl) {
-              html.push('</ol>');
-              inOl = false;
-            }
-            html.push('<ul>');
-            inUl = true;
-          }
-          let match = line.match(/^\s*[-*]\s+(.+)/);
-          html.push('<li>' + match[1] + '</li>');
-        }
-        // Check for ordered list items
-        else if (/^\s*\d+\.\s+(.+)/.test(line)) {
-          if (!inOl) {
-            if (inUl) {
-              html.push('</ul>');
-              inUl = false;
-            }
-            html.push('<ol>');
-            inOl = true;
-          }
-          let match = line.match(/^\s*\d+\.\s+(.+)/);
-          html.push('<li>' + match[1] + '</li>');
-        }
-        else {
-          // Close any open lists
-          if (inUl) {
-            html.push('</ul>');
-            inUl = false;
-          }
-          if (inOl) {
-            html.push('</ol>');
-            inOl = false;
-          }
-          // Add regular text line (preserve empty lines as <br>)
-          if (line.trim()) {
-            html.push(line + '<br>');
+        // Calculate indentation
+        let indentMatch = line.match(/^(\s*)/);
+        let indent = indentMatch ? indentMatch[1].length : 0;
+        let content = line.trim();
+        
+        let isUl = /^[-*]\s+(.+)/.test(content);
+        let isOl = /^\d+\.\s+(.+)/.test(content);
+        
+        if (isUl || isOl) {
+          let listType = isUl ? 'ul' : 'ol';
+          let match = isUl ? content.match(/^[-*]\s+(.+)/) : content.match(/^\d+\.\s+(.+)/);
+          let itemText = match[1];
+          
+          if (stack.length === 0) {
+            // New list
+            stack.push({ type: listType, indent: indent });
+            html.push('<' + listType + '>');
           } else {
+            let last = stack[stack.length - 1];
+            
+            if (indent > last.indent) {
+              // Nested list
+              stack.push({ type: listType, indent: indent });
+              html.push('<' + listType + '>');
+            } else if (indent < last.indent) {
+              // Close lists until indent matches
+              while (stack.length > 0 && stack[stack.length - 1].indent > indent) {
+                let closed = stack.pop();
+                html.push('</' + closed.type + '>');
+              }
+              // If stack empty or indent still mismatch (weird case), start new or append
+              if (stack.length === 0 || stack[stack.length - 1].indent !== indent) {
+                 stack.push({ type: listType, indent: indent });
+                 html.push('<' + listType + '>');
+              } else if (stack[stack.length - 1].type !== listType) {
+                 // Switch list type
+                 let closed = stack.pop();
+                 html.push('</' + closed.type + '>');
+                 stack.push({ type: listType, indent: indent });
+                 html.push('<' + listType + '>');
+              }
+            } else {
+              // Same indent
+              if (last.type !== listType) {
+                let closed = stack.pop();
+                html.push('</' + closed.type + '>');
+                stack.push({ type: listType, indent: indent });
+                html.push('<' + listType + '>');
+              }
+            }
+          }
+          html.push('<li>' + itemText + '</li>');
+        } else {
+          // Close all lists if line is not empty (or just break lists on empty line?)
+          // Standard MD: empty line breaks list.
+          // Here: assume anything not a list item breaks the list sequence if text exists
+          if (content !== '') {
+             while (stack.length > 0) {
+               let closed = stack.pop();
+               html.push('</' + closed.type + '>');
+             }
+          }
+          
+          if (content) {
+            html.push(content + '<br>');
+          } else {
+            // Empty line - if inside list, maybe keep it? No, simpler to break.
+            // If we are in a list, we might want to close it?
+            // Let's keep it simple: empty line = <br> but doesn't necessarily close list
+            // actually, standard MD: empty line separates blocks.
+            // let's behave like the previous one: preserve empty lines
             html.push('<br>');
           }
         }
       }
       
-      // Close any remaining open lists
-      if (inUl) html.push('</ul>');
-      if (inOl) html.push('</ol>');
+      // Close remaining
+      while (stack.length > 0) {
+        let closed = stack.pop();
+        html.push('</' + closed.type + '>');
+      }
       
-      // Join without adding extra spacing
       let result = html.join('')
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/__(.+?)__/g, '<strong>$1</strong>')
@@ -4132,7 +4182,6 @@ renderMathInElement(document.body, {
         .replace(/`(.+?)`/g, '<code>$1</code>')
         .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
       
-      // Clean up extra <br> before/after lists
       result = result
         .replace(/<br><ul>/g, '<ul>')
         .replace(/<br><ol>/g, '<ol>')
@@ -4214,18 +4263,20 @@ renderMathInElement(document.body, {
       const fragment = document.createRange().createContextualFragment(tableHTML);
       range.insertNode(fragment);
       
-      // Add a line break after table for spacing
-      const br = document.createElement('br');
+      // Add a paragraph after table for spacing
+      const p = document.createElement('p');
+      p.innerHTML = '<br>';
       range.setStartAfter(fragment.lastChild);
-      range.insertNode(br);
+      range.insertNode(p);
       
-      // Move cursor after the br
-      range.setStartAfter(br);
-      range.collapse(true);
+      // Move cursor inside the new paragraph
+      const newRange = document.createRange();
+      newRange.setStart(p, 0);
+      newRange.collapse(true);
       
       const selection = window.getSelection();
       selection.removeAllRanges();
-      selection.addRange(range);
+      selection.addRange(newRange);
       
       // Clear saved range
       savedTableRange = null;
@@ -4790,6 +4841,39 @@ renderMathInElement(document.body, {
           // Find the actual element
           while (node && node !== editor && node.nodeType === 3) {
             node = node.parentNode;
+          }
+
+          // FIX: Handle Backspace after TABLE
+          if (e.key === 'Backspace' && node && (node.tagName === 'P' || node.tagName === 'DIV')) {
+             // Check if cursor is at start
+             if (range.collapsed && range.startOffset === 0) {
+                 const prev = node.previousElementSibling;
+                 if (prev && prev.tagName === 'TABLE') {
+                     // We are after a table
+                     e.preventDefault();
+                     
+                     // If paragraph is empty, remove it
+                     if (node.textContent.trim() === '') {
+                        node.remove();
+                     }
+                     
+                     // Move cursor to last cell of table
+                     const rows = prev.rows;
+                     if (rows.length > 0) {
+                       const lastRow = rows[rows.length - 1];
+                       if (lastRow.cells.length > 0) {
+                         const lastCell = lastRow.cells[lastRow.cells.length - 1];
+                         const newRange = document.createRange();
+                         newRange.selectNodeContents(lastCell);
+                         newRange.collapse(false);
+                         selection.removeAllRanges();
+                         selection.addRange(newRange);
+                       }
+                     }
+                     saveToHistory();
+                     return;
+                 }
+             }
           }
           
           // Check if adjacent to <hr>

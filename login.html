@@ -32,10 +32,22 @@
         #login-form {
             display: block;
         }
+        .logo-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+        .logo-img {
+            width: 270px;
+            max-width: 100%;
+            margin-left: 100px;
+            filter: invert(1);
+        }
         h2 {
             text-align: center;
             color: #588157;
             margin-bottom: 1.5rem;
+            font-size: 1.25rem;
+            display: none; /* Hide the redundant "Login" text as logo is present */
         }
         .form-group {
             margin-bottom: 1rem;
@@ -60,11 +72,20 @@
             background: #588157;
             color: white;
             font-size: 1rem;
+            font-weight: bold;
             cursor: pointer;
             transition: background 0.2s;
         }
         .btn:hover {
             background: #466c43;
+        }
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            opacity: 1;
+        }
+        .btn:disabled:hover {
+            background: #ccc;
         }
         .error-message {
             color: #ef4444;
@@ -84,6 +105,9 @@
 <body>
 
     <div class="account-container">
+        <div class="logo-header">
+            <img src="svg/logo-coursebook.svg" alt="Coursebook Logo" class="logo-img">
+        </div>
         <!-- Login Form -->
         <div id="login-form" class="form-container">
             <h2>Login</h2>
@@ -97,7 +121,7 @@
                     <label for="login-password">Password</label>
                     <input type="password" id="login-password" required>
                 </div>
-                <button type="submit" class="btn">Login</button>
+                <button type="submit" id="login-btn" class="btn" disabled>Login</button>
             </form>
         </div>
 
@@ -117,6 +141,24 @@
     <!-- Account System Script -->
     <script src="./js/account-system.js?v=20260125"></script>
     <script>
+        // Login button state logic
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameInput = document.getElementById('login-username');
+            const passwordInput = document.getElementById('login-password');
+            const loginBtn = document.getElementById('login-btn');
+
+            function updateButtonState() {
+                if (usernameInput.value.trim() !== '' && passwordInput.value.trim() !== '') {
+                    loginBtn.removeAttribute('disabled');
+                } else {
+                    loginBtn.setAttribute('disabled', 'disabled');
+                }
+            }
+
+            usernameInput.addEventListener('input', updateButtonState);
+            passwordInput.addEventListener('input', updateButtonState);
+        });
+
         (async function() {
             try {
                 window.accountSystem = new AccountSystem();
