@@ -432,90 +432,107 @@ class ChatFirebaseREST {
         let allOnlineAuthData = {}; // Cache for authenticated users online presence
         let allOnlineGuestData = {}; // Cache for guest users online presence
 
+        let debounceTimer;
         const processAndCallback = () => {
-            const groupedUsers = {};
-            const now = Date.now();
-            const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                const groupedUsers = {};
+                const now = Date.now();
+                const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes
 
-            const isUserOnline = (devices) => {
-                return Object.values(devices).some(device => {
-                    // Standard online check
-                    if (device.isActive === true) return true;
-                    
-                    // Grace period for mobile: if device is mobile and disconnected recently
-                    if (device.isMobile && device.offlineAt) {
-                        return (now - device.offlineAt) < GRACE_PERIOD;
+                const isUserOnline = (devices) => {
+                    return Object.values(devices).some(device => {
+                        // 1. Truly active
+                        if (device.isActive === true) return true;
+                        
+                        // 2. Grace period for mobile devices
+                        if (device.isMobile) {
+                            if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) return true;
+                            if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) return true;
+                        }
+                        
+                        // 3. Desktop transition grace period (very short, e.g. 5 seconds)
+                        // This handles page reloads/navigation on desktop
+                        if (!device.isMobile && device.offlineAt && (now - device.offlineAt) < 5000) {
+                            return true;
+                        }
+
+                        return false;
+                    });
+                };
+
+                // ... (rest of processing)
+                // Process Authenticated Users
+                for (const uid in allOnlineAuthData) {
+                    const devices = allOnlineAuthData[uid];
+                    if (isUserOnline(devices)) {
+                        const deviceIds = Object.keys(devices);
+                        const deviceCount = deviceIds.length;
+                        const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
+                        
+                        const userProfile = allSiteUsers[uid];
+                        if (userProfile) {
+                            groupedUsers[uid] = {
+                                userId: uid,
+                                userName: userProfile.displayName || userProfile.username,
+                                color: userProfile.color,
+                                avatar: userProfile.avatar,
+                                deviceCount: deviceCount,
+                                hasMobile: hasMobile,
+                                isGuest: false
+                            };
+                        } else {
+                            groupedUsers[uid] = {
+                                userId: uid,
+                                userName: `Unknown User (${uid})`,
+                                color: '#cccccc',
+                                deviceCount: deviceCount,
+                                hasMobile: hasMobile,
+                                isGuest: false
+                            };
+                        }
                     }
-                    return false;
+                }
+
+                // Process Guest Users
+                for (const guestId in allOnlineGuestData) {
+                    const devices = allOnlineGuestData[guestId];
+                    if (isUserOnline(devices)) {
+                        const deviceIds = Object.keys(devices);
+                        const deviceCount = deviceIds.length;
+                        const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
+                        
+                        const sampleDeviceData = devices[deviceIds[0]]; 
+                        const guestUserName = sampleDeviceData.userName || `Guest-${guestId.substring(6, 10)}`;
+
+                        groupedUsers[guestId] = {
+                            userId: guestId,
+                            userName: guestUserName,
+                            color: '#9E9E9E',
+                            deviceCount: deviceCount,
+                            hasMobile: hasMobile,
+                            isGuest: true
+                        };
+                    }
+                }
+
+                callback({
+                    count: Object.keys(groupedUsers).length,
+                    users: groupedUsers,
+                    usersList: Object.keys(groupedUsers),
+                    allUsers: allSiteUsers
                 });
-            };
-
-            // Process Authenticated Users
-            for (const uid in allOnlineAuthData) {
-                const devices = allOnlineAuthData[uid];
-                if (isUserOnline(devices)) {
-                    const deviceIds = Object.keys(devices);
-                    const deviceCount = deviceIds.length;
-                    const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
-                    
-                    const userProfile = allSiteUsers[uid];
-                    if (userProfile) {
-                        groupedUsers[uid] = {
-                            userId: uid,
-                            userName: userProfile.displayName || userProfile.username,
-                            color: userProfile.color,
-                            avatar: userProfile.avatar,
-                            deviceCount: deviceCount,
-                            hasMobile: hasMobile,
-                            isGuest: false
-                        };
-                    } else {
-                        groupedUsers[uid] = {
-                            userId: uid,
-                            userName: `Unknown User (${uid})`,
-                            color: '#cccccc',
-                            deviceCount: deviceCount,
-                            hasMobile: hasMobile,
-                            isGuest: false
-                        };
-                    }
-                }
-            }
-
-            // Process Guest Users
-            for (const guestId in allOnlineGuestData) {
-                const devices = allOnlineGuestData[guestId];
-                if (isUserOnline(devices)) {
-                    const deviceIds = Object.keys(devices);
-                    const deviceCount = deviceIds.length;
-                    const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
-                    
-                    const sampleDeviceData = devices[deviceIds[0]]; 
-                    const guestUserName = sampleDeviceData.userName || `Guest-${guestId.substring(6, 10)}`;
-
-                    groupedUsers[guestId] = {
-                        userId: guestId,
-                        userName: guestUserName,
-                        color: '#9E9E9E',
-                        deviceCount: deviceCount,
-                        hasMobile: hasMobile,
-                        isGuest: true
-                    };
-                }
-            }
-
-            callback({
-                count: Object.keys(groupedUsers).length,
-                users: groupedUsers,
-                usersList: Object.keys(groupedUsers),
-                allUsers: allSiteUsers // Pass full user directory
-            });
+            }, 2000); // 2 second debounce
         };
+
+        // Run cleanup/refresh every 30 seconds to handle grace period expirations
+        const refreshInterval = setInterval(processAndCallback, 30000);
+        this.unsubscribers.push(() => clearInterval(refreshInterval));
 
         // Listen for all site users (for username and color)
         const unsubscribeSiteUsers = siteUsersRef.on('value', (snapshot) => {
             allSiteUsers = snapshot.val() || {};
-            processAndCallback(); // Recalculate and update when user profiles change
+            processAndCallback();
         });
         this.unsubscribers.push(unsubscribeSiteUsers);
 
