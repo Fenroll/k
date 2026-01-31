@@ -539,20 +539,20 @@
 }
 
 /* Scrollbar styling */
-.chat-messages::-webkit-scrollbar,
-.chat-active-users::-webkit-scrollbar {
-  width: 6px;
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
 }
-
+.chat-active-users::-webkit-scrollbar {
+    width: 3px;
+}
 .chat-messages::-webkit-scrollbar-track,
 .chat-active-users::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
-
 .chat-messages::-webkit-scrollbar-thumb,
 .chat-active-users::-webkit-scrollbar-thumb {
-  background: var(--chat-border);
-  border-radius: 3px;
+    background: var(--chat-border);
+    border-radius: 3px;
 }
 
 .chat-messages::-webkit-scrollbar-thumb:hover,

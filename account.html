@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-    <script src="js/auth-guard.js?v=20260131quq"></script>
+    <script src="js/auth-guard.js?v=2026013111pl"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
@@ -48,7 +48,7 @@
             margin-bottom: 0.5rem;
             font-weight: 600;
         }
-        input[type="text"], input[type="email"], input[type="password"] {
+        input[type="text"], input[type="email"], input[type="password"], input[type="url"], input[type="file"] {
             width: 100%;
             padding: 0.75rem;
             border: 1px solid #ccc;
@@ -233,9 +233,21 @@
             <form id="change-avatar-form-element">
                 <div class="form-group">
                     <label for="new-avatar-file">Upload Image</label>
-                    <input type="file" id="new-avatar-file" accept="image/*" required style="padding: 10px; background: white; border: 1px solid #ccc; width: 100%;">
+                    <input type="file" id="new-avatar-file" accept="image/*" style="padding: 10px; background: white; border: 1px solid #ccc; width: 100%; border-radius: 8px;">
                     <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Images will be resized to 150x150px.</p>
                 </div>
+                
+                <div style="text-align: center; margin: 15px 0; color: #666; font-weight: bold; position: relative;">
+                    <span style="background: #f4f4f9; padding: 0 10px; position: relative; z-index: 1;">OR</span>
+                    <hr style="position: absolute; top: 50%; left: 0; right: 0; border: 0; border-top: 1px solid #ccc; margin: 0;">
+                </div>
+
+                <div class="form-group">
+                    <label for="new-avatar-url">Image URL</label>
+                    <input type="url" id="new-avatar-url" placeholder="https://example.com/image.jpg" style="width: 100%; border-radius: 8px;">
+                    <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Link directly to an external image (won't be resized).</p>
+                </div>
+
                 <button type="submit" class="btn">Save</button>
                 <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Cancel</button>
             </form>
@@ -331,7 +343,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
 
     <!-- Нашият скрипт за акаунти -->
-    <script src="./js/account-system.js?v=20260131quq"></script>
+    <script src="./js/account-system.js?v=2026013111pl"></script>
     <script src="js/presence.js"></script>
     <script src="js/version-check.js"></script>
     <script>

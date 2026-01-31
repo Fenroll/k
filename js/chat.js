@@ -693,38 +693,41 @@ class ChatUIManager {
                 box-sizing: border-box;
                 margin-bottom: 4px;
             }
-            .message-actions {
-                position: absolute;
-                top: 50%;
-                transform: translateY(-50%);
-                right: -79px; /* Adjusted to be less "to the left" */
-                display: none;
-                background: none;
-                border-radius: 20px;
-                padding: 2px;
-                gap: 2px;
-                z-index: 10;
-            }
-            .message-actions.two-btns {
-                right: -53px;
-            }
-            .chat-message:hover .message-actions {
-                display: flex;
-            }
-            .message-actions button {
-                transition: all 0.2s;
-                border-radius: 50% !important;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
-            .message-actions button:hover {
-                background: rgba(0,0,0,0.05) !important;
-            }
+.message-actions {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -79px;
+  display: none;
+  gap: 2px;
+  z-index: 10;
+}
+.message-actions.two-btns {
+  right: -53px;
+}
+.chat-message:hover .message-actions {
+  display: flex;
+}
+.message-actions button {
+  transition: background 0.2s;
+  border-radius: 8px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  width: 28px;
+  height: 28px;
+}
+.message-actions button:hover {
+  background: rgba(0, 0, 0, 0.05) !important;
+}
             .message-options-menu {
                 position: fixed;
                 background: white;
-                border-radius: 8px;
+                border-radius: 12px;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                 border: 1px solid var(--chat-border);
                 padding: 4px;
@@ -740,7 +743,7 @@ class ChatUIManager {
                 padding: 8px 12px;
                 font-size: 13px;
                 cursor: pointer;
-                border-radius: 4px;
+                border-radius: 8px;
                 color: var(--chat-text);
                 transition: background 0.2s;
             }
@@ -1297,52 +1300,40 @@ class ChatUIManager {
   }
 
   initNotificationButton() {
-    // Инициализирай бутон за уведомления един път
+    // Populate sidebar with ONLY the users list container
     const sidebarEl = this.container.querySelector('.chat-active-users');
-    if (!sidebarEl) {
-      console.error('Sidebar не е намерен!');
-      return;
+    if (sidebarEl) {
+      sidebarEl.innerHTML = `
+        <div id="active-users-list" style="padding: 4px 4px; font-size: 11px; color: #6b7280;"></div>
+      `;
     }
 
-    sidebarEl.innerHTML = `
-      <div style="padding: 8px; overflow-x: hidden;">
-        <button id="toggle-notifications" style="width: 100%; padding: 10px; background: ${this.notificationsDisabled ? '#ff6b6b' : '#4ade80'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
-          <img src="svg/chat/${this.notificationsDisabled ? 'icon-notifications-disabled.svg' : 'icon-notifications-enabled.svg'}" alt="Notifications" style="width: 16px; height: 16px; filter: invert(1);">
-          <span>${this.notificationsDisabled ? 'Disabled' : 'Enabled'}</span>
-        </button>
-        <div id="active-users-list" style="margin: 12px -8px 0 -8px; padding: 12px 0 0 4px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280;"></div>
-      </div>
-    `;
-
-    // Добави listener един път
-    const toggleBtn = sidebarEl.querySelector('#toggle-notifications');
+    // Attach listener to the HEADER button
+    const toggleBtn = this.container.querySelector('#toggle-notifications');
     if (toggleBtn) {
-      toggleBtn.addEventListener('click', () => { // Can be removed, internal logic
+      toggleBtn.addEventListener('click', () => {
         this.notificationsDisabled = !this.notificationsDisabled;
         localStorage.setItem(`notificationsDisabled_${this.documentId}`, this.notificationsDisabled);
-        // Обнови цвета без да презаписваш HTML
+        
+        // Update button visual state
         this.updateNotificationButtonColor();
-        // Обнови иконката (скрий/покажи числото на непрочетени)
+        // Update unread count visibility
         this.updateActiveCount();
       });
-    } else {
-      console.error('Бутон НЕ е намерен!');
     }
   }
 
   updateNotificationButtonColor() {
-    // Обнови само цвета и текста на бутона без да презаписваш HTML
-    const toggleBtn = document.querySelector('#toggle-notifications');
+    const toggleBtn = this.container.querySelector('#toggle-notifications');
     if (toggleBtn) {
-      toggleBtn.style.background = this.notificationsDisabled ? '#ff6b6b' : '#4ade80';
       const img = toggleBtn.querySelector('img');
       if (img) {
         img.src = `svg/chat/${this.notificationsDisabled ? 'icon-notifications-disabled.svg' : 'icon-notifications-enabled.svg'}`;
+        img.style.width = this.notificationsDisabled ? '18px' : '20px';
+        img.style.height = this.notificationsDisabled ? '18px' : '20px';
+        img.style.filter = 'brightness(0) invert(1)';
       }
-      const span = toggleBtn.querySelector('span');
-      if (span) {
-        span.textContent = this.notificationsDisabled ? 'Disabled' : 'Enabled';
-      }
+      toggleBtn.title = this.notificationsDisabled ? 'Notifications Disabled' : 'Notifications Enabled';
     }
   }
 
@@ -1697,7 +1688,7 @@ class ChatUIManager {
     if (!messagesContainer) return;
 
     const scrollWasAtBottom = this.autoScroll ||
-      messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 50;
+      messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 100;
 
     // 1. Remove deleted messages from DOM
     const newIds = new Set(messages.map(m => m.id));
@@ -1715,7 +1706,25 @@ class ChatUIManager {
 
     // 2. Add or Update messages
     let prevMsg = null;
+    let lastDateStr = null;
+
     messages.forEach((msg, index) => {
+        const msgDate = new Date(msg.timestamp);
+        const dateStr = msgDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+        
+        // Add date separator if day changed
+        if (dateStr !== lastDateStr) {
+            let dateSep = messagesContainer.querySelector(`.chat-date-separator[data-date="${dateStr}"]`);
+            if (!dateSep) {
+                dateSep = document.createElement('div');
+                dateSep.className = 'chat-date-separator';
+                dateSep.dataset.date = dateStr;
+                dateSep.innerHTML = `<span>${dateStr}</span>`;
+                messagesContainer.appendChild(dateSep);
+            }
+            lastDateStr = dateStr;
+        }
+
         let isContinuation = false;
         if (prevMsg && prevMsg.userId === msg.userId && (msg.timestamp - prevMsg.timestamp < 3 * 60 * 1000)) {
             isContinuation = true;
@@ -1790,7 +1799,7 @@ class ChatUIManager {
     if (scrollWasAtBottom && hasNewMessage) {
       setTimeout(() => {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
-      }, 0);
+      }, 50);
     }
   }
 
@@ -2041,7 +2050,7 @@ class ChatUIManager {
       
       editIndicator.style.cssText = `
         background: var(--chat-secondary); border-left: 3px solid var(--chat-primary);
-        padding: 8px 12px; margin-bottom: 8px; border-radius: 4px;
+        padding: 8px 12px; margin-bottom: 8px; border-radius: 8px;
         font-size: 12px; display: flex; justify-content: space-between; align-items: center;
       `;
       
@@ -2626,7 +2635,7 @@ class ChatUIManager {
 
       replyIndicator.style.cssText = `
         background: var(--chat-secondary); border-left: 3px solid var(--chat-primary);
-        padding: 8px 12px; margin-bottom: 8px; border-radius: 4px;
+        padding: 8px 12px; margin-bottom: 8px; border-radius: 8px;
         font-size: 12px; display: flex; justify-content: space-between; align-items: flex-start;
         gap: 10px;
       `;
@@ -2857,6 +2866,10 @@ class ChatUIManager {
         <span class="chat-online-count" style="font-size: 12px; color: #10b981;">Active: 1</span>
       </div>
       <div style="display: flex; gap: 8px;">
+        <button class="chat-header-btn" id="toggle-notifications" title="Notifications">
+          <img src="svg/chat/${this.notificationsDisabled ? 'icon-notifications-disabled.svg' : 'icon-notifications-enabled.svg'}" 
+               style="width: ${this.notificationsDisabled ? '18px' : '20px'}; height: ${this.notificationsDisabled ? '18px' : '20px'}; filter: brightness(0) invert(1);">
+        </button>
         <button class="chat-header-btn" id="chat-members-toggle" title="Active Members">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
@@ -3001,7 +3014,7 @@ class ChatUIManager {
   height: 100px;
   object-fit: cover;
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 8px;
   transition: opacity 0.2s;
 }
 .gif-item:hover {
@@ -3152,16 +3165,15 @@ class ChatUIManager {
 .chat-close-btn {
   background: rgba(255, 255, 255, 0.2);
   border: none;
-  color: white;
-  font-size: 20px;
-  cursor: pointer;
-  padding: 0;
   width: 32px;
   height: 32px;
+  font-size: 18px;
+  color: white;
+  border-radius: 6px;
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 6px;
+  cursor: pointer;
   transition: background 0.2s;
 }
 .chat-close-btn:hover {
@@ -3184,10 +3196,33 @@ class ChatUIManager {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px 12px 24px 12px;
+  padding: 12px 0;
   display: flex;
   flex-direction: column;
-  gap: 0px;
+  gap: 0;
+}
+.chat-date-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0 8px 0;
+  padding: 0 16px;
+  height: 1px;
+  background: var(--chat-border);
+  position: relative;
+  flex-shrink: 0;
+}
+.chat-date-separator span {
+  background: white;
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--chat-text-light);
+  transform: translateY(-50%);
+  position: absolute;
+  top: 50%;
+  border-radius: 12px;
+  border: 1px solid var(--chat-border);
 }
 .chat-message {
   display: flex;
@@ -3217,7 +3252,7 @@ class ChatUIManager {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-right: 65px; /* Reduced reserved space */
+  margin-right: 80px; /* Increased to fit action buttons */
 }
 .message-header {
   display: flex;
@@ -3263,7 +3298,7 @@ class ChatUIManager {
 }
 .chat-active-users {
   width: 120px;
-  padding: 12px 8px;
+  padding: 4px 2px;
   border-left: 1px solid var(--chat-border);
   overflow-y: auto;
   background: #fafafa;
@@ -3459,9 +3494,11 @@ class ChatUIManager {
     height: 48px;
   }
 }
-.chat-messages::-webkit-scrollbar,
-.chat-active-users::-webkit-scrollbar {
+.chat-messages::-webkit-scrollbar {
   width: 6px;
+}
+.chat-active-users::-webkit-scrollbar {
+  width: 3px;
 }
 .chat-messages::-webkit-scrollbar-track,
 .chat-active-users::-webkit-scrollbar-track {

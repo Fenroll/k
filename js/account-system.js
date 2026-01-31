@@ -203,8 +203,14 @@ class AccountSystem {
             document.getElementById('change-avatar-form-element').addEventListener('submit', (e) => {
                 e.preventDefault();
                 const fileInput = document.getElementById('new-avatar-file');
+                const urlInput = document.getElementById('new-avatar-url');
+                
                 if (fileInput.files.length > 0) {
                     this.changeAvatar(fileInput.files[0]);
+                } else if (urlInput.value.trim()) {
+                    this.changeAvatar(urlInput.value.trim());
+                } else {
+                    this.showError('change-avatar-error', 'Моля, изберете файл или въведете URL.');
                 }
             });
 
@@ -519,15 +525,9 @@ class AccountSystem {
         }
     }
 
-    async changeAvatar(file) {
-        if (!file) {
-            this.showError('change-avatar-error', 'Моля, изберете изображение.');
-            return;
-        }
-        
-        // 2MB limit check
-        if (file.size > 2 * 1024 * 1024) {
-            this.showError('change-avatar-error', 'Файлът е твърде голям (макс 2MB).');
+    async changeAvatar(avatarSource) {
+        if (!avatarSource) {
+            this.showError('change-avatar-error', 'Моля, изберете изображение или въведете URL.');
             return;
         }
 
@@ -536,68 +536,87 @@ class AccountSystem {
         this.hideError('change-avatar-error');
 
         try {
-            // Resize image logic
-            const resizedBase64 = await new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = (readerEvent) => {
-                    const img = new Image();
-                    img.onload = () => {
-                        const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-                        const maxSize = 150;
+            let finalAvatar = '';
 
-                        if (width > height) {
-                            if (width > maxSize) {
-                                height *= maxSize / width;
-                                width = maxSize;
+            if (typeof avatarSource === 'string') {
+                // It's a URL
+                finalAvatar = avatarSource;
+            } else {
+                // It's a File object
+                const file = avatarSource;
+                
+                // 2MB limit check for uploads
+                if (file.size > 2 * 1024 * 1024) {
+                    throw new Error('Файлът е твърде голям (макс 2MB).');
+                }
+
+                // Resize image logic
+                finalAvatar = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = (readerEvent) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            const canvas = document.createElement('canvas');
+                            let width = img.width;
+                            let height = img.height;
+                            const maxSize = 150;
+
+                            if (width > height) {
+                                if (width > maxSize) {
+                                    height *= maxSize / width;
+                                    width = maxSize;
+                                }
+                            } else {
+                                if (height > maxSize) {
+                                    width *= maxSize / height;
+                                    height = maxSize;
+                                }
                             }
-                        } else {
-                            if (height > maxSize) {
-                                width *= maxSize / height;
-                                height = maxSize;
+                            
+                            canvas.width = width;
+                            canvas.height = height;
+                            const ctx = canvas.getContext('2d');
+                            ctx.drawImage(img, 0, 0, width, height);
+                            
+                            // Compress to JPEG 0.6
+                            let dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                            
+                            // Fallback: If still too large (> 50KB), shrink even more
+                            if (dataUrl.length > 50000) {
+                                const smallerMaxSize = 100;
+                                const scale = smallerMaxSize / Math.max(width, height);
+                                canvas.width = width * scale;
+                                canvas.height = height * scale;
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                                dataUrl = canvas.toDataURL('image/jpeg', 0.5);
                             }
-                        }
-                        
-                        canvas.width = width;
-                        canvas.height = height;
-                        const ctx = canvas.getContext('2d');
-                        ctx.drawImage(img, 0, 0, width, height);
-                        
-                        // Compress to JPEG 0.6
-                        let dataUrl = canvas.toDataURL('image/jpeg', 0.6);
-                        
-                        // Fallback: If still too large (> 50KB), shrink even more
-                        if (dataUrl.length > 50000) {
-                            const smallerMaxSize = 100;
-                            const scale = smallerMaxSize / Math.max(width, height);
-                            canvas.width = width * scale;
-                            canvas.height = height * scale;
-                            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                            dataUrl = canvas.toDataURL('image/jpeg', 0.5);
-                        }
-                        
-                        resolve(dataUrl);
+                            
+                            resolve(dataUrl);
+                        };
+                        img.onerror = () => reject(new Error('Невалидно изображение.'));
+                        img.src = readerEvent.target.result;
                     };
-                    img.onerror = reject;
-                    img.src = readerEvent.target.result;
-                };
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            });
+                    reader.onerror = () => reject(new Error('Грешка при четене на файла.'));
+                    reader.readAsDataURL(file);
+                });
+            }
 
             // Save to Firebase
             const userRef = this.db.ref(`site_users/${this.user.uid}`);
-            await userRef.update({ avatar: resizedBase64 });
+            await userRef.update({ avatar: finalAvatar });
 
-            this.user.avatar = resizedBase64;
+            this.user.avatar = finalAvatar;
             localStorage.setItem('loggedInUser', JSON.stringify(this.user));
+            
+            // Clear inputs
+            document.getElementById('new-avatar-file').value = '';
+            document.getElementById('new-avatar-url').value = '';
             
             this.updateUI();
 
         } catch (error) {
             console.error("Avatar change error:", error);
-            this.showError('change-avatar-error', 'Възникна грешка при качване.');
+            this.showError('change-avatar-error', error.message || 'Възникна грешка при качване.');
             this.showForm('change-avatar');
         } finally {
             this.loadingSpinner.style.display = 'none';
