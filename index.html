@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026013116av"></script>
+  <script src="js/auth-guard.js?v=202601311f7z"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -9,6 +9,7 @@
   
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=7" type="image/svg+xml">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260131">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -1107,7 +1108,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=2026013116av"></script>
+  <script src="courses.generated.js?v=202601311f7z"></script>
 </head>
 <body>
 <!-- Right-side overlay for course card click -->
@@ -1699,15 +1700,6 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 
-<!-- Hamburger button for mobile -->
-<button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Отвори меню">
-  <span></span>
-  <span></span>
-  <span></span>
-</button>
-<div class="mobile-overlay" id="mobileOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:3000;"></div>
-<div class="sidemenu-overlay" id="sidemenuOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:transparent;z-index:50;"></div>
-
 <style>
 @media (max-width: 768px) {
   html, body {
@@ -1737,37 +1729,6 @@ document.addEventListener('DOMContentLoaded', function() {
     bottom: 0;
     right: 0;
   }
-  .mobile-menu-toggle {
-    display: flex !important;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 44px;
-    height: 44px;
-    background: #fff;
-    border: none;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
-    position: fixed;
-    top: 18px;
-    left: 18px;
-    z-index: 3300;
-    padding: 0;
-    transition: opacity 0.3s, visibility 0.3s;
-  }
-  #side-menu.mobile-open ~ .mobile-menu-toggle {
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-  }
-  .mobile-menu-toggle span {
-    display: block;
-    width: 26px;
-    height: 3px;
-    background: #222;
-    margin: 4px 0;
-    border-radius: 2px;
-  }
 }
 @media (min-width: 769px) {
   .mobile-menu-toggle { display: none !important; }
@@ -1776,68 +1737,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  // Mobile Menu Logic
-  const mobileToggle = document.getElementById('mobileMenuToggle');
-  const sidebar = document.getElementById('side-menu');
-  const mobileOverlay = document.getElementById('mobileOverlay');
-  const sidemenuOverlay = document.getElementById('sidemenuOverlay');
-  if (mobileToggle && sidebar && sidemenuOverlay) {
-    mobileToggle.addEventListener('click', function() {
-      const isOpen = sidebar.classList.contains('mobile-open');
-      if (isOpen) {
-        sidebar.classList.remove('mobile-open');
-        sidemenuOverlay.style.display = 'none';
-        document.body.style.overflow = '';
-        mobileToggle.style.opacity = '';
-        mobileToggle.style.visibility = '';
-        mobileToggle.style.pointerEvents = '';
-      } else {
-        sidebar.classList.add('mobile-open');
-        sidemenuOverlay.style.display = 'block';
-        document.body.style.overflow = 'hidden';
-        mobileToggle.style.opacity = '0';
-        mobileToggle.style.visibility = 'hidden';
-        mobileToggle.style.pointerEvents = 'none';
-      }
-    });
-    sidemenuOverlay.addEventListener('click', function() {
-      sidebar.classList.remove('mobile-open');
-      sidemenuOverlay.style.display = 'none';
-      document.body.style.overflow = '';
-      mobileToggle.style.opacity = '';
-      mobileToggle.style.visibility = '';
-      mobileToggle.style.pointerEvents = '';
-    });
-    // Затваря менюто при клик на линк
-    sidebar.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', function(e) {
-        // Позволяваме на линка да работи нормално
-        // Затваряме менюто след малко закъснение
-        setTimeout(function() {
-          sidebar.classList.remove('mobile-open');
-          sidemenuOverlay.style.display = 'none';
-          document.body.style.overflow = '';
-          mobileToggle.style.opacity = '';
-          mobileToggle.style.visibility = '';
-          mobileToggle.style.pointerEvents = '';
-        }, 200);
-      });
-    });
-    // Затваря менюто при resize към desktop
-    window.addEventListener('resize', function() {
-      if (window.innerWidth > 768) {
-        sidebar.classList.remove('mobile-open');
-        sidemenuOverlay.style.display = 'none';
-        document.body.style.overflow = '';
-        mobileToggle.style.opacity = '';
-        mobileToggle.style.visibility = '';
-        mobileToggle.style.pointerEvents = '';
-      }
-    });
-  }
-});
-
-// Функция за показване/скриване на dropdown с файлове
+  // Функция за показване/скриване на dropdown с файлове
 function toggleFileDropdown(sectionId) {
   const dropdown = document.getElementById(`files-${sectionId}`);
   const arrow = document.getElementById(`arrow-${sectionId}`);
@@ -1873,7 +1773,7 @@ function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=2026013116av"></script>
+<script src="js/chat.js?v=202601311f7z"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -2831,6 +2731,7 @@ function toggleFileDropdown(sectionId) {
       <script src="html-priority.js"></script>
       <script src="js/presence.js"></script>
       <script src="js/version-check.js"></script>
+      <script src="js/mobile-nav.js?v=20260131"></script>
 <!-- Privacy Modal -->
 <div id="privacyModal" class="text-modal" style="display: none;">
   <div class="text-modal-content" style="max-width: 500px;">
