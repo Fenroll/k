@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=2026013112td"></script>
+  <script src="js/auth-guard.js?v=2026013116av"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
@@ -446,9 +446,6 @@
     </button>
     <button id="notes-toggle-btn" class="btn" title="Бележки">
       <img src="svg/md-viewer/icon-notes.svg" alt="Бележки" width="20" height="20">
-    </button>
-    <button id="backup-annotations-btn" class="btn" title="Backup Annotations">
-      <img src="svg/md-editor/icon-download.svg" alt="Backup" width="20" height="20">
     </button>
     <button id="prevH1Btn" class="btn" title="Предишно заглавие">
       <img src="svg/md-viewer/icon-arrow-left.svg" alt="Предишно" width="20" height="20">
@@ -1311,7 +1308,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=2026013112td"></script>
+  <script src="courses.generated.js?v=2026013116av"></script>
 
   <!-- ============================================
        CHAT SYSTEM - Firebase & Notes
@@ -1321,8 +1318,9 @@
   
 <script src="js/user-identity.js?v=20260125"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026013112td"></script>
+    <script src="js/chat.js?v=2026013116av"></script>
   <script src="js/presence.js?v=20260125"></script>
+  <script src="js/notes-init.js?v=20260131"></script>
 
   <!-- Notes Widget HTML -->
   <!-- <div id="notes-widget" class="notes-widget">
@@ -1863,30 +1861,6 @@
 
     // Load after content is rendered
     setTimeout(loadAnnotations, 1500);
-
-    // Backup functionality
-    document.getElementById('backup-annotations-btn').addEventListener('click', async () => {
-      docId = getDocumentId();
-      try {
-        const snapshot = await firebase.database().ref(`annotations/${docId}`).once('value');
-        if (!snapshot.exists()) {
-          alert('Няма бележки за този документ.');
-          return;
-        }
-        
-        const data = snapshot.val();
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `annotations_${docId}_${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-      } catch (e) {
-        console.error('Backup failed:', e);
-        alert('Грешка при създаване на резервно копие.');
-      }
-    });
   })();
 </script>
 </body>
