@@ -539,8 +539,69 @@ class AccountSystem {
             let finalAvatar = '';
 
             if (typeof avatarSource === 'string') {
-                // It's a URL
-                finalAvatar = avatarSource;
+                // It's a URL - fetch and process it with smart CORS handling
+                finalAvatar = await new Promise((resolve, reject) => {
+                    // First, try loading without CORS to check if image is accessible
+                    const testImg = new Image();
+                    
+                    testImg.onload = () => {
+                        // Image is accessible, now try processing with CORS
+                        const img = new Image();
+                        img.crossOrigin = 'anonymous';
+                        
+                        img.onload = () => {
+                            try {
+                                const canvas = document.createElement('canvas');
+                                let width = img.width;
+                                let height = img.height;
+                                const maxSize = 150;
+
+                                if (width > height) {
+                                    if (width > maxSize) {
+                                        height *= maxSize / width;
+                                        width = maxSize;
+                                    }
+                                } else {
+                                    if (height > maxSize) {
+                                        width *= maxSize / height;
+                                        height = maxSize;
+                                    }
+                                }
+                                
+                                canvas.width = width;
+                                canvas.height = height;
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, width, height);
+                                
+                                // High quality JPEG compression (95% quality, minimal artifacts)
+                                let dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                                
+                                // Fallback: If still too large (> 100KB), reduce quality slightly
+                                if (dataUrl.length > 100000) {
+                                    dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                                }
+                                
+                                resolve(dataUrl);
+                            } catch (err) {
+                                reject(new Error('Не можа да се обработи изображението. Опитайте да изтеглите и качите файла директно.'));
+                            }
+                        };
+                        
+                        img.onerror = () => {
+                            // CORS blocked this image
+                            reject(new Error('Този сървър блокира обработката на изображения (CORS). Моля, изтеглете изображението и го качете като файл.'));
+                        };
+                        
+                        img.src = avatarSource;
+                    };
+                    
+                    testImg.onerror = () => {
+                        reject(new Error('Не можа да се зареди изображението от URL. Проверете дали е валидно и достъпно.'));
+                    };
+                    
+                    // Try loading without CORS first
+                    testImg.src = avatarSource;
+                });
             } else {
                 // It's a File object
                 const file = avatarSource;
@@ -578,17 +639,12 @@ class AccountSystem {
                             const ctx = canvas.getContext('2d');
                             ctx.drawImage(img, 0, 0, width, height);
                             
-                            // Compress to JPEG 0.6
-                            let dataUrl = canvas.toDataURL('image/jpeg', 0.6);
+                            // High quality JPEG compression (95% quality, minimal artifacts)
+                            let dataUrl = canvas.toDataURL('image/jpeg', 0.95);
                             
-                            // Fallback: If still too large (> 50KB), shrink even more
-                            if (dataUrl.length > 50000) {
-                                const smallerMaxSize = 100;
-                                const scale = smallerMaxSize / Math.max(width, height);
-                                canvas.width = width * scale;
-                                canvas.height = height * scale;
-                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-                                dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+                            // Fallback: If still too large (> 100KB), reduce quality slightly
+                            if (dataUrl.length > 100000) {
+                                dataUrl = canvas.toDataURL('image/jpeg', 0.85);
                             }
                             
                             resolve(dataUrl);

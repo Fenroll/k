@@ -520,8 +520,9 @@ class ChatFirebaseREST {
                                 lastActivity: lastActivity
                             };
                         }
-                    } else if (allSiteUsers[uid]) {
+                    } else if (allSiteUsers[uid] && lastActivity > 0) {
                         // Store offline users with their last activity for "Last seen" feature
+                        // Only update if we have a valid timestamp (don't overwrite with 0)
                         const userProfile = allSiteUsers[uid];
                         allSiteUsers[uid] = {
                             ...userProfile,
@@ -3221,8 +3222,6 @@ class ChatUIManager {
   transform: translateY(-50%);
   position: absolute;
   top: 50%;
-  border-radius: 12px;
-  border: 1px solid var(--chat-border);
 }
 .chat-message {
   display: flex;
