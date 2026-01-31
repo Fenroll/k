@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=202601314pk"></script>
+    <script src="js/auth-guard.js?v=20260131quq"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=20260125"></script>
@@ -458,6 +458,10 @@
                 <label for="edit-displayname">Public Name</label>
                 <input type="text" id="edit-displayname" required>
             </div>
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="edit-show-in-members" style="width: auto;">
+                <label for="edit-show-in-members" style="margin: 0;">Show in Members List (hides test accounts)</label>
+            </div>
             <button id="save-user-changes" class="btn">Save Changes</button>
             <button id="reset-password" class="btn" style="background-color: #cf6679; margin-top: 1rem;">Reset Password</button>
         </div>
@@ -875,7 +879,8 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=202601314pk"></script>
+    <script src="courses.generated.js?v=20260131quq"></script>
+    <script src="js/presence.js?v=20260131"></script>
     <script src="js/admin.js?v=20260125"></script>
     <script src="js/schedule-notes-admin.js"></script>
     <script src="js/admin-visual-editor.js"></script>

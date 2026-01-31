@@ -96,8 +96,8 @@
     function updatePresenceStatus() {
         if (typeof firebase === 'undefined' || !window.userStatusDatabaseRef) return;
         
-        const isMobile = window.innerWidth <= 768 || 
-                         /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // More accurate mobile detection - only use user agent, not window width
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         if (isUserActive) {
             const deviceData = {
@@ -109,6 +109,14 @@
                 lastActivity: firebase.database.ServerValue.TIMESTAMP
             };
             window.userStatusDatabaseRef.set(deviceData);
+            
+            // Also update lastSeen in user profile (for persistent tracking)
+            if (!isGuest && currentUid) {
+                firebase.database().ref(`site_users/${currentUid}`).update({
+                    lastSeen: firebase.database.ServerValue.TIMESTAMP
+                }).catch(err => console.error('Failed to update lastSeen:', err));
+            }
+            
             console.log('Presence: User is ACTIVE');
         } else {
             // Mark as inactive (but still connected)
@@ -127,14 +135,23 @@
         const userStatusDatabaseRef = db.ref(presenceRefPath + currentUid + '/' + deviceId);
         window.userStatusDatabaseRef = userStatusDatabaseRef; // Store globally for updates
 
+        // Get server time offset
+        let serverTimeOffset = 0;
+        db.ref(".info/serverTimeOffset").on("value", (snap) => {
+            serverTimeOffset = snap.val() || 0;
+        });
+
         db.ref('.info/connected').on('value', function(snapshot) {
             if (snapshot.val() === false) {
+                console.log('Presence: Not connected to Firebase');
                 return;
             };
+            
+            console.log('Presence: Connected to Firebase, setting up presence...');
 
-            // Determine device type
-            const isMobile = window.innerWidth <= 768 || 
-                             /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            // Determine device type - only use user agent, not window width
+            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+            console.log('Presence: Mobile detection -', isMobile, 'User Agent:', navigator.userAgent);
 
             const deviceData = {
                 isMobile: isMobile,
@@ -144,14 +161,48 @@
                 isActive: isUserActive && isPageVisible,
                 lastActivity: firebase.database.ServerValue.TIMESTAMP
             };
-            console.log('Presence: Setting initial presence for UID:', currentUid, 'isGuest:', isGuest, 'isActive:', deviceData.isActive);
+            console.log('Presence: Setting initial presence for UID:', currentUid, 'deviceId:', deviceId, 'isGuest:', isGuest, 'isActive:', deviceData.isActive, 'isMobile:', isMobile);
 
             userStatusDatabaseRef.onDisconnect().update({
                 isActive: false,
                 offlineAt: firebase.database.ServerValue.TIMESTAMP,
                 lastInactive: firebase.database.ServerValue.TIMESTAMP
             }).then(function() {
-                userStatusDatabaseRef.set(deviceData);
+                // First set the current device data
+                return userStatusDatabaseRef.set(deviceData);
+            }).then(function() {
+                console.log('Presence: Device data set successfully');
+                
+                // Update lastSeen in user profile (for persistent tracking)
+                if (!isGuest && currentUid) {
+                    db.ref(`site_users/${currentUid}`).update({
+                        lastSeen: firebase.database.ServerValue.TIMESTAMP
+                    }).catch(err => console.error('Failed to update lastSeen:', err));
+                }
+                
+                // Then clean up old devices for this user after setting current device
+                const userDevicesRef = db.ref(presenceRefPath + currentUid);
+                return userDevicesRef.once('value').then((snapshot) => {
+                    const devices = snapshot.val();
+                    if (devices) {
+                        const now = Date.now() + serverTimeOffset;
+                        const CLEANUP_THRESHOLD = 5 * 60 * 1000; // 5 minutes
+                        
+                        Object.keys(devices).forEach(devId => {
+                            // Skip current device
+                            if (devId === deviceId) return;
+                            
+                            const device = devices[devId];
+                            // Remove devices that are offline for more than 5 minutes
+                            if (device.offlineAt && (now - device.offlineAt > CLEANUP_THRESHOLD)) {
+                                console.log('Presence: Cleaning up stale device:', devId);
+                                userDevicesRef.child(devId).remove();
+                            }
+                        });
+                    }
+                });
+            }).catch(function(error) {
+                console.error('Presence: Error setting up presence:', error);
             });
         });
 

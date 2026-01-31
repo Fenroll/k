@@ -316,6 +316,7 @@
                     document.getElementById('edit-user-uid').value = uid;
                     document.getElementById('edit-username').value = user.username;
                     document.getElementById('edit-displayname').value = user.displayName;
+                    document.getElementById('edit-show-in-members').checked = user.showInMembersList || false;
                     modal.style.display = 'block';
                 });
             });
@@ -332,11 +333,13 @@
             const uid = document.getElementById('edit-user-uid').value;
             const newUsername = document.getElementById('edit-username').value;
             const newDisplayName = document.getElementById('edit-displayname').value;
+            const showInMembersList = document.getElementById('edit-show-in-members').checked;
 
             try {
                 await db.ref(`site_users/${uid}`).update({
                     username: newUsername,
-                    displayName: newDisplayName
+                    displayName: newDisplayName,
+                    showInMembersList: showInMembersList
                 });
                 showNotification('User updated successfully!');
                 modal.style.display = 'none';
@@ -491,6 +494,12 @@
         const siteUsersRef = db.ref('site_users');
         const onlineUsersRef = db.ref('online_users'); // Authenticated users
         const onlineGuestsRef = db.ref('online_guests'); // Guest users
+        const offsetRef = db.ref(".info/serverTimeOffset");
+
+        let serverTimeOffset = 0;
+        offsetRef.on("value", (snap) => {
+            serverTimeOffset = snap.val() || 0;
+        });
 
         let allSiteUsers = {};
         let allOnlineAuthData = {};
@@ -500,10 +509,42 @@
             onlineUsersContainer.innerHTML = '<ul></ul>';
             const ul = onlineUsersContainer.querySelector('ul');
             const allOnline = {}; // Consolidated list of all online users
+            
+            const now = Date.now() + serverTimeOffset;
+            const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes
+
+            const isUserOnline = (devices) => {
+                return Object.values(devices).some(device => {
+                    // 1. Truly active - most important check
+                    if (device.isActive === true) {
+                        return true;
+                    }
+                    
+                    // 2. Recently active (within 30 seconds) - for transitions
+                    if (device.lastActivity && (now - device.lastActivity) < 30000) {
+                        return true;
+                    }
+                    
+                    // 3. Grace period for backgrounded tabs
+                    if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) {
+                        return true;
+                    }
+                    
+                    // 4. Grace period for disconnected devices
+                    if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) {
+                        return true;
+                    }
+                    
+                    return false;
+                });
+            };
 
             // Add authenticated online users
             for (const uid in allOnlineAuthData) {
                 const devices = allOnlineAuthData[uid];
+                
+                // Only show users who are actually online according to grace period logic
+                if (!isUserOnline(devices)) continue;
                 const deviceCount = Object.keys(devices).length;
                 let hasMobile = false;
                 if (deviceCount > 0) {
@@ -537,6 +578,9 @@
             // Add guest online users
             for (const guestId in allOnlineGuestData) {
                 const devices = allOnlineGuestData[guestId];
+                
+                // Only show guests who are actually online according to grace period logic
+                if (!isUserOnline(devices)) continue;
                 const deviceCount = Object.keys(devices).length;
                 let hasMobile = false;
                 if (deviceCount > 0) {

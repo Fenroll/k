@@ -441,17 +441,26 @@ class ChatFirebaseREST {
         const processAndCallback = () => {
                 const groupedUsers = {};
                 const now = Date.now() + serverTimeOffset;
-                const GRACE_PERIOD = 30 * 1000; // 30 seconds
+                const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes
 
                 const isUserOnline = (devices) => {
                     return Object.values(devices).some(device => {
-                        // 1. Truly active
-                        if (device.isActive === true) return true;
+                        // 1. Truly active - most important check
+                        if (device.isActive === true) {
+                            return true;
+                        }
                         
-                        // 2. Grace period for backgrounded tabs or disconnected devices
+                        // 2. Recently active (within 30 seconds) - for transitions
+                        if (device.lastActivity && (now - device.lastActivity) < 30000) {
+                            return true;
+                        }
+                        
+                        // 3. Grace period for backgrounded tabs
                         if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) {
                             return true;
                         }
+                        
+                        // 4. Grace period for disconnected devices
                         if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) {
                             return true;
                         }
@@ -464,6 +473,24 @@ class ChatFirebaseREST {
                 // Process Authenticated Users
                 for (const uid in allOnlineAuthData) {
                     const devices = allOnlineAuthData[uid];
+                    
+                    // Get most recent activity/offline timestamp from all devices
+                    let lastActivity = 0;
+                    Object.values(devices).forEach(device => {
+                        if (device.lastActivity && device.lastActivity > lastActivity) {
+                            lastActivity = device.lastActivity;
+                        }
+                        if (device.timestamp && device.timestamp > lastActivity) {
+                            lastActivity = device.timestamp;
+                        }
+                        if (device.offlineAt && device.offlineAt > lastActivity) {
+                            lastActivity = device.offlineAt;
+                        }
+                        if (device.lastInactive && device.lastInactive > lastActivity) {
+                            lastActivity = device.lastInactive;
+                        }
+                    });
+                    
                     if (isUserOnline(devices)) {
                         const deviceIds = Object.keys(devices);
                         const deviceCount = deviceIds.length;
@@ -476,9 +503,11 @@ class ChatFirebaseREST {
                                 userName: userProfile.displayName || userProfile.username,
                                 color: userProfile.color,
                                 avatar: userProfile.avatar,
+                                isAdmin: userProfile.isAdmin || false,
                                 deviceCount: deviceCount,
                                 hasMobile: hasMobile,
-                                isGuest: false
+                                isGuest: false,
+                                lastActivity: lastActivity
                             };
                         } else {
                             groupedUsers[uid] = {
@@ -487,9 +516,17 @@ class ChatFirebaseREST {
                                 color: '#cccccc',
                                 deviceCount: deviceCount,
                                 hasMobile: hasMobile,
-                                isGuest: false
+                                isGuest: false,
+                                lastActivity: lastActivity
                             };
                         }
+                    } else if (allSiteUsers[uid]) {
+                        // Store offline users with their last activity for "Last seen" feature
+                        const userProfile = allSiteUsers[uid];
+                        allSiteUsers[uid] = {
+                            ...userProfile,
+                            lastActivity: lastActivity
+                        };
                     }
                 }
 
@@ -668,6 +705,9 @@ class ChatUIManager {
                 gap: 2px;
                 z-index: 10;
             }
+            .message-actions.two-btns {
+                right: -53px;
+            }
             .chat-message:hover .message-actions {
                 display: flex;
             }
@@ -730,6 +770,113 @@ class ChatUIManager {
                 max-width: 200px;
                 line-height: 1.5;
             }
+            /* User Profile Modal */
+            .user-profile-modal-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.4);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                z-index: 20000;
+                backdrop-filter: blur(2px);
+                animation: fadeIn 0.2s ease;
+            }
+            .user-profile-modal {
+                background: white;
+                border-radius: 16px;
+                width: 280px;
+                padding: 24px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                text-align: center;
+                position: relative;
+                animation: modalSlideUp 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+            }
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+            @keyframes modalSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+            
+            .profile-modal-close {
+                position: absolute;
+                top: 12px;
+                right: 12px;
+                background: none;
+                border: none;
+                font-size: 20px;
+                color: #9ca3af;
+                cursor: pointer;
+                padding: 4px;
+                line-height: 1;
+            }
+            .profile-modal-close:hover { color: #4b5563; }
+            
+            .profile-modal-avatar {
+                width: 100px;
+                height: 100px;
+                border-radius: 50%;
+                margin-bottom: 16px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 36px;
+                font-weight: bold;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                object-fit: cover;
+            }
+            .profile-modal-name {
+                font-size: 18px;
+                font-weight: 700;
+                color: #111827;
+                margin-bottom: 4px;
+            }
+            .profile-modal-status {
+                font-size: 13px;
+                color: #059669;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                margin-bottom: 16px;
+            }
+            .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; }
+            
+            .profile-modal-info {
+                width: 100%;
+                background: #f9fafb;
+                border-radius: 12px;
+                padding: 12px;
+                margin-bottom: 20px;
+                font-size: 12px;
+                color: #4b5563;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
+            }
+            .info-item { display: flex; justify-content: space-between; }
+            .info-label { font-weight: 600; }
+            
+            .profile-modal-actions {
+                display: flex;
+                gap: 8px;
+                width: 100%;
+            }
+            .profile-action-btn {
+                flex: 1;
+                padding: 10px;
+                border-radius: 8px;
+                border: none;
+                font-size: 13px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s;
+            }
+            .btn-mention { background: var(--chat-primary); color: white; }
+            .btn-mention:hover { background: #6d28d9; }
         `;
         document.head.appendChild(style);
     }
@@ -1158,12 +1305,12 @@ class ChatUIManager {
     }
 
     sidebarEl.innerHTML = `
-      <div style="padding: 8px;">
+      <div style="padding: 8px; overflow-x: hidden;">
         <button id="toggle-notifications" style="width: 100%; padding: 10px; background: ${this.notificationsDisabled ? '#ff6b6b' : '#4ade80'}; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 6px;">
           <img src="svg/chat/${this.notificationsDisabled ? 'icon-notifications-disabled.svg' : 'icon-notifications-enabled.svg'}" alt="Notifications" style="width: 16px; height: 16px; filter: invert(1);">
           <span>${this.notificationsDisabled ? 'Disabled' : 'Enabled'}</span>
         </button>
-        <div id="active-users-list" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280;"></div>
+        <div id="active-users-list" style="margin: 12px -8px 0 -8px; padding: 12px 0 0 4px; border-top: 1px solid #e5e7eb; font-size: 11px; color: #6b7280;"></div>
       </div>
     `;
 
@@ -1203,56 +1350,221 @@ class ChatUIManager {
     const usersListEl = document.getElementById('active-users-list');
     if (!usersListEl) return;
 
-    // data.users is already an object of user-centric data:
-    // { uid: { userId, userName, color, deviceCount, hasMobile } }
-    let users = Object.values(data.users || {});
-    const count = data.count || 0; // Use count directly from data
+    // data.users is online users, data.allUsers has all registered users
+    let onlineUsers = Object.values(data.users || {});
+    const allUsers = data.allUsers || {};
+    const count = data.count || 0; // Online count
 
     const myId = (typeof window.currentUser !== 'undefined' && window.currentUser.userId) ? String(window.currentUser.userId) : null;
 
-    // Map and sort users
-    users.forEach(user => {
+    // Get offline users who should be shown (filter by showInMembersList flag)
+    const offlineUsers = [];
+    for (const uid in allUsers) {
+      const user = allUsers[uid];
+      // Skip if already online or if not flagged to show in members list
+      if (data.users[uid] || !user.showInMembersList) continue;
+      
+      offlineUsers.push({
+        userId: uid,
+        userName: user.displayName || user.username,
+        color: user.color || '#999',
+        avatar: user.avatar,
+        isAdmin: user.isAdmin || false,
+        lastSeen: user.lastSeen,
+        isOffline: true
+      });
+    }
+
+    // Map and sort online users
+    onlineUsers.forEach(user => {
         // Resolve name mapping
         let name = user.userName;
         if (this.userNameMappings && this.userNameMappings[name]) {
             name = this.userNameMappings[name];
         }
-        user.userName = name; // Update with resolved name
-        user.isMe = (String(user.userId) === myId); // Check if current user
+        user.userName = name;
+        user.isMe = (String(user.userId) === myId);
     });
 
-    // Sort: current user first, then alphabetically by userName
-    users.sort((a, b) => {
+    // Map and sort offline users
+    offlineUsers.forEach(user => {
+        // Resolve name mapping
+        let name = user.userName;
+        if (this.userNameMappings && this.userNameMappings[name]) {
+            name = this.userNameMappings[name];
+        }
+        user.userName = name;
+        user.isMe = (String(user.userId) === myId);
+    });
+
+    // Sort: current user first, then alphabetically
+    onlineUsers.sort((a, b) => {
       if (a.isMe && !b.isMe) return -1;
       if (!a.isMe && b.isMe) return 1;
       return a.userName.localeCompare(b.userName);
     });
 
-    usersListEl.innerHTML = `
-      <strong>Active (${count}):</strong><br>
-      ${users.map(user => {
-          const mobileIcon = user.hasMobile
-            ? `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="margin-left: 4px; vertical-align: middle;" title="Mobile device"> <path d="M11.5,0h-7C3.675,0,3,0.675,3,1.5v13C3,15.325,3.675,16,4.5,16h7c0.825,0,1.5-0.675,1.5-1.5v-13C13,0.675,12.325,0,11.5,0z M8,15c-0.553,0-1-0.447-1-1s0.447-1,1-1s1,0.447,1,1S8.553,15,8,15z M12,12H4V2h8V12z" /> </svg>`
-            : '';
-            
-          return `
-        <div style="display: flex; align-items: center; gap: 6px; margin: 4px 0;">
+    offlineUsers.sort((a, b) => {
+      if (a.isMe && !b.isMe) return -1;
+      if (!a.isMe && b.isMe) return 1;
+      return a.userName.localeCompare(b.userName);
+    });
+
+    const renderUserItem = (user) => {
+      const mobileIcon = user.hasMobile
+        ? `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="margin-left: 4px; vertical-align: middle;" title="Mobile device"> <path d="M11.5,0h-7C3.675,0,3,0.675,3,1.5v13C3,15.325,3.675,16,4.5,16h7c0.825,0,1.5-0.675,1.5-1.5v-13C13,0.675,12.325,0,11.5,0z M8,15c-0.553,0-1-0.447-1-1s0.447-1,1-1s1,0.447,1,1S8.553,15,8,15z M12,12H4V2h8V12z" /> </svg>`
+        : '';
+      
+      const opacity = user.isOffline ? '0.6' : '1';
+        
+      return `
+        <div class="active-user-item" data-user-id="${user.userId}" style="display: flex; align-items: center; gap: 8px; margin: 6px 0; cursor: pointer; padding: 4px 2px; border-radius: 4px; transition: background 0.2s; opacity: ${opacity};">
           ${user.avatar ? 
-            `<img src="${user.avatar}" style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;">` :
-            `<div style="width: 16px; height: 16px; border-radius: 50%; background-color: ${user.color}; display: flex; align-items: center; justify-content: center; font-size: 9px; color: white; font-weight: bold;">${user.userName.charAt(0).toUpperCase()}</div>`
+            `<img src="${user.avatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">` :
+            `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${user.color}; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: bold; flex-shrink: 0;">${user.userName.charAt(0).toUpperCase()}</div>`
           }
-          <span style="font-size: 10px; flex: 1; word-break: break-all; display: flex; align-items: center; ${user.isMe ? 'font-weight: bold; color: var(--fg);' : ''}">
-            ${user.userName} ${user.isMe ? ' (Аз)' : ''}
+          <span style="font-size: 12px; flex: 1; min-width: 0; display: flex; align-items: center; ${user.isMe ? 'font-weight: bold; color: var(--fg);' : ''}">
+            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; max-width: 100%;">${user.userName}</span>
             ${mobileIcon}
           </span>
         </div>
-      `}).join('')}
+      `;
+    };
+
+    usersListEl.innerHTML = `
+      <strong>Online (${count}):</strong><br>
+      ${onlineUsers.map(renderUserItem).join('')}
+      ${offlineUsers.length > 0 ? `<div style="height: 4px;"></div><strong style="margin-top: 0; display: block;">Offline:</strong>${offlineUsers.map(renderUserItem).join('')}` : ''}
     `;
+
+    // Add click listeners
+    usersListEl.querySelectorAll('.active-user-item').forEach(item => {
+        item.addEventListener('click', () => {
+            this.showUserProfile(item.dataset.userId);
+        });
+    });
 
     // Also update header count to be consistent
     if (this.updateHeaderOnlineCount) {
         this.updateHeaderOnlineCount(count);
     }
+  }
+
+  showUserProfile(userId) {
+    const user = this.activeUsers[userId] || (this.userProfiles && this.userProfiles[userId]);
+    if (!user) return;
+
+    const resolvedName = this.resolveName(user.userName || user.displayName);
+    const initial = resolvedName.charAt(0).toUpperCase();
+    const userColor = user.color || '#588157';
+    const hasAvatar = user.avatar && user.avatar.length > 5;
+    
+    // Check if user is actually online (in activeUsers list)
+    const isOnline = !!this.activeUsers[userId];
+    
+    // Determine status text (Admin > Guest > Member)
+    let statusText = 'Member';
+    if (user.isAdmin) {
+        statusText = 'Admin';
+    } else if (user.isGuest) {
+        statusText = 'Guest';
+    }
+    
+    const deviceText = user.hasMobile ? 'Mobile' : 'Desktop';
+    
+    // Format last seen time for offline users
+    let lastSeenText = '';
+    if (!isOnline) {
+        // Try lastActivity from presence data first, then lastSeen from profile
+        const lastSeenTimestamp = user.lastActivity || user.lastSeen;
+        
+        if (lastSeenTimestamp) {
+            const lastSeenDate = new Date(lastSeenTimestamp);
+            const now = new Date();
+            const diffMs = now - lastSeenDate;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+            
+            if (diffMins < 1) {
+                lastSeenText = 'Just now';
+            } else if (diffMins < 60) {
+                lastSeenText = `${diffMins} minute${diffMins !== 1 ? 's' : ''} ago`;
+            } else if (diffHours < 24) {
+                lastSeenText = `${diffHours} hour${diffHours !== 1 ? 's' : ''} ago`;
+            } else if (diffDays < 7) {
+                lastSeenText = `${diffDays} day${diffDays !== 1 ? 's' : ''} ago`;
+            } else {
+                lastSeenText = lastSeenDate.toLocaleDateString();
+            }
+        } else {
+            // No timestamp available (user hasn't been active since tracking was added)
+            lastSeenText = 'Long time ago';
+        }
+    }
+    
+    const modalOverlay = document.createElement('div');
+    modalOverlay.className = 'user-profile-modal-overlay';
+
+    modalOverlay.innerHTML = `
+        <div class="user-profile-modal">
+            <button class="profile-modal-close">✕</button>
+            
+            ${hasAvatar ? 
+                `<img src="${user.avatar}" class="profile-modal-avatar">` :
+                `<div class="profile-modal-avatar" style="background-color: ${userColor}">${initial}</div>`
+            }
+            
+            <div class="profile-modal-name">${this.escapeHtml(resolvedName)}</div>
+            <div class="profile-modal-status">
+                <span class="status-dot" style="background-color: ${isOnline ? '#22c55e' : '#9ca3af'}"></span>
+                ${isOnline ? 'Online' : 'Offline'}
+            </div>
+            ${!isOnline && lastSeenText ? `<div style="font-size: 12px; color: #6b7280; margin-top: -4px;">Last seen: ${lastSeenText}</div>` : ''}
+            
+            <div class="profile-modal-info">
+                <div class="info-item">
+                    <span class="info-label">Status</span>
+                    <span>${statusText}</span>
+                </div>
+                <div class="info-item">
+                    <span class="info-label">Device</span>
+                    <span>${deviceText}</span>
+                </div>
+                ${user.deviceCount > 1 ? `
+                <div class="info-item">
+                    <span class="info-label">Sessions</span>
+                    <span>${user.deviceCount} active</span>
+                </div>` : ''}
+            </div>
+            
+            <div class="profile-modal-actions">
+                <button class="profile-action-btn btn-mention">@ Mention</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modalOverlay);
+
+    // Close on click overlay
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) {
+            modalOverlay.remove();
+        }
+    });
+
+    // Close on button
+    modalOverlay.querySelector('.profile-modal-close').onclick = () => modalOverlay.remove();
+
+    // Mention button
+    modalOverlay.querySelector('.btn-mention').onclick = () => {
+        const input = this.container.querySelector('.chat-input');
+        if (input) {
+            this.insertMention(input, resolvedName);
+            modalOverlay.remove();
+            // Open chat if closed? It's likely open if they clicked active members
+        }
+    };
   }
 
   async handleAdminCommand(commandObj) {
@@ -1530,14 +1842,14 @@ class ChatUIManager {
     
     if (currentAvatar && typeof currentAvatar === 'string' && currentAvatar.length > 5) {
         avatarHtml = `
-            <div style="width: 32px; height: 32px; flex-shrink: 0; position: relative;">
+            <div class="message-avatar-container" style="width: 32px; height: 32px; flex-shrink: 0; position: relative;">
                 <img src="${currentAvatar}" class="message-avatar" style="${avatarStyle} object-fit: cover;" 
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="message-avatar" style="background-color: ${currentColor}; ${avatarStyle} display: none; align-items: center; justify-content: center; border-radius: 50%; color: white; font-weight: bold;">${initial}</div>
             </div>`;
     } else {
         avatarHtml = `
-            <div style="width: 32px; height: 32px; flex-shrink: 0;">
+            <div class="message-avatar-container" style="width: 32px; height: 32px; flex-shrink: 0;">
                 <div class="message-avatar" style="background-color: ${currentColor}; ${avatarStyle} display: flex; align-items: center; justify-content: center; border-radius: 50%; color: white; font-weight: bold;">${initial}</div>
             </div>`;
     }
@@ -1561,6 +1873,8 @@ class ChatUIManager {
         marginBottom = '2px';
     }
 
+    const actionClass = isCurrentUser ? '' : 'two-btns';
+
     const htmlString = `
       <div class="chat-message" data-user-id="${msg.userId}" data-message-id="${msg.id}" data-message-key="${msg.key}" style="position: relative; display: flex; gap: 8px; margin-bottom: ${marginBottom}; flex-direction: row;">
         ${avatarHtml}
@@ -1574,7 +1888,7 @@ class ChatUIManager {
             ${msg.edited ? `<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>` : ''}
           </div>
              
-        <div class="message-actions">
+        <div class="message-actions ${actionClass}">
           <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Отговори">
             <img src="svg/chat/icon-reply.svg" alt="Reply" style="width: 16px; height: 16px">
           </button>
@@ -1628,6 +1942,26 @@ class ChatUIManager {
         e.stopPropagation();
         this.showMessageOptions(optionsBtn.dataset.messageId, optionsBtn.dataset.messageKey, optionsBtn);
       });
+    }
+
+    // Add listener for profile view
+    const avatar = msgEl.querySelector('.message-avatar');
+    const author = msgEl.querySelector('.message-author');
+    const userId = msgEl.dataset.userId;
+
+    if (avatar) {
+        avatar.style.cursor = 'pointer';
+        avatar.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.showUserProfile(userId);
+        });
+    }
+    if (author) {
+        author.style.cursor = 'pointer';
+        author.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.showUserProfile(userId);
+        });
     }
   }
 
@@ -1919,23 +2253,7 @@ class ChatUIManager {
   // updateNotificationButton removed (duplicate logic)
 
 
-  updateActiveSidebar(users) {
-    const sidebarEl = this.container.querySelector('.chat-active-users');
-    if (!sidebarEl) return;
-
-    const usersList = Object.values(users).slice(0, 5);
-    sidebarEl.innerHTML = `
-      <div class="active-users-header">Active now:</div>
-      ${usersList.map(user => `
-        <div class="active-user" title="${user.userName}">
-          <div class="active-user-badge" style="background-color: ${user.color}">
-            ${user.userName.charAt(0)}
-          </div>
-          <span>${user.userName}</span>
-        </div>
-      `).join('')}
-    `;
-  }
+  // updateActiveSidebar removed - replaced by updateNotificationButton
 
   showNotification() {
     const icon = document.querySelector('.chat-icon');
@@ -2762,7 +3080,7 @@ class ChatUIManager {
   bottom: 90px;
   right: 20px;
   width: 550px;
-  height: 500px;
+  height: 600px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16);
@@ -2875,7 +3193,7 @@ class ChatUIManager {
   display: flex;
   gap: 8px;
   animation: slideIn 0.3s ease;
-  margin-bottom: 2px;
+  /* margin-bottom controlled by inline styles (1px continuation, 6px new group) */
 }
 @keyframes slideIn {
   from { opacity: 0; transform: translateY(10px); }

@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202601314pk"></script>
+  <script src="js/auth-guard.js?v=20260131quq"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1107,9 +1107,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="html-priority.js"></script>
-  <script src="courses.generated.js?v=202601314pk"></script>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260129">
+  <script src="courses.generated.js?v=20260131quq"></script>
 </head>
 <body>
 <!-- Right-side overlay for course card click -->
@@ -1160,7 +1158,12 @@
                 <span class="link-text">Calendar</span>
               </a>
             </li>
-
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="tests.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg" alt="Tools" />
+                <span class="link-text">Tools</span>
+              </a>
+            </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg" alt="Editor" style="filter: brightness(0) invert(1);" />
@@ -1192,7 +1195,6 @@
       <header class="main-header">
         <h1 class="page-title">Courses</h1>
       </header>
-
  <div class="course-org-list" id="course-org-list">
     
   <div id="dynamic-course-list"></div>
@@ -1697,7 +1699,12 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 
-
+<!-- Hamburger button for mobile -->
+<button id="mobileMenuToggle" class="mobile-menu-toggle" aria-label="Отвори меню">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
 <div class="mobile-overlay" id="mobileOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:rgba(0,0,0,0.5);z-index:3000;"></div>
 <div class="sidemenu-overlay" id="sidemenuOverlay" style="display:none;position:fixed;top:0;left:0;width:100vw;height:100vh;background:transparent;z-index:50;"></div>
 
@@ -1866,8 +1873,29 @@ function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-    <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202601314pk"></script>
+<script src="js/chat.js?v=20260131quq"></script>
+
+<!-- Chat widget is injected by chat.js -->
+
+<style>
+/* Custom scrollbar styling for chat (chat.js handles everything else) */
+
+.chat-messages::-webkit-scrollbar-track,
+.chat-active-users::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb,
+.chat-active-users::-webkit-scrollbar-thumb {
+  background: var(--chat-border);
+  border-radius: 3px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb:hover,
+.chat-active-users::-webkit-scrollbar-thumb:hover {
+  background: var(--chat-text-light);
+}
+</style>
 
     <script>
     // Function to process table rowspans (convert ^ to rowspan)
@@ -2800,6 +2828,7 @@ function toggleFileDropdown(sectionId) {
 
       <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
       <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+      <script src="html-priority.js"></script>
       <script src="js/presence.js"></script>
       <script src="js/version-check.js"></script>
 <!-- Privacy Modal -->
@@ -2844,6 +2873,5 @@ document.addEventListener('click', function(event) {
   }
 });
 </script>
-<script src="js/mobile-nav.js?v=20260129"></script>
     </body>
     </html>

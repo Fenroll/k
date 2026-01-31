@@ -41,6 +41,12 @@ function convertAbsoluteToRelativePath(absolutePath) {
     appId: "APP_ID"
   };
 
+  // Check if firebase is loaded
+  if (typeof firebase === 'undefined') {
+    console.warn('html-priority.js: Firebase not loaded yet, skipping initialization');
+    return;
+  }
+
   let app;
   if (firebase.apps.length === 0) {
     app = firebase.initializeApp(firebaseConfig);

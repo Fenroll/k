@@ -135,12 +135,8 @@ class ChatFirebaseREST {
     updateLocalTabs();
 
     try {
-      // По-добра детекция на устройство
-      const isMobile = window.innerWidth <= 768 || 
-                      /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
-      console.log('Mobile detection:', isMobile, 'Window width:', window.innerWidth);
-      // console.log('Mobile detection:', isMobile, 'Window width:', window.innerWidth); // Can be removed
+      // Mobile detection using only user agent (not window width)
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
       const userData = {
         userId: currentUser.userId,
         userName: currentUser.userName,
@@ -171,9 +167,8 @@ class ChatFirebaseREST {
           return;
         }
         
-        // Обновяваме и статуса на устройството периодично, в случай че се промени (напр. resize)
-        const currentIsMobile = window.innerWidth <= 768 || 
-                               /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        // Mobile detection using only user agent (not window width)
+        const currentIsMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
         
         await fetch(userRef, {
           method: 'PATCH',
