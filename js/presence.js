@@ -17,38 +17,11 @@
     const MAX_DEVICES_PER_USER = 5; // Max devices allowed per user
     const PERIODIC_CLEANUP_INTERVAL = 2 * 60 * 1000; // Clean up every 2 minutes
     const LOCALSTORAGE_CLEANUP_DAYS = 7; // Clean localStorage entries older than 7 days
-    
-    // Tab coordination - only one tab performs cleanup to avoid race conditions
-    let isLeaderTab = false;
-    let tabId = 'tab_' + Math.random().toString(36).substr(2, 9);
-    let lastLeaderHeartbeat = Date.now();
-    const TAB_ELECTION_INTERVAL = 5000;
     const TAB_ELECTION_INTERVAL = 5000; // Re-elect leader every 5 seconds
     
-    // Tab coordination - prevent multiple tabs from conflicting
-    let isLeaderTab = false;
+    // Tab coordination - only one tab performs cleanup to avoid race conditions
+    let isLeaderTab = true; // Start as leader, will be demoted if another tab exists
     let tabId = 'tab_' + Math.random().toString(36).substr(2, 9);
-    let lastLeaderHeartbeat = Date.now();
-    
-    // Use BroadcastChannel for cross-tab communication (if supported)
-    let tabChannel = null;
-    if (typeof BroadcastChannel !== 'undefined') {
-        try {
-            tabChannel = new BroadcastChannel('presence_tabs_' + (currentUid || 'unknown'));
-            tabChannel.onmessage = (event) => {
-                if (event.data.type === 'leader_heartbeat' && event.data.tabId !== tabId) {
-                    lastLeaderHeartbeat = Date.now();
-                    if (isLeaderTab && event.data.timestamp > Date.now() - 1000) {
-                        // Another tab claimed leadership recently, step down
-                        isLeaderTab = false;
-                        console.log('Presence: Another tab is now leader, stepping down');
-                    }
-                }
-            };
-        } catch (e) {
-            console.warn('Presence: BroadcastChannel not available, multi-tab coordination disabled');
-        }
-    }
 
     const loggedInUserStr = localStorage.getItem('loggedInUser');
     const urlParams = new URLSearchParams(window.location.search);
@@ -214,12 +187,11 @@
     }
     
     // Perform device cleanup
-    function performDeviceCleanup(db) {
+    function performDeviceCleanup(db, forceRun = false) {
         if (!presenceRefPath || !currentUid) return Promise.resolve();
         
-        // Only leader tab performs cleanup to avoid conflicts
-        if (!isLeaderTab) {
-            console.log('Presence: Not leader tab, skipping cleanup');
+        // Only leader tab performs periodic cleanup (but allow forced cleanup on connect)
+        if (!isLeaderTab && !forceRun) {
             return Promise.resolve();
         }
         
@@ -309,7 +281,8 @@
         }
         
         keysToRemove.forEach(key => {
-            console.log(`Presence: Removing old localStorage entry: ${key}`);\n            localStorage.removeItem(key);
+            console.log(`Presence: Removing old localStorage entry: ${key}`);
+            localStorage.removeItem(key);
         });
     }
     
@@ -317,19 +290,29 @@
     function electLeader() {
         const storageKey = 'presence_leader_' + (currentUid || 'guest');
         const leaderData = localStorage.getItem(storageKey);
+        const now = Date.now();
         
         if (leaderData) {
             try {
                 const { tabId: leaderId, timestamp } = JSON.parse(leaderData);
-                const age = Date.now() - timestamp;
+                const age = now - timestamp;
                 
                 // If current leader heartbeat is fresh (< 10s old) and it's us, stay leader
                 if (leaderId === tabId && age < 10000) {
                     isLeaderTab = true;
                 }
+                // If it's us but stale, refresh it
+                else if (leaderId === tabId) {
+                    isLeaderTab = true;
+                }
                 // If leader is stale (> 10s old), claim leadership
                 else if (age > 10000) {
                     isLeaderTab = true;
+                    console.log('Presence: Previous leader stale, claiming leadership');
+                }
+                // Fresh leader that's not us, step down
+                else {
+                    isLeaderTab = false;
                 }
             } catch (e) {
                 // Invalid data, claim leadership
@@ -344,7 +327,7 @@
         if (isLeaderTab) {
             localStorage.setItem(storageKey, JSON.stringify({
                 tabId: tabId,
-                timestamp: Date.now()
+                timestamp: now
             }));
         }
     }
@@ -455,7 +438,7 @@
                 
                 // Then clean up old devices for this user after setting current device
                 console.log('Presence: Running initial device cleanup');
-                return performDeviceCleanup(db);
+                return performDeviceCleanup(db, true); // Force run on initial connect
             }).catch(function(error) {
                 console.error('Presence: Error setting up presence:', error);
             });
@@ -493,8 +476,10 @@
     
     // Cleanup on page close
     window.addEventListener('beforeunload', function() {
-        if (tabChannel) {
-            tabChannel.close();
+        // Clear our leader status so another tab can take over immediately
+        if (isLeaderTab) {
+            const storageKey = 'presence_leader_' + (currentUid || 'guest');
+            localStorage.removeItem(storageKey);
         }
     });
 

@@ -1519,17 +1519,23 @@ class ChatUIManager {
             
             <div class="profile-modal-info">
                 <div class="info-item">
-                    <span class="info-label">Status</span>
+                    <span class="info-label">Role</span>
                     <span>${statusText}</span>
                 </div>
+                ${user.displayName && user.displayName !== user.userName ? `
                 <div class="info-item">
-                    <span class="info-label">Device</span>
-                    <span>${deviceText}</span>
-                </div>
-                ${user.deviceCount > 1 ? `
+                    <span class="info-label">Username</span>
+                    <span>@${user.userName || user.username}</span>
+                </div>` : ''}
+                ${user.email && !user.isGuest ? `
                 <div class="info-item">
-                    <span class="info-label">Sessions</span>
-                    <span>${user.deviceCount} active</span>
+                    <span class="info-label">Email</span>
+                    <span>${user.email}</span>
+                </div>` : ''}
+                ${isOnline && user.hasMobile ? `
+                <div class="info-item">
+                    <span class="info-label">Platform</span>
+                    <span>📱 Mobile</span>
                 </div>` : ''}
             </div>
             

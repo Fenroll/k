@@ -43,6 +43,9 @@
             <a href="account.html" class="others-menu-item">
                 <img src="svg/icon-account.svg" alt="Account"> Account
             </a>
+            <a href="tools.html" class="others-menu-item">
+                <img src="svg/icon-tools.svg" alt="Tools"> Tools
+            </a>
             <a href="text-editor.html" class="others-menu-item">
                 <img src="svg/icon-editor.svg" alt="Editor"> Editor
             </a>

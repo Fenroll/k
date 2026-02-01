@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/auth-guard.js?v=202602011aln"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Tools</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" href="favicon.svg?v=7" type="image/svg+xml">
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
+  
+  <style>
+    /* Base styles */
+    *, *::before, *::after { box-sizing: border-box; }
+    body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; overflow-y: scroll; }
+    .layout { display: flex; min-height: 100vh; }
+    
+    /* Sidebar styling */
+    #side-menu {
+      background: #262626;
+      width: 200px;
+      min-width: 200px;
+      max-width: 200px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      z-index: 100;
+    }
+    
+    .logo-header {
+      background: #262626;
+      width: 200px !important;
+      height: 107px !important;
+      min-width: 200px !important;
+      min-height: 107px !important;
+      max-width: 200px !important;
+      max-height: 107px !important;
+      text-align: center;
+      border-bottom: none;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden;
+      flex: 0 0 107px !important;
+      box-sizing: content-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 2px solid #1d1b1b;
+    }
+    
+    .logo-header > a {
+      display: block;
+      margin: 0 !important;
+      padding: 0 !important;
+      box-sizing: content-box;
+    }
+    
+    .logo-img {
+      width: 240px !important;
+      height: 50px !important;
+      object-fit: contain;
+      padding-left: 70px !important;
+      padding-top: 1px !important;
+      margin: 0 !important;
+      display: block;
+      box-sizing: content-box;
+    }
+    
+    .sidebar-nav ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .sidebar-nav a {
+      display: flex;
+      align-items: center;
+      color: #fff !important;
+      text-decoration: none;
+      padding: 16px 28px 16px 12px;
+      font-size: 14px;
+      transition: background 0.2s;
+      gap: 12px;
+      background: transparent;
+      font-weight: 400;
+      position: relative;
+      border-radius: 0;
+      flex-direction: row;
+    }
+    
+    .sidebar-nav .active a {
+      background: #000000;
+    }
+    
+    .sidebar-nav .active a::before {
+      content: '';
+      display: block;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 4px;
+      height: 100%;
+      background: #588157;
+    }
+    
+    .sidebar-nav a:hover {
+      background: #181818;
+    }
+    
+    .sidebar-nav .svg-icon {
+      width: 26px;
+      height: 26px;
+      flex-shrink: 0;
+      margin-right: -2px;
+      margin-left: -2px;
+      margin-top: -2px;
+      margin-bottom: -2px;
+    }
+    
+    .sidebar-nav a[href*="messages"] .svg-icon {
+      filter: brightness(0) invert(1);
+    }
+    
+    .sidebar-footer-links {
+      position: absolute;
+      left: 12px;
+      bottom: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5px;
+      font-size: 12px;
+      color: #cdcdcd;
+    }
+    
+    .sidebar-footer-item {
+      font-size: 12px;
+      color: #cdcdcd;
+      cursor: default;
+    }
+    
+    .sidebar-footer-item:hover {
+      color: #fff;
+      text-decoration: underline;
+    }
+    
+    .bb-inner-wrap {
+      position: relative;
+      height: 100%;
+    }
+    
+    /* Main content */
+    .main-content {
+      flex: 1;
+      padding: 0 0 0 200px;
+      background: #f5f5f5;
+      min-height: 100vh;
+    }
+    
+    .main-header {
+      background: #fff;
+      color: #000;
+      width: 100%;
+      height: 107px;
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #d3cdcd;
+    }
+    
+    .page-title {
+      font-size: 30px !important;
+      margin-left: 30px !important;
+      font-family: 'Open Sans', serif;
+      font-weight: 400;
+    }
+    
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.2s;
+      font-family: 'Open Sans', Arial, sans-serif;
+    }
+    
+    .btn-primary {
+      background: #588157;
+      color: white;
+    }
+    
+    .btn-primary:hover {
+      background: #476647;
+    }
+    
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #4b5563;
+    }
+    
+    .btn-secondary:hover {
+      background: #d1d5db;
+    }
+    
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+    
+    .btn-success:hover {
+      background: #059669;
+    }
+
+    /* Upload Tool Styles */
+    .drop-zone {
+      border: 3px dashed #d1d5db;
+      border-radius: 12px;
+      padding: 60px 40px;
+      text-align: center;
+      transition: all 0.3s ease;
+      background: white;
+      cursor: pointer;
+    }
+    
+    .drop-zone:hover {
+      border-color: #588157;
+      background: #f0f9ff;
+    }
+    
+    .drop-zone.drag-over {
+      border-color: #588157;
+      background: #dbeafe;
+      border-style: solid;
+    }
+    
+    .drop-zone.drag-over .drop-zone-content {
+      display: none;
+    }
+    
+    .drop-zone.drag-over .drop-zone-active {
+      display: block !important;
+    }
+    
+    .drop-zone-content h3 {
+      margin: 0 0 8px 0;
+      color: #262626;
+      font-size: 20px;
+    }
+    
+    .drop-zone-content p {
+      margin: 8px 0;
+      color: #666;
+    }
+    
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+    
+    .file-item-info {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+    
+    .file-item-name {
+      font-weight: 500;
+      color: #262626;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    
+    .file-item-size {
+      color: #666;
+      font-size: 13px;
+    }
+    
+    .file-item-status {
+      font-size: 13px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+    
+    .file-item-status.success {
+      background: #d1fae5;
+      color: #065f46;
+    }
+    
+    .file-item-status.error {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+    
+    .file-item-status.uploading {
+      background: #dbeafe;
+      color: #1e40af;
+    }
+    
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background: #e5e7eb;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #588157, #6b9b6a);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        padding-left: 0 !important;
+        padding-bottom: 90px !important;
+      }
+      
+      .main-header {
+        display: none !important;
+      }
+      
+      #side-menu {
+        display: none !important;
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="css/mobile-nav.css">
+</head>
+<body>
+  <div class="layout">
+    <!-- Side menu -->
+    <div id="side-menu">
+      <div class="bb-inner-wrap">
+        <div class="logo-header">
+          <a href="https://elearn.mu-varna.bg" target="_blank" rel="noopener noreferrer">
+            <img class="logo-img" src="svg/logo-coursebook.svg" alt="StudyBoard">
+          </a>
+        </div>
+        <nav class="sidebar-nav" aria-label="Main">
+          <ul>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/course">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg" alt="blackboard" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Blackboard</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a href="account.html?v=2026013112">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg" alt="Account" />
+                <span class="link-text">Account</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a href="index.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg" alt="Courses" />
+                <span class="link-text">Courses</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a href="anamnesis.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg" alt="Anamnesis" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Anamnesis</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a href="calendar.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg" alt="Calendar" />
+                <span class="link-text">Calendar</span>
+              </a>
+            </li>
+            <li class="base-navigation-button active">
+              <a href="tools.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg" alt="Tools" />
+                <span class="link-text">Tools</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg" alt="Editor" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Editor</span>
+              </a>
+            </li>
+            <li class="base-navigation-button" id="admin-button" style="display: none;">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Admin Panel</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="#" onclick="handleLogout()">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg" alt="Sign Out" />
+                <span class="link-text">Sign Out</span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <div class="sidebar-footer-links">
+          <span class="sidebar-footer-item" onclick="showPrivacyModal()" style="cursor: pointer;">Privacy</span>
+          <span class="sidebar-footer-item" onclick="toggleVersionInfo()" style="cursor: pointer;">Version</span>
+          <span id="versionInfo" style="display: none; position: absolute; left: 100%; bottom: 0; margin-left: 20px; padding: 3px 20px; background: #333; color: white; border-radius: 6px; font-size: 0.85em; white-space: normal; box-shadow: 0 2px 10px rgba(0,0,0,0.3); max-width: calc(100vw - 280px);"></span>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-content">
+      <header class="main-header">
+        <h1 class="page-title">Tools</h1>
+      </header>
+      
+      <!-- Tools Menu -->
+      <div class="tools-menu" style="padding: 30px 20px; background: #f5f5f5; border-bottom: 1px solid #e5e7eb;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto;">
+          <button class="test-menu-btn active" data-test="upload" style="padding: 18px 24px; border: none; background: #588157; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(88, 129, 87, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            📤 Качване на файлове
+          </button>
+          <button class="test-menu-btn" data-test="tool2" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            📋 инструмент 2 (скоро)
+          </button>
+          <button class="test-menu-btn" data-test="tool3" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            📝 инструмент 3 (скоро)
+          </button>
+        </div>
+      </div>
+      
+      <div class="content">
+        <!-- File Upload Container -->
+        <div id="uploadTool" class="test-container" style="display: block;">
+          <div class="upload-container" style="max-width: 800px; margin: 40px auto; padding: 30px;">
+            <h2 style="text-align: center; margin-bottom: 30px; color: #262626;">Качване на файлове в Cloudflare R2</h2>
+            
+            <!-- Drop Zone -->
+            <div id="dropZone" class="drop-zone">
+              <div class="drop-zone-content">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #588157; margin-bottom: 16px;">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="17 8 12 3 7 8"></polyline>
+                  <line x1="12" y1="3" x2="12" y2="15"></line>
+                </svg>
+                <h3>Пуснете файлове или папки тук</h3>
+                <p>или</p>
+                <div style="display: flex; gap: 12px; justify-content: center;">
+                  <label for="singleFileInput" class="btn btn-primary" style="cursor: pointer;">
+                    📄 Избери файлове
+                  </label>
+                  <label for="fileInput" class="btn btn-secondary" style="cursor: pointer;">
+                    📁 Избери папка
+                  </label>
+                </div>
+                <input type="file" id="fileInput" multiple webkitdirectory directory style="display: none;">
+                <input type="file" id="singleFileInput" multiple style="display: none;">
+                <p style="font-size: 12px; color: #666; margin-top: 12px;">Избери отделни файлове или цяла папка с файлове</p>
+              </div>
+              <div class="drop-zone-active" style="display: none;">
+                <h3>Пуснете файловете тук</h3>
+              </div>
+            </div>
+            
+            <!-- Upload Progress -->
+            <div id="uploadProgress" style="display: none; margin-top: 24px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span id="uploadStatusText">Качване...</span>
+                <span id="uploadPercentage">0%</span>
+              </div>
+              <div class="progress-bar">
+                <div class="progress-bar-fill" id="progressBarFill"></div>
+              </div>
+            </div>
+            
+            <!-- File List -->
+            <div id="fileList" style="margin-top: 24px; display: none;">
+              <h3 style="margin-bottom: 16px;">Избрани файлове</h3>
+              <div id="fileListContainer" style="max-height: 400px; overflow-y: auto;">
+                <!-- Files will be listed here -->
+              </div>
+              <div style="margin-top: 16px; display: flex; gap: 12px;">
+                <button id="uploadBtn" class="btn btn-success">Качи всички файлове</button>
+                <button id="clearFilesBtn" class="btn btn-secondary">Изчисти</button>
+              </div>
+            </div>
+            
+            <!-- Upload Results -->
+            <div id="uploadResults" style="display: none; margin-top: 24px;">
+              <h3>Резултати</h3>
+              <div id="uploadResultsList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Test menu functionality
+    document.querySelectorAll('.test-menu-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        // Remove active state from all buttons
+        document.querySelectorAll('.test-menu-btn').forEach(b => {
+          b.style.borderColor = '';
+          b.style.background = 'white';
+          b.style.color = '#666';
+          b.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+        });
+        
+        // Add active state to clicked button
+        e.target.style.borderColor = '';
+        e.target.style.background = '#588157';
+        e.target.style.color = 'white';
+        e.target.style.boxShadow = '0 4px 15px rgba(88, 129, 87, 0.2)';
+        
+        // Hide all test containers
+        document.querySelectorAll('.test-container').forEach(test => {
+          test.style.display = 'none';
+        });
+        
+        // Show selected tool
+        const testType = e.target.dataset.test;
+        if (testType === 'upload') {
+          document.getElementById('uploadTool').style.display = 'block';
+        }
+      });
+    });
+    
+    // Mobile menu toggle
+    document.addEventListener('DOMContentLoaded', function() {
+      const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+      const sideMenu = document.getElementById('side-menu');
+      const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+      
+      // Check if elements exist
+      if (!mobileMenuToggle || !sideMenu || !mobileMenuOverlay) {
+        return;
+      }
+      
+      // Function to close menu
+      function closeMenu() {
+        sideMenu.classList.remove('show');
+        mobileMenuOverlay.classList.remove('show');
+        mobileMenuToggle.classList.remove('hidden');
+      }
+      
+      // Function to open menu
+      function openMenu() {
+        sideMenu.classList.add('show');
+        mobileMenuOverlay.classList.add('show');
+        mobileMenuToggle.classList.add('hidden');
+      }
+      
+      // Toggle menu on button click
+      mobileMenuToggle.addEventListener('click', function() {
+        if (sideMenu.classList.contains('show')) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      });
+      
+      // Close menu when clicking on overlay
+      mobileMenuOverlay.addEventListener('click', closeMenu);
+    });
+  </script>
+  
+  <!-- File Upload Script -->
+  <script>
+    // Cloudflare R2 Upload Configuration
+    const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+    
+    let selectedFiles = [];
+    
+    // DOM Elements
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('fileInput');
+    const singleFileInput = document.getElementById('singleFileInput');
+    const fileList = document.getElementById('fileList');
+    const fileListContainer = document.getElementById('fileListContainer');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const clearFilesBtn = document.getElementById('clearFilesBtn');
+    const uploadProgress = document.getElementById('uploadProgress');
+    const uploadStatusText = document.getElementById('uploadStatusText');
+    const uploadPercentage = document.getElementById('uploadPercentage');
+    const progressBarFill = document.getElementById('progressBarFill');
+    const uploadResults = document.getElementById('uploadResults');
+    const uploadResultsList = document.getElementById('uploadResultsList');
+    
+    // Format file size
+    function formatFileSize(bytes) {
+      if (bytes === 0) return '0 B';
+      const k = 1024;
+      const sizes = ['B', 'KB', 'MB', 'GB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+    }
+    
+    // File/Folder input change (labels trigger inputs directly now)
+    fileInput.addEventListener('change', (e) => {
+      handleFiles(Array.from(e.target.files));
+    });
+    
+    singleFileInput.addEventListener('change', (e) => {
+      handleFiles(Array.from(e.target.files));
+    });
+    
+    // Drag and drop
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('drag-over');
+    });
+    
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('drag-over');
+    });
+    
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('drag-over');
+      
+      const items = Array.from(e.dataTransfer.items);
+      const files = [];
+      
+      // Process dropped items (handles folders)
+      Promise.all(items.map(item => {
+        if (item.kind === 'file') {
+          const entry = item.webkitGetAsEntry();
+          if (entry) {
+            return traverseFileTree(entry);
+          }
+        }
+        return Promise.resolve([]);
+      })).then(results => {
+        results.forEach(fileArray => files.push(...fileArray));
+        handleFiles(files);
+      });
+    });
+    
+    // Traverse folder tree
+    function traverseFileTree(item, path = '') {
+      return new Promise((resolve) => {
+        if (item.isFile) {
+          item.file(file => {
+            const fullPath = path + file.name;
+            file.fullPath = fullPath;
+            resolve([file]);
+          });
+        } else if (item.isDirectory) {
+          const dirReader = item.createReader();
+          dirReader.readEntries(entries => {
+            Promise.all(entries.map(entry => 
+              traverseFileTree(entry, path + item.name + '/')
+            )).then(results => {
+              resolve(results.flat());
+            });
+          });
+        } else {
+          resolve([]);
+        }
+      });
+    }
+    
+    // Handle selected files
+    function handleFiles(files) {
+      files.forEach(file => {
+        // Add fullPath if not set
+        if (!file.fullPath) {
+          file.fullPath = file.webkitRelativePath || file.name;
+        }
+        
+        // Check if file already exists
+        if (!selectedFiles.find(f => f.fullPath === file.fullPath)) {
+          selectedFiles.push(file);
+        }
+      });
+      
+      renderFileList();
+      fileList.style.display = 'block';
+      uploadResults.style.display = 'none';
+    }
+    
+    // Render file list
+    function renderFileList() {
+      fileListContainer.innerHTML = selectedFiles.map((file, index) => `
+        <div class="file-item" data-index="${index}">
+          <div class="file-item-info">
+            <span class="file-item-name" title="${file.fullPath}">📄 ${file.fullPath}</span>
+            <span class="file-item-size">${formatFileSize(file.size)}</span>
+          </div>
+          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="removeFile(${index})">Премахни</button>
+        </div>
+      `).join('');
+    }
+    
+    // Remove file
+    window.removeFile = function(index) {
+      selectedFiles.splice(index, 1);
+      renderFileList();
+      if (selectedFiles.length === 0) {
+        fileList.style.display = 'none';
+      }
+    };
+    
+    // Clear all files
+    clearFilesBtn.addEventListener('click', () => {
+      selectedFiles = [];
+      fileList.style.display = 'none';
+      uploadResults.style.display = 'none';
+      fileInput.value = '';
+      singleFileInput.value = '';
+    });
+    
+    // Upload files
+    uploadBtn.addEventListener('click', async () => {
+      if (selectedFiles.length === 0) return;
+      
+      // Get current user name
+      let userName = 'anonymous';
+      try {
+        const loggedInUser = localStorage.getItem('loggedInUser');
+        if (loggedInUser) {
+          const user = JSON.parse(loggedInUser);
+          userName = user.userName || user.displayName || 'anonymous';
+        }
+      } catch (e) {
+        console.warn('Could not get user name:', e);
+      }
+      
+      uploadProgress.style.display = 'block';
+      uploadBtn.disabled = true;
+      clearFilesBtn.disabled = true;
+      
+      const results = [];
+      let completed = 0;
+      
+      for (const file of selectedFiles) {
+        try {
+          uploadStatusText.textContent = `Качване на ${file.fullPath}...`;
+          
+          const formData = new FormData();
+          formData.append('file', file);
+          formData.append('path', file.fullPath);
+          formData.append('userName', userName);
+          
+          const response = await fetch(R2_WORKER_URL, {
+            method: 'POST',
+            body: formData
+          });
+          
+          if (response.ok) {
+            const data = await response.json();
+            results.push({ file: file.fullPath, status: 'success', url: data.url });
+          } else {
+            const errorText = await response.text();
+            console.error('Upload error for', file.fullPath, ':', errorText);
+            results.push({ file: file.fullPath, status: 'error', message: errorText });
+          }
+        } catch (error) {
+          results.push({ file: file.fullPath, status: 'error', message: error.message });
+        }
+        
+        completed++;
+        const percentage = Math.round((completed / selectedFiles.length) * 100);
+        uploadPercentage.textContent = `${percentage}%`;
+        progressBarFill.style.width = `${percentage}%`;
+      }
+      
+      // Show results
+      uploadProgress.style.display = 'none';
+      uploadResults.style.display = 'block';
+      uploadResultsList.innerHTML = results.map(result => `
+        <div class="file-item">
+          <div class="file-item-info">
+            <span class="file-item-name">${result.file}</span>
+          </div>
+          <span class="file-item-status ${result.status}">
+            ${result.status === 'success' ? '✓ Качен' : '✗ Грешка'}
+          </span>
+        </div>
+      `).join('');
+      
+      uploadBtn.disabled = false;
+      clearFilesBtn.disabled = false;
+      uploadStatusText.textContent = 'Качване завършено!';
+      
+      // Clear selected files after successful upload
+      selectedFiles = [];
+      fileList.style.display = 'none';
+    });
+  </script>
+  
+  <script>
+    // Show admin button if user is admin
+    document.addEventListener('DOMContentLoaded', function() {
+      const adminButton = document.getElementById('admin-button');
+      if (adminButton && window.currentUserPromise) {
+        window.currentUserPromise.then(user => {
+          if (user && user.isAdmin) {
+            adminButton.style.display = 'list-item';
+          }
+        }).catch(error => {
+          console.error("Error checking admin status for button visibility:", error);
+        });
+      }
+    });
+  </script>
+  
+  <script src="js/user-identity.js?v=202404231000"></script>
+  <!-- Mobile menu overlay -->
+  <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+
+  <!-- ============================================
+       FIREBASE & CHAT WIDGET
+       ============================================ -->
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
+
+  <!-- Initialize Chat Widget -->
+    <script src="js/chat.js?v=202602011aln"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+  <script src="js/presence.js"></script>
+<script>
+  // Initialize chat widget
+  document.addEventListener('DOMContentLoaded', function() {
+    if (typeof ChatWidget !== 'undefined') {
+      new ChatWidget();
+    }
+  });
+  
+  // Privacy modal
+  function showPrivacyModal() {
+    alert('Privacy policy coming soon!');
+  }
+  
+  // Version info
+  function toggleVersionInfo() {
+    const versionInfo = document.getElementById('versionInfo');
+    if (versionInfo.style.display === 'none') {
+      versionInfo.textContent = 'Version 2026.02.01';
+      versionInfo.style.display = 'block';
+    } else {
+      versionInfo.style.display = 'none';
+    }
+  }
+  
+  // Logout
+  function handleLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('loggedInUser');
+      window.location.href = 'login.html';
+    }
+  }
+</script>
+<script src="js/mobile-nav.js"></script>
+</body>
+</html>
