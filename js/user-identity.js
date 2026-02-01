@@ -102,7 +102,6 @@ async function createAndInitUser() {
                     });
                     
                     localStorage.setItem('loggedInUser', JSON.stringify(fullUserObject));
-                    console.log('Identity: Refreshed logged-in user from DB:', user);
                     return user;
                 } else {
                     throw new Error("User not found in database.");
@@ -134,11 +133,9 @@ async function createAndInitUser() {
             userName: `Guest-${guestId.substring(6, 10)}`, // e.g., Guest-cd23
             color: guestColor,
             isGuest: true,
-            // Guests don't have legacy IDs in this context
             legacyChatId: null, 
             legacyNotesId: null
         });
-        console.log('Identity: Using guest user:', user);
         return user;
     }
 
@@ -151,7 +148,6 @@ async function createAndInitUser() {
         legacyChatId: anonymousId,
         legacyNotesId: anonymousId
     });
-    console.log('Identity: Using anonymous user:', user);
     return user;
 }
 
@@ -159,7 +155,6 @@ async function createAndInitUser() {
 if (typeof window.currentUserPromise === 'undefined') {
     window.currentUserPromise = createAndInitUser().then(user => {
         window.currentUser = user;
-        console.log('Global currentUser set:', window.currentUser);
         return user;
     });
 }

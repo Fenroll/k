@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202601311f7z"></script>
+  <script src="js/auth-guard.js?v=20260201qhw"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -99,9 +99,6 @@
         max-width: 260px !important;
         min-width: 200px !important;
         display: block;
-      }
-      #side-menu.mobile-open {
-        transform: translateX(0);
       }
       .mobile-overlay {
         display: none;
@@ -273,16 +270,6 @@
   .element-details-content {
     padding-top: 2px; /* Small vertical adjustment */
   }
-    @media (max-width: 600px) {
-      .element-details {
-        flex-direction: column;
-        align-items: stretch;
-      }
-      .element-details-content {
-        /* `width: auto` is inherited from the 768px breakpoint. */
-        white-space: normal; /* Allow text to wrap */
-      }
-    }
   .course-title {
     font-size: 15px !important;
     line-height: 1.25 !important;
@@ -1108,7 +1095,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=202601311f7z"></script>
+  <script src="courses.generated.js?v=20260201qhw"></script>
 </head>
 <body>
 <!-- Right-side overlay for course card click -->
@@ -1266,12 +1253,13 @@ function generateColorFromId(id, isArchived = false) {
 // Function to get color mapping for all courses (for debugging/reference)
 function getColorMapping() {
   if (typeof courses !== 'undefined' && Array.isArray(courses)) {
-    console.log('Course ID -> Color mapping:');
-    courses.forEach(course => {
-      const color = generateColorFromId(course.id);
-      console.log(`${course.id} (${course.title}) -> ${color}`);
-    });
+    return courses.map(course => ({
+      id: course.id,
+      title: course.title,
+      color: generateColorFromId(course.id)
+    }));
   }
+  return [];
 }
 
 // Render course cards dynamically using the global courses array from courses.generated.js
@@ -1373,6 +1361,7 @@ function renderCourseList() {
             </div>
         `;
         
+        
         // Apply the color as border-left style
         card.style.borderLeft = "8px solid " + borderColor;
         
@@ -1414,6 +1403,7 @@ document.addEventListener('DOMContentLoaded', function() {
       const visible = courseList.querySelectorAll('.element-card:not([style*="display: none"])').length;
     }
     function filterCourses() {
+      if (!searchInput) return;
       const val = searchInput.value.trim().toLowerCase();
       const cards = courseList.querySelectorAll('.element-card');
       cards.forEach(card => {
@@ -1438,10 +1428,10 @@ document.addEventListener('DOMContentLoaded', function() {
       if (adminButton && window.currentUserPromise) {
         window.currentUserPromise.then(user => {
           if (user && user.isAdmin) {
-            adminButton.style.display = 'list-item'; // Or 'block', depending on parent element
+            adminButton.style.display = 'list-item';
           }
-        }).catch(error => {
-          console.error("Error checking admin status for button visibility:", error);
+        }).catch(() => {
+          // Silent fail for admin status
         });
       }
     });
@@ -1700,40 +1690,7 @@ document.addEventListener('DOMContentLoaded', function() {
 }
 </style>
 
-<style>
-@media (max-width: 768px) {
-  html, body {
-    height: 100vh !important;
-    min-height: 100vh !important;
-    overflow-x: hidden;
-  }
-  #side-menu {
-    height: 100vh !important;
-    min-height: 100vh !important;
-    max-height: 100vh !important;
-    overflow-y: auto !important;
-    position: fixed !important;
-    top: 0;
-    bottom: 0;
-    width: 200px !important;
-    max-width: 200px !important;
-    min-width: 200px !important;
-  }
-  .right-overlay {
-    height: 100vh !important;
-    min-height: 100vh !important;
-    max-height: 100vh !important;
-    overflow-y: auto !important;
-    position: fixed !important;
-    top: 0;
-    bottom: 0;
-    right: 0;
-  }
-}
-@media (min-width: 769px) {
-  .mobile-menu-toggle { display: none !important; }
-}
-</style>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -1766,6 +1723,7 @@ function toggleFileDropdown(sectionId) {
     }
   }
 }
+});
 </script>
 
 <!-- ============================================
@@ -1773,7 +1731,7 @@ function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=202601311f7z"></script>
+<script src="js/chat.js?v=20260201qhw"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -2351,25 +2309,11 @@ function toggleFileDropdown(sectionId) {
       <div class="overlay-main-content" style="margin-top:18px;">${customContent}</div>
     `;
     overlay.classList.add('open');
-    // Скрий hamburger бутона на мобилни устройства когато overlay е отворен
-    var hamburger = document.getElementById('mobileMenuToggle');
-    if (hamburger && window.innerWidth <= 768) {
-      hamburger.style.opacity = '0';
-      hamburger.style.visibility = 'hidden';
-      hamburger.style.pointerEvents = 'none';
-    }
   }
 }
     function closeRightOverlay() {
       var overlay = document.getElementById('rightOverlay');
       if (overlay) overlay.classList.remove('open');
-      // Покажи hamburger бутона отново
-      var hamburger = document.getElementById('mobileMenuToggle');
-      if (hamburger && window.innerWidth <= 768) {
-        hamburger.style.opacity = '';
-        hamburger.style.visibility = '';
-        hamburger.style.pointerEvents = '';
-      }
     }
     
     // Close overlay when clicking outside on desktop
@@ -2445,13 +2389,39 @@ function toggleFileDropdown(sectionId) {
           }
           
           if (htmlContent) {
-            // Store in sessionStorage to avoid URL length limits
+            // Try to store in sessionStorage, but fallback to hash if quota exceeded
             const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            sessionStorage.setItem(sessionKey, htmlContent);
-            sessionStorage.setItem(sessionKey + '_path', notePath);
-            
-            const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&sessionKey=${sessionKey}`;
-            window.open(mdViewerUrl, '_blank');
+            try {
+              sessionStorage.setItem(sessionKey, htmlContent);
+              sessionStorage.setItem(sessionKey + '_path', notePath);
+              
+              const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&sessionKey=${sessionKey}`;
+              window.open(mdViewerUrl, '_blank');
+            } catch (quotaError) {
+              // SessionStorage full - clear old htmlContent keys and try again
+              console.warn('SessionStorage quota exceeded, cleaning up old keys...');
+              const keysToRemove = [];
+              for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                if (key && key.startsWith('htmlContent_')) {
+                  keysToRemove.push(key);
+                }
+              }
+              keysToRemove.forEach(k => sessionStorage.removeItem(k));
+              
+              // Try one more time
+              try {
+                sessionStorage.setItem(sessionKey, htmlContent);
+                sessionStorage.setItem(sessionKey + '_path', notePath);
+                const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&sessionKey=${sessionKey}`;
+                window.open(mdViewerUrl, '_blank');
+              } catch (e2) {
+                // Still failed - open without sessionKey, let md-viewer fetch it
+                console.error('Cannot store in sessionStorage, opening without cache');
+                const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}`;
+                window.open(mdViewerUrl, '_blank');
+              }
+            }
           }
           return;
         }

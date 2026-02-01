@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202601311f7z"></script>
+  <script src="js/auth-guard.js?v=20260201qhw"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1557,7 +1557,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202601311f7z"></script>
+  <script src="courses.generated.js?v=20260201qhw"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js"></script>
@@ -3416,9 +3416,13 @@ localStorage.setItem('textEditorContent', htmlContent);
         editorContentForBody = editorContentForBody.replace(/<p>\s*<br\s*\/?>(\s*)<\/p>/g, '');
       } while (editorContentForBody !== prevContent && iterations < 2);
 
-      // Fix image paths
-      editorContentForBody = editorContentForBody.replace(/src="[^"]*?(assets\/[^"]*)"(?=[^>]*>)/g, 'src="$1"');
+      // Fix image paths - handle both local assets and external URLs
+      // For local assets: ensure path starts with assets/
+      // For external URLs: keep them as-is
+      editorContentForBody = editorContentForBody.replace(/src="(?!https?:\/\/)([^"]*?)(assets\/[^"]*)"(?=[^>]*>)/g, 'src="$2"');
+      // Sync data-original-src with src for all images
       editorContentForBody = editorContentForBody.replace(/(<img[^>]*src="([^"]*?)"[^>]*)data-original-src="[^"]*?"(?=[^>]*>)/g, '$1data-original-src="$2"');
+      // Remove local file paths
       editorContentForBody = editorContentForBody.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
 
       // Sanitize <style> blocks
@@ -6865,7 +6869,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202404231000"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202601311f7z"></script>
+    <script src="js/chat.js?v=20260201qhw"></script>
   
 <script src="js/version-check.js"></script>
 </body>

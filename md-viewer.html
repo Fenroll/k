@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202601311f7z"></script>
+  <script src="js/auth-guard.js?v=20260201qhw"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
@@ -459,6 +459,67 @@
   <main>
     <div id="content" class="markdown-body">Зареждане…</div>
   </main>
+
+  <script>
+    // Font size button setup - runs after content div exists
+    (function() {
+      const SIZES = ['0.8em', '1em', '1.2em', '1.4em'];
+      let idx = 1;
+      const btn = document.getElementById('fontSizeBtn');
+      const content = document.getElementById('content');
+      
+      if (btn && content) {
+        const saved = localStorage.getItem('mdViewerFontSize');
+        if (saved) {
+          content.style.fontSize = saved;
+          const i = SIZES.indexOf(saved);
+          if (i !== -1) idx = i;
+        }
+        
+        btn.onclick = () => {
+          // If at the top of the page, stay at top
+          if (window.scrollY < 100) {
+            idx = (idx + 1) % SIZES.length;
+            content.style.fontSize = SIZES[idx];
+            localStorage.setItem('mdViewerFontSize', SIZES[idx]);
+            return;
+          }
+          
+          // Find element currently in viewport to maintain position
+          const elements = content.querySelectorAll('h1, h2, h3, p, li, td');
+          let targetElement = null;
+          let minDistance = Infinity;
+          
+          const viewportCenter = window.scrollY + window.innerHeight / 3;
+          
+          elements.forEach(el => {
+            const rect = el.getBoundingClientRect();
+            const elTop = rect.top + window.scrollY;
+            const distance = Math.abs(elTop - viewportCenter);
+            
+            if (distance < minDistance) {
+              minDistance = distance;
+              targetElement = el;
+            }
+          });
+          
+          // Change font size
+          idx = (idx + 1) % SIZES.length;
+          content.style.fontSize = SIZES[idx];
+          localStorage.setItem('mdViewerFontSize', SIZES[idx]);
+          
+          // Restore scroll position to target element
+          if (targetElement) {
+            setTimeout(() => {
+              const headerHeight = 100;
+              const y = targetElement.getBoundingClientRect().top + window.scrollY - headerHeight;
+              window.scrollTo({ top: y, behavior: 'auto' });
+            }, 10);
+          }
+        };
+      }
+    })();
+  </script>
 
   <button id="floating-comment-btn">💬 Коментирай</button>
 
@@ -1175,49 +1236,6 @@
     // Also try to setup after a short delay to ensure courses is loaded
     setTimeout(setupButton, 100);
     
-    // Font size control - outside IIFE so it works immediately
-    const fontSizeBtn = document.getElementById('fontSizeBtn');
-    const contentDiv = document.getElementById('content');
-    
-    // Load saved font size from localStorage
-    const savedFontSize = localStorage.getItem('mdViewerFontSize');
-    if (savedFontSize && contentDiv) {
-      contentDiv.style.fontSize = savedFontSize;
-    }
-    
-    // Detect if mobile
-    const isMobile = window.innerWidth <= 768;
-    
-    // Font size increment levels - different for mobile and desktop
-    const fontSizes = isMobile 
-      ? ['0.6em', '0.75em', '0.9em', '1em'] // Mobile sizes (smaller)
-      : ['0.8em', '1em', '1.2em', '1.4em']; // Desktop sizes
-    
-    let currentSizeIndex = fontSizes.findIndex(size => {
-      if (savedFontSize) return size === savedFontSize;
-      return isMobile ? size === '0.75em' : size === '1em'; // Default
-    });
-    if (currentSizeIndex === -1) currentSizeIndex = isMobile ? 1 : 1;
-    
-    fontSizeBtn.addEventListener('click', () => {
-      currentSizeIndex = (currentSizeIndex + 1) % fontSizes.length;
-      const newSize = fontSizes[currentSizeIndex];
-      
-      contentDiv.style.fontSize = newSize;
-      
-      // Save to localStorage
-      localStorage.setItem('mdViewerFontSize', newSize);
-      
-      // Visual feedback
-      fontSizeBtn.style.transform = 'scale(1.1)';
-      setTimeout(() => {
-        fontSizeBtn.style.transform = 'scale(1)';
-      }, 200);
-    });
-    
-    // Add transition to button
-    fontSizeBtn.style.transition = 'transform 0.2s ease';
-    
     // Edit button handler
     let currentEditPath = null;
     let currentEditContent = null;
@@ -1310,7 +1328,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202601311f7z"></script>
+  <script src="courses.generated.js?v=20260201qhw"></script>
 
   <!-- ============================================
        CHAT SYSTEM - Firebase & Notes
@@ -1320,9 +1338,155 @@
   
 <script src="js/user-identity.js?v=20260125"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202601311f7z"></script>
+    <script src="js/chat.js?v=20260201qhw"></script>
   <script src="js/presence.js?v=20260125"></script>
   <script src="js/notes-init.js?v=20260131"></script>
+
+  <!-- H1 Navigation with Arrow Keys -->
+  <script>
+    (function() {
+      let h1Elements = [];
+      let currentH1Index = -1;
+      
+      // Function to update h1 elements list
+      function updateH1List() {
+        h1Elements = Array.from(document.querySelectorAll('#content h1'));
+      }
+      
+      // Function to scroll to h1 element
+      function scrollToH1(index) {
+        if (index >= 0 && index < h1Elements.length) {
+          const h1 = h1Elements[index];
+          const headerHeight = document.querySelector('header').offsetHeight || 0;
+          const yOffset = -headerHeight - 20; // Add some extra padding
+          const y = h1.getBoundingClientRect().top + window.pageYOffset + yOffset;
+          
+          window.scrollTo({ top: y, behavior: 'auto' });
+          currentH1Index = index;
+          
+          // Visual feedback - briefly highlight the h1
+          h1.style.transition = 'background-color 0.3s ease';
+          const originalBg = h1.style.backgroundColor;
+          h1.style.backgroundColor = 'rgba(124, 58, 237, 0.1)';
+          setTimeout(() => {
+            h1.style.backgroundColor = originalBg;
+          }, 600);
+        }
+      }
+      
+      // Function to find current h1 based on scroll position
+      function findCurrentH1() {
+        const scrollPosition = window.scrollY + 100; // Offset for header
+        
+        for (let i = h1Elements.length - 1; i >= 0; i--) {
+          if (h1Elements[i].offsetTop <= scrollPosition) {
+            return i;
+          }
+        }
+        return 0;
+      }
+      
+      // Button Handlers for Mobile
+      const prevH1Btn = document.getElementById('prevH1Btn');
+      const nextH1Btn = document.getElementById('nextH1Btn');
+
+      if (prevH1Btn) {
+        prevH1Btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          // Update list if needed (in case content changed)
+          if (h1Elements.length === 0) {
+            updateH1List();
+          }
+          if (h1Elements.length === 0) return;
+
+          if (currentH1Index === -1) {
+            currentH1Index = findCurrentH1();
+          }
+          const prevIndex = (currentH1Index - 1 + h1Elements.length) % h1Elements.length;
+          scrollToH1(prevIndex);
+        });
+      }
+
+      if (nextH1Btn) {
+        nextH1Btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          // Update list if needed (in case content changed)
+          if (h1Elements.length === 0) {
+            updateH1List();
+          }
+          if (h1Elements.length === 0) return;
+
+          if (currentH1Index === -1) {
+            currentH1Index = findCurrentH1();
+          }
+          const nextIndex = (currentH1Index + 1) % h1Elements.length;
+          scrollToH1(nextIndex);
+        });
+      }
+
+      // Listen for arrow key presses
+      document.addEventListener('keydown', (e) => {
+        // Ignore if user is typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+          return;
+        }
+        
+        // Update list if needed (in case content changed)
+        if (h1Elements.length === 0) {
+          updateH1List();
+        }
+        
+        if (h1Elements.length === 0) return;
+        
+        // Right Arrow - next h1
+        if (e.key === 'ArrowRight') {
+          e.preventDefault();
+          if (currentH1Index === -1) {
+            currentH1Index = findCurrentH1();
+          }
+          const nextIndex = (currentH1Index + 1) % h1Elements.length;
+          scrollToH1(nextIndex);
+        }
+        
+        // Left Arrow - previous h1
+        if (e.key === 'ArrowLeft') {
+          e.preventDefault();
+          if (currentH1Index === -1) {
+            currentH1Index = findCurrentH1();
+          }
+          const prevIndex = (currentH1Index - 1 + h1Elements.length) % h1Elements.length;
+          scrollToH1(prevIndex);
+        }
+      });
+      
+      // Initialize h1 list when content loads
+      function initH1Navigation() {
+        setTimeout(() => {
+          updateH1List();
+        }, 500);
+      }
+      
+      // Watch for content changes
+      const contentDiv = document.getElementById('content');
+      if (contentDiv) {
+        const observer = new MutationObserver(() => {
+          updateH1List();
+        });
+        
+        observer.observe(contentDiv, {
+          childList: true,
+          subtree: true
+        });
+      }
+      
+      // Initialize on page load
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initH1Navigation);
+      } else {
+        initH1Navigation();
+      }
+    })();
+  </script>
 
   <!-- Notes Widget HTML -->
   <!-- <div id="notes-widget" class="notes-widget">

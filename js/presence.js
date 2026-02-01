@@ -102,7 +102,6 @@
         if (isUserActive) {
             const deviceData = {
                 isMobile: isMobile,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
                 isGuest: isGuest,
                 userName: currentUserName,
                 isActive: true,
@@ -114,17 +113,14 @@
             if (!isGuest && currentUid) {
                 firebase.database().ref(`site_users/${currentUid}`).update({
                     lastSeen: firebase.database.ServerValue.TIMESTAMP
-                }).catch(err => console.error('Failed to update lastSeen:', err));
+                }).catch(err => console.warn('Failed to update lastSeen:', err.message));
             }
-            
-            console.log('Presence: User is ACTIVE');
         } else {
             // Mark as inactive (but still connected)
             window.userStatusDatabaseRef.update({
                 isActive: false,
-                lastInactive: firebase.database.ServerValue.TIMESTAMP
+                lastActivity: firebase.database.ServerValue.TIMESTAMP
             });
-            console.log('Presence: User is INACTIVE (idle or tab hidden)');
         }
     }
 
@@ -143,41 +139,33 @@
 
         db.ref('.info/connected').on('value', function(snapshot) {
             if (snapshot.val() === false) {
-                console.log('Presence: Not connected to Firebase');
                 return;
             };
             
-            console.log('Presence: Connected to Firebase, setting up presence...');
-
             // Determine device type - only use user agent, not window width
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            console.log('Presence: Mobile detection -', isMobile, 'User Agent:', navigator.userAgent);
 
             const deviceData = {
                 isMobile: isMobile,
-                timestamp: firebase.database.ServerValue.TIMESTAMP,
                 isGuest: isGuest,
                 userName: currentUserName,
                 isActive: isUserActive && isPageVisible,
                 lastActivity: firebase.database.ServerValue.TIMESTAMP
             };
-            console.log('Presence: Setting initial presence for UID:', currentUid, 'deviceId:', deviceId, 'isGuest:', isGuest, 'isActive:', deviceData.isActive, 'isMobile:', isMobile);
 
             userStatusDatabaseRef.onDisconnect().update({
                 isActive: false,
-                offlineAt: firebase.database.ServerValue.TIMESTAMP,
-                lastInactive: firebase.database.ServerValue.TIMESTAMP
+                lastActivity: firebase.database.ServerValue.TIMESTAMP
             }).then(function() {
                 // First set the current device data
                 return userStatusDatabaseRef.set(deviceData);
             }).then(function() {
-                console.log('Presence: Device data set successfully');
                 
                 // Update lastSeen in user profile (for persistent tracking)
                 if (!isGuest && currentUid) {
                     db.ref(`site_users/${currentUid}`).update({
                         lastSeen: firebase.database.ServerValue.TIMESTAMP
-                    }).catch(err => console.error('Failed to update lastSeen:', err));
+                    }).catch(err => console.warn('Failed to update lastSeen on connect:', err.message));
                 }
                 
                 // Then clean up old devices for this user after setting current device

@@ -1470,8 +1470,11 @@ class ChatUIManager {
         // Try lastActivity from presence data first, then lastSeen from profile
         const lastSeenTimestamp = user.lastActivity || user.lastSeen;
         
-        if (lastSeenTimestamp) {
-            const lastSeenDate = new Date(lastSeenTimestamp);
+        // Ensure timestamp is a valid number
+        const validTimestamp = lastSeenTimestamp && !isNaN(Number(lastSeenTimestamp)) ? Number(lastSeenTimestamp) : null;
+        
+        if (validTimestamp) {
+            const lastSeenDate = new Date(validTimestamp);
             const now = new Date();
             const diffMs = now - lastSeenDate;
             const diffMins = Math.floor(diffMs / 60000);
