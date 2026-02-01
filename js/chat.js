@@ -1446,6 +1446,11 @@ class ChatUIManager {
     const user = this.activeUsers[userId] || (this.userProfiles && this.userProfiles[userId]);
     if (!user) return;
 
+    // Get actual username from userProfiles if available (activeUsers only has displayName in userName field)
+    const actualUsername = (this.userProfiles && this.userProfiles[userId]) ? 
+        (this.userProfiles[userId].username || this.userProfiles[userId].userName) : 
+        (user.username || user.userName);
+
     const resolvedName = this.resolveName(user.userName || user.displayName);
     const initial = resolvedName.charAt(0).toUpperCase();
     const userColor = user.color || '#588157';
@@ -1522,10 +1527,10 @@ class ChatUIManager {
                     <span class="info-label">Role</span>
                     <span>${statusText}</span>
                 </div>
-                ${user.displayName && user.displayName !== user.userName ? `
+                ${actualUsername ? `
                 <div class="info-item">
                     <span class="info-label">Username</span>
-                    <span>@${user.userName || user.username}</span>
+                    <span>@${actualUsername}</span>
                 </div>` : ''}
                 ${user.email && !user.isGuest ? `
                 <div class="info-item">
