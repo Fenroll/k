@@ -560,7 +560,8 @@
                         avatar: userProfile.avatar, // Add avatar
                         deviceCount: deviceCount,
                         hasMobile: hasMobile,
-                        isGuest: false
+                        isGuest: false,
+                        devices: devices // Add device details
                     };
                 } else {
                     // Fallback for authenticated users whose profile might be missing
@@ -570,7 +571,8 @@
                         color: '#cccccc',
                         deviceCount: deviceCount,
                         hasMobile: hasMobile,
-                        isGuest: false
+                        isGuest: false,
+                        devices: devices // Add device details
                     };
                 }
             }
@@ -597,7 +599,8 @@
                     color: '#9E9E9E', // Default grey for guests
                     deviceCount: deviceCount,
                     hasMobile: hasMobile,
-                    isGuest: true
+                    isGuest: true,
+                    devices: devices // Add device details
                 };
             }
 
@@ -637,12 +640,29 @@
                     avatarHtml = `<span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:${onlineUser.color}; color:white; text-align:center; line-height:20px; font-size:10px; font-weight:bold; margin-right:8px; vertical-align:middle;">${onlineUser.userName.charAt(0).toUpperCase()}</span>`;
                 }
 
+                // Build device details if available
+                let deviceDetailsHtml = '';
+                if (onlineUser.devices && Object.keys(onlineUser.devices).length > 0) {
+                    deviceDetailsHtml = '<div style="margin-left:28px; margin-top:4px; font-size:0.75em; color:#666;">';
+                    Object.entries(onlineUser.devices).forEach(([devId, devData]) => {
+                        const shortDevId = devId.substring(0, 12);
+                        const deviceIcon = devData.isMobile ? '📱' : '🖥️';
+                        const deviceName = devData.deviceName || 'Unknown';
+                        const activeStatus = devData.isActive ? '✅' : '⏸️';
+                        deviceDetailsHtml += `<div>${deviceIcon} ${activeStatus} ${deviceName} (${shortDevId})</div>`;
+                    });
+                    deviceDetailsHtml += '</div>';
+                }
+
                 li.id = `online-user-${onlineUser.userId}`;
                 li.innerHTML = `
-                    <div style="display:flex; align-items:center;">
-                        ${avatarHtml}
-                        <span style="color: ${onlineUser.color}; font-weight: bold;">${onlineUser.userName}</span>
-                        <span style="margin-left:8px; font-size:0.9em; color:#888;">${userType}${mobileIcon} - ${onlineUser.deviceCount} device(s) online</span>
+                    <div style="display:flex; align-items:center; flex-direction:column; align-items:flex-start;">
+                        <div style="display:flex; align-items:center;">
+                            ${avatarHtml}
+                            <span style="color: ${onlineUser.color}; font-weight: bold;">${onlineUser.userName}</span>
+                            <span style="margin-left:8px; font-size:0.9em; color:#888;">${userType}${mobileIcon} - ${onlineUser.deviceCount} device(s) online</span>
+                        </div>
+                        ${deviceDetailsHtml}
                     </div>
                 `;
                 ul.appendChild(li);
