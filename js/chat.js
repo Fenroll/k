@@ -1857,7 +1857,7 @@ class ChatUIManager {
     const resolvedName = this.resolveName(msg.userName);
 
     const isCurrentUser = (window.currentUser.userId && msg.userId === window.currentUser.userId) || (window.currentUser.legacyChatId && msg.userId === window.currentUser.legacyChatId);
-    const messageBgColor = isCurrentUser ? '#e0f2fe' : 'var(--chat-secondary)';
+    const messageBgColor = isCurrentUser ? '#e8f5e9' : 'var(--chat-secondary)';
 
     // Avatar Logic
     let avatarHtml = '';
@@ -1987,6 +1987,121 @@ class ChatUIManager {
             this.showUserProfile(userId);
         });
     }
+
+    // Add listener for image preview
+    const images = msgEl.querySelectorAll('.chat-message-image');
+    images.forEach(img => {
+        img.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.openImageModal(img.dataset.imageUrl);
+        });
+    });
+  }
+
+  openImageModal(imageUrl) {
+    // Remove existing modal if any
+    const existingModal = document.getElementById('image-modal');
+    if (existingModal) existingModal.remove();
+
+    // Create modal overlay
+    const modal = document.createElement('div');
+    modal.id = 'image-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        cursor: pointer;
+    `;
+
+    // Create container for image and close button
+    const container = document.createElement('div');
+    container.style.cssText = `
+        position: relative;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        max-width: 90%;
+        max-height: 90%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.style.cssText = `
+        max-width: 100%;
+        max-height: calc(90vh - 80px);
+        object-fit: contain;
+        border-radius: 8px;
+        display: block;
+    `;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        background: white;
+        border: 2px solid #e5e7eb;
+        color: #374151;
+        font-size: 24px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    `;
+    closeBtn.onmouseover = () => {
+        closeBtn.style.background = '#f3f4f6';
+        closeBtn.style.borderColor = '#d1d5db';
+    };
+    closeBtn.onmouseout = () => {
+        closeBtn.style.background = 'white';
+        closeBtn.style.borderColor = '#e5e7eb';
+    };
+
+    container.appendChild(img);
+    container.appendChild(closeBtn);
+    modal.appendChild(container);
+    document.body.appendChild(modal);
+
+    // Close on click outside container
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+    
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        modal.remove();
+    });
+
+    // Prevent container click from closing modal
+    container.addEventListener('click', (e) => e.stopPropagation());
+
+    // Close on Escape key
+    const escHandler = (e) => {
+        if (e.key === 'Escape') {
+            modal.remove();
+            document.removeEventListener('keydown', escHandler);
+        }
+    };
+    document.addEventListener('keydown', escHandler);
   }
 
   showMessageOptions(messageId, messageKey, anchorEl) {
@@ -2111,6 +2226,10 @@ class ChatUIManager {
     menu = document.createElement('div');
     menu.className = 'chat-plus-menu';
     menu.innerHTML = `
+      <div class="plus-menu-item" data-type="image">
+        <img src="svg/chat/icon-image.svg">
+        Image
+      </div>
       <div class="plus-menu-item" data-type="gif">
         <img src="svg/chat/icon-gif.svg">
         GIFs
@@ -2127,7 +2246,11 @@ class ChatUIManager {
       item.onclick = () => {
         const type = item.dataset.type;
         menu.remove();
-        this.toggleMediaPicker(type);
+        if (type === 'image') {
+          this.openImageUpload();
+        } else {
+          this.toggleMediaPicker(type);
+        }
       };
     });
 
@@ -2239,6 +2362,74 @@ class ChatUIManager {
     this.chatFirebase.sendMessage(url);
     const picker = this.container.querySelector('.gif-picker-container');
     if (picker) picker.remove();
+  }
+
+  openImageUpload() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        this.uploadImage(file);
+      }
+    };
+    input.click();
+  }
+
+  async uploadImage(file) {
+    // Validate file size (10MB limit)
+    const MAX_SIZE = 10 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert('Image too large. Maximum size is 10MB.');
+      return;
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file.');
+      return;
+    }
+
+    // Show uploading indicator
+    const input = this.container.querySelector('.chat-input');
+    const originalPlaceholder = input.placeholder;
+    input.placeholder = 'Uploading image...';
+    input.disabled = true;
+
+    try {
+      // Get R2 worker URL from config or use default
+      const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev'; // TODO: Update this with your actual worker URL
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('userName', currentUser.userName || 'anonymous');
+      formData.append('path', `chat-images/${Date.now()}-${file.name}`);
+      formData.append('bucketType', 'chat'); // Use chat bucket
+
+      const response = await fetch(R2_WORKER_URL, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Upload failed');
+      }
+
+      const result = await response.json();
+      
+      // Send the image URL as a message
+      if (result.url) {
+        this.chatFirebase.sendMessage(result.url);
+      }
+    } catch (error) {
+      console.error('Image upload error:', error);
+      alert('Failed to upload image: ' + error.message);
+    } finally {
+      input.placeholder = originalPlaceholder;
+      input.disabled = false;
+    }
   }
 
   // Renaming old methods to stay consistent with new logic
@@ -2793,9 +2984,7 @@ class ChatUIManager {
       if (isImage) {
           return `
             <div class="chat-image-preview" style="margin-top: 5px;">
-              <a href="${url}" target="_blank">
-                <img src="${url}" alt="Image" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--chat-border); display: block; cursor: pointer;">
-              </a>
+              <img src="${url}" alt="Image" class="chat-message-image" data-image-url="${url}" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--chat-border); display: block; cursor: pointer;">
             </div>
           `;
       }
@@ -2805,9 +2994,36 @@ class ChatUIManager {
   }
 
   async deleteMessage(messageKey) {
+        // Find the message to check if it has an image
+        const msg = this.chatFirebase.messages.find(m => m.key === messageKey);
+        
         if (await this.chatFirebase.deleteMessage(messageKey)) {
             // Hide tooltip if it was showing for this message
             this.hideReactionTooltip();
+            
+            // Check if message contains an R2 image URL and delete it
+            if (msg && msg.text) {
+                const chatImageRegex = /https:\/\/chat\.coursebook\.lol\/([^\s]+)/g;
+                const matches = [...msg.text.matchAll(chatImageRegex)];
+                
+                for (const match of matches) {
+                    const imageKey = decodeURIComponent(match[1]);
+                    try {
+                        const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+                        await fetch(R2_WORKER_URL, {
+                            method: 'DELETE',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ 
+                                key: imageKey,
+                                bucketType: 'chat'
+                            })
+                        });
+                        console.log('Image deleted from R2:', imageKey);
+                    } catch (error) {
+                        console.error('Failed to delete image from R2:', error);
+                    }
+                }
+            }
             
             // Премахни локално веднага с анимация
             const messagesContainer = this.container.querySelector('.chat-messages');
@@ -3211,7 +3427,7 @@ class ChatUIManager {
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 12px 0;
+  padding: 12px 0 20px 0;
   display: flex;
   flex-direction: column;
   gap: 0;
