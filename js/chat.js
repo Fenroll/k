@@ -522,7 +522,8 @@ class ChatFirebaseREST {
         const processAndCallback = () => {
                 const groupedUsers = {};
                 const now = Date.now() + serverTimeOffset;
-                const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes
+                const GRACE_PERIOD_ACTIVE = 5 * 60 * 1000; // 5 minutes for temporary disconnections
+                const GRACE_PERIOD_CLOSED = 2 * 60 * 1000; // 2 minutes for closed tabs
 
                 const isUserOnline = (devices) => {
                     return Object.values(devices).some(device => {
@@ -536,13 +537,13 @@ class ChatFirebaseREST {
                             return true;
                         }
                         
-                        // 3. Grace period for backgrounded tabs
-                        if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) {
+                        // 3. Grace period for backgrounded tabs (still connected)
+                        if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD_ACTIVE) {
                             return true;
                         }
                         
-                        // 4. Grace period for disconnected devices
-                        if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) {
+                        // 4. Shorter grace period for disconnected devices (closed tabs)
+                        if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD_CLOSED) {
                             return true;
                         }
                         
@@ -1713,7 +1714,7 @@ class ChatUIManager {
             }
             
             <div class="profile-modal-name">${this.escapeHtml(resolvedName)}</div>
-            <div class="profile-modal-status">
+            <div class="profile-modal-status" style="color: ${isOnline ? '#22c55e' : '#9ca3af'}">
                 <span class="status-dot" style="background-color: ${isOnline ? '#22c55e' : '#9ca3af'}"></span>
                 ${isOnline ? 'Online' : 'Offline'}
             </div>
@@ -1733,11 +1734,6 @@ class ChatUIManager {
                 <div class="info-item">
                     <span class="info-label">Email</span>
                     <span>${user.email}</span>
-                </div>` : ''}
-                ${isOnline && user.hasMobile ? `
-                <div class="info-item">
-                    <span class="info-label">Platform</span>
-                    <span>📱 Mobile</span>
                 </div>` : ''}
             </div>
             
