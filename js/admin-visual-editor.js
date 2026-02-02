@@ -127,6 +127,7 @@
         function generateWeeksFromTemplate(config) {
             const weeks = [];
             const overrides = config.overrides || {};
+            const addedExamPeriods = new Set(); // Track which exam periods we've already added
 
             const processedTemplates = {};
             if (config.templates) {
@@ -153,14 +154,54 @@
                     }
                 }
 
+                // Auto-detect if this week overlaps with any exam period
+                let matchingExamPeriod = null;
+                const weekDate = new Date(weekStartDateStr);
+                const weekEndDate = new Date(weekDate);
+                weekEndDate.setDate(weekEndDate.getDate() + 6); // Week spans Monday to Sunday
+                
+                if (config.semesters) {
+                    for (const semKey in config.semesters) {
+                        const sem = config.semesters[semKey];
+                        if (sem.examPeriod && sem.examPeriod.start && sem.examPeriod.end) {
+                            const examStart = new Date(sem.examPeriod.start);
+                            const examEnd = new Date(sem.examPeriod.end);
+                            examStart.setHours(0, 0, 0, 0);
+                            examEnd.setHours(0, 0, 0, 0);
+                            weekDate.setHours(0, 0, 0, 0);
+                            weekEndDate.setHours(0, 0, 0, 0);
+                            
+                            // Check if week overlaps with exam period at all
+                            if (weekDate <= examEnd && weekEndDate >= examStart) {
+                                matchingExamPeriod = { key: semKey, ...sem.examPeriod };
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                // Skip weeks that overlap with exam periods - but add the exam period once
+                if (matchingExamPeriod) {
+                    const examKey = `${matchingExamPeriod.start}_${matchingExamPeriod.end}`;
+                    if (!addedExamPeriods.has(examKey)) {
+                        addedExamPeriods.add(examKey);
+                        weeks.push({
+                            weekNumber: weekNumber,
+                            startDate: matchingExamPeriod.start,
+                            endDate: matchingExamPeriod.end,
+                            schedule: [],
+                            semester: semesterKey,
+                            type: 'exam'
+                        });
+                    }
+                    return; // Skip this week
+                }
+
                 const currentTemplate = processedTemplates[semesterKey] || [];
                 let schedule = JSON.parse(JSON.stringify(currentTemplate));
                 
-                if (week.type === 'exam') {
-                    schedule = [];
-                }
-                
-                if (week.type !== 'exam' && overrides[weekNumber]) {
+                // Apply overrides
+                if (overrides[weekNumber]) {
                     overrides[weekNumber].forEach(override => {
                         if (override.removeDay) {
                             schedule = schedule.filter(item => item.day !== override.removeDay);
@@ -198,8 +239,7 @@
                     startDate: week.startDate,
                     schedule: schedule,
                     semester: semesterKey,
-                    type: week.type || 'normal',
-                    endDate: week.endDate
+                    type: 'normal'
                 });
             });
             return weeks;
@@ -258,8 +298,21 @@
             const start = new Date(currentWeek.startDate);
             let end;
             
-            if (currentWeek.type === 'exam' && currentWeek.endDate) {
-                end = new Date(currentWeek.endDate);
+            if (currentWeek.type === 'exam') {
+                // For exam weeks, calculate end date from exam period or use endDate if set
+                if (currentWeek.endDate) {
+                    end = new Date(currentWeek.endDate);
+                } else {
+                    // Try to get end date from the semester's exam period
+                    const currentSem = currentScheduleData.semesters[currentWeek.semester];
+                    if (currentSem && currentSem.examPeriod && currentSem.examPeriod.end) {
+                        end = new Date(currentSem.examPeriod.end);
+                    } else {
+                        // Fallback: use week end
+                        end = new Date(start);
+                        end.setDate(end.getDate() + 6);
+                    }
+                }
                 infoEl.style.color = '#d87060';
                 infoEl.textContent = `EXAM SEASON: ${start.toLocaleDateString('bg-BG', options)} - ${end.toLocaleDateString('bg-BG', options)}`;
             } else {

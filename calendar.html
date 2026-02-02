@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202602011rz1"></script>
+  <script src="js/auth-guard.js?v=20260202rnd"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1601,6 +1601,7 @@
     function generateWeeksFromTemplate(config) {
       const weeks = [];
       const overrides = config.overrides || {};
+      const addedExamPeriods = new Set(); // Track which exam periods we've already added
       
       // Pre-parse additionalInfo for templates
       const processedTemplates = {};
@@ -1643,6 +1644,49 @@
              if (weekStartDateStr >= config.semesters.summer.startDate) {
                  semesterKey = 'summer';
              }
+        }
+        
+        // Check if this week overlaps with an exam period
+        let matchingExamPeriod = null;
+        const weekDate = new Date(weekStartDateStr);
+        const weekEndDate = new Date(weekDate);
+        weekEndDate.setDate(weekEndDate.getDate() + 6); // Week spans Monday to Sunday
+        
+        if (config.semesters) {
+            for (const semKey in config.semesters) {
+                const sem = config.semesters[semKey];
+                if (sem.examPeriod && sem.examPeriod.start && sem.examPeriod.end) {
+                    const examStart = new Date(sem.examPeriod.start);
+                    const examEnd = new Date(sem.examPeriod.end);
+                    examStart.setHours(0, 0, 0, 0);
+                    examEnd.setHours(0, 0, 0, 0);
+                    weekDate.setHours(0, 0, 0, 0);
+                    weekEndDate.setHours(0, 0, 0, 0);
+                    
+                    // Check if week overlaps with exam period at all
+                    if (weekDate <= examEnd && weekEndDate >= examStart) {
+                        matchingExamPeriod = { key: semKey, ...sem.examPeriod };
+                        break;
+                    }
+                }
+            }
+        }
+        
+        // Skip weeks that overlap with exam periods - but add the exam period once
+        if (matchingExamPeriod) {
+            const examKey = `${matchingExamPeriod.start}_${matchingExamPeriod.end}`;
+            if (!addedExamPeriods.has(examKey)) {
+                addedExamPeriods.add(examKey);
+                weeks.push({
+                    weekNumber: weekNumber,
+                    startDate: matchingExamPeriod.start,
+                    endDate: matchingExamPeriod.end,
+                    schedule: [],
+                    semester: semesterKey,
+                    type: 'exam'
+                });
+            }
+            return; // Skip this week
         }
         
         const currentTemplate = processedTemplates[semesterKey] || [];
@@ -1696,7 +1740,8 @@
           weekNumber: weekNumber,
           startDate: week.startDate,
           schedule: schedule,
-          semester: semesterKey
+          semester: semesterKey,
+          type: 'normal'
         });
       });
       
@@ -2085,8 +2130,8 @@
         endDate.setDate(endDate.getDate() + 6); // Sunday (понеделник + 6 дни = неделя)
       }
       
-      // Get week type
-      const weekType = getWeekType(currentWeek.startDate);
+      // Get week type - use the type from the week object itself (already calculated during generation)
+      const weekType = currentWeek.type || getWeekType(currentWeek.startDate);
       
       // Format dates
       const months = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 
@@ -2561,7 +2606,7 @@
 
 <script src="js/user-identity.js?v=202404231000"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202602011rz1"></script>
+    <script src="js/chat.js?v=20260202rnd"></script>
 
     <script src="js/presence.js"></script>
 <script src="js/version-check.js"></script>
