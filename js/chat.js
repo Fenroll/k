@@ -108,13 +108,13 @@ class ChatFirebaseREST {
   }
 
   async loadMessages() {
-    // В SDK режим, това се използва рядко, защото startPolling поддържа всичко
+    // Load initial batch of messages (last 200)
     await this._ensureInit();
     
     try {
       const messagesRef = firebase.database().ref(`messages/${this.documentId}`);
-      // Limit to last 500 to prevent lagging
-      const q = messagesRef.orderByChild('timestamp').limitToLast(500);
+      // Load last 200 messages initially
+      const q = messagesRef.orderByChild('timestamp').limitToLast(200);
       
       const snapshot = await q.once('value');
       if (!snapshot.exists()) return [];
@@ -129,9 +129,70 @@ class ChatFirebaseREST {
       // Sort
       messages.sort((a, b) => a.timestamp - b.timestamp);
       this.messages = messages;
+      this.oldestLoadedTimestamp = messages.length > 0 ? messages[0].timestamp : null;
+      this.hasMoreMessages = messages.length === 200; // If we got 200, there might be more
+      
+      console.log(`✅ Initial load: ${messages.length} messages, hasMore: ${this.hasMoreMessages}`);
+      
       return messages;
     } catch (error) {
       console.error('SDK Load error:', error);
+      return [];
+    }
+  }
+
+  async loadMoreMessages(batchSize = 30) {
+    // Load older messages for infinite scroll
+    if (!this.hasMoreMessages || this.isLoadingMore) return [];
+    
+    await this._ensureInit();
+    this.isLoadingMore = true;
+    
+    console.log(`📥 Loading more messages (batch: ${batchSize}, current total: ${this.messages.length})`);
+    
+    try {
+      const messagesRef = firebase.database().ref(`messages/${this.documentId}`);
+      // Load messages older than the oldest one we have
+      const q = messagesRef.orderByChild('timestamp')
+        .endBefore(this.oldestLoadedTimestamp)
+        .limitToLast(batchSize);
+      
+      const snapshot = await q.once('value');
+      if (!snapshot.exists()) {
+        this.hasMoreMessages = false;
+        this.isLoadingMore = false;
+        console.log('📭 No more messages to load');
+        return [];
+      }
+      
+      const data = snapshot.val();
+      const newMessages = Object.keys(data).map(key => ({
+        ...data[key],
+        key: key,
+        id: key
+      }));
+
+      // Sort
+      newMessages.sort((a, b) => a.timestamp - b.timestamp);
+      
+      // Prepend to existing messages
+      this.messages = [...newMessages, ...this.messages];
+      
+      // Update oldest timestamp
+      if (newMessages.length > 0) {
+        this.oldestLoadedTimestamp = newMessages[0].timestamp;
+      }
+      
+      // If we got fewer than requested, we've reached the beginning
+      this.hasMoreMessages = newMessages.length === batchSize;
+      this.isLoadingMore = false;
+      
+      console.log(`✅ Loaded ${newMessages.length} older messages. Total now: ${this.messages.length}, hasMore: ${this.hasMoreMessages}`);
+      
+      return newMessages;
+    } catch (error) {
+      console.error('SDK Load More error:', error);
+      this.isLoadingMore = false;
       return [];
     }
   }
@@ -250,42 +311,62 @@ class ChatFirebaseREST {
 
     this._ensureInit().then(() => {
         const messagesRef = firebase.database().ref(`messages/${this.documentId}`);
-        // Realtime Listener
-        const q = messagesRef.orderByChild('timestamp').limitToLast(500);
+        
+        // Get the latest timestamp from already loaded messages
+        const latestTimestamp = this.messages.length > 0 
+            ? this.messages[this.messages.length - 1].timestamp 
+            : Date.now();
+        
+        // Only listen for messages AFTER the ones we already have
+        const q = messagesRef.orderByChild('timestamp').startAfter(latestTimestamp);
 
-        const unsubscribe = q.on('value', (snapshot) => {
-            const messages = [];
-            snapshot.forEach((child) => {
-                const val = child.val();
-                messages.push({
-                    ...val,
-                    key: child.key,
-                    id: child.key,
-                    // Handle serverTimestamp properly if it's still processing (can be null briefly)
-                    timestamp: val.timestamp || Date.now()
-                });
-            });
+        const unsubscribe = q.on('child_added', (snapshot) => {
+            const val = snapshot.val();
+            const newMessage = {
+                ...val,
+                key: snapshot.key,
+                id: snapshot.key,
+                timestamp: val.timestamp || Date.now()
+            };
             
-            // Check for new messages for notifications
-            if (messages.length > 0) {
-                 const lastMsg = messages[messages.length - 1];
-                 // Initialize on first data arrival
-                 if (!this.lastNotifiedId) {
-                     this.lastNotifiedId = lastMsg.id;
-                 } else if (lastMsg.id > this.lastNotifiedId) {
-                     // Firebase IDs are chronological, so newId > oldId means addition
-                     this.lastNotifiedId = lastMsg.id;
-                     this.listeners.forEach(listener => listener(lastMsg));
-                 } else if (lastMsg.id < this.lastNotifiedId) {
-                     // A deletion happened at the end of the list, update tracker without notifying
-                     this.lastNotifiedId = lastMsg.id;
-                 }
-            } // Can be removed, frequent
-
-            this.messages = messages;
-            callback(messages);
+            // Only add if not already in messages array
+            const exists = this.messages.find(m => m.id === newMessage.id);
+            if (!exists) {
+                this.messages.push(newMessage);
+                this.messages.sort((a, b) => a.timestamp - b.timestamp);
+                
+                // Notify listeners of new message
+                this.listeners.forEach(listener => listener(newMessage));
+                this.lastNotifiedId = newMessage.id;
+                
+                callback(this.messages);
+            }
         });
         this.unsubscribers.push(unsubscribe);
+        
+        // Listen for deletions (all messages, not just new ones)
+        const qAll = messagesRef.orderByChild('timestamp');
+        const unsubscribeRemoved = qAll.on('child_removed', (snapshot) => {
+            this.messages = this.messages.filter(m => m.id !== snapshot.key);
+            callback(this.messages);
+        });
+        this.unsubscribers.push(unsubscribeRemoved);
+        
+        // Listen for changes (edits)
+        const unsubscribeChanged = qAll.on('child_changed', (snapshot) => {
+            const val = snapshot.val();
+            const idx = this.messages.findIndex(m => m.id === snapshot.key);
+            if (idx !== -1) {
+                this.messages[idx] = {
+                    ...val,
+                    key: snapshot.key,
+                    id: snapshot.key,
+                    timestamp: val.timestamp || Date.now()
+                };
+                callback(this.messages);
+            }
+        });
+        this.unsubscribers.push(unsubscribeChanged);
     });
   }
 
@@ -666,6 +747,62 @@ class ChatUIManager {
     return currentName;
   }
 
+  getUserInfo(userId, userName) {
+    // Check all possible sources for user info (avatar, color)
+    let avatar = null;
+    let color = null;
+    
+    // 1. Check userProfiles (site_users) by ID
+    if (this.userProfiles && userId) {
+      const profile = this.userProfiles[userId] || this.userProfiles[String(userId)];
+      if (profile) {
+        avatar = profile.avatar;
+        color = profile.color;
+        if (avatar && color) return { avatar, color };
+      }
+    }
+    
+    // 2. Check userProfiles by name (case-insensitive)
+    if (this.userProfiles && userName) {
+      const searchName = userName.toLowerCase();
+      const profile = Object.values(this.userProfiles).find(p => 
+        (p.username && p.username.toLowerCase() === searchName) || 
+        (p.displayName && p.displayName.toLowerCase() === searchName) ||
+        (p.userName && p.userName.toLowerCase() === searchName)
+      );
+      if (profile) {
+        avatar = avatar || profile.avatar;
+        color = color || profile.color;
+        if (avatar && color) return { avatar, color };
+      }
+    }
+    
+    // 3. Check activeUsers (online presence)
+    if (this.activeUsers && userId) {
+      const user = this.activeUsers[userId] || this.activeUsers[String(userId)];
+      if (user) {
+        avatar = avatar || user.avatar;
+        color = color || user.color;
+        if (avatar && color) return { avatar, color };
+      }
+    }
+    
+    // 4. Check activeUsers by name
+    if (this.activeUsers && userName) {
+      const searchName = userName.toLowerCase();
+      const user = Object.values(this.activeUsers).find(u => 
+        (u.userName && u.userName.toLowerCase() === searchName) ||
+        (u.displayName && u.displayName.toLowerCase() === searchName)
+      );
+      if (user) {
+        avatar = avatar || user.avatar;
+        color = color || user.color;
+      }
+    }
+    
+    return { avatar, color };
+  }
+
   fixInputLayout() {
     const inputArea = this.container.querySelector('.chat-input-area');
     if (!inputArea) return;
@@ -913,7 +1050,17 @@ class ChatUIManager {
       // Зареди първоначални съобщения - от localStorage или Firebase
       let messages = this.loadFromCache();
       if (!messages || messages.length === 0) {
+        console.log('📂 No cache, loading from Firebase...');
         messages = await this.chatFirebase.loadMessages();
+      } else {
+        console.log(`💾 Loaded ${messages.length} messages from cache`);
+        // Restore pagination state from cached messages
+        this.chatFirebase.messages = messages;
+        if (messages.length > 0) {
+          this.chatFirebase.oldestLoadedTimestamp = messages[0].timestamp;
+          // Assume there might be more if we have messages
+          this.chatFirebase.hasMoreMessages = true;
+        }
       }
       
       // Зареди мапинги на имена
@@ -932,7 +1079,12 @@ class ChatUIManager {
       // Polling за нови съобщения
       this.chatFirebase.startPolling((messages) => {
         this.saveToCache(messages);
-        this.renderMessages(messages);
+        // Throttle renders to prevent flickering
+        if (this.renderTimeout) return;
+        this.renderTimeout = setTimeout(() => {
+          this.renderTimeout = null;
+          this.renderMessages(messages);
+        }, 100);
       }, 2500);
 
       // Real-time слушател за ВСИЧКИ реакции
@@ -942,18 +1094,21 @@ class ChatUIManager {
       });
 
       // New site-wide presence polling
+      let profilesLoaded = false;
       this.chatFirebase.startSiteWidePresencePolling((data) => {
         // Cache user data
         this.activeUsers = data.users || {};
         this.userProfiles = data.allUsers || {};
         
-        // Re-render messages to update avatars/names now that reconciliation is flicker-free
-        if (this.lastMessages.length > 0) {
-            this.renderMessages(this.lastMessages);
-        }
-
+        // Update member list and header
         this.updateNotificationButton(data);
         this.updateHeaderOnlineCount(data.count);
+        
+        // Re-render messages ONCE when profiles first load to update avatars
+        if (!profilesLoaded && Object.keys(this.userProfiles).length > 0 && this.lastMessages.length > 0) {
+          profilesLoaded = true;
+          this.renderMessages(this.lastMessages);
+        }
       });
 
       // Typing indicators polling
@@ -1010,10 +1165,41 @@ class ChatUIManager {
       // Инициализирай бутон за уведомления един път
       this.initNotificationButton();
       
+      // Setup lazy loading for images using Intersection Observer
+      this.setupLazyLoading();
+      
       // console.log('✓✓✓ ChatUIManager готов'); // Can be removed
     } catch (error) {
       console.error('Init error:', error);
     }
+  }
+
+  setupLazyLoading() {
+    // Create Intersection Observer for lazy loading images
+    this.imageObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          const img = entry.target;
+          const src = img.dataset.src;
+          if (src) {
+            img.src = src;
+            img.removeAttribute('data-src');
+            img.classList.remove('lazy-image');
+            this.imageObserver.unobserve(img);
+          }
+        }
+      });
+    }, {
+      root: this.container.querySelector('.chat-messages'),
+      rootMargin: '50px' // Start loading 50px before image enters viewport
+    });
+  }
+
+  observeLazyImages() {
+    // Observe all lazy images in the messages container
+    if (!this.imageObserver) return; // Safety check
+    const lazyImages = this.container.querySelectorAll('.lazy-image');
+    lazyImages.forEach(img => this.imageObserver.observe(img));
   }
 
   loadFromCache() {
@@ -1135,10 +1321,21 @@ class ChatUIManager {
     }
 
     if (messagesContainer) {
+      let scrollTimeout;
       messagesContainer.addEventListener('scroll', () => {
         const isAtBottom =
           messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 50;
         this.autoScroll = isAtBottom;
+        
+        // Throttle infinite scroll check
+        if (scrollTimeout) return;
+        scrollTimeout = setTimeout(() => {
+          scrollTimeout = null;
+          // Infinite scroll: Load more when scrolled to top
+          if (messagesContainer.scrollTop < 100 && !this.isLoadingMore && this.chatFirebase.hasMoreMessages) {
+            this.loadMoreMessages();
+          }
+        }, 200);
       });
     }
   }
@@ -1719,7 +1916,8 @@ class ChatUIManager {
         this.hideReactionTooltip();
     }
 
-    // 2. Add or Update messages
+    // 2. Build complete message list with date separators
+    const fragment = document.createDocumentFragment();
     let prevMsg = null;
     let lastDateStr = null;
 
@@ -1735,7 +1933,10 @@ class ChatUIManager {
                 dateSep.className = 'chat-date-separator';
                 dateSep.dataset.date = dateStr;
                 dateSep.innerHTML = `<span>${dateStr}</span>`;
-                messagesContainer.appendChild(dateSep);
+                fragment.appendChild(dateSep);
+            } else {
+                // Move existing separator to fragment in correct position
+                fragment.appendChild(dateSep);
             }
             lastDateStr = dateStr;
         }
@@ -1748,36 +1949,37 @@ class ChatUIManager {
         let existingEl = messagesContainer.querySelector(`.chat-message[data-message-id="${msg.id}"]`);
         if (!existingEl) {
             const messageEl = this.createMessageElement(msg, messages, isContinuation);
-            messagesContainer.appendChild(messageEl);
-            this.attachMessageListeners(messageEl);
+            fragment.appendChild(messageEl);
+            // Will attach listeners after append
         } else {
-            // Check if profile data arrived for a placeholder message
-            // ONLY refresh if we now have a real image to show (currentAvatar is long string)
+            // Move existing element to fragment
+            fragment.appendChild(existingEl);
+            
+            // Update if needed
             const profile = this.userProfiles && (this.userProfiles[msg.userId] || Object.values(this.userProfiles).find(p => (p.username||"").toLowerCase() === (msg.userName||"").toLowerCase()));
             const hasRealAvatar = profile && profile.avatar && typeof profile.avatar === 'string' && profile.avatar.length > 5;
             const isShowingPlaceholder = !existingEl.querySelector('img.message-avatar') || existingEl.querySelector('img.message-avatar').style.display === 'none';
             
             if (hasRealAvatar && isShowingPlaceholder && !isContinuation) {
-                // Refresh in place to show new avatar/name
                 const newMessageEl = this.createMessageElement(msg, messages, isContinuation);
                 existingEl.replaceWith(newMessageEl);
-                this.attachMessageListeners(newMessageEl);
+                fragment.appendChild(newMessageEl);
             } else {
                 // Check if message was edited
                 const textEl = existingEl.querySelector('.message-text');
                 if (textEl) {
                     const currentText = msg.text;
                     const isEdited = !!msg.edited;
-                    // Store text in data-attribute for efficient change tracking
-                                    if (textEl.getAttribute('data-raw-text') !== currentText) {
-                                        textEl.innerHTML = `
-                                            ${this.linkifyText(currentText)}
-                                            ${isEdited ? `<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>` : ''}
-                                        `;
-                                        textEl.setAttribute('data-raw-text', currentText);
-                                    }                }
+                    if (textEl.getAttribute('data-raw-text') !== currentText) {
+                        textEl.innerHTML = `
+                            ${this.linkifyText(currentText)}
+                            ${isEdited ? `<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>` : ''}
+                        `;
+                        textEl.setAttribute('data-raw-text', currentText);
+                    }
+                }
 
-                // Standard continuation update - only touch visibility if changed
+                // Update continuation styling
                 const avatar = existingEl.querySelector('.message-avatar');
                 if (avatar) {
                     const targetVis = isContinuation ? 'hidden' : 'visible';
@@ -1791,6 +1993,18 @@ class ChatUIManager {
             }
         }
         prevMsg = msg;
+    });
+
+    // Clear and re-append all messages in correct order
+    messagesContainer.innerHTML = '';
+    messagesContainer.appendChild(fragment);
+    
+    // Attach listeners to new messages
+    messagesContainer.querySelectorAll('.chat-message').forEach(el => {
+        if (!el.hasAttribute('data-listeners-attached')) {
+            this.attachMessageListeners(el);
+            el.setAttribute('data-listeners-attached', 'true');
+        }
     });
 
     this.recalculateUnreadCount(messages);
@@ -1810,6 +2024,9 @@ class ChatUIManager {
     if (this.activeTyping && Object.keys(this.activeTyping).length > 0) {
         this.renderTypingIndicators(this.activeTyping);
     }
+
+    // Setup lazy loading for newly rendered images
+    this.observeLazyImages();
 
     if (scrollWasAtBottom && hasNewMessage) {
       setTimeout(() => {
@@ -1840,20 +2057,10 @@ class ChatUIManager {
       `;
     }
 
-    // Dynamic Profile Lookup - Prioritize live data from site_users
-    let userProfile = this.userProfiles ? (this.userProfiles[msg.userId] || this.userProfiles[String(msg.userId)] || null) : null;
-    
-    // Fallback: search by name in profiles if ID lookup failed (case-insensitive)
-    if (!userProfile && this.userProfiles) {
-        const searchName = (msg.userName || "").toLowerCase();
-        userProfile = Object.values(this.userProfiles).find(p => 
-            (p.username && p.username.toLowerCase() === searchName) || 
-            (p.displayName && p.displayName.toLowerCase() === searchName)
-        ) || null;
-    }
-
-    const currentAvatar = (userProfile && userProfile.avatar) ? userProfile.avatar : msg.userAvatar; 
-    const currentColor = (userProfile && userProfile.color) ? userProfile.color : (msg.userColor || '#ccc'); 
+    // Robust avatar/color lookup - check all sources
+    const userInfo = this.getUserInfo(msg.userId, msg.userName);
+    const currentAvatar = userInfo.avatar || msg.userAvatar; 
+    const currentColor = userInfo.color || msg.userColor || '#ccc'; 
     const resolvedName = this.resolveName(msg.userName);
 
     const isCurrentUser = (window.currentUser.userId && msg.userId === window.currentUser.userId) || (window.currentUser.legacyChatId && msg.userId === window.currentUser.legacyChatId);
@@ -2524,6 +2731,129 @@ class ChatUIManager {
     }
   }
 
+  async loadMoreMessages() {
+    if (this.isLoadingMore || !this.chatFirebase.hasMoreMessages) {
+      return;
+    }
+    
+    this.isLoadingMore = true;
+    const messagesContainer = this.container.querySelector('.chat-messages');
+    
+    // Show loading indicator at top
+    let loadingIndicator = messagesContainer.querySelector('.loading-more-indicator');
+    if (!loadingIndicator) {
+      loadingIndicator = document.createElement('div');
+      loadingIndicator.className = 'loading-more-indicator';
+      loadingIndicator.style.cssText = `
+        text-align: center;
+        padding: 10px;
+        color: #888;
+        font-size: 12px;
+      `;
+      loadingIndicator.textContent = 'Loading older messages...';
+      messagesContainer.prepend(loadingIndicator);
+    }
+    
+    // Get current first message to restore position
+    const firstMessage = messagesContainer.querySelector('.chat-message');
+    const firstMessageId = firstMessage ? firstMessage.dataset.messageId : null;
+    
+    // Load more messages
+    const oldCount = this.chatFirebase.messages.length;
+    const newMessages = await this.chatFirebase.loadMoreMessages(30);
+    
+    // Remove loading indicator
+    if (loadingIndicator) loadingIndicator.remove();
+    
+    if (newMessages.length > 0) {
+      // Only insert new messages at the top
+      this.prependMessages(newMessages);
+      
+      // Restore scroll to the previous first message
+      if (firstMessageId) {
+        const firstMsg = messagesContainer.querySelector(`[data-message-id="${firstMessageId}"]`);
+        if (firstMsg) {
+          firstMsg.scrollIntoView({ block: 'start' });
+          // Add small offset to account for loading indicator space
+          messagesContainer.scrollTop -= 10;
+        }
+      }
+    }
+    
+    this.isLoadingMore = false;
+  }
+
+  prependMessages(messages) {
+    const messagesContainer = this.container.querySelector('.chat-messages');
+    if (!messagesContainer || messages.length === 0) return;
+
+    const fragment = document.createDocumentFragment();
+    let prevMsg = null;
+    let lastDateStr = null;
+    
+    // Get the date of the first existing message to avoid duplicate separator
+    const firstExistingMessage = messagesContainer.querySelector('.chat-message');
+    const firstExistingDate = firstExistingMessage ? 
+      new Date(parseInt(firstExistingMessage.dataset.timestamp || 0)).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : 
+      null;
+    
+    messages.forEach((msg, index) => {
+      const msgDate = new Date(msg.timestamp);
+      const dateStr = msgDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
+      
+      // Add date separator only when date changes
+      if (dateStr !== lastDateStr) {
+        // Check if this is the last message we're adding and it has the same date as the first existing message
+        const isLastNewMessage = (index === messages.length - 1);
+        const sameAsExisting = (dateStr === firstExistingDate);
+        
+        // Only add separator if it's not a duplicate with existing messages
+        if (!(isLastNewMessage && sameAsExisting)) {
+          // Remove existing date separator for this date if present
+          const existingDateSep = messagesContainer.querySelector(`.chat-date-separator[data-date="${dateStr}"]`);
+          if (existingDateSep) {
+            existingDateSep.remove();
+          }
+          
+          const dateSep = document.createElement('div');
+          dateSep.className = 'chat-date-separator';
+          dateSep.dataset.date = dateStr;
+          dateSep.innerHTML = `<span>${dateStr}</span>`;
+          fragment.appendChild(dateSep);
+        }
+        lastDateStr = dateStr;
+      }
+      
+      // Check continuation
+      let isContinuation = false;
+      if (prevMsg && prevMsg.userId === msg.userId && (msg.timestamp - prevMsg.timestamp < 3 * 60 * 1000)) {
+        isContinuation = true;
+      }
+      
+      // Create and add message element
+      const messageEl = this.createMessageElement(msg, this.chatFirebase.messages, isContinuation);
+      messageEl.dataset.timestamp = msg.timestamp; // Store timestamp for date checks
+      fragment.appendChild(messageEl);
+      
+      prevMsg = msg;
+    });
+    
+    // Prepend all new messages at once
+    messagesContainer.prepend(fragment);
+    
+    // Attach listeners to new messages
+    messages.forEach(msg => {
+      const el = messagesContainer.querySelector(`[data-message-id="${msg.id}"]`);
+      if (el && !el.hasAttribute('data-listeners-attached')) {
+        this.attachMessageListeners(el);
+        el.setAttribute('data-listeners-attached', 'true');
+      }
+    });
+    
+    // Setup lazy loading for new images
+    this.observeLazyImages();
+  }
+
   showReactionPicker(messageId) {
     // Премахни стар picker ако съществува
     const oldPicker = document.querySelector('.reaction-picker');
@@ -2984,7 +3314,7 @@ class ChatUIManager {
       if (isImage) {
           return `
             <div class="chat-image-preview" style="margin-top: 5px;">
-              <img src="${url}" alt="Image" class="chat-message-image" data-image-url="${url}" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--chat-border); display: block; cursor: pointer;">
+              <img data-src="${url}" alt="Image" class="chat-message-image lazy-image" data-image-url="${url}" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--chat-border); display: block; cursor: pointer; background: #f3f4f6;">
             </div>
           `;
       }
