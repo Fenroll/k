@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202602021hnm"></script>
+  <script src="js/auth-guard.js?v=20260215168c"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -2244,25 +2244,27 @@
     
     // Update dates in table header
     function updateTableHeaderDates(startDate) {
-      const headerCells = document.querySelectorAll('#scheduleHeader th .date-label');
-      const headerThs = document.querySelectorAll('#scheduleHeader th');
+      const headerCells = document.querySelectorAll('#scheduleGrid .header-cell:not(.time-header)');
       const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
       const currentDay = getCurrentDay();
+
+      if (!headerCells.length) return;
       
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < Math.min(5, headerCells.length); i++) {
         const date = new Date(startDate);
         date.setDate(date.getDate() + i);
         
         const day = date.getDate();
         const month = date.getMonth() + 1; // Month is 0-indexed
+        const dateStr = `${day}.${month < 10 ? '0' + month : month}`;
         
-        headerCells[i].textContent = `${day}.${month < 10 ? '0' + month : month}`;
+        headerCells[i].innerHTML = `<div>${days[i]}</div><div style="font-weight:400; font-size: 0.9em; opacity: 0.9; margin-top: 2px;">${dateStr}</div>`;
         
         // Add current-day class if this is today
         if (days[i] === currentDay) {
-          headerThs[i].classList.add('current-day');
+          headerCells[i].style.backgroundColor = 'var(--col-pine)';
         } else {
-          headerThs[i].classList.remove('current-day');
+          headerCells[i].style.backgroundColor = '';
         }
       }
     }
@@ -2606,7 +2608,7 @@
 
 <script src="js/user-identity.js?v=202404231000"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202602021hnm"></script>
+    <script src="js/chat.js?v=20260215168c"></script>
 
     <script src="js/presence.js"></script>
 <script src="js/version-check.js"></script>

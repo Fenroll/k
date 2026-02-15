@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202602021hnm"></script>
+  <script src="js/auth-guard.js?v=20260215168c"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1095,7 +1095,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=202602021hnm"></script>
+  <script src="courses.generated.js?v=20260215168c"></script>
 </head>
 <body>
 <!-- Right-side overlay for course card click -->
@@ -1211,43 +1211,237 @@
           });
         });
       }
-    });// Generate a consistent color based on course ID
-function generateColorFromId(id, isArchived = false) {
-  // Remove any non-numeric characters and convert to number
-  const numericId = parseInt(id.replace(/\D/g, ''), 10) || 0;
-  
-  // Predefined color palette for better aesthetics
-  const colors = [
-    '#588157', // Fern
-    '#43a047', // Green
-    '#fbc02d', // Yellow
-    '#588157', // Fern
-    '#e53935', // Red
-    '#ff5722', // Orange
-    '#009688', // Teal
-    '#795548', // Brown
-    '#607d8b', // Blue Grey
-    '#f57c00', // Orange (darker)
-    '#3a5a40', // Hunter Green
-    '#388e3c', // Green (darker)
-    '#3a5a40', // Hunter Green
-    '#c62828', // Red (darker)
-    '#00695c', // Teal (darker)
-    '#5d4037'  // Brown (darker)
+    });
+
+const COURSE_COLORS = [
+  // Greens / teals
+  '#6fcf97', '#62d7a1', '#7ad66f', '#7cc6a6', '#75d0b1', '#8dd3b3', '#98e0cc', '#7ec8c3', '#66d1c2', '#58c9b9', '#4fd1a6', '#70d6b5',
+  // Blues / cyans
+  '#81c7f5', '#5fa8ff', '#6ea8fe', '#4fc3f7', '#74b9d6', '#8fc0ff', '#7da0fa', '#9bb3ff', '#a8d8ff', '#6ec5ff', '#5fb8f9', '#7fb7ff',
+  // Yellows
+  '#ffe066', '#ffd166', '#f6d365', '#ffd57e', '#f4c95d', '#f9d976', '#ffdf8a', '#f7e27d', '#f3d86f', '#f6cf65',
+  // Reds / pinks
+  '#ff6f7d', '#ff7f7f', '#ff8b94', '#ff8fa3', '#ff9a8b', '#f28b82', '#ff7a8a', '#ff8298', '#ff7388', '#f97f7f', '#ff647c', '#ff5f75', '#ff6b7a',
+  // Purples
+  '#c8a2ff', '#bfa6ff', '#d4a5ff', '#c7b8ff', '#b39ddb', '#c6a4ff',
+  // Limited oranges / browns (reduced)
+  '#ffb46a', '#f9a66c', '#d7b899', '#cfa18d'
   ];
-  
-  // For archived courses, use an offset to get different colors
-  let colorIndex;
-  if (isArchived) {
-    // Use a different offset (half the palette) for archived courses
-    const offset = Math.floor(colors.length / 2);
-    colorIndex = (numericId + offset) % colors.length;
-  } else {
-    colorIndex = numericId % colors.length;
+
+function generateColorFromId(id, isArchived = false) {
+  const baseId = String(id || '0');
+
+  // Deterministic pseudo-random hash from ID
+  const seed = isArchived ? `${baseId}_archived` : baseId;
+  let hash = 2166136261;
+  for (let i = 0; i < seed.length; i++) {
+    hash ^= seed.charCodeAt(i);
+    hash = (hash * 16777619) >>> 0;
   }
-  
-  // Use modulo to ensure we always get a valid color index
-  return colors[colorIndex];
+
+  const colorIndex = hash % COURSE_COLORS.length;
+  return COURSE_COLORS[colorIndex];
+}
+
+function hexToRgb(hex) {
+  const normalized = hex.replace('#', '');
+  return {
+    r: parseInt(normalized.substring(0, 2), 16),
+    g: parseInt(normalized.substring(2, 4), 16),
+    b: parseInt(normalized.substring(4, 6), 16)
+  };
+}
+
+function colorDistance(c1, c2) {
+  const a = hexToRgb(c1);
+  const b = hexToRgb(c2);
+  const dr = a.r - b.r;
+  const dg = a.g - b.g;
+  const db = a.b - b.b;
+  return dr * dr + dg * dg + db * db;
+}
+
+function rgbToHsl(r, g, b) {
+  const rn = r / 255;
+  const gn = g / 255;
+  const bn = b / 255;
+  const max = Math.max(rn, gn, bn);
+  const min = Math.min(rn, gn, bn);
+  const delta = max - min;
+
+  let h = 0;
+  const l = (max + min) / 2;
+  let s = 0;
+
+  if (delta !== 0) {
+    s = delta / (1 - Math.abs(2 * l - 1));
+    switch (max) {
+      case rn:
+        h = 60 * (((gn - bn) / delta) % 6);
+        break;
+      case gn:
+        h = 60 * (((bn - rn) / delta) + 2);
+        break;
+      default:
+        h = 60 * (((rn - gn) / delta) + 4);
+        break;
+    }
+  }
+
+  if (h < 0) h += 360;
+  return { h, s, l };
+}
+
+function getColorFamily(hex) {
+  const { r, g, b } = hexToRgb(hex);
+  const { h, s, l } = rgbToHsl(r, g, b);
+
+  if (s < 0.12 || l < 0.15) return 'neutral';
+  if (h < 20 || h >= 340) return 'red';
+  if (h < 45) return 'orange';
+  if (h < 70) return 'yellow';
+  if (h < 170) return 'green';
+  if (h < 260) return 'blue';
+  return 'purple';
+}
+
+function createsABABPattern(ordered, candidateColor) {
+  if (ordered.length < 3) return false;
+
+  const a = getColorFamily(ordered[ordered.length - 3]);
+  const b = getColorFamily(ordered[ordered.length - 2]);
+  const c = getColorFamily(ordered[ordered.length - 1]);
+  const d = getColorFamily(candidateColor);
+
+  return a === c && b === d && a !== b;
+}
+
+function buildBalancedColorOrder(colors) {
+  if (colors.length <= 2) return colors.slice();
+
+  const remaining = colors.slice();
+  const ordered = [remaining.shift()];
+
+  while (remaining.length) {
+    const last = ordered[ordered.length - 1];
+    const lastFamily = getColorFamily(last);
+    const twoBack = ordered.length >= 2 ? ordered[ordered.length - 2] : null;
+    const twoBackFamily = twoBack ? getColorFamily(twoBack) : null;
+
+    let bestIndex = 0;
+    let bestScore = -Infinity;
+
+    for (let i = 0; i < remaining.length; i++) {
+      const candidate = remaining[i];
+      const candidateFamily = getColorFamily(candidate);
+
+      const dLast = colorDistance(last, candidate);
+      const dTwoBack = twoBack ? colorDistance(twoBack, candidate) : dLast;
+
+      // Cap distance influence to avoid over-forcing extreme alternation.
+      let score = Math.min(dLast, 18000) + Math.min(dTwoBack, 16000) * 0.2;
+
+      // Avoid same family right next to each other.
+      if (candidateFamily === lastFamily) {
+        score -= 12000;
+      }
+
+      // Avoid ABAB ping-pong patterns like blue-yellow-blue-yellow.
+      if (createsABABPattern(ordered, candidate)) {
+        score -= 10000;
+      }
+
+      // Slight penalty for repeating the family from 2 positions back.
+      if (twoBackFamily && candidateFamily === twoBackFamily) {
+        score -= 2500;
+      }
+
+      if (score > bestScore) {
+        bestScore = score;
+        bestIndex = i;
+      }
+    }
+
+    ordered.push(remaining.splice(bestIndex, 1)[0]);
+  }
+
+  return ordered;
+}
+
+function pickDistinctColors(colors, count, isArchived = false) {
+  if (count >= colors.length) return colors.slice();
+
+  const remaining = colors.slice();
+  const picked = [];
+
+  // Deterministic start index
+  let seed = isArchived ? 0x6d2b79f5 : 0x243f6a88;
+  const startIndex = seed % remaining.length;
+  picked.push(remaining.splice(startIndex, 1)[0]);
+
+  while (picked.length < count && remaining.length) {
+    let bestIndex = 0;
+    let bestScore = -Infinity;
+
+    for (let i = 0; i < remaining.length; i++) {
+      const candidate = remaining[i];
+      const candidateFamily = getColorFamily(candidate);
+
+      let minDist = Infinity;
+      let familyPenalty = 0;
+
+      for (let j = 0; j < picked.length; j++) {
+        const d = colorDistance(candidate, picked[j]);
+        if (d < minDist) minDist = d;
+        if (candidateFamily === getColorFamily(picked[j])) {
+          familyPenalty += 800;
+        }
+      }
+
+      const score = minDist - familyPenalty;
+      if (score > bestScore) {
+        bestScore = score;
+        bestIndex = i;
+      }
+    }
+
+    picked.push(remaining.splice(bestIndex, 1)[0]);
+  }
+
+  return picked;
+}
+
+function getUniqueShuffledColors(count, isArchived = false) {
+  const colors = COURSE_COLORS.slice();
+
+  // Deterministic PRNG (xorshift32)
+  let seed = isArchived ? 0x9e3779b9 : 0x85ebca6b;
+  const rand = () => {
+    seed ^= seed << 13;
+    seed ^= seed >>> 17;
+    seed ^= seed << 5;
+    return (seed >>> 0) / 4294967296;
+  };
+
+  // Deterministic Fisher-Yates shuffle
+  for (let i = colors.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [colors[i], colors[j]] = [colors[j], colors[i]];
+  }
+
+  const contrasted = buildBalancedColorOrder(colors);
+
+  if (count <= contrasted.length) {
+    const distinct = pickDistinctColors(contrasted, count, isArchived);
+    return buildBalancedColorOrder(distinct);
+  }
+
+  // If more courses than colors, continue cycling deterministically
+  const result = [];
+  for (let i = 0; i < count; i++) {
+    result.push(contrasted[i % contrasted.length]);
+  }
+  return result;
 }
 
 // Function to get color mapping for all courses (for debugging/reference)
@@ -1295,14 +1489,15 @@ function renderCourseList() {
     }
     
     // Render active courses
-    activeCourses.forEach(course => {
+    const activeColors = getUniqueShuffledColors(activeCourses.length, false);
+    activeCourses.forEach((course, index) => {
       const card = document.createElement('div');
       card.className = 'element-card';
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
       
       // Generate color based on course ID
-      const borderColor = generateColorFromId(course.id);
+      const borderColor = activeColors[index] || generateColorFromId(course.id, false);
       
       card.innerHTML = `
         <div class="element-details">
@@ -1341,7 +1536,8 @@ function renderCourseList() {
       list.appendChild(archiveLabel);
       
       // Render archived courses
-      archivedCourses.forEach(course => {
+      const archivedColors = getUniqueShuffledColors(archivedCourses.length, true);
+      archivedCourses.forEach((course, index) => {
         const card = document.createElement('div');
         card.className = 'element-card';
         card.style.opacity = '0.75';
@@ -1349,7 +1545,7 @@ function renderCourseList() {
         card.setAttribute('tabindex', '0');
         
         // Generate color based on course ID with isArchived flag for different palette
-        const borderColor = generateColorFromId(course.id, true);
+        const borderColor = archivedColors[index] || generateColorFromId(course.id, true);
         
         card.innerHTML = `
           <div class="element-details">
@@ -1731,7 +1927,7 @@ function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=202602021hnm"></script>
+<script src="js/chat.js?v=20260215168c"></script>
 
 <!-- Chat widget is injected by chat.js -->
 

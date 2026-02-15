@@ -608,7 +608,10 @@
                     template.push(newEventData);
                 }
             } else {
-                const weekNum = currentWeekIndex + 1;
+                const currentWeek = scheduleByWeek[currentWeekIndex];
+                const weekNum = (currentWeek && typeof currentWeek.weekNumber === 'number')
+                    ? currentWeek.weekNumber
+                    : currentWeekIndex + 1;
                 if (!currentScheduleData.overrides) currentScheduleData.overrides = {};
                 if (!currentScheduleData.overrides[weekNum]) currentScheduleData.overrides[weekNum] = [];
 
@@ -661,7 +664,10 @@
                 const index = template.findIndex(t => t === currentEditingEvent || (t.day === currentEditingEvent.day && t.startTime === currentEditingEvent.startTime && t.subject === currentEditingEvent.subject));
                 if (index !== -1) template.splice(index, 1);
             } else {
-                const weekNum = currentWeekIndex + 1;
+                const currentWeek = scheduleByWeek[currentWeekIndex];
+                const weekNum = (currentWeek && typeof currentWeek.weekNumber === 'number')
+                    ? currentWeek.weekNumber
+                    : currentWeekIndex + 1;
                 if (!currentScheduleData.overrides) currentScheduleData.overrides = {};
                 if (!currentScheduleData.overrides[weekNum]) currentScheduleData.overrides[weekNum] = [];
 

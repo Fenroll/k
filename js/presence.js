@@ -11,13 +11,13 @@
     let isConnected = false;
     let reconnectAttempts = 0;
     const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes of inactivity = idle
-    const ACTIVITY_CHECK_INTERVAL = 10000; // Check every 10 seconds
-    const HEARTBEAT_INTERVAL = 30000; // Update activity every 30 seconds when active
+    const ACTIVITY_CHECK_INTERVAL = 30000; // Check every 30 seconds
+    const HEARTBEAT_INTERVAL = 60000; // Update activity every 60 seconds when active
     const MAX_RECONNECT_ATTEMPTS = 5;
     const MAX_DEVICES_PER_USER = 5; // Max devices allowed per user
-    const PERIODIC_CLEANUP_INTERVAL = 2 * 60 * 1000; // Clean up every 2 minutes
+    const PERIODIC_CLEANUP_INTERVAL = 5 * 60 * 1000; // Clean up every 5 minutes
     const LOCALSTORAGE_CLEANUP_DAYS = 7; // Clean localStorage entries older than 7 days
-    const TAB_ELECTION_INTERVAL = 5000; // Re-elect leader every 5 seconds
+    const TAB_ELECTION_INTERVAL = 15000; // Re-elect leader every 15 seconds
     
     // Tab coordination - only one tab performs cleanup to avoid race conditions
     let isLeaderTab = true; // Start as leader, will be demoted if another tab exists

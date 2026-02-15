@@ -180,7 +180,7 @@ class ChatFirebaseREST {
           })
         });
         console.log('✓ User active - updated lastSeen');
-      }, 30000);
+      }, 60000);
 
       // Махни потребителя щом затвори таба
       window.addEventListener('beforeunload', () => {

@@ -644,7 +644,7 @@ class ChatFirebaseREST {
         };
 
         // Run cleanup/refresh every 30 seconds to handle grace period expirations
-        const refreshInterval = setInterval(processAndCallback, 30000);
+        const refreshInterval = setInterval(processAndCallback, 60000);
         this.unsubscribers.push(() => clearInterval(refreshInterval));
 
         // Listen for all site users (for username and color)
