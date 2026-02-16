@@ -107,9 +107,24 @@
                 document.getElementById('ve-prev-week-btn').disabled = true;
                 document.getElementById('ve-next-week-btn').disabled = true;
             }
+
+            updateWeekControlsVisibility();
             
             renderSchedule();
             updateWeekInfo();
+        }
+
+        function updateWeekControlsVisibility() {
+            const prevBtn = document.getElementById('ve-prev-week-btn');
+            const nextBtn = document.getElementById('ve-next-week-btn');
+            const editBtn = document.getElementById('ve-edit-week-btn');
+            const weekSelector = document.querySelector('.week-selector');
+            const isTemplateMode = viewMode.startsWith('template-');
+
+            if (prevBtn) prevBtn.style.display = isTemplateMode ? 'none' : '';
+            if (nextBtn) nextBtn.style.display = isTemplateMode ? 'none' : '';
+            if (editBtn) editBtn.style.display = isTemplateMode ? 'none' : '';
+            if (weekSelector) weekSelector.classList.toggle('template-mode', isTemplateMode);
         }
         
         function generateTemplateView(semKey) {

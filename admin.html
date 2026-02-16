@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=202602161r02"></script>
+    <script src="js/auth-guard.js?v=202602161rky"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=20260125"></script>
@@ -159,6 +159,10 @@
             margin: 0;
             border: none;
         }
+        .ve-header-actions {
+            display: flex;
+            gap: 10px;
+        }
         .week-selector {
             display: flex;
             align-items: center;
@@ -170,9 +174,19 @@
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.2);
         }
+        .ve-mode-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
         .week-info {
             text-align: center;
             color: #e0e0e0;
+        }
+        .ve-table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .schedule-table {
             width: 100%;
@@ -355,6 +369,105 @@
         }
         .exam-card-edit-btn:hover {
             background: #3a2a2a;
+        }
+
+        @media (max-width: 768px) {
+            #visual-editor-container {
+                padding: 1rem;
+            }
+
+            .ve-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+                margin-bottom: 1rem;
+            }
+
+            .ve-header-actions {
+                width: 100%;
+            }
+
+            .ve-header-actions .btn {
+                flex: 1;
+            }
+
+            .week-selector {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                gap: 10px;
+                padding: 12px;
+                margin-bottom: 14px;
+            }
+
+            .ve-mode-wrap,
+            #ve-edit-week-btn {
+                grid-column: 1 / -1;
+            }
+
+            #ve-prev-week-btn {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .week-info {
+                grid-column: 2;
+                grid-row: 2;
+                font-size: 0.95rem;
+                line-height: 1.35;
+                padding: 0 6px;
+            }
+
+            #ve-next-week-btn {
+                grid-column: 3;
+                grid-row: 2;
+            }
+
+            #ve-mode-selector,
+            #ve-edit-week-btn {
+                width: 100%;
+            }
+
+            #ve-prev-week-btn,
+            #ve-next-week-btn {
+                width: auto !important;
+                min-width: 44px;
+                padding: 10px 12px;
+                font-size: 0;
+                line-height: 1;
+            }
+
+            #ve-prev-week-btn::before {
+                content: '◀';
+                font-size: 18px;
+            }
+
+            #ve-next-week-btn::before {
+                content: '▶';
+                font-size: 18px;
+            }
+
+            .week-selector.template-mode {
+                grid-template-columns: 1fr;
+            }
+
+            .week-selector.template-mode .week-info {
+                grid-column: 1 / -1;
+                grid-row: auto;
+            }
+
+            .schedule-table {
+                min-width: 560px;
+            }
+
+            .schedule-table th {
+                padding: 10px 8px;
+                font-size: 0.95rem;
+                white-space: nowrap;
+            }
+
+            .schedule-table td {
+                padding: 6px;
+            }
         }
     </style>
 </head>
@@ -588,14 +701,14 @@
     <div id="visual-editor-container">
         <div class="ve-header">
             <h2>Visual Schedule Editor</h2>
-            <div style="display: flex; gap: 10px;">
+            <div class="ve-header-actions">
                 <button id="manage-semesters-btn" class="btn" style="width: auto; background-color: #588157;">Manage Semesters</button>
                 <button id="close-visual-editor" class="btn btn-secondary" style="width: auto;">Close & Back</button>
             </div>
         </div>
 
         <div class="week-selector">
-            <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="ve-mode-wrap">
                 <select id="ve-mode-selector" style="padding: 8px; border-radius: 4px; background: #333; color: white; border: 1px solid #555;">
                     <option value="schedule">View Schedule</option>
                     <option value="template-winter">Edit Template: Winter</option>
@@ -608,20 +721,22 @@
             <button id="ve-edit-week-btn" class="btn btn-secondary" style="width: auto; margin-left: 10px;">Edit Week Date</button>
         </div>
 
-        <table class="schedule-table" id="ve-schedule-table">
-            <thead>
-                <tr>
-                    <th>Monday</th>
-                    <th>Tuesday</th>
-                    <th>Wednesday</th>
-                    <th>Thursday</th>
-                    <th>Friday</th>
-                </tr>
-            </thead>
-            <tbody id="ve-schedule-body">
-                <!-- Schedule items will be rendered here -->
-            </tbody>
-        </table>
+        <div class="ve-table-wrap">
+            <table class="schedule-table" id="ve-schedule-table">
+                <thead>
+                    <tr>
+                        <th>Monday</th>
+                        <th>Tuesday</th>
+                        <th>Wednesday</th>
+                        <th>Thursday</th>
+                        <th>Friday</th>
+                    </tr>
+                </thead>
+                <tbody id="ve-schedule-body">
+                    <!-- Schedule items will be rendered here -->
+                </tbody>
+            </table>
+        </div>
 
         <!-- Exam Editor View (Replaces table during exam weeks) -->
         <div id="ve-exam-editor" style="display: none;">
@@ -870,7 +985,7 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=202602161r02"></script>
+    <script src="courses.generated.js?v=202602161rky"></script>
     <script src="js/presence.js?v=20260131"></script>
     <script src="js/admin.js?v=20260125"></script>
     <script src="js/admin-visual-editor.js"></script>
