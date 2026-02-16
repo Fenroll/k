@@ -46,6 +46,9 @@
             <a href="tools.html" class="others-menu-item">
                 <img src="svg/icon-tools.svg" alt="Tools"> Tools
             </a>
+            <a href="calendar.html#currentInfoPanel" class="others-menu-item">
+                <img src="svg/icon-calendar.svg" alt="Schedule Notes"> Schedule Notes
+            </a>
             <a href="text-editor.html" class="others-menu-item">
                 <img src="svg/icon-editor.svg" alt="Editor"> Editor
             </a>

@@ -90,7 +90,15 @@ document.addEventListener('DOMContentLoaded', () => {
             hideError('schedule-notes-error'); // Clear previous errors
             dbRef.once('value')
                 .then(snapshot => {
-                    const content = snapshot.val();
+                    const value = snapshot.val();
+                    let content = '';
+
+                    if (typeof value === 'string') {
+                        content = value;
+                    } else if (value && typeof value === 'object') {
+                        content = value.content || '';
+                    }
+
                     if (content) {
                         scheduleNotesContent.value = content;
                         showNotification('Schedule notes loaded successfully!', false);
@@ -109,7 +117,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // Save content to Firebase
         saveScheduleNotesBtn.addEventListener('click', () => {
             const content = scheduleNotesContent.value;
-            dbRef.set(content)
+            const editorName = user.displayName || user.userName || user.username || user.userId || 'Admin';
+            const payload = {
+                content,
+                lastEditedBy: editorName,
+                lastEditedAt: firebase.database.ServerValue.TIMESTAMP
+            };
+
+            dbRef.set(payload)
                 .then(() => {
                     showNotification('Schedule notes saved successfully!', false);
                     hideError('schedule-notes-error');

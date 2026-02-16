@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202602151f5n"></script>
+  <script src="js/auth-guard.js?v=202602161pua"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -197,8 +197,40 @@
     padding: 24px;
     margin-top: 24px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    position: relative;
     min-height: 50px; /* Add this to reserve space */
     transition: opacity 0.3s ease-in-out; /* Add for smooth transition */
+  }
+
+  .schedule-notes-edit-btn {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    border: none;
+    border-radius: 6px;
+    padding: 7px 12px;
+    background: #588157;
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+
+  .schedule-notes-edit-btn:hover {
+    background: #344e41;
+  }
+
+  .schedule-notes-last-edit {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    color: #6b7280;
+    font-size: 12px;
+    max-width: calc(100% - 140px);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
   
   .info-panel-content {
@@ -1184,6 +1216,64 @@
     position: relative;
     height: 100%;
   }
+
+  .schedule-notes-modal-content {
+    max-width: 760px;
+    width: calc(100% - 32px);
+  }
+
+  .schedule-notes-modal-error {
+    color: #dc2626;
+    margin-bottom: 10px;
+    display: none;
+    font-size: 13px;
+  }
+
+  .schedule-notes-modal-actions {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+  }
+
+  .schedule-notes-btn {
+    border: none;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .schedule-notes-btn.cancel {
+    background: #e5e7eb;
+    color: #111827;
+  }
+
+  .schedule-notes-btn.save {
+    background: #588157;
+    color: #fff;
+  }
+
+  .schedule-notes-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+  }
+
+  @media (max-width: 768px) {
+    .schedule-notes-last-edit {
+      position: static;
+      margin-bottom: 8px;
+      max-width: 100%;
+      white-space: normal;
+    }
+
+    .schedule-notes-edit-btn {
+      top: 10px;
+      right: 10px;
+      padding: 6px 11px;
+    }
+  }
   </style>
   <link rel="stylesheet" href="css/mobile-nav.css?v=20260129">
 </head>
@@ -1324,9 +1414,11 @@
         </div>
         
         <!-- Current Information Panel -->
-        <div id="currentInfoPanel" class="info-panel" style="opacity: 0; visibility: hidden; pointer-events: none;">
+        <div id="currentInfoPanel" class="info-panel">
+          <div id="scheduleNotesLastEdit" class="schedule-notes-last-edit">Last edit: —</div>
+          <button id="editScheduleNotesBtn" class="schedule-notes-edit-btn" type="button">Edit</button>
           <div class="info-panel-content" id="infoContent">
-            <!-- Markdown content will be loaded here -->
+            Loading schedule notes...
           </div>
         </div>
       </div>
@@ -1434,6 +1526,19 @@
     </div>
   </div>
 
+  <div class="modal-overlay" id="scheduleNotesEditModal" style="display: none;">
+    <div class="modal-content schedule-notes-modal-content">
+      <button class="modal-close" type="button" onclick="closeScheduleNotesModal()">×</button>
+      <h2 class="modal-title">Edit Schedule Notes</h2>
+      <div id="scheduleNotesModalError" class="schedule-notes-modal-error"></div>
+      <textarea id="scheduleNotesEditor" style="width: 100%; min-height: 320px; resize: vertical; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px;"></textarea>
+      <div class="schedule-notes-modal-actions">
+        <button id="cancelScheduleNotesBtn" type="button" class="schedule-notes-btn cancel" onclick="closeScheduleNotesModal()">Cancel</button>
+        <button id="saveScheduleNotesBtn" type="button" class="schedule-notes-btn save" onclick="saveScheduleNotesFromModal()">Save</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     // Schedule data loaded from Firebase
     let scheduleByWeek = [];
@@ -1442,74 +1547,290 @@
     // Global variable to store loaded data for helpers
     window.scheduleData = null;
 
-    document.addEventListener('DOMContentLoaded', async function() {
+    const SCHEDULE_CACHE_KEY = 'calendarScheduleDataCache_v1';
+    const SCHEDULE_NOTES_CACHE_KEY = 'calendarScheduleNotesCache_v1';
+    const CACHE_MAX_AGE_MS = 15 * 60 * 1000;
+
+    function readCachedJson(cacheKey, maxAgeMs = CACHE_MAX_AGE_MS) {
       try {
-        const snapshot = await firebase.database().ref('/settings/scheduleData').once('value');
-        if (snapshot.exists()) {
-          const activeScheduleData = snapshot.val();
-          window.scheduleData = activeScheduleData;
+        const raw = localStorage.getItem(cacheKey);
+        if (!raw) return null;
 
-          // Generate weeks from template and overrides
-          scheduleByWeek = generateWeeksFromTemplate(activeScheduleData);
+        const parsed = JSON.parse(raw);
+        if (!parsed || typeof parsed !== 'object') return null;
+        if (!parsed.savedAt || !parsed.data) return null;
 
-          // Pre-parse additionalInfo for exams
-          if (activeScheduleData.exams && Array.isArray(activeScheduleData.exams)) {
-            activeScheduleData.exams.forEach(exam => {
-              if (exam.additionalInfo) {
-                exam.additionalInfoHtml = marked.parse(exam.additionalInfo);
-              } else {
-                exam.additionalInfoHtml = '';
-              }
-            });
-          }
-          
-          // Find and set current week based on today's date
-          currentWeekIndex = findCurrentWeekIndex();
-          
-          renderSchedule();
-          updateWeekInfo();
-          
-          // Load current information from Markdown file
-          loadCurrentInfo();
-        } else {
-          console.error('No schedule data found in Firebase');
-          document.querySelector('.schedule-container').innerHTML = '<p style="text-align:center; padding: 20px;">Няма намерено разписание в базата данни.</p>';
+        if (Date.now() - parsed.savedAt > maxAgeMs) {
+          return null;
         }
+
+        return parsed.data;
+      } catch (error) {
+        console.warn(`Failed to read cache for ${cacheKey}:`, error);
+        return null;
+      }
+    }
+
+    function writeCachedJson(cacheKey, data) {
+      try {
+        localStorage.setItem(cacheKey, JSON.stringify({
+          savedAt: Date.now(),
+          data
+        }));
+      } catch (error) {
+        console.warn(`Failed to write cache for ${cacheKey}:`, error);
+      }
+    }
+
+    function applyScheduleData(activeScheduleData) {
+      if (!activeScheduleData) return false;
+
+      window.scheduleData = activeScheduleData;
+
+      scheduleByWeek = generateWeeksFromTemplate(activeScheduleData);
+
+      if (activeScheduleData.exams && Array.isArray(activeScheduleData.exams)) {
+        activeScheduleData.exams.forEach(exam => {
+          if (exam.additionalInfo) {
+            exam.additionalInfoHtml = marked.parse(exam.additionalInfo);
+          } else {
+            exam.additionalInfoHtml = '';
+          }
+        });
+      }
+
+      currentWeekIndex = findCurrentWeekIndex();
+      renderSchedule();
+      updateWeekInfo();
+
+      return true;
+    }
+
+    async function refreshScheduleDataFromFirebase() {
+      const snapshot = await firebase.database().ref('/settings/scheduleData').once('value');
+      if (!snapshot.exists()) {
+        throw new Error('No schedule data found in Firebase');
+      }
+
+      const activeScheduleData = snapshot.val();
+      applyScheduleData(activeScheduleData);
+      writeCachedJson(SCHEDULE_CACHE_KEY, activeScheduleData);
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      setupScheduleNotesEditor();
+      loadCurrentInfo({ preferCache: true });
+
+      let hasRenderedSchedule = false;
+      const cachedScheduleData = readCachedJson(SCHEDULE_CACHE_KEY);
+      if (cachedScheduleData) {
+        hasRenderedSchedule = applyScheduleData(cachedScheduleData);
+      }
+
+      try {
+        await refreshScheduleDataFromFirebase();
       } catch (error) {
         console.error('Error fetching schedule from Firebase:', error);
-        document.querySelector('.schedule-container').innerHTML = '<p style="text-align:center; padding: 20px;">Грешка при зареждане на разписанието. Моля, опитайте по-късно.</p>';
+        if (!hasRenderedSchedule) {
+          document.querySelector('.schedule-container').innerHTML = '<p style="text-align:center; padding: 20px;">Грешка при зареждане на разписанието. Моля, опитайте по-късно.</p>';
+        }
       }
     });
     
-    // Load current information from Markdown file
-    async function loadCurrentInfo() {
-      try {
-        // Fetch content from Firebase Realtime Database
-        const dbRef = firebase.database().ref('scheduleNotes/content');
-        const snapshot = await dbRef.once('value');
-        const markdown = snapshot.val();
-        const currentInfoPanel = document.getElementById('currentInfoPanel');
+    const scheduleNotesDbRef = firebase.database().ref('scheduleNotes/content');
+    let scheduleNotesState = {
+      content: '',
+      lastEditedBy: '',
+      lastEditedAt: null
+    };
 
-        if (markdown) {
-          const html = marked.parse(markdown);
-          document.getElementById('infoContent').innerHTML = html;
-          currentInfoPanel.style.opacity = '1'; // Show
-          currentInfoPanel.style.visibility = 'visible';
-          currentInfoPanel.style.pointerEvents = 'auto'; // Re-enable interactions
-        } else {
-          // If no content in Firebase, hide the panel
-          document.getElementById('infoContent').innerHTML = ''; // Clear content
-          currentInfoPanel.style.opacity = '0'; // Hide
-          currentInfoPanel.style.visibility = 'hidden';
-          currentInfoPanel.style.pointerEvents = 'none'; // Disable interactions
+    function normalizeScheduleNotesValue(value) {
+      if (typeof value === 'string') {
+        return {
+          content: value,
+          lastEditedBy: '',
+          lastEditedAt: null
+        };
+      }
+
+      if (value && typeof value === 'object') {
+        return {
+          content: value.content || '',
+          lastEditedBy: value.lastEditedBy || '',
+          lastEditedAt: value.lastEditedAt || null
+        };
+      }
+
+      return {
+        content: '',
+        lastEditedBy: '',
+        lastEditedAt: null
+      };
+    }
+
+    function applyScheduleNotesState(nextState) {
+      scheduleNotesState = {
+        content: nextState.content || '',
+        lastEditedBy: nextState.lastEditedBy || '',
+        lastEditedAt: nextState.lastEditedAt || null
+      };
+
+      renderScheduleNotesContent(scheduleNotesState.content);
+      updateLastEditInfo(scheduleNotesState.lastEditedBy, scheduleNotesState.lastEditedAt);
+      writeCachedJson(SCHEDULE_NOTES_CACHE_KEY, scheduleNotesState);
+    }
+
+    function getEditorDisplayName(user) {
+      if (!user) return 'Unknown user';
+      return user.displayName || user.userName || user.username || user.userId || 'Unknown user';
+    }
+
+    function formatLastEdited(lastEditedAt) {
+      if (!lastEditedAt) return 'Last edit: —';
+      const date = new Date(lastEditedAt);
+      if (Number.isNaN(date.getTime())) return 'Last edit: —';
+      return `Last edit: ${date.toLocaleString('bg-BG')}`;
+    }
+
+    function renderScheduleNotesContent(markdown) {
+      const infoContent = document.getElementById('infoContent');
+      if (!infoContent) return;
+
+      if (markdown && markdown.trim()) {
+        infoContent.innerHTML = marked.parse(markdown);
+      } else {
+        infoContent.innerHTML = '<p>Няма въведени бележки. Натисни <strong>Edit</strong>, за да добавиш.</p>';
+      }
+    }
+
+    function updateLastEditInfo(lastEditedBy, lastEditedAt) {
+      const lastEditEl = document.getElementById('scheduleNotesLastEdit');
+      if (!lastEditEl) return;
+
+      const timeText = formatLastEdited(lastEditedAt).replace('Last edit: ', '');
+      if (lastEditedBy && lastEditedAt) {
+        lastEditEl.textContent = `Last edit: ${lastEditedBy} · ${timeText}`;
+      } else {
+        lastEditEl.textContent = 'Last edit: —';
+      }
+    }
+
+    function openScheduleNotesModal() {
+      const modal = document.getElementById('scheduleNotesEditModal');
+      const editor = document.getElementById('scheduleNotesEditor');
+      const errorEl = document.getElementById('scheduleNotesModalError');
+
+      if (!modal || !editor) return;
+
+      editor.value = scheduleNotesState.content || '';
+      if (errorEl) {
+        errorEl.style.display = 'none';
+        errorEl.textContent = '';
+      }
+
+      modal.style.display = 'flex';
+      modal.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      editor.focus();
+    }
+
+    function closeScheduleNotesModal() {
+      const modal = document.getElementById('scheduleNotesEditModal');
+      if (!modal) return;
+
+      modal.style.display = 'none';
+      modal.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    async function saveScheduleNotesFromModal() {
+      const editor = document.getElementById('scheduleNotesEditor');
+      const saveBtn = document.getElementById('saveScheduleNotesBtn');
+      const errorEl = document.getElementById('scheduleNotesModalError');
+      if (!editor || !saveBtn) return;
+
+      saveBtn.disabled = true;
+      if (errorEl) {
+        errorEl.style.display = 'none';
+        errorEl.textContent = '';
+      }
+
+      try {
+        let currentUser = null;
+        if (window.currentUserPromise) {
+          currentUser = await window.currentUserPromise;
         }
+
+        const payload = {
+          content: editor.value,
+          lastEditedBy: getEditorDisplayName(currentUser),
+          lastEditedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        await scheduleNotesDbRef.set(payload);
+        applyScheduleNotesState({
+          content: editor.value,
+          lastEditedBy: getEditorDisplayName(currentUser),
+          lastEditedAt: Date.now()
+        });
+        closeScheduleNotesModal();
+        loadCurrentInfo();
+      } catch (error) {
+        console.error('Error saving schedule notes:', error);
+        if (errorEl) {
+          errorEl.textContent = `Error saving: ${error.message}`;
+          errorEl.style.display = 'block';
+        }
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    function setupScheduleNotesEditor() {
+      const editBtn = document.getElementById('editScheduleNotesBtn');
+      const modal = document.getElementById('scheduleNotesEditModal');
+
+      if (editBtn) {
+        editBtn.addEventListener('click', openScheduleNotesModal);
+      }
+
+      if (modal) {
+        modal.addEventListener('click', function(event) {
+          if (event.target === modal) {
+            closeScheduleNotesModal();
+          }
+        });
+      }
+    }
+
+    window.closeScheduleNotesModal = closeScheduleNotesModal;
+    window.saveScheduleNotesFromModal = saveScheduleNotesFromModal;
+
+    // Load current information from Markdown file
+    async function loadCurrentInfo(options = {}) {
+      const { preferCache = false } = options;
+      let renderedFromCache = false;
+
+      if (preferCache) {
+        const cachedNotes = readCachedJson(SCHEDULE_NOTES_CACHE_KEY);
+        if (cachedNotes) {
+          applyScheduleNotesState(normalizeScheduleNotesValue(cachedNotes));
+          renderedFromCache = true;
+        }
+      }
+
+      try {
+        const snapshot = await scheduleNotesDbRef.once('value');
+        applyScheduleNotesState(normalizeScheduleNotesValue(snapshot.val()));
       } catch (error) {
         console.error('Error loading current info from Firebase:', error);
-        // Hide panel if there's an error fetching from Firebase
-        const currentInfoPanel = document.getElementById('currentInfoPanel');
-        currentInfoPanel.style.opacity = '0'; // Hide on error
-        currentInfoPanel.style.visibility = 'hidden';
-        currentInfoPanel.style.pointerEvents = 'none';
+        if (!renderedFromCache) {
+          applyScheduleNotesState({
+            content: '',
+            lastEditedBy: '',
+            lastEditedAt: null
+          });
+        }
       }
     }
     
@@ -2608,7 +2929,7 @@
 
 <script src="js/user-identity.js?v=202404231000"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202602151f5n"></script>
+    <script src="js/chat.js?v=202602161pua"></script>
 
     <script src="js/presence.js"></script>
 <script src="js/version-check.js"></script>

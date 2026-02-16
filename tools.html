@@ -429,8 +429,8 @@
           <button class="test-menu-btn active" data-test="upload" style="padding: 18px 24px; border: none; background: #588157; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(88, 129, 87, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
             📤 Качване на файлове
           </button>
-          <button class="test-menu-btn" data-test="tool2" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
-            📋 инструмент 2 (скоро)
+          <button class="test-menu-btn" data-test="finance" id="financeMenuBtn" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            💶 Финанси
           </button>
           <button class="test-menu-btn" data-test="tool3" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
             📝 инструмент 3 (скоро)
@@ -501,6 +501,65 @@
             </div>
           </div>
         </div>
+
+        <div id="financeTool" class="test-container" style="display: none;">
+          <div style="max-width: 1000px; margin: 40px auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+              <h2 style="margin: 0; color: #1f2937;">Финанси</h2>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <button id="financePrevMonthBtn" type="button" class="btn btn-secondary" style="padding: 8px 12px;">◀</button>
+                <div id="financeMonthLabel" style="min-width: 180px; text-align: center; font-weight: 700; color: #374151;"></div>
+                <button id="financeNextMonthBtn" type="button" class="btn btn-secondary" style="padding: 8px 12px;">▶</button>
+              </div>
+            </div>
+
+            <div id="financeMyDonationCard" style="display: none; margin-bottom: 16px; padding: 14px; border-radius: 10px; border: 1px solid #d1d5db; background: #f9fafb;">
+              <div style="font-size: 13px; color: #6b7280; margin-bottom: 6px; font-weight: 700;">Моят приход:</div>
+              <div id="financeMyDonationText" style="font-size: 15px; font-weight: 700; color: #1f2937;">—</div>
+            </div>
+
+            <div id="financeAdminPanel" style="display: none;">
+              <div id="financeStatus" style="display: none; margin-bottom: 12px; padding: 10px 12px; border-radius: 8px; font-size: 14px;"></div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 16px;">
+                <div style="border: 1px solid #d1fae5; border-left: 5px solid #10b981; border-radius: 10px; padding: 14px; background: #ecfdf5;">
+                  <h3 style="margin: 0 0 10px 0; color: #065f46;">Доходи</h3>
+                  <textarea id="financeIncomeInput" style="width: 100%; min-height: 180px; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px; box-sizing: border-box; resize: vertical; font-size: 14px;" placeholder="Пример:\n- Donations: 45 EUR\n- Спонсорство: 20 EUR"></textarea>
+                  <div id="financeIncomePreview" style="display:none; min-height: 180px; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px; box-sizing: border-box; background:#fff; font-size: 14px; color:#374151; white-space: normal;"></div>
+                </div>
+
+                <div style="border: 1px solid #fecaca; border-left: 5px solid #ef4444; border-radius: 10px; padding: 14px; background: #fef2f2;">
+                  <h3 style="margin: 0 0 10px 0; color: #991b1b;">Разходи</h3>
+                  <textarea id="financeExpenseInput" style="width: 100%; min-height: 180px; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; box-sizing: border-box; resize: vertical; font-size: 14px;" placeholder="Пример:\n- Хостинг: 12 EUR\n- Домейн: 9 EUR"></textarea>
+                  <div id="financeExpensePreview" style="display:none; min-height: 180px; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; box-sizing: border-box; background:#fff; font-size: 14px; color:#374151; white-space: normal;"></div>
+                </div>
+              </div>
+
+              <div id="financeDonationsSection" style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; background: #f9fafb; margin-bottom: 12px;">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
+                  <h3 style="margin: 0; color: #1f2937;">Donations по потребители</h3>
+                  <span style="font-size: 12px; color: #6b7280;">Автоматичен списък от Members List</span>
+                </div>
+
+                <div id="financeDonationsRows"></div>
+                <div style="font-size: 12px; color: #6b7280; margin-top: 8px;">Сумата може да е от 2 до 5 EUR (или друга стойност).</div>
+              </div>
+
+              <div id="financeAdminActions" style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
+                <button id="financeReloadBtn" type="button" class="btn btn-secondary">Презареди</button>
+                <button id="financeSaveBtn" type="button" class="btn btn-success">Запази за месеца</button>
+              </div>
+
+              <div id="financeLastUpdate" style="margin-top: 10px; font-size: 12px; color: #6b7280;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div id="tool3Tool" class="test-container" style="display: none;">
+          <div style="max-width: 800px; margin: 40px auto; padding: 30px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); color: #6b7280; text-align: center;">
+            Инструмент 3 предстои.
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -529,9 +588,14 @@
         });
         
         // Show selected tool
-        const testType = e.target.dataset.test;
+        const button = e.currentTarget;
+        const testType = button.dataset.test;
         if (testType === 'upload') {
           document.getElementById('uploadTool').style.display = 'block';
+        } else if (testType === 'finance') {
+          document.getElementById('financeTool').style.display = 'block';
+        } else if (testType === 'tool3') {
+          document.getElementById('tool3Tool').style.display = 'block';
         }
       });
     });
@@ -823,15 +887,681 @@
   <!-- ============================================
        FIREBASE & CHAT WIDGET
        ============================================ -->
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
-
   <!-- Initialize Chat Widget -->
     <script src="js/chat.js?v=202602011aln"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
   <script src="js/presence.js"></script>
+<script>
+  (function() {
+    const firebaseConfig = {
+      apiKey: "API_KEY",
+      authDomain: "med-student-chat.firebaseapp.com",
+      databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "med-student-chat",
+      storageBucket: "med-student-chat.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    try {
+      if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+    } catch (error) {
+      console.warn('Firebase init warning in tools finance module:', error);
+    }
+
+    const state = {
+      monthDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+      currentUser: null,
+      isAdmin: false
+    };
+
+    const SPECIAL_DONATION_RULES = [
+      { aliases: ['vikopiko'], label: 'Driver Pass' },
+      { aliases: ['паисий', 'paisiy'], label: 'Owner' }
+    ];
+
+    const FINANCE_BLUE = '#2563eb';
+
+    const MIN_FINANCE_MONTH = new Date(2026, 0, 1);
+
+    function getCurrentMonthStart() {
+      const now = new Date();
+      return new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+
+    function clampFinanceMonth(date) {
+      const normalized = new Date(date.getFullYear(), date.getMonth(), 1);
+      const maxMonth = getCurrentMonthStart();
+
+      if (normalized < MIN_FINANCE_MONTH) return new Date(MIN_FINANCE_MONTH);
+      if (normalized > maxMonth) return maxMonth;
+      return normalized;
+    }
+
+    function getMonthKey(date) {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      return `${y}-${m}`;
+    }
+
+    function normalizeText(value) {
+      return String(value || '').trim().toLowerCase();
+    }
+
+    function escapeHtml(value) {
+      return String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function renderFormattedFinanceText(value) {
+      let html = escapeHtml(value || '');
+
+      html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+      html = html.replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/g, '<u>$1</u>');
+      html = html.replace(/(\d+(?:[\.,]\d+)?)\s*€/g, `<span style="color:${FINANCE_BLUE}; font-weight:700;">$1€</span>`);
+      html = html.replace(/(^|\n)-\s+/g, '$1• ');
+      html = html.replace(/\n/g, '<br>');
+
+      return html;
+    }
+
+    function syncFinancePreview(textarea, preview) {
+      if (!textarea || !preview) return;
+      preview.innerHTML = renderFormattedFinanceText(textarea.value || '');
+    }
+
+    function setFinancePreviewMode(textarea, preview, editable) {
+      if (!textarea || !preview) return;
+
+      textarea.style.display = 'none';
+      preview.style.display = 'block';
+      preview.style.cursor = editable ? 'text' : 'default';
+      syncFinancePreview(textarea, preview);
+    }
+
+    function setFinanceRawMode(textarea, preview) {
+      if (!textarea || !preview) return;
+
+      preview.style.display = 'none';
+      textarea.style.display = 'block';
+      textarea.focus();
+      const end = textarea.value.length;
+      textarea.setSelectionRange(end, end);
+    }
+
+    function bindFinancePreviewToggle(textarea, preview, editable) {
+      if (!textarea || !preview || textarea.dataset.previewBound === 'true') return;
+
+      if (editable) {
+        preview.addEventListener('click', () => {
+          setFinanceRawMode(textarea, preview);
+        });
+
+        textarea.addEventListener('blur', () => {
+          setFinancePreviewMode(textarea, preview, true);
+        });
+
+        textarea.addEventListener('input', () => {
+          syncFinancePreview(textarea, preview);
+        });
+      }
+
+      textarea.dataset.previewBound = 'true';
+    }
+
+    function getCurrentUserIdentityNames() {
+      if (!state.currentUser) return [];
+      const identity = [
+        state.currentUser.userName,
+        state.currentUser.username,
+        state.currentUser.displayName,
+        state.currentUser.uid,
+        state.currentUser.userId
+      ];
+
+      return identity
+        .map(normalizeText)
+        .filter(Boolean);
+    }
+
+    function getSpecialRuleByName(name) {
+      const normalized = normalizeText(name);
+      if (!normalized) return null;
+
+      return SPECIAL_DONATION_RULES.find(rule =>
+        rule.aliases.some(alias => normalizeText(alias) === normalized)
+      ) || null;
+    }
+
+    function getSpecialRuleForUser(user) {
+      if (!user) return null;
+      const candidates = [user.displayName, user.username, user.userName];
+      for (const candidate of candidates) {
+        const rule = getSpecialRuleByName(candidate);
+        if (rule) return rule;
+      }
+      return null;
+    }
+
+    function getSpecialRuleForCurrentUser() {
+      const identityNames = getCurrentUserIdentityNames();
+      for (const name of identityNames) {
+        const rule = getSpecialRuleByName(name);
+        if (rule) return rule;
+      }
+      return null;
+    }
+
+    function formatMonthLabel(date) {
+      return date.toLocaleDateString('bg-BG', { year: 'numeric', month: 'long' });
+    }
+
+    function financeRefForMonth(date) {
+      return firebase.database().ref(`finance/monthly/${getMonthKey(date)}`);
+    }
+
+
+    function setFinanceStatus(message, isError = false) {
+      const statusEl = document.getElementById('financeStatus');
+      if (!statusEl) return;
+
+      statusEl.textContent = message;
+      statusEl.style.display = 'block';
+      if (isError) {
+        statusEl.style.background = '#fef2f2';
+        statusEl.style.color = '#991b1b';
+        statusEl.style.border = '1px solid #fecaca';
+      } else {
+        statusEl.style.background = '#ecfdf5';
+        statusEl.style.color = '#065f46';
+        statusEl.style.border = '1px solid #a7f3d0';
+      }
+    }
+
+    function clearFinanceStatus() {
+      const statusEl = document.getElementById('financeStatus');
+      if (!statusEl) return;
+      statusEl.style.display = 'none';
+      statusEl.textContent = '';
+    }
+
+    function createDonationRow(row = {}) {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'finance-donation-row';
+      wrapper.dataset.userId = row.uid || '';
+
+      if (row.specialLabel) {
+        wrapper.style.display = 'grid';
+        wrapper.style.gridTemplateColumns = 'minmax(200px, 2fr) minmax(200px, 1fr)';
+        wrapper.style.gap = '8px';
+        wrapper.style.marginBottom = '8px';
+        wrapper.innerHTML = `
+          <input type="text" class="finance-donation-user" value="${(row.user || '').replace(/"/g, '&quot;')}" readonly>
+          <input type="text" class="finance-donation-special" value="${(row.specialLabel || '').replace(/"/g, '&quot;')}" readonly>
+        `;
+
+        wrapper.querySelectorAll('input').forEach(el => {
+          el.style.padding = '8px 10px';
+          el.style.border = '1px solid #d1d5db';
+          el.style.borderRadius = '8px';
+          el.style.fontSize = '13px';
+          el.style.background = '#f3f4f6';
+          el.style.color = FINANCE_BLUE;
+          el.style.fontWeight = '700';
+        });
+
+        return wrapper;
+      }
+
+      wrapper.style.display = 'grid';
+      wrapper.style.gridTemplateColumns = 'minmax(180px, 1.5fr) minmax(90px, 0.7fr) minmax(90px, 0.7fr) minmax(220px, 1.6fr)';
+      wrapper.style.gap = '8px';
+      wrapper.style.marginBottom = '8px';
+      wrapper.innerHTML = `
+        <input type="text" class="finance-donation-user" value="${(row.user || '').replace(/"/g, '&quot;')}" readonly>
+        <select class="finance-donation-paid">
+          <option value="yes" ${row.donated ? 'selected' : ''}>Да</option>
+          <option value="no" ${!row.donated ? 'selected' : ''}>Не</option>
+        </select>
+        <input type="number" class="finance-donation-amount" min="0" step="0.01" placeholder="EUR" value="${Number.isFinite(row.amount) ? row.amount : ''}">
+        <input type="text" class="finance-donation-note" placeholder="Бележка (напр. за януари и февруари)" value="${String(row.note || '').replace(/"/g, '&quot;')}">
+      `;
+
+      wrapper.querySelectorAll('input, select').forEach(el => {
+        el.style.padding = '8px 10px';
+        el.style.border = '1px solid #d1d5db';
+        el.style.borderRadius = '8px';
+        el.style.fontSize = '13px';
+      });
+
+      const amountInput = wrapper.querySelector('.finance-donation-amount');
+      if (amountInput) {
+        amountInput.style.color = FINANCE_BLUE;
+        amountInput.style.fontWeight = '700';
+      }
+
+      return wrapper;
+    }
+
+    function getDonationsFromUI() {
+      const rowsContainer = document.getElementById('financeDonationsRows');
+      if (!rowsContainer) return [];
+
+      const rows = Array.from(rowsContainer.querySelectorAll('.finance-donation-row'));
+      return rows
+        .map(row => {
+          const specialLabel = row.querySelector('.finance-donation-special')?.value?.trim() || '';
+          if (specialLabel) {
+            return null;
+          }
+
+          const uid = row.dataset.userId || '';
+          const user = row.querySelector('.finance-donation-user')?.value?.trim() || '';
+          const donated = row.querySelector('.finance-donation-paid')?.value === 'yes';
+          const amountRaw = row.querySelector('.finance-donation-amount')?.value;
+          const amount = amountRaw === '' ? null : Number(amountRaw);
+          const note = row.querySelector('.finance-donation-note')?.value?.trim() || '';
+          return { uid, user, donated, amount, note };
+        })
+        .filter(entry => entry && (entry.uid || entry.user || entry.amount !== null || entry.note));
+    }
+
+    async function loadDonationMembersList() {
+      const usersSnap = await firebase.database().ref('site_users').once('value');
+      const users = usersSnap.val() || {};
+
+      return Object.entries(users)
+        .filter(([, user]) => {
+          if (!user) return false;
+
+          const username = normalizeText(user.username);
+          const displayName = normalizeText(user.displayName);
+          const userName = normalizeText(user.userName);
+          const isTestAccount = username === 'test' || displayName === 'test' || userName === 'test';
+
+          if (!user.showInMembersList && !isTestAccount) return false;
+
+          const specialRule = getSpecialRuleForUser(user);
+          if (specialRule && specialRule.label === 'Owner') {
+            return false; // Paisiy/Owner should not be editable in list
+          }
+          if (specialRule && specialRule.label === 'Driver Pass') {
+            return false; // Vikopiko should not be shown in donations list
+          }
+
+          return true;
+        })
+        .map(([uid, user]) => ({
+          uid,
+          user: user.displayName || user.username || uid,
+          username: user.username || '',
+          isTestAccount: normalizeText(user.username) === 'test' || normalizeText(user.displayName) === 'test' || normalizeText(user.userName) === 'test',
+          specialLabel: getSpecialRuleForUser(user)?.label || ''
+        }))
+        .sort((a, b) => {
+          if (a.isTestAccount && !b.isTestAccount) return 1;
+          if (!a.isTestAccount && b.isTestAccount) return -1;
+          return a.user.localeCompare(b.user, 'bg');
+        });
+    }
+
+    function mergeDonationsByMembers(savedRows, members) {
+      const byUid = new Map();
+      const byName = new Map();
+
+      (savedRows || []).forEach(row => {
+        if (!row) return;
+        if (row.uid) byUid.set(String(row.uid), row);
+        if (row.user) byName.set(String(row.user).toLowerCase(), row);
+      });
+
+      return members.map(member => {
+        if (member.specialLabel) {
+          return {
+            uid: member.uid,
+            user: member.user,
+            specialLabel: member.specialLabel
+          };
+        }
+
+        const existing = byUid.get(String(member.uid)) || byName.get(String(member.user).toLowerCase()) || byName.get(String(member.username || '').toLowerCase()) || null;
+
+        return {
+          uid: member.uid,
+          user: member.user,
+          donated: !!existing?.donated,
+          amount: Number.isFinite(existing?.amount) ? existing.amount : null,
+          note: typeof existing?.note === 'string' ? existing.note : ''
+        };
+      });
+    }
+
+    function renderDonationsRows(rows) {
+      const rowsContainer = document.getElementById('financeDonationsRows');
+      if (!rowsContainer) return;
+      rowsContainer.innerHTML = '';
+
+      if (!rows || rows.length === 0) {
+        rowsContainer.appendChild(createDonationRow({ donated: false }));
+        return;
+      }
+
+      rows.forEach(row => rowsContainer.appendChild(createDonationRow(row)));
+    }
+
+    function renderMyDonationStatus(monthValue) {
+      const card = document.getElementById('financeMyDonationCard');
+      const textEl = document.getElementById('financeMyDonationText');
+      if (!card || !textEl) return;
+
+      const meNames = new Set(getCurrentUserIdentityNames());
+      const meUid = normalizeText(state.currentUser?.uid || state.currentUser?.userId || '');
+
+      card.style.display = 'block';
+
+      const mySpecialRule = getSpecialRuleForCurrentUser();
+      if (mySpecialRule) {
+        textEl.textContent = mySpecialRule.label;
+        textEl.style.color = FINANCE_BLUE;
+        return;
+      }
+
+      const donations = Array.isArray(monthValue?.donations) ? monthValue.donations : [];
+      const myDonation = donations.find(row => {
+        if (!row) return false;
+        const rowUid = normalizeText(row.uid || '');
+        const rowUser = normalizeText(row.user || '');
+        return (rowUid && rowUid === meUid) || (rowUser && meNames.has(rowUser));
+      });
+
+      if (!myDonation) {
+        textEl.innerHTML = '<span style="color:#991b1b;">0€</span>';
+        textEl.style.color = '';
+        return;
+      }
+
+      if (myDonation.donated) {
+        const amountValue = Number.isFinite(myDonation.amount) ? myDonation.amount : 0;
+        const amountText = amountValue.toLocaleString('bg-BG');
+        const noteText = typeof myDonation.note === 'string' ? myDonation.note.trim() : '';
+        const safeNote = escapeHtml(noteText);
+        textEl.innerHTML = noteText
+          ? `<span style="color:#065f46; font-weight:700;">${amountText}€</span> <span style="color:#111827; font-weight:400;">(${safeNote})</span>`
+          : `<span style="color:#065f46; font-weight:700;">${amountText}€</span>`;
+        textEl.style.color = '';
+      } else {
+        textEl.innerHTML = '<span style="color:#991b1b;">0€</span>';
+        textEl.style.color = '';
+      }
+    }
+
+
+    function setMonthLabel() {
+      state.monthDate = clampFinanceMonth(state.monthDate);
+
+      const monthLabel = document.getElementById('financeMonthLabel');
+      if (monthLabel) {
+        monthLabel.textContent = formatMonthLabel(state.monthDate);
+      }
+
+      const prevBtn = document.getElementById('financePrevMonthBtn');
+      const nextBtn = document.getElementById('financeNextMonthBtn');
+      const maxMonth = getCurrentMonthStart();
+
+      if (prevBtn) {
+        prevBtn.disabled = state.monthDate <= MIN_FINANCE_MONTH;
+      }
+
+      if (nextBtn) {
+        nextBtn.disabled = state.monthDate >= maxMonth;
+      }
+    }
+
+    function setLastUpdate(meta) {
+      const lastUpdateEl = document.getElementById('financeLastUpdate');
+      if (!lastUpdateEl) return;
+
+      if (!meta || !meta.updatedAt) {
+        lastUpdateEl.textContent = 'Последен ъпдейт: няма';
+        return;
+      }
+
+      const when = new Date(meta.updatedAt);
+      const by = meta.updatedBy || 'Unknown';
+      const byRule = getSpecialRuleByName(by);
+      if (byRule && byRule.label === 'Owner') {
+        lastUpdateEl.textContent = `Последен ъпдейт: ${when.toLocaleString('bg-BG')}`;
+      } else {
+        lastUpdateEl.textContent = `Последен ъпдейт: ${by} · ${when.toLocaleString('bg-BG')}`;
+      }
+    }
+
+    function applyInlineFormat(textarea, prefix, suffix) {
+      if (!textarea || textarea.readOnly) return;
+
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = textarea.value;
+      const selected = value.slice(start, end);
+
+      const replacement = `${prefix}${selected}${suffix}`;
+      textarea.value = value.slice(0, start) + replacement + value.slice(end);
+
+      const caretStart = start + prefix.length;
+      const caretEnd = caretStart + selected.length;
+      textarea.setSelectionRange(caretStart, caretEnd);
+      textarea.focus();
+    }
+
+    function applyBulletPoints(textarea) {
+      if (!textarea || textarea.readOnly) return;
+
+      const value = textarea.value;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+
+      const lineStart = value.lastIndexOf('\n', Math.max(0, start - 1)) + 1;
+      const nextNewLine = value.indexOf('\n', end);
+      const lineEnd = nextNewLine === -1 ? value.length : nextNewLine;
+
+      const selectedBlock = value.slice(lineStart, lineEnd);
+      const lines = selectedBlock.split('\n');
+      const allBulleted = lines.every(line => line.trim() === '' || line.startsWith('- '));
+
+      const transformedLines = allBulleted
+        ? lines.map(line => (line.startsWith('- ') ? line.slice(2) : line))
+        : lines.map(line => (line.trim() === '' ? line : `- ${line}`));
+
+      const transformedBlock = transformedLines.join('\n');
+      textarea.value = value.slice(0, lineStart) + transformedBlock + value.slice(lineEnd);
+      textarea.setSelectionRange(lineStart, lineStart + transformedBlock.length);
+      textarea.focus();
+    }
+
+    function attachFinanceFormattingShortcuts(textarea) {
+      if (!textarea || textarea.dataset.shortcutsBound === 'true') return;
+
+      textarea.addEventListener('keydown', (event) => {
+        if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+
+        const key = (event.key || '').toLowerCase();
+        const code = event.code || '';
+
+        if (code === 'KeyB' || key === 'b') {
+          event.preventDefault();
+          applyInlineFormat(textarea, '**', '**');
+        } else if (code === 'KeyI' || key === 'i') {
+          event.preventDefault();
+          applyInlineFormat(textarea, '*', '*');
+        } else if (code === 'KeyU' || key === 'u') {
+          event.preventDefault();
+          applyInlineFormat(textarea, '<u>', '</u>');
+        } else if (code === 'KeyG' || key === 'g') {
+          event.preventDefault();
+          applyBulletPoints(textarea);
+        }
+      });
+
+      textarea.dataset.shortcutsBound = 'true';
+    }
+
+    async function loadFinanceMonth() {
+      if (!state.currentUser) return;
+
+      clearFinanceStatus();
+      setMonthLabel();
+
+      try {
+        const snap = await financeRefForMonth(state.monthDate).once('value');
+        const value = snap.val() || {};
+        const members = await loadDonationMembersList();
+        const donationRows = mergeDonationsByMembers(Array.isArray(value.donations) ? value.donations : [], members);
+
+        document.getElementById('financeIncomeInput').value = value.incomeMarkdown || '';
+        document.getElementById('financeExpenseInput').value = value.expenseMarkdown || '';
+        const incomePreview = document.getElementById('financeIncomePreview');
+        const expensePreview = document.getElementById('financeExpensePreview');
+        if (incomePreview) incomePreview.innerHTML = renderFormattedFinanceText(value.incomeMarkdown || '');
+        if (expensePreview) expensePreview.innerHTML = renderFormattedFinanceText(value.expenseMarkdown || '');
+        renderDonationsRows(donationRows);
+        renderMyDonationStatus(value);
+
+        setLastUpdate(value);
+      } catch (error) {
+        console.error('Finance load error:', error);
+        setFinanceStatus(`Грешка при зареждане: ${error.message}`, true);
+      }
+    }
+
+    async function saveFinanceMonth() {
+      if (!state.isAdmin) return;
+
+      const saveBtn = document.getElementById('financeSaveBtn');
+      if (saveBtn) saveBtn.disabled = true;
+      clearFinanceStatus();
+
+      try {
+        const payload = {
+          incomeMarkdown: document.getElementById('financeIncomeInput').value || '',
+          expenseMarkdown: document.getElementById('financeExpenseInput').value || '',
+          donations: getDonationsFromUI(),
+          updatedBy: state.currentUser?.displayName || state.currentUser?.userName || state.currentUser?.userId || 'Admin',
+          updatedAt: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        await financeRefForMonth(state.monthDate).set(payload);
+        setFinanceStatus('Финансите са запазени успешно.');
+        await loadFinanceMonth();
+      } catch (error) {
+        console.error('Finance save error:', error);
+        setFinanceStatus(`Грешка при запис: ${error.message}`, true);
+      } finally {
+        if (saveBtn) saveBtn.disabled = false;
+      }
+    }
+
+    function shiftMonth(offset) {
+      const targetMonth = new Date(state.monthDate.getFullYear(), state.monthDate.getMonth() + offset, 1);
+      state.monthDate = clampFinanceMonth(targetMonth);
+      loadFinanceMonth();
+    }
+
+    async function initFinanceTool() {
+      const financeMenuBtn = document.getElementById('financeMenuBtn');
+      const adminPanel = document.getElementById('financeAdminPanel');
+      const donationsSection = document.getElementById('financeDonationsSection');
+      const adminActions = document.getElementById('financeAdminActions');
+      const financeStatus = document.getElementById('financeStatus');
+      const incomeInput = document.getElementById('financeIncomeInput');
+      const expenseInput = document.getElementById('financeExpenseInput');
+      const incomePreview = document.getElementById('financeIncomePreview');
+      const expensePreview = document.getElementById('financeExpensePreview');
+      const prevBtn = document.getElementById('financePrevMonthBtn');
+      const nextBtn = document.getElementById('financeNextMonthBtn');
+      const reloadBtn = document.getElementById('financeReloadBtn');
+      const saveBtn = document.getElementById('financeSaveBtn');
+
+      if (!financeMenuBtn || !adminPanel) return;
+
+      if (!window.currentUserPromise) {
+        financeMenuBtn.style.display = 'none';
+        return;
+      }
+
+      try {
+        state.currentUser = await window.currentUserPromise;
+      } catch (error) {
+        console.error('Cannot resolve current user for finance tool:', error);
+      }
+
+      state.isAdmin = !!(state.currentUser && state.currentUser.isAdmin);
+      adminPanel.style.display = 'block';
+
+      attachFinanceFormattingShortcuts(incomeInput);
+      attachFinanceFormattingShortcuts(expenseInput);
+
+      state.monthDate = clampFinanceMonth(state.monthDate);
+      prevBtn?.addEventListener('click', () => shiftMonth(-1));
+      nextBtn?.addEventListener('click', () => shiftMonth(1));
+
+      if (!state.isAdmin) {
+        if (donationsSection) donationsSection.style.display = 'none';
+        if (adminActions) adminActions.style.display = 'none';
+        if (financeStatus) financeStatus.style.display = 'none';
+        if (incomeInput) {
+          incomeInput.readOnly = true;
+          incomeInput.style.display = 'none';
+          incomeInput.style.color = '#374151';
+        }
+        if (expenseInput) {
+          expenseInput.readOnly = true;
+          expenseInput.style.display = 'none';
+          expenseInput.style.color = '#374151';
+        }
+        setFinancePreviewMode(incomeInput, incomePreview, false);
+        setFinancePreviewMode(expenseInput, expensePreview, false);
+        await loadFinanceMonth();
+        return;
+      }
+
+      if (donationsSection) donationsSection.style.display = 'block';
+      if (adminActions) adminActions.style.display = 'flex';
+      if (incomeInput) {
+        incomeInput.readOnly = false;
+        incomeInput.style.display = 'none';
+        incomeInput.style.background = '';
+        incomeInput.style.color = '';
+      }
+      if (expenseInput) {
+        expenseInput.readOnly = false;
+        expenseInput.style.display = 'none';
+        expenseInput.style.background = '';
+        expenseInput.style.color = '';
+      }
+
+      bindFinancePreviewToggle(incomeInput, incomePreview, true);
+      bindFinancePreviewToggle(expenseInput, expensePreview, true);
+      setFinancePreviewMode(incomeInput, incomePreview, true);
+      setFinancePreviewMode(expenseInput, expensePreview, true);
+
+      reloadBtn?.addEventListener('click', loadFinanceMonth);
+      saveBtn?.addEventListener('click', saveFinanceMonth);
+
+      await loadFinanceMonth();
+    }
+
+    document.addEventListener('DOMContentLoaded', initFinanceTool);
+  })();
+</script>
 <script>
   // Initialize chat widget
   document.addEventListener('DOMContentLoaded', function() {
