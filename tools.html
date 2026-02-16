@@ -538,11 +538,9 @@
               <div id="financeDonationsSection" style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; background: #f9fafb; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
                   <h3 style="margin: 0; color: #1f2937;">Donations по потребители</h3>
-                  <span style="font-size: 12px; color: #6b7280;">Автоматичен списък от Members List</span>
                 </div>
 
                 <div id="financeDonationsRows"></div>
-                <div style="font-size: 12px; color: #6b7280; margin-top: 8px;">Сумата може да е от 2 до 5 EUR (или друга стойност).</div>
               </div>
 
               <div id="financeAdminActions" style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
@@ -1133,7 +1131,7 @@
           <option value="no" ${!row.donated ? 'selected' : ''}>Не</option>
         </select>
         <input type="number" class="finance-donation-amount" min="0" step="0.01" placeholder="EUR" value="${Number.isFinite(row.amount) ? row.amount : ''}">
-        <input type="text" class="finance-donation-note" placeholder="Бележка (напр. за януари и февруари)" value="${String(row.note || '').replace(/"/g, '&quot;')}">
+        <input type="text" class="finance-donation-note" placeholder="Бележка" value="${String(row.note || '').replace(/"/g, '&quot;')}">
       `;
 
       wrapper.querySelectorAll('input, select').forEach(el => {
