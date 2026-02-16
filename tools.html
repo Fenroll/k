@@ -329,6 +329,91 @@
       .main-content {
         padding-left: 0 !important;
         padding-bottom: 90px !important;
+        overflow-x: hidden;
+      }
+
+      .content {
+        padding: 0 10px 16px;
+        overflow-x: hidden;
+      }
+
+      .tools-menu {
+        padding: 14px 10px !important;
+      }
+
+      .tools-menu > div {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+        max-width: 100% !important;
+      }
+
+      .test-menu-btn {
+        width: 100%;
+        min-height: 46px;
+        padding: 8px 6px !important;
+        font-size: 0 !important;
+      }
+
+      .test-menu-btn::before {
+        content: attr(data-emoji);
+        font-size: 22px;
+        line-height: 1;
+      }
+
+      .upload-container,
+      #financeTool > div,
+      #tool3Tool > div {
+        max-width: 100% !important;
+        margin: 16px auto !important;
+        padding: 14px !important;
+      }
+
+      .drop-zone {
+        padding: 24px 14px;
+      }
+
+      #financeAdminPanel > div:nth-of-type(2) {
+        grid-template-columns: 1fr !important;
+      }
+
+      #financeTool > div > div:first-child {
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center;
+      }
+
+      #financeTool > div > div:first-child > div {
+        width: 100%;
+        justify-content: center !important;
+      }
+
+      #financeDonationsSection {
+        overflow-x: auto;
+        padding: 10px !important;
+      }
+
+      #financeDonationsRows {
+        min-width: 0;
+        width: max-content;
+      }
+
+      #financeDonationsRows .finance-donation-row {
+        grid-template-columns: 114px 68px 48px 88px !important;
+        gap: 5px !important;
+        width: max-content;
+      }
+
+      #financeDonationsRows .finance-donation-row input,
+      #financeDonationsRows .finance-donation-row select {
+        padding: 8px 6px !important;
+      }
+
+      #financeDonationsRows .finance-donation-row .finance-donation-paid {
+        padding-right: 20px !important;
+      }
+
+      #financeAdminActions {
+        justify-content: center !important;
+        width: 100%;
       }
       
       .main-header {
@@ -426,13 +511,13 @@
       <!-- Tools Menu -->
       <div class="tools-menu" style="padding: 30px 20px; background: #f5f5f5; border-bottom: 1px solid #e5e7eb;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto;">
-          <button class="test-menu-btn active" data-test="upload" style="padding: 18px 24px; border: none; background: #588157; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(88, 129, 87, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <button class="test-menu-btn active" data-test="upload" data-emoji="📤" style="padding: 18px 24px; border: none; background: #588157; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(88, 129, 87, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
             📤 Качване на файлове
           </button>
-          <button class="test-menu-btn" data-test="finance" id="financeMenuBtn" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <button class="test-menu-btn" data-test="finance" data-emoji="💶" id="financeMenuBtn" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
             💶 Финанси
           </button>
-          <button class="test-menu-btn" data-test="tool3" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <button class="test-menu-btn" data-test="tool3" data-emoji="📝" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
             📝 инструмент 3 (скоро)
           </button>
         </div>
