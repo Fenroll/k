@@ -1,15 +1,15 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202602171qz1"></script>
+  <script src="js/auth-guard.js?v=202602171rk5"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Courses</title>
   
   <!-- Favicon -->
-  <link rel="icon" href="favicon.svg?v=202602171qz1" type="image/svg+xml">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202602171qz1">
+  <link rel="icon" href="favicon.svg?v=202602171rk5" type="image/svg+xml">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202602171rk5">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -1094,49 +1094,51 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=202602171qz1"></script>
+  <script src="courses.generated.js?v=202602171rk5"></script>
   <script>
   // --- On-demand course content loader ---
   // Content is now split into per-course files in courses-data/ for fast initial load.
   // This loads content via dynamic <script> tags (works on file:// unlike fetch).
-  function loadCourseContent(courseOrId) {
-    return new Promise(function(resolve) {
-      if (!courseOrId || typeof courses === 'undefined') { resolve(); return; }
-      
-      var course = (typeof courseOrId === 'object') ? courseOrId : courses.find(function(c) { return c.id === courseOrId; });
-      if (!course) { resolve(); return; }
-      
-      // Already loaded and merged?
-      if (course._contentLoaded) { resolve(); return; }
+  const courseContentLoadPromises = Object.create(null);
 
-      // Courses without msg content do not have a separate content bundle.
-      if (!course._contentKey) { course._contentLoaded = true; resolve(); return; }
-      
-      // Use _contentKey (handles archived- prefix) or fall back to id
-      var contentKey = course._contentKey || course.id;
-      
-      // Already in global from a previous script load?
-      if (window.courseContent && window.courseContent[contentKey]) {
-        _mergeCourseContent(course, contentKey);
-        resolve();
-        return;
-      }
-      
-      // Load via dynamic script tag
-      var script = document.createElement('script');
-      var rawUrl = 'courses-data/' + contentKey + '.js';
-      script.src = (window.VersionManager && typeof window.VersionManager.versionedUrl === 'function')
-        ? window.VersionManager.versionedUrl(rawUrl)
-        : (rawUrl + ((window.coursesVersion || '') ? ('?v=' + window.coursesVersion) : ''));
-      script.onload = function() {
-        _mergeCourseContent(course, contentKey);
-        resolve();
-      };
-      script.onerror = function() {
-        console.warn('Could not load content for course', contentKey);
-        resolve();
-      };
-      document.head.appendChild(script);
+  function loadCourseContent(courseOrId) {
+    if (!courseOrId || typeof courses === 'undefined') return Promise.resolve();
+
+    var course = (typeof courseOrId === 'object') ? courseOrId : courses.find(function(c) { return c.id === courseOrId; });
+    if (!course) return Promise.resolve();
+
+    if (course._contentLoaded) return Promise.resolve();
+
+    if (!course._contentKey) {
+      course._contentLoaded = true;
+      return Promise.resolve();
+    }
+
+    var contentKey = course._contentKey || course.id;
+
+    if (window.courseContent && window.courseContent[contentKey]) {
+      _mergeCourseContent(course, contentKey);
+      return Promise.resolve();
+    }
+
+    if (!courseContentLoadPromises[contentKey]) {
+      courseContentLoadPromises[contentKey] = new Promise(function(resolve) {
+        var script = document.createElement('script');
+        var rawUrl = 'courses-data/' + contentKey + '.js';
+        script.src = (window.VersionManager && typeof window.VersionManager.versionedUrl === 'function')
+          ? window.VersionManager.versionedUrl(rawUrl)
+          : (rawUrl + ((window.coursesVersion || '') ? ('?v=' + window.coursesVersion) : ''));
+        script.onload = function() { resolve(); };
+        script.onerror = function() {
+          console.warn('Could not load content for course', contentKey);
+          resolve();
+        };
+        document.head.appendChild(script);
+      });
+    }
+
+    return courseContentLoadPromises[contentKey].then(function() {
+      _mergeCourseContent(course, contentKey);
     });
   }
   
@@ -1163,8 +1165,63 @@
     }
     course._contentLoaded = true;
   }
+
+  function findCourseByCard(card) {
+    if (!card || typeof courses === 'undefined') return null;
+    var courseId = card.querySelector('.course-id')?.textContent || '';
+    var isArchivedCard = card.style.opacity === '0.75';
+
+    if (isArchivedCard) {
+      return courses.find(c => c.id === courseId && c.isArchived === true) || null;
+    }
+
+    return courses.find(c => c.id === courseId && (!c.isArchived || c.isArchived === false)) || null;
+  }
+
+  function prewarmCourseContent(card) {
+    const courseObj = findCourseByCard(card);
+    if (!courseObj || courseObj._contentLoaded) return;
+    loadCourseContent(courseObj).catch(() => {});
+  }
+
+  function scheduleCoursePrewarm(container) {
+    if (!container) return;
+    const cards = Array.from(container.querySelectorAll('.element-card')).slice(0, 8);
+    if (!cards.length) return;
+
+    const warm = () => {
+      cards.forEach(card => prewarmCourseContent(card));
+    };
+
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(warm, { timeout: 1200 });
+    } else {
+      setTimeout(warm, 350);
+    }
+  }
+
+  function setupViewportCoursePrewarm(container) {
+    if (!container || typeof IntersectionObserver === 'undefined') return;
+    const cards = Array.from(container.querySelectorAll('.element-card'));
+    if (!cards.length) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          prewarmCourseContent(entry.target);
+          observer.unobserve(entry.target);
+        }
+      });
+    }, {
+      root: null,
+      rootMargin: '220px 0px',
+      threshold: 0.01
+    });
+
+    cards.forEach((card) => observer.observe(card));
+  }
   </script>
-  <script src="js/version-manager.js?v=202602171qz1"></script>
+  <script src="js/version-manager.js?v=202602171rk5"></script>
 </head>
 <body>
 <!-- Right-side overlay for course card click -->
@@ -1179,63 +1236,63 @@
   <div id="side-menu" class="mode-light hide-in-background themed-background-primary-fill-only left-off-canvas-menu color-selection-live-mode" style="background: #262626; width: 200px; min-width: 200px; max-width: 200px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100;">
       <div class="bb-inner-wrap">
         <div class="logo-header">
-          <a href="index.html?v=202602171qz1">
-            <img class="logo-img" src="svg/logo-coursebook.svg?v=202602171qz1" alt="StudyBoard">
+          <a href="index.html?v=202602171rk5">
+            <img class="logo-img" src="svg/logo-coursebook.svg?v=202602171rk5" alt="StudyBoard">
           </a>
         </div>
         <nav class="sidebar-nav" aria-label="Main">
           <ul class="off-canvas-list" id="base_tools">
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/course">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=202602171qz1" alt="blackboard" style="filter: brightness(0) invert(1);" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=202602171rk5" alt="blackboard" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Blackboard</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="account.html?v=202602171qz1">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=202602171qz1" alt="Account" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="account.html?v=202602171rk5">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=202602171rk5" alt="Account" />
                 <span class="link-text">Account</span>
               </a>
             </li>
             <li class="base-navigation-button active">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="index.html?v=202602171qz1">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202602171qz1" alt="Courses" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="index.html?v=202602171rk5">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202602171rk5" alt="Courses" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="anamnesis.html?v=202602171qz1">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=202602171qz1" alt="Anamnesis" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="anamnesis.html?v=202602171rk5">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=202602171rk5" alt="Anamnesis" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Anamnesis</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="calendar.html?v=202602171qz1">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=202602171qz1" alt="Calendar" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="calendar.html?v=202602171rk5">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=202602171rk5" alt="Calendar" />
                 <span class="link-text">Calendar</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="tools.html?v=202602171qz1">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=202602171qz1" alt="Tools" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="tools.html?v=202602171rk5">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=202602171rk5" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=202602171qz1">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=202602171qz1" alt="Editor" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=202602171rk5">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=202602171rk5" alt="Editor" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Editor</span>
               </a>
             </li>
             <li class="base-navigation-button" id="admin-button" style="display: none;">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=202602171qz1">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=202602171qz1" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=202602171rk5">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=202602171rk5" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Admin Panel</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="#" onclick="handleLogout()">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=202602171qz1" alt="Logout" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=202602171rk5" alt="Logout" />
                 <span class="link-text">Logout</span>
               </a>
             </li>
@@ -1270,16 +1327,6 @@
         });
       }
       
-      var courseList = document.getElementById('course-org-list');
-      if (courseList) {
-        courseList.querySelectorAll('.element-card').forEach(function(card) {
-          card.style.cursor = 'pointer';
-          card.addEventListener('click', function(e) {
-            openRightOverlayForCard(card);
-            e.stopPropagation();
-          });
-        });
-      }
     });
 
 const COURSE_COLORS = [
@@ -1649,7 +1696,17 @@ function renderCourseList() {
         openRightOverlayForCard(card);
         e.stopPropagation();
       });
+
+      const prewarmOnce = function() {
+        prewarmCourseContent(card);
+      };
+      card.addEventListener('mouseenter', prewarmOnce, { once: true, passive: true });
+      card.addEventListener('pointerdown', prewarmOnce, { once: true, passive: true });
+      card.addEventListener('touchstart', prewarmOnce, { once: true, passive: true });
     });
+
+    scheduleCoursePrewarm(list);
+    setupViewportCoursePrewarm(list);
   }
 }
 
@@ -1996,7 +2053,7 @@ function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
-<script src="js/chat.js?v=202602171qz1"></script>
+<script src="js/chat.js?v=202602171rk5"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -2177,34 +2234,13 @@ function toggleFileDropdown(sectionId) {
         });
       }
       
-      var courseList = document.getElementById('course-org-list');
-      if (courseList) {
-        courseList.querySelectorAll('.element-card').forEach(function(card) {
-          card.style.cursor = 'pointer';
-          card.addEventListener('click', function(e) {
-            openRightOverlayForCard(card);
-            e.stopPropagation();
-          });
-        });
-      }
     });
   async function openRightOverlayForCard(card) {
   var overlay = document.getElementById('rightOverlay');
   var content = document.getElementById('overlayContent');
   if (overlay && content) {
     var title = card.querySelector('.course-title')?.textContent || 'Course';
-    var courseId = card.querySelector('.course-id')?.textContent || '';
-    var isArchivedCard = card.style.opacity === '0.75'; // Archived cards have opacity
-    
-    // Find the course - need to check if it's archived or active
-    var courseObj;
-    if (isArchivedCard) {
-      // For archived cards, find in archived courses only
-      courseObj = courses.find(c => c.id === courseId && c.isArchived === true);
-    } else {
-      // For active cards, find in active courses only
-      courseObj = courses.find(c => c.id === courseId && (!c.isArchived || c.isArchived === false));
-    }
+    var courseObj = findCourseByCard(card);
     
     // Show overlay immediately with header (content loads async)
     content.innerHTML = `

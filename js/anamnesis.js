@@ -24,6 +24,10 @@
     let currentUser = null;
     let editingRecordId = null;
     let currentPatientNorm = null;
+    let selectedPatientEl = null;
+
+    const ANAMNESIS_CACHE_KEY = 'anamnesisDataCache_v1';
+    const ANAMNESIS_CACHE_MAX_AGE_MS = 12 * 60 * 60 * 1000;
 
     // --- DOM Elements ---
     const patientListEl = document.getElementById('patient-list');
@@ -53,16 +57,31 @@
         showLoading(true);
         
         try {
-            if (!window.currentUserPromise) {
-                console.error("Anamnesis: User identity system not ready.");
-                return;
+            const cachedData = readCachedAnamneses();
+            if (cachedData) {
+                processData(cachedData);
+                renderSidebar(searchInput.value);
+                showLoading(false);
             }
-            currentUser = await window.currentUserPromise;
+
+            if (window.currentUserPromise) {
+                window.currentUserPromise.then((user) => {
+                    currentUser = user;
+                    if (currentPatientNorm && groupedPatients[currentPatientNorm]) {
+                        renderCards(groupedPatients[currentPatientNorm]);
+                    }
+                }).catch((error) => {
+                    console.warn("Anamnesis: Could not resolve current user:", error);
+                });
+            } else {
+                console.error("Anamnesis: User identity system not ready.");
+            }
             
             const ref = db.ref('anamneses');
             ref.on('value', (snapshot) => {
                 const data = snapshot.val();
                 processData(data);
+                writeCachedAnamneses(data);
                 renderSidebar(searchInput.value);
                 
                 // Refresh current view if active
@@ -105,7 +124,8 @@
             btnBackMobile.addEventListener('click', (e) => {
                 e.preventDefault();
                 workspacePanel.classList.remove('active');
-                document.querySelectorAll('.patient-item').forEach(el => el.classList.remove('selected'));
+                if (selectedPatientEl) selectedPatientEl.classList.remove('selected');
+                selectedPatientEl = null;
                 currentPatientNorm = null; 
             });
         }
@@ -131,6 +151,7 @@
 
     function renderSidebar(filterText = '') {
         patientListEl.innerHTML = '';
+        selectedPatientEl = null;
         const normFilter = filterText.toLowerCase().trim();
         const names = Object.keys(groupedPatients).sort(); 
 
@@ -138,6 +159,9 @@
             patientListEl.innerHTML = '<li style="padding:20px; color:#999; text-align:center;">Няма намерени пациенти</li>';
             return;
         }
+
+        const fragment = document.createDocumentFragment();
+        let visibleCount = 0;
 
         names.forEach(normName => {
             const records = groupedPatients[normName];
@@ -147,7 +171,10 @@
 
             const li = document.createElement('li');
             li.className = 'patient-item';
-            if (normName === currentPatientNorm) li.classList.add('selected');
+            if (normName === currentPatientNorm) {
+                li.classList.add('selected');
+                selectedPatientEl = li;
+            }
             li.innerHTML = `
                 <div class="patient-name">${escapeHtml(originalName)}</div>
                 <div class="patient-meta">
@@ -156,14 +183,29 @@
                 </div>
             `;
             li.onclick = () => selectPatient(normName, li);
-            patientListEl.appendChild(li);
+            fragment.appendChild(li);
+            visibleCount += 1;
         });
+
+        if (visibleCount === 0) {
+            patientListEl.innerHTML = '<li style="padding:20px; color:#999; text-align:center;">Няма намерени пациенти</li>';
+            return;
+        }
+
+        patientListEl.appendChild(fragment);
     }
 
     function selectPatient(normName, liElement) {
         currentPatientNorm = normName;
-        document.querySelectorAll('.patient-item').forEach(el => el.classList.remove('selected'));
-        if (liElement) liElement.classList.add('selected');
+        if (selectedPatientEl && selectedPatientEl !== liElement) {
+            selectedPatientEl.classList.remove('selected');
+        }
+        if (liElement) {
+            liElement.classList.add('selected');
+            selectedPatientEl = liElement;
+        } else {
+            selectedPatientEl = null;
+        }
         showForm(false);
         const records = groupedPatients[normName];
         if (!records || records.length === 0) return;
@@ -321,6 +363,30 @@
     };
 
     function showLoading(s) { if(s) loadingOverlay.classList.remove('hidden'); else loadingOverlay.classList.add('hidden'); }
+    function readCachedAnamneses() {
+        try {
+            const raw = localStorage.getItem(ANAMNESIS_CACHE_KEY);
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return null;
+            if (!parsed.savedAt || !('data' in parsed)) return null;
+            if (Date.now() - parsed.savedAt > ANAMNESIS_CACHE_MAX_AGE_MS) return null;
+            return parsed.data;
+        } catch (error) {
+            console.warn('Anamnesis cache read failed:', error);
+            return null;
+        }
+    }
+    function writeCachedAnamneses(data) {
+        try {
+            localStorage.setItem(ANAMNESIS_CACHE_KEY, JSON.stringify({
+                savedAt: Date.now(),
+                data: data || null
+            }));
+        } catch (error) {
+            console.warn('Anamnesis cache write failed:', error);
+        }
+    }
     function escapeHtml(t) { return t ? String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : ''; }
     function formatDate(ts, it = false) { if(!ts) return ''; const d = new Date(ts); return it ? d.toLocaleString('bg-BG') : d.toLocaleDateString('bg-BG'); }
     init();
