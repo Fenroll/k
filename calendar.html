@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202602161rky"></script>
+  <script src="js/auth-guard.js?v=202602171irb"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -393,6 +393,14 @@
       border-right: 1px solid #f4f4f4;
       pointer-events: none;
       z-index: 1;
+  }
+
+  /* Full-column highlight for current day */
+  .current-day-column {
+      grid-row: 1 / -1;
+      background-color: rgba(52, 78, 65, 0.07);
+      pointer-events: none;
+      z-index: 0;
   }
 
   /* Header (Days) */
@@ -1547,6 +1555,9 @@
     // Global variable to store loaded data for helpers
     window.scheduleData = null;
 
+    // Pre-computed time ranges per semester (earliest start / latest end across all weeks)
+    let semesterTimeRanges = {};
+
     const SCHEDULE_CACHE_KEY = 'calendarScheduleDataCache_v1';
     const SCHEDULE_NOTES_CACHE_KEY = 'calendarScheduleNotesCache_v1';
     const CACHE_MAX_AGE_MS = 15 * 60 * 1000;
@@ -1589,6 +1600,9 @@
 
       scheduleByWeek = generateWeeksFromTemplate(activeScheduleData);
 
+      // Pre-compute semester-wide time ranges so every week in a semester uses the same grid bounds
+      semesterTimeRanges = computeSemesterTimeRanges(scheduleByWeek);
+
       if (activeScheduleData.exams && Array.isArray(activeScheduleData.exams)) {
         activeScheduleData.exams.forEach(exam => {
           if (exam.additionalInfo) {
@@ -1619,14 +1633,21 @@
 
     document.addEventListener('DOMContentLoaded', async function() {
       setupScheduleNotesEditor();
-      loadCurrentInfo({ preferCache: true });
 
+      // Apply cached notes instantly (synchronous, no Firebase request)
+      const cachedNotes = readCachedJson(SCHEDULE_NOTES_CACHE_KEY);
+      if (cachedNotes) {
+        applyScheduleNotesState(normalizeScheduleNotesValue(cachedNotes));
+      }
+
+      // Apply cached schedule instantly (synchronous)
       let hasRenderedSchedule = false;
       const cachedScheduleData = readCachedJson(SCHEDULE_CACHE_KEY);
       if (cachedScheduleData) {
         hasRenderedSchedule = applyScheduleData(cachedScheduleData);
       }
 
+      // Priority: fetch timetable data first — this is the main visible content
       try {
         await refreshScheduleDataFromFirebase();
       } catch (error) {
@@ -1635,6 +1656,9 @@
           document.querySelector('.schedule-container').innerHTML = '<p style="text-align:center; padding: 20px;">Грешка при зареждане на разписанието. Моля, опитайте по-късно.</p>';
         }
       }
+
+      // After timetable is rendered, refresh notes from Firebase (non-blocking)
+      refreshScheduleNotesFromFirebase();
     });
     
     const scheduleNotesDbRef = firebase.database().ref('scheduleNotes/content');
@@ -1774,7 +1798,7 @@
           lastEditedAt: Date.now()
         });
         closeScheduleNotesModal();
-        loadCurrentInfo();
+        refreshScheduleNotesFromFirebase();
       } catch (error) {
         console.error('Error saving schedule notes:', error);
         if (errorEl) {
@@ -1831,6 +1855,16 @@
             lastEditedAt: null
           });
         }
+      }
+    }
+
+    // Lightweight refresh: fetches notes from Firebase without clearing on error
+    async function refreshScheduleNotesFromFirebase() {
+      try {
+        const snapshot = await scheduleNotesDbRef.once('value');
+        applyScheduleNotesState(normalizeScheduleNotesValue(snapshot.val()));
+      } catch (error) {
+        console.error('Error refreshing schedule notes from Firebase:', error);
       }
     }
     
@@ -2166,6 +2200,50 @@
       return h * 60 + m;
     }
 
+    // Compute the earliest start hour and latest end hour for each semester across all weeks
+    function computeSemesterTimeRanges(weeks) {
+      const ranges = {};
+      weeks.forEach(week => {
+        if (week.type === 'exam' || !week.schedule || week.schedule.length === 0) return;
+        const sem = week.semester || 'winter';
+        if (!ranges[sem]) {
+          ranges[sem] = { earliestMin: 24 * 60, latestMin: 0 };
+        }
+        week.schedule.forEach(ev => {
+          if (!ev.startTime || !ev.endTime) return;
+          const start = timeToMinutes(ev.startTime);
+          const end = timeToMinutes(ev.endTime);
+          if (start < ranges[sem].earliestMin) ranges[sem].earliestMin = start;
+          if (end > ranges[sem].latestMin) ranges[sem].latestMin = end;
+        });
+      });
+
+      const result = {};
+      for (const sem in ranges) {
+        const r = ranges[sem];
+        if (r.latestMin === 0) {
+          result[sem] = { startHour: 8, endHour: 18 };
+          continue;
+        }
+        const startHour = Math.floor(r.earliestMin / 60);
+        const baseHour = Math.floor(r.latestMin / 60);
+        const mins = r.latestMin % 60;
+        const endHour = mins < 30 ? baseHour + 0.5 : baseHour + 1.5;
+        result[sem] = { startHour, endHour };
+      }
+      return result;
+    }
+
+    // Helper: Get time range for a week (uses semester-wide range if available, else per-week)
+    function getTimeRangeForWeek(week) {
+      const sem = week.semester || 'winter';
+      if (semesterTimeRanges[sem]) {
+        return semesterTimeRanges[sem];
+      }
+      // Fallback to per-week calculation
+      return calculateDynamicRange(week.schedule || []);
+    }
+
     // Helper: Calculate start/end hour based on events
     function calculateDynamicRange(events) {
       let earliestMin = 24 * 60;
@@ -2246,7 +2324,7 @@
       // Let's first clear dynamic content.
       
       // Remove all elements that are NOT header-cell
-      const dynamicElements = grid.querySelectorAll('.time-label, .grid-line, .event-card, .vertical-line');
+      const dynamicElements = grid.querySelectorAll('.time-label, .grid-line, .event-card, .vertical-line, .current-day-column');
       dynamicElements.forEach(el => el.remove());
 
       // Update Dates in Headers
@@ -2288,7 +2366,7 @@
       }
 
       const scheduleData = currentWeek.schedule;
-      const { startHour, endHour } = calculateDynamicRange(scheduleData);
+      const { startHour, endHour } = getTimeRangeForWeek(currentWeek);
       
       const stepMinutes = 15;
       const totalMinutes = (endHour - startHour) * 60;
@@ -2306,6 +2384,16 @@
           vLine.style.gridRow = `1 / ${gridEndRow}`; // Explicit span
           vLine.style.borderLeft = '1px solid #f4f4f4';
           grid.appendChild(vLine);
+      }
+
+      // Full-column highlight for current day
+      if (currentDay) {
+          const dayCol = days.indexOf(currentDay) + 2; // +2 because col 1 is time
+          const highlight = document.createElement('div');
+          highlight.className = 'current-day-column';
+          highlight.style.gridColumn = dayCol;
+          highlight.style.gridRow = `1 / ${gridEndRow}`;
+          grid.appendChild(highlight);
       }
 
       for (let i = 0; i <= totalRows; i++) {
@@ -2929,7 +3017,7 @@
 
 <script src="js/user-identity.js?v=202404231000"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202602161rky"></script>
+    <script src="js/chat.js?v=202602171irb"></script>
 
     <script src="js/presence.js"></script>
 <script src="js/version-check.js"></script>

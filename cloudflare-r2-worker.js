@@ -17,7 +17,7 @@ export default {
   async fetch(request, env) {
     // CORS headers for your domain
     const corsHeaders = {
-      'Access-Control-Allow-Origin': '*', // Change to your domain in production
+      'Access-Control-Allow-Origin': 'https://coursebook.lol', // Restricted to production domain
       'Access-Control-Allow-Methods': 'POST, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };
