@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202602171irb"></script>
+  <script src="js/auth-guard.js?v=202602171n2n"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
   <!-- Favicon -->
-  <link rel="icon" href="favicon.svg?v=7" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=202602171n2n" type="image/svg+xml">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <!-- Mobile Navigation CSS -->
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260131">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202602171n2n">
   
   <!-- Firebase SDKs - Moved to head and using compat versions -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
@@ -423,37 +423,38 @@
             ? `data-original-src="${href}"`
             : '';
 
-          return `<img src="${href}" alt="${text}" style="${style}"${dataWidth}${dataOriginalSrc}${cleanTitle ? ` title="${cleanTitle}"` : ''}>`;
+          return `<img src="${href}?v=202602171mhr" alt="${text}" style="${style}"${dataWidth}${dataOriginalSrc}${cleanTitle ? ` title="${cleanTitle}"` : ''}>`;
         }
       }
     });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
+  <script src="js/version-manager.js?v=202602171n2n"></script>
 </head>
 <body>
   <header>
     <h1 id="docTitle">Преглед на документ</h1>
     <a class="btn" href="#" onclick="if (window.opener) { window.close(); } else if (document.referrer) { history.back(); } else { window.close(); } return false;" title="Назад">
-      <img src="svg/md-viewer/icon-close.svg" alt="Назад" width="25" height="25">
+      <img src="svg/md-viewer/icon-close.svg?v=202602171n2n" alt="Назад" width="25" height="25">
     </a>
     <button id="summaryBtn" class="btn" title="Summary">
-      <img src="svg/md-viewer/icon-summary.svg" alt="Summary" width="20" height="20">
+      <img src="svg/md-viewer/icon-summary.svg?v=202602171n2n" alt="Summary" width="20" height="20">
     </button>
     <button id="editBtn" class="btn" title="Редактирай">
-      <img src="svg/md-viewer/icon-edit.svg" alt="Редактирай" width="20" height="20">
+      <img src="svg/md-viewer/icon-edit.svg?v=202602171n2n" alt="Редактирай" width="20" height="20">
     </button>
     <button id="fontSizeBtn" class="btn" title="Change Font Size">
-      <img src="svg/md-viewer/icon-textsize.svg" alt="Change Font Size" width="20" height="20">
+      <img src="svg/md-viewer/icon-textsize.svg?v=202602171n2n" alt="Change Font Size" width="20" height="20">
     </button>
     <button id="notes-toggle-btn" class="btn" title="Бележки">
-      <img src="svg/md-viewer/icon-notes.svg" alt="Бележки" width="20" height="20">
+      <img src="svg/md-viewer/icon-notes.svg?v=202602171n2n" alt="Бележки" width="20" height="20">
     </button>
     <button id="prevH1Btn" class="btn" title="Предишно заглавие">
-      <img src="svg/md-viewer/icon-arrow-left.svg" alt="Предишно" width="20" height="20">
+      <img src="svg/md-viewer/icon-arrow-left.svg?v=202602171n2n" alt="Предишно" width="20" height="20">
     </button>
     <button id="nextH1Btn" class="btn" title="Следващо заглавие">
-      <img src="svg/md-viewer/icon-arrow-right.svg" alt="Следващо" width="20" height="20">
+      <img src="svg/md-viewer/icon-arrow-right.svg?v=202602171n2n" alt="Следващо" width="20" height="20">
     </button>
   </header>
   <main>
@@ -695,6 +696,101 @@
       return doc.body.innerHTML;
     }
 
+    // Generous image lazy-loading for fast h1 jumps
+    const IMAGE_PRELOAD_MARGIN_PX = 2800;
+    const IMAGE_EAGER_COUNT = 6;
+    let mdImageIntersectionObserver = null;
+    let mdImageMutationObserver = null;
+    let mdImageScrollBound = false;
+
+    function promoteNearbyImages(root) {
+      const viewportTop = window.scrollY - IMAGE_PRELOAD_MARGIN_PX;
+      const viewportBottom = window.scrollY + window.innerHeight + IMAGE_PRELOAD_MARGIN_PX;
+
+      root.querySelectorAll('img').forEach(img => {
+        const rect = img.getBoundingClientRect();
+        const absoluteTop = rect.top + window.scrollY;
+        const absoluteBottom = rect.bottom + window.scrollY;
+
+        if (absoluteBottom >= viewportTop && absoluteTop <= viewportBottom) {
+          img.loading = 'eager';
+          if (!img.getAttribute('fetchpriority')) {
+            img.setAttribute('fetchpriority', 'high');
+          }
+        }
+      });
+    }
+
+    function configureContentImages(root) {
+      const images = Array.from(root.querySelectorAll('img'));
+
+      images.forEach((img, index) => {
+        if (!img.dataset.mdImageConfigured) {
+          img.dataset.mdImageConfigured = '1';
+          img.setAttribute('decoding', 'async');
+          img.setAttribute('loading', 'lazy');
+        }
+
+        if (index < IMAGE_EAGER_COUNT) {
+          img.setAttribute('loading', 'eager');
+          img.setAttribute('fetchpriority', 'high');
+        }
+
+        if (mdImageIntersectionObserver && !img.complete) {
+          mdImageIntersectionObserver.observe(img);
+        }
+      });
+
+      promoteNearbyImages(root);
+    }
+
+    function initGenerousImageLoading() {
+      const root = document.getElementById('content');
+      if (!root) return;
+
+      if (!mdImageIntersectionObserver && 'IntersectionObserver' in window) {
+        mdImageIntersectionObserver = new IntersectionObserver(entries => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              img.setAttribute('loading', 'eager');
+              if (!img.getAttribute('fetchpriority')) {
+                img.setAttribute('fetchpriority', 'high');
+              }
+              mdImageIntersectionObserver.unobserve(img);
+            }
+          });
+        }, {
+          root: null,
+          rootMargin: `${IMAGE_PRELOAD_MARGIN_PX}px 0px`,
+          threshold: 0.01
+        });
+      }
+
+      if (!mdImageMutationObserver) {
+        mdImageMutationObserver = new MutationObserver(() => {
+          configureContentImages(root);
+        });
+        mdImageMutationObserver.observe(root, { childList: true, subtree: true });
+      }
+
+      if (!mdImageScrollBound) {
+        let scrollTimer = null;
+        const onScrollOrResize = () => {
+          if (scrollTimer) return;
+          scrollTimer = setTimeout(() => {
+            scrollTimer = null;
+            promoteNearbyImages(root);
+          }, 80);
+        };
+        window.addEventListener('scroll', onScrollOrResize, { passive: true });
+        window.addEventListener('resize', onScrollOrResize);
+        mdImageScrollBound = true;
+      }
+
+      configureContentImages(root);
+    }
+
     // Function to load summary file
     function loadSummary(summaryPath) {
       console.log('loadSummary function called with:', summaryPath);
@@ -782,6 +878,8 @@
         });
     }
 
+    initGenerousImageLoading();
+
     (function(){
       function getParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
       const path = getParam('path');
@@ -794,7 +892,9 @@
       document.title = title;
       document.getElementById('docTitle').textContent = title;
       const dl = document.getElementById('downloadLink');
-      dl.href = decodedPath;
+      if (dl) {
+        dl.href = decodedPath;
+      }
 
       // Check if content is passed via sessionKey (sessionStorage)
       const sessionKey = getParam('sessionKey');
@@ -974,12 +1074,18 @@
             }
           }, 100);
 
-          function recoverContentFromCourses() {
+          async function recoverContentFromCourses() {
             const path = getParam('path');
             if (!path) { showError(err); return; }
             
             const decodedPath = decodeURIComponent(path);
             const normalizedPath = decodedPath.replace(/\\/g, '/');
+            
+            // Find which course this file belongs to and load its content
+            const targetCourse = findCourseForPath(normalizedPath);
+            if (targetCourse) {
+              await loadCourseContent(targetCourse);
+            }
             
             // Search logic (duplicated for resilience inside this closure)
             let fileData = null;
@@ -1046,7 +1152,39 @@
               contentDiv.innerHTML = html;
               
               if (typeof renderMathInElement !== 'undefined') {
-                try { renderMathInElement(contentDiv, { delimiters: [{left: '$', right: '$', display: true}, {left: '
+                try {
+                  renderMathInElement(contentDiv, {
+                    delimiters: [
+                      {left: '$$', right: '$$', display: true},
+                      {left: '$', right: '$', display: false}
+                    ],
+                    throwOnError: false
+                  });
+                } catch (e) {
+                  console.error('KaTeX error (recovery):', e);
+                }
+              }
+
+              contentDiv.querySelectorAll('table').forEach(tbl => {
+                if (!tbl.parentElement.classList.contains('table-scroll')) {
+                  const wrap = document.createElement('div');
+                  wrap.className = 'table-scroll';
+                  tbl.parentElement.insertBefore(wrap, tbl);
+                  wrap.appendChild(tbl);
+                }
+              });
+
+              contentDiv.querySelectorAll('a').forEach(a => a.target = '_blank');
+            } else {
+              showError(err);
+            }
+          }
+
+          function showError(error) {
+            const message = (error && error.message) ? error.message : 'Unknown error';
+            contentDiv.textContent = 'Неуспешно зареждане на файла: ' + message;
+          }
+        });
     })();
     
     // Setup summary button - outside IIFE so it always works
@@ -1127,7 +1265,7 @@
       }
       
       // Setup click handler
-      summaryBtn.addEventListener('click', (e) => {
+      summaryBtn.addEventListener('click', async (e) => {
         e.preventDefault();
         if (originalPath) {
           isSummaryMode = !isSummaryMode;
@@ -1135,8 +1273,14 @@
           console.log('Loading:', pathToLoad);
           
           // Find and display content
-          function findFileContent(filePath) {
+          async function findFileContent(filePath) {
             const normalizedPath = filePath.replace(/\\/g, '/');
+            
+            // Load content for the course that contains this file
+            const targetCourse = findCourseForPath(normalizedPath);
+            if (targetCourse) {
+              await loadCourseContent(targetCourse);
+            }
             
             for (const course of courses) {
               function searchSection(section) {
@@ -1173,7 +1317,7 @@
             return null;
           }
           
-          const fileData = findFileContent(pathToLoad);
+          const fileData = await findFileContent(pathToLoad);
           if (fileData && fileData.content) {
             const root = document.getElementById('content');
             
@@ -1328,7 +1472,90 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202602171irb"></script>
+  <script src="courses.generated.js?v=202602171n2n"></script>
+  <script>
+  // --- On-demand course content loader (works on file://) ---
+  function loadCourseContent(courseOrId) {
+    return new Promise(function(resolve) {
+      if (!courseOrId || typeof courses === 'undefined') { resolve(); return; }
+      var course = (typeof courseOrId === 'object') ? courseOrId : courses.find(function(c) { return c.id === courseOrId; });
+      if (!course) { resolve(); return; }
+      if (course._contentLoaded) { resolve(); return; }
+      if (!course._contentKey) { course._contentLoaded = true; resolve(); return; }
+      var contentKey = course._contentKey || course.id;
+      if (window.courseContent && window.courseContent[contentKey]) {
+        _mergeCourseContent(course, contentKey);
+        resolve();
+        return;
+      }
+      var script = document.createElement('script');
+      var rawUrl = 'courses-data/' + contentKey + '.js';
+      script.src = (window.VersionManager && typeof window.VersionManager.versionedUrl === 'function')
+        ? window.VersionManager.versionedUrl(rawUrl)
+        : (rawUrl + ((window.coursesVersion || '') ? ('?v=' + window.coursesVersion) : ''));
+      script.onload = function() {
+        _mergeCourseContent(course, contentKey);
+        resolve();
+      };
+      script.onerror = function() {
+        console.warn('Could not load content for course', contentKey);
+        resolve();
+      };
+      document.head.appendChild(script);
+    });
+  }
+  function _mergeCourseContent(course, contentKey) {
+    if (!window.courseContent || !window.courseContent[contentKey]) return;
+    var contentMap = window.courseContent[contentKey];
+    function mergeSection(section) {
+      if (section.msgNotes) {
+        section.msgNotes.forEach(function(note) {
+          if (!note.content && contentMap[note.path]) {
+            note.content = contentMap[note.path];
+          }
+        });
+      }
+      if (section.subsections) {
+        section.subsections.forEach(mergeSection);
+      }
+    }
+    if (course.sections) {
+      course.sections.forEach(mergeSection);
+    }
+    course._contentLoaded = true;
+  }
+  function findCourseForPath(normalizedPath) {
+    if (typeof courses === 'undefined') return null;
+    for (var i = 0; i < courses.length; i++) {
+      var course = courses[i];
+      if (!course.sections) continue;
+      for (var j = 0; j < course.sections.length; j++) {
+        if (_sectionContainsPath(course.sections[j], normalizedPath)) return course;
+      }
+    }
+    return null;
+  }
+  function _sectionContainsPath(section, normalizedPath) {
+    if (section.msgNotes) {
+      for (var k = 0; k < section.msgNotes.length; k++) {
+        var p = section.msgNotes[k].path;
+        if (p === normalizedPath || (p && p.replace(/\\/g, '/') === normalizedPath)) return true;
+      }
+    }
+    if (section.files) {
+      for (var k = 0; k < section.files.length; k++) {
+        var p = section.files[k].path;
+        if (p === normalizedPath || (p && p.replace(/\\/g, '/') === normalizedPath)) return true;
+      }
+    }
+    if (section.subsections) {
+      for (var k = 0; k < section.subsections.length; k++) {
+        if (_sectionContainsPath(section.subsections[k], normalizedPath)) return true;
+      }
+    }
+    return false;
+  }
+  </script>
 
   <!-- ============================================
        CHAT SYSTEM - Firebase & Notes
@@ -1336,17 +1563,71 @@
 
 
   
-<script src="js/user-identity.js?v=20260125"></script>
+<script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202602171irb"></script>
-  <script src="js/presence.js?v=20260125"></script>
-  <script src="js/notes-init.js?v=20260131"></script>
+    <script src="js/chat.js?v=202602171n2n"></script>
+  <script src="js/presence.js?v=202602171mhr"></script>
+  <script src="js/notes-init.js?v=202602171mhr"></script>
 
   <!-- H1 Navigation with Arrow Keys -->
   <script>
     (function() {
       let h1Elements = [];
       let currentH1Index = -1;
+      const prefetchedImages = new Set();
+
+      function toAbsoluteUrl(src) {
+        try {
+          return new URL(src, window.location.href).href;
+        } catch (_) {
+          return src;
+        }
+      }
+
+      function prefetchImage(src) {
+        if (!src) return;
+        const abs = toAbsoluteUrl(src);
+        if (!abs || prefetchedImages.has(abs)) return;
+        prefetchedImages.add(abs);
+
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = abs;
+      }
+
+      function getSectionImagesByH1Index(index) {
+        if (index < 0 || index >= h1Elements.length) return [];
+        const currentH1 = h1Elements[index];
+        const nextH1 = index < h1Elements.length - 1 ? h1Elements[index + 1] : null;
+        const sectionImages = [];
+
+        let node = currentH1;
+        while (node && node !== nextH1) {
+          if (node.nodeType === 1 && node.tagName === 'IMG') {
+            sectionImages.push(node);
+          }
+          if (node.querySelectorAll && node !== currentH1) {
+            node.querySelectorAll('img').forEach(img => sectionImages.push(img));
+          }
+          node = node.nextElementSibling;
+        }
+
+        if (sectionImages.length === 0) {
+          currentH1.querySelectorAll('img').forEach(img => sectionImages.push(img));
+        }
+
+        return sectionImages;
+      }
+
+      function prefetchAssetsAroundH1(index) {
+        const targets = [index, index - 1, index + 1, index - 2, index + 2]
+          .filter(i => i >= 0 && i < h1Elements.length);
+
+        targets.forEach(i => {
+          const images = getSectionImagesByH1Index(i);
+          images.forEach(img => prefetchImage(img.getAttribute('src')));
+        });
+      }
       
       // Function to update h1 elements list
       function updateH1List() {
@@ -1371,6 +1652,8 @@
           setTimeout(() => {
             h1.style.backgroundColor = originalBg;
           }, 600);
+
+          prefetchAssetsAroundH1(index);
         }
       }
       
@@ -1463,6 +1746,10 @@
       function initH1Navigation() {
         setTimeout(() => {
           updateH1List();
+          if (h1Elements.length > 0) {
+            const initialIndex = findCurrentH1();
+            prefetchAssetsAroundH1(initialIndex);
+          }
         }, 500);
       }
       
@@ -1471,6 +1758,10 @@
       if (contentDiv) {
         const observer = new MutationObserver(() => {
           updateH1List();
+          if (h1Elements.length > 0) {
+            const idx = currentH1Index >= 0 ? currentH1Index : findCurrentH1();
+            prefetchAssetsAroundH1(idx);
+          }
         });
         
         observer.observe(contentDiv, {
@@ -1543,7 +1834,7 @@
     .notes-list::-webkit-scrollbar-track { background: transparent; }
     .notes-list::-webkit-scrollbar-thumb { background: var(--notes-border); border-radius: 3px; }
   </style>
-<script src="js/version-check.js"></script>
+<script src="js/version-check.js?v=202602171mhr"></script>
 <!-- Hydration Script: Ensures fresh content on reload even if sessionKey is present -->
 <script>
   (function() {
@@ -1792,7 +2083,7 @@
 
         let avatarHtml = '';
         if (avatarSrc) {
-            avatarHtml = `<img src="${avatarSrc}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; margin-right:8px; border:1px solid #ddd;">`;
+            avatarHtml = `<img src="${avatarSrc}?v=202602171mhr" style="width:24px; height:24px; border-radius:50%; object-fit:cover; margin-right:8px; border:1px solid #ddd;">`;
         } else {
             // Fallback to colored circle with initial
             const initial = (note.author || "?")[0].toUpperCase();

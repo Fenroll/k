@@ -228,15 +228,20 @@ class ChatFirebaseREST {
     } catch(e) { return {}; }
   }
 
+  _attachListener(ref, eventName, callback) {
+    ref.on(eventName, callback);
+    this.unsubscribers.push(() => ref.off(eventName, callback));
+  }
+
   startNameMappingsPolling(callback) {
     this._ensureInit().then(() => {
         const mappingsRef = firebase.database().ref(`name_mappings`);
 
-        const unsubscribe = mappingsRef.on('value', (snapshot) => {
+        const onValue = (snapshot) => {
             const mappings = snapshot.val() || {};
             callback(mappings);
-        });
-        this.unsubscribers.push(unsubscribe);
+        };
+        this._attachListener(mappingsRef, 'value', onValue);
     });
   }
 
@@ -284,7 +289,7 @@ class ChatFirebaseREST {
   startTypingPolling(callback) {
     this._ensureInit().then(() => {
         const typingRef = firebase.database().ref(`typing/${this.documentId}`);
-        const unsubscribe = typingRef.on('value', (snapshot) => {
+        const onValue = (snapshot) => {
             const typingData = snapshot.val() || {};
             // Filter out stale typing indicators (older than 10 seconds)
             const activeTyping = {};
@@ -300,8 +305,8 @@ class ChatFirebaseREST {
             });
             
             callback(activeTyping);
-        });
-        this.unsubscribers.push(unsubscribe);
+          };
+          this._attachListener(typingRef, 'value', onValue);
     });
   }
 
@@ -320,7 +325,7 @@ class ChatFirebaseREST {
         // Only listen for messages AFTER the ones we already have
         const q = messagesRef.orderByChild('timestamp').startAfter(latestTimestamp);
 
-        const unsubscribe = q.on('child_added', (snapshot) => {
+        const onChildAdded = (snapshot) => {
             const val = snapshot.val();
             const newMessage = {
                 ...val,
@@ -341,19 +346,19 @@ class ChatFirebaseREST {
                 
                 callback(this.messages);
             }
-        });
-        this.unsubscribers.push(unsubscribe);
+            };
+            this._attachListener(q, 'child_added', onChildAdded);
         
         // Listen for deletions (all messages, not just new ones)
         const qAll = messagesRef.orderByChild('timestamp');
-        const unsubscribeRemoved = qAll.on('child_removed', (snapshot) => {
+        const onChildRemoved = (snapshot) => {
             this.messages = this.messages.filter(m => m.id !== snapshot.key);
             callback(this.messages);
-        });
-        this.unsubscribers.push(unsubscribeRemoved);
+        };
+        this._attachListener(qAll, 'child_removed', onChildRemoved);
         
         // Listen for changes (edits)
-        const unsubscribeChanged = qAll.on('child_changed', (snapshot) => {
+        const onChildChanged = (snapshot) => {
             const val = snapshot.val();
             const idx = this.messages.findIndex(m => m.id === snapshot.key);
             if (idx !== -1) {
@@ -365,8 +370,8 @@ class ChatFirebaseREST {
                 };
                 callback(this.messages);
             }
-        });
-        this.unsubscribers.push(unsubscribeChanged);
+            };
+            this._attachListener(qAll, 'child_changed', onChildChanged);
     });
   }
 
@@ -423,13 +428,13 @@ class ChatFirebaseREST {
     this._ensureInit().then(() => {
         const lastReadRef = firebase.database().ref(`last_read/${this.documentId}/${safeUserName}`);
 
-        const unsubscribe = lastReadRef.on('value', (snapshot) => {
+        const onValue = (snapshot) => {
             const lastReadId = snapshot.val();
             if (lastReadId) {
                 callback(lastReadId);
             } // Can be removed, frequent
-        });
-        this.unsubscribers.push(unsubscribe);
+        };
+        this._attachListener(lastReadRef, 'value', onValue);
     });
   }
 
@@ -495,11 +500,11 @@ class ChatFirebaseREST {
     this._ensureInit().then(() => {
         const reactionsRef = firebase.database().ref(`reactions/${this.documentId}`);
 
-        const unsubscribe = reactionsRef.on('value', (snapshot) => {
+        const onValue = (snapshot) => {
             const reactions = snapshot.val() || {};
             callback(reactions);
-        });
-        this.unsubscribers.push(unsubscribe);
+        };
+        this._attachListener(reactionsRef, 'value', onValue);
     });
   }
 
@@ -511,9 +516,10 @@ class ChatFirebaseREST {
         const offsetRef = firebase.database().ref(".info/serverTimeOffset");
 
         let serverTimeOffset = 0;
-        offsetRef.on("value", (snap) => {
+        const onOffsetValue = (snap) => {
             serverTimeOffset = snap.val() || 0;
-        });
+        };
+        this._attachListener(offsetRef, 'value', onOffsetValue);
 
         let allSiteUsers = {};     
         let allOnlineAuthData = {}; 
@@ -648,25 +654,25 @@ class ChatFirebaseREST {
         this.unsubscribers.push(() => clearInterval(refreshInterval));
 
         // Listen for all site users (for username and color)
-        const unsubscribeSiteUsers = siteUsersRef.on('value', (snapshot) => {
+        const onSiteUsersValue = (snapshot) => {
             allSiteUsers = snapshot.val() || {};
             processAndCallback();
-        });
-        this.unsubscribers.push(unsubscribeSiteUsers);
+        };
+        this._attachListener(siteUsersRef, 'value', onSiteUsersValue);
 
         // Listen for authenticated users online presence data
-        const unsubscribeOnlineUsers = onlineUsersRef.on('value', (snapshot) => {
+        const onOnlineUsersValue = (snapshot) => {
             allOnlineAuthData = snapshot.val() || {};
             processAndCallback(); // Recalculate and update when online status changes
-        });
-        this.unsubscribers.push(unsubscribeOnlineUsers);
+        };
+        this._attachListener(onlineUsersRef, 'value', onOnlineUsersValue);
 
         // New: Listen for guest users online presence data
-        const unsubscribeOnlineGuests = onlineGuestsRef.on('value', (snapshot) => {
+        const onOnlineGuestsValue = (snapshot) => {
             allOnlineGuestData = snapshot.val() || {};
             processAndCallback(); // Recalculate and update when guest online status changes
-        });
-        this.unsubscribers.push(unsubscribeOnlineGuests);
+        };
+        this._attachListener(onlineGuestsRef, 'value', onOnlineGuestsValue);
     });
   }
 
@@ -1771,7 +1777,7 @@ class ChatUIManager {
 
       if (cmd === 'deletechat') {
           if(confirm("⚠ WARNING: This will delete ALL chat history globally! Are you sure?")) {
-              await window.deleteAllChatMessages('admin');
+          await window.deleteAllChatMessages();
           }
       }
   }
@@ -3390,10 +3396,7 @@ class ChatUIManager {
           // Update the global currentUser object
           Object.assign(window.currentUser, newUserData);
           
-          // Force an immediate presence update with the new data (e.g., new color)
-          if (window.chatManager && window.chatManager.chatFirebase) {
-              window.chatManager.chatFirebase.forceUpdatePresence();
-          }
+          // Presence updates are handled by presence.js based on shared user state.
         }
       } catch (e) { console.error('Error processing storage event:', e); }
     }
@@ -4235,20 +4238,21 @@ class ChatUIManager {
 // ============================================
 
 window.resetChat = function() {
+  const isLocalDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  if (!isLocalDev) {
+    console.warn('resetChat is available only in local development.');
+    return;
+  }
+
   localStorage.removeItem('userId');
   localStorage.removeItem('userName');
   localStorage.removeItem('userColor');
   console.log('✅ Ресет завършен! Напиши в консолата: location.reload()');
 };
 
-window.deleteAllChatMessages = async function(password) {
-  if (!password) {
-    console.error('❌ Парола не е дадена! Използвай: window.deleteAllChatMessages("admin")');
-    return false;
-  }
-
-  if (password !== 'admin') {
-    console.error('❌ ГРЕШНА ПАРОЛА!');
+window.deleteAllChatMessages = async function() {
+  if (!window.currentUser || !window.currentUser.isAdmin) {
+    console.error('❌ Само администратори могат да изтрият чата.');
     return false;
   }
 

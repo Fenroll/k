@@ -8,6 +8,7 @@ const path = require('path');
 
 const ELEMENTS_DIR = path.join(__dirname, 'files');
 const OUTPUT_FILE = path.join(__dirname, 'courses.generated.js');
+const CONTENT_DIR = path.join(__dirname, 'courses-data');
 const ID_MAPPING_FILE = path.join(__dirname, 'course-ids.json');
 const NAME_MAPPING_FILE = path.join(__dirname, 'folder-name-mappings.json');
 const FILES_INDEX_FILE = path.join(__dirname, 'files-index.json');
@@ -430,18 +431,10 @@ function getAllCourses() {
 }
 
 function updateHtmlFiles(version) {
-  // HTML files that need cache-busting updates
-  const htmlFiles = [
-    path.join(__dirname, 'index.html'),
-    path.join(__dirname, 'md-viewer.html'),
-    path.join(__dirname, 'md-editor.html'),
-    path.join(__dirname, 'text-editor.html'),
-    path.join(__dirname, 'admin.html'),
-    path.join(__dirname, 'account.html'),
-    path.join(__dirname, 'tests.html'),
-    path.join(__dirname, 'calendar.html'),
-    path.join(__dirname, 'anamnesis.html')
-  ];
+  // Update all top-level HTML files in the workspace root
+  const htmlFiles = fs.readdirSync(__dirname)
+    .filter(name => name.toLowerCase().endsWith('.html'))
+    .map(name => path.join(__dirname, name));
 
   htmlFiles.forEach(filePath => {
     if (!fs.existsSync(filePath)) {
@@ -452,6 +445,30 @@ function updateHtmlFiles(version) {
     try {
       let content = fs.readFileSync(filePath, 'utf8');
       let updated = false;
+
+      function replaceOutsideScriptBlocks(html, pattern, replacement) {
+        const scriptBlockPattern = /<script\b[^>]*>[\s\S]*?<\/script>/gi;
+        let lastIndex = 0;
+        let result = '';
+        let changed = false;
+        let match;
+
+        while ((match = scriptBlockPattern.exec(html)) !== null) {
+          const before = html.slice(lastIndex, match.index);
+          const replacedBefore = before.replace(pattern, replacement);
+          if (replacedBefore !== before) changed = true;
+          result += replacedBefore;
+          result += match[0];
+          lastIndex = match.index + match[0].length;
+        }
+
+        const after = html.slice(lastIndex);
+        const replacedAfter = after.replace(pattern, replacement);
+        if (replacedAfter !== after) changed = true;
+        result += replacedAfter;
+
+        return { content: result, changed };
+      }
       
       // 1. Replace courses.generated.js script tags
       const coursesPattern = /<script src="courses\.generated\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
@@ -488,6 +505,44 @@ function updateHtmlFiles(version) {
         content = content.replace(guardPattern, newGuardTag);
         updated = true;
       }
+
+      // 5. Enforce one-token policy for local static assets (script/link/img/source)
+      // IMPORTANT: only apply outside <script> blocks to avoid mutating JS template strings.
+      const localAssetPattern = /(<(?:script|link|img|source)\b[^>]*?\b(?:src|href)=")(?!https?:\/\/|\/\/|data:|blob:|chrome-extension:|mailto:|tel:|#)([^"?]+)(?:\?v=[a-zA-Z0-9_]+)?(")/gi;
+      const localAssetResult = replaceOutsideScriptBlocks(
+        content,
+        localAssetPattern,
+        `$1$2?v=${version}$3`
+      );
+      if (localAssetResult.changed) {
+        content = localAssetResult.content;
+        updated = true;
+      }
+
+      // 5b. Enforce same token for internal page links (e.g. href="account.html?v=...")
+      // Apply outside <script> blocks only.
+      const internalHtmlLinkPattern = /(href=")(?!https?:\/\/|\/\/|mailto:|tel:|#)(?:\.\/)?([^"?#]+\.html)(?:\?v=[a-zA-Z0-9_]+)?(")/gi;
+      const internalLinkResult = replaceOutsideScriptBlocks(
+        content,
+        internalHtmlLinkPattern,
+        `$1$2?v=${version}$3`
+      );
+      if (internalLinkResult.changed) {
+        content = internalLinkResult.content;
+        updated = true;
+      }
+
+      // 6. Ensure central version manager is loaded on all updated pages
+      const versionManagerPattern = /<script src="(?:\.\/)?js\/version-manager\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
+      const versionManagerTag = `<script src="js/version-manager.js?v=${version}"></script>`;
+
+      if (versionManagerPattern.test(content)) {
+        content = content.replace(versionManagerPattern, versionManagerTag);
+        updated = true;
+      } else if (content.includes('</head>')) {
+        content = content.replace('</head>', `  ${versionManagerTag}\n</head>`);
+        updated = true;
+      }
       
       if (updated) {
         fs.writeFileSync(filePath, content, 'utf8');
@@ -499,6 +554,47 @@ function updateHtmlFiles(version) {
       console.error(`✗ Error updating ${path.basename(filePath)}:`, error.message);
     }
   });
+}
+
+// Extract content from a course's sections into a flat path->content map
+function extractCourseContent(course) {
+  const contentMap = {};
+  
+  function walkSection(section) {
+    if (section.msgNotes) {
+      section.msgNotes.forEach(note => {
+        if (note.content) {
+          contentMap[note.path] = note.content;
+        }
+      });
+    }
+    if (section.subsections) {
+      section.subsections.forEach(walkSection);
+    }
+  }
+  
+  if (course.sections) {
+    course.sections.forEach(walkSection);
+  }
+  return contentMap;
+}
+
+// Strip content from a course's sections (for the main metadata-only output)
+function stripCourseContent(course) {
+  function walkSection(section) {
+    if (section.msgNotes) {
+      section.msgNotes.forEach(note => {
+        delete note.content;
+      });
+    }
+    if (section.subsections) {
+      section.subsections.forEach(walkSection);
+    }
+  }
+  
+  if (course.sections) {
+    course.sections.forEach(walkSection);
+  }
 }
 
 function main() {
@@ -537,13 +633,58 @@ function main() {
   });
   const buildTimestamp = `${date} ${time}`;
 
-  // Write JS file with version at the top
+  // --- Generate per-course content files ---
+  // Create courses-data directory
+  if (!fs.existsSync(CONTENT_DIR)) {
+    fs.mkdirSync(CONTENT_DIR, { recursive: true });
+  }
+  
+  // Clean old content files
+  const existingContentFiles = fs.readdirSync(CONTENT_DIR).filter(f => f.endsWith('.js'));
+  existingContentFiles.forEach(f => fs.unlinkSync(path.join(CONTENT_DIR, f)));
+  
+  let totalContentFiles = 0;
+  let totalContentSize = 0;
+  
+  courses.forEach(course => {
+    const contentMap = extractCourseContent(course);
+    const noteCount = Object.keys(contentMap).length;
+    
+    if (noteCount > 0) {
+      // Use a unique content key: prefix archived courses to avoid ID collision
+      const contentKey = (course.isArchived ? 'archived-' : '') + course.id;
+      
+      // Write per-course content file:
+      // (window.courseContent = window.courseContent || {})["000001"] = { "path": "content", ... };
+      const contentJs = '(window.courseContent = window.courseContent || {})' +
+        '[' + JSON.stringify(contentKey) + '] = ' + JSON.stringify(contentMap) + ';\n';
+      
+      const contentFile = path.join(CONTENT_DIR, `${contentKey}.js`);
+      fs.writeFileSync(contentFile, contentJs, 'utf8');
+      
+      // Store the content key on the course for client-side lookup
+      course._contentKey = contentKey;
+      
+      const fileSize = Buffer.byteLength(contentJs, 'utf8');
+      totalContentSize += fileSize;
+      totalContentFiles++;
+      console.log(`  ✓ courses-data/${contentKey}.js (${noteCount} notes, ${(fileSize / 1024).toFixed(1)} KB)`);
+    }
+  });
+  
+  console.log(`\n✓ Generated ${totalContentFiles} per-course content files (${(totalContentSize / 1024 / 1024).toFixed(2)} MB total)`);
+  
+  // --- Now strip content from main courses array and write metadata-only file ---
+  courses.forEach(stripCourseContent);
+
   const js = 'window.coursesVersion = "' + version + '";\n' +
              'window.courses = ' + JSON.stringify(courses, null, 2) + ';\n' +
              'window.eventInfo = ' + JSON.stringify(eventInfo) + ';\n' +
              'window.buildTimestamp = "' + buildTimestamp + '";\n';
   fs.writeFileSync(OUTPUT_FILE, js, 'utf8');
-  console.log('Generated courses:', OUTPUT_FILE);
+  
+  const mainSize = Buffer.byteLength(js, 'utf8');
+  console.log(`\n✓ Generated ${OUTPUT_FILE} (${(mainSize / 1024).toFixed(1)} KB - metadata only)`);
   console.log('Build timestamp:', buildTimestamp);
   console.log('coursesVersion:', version);
 

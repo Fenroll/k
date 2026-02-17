@@ -1,5 +1,9 @@
 // Version checker for site-wide updates
 (function() {
+  if (window.location.protocol === 'file:') {
+    return;
+  }
+
   const CHECK_INTERVAL = 2 * 60 * 1000; // Check every 2 minutes
   const VERSION_FILE = 'courses.version.json';
   
