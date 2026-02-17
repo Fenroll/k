@@ -17,6 +17,24 @@ class AccountSystem {
         this.deleteAccountForm = null;
     }
 
+    decodeStoredPassword(storedPassword) {
+        if (typeof storedPassword !== 'string') return '';
+        try {
+            return atob(storedPassword);
+        } catch (_) {
+            return storedPassword;
+        }
+    }
+
+    encodePassword(plainPassword) {
+        if (typeof plainPassword !== 'string') return '';
+        try {
+            return btoa(plainPassword);
+        } catch (_) {
+            return plainPassword;
+        }
+    }
+
     async init() {
         const isLoginPage = window.location.pathname.endsWith('login.html');
         const isAccountPage = window.location.pathname.endsWith('account.html');
@@ -73,7 +91,13 @@ class AccountSystem {
 
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
-                    const plainPassword = atob(userData.password);
+                    const plainPassword = this.decodeStoredPassword(userData.password);
+
+                    const normalizedPassword = this.encodePassword(plainPassword);
+                    if (userData.password !== normalizedPassword) {
+                        await userRef.update({ password: normalizedPassword });
+                        userData.password = normalizedPassword;
+                    }
                     
                     // Reconstruct the user object for the session with the decoded password.
                     this.user = { ...userData, password: plainPassword };
@@ -327,7 +351,12 @@ class AccountSystem {
                     console.log(`User ${migratedUserData.username} migrated to new UID: ${newUid} with legacy UID: ${migratedUserData.legacyUid}`);
                 }
 
-                const storedPassword = atob(userData.password);
+                const storedPassword = this.decodeStoredPassword(userData.password);
+                const normalizedPassword = this.encodePassword(storedPassword);
+                if (userData.password !== normalizedPassword) {
+                    await this.db.ref(`site_users/${userKey}`).update({ password: normalizedPassword });
+                    userData.password = normalizedPassword;
+                }
 
                 if (password === storedPassword) {
                     const userColor = userData.color || this.generateRandomColor();
@@ -430,7 +459,7 @@ class AccountSystem {
                 throw new Error("Текущият потребител не е намерен в базата данни. Моля, влезте отново.");
             }
             const userData = currentUserSnapshot.val();
-            if (atob(userData.password) !== password) {
+            if (this.decodeStoredPassword(userData.password) !== password) {
                 this.showError('change-username-error', 'Грешна парола.');
                 this.loadingSpinner.style.display = 'none';
                 this.showForm('change-username');

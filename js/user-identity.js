@@ -62,6 +62,14 @@ class CurrentUser {
 // Async factory function to create and initialize the user
 async function createAndInitUser() {
     const user = new CurrentUser();
+  const decodeStoredPassword = (storedPassword) => {
+    if (typeof storedPassword !== 'string') return '';
+    try {
+      return atob(storedPassword);
+    } catch (_) {
+      return storedPassword;
+    }
+  };
     const loggedInUserStr = localStorage.getItem('loggedInUser');
     const urlParams = new URLSearchParams(window.location.search);
     const guestMode = urlParams.get('guest') === 'true';
@@ -88,7 +96,7 @@ async function createAndInitUser() {
                 const freshUserData = await response.json();
 
                 if (freshUserData) {
-                    const plainPassword = atob(freshUserData.password);
+                  const plainPassword = decodeStoredPassword(freshUserData.password);
                     const fullUserObject = { ...freshUserData, password: plainPassword };
                     
                     user._populate({

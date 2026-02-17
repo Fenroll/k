@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=202602171n2n"></script>
+    <script src="js/auth-guard.js?v=202602171pkj"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=202602171mhr"></script>
@@ -9,8 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link rel="icon" href="favicon.svg?v=202602171n2n" type="image/svg+xml">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202602171n2n">
+     <link rel="icon" href="favicon.svg?v=202602171pkj" type="image/svg+xml">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202602171pkj">
     <title>Admin Panel</title>
     <style>
         body {
@@ -77,6 +77,21 @@
         }
         .btn:hover {
             background: #7a9a6a;
+        }
+        .btn-green {
+            background-color: #588157;
+            color: #121212;
+        }
+        .btn-green:hover {
+            background-color: #7a9a6a;
+        }
+        .btn-red {
+            background-color: #cf6679;
+            color: #121212;
+        }
+        .btn-red:hover {
+            background-color: #b91c1c;
+            color: #ffffff;
         }
         .btn-secondary {
             background-color: #444;
@@ -470,10 +485,10 @@
             }
         }
     </style>
-  <script src="js/version-manager.js?v=202602171n2n"></script>
+  <script src="js/version-manager.js?v=202602171pkj"></script>
 </head>
 <body>
-    <a href="index.html?v=202602171n2n" class="btn back-btn">Go Back</a>
+    <a href="index.html?v=202602171pkj" class="btn back-btn">Go Back</a>
     <h1>Admin Panel</h1>
 
     <div id="notification-container"></div>
@@ -568,7 +583,8 @@
                 <label for="edit-show-in-members" style="margin: 0;">Show in Members List (hides test accounts)</label>
             </div>
             <button id="save-user-changes" class="btn">Save Changes</button>
-            <button id="reset-password" class="btn" style="background-color: #cf6679; margin-top: 1rem;">Reset Password</button>
+            <button id="reset-password" class="btn btn-green" style="margin-top: 1rem;">Reset Password</button>
+            <button id="delete-account" class="btn btn-red" style="margin-top: 0.75rem;">Delete Account</button>
         </div>
     </div>
     
@@ -986,7 +1002,7 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=202602171n2n"></script>
+    <script src="courses.generated.js?v=202602171pkj"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=202602171mhr"></script>
     <script src="js/admin-visual-editor.js?v=202602171mhr"></script>

@@ -37,6 +37,7 @@
         const closeModalBtn = modal.querySelector('.close-button');
         const saveChangesBtn = document.getElementById('save-user-changes');
         const resetPasswordBtn = document.getElementById('reset-password');
+        const deleteAccountBtn = document.getElementById('delete-account');
         const notificationContainer = document.getElementById('notification-container');
         
         // HTML Priority Settings elements
@@ -250,9 +251,10 @@
                 const randomColor = generateRandomColor();
 
                 await newUserRef.set({
+                    uid: uid,
                     username: username,
                     displayName: displayName,
-                    password: password,
+                    password: btoa(password),
                     color: randomColor,
                     isAdmin: false,
                     createdAt: Date.now()
@@ -367,6 +369,30 @@
                 console.error(error);
             }
         };
+
+        if (deleteAccountBtn) {
+            deleteAccountBtn.onclick = async () => {
+                const uid = document.getElementById('edit-user-uid').value;
+                const username = document.getElementById('edit-username').value || 'this user';
+
+                if (!uid) {
+                    showError('edit-user-error', 'User ID is missing.');
+                    return;
+                }
+
+                const confirmed = confirm(`Are you sure you want to delete account "${username}"? This action cannot be undone.`);
+                if (!confirmed) return;
+
+                try {
+                    await db.ref(`site_users/${uid}`).remove();
+                    showNotification(`Account "${username}" deleted successfully.`);
+                    modal.style.display = 'none';
+                } catch (error) {
+                    showError('edit-user-error', 'Failed to delete account: ' + (error.message || error));
+                    console.error(error);
+                }
+            };
+        }
 
 
         // Schedule Data (JSON) Management
