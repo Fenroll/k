@@ -1,0 +1,12 @@
+name = "coursebook-liveblocks-auth"
+main = "worker.js"
+compatibility_date = "2026-02-18"
+workers_dev = true
+
+routes = [
+	{ pattern = "coursebook.lol/liveblocks-auth*", zone_name = "coursebook.lol" }
+]
+
+[vars]
+FIREBASE_DB_URL = "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app"
+ALLOWED_ORIGINS = "https://coursebook.lol,http://localhost:5500,file://"
