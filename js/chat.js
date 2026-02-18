@@ -1056,23 +1056,6 @@ class ChatUIManager {
             .info-item { display: flex; justify-content: space-between; }
             .info-label { font-weight: 600; }
             
-            .profile-modal-actions {
-                display: flex;
-                gap: 8px;
-                width: 100%;
-            }
-            .profile-action-btn {
-                flex: 1;
-                padding: 10px;
-                border-radius: 8px;
-                border: none;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            .btn-mention { background: var(--chat-primary); color: white; }
-            .btn-mention:hover { background: #6d28d9; }
         `;
         document.head.appendChild(style);
     }
@@ -1634,6 +1617,15 @@ class ChatUIManager {
     const usersListEl = document.getElementById('active-users-list');
     if (!usersListEl) return;
 
+    if (!usersListEl.dataset.profileClickBound) {
+      usersListEl.addEventListener('click', (event) => {
+        const item = event.target.closest('.active-user-item');
+        if (!item || !usersListEl.contains(item)) return;
+        this.showUserProfile(item.dataset.userId);
+      });
+      usersListEl.dataset.profileClickBound = 'true';
+    }
+
     // data.users is online users, data.allUsers has all registered users
     let onlineUsers = Object.values(data.users || {});
     const allUsers = data.allUsers || {};
@@ -1720,18 +1712,15 @@ class ChatUIManager {
       `;
     };
 
-    usersListEl.innerHTML = `
+    const nextMarkup = `
       <strong>Online (${count}):</strong><br>
       ${onlineUsers.map(renderUserItem).join('')}
       ${offlineUsers.length > 0 ? `<div style="height: 4px;"></div><strong style="margin-top: 0; display: block;">Offline:</strong>${offlineUsers.map(renderUserItem).join('')}` : ''}
     `;
 
-    // Add click listeners
-    usersListEl.querySelectorAll('.active-user-item').forEach(item => {
-        item.addEventListener('click', () => {
-            this.showUserProfile(item.dataset.userId);
-        });
-    });
+    if (usersListEl.innerHTML !== nextMarkup) {
+      usersListEl.innerHTML = nextMarkup;
+    }
 
     // Also update header count to be consistent
     if (this.updateHeaderOnlineCount) {
@@ -1839,9 +1828,6 @@ class ChatUIManager {
                 </div>` : ''}
             </div>
             
-            <div class="profile-modal-actions">
-                <button class="profile-action-btn btn-mention">@ Mention</button>
-            </div>
         </div>
     `;
 
@@ -1857,15 +1843,6 @@ class ChatUIManager {
     // Close on button
     modalOverlay.querySelector('.profile-modal-close').onclick = () => modalOverlay.remove();
 
-    // Mention button
-    modalOverlay.querySelector('.btn-mention').onclick = () => {
-        const input = this.container.querySelector('.chat-input');
-        if (input) {
-            this.insertMention(input, resolvedName);
-            modalOverlay.remove();
-            // Open chat if closed? It's likely open if they clicked active members
-        }
-    };
   }
 
   async handleAdminCommand(commandObj) {
