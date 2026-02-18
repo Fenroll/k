@@ -9,7 +9,7 @@
     let activeTab = '';
     // Check for index.html or root
     if (page === 'index.html' || page === '') activeTab = 'courses';
-    else if (page.includes('anamnesis')) activeTab = 'anamnesis';
+    else if (page.includes('notes')) activeTab = 'notes';
     else if (page.includes('calendar')) activeTab = 'calendar';
     
     // HTML Structure
@@ -19,9 +19,9 @@
             <img src="svg/icon-courses.svg" alt="Courses">
             <span>Courses</span>
         </a>
-        <a href="anamnesis.html" class="bottom-nav-item ${activeTab === 'anamnesis' ? 'active' : ''}">
-            <img src="svg/icon-anamnesis.svg" alt="Anamnesis">
-            <span>Anamnesis</span>
+        <a href="notes.html" class="bottom-nav-item ${activeTab === 'notes' ? 'active' : ''}">
+            <img src="svg/icon-anamnesis.svg" alt="Notes">
+            <span>Notes</span>
         </a>
         <a href="calendar.html" class="bottom-nav-item ${activeTab === 'calendar' ? 'active' : ''}">
             <img src="svg/icon-calendar.svg" alt="Calendar">

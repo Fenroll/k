@@ -1,0 +1,1867 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notes</title>
+
+    <script src="js/auth-guard.js?v=202602181csw"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+    <script src="js/user-identity.js?v=202602171mhr"></script>
+    <script src="courses.generated.js?v=202602181csw"></script>
+
+    <link rel="icon" href="favicon.svg?v=202602181csw" type="image/svg+xml">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202602181csw">
+    <script src="js/version-manager.js?v=202602181csw"></script>
+
+    <style>
+        body {
+            background: #f5f5f5;
+            font-family: 'Open Sans', Arial, sans-serif;
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        #side-menu {
+            background: #262626;
+            width: 200px;
+            min-width: 200px;
+            max-width: 200px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            z-index: 3200;
+        }
+
+        .logo-header {
+            background: #262626;
+            width: 200px !important;
+            height: 107px !important;
+            min-width: 200px !important;
+            min-height: 107px !important;
+            max-width: 200px !important;
+            max-height: 107px !important;
+            text-align: center;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden;
+            flex: 0 0 107px !important;
+            box-sizing: content-box;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-bottom: 2px solid #1d1b1b;
+        }
+
+        .logo-img {
+            width: 240px !important;
+            height: 50px !important;
+            object-fit: contain;
+            padding-top: 4px !important;
+        }
+
+        .sidebar-nav ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            color: #fff !important;
+            text-decoration: none;
+            padding: 16px 28px 16px 12px;
+            font-size: 14px;
+            transition: background 0.2s;
+            gap: 12px;
+            background: transparent;
+            font-weight: 400;
+            position: relative;
+            border-radius: 0;
+            flex-direction: row;
+        }
+
+        .sidebar-nav .active a {
+            background: #000000;
+        }
+
+        .sidebar-nav .active a::before {
+            content: '';
+            display: block;
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 4px;
+            height: 100%;
+            background: #588157;
+        }
+
+        .sidebar-nav a:hover {
+            background: #181818;
+        }
+
+        .sidebar-nav .svg-icon {
+            width: 26px;
+            height: 26px;
+            flex-shrink: 0;
+            margin-right: -2px;
+            margin-left: -2px;
+            margin-top: -2px;
+            margin-bottom: -2px;
+        }
+
+        .sidebar-footer-links {
+            position: absolute;
+            left: 12px;
+            bottom: 11px;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5px;
+            font-size: 12px;
+            color: #cdcdcd;
+        }
+
+        .sidebar-footer-item {
+            font-size: 12px;
+            color: #cdcdcd;
+            cursor: default;
+        }
+
+        .main-content {
+            flex: 1;
+            margin-left: 200px;
+            padding: 24px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            overflow: hidden;
+        }
+
+        .notes-header {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .notes-title {
+            margin: 0;
+            font-size: 24px;
+            color: #111827;
+        }
+
+        .notes-subtitle {
+            margin: 4px 0 0 0;
+            color: #6b7280;
+            font-size: 14px;
+        }
+
+        .status-chip {
+            padding: 7px 11px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            color: #374151;
+        }
+
+        .status-chip.error {
+            border-color: #fecaca;
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .notes-layout {
+            flex: 1;
+            min-height: 0;
+            display: grid;
+            grid-template-columns: 320px 1fr;
+            gap: 16px;
+        }
+
+        .courses-panel,
+        .editor-panel {
+            background: #fff;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+
+        .courses-panel {
+            overflow: hidden;
+        }
+
+        .panel-title {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #1f2937;
+        }
+
+        .panel-header {
+            padding: 14px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .search-input {
+            margin-top: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+        }
+
+        .courses-list {
+            margin: 0;
+            padding: 8px;
+            list-style: none;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .course-item {
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            color: #111827;
+            margin-bottom: 4px;
+        }
+
+        .course-item:hover {
+            background: #f3f4f6;
+        }
+
+        .course-item.active {
+            background: #e8f5e9;
+            color: #1f2937;
+            font-weight: 700;
+            border-left: 3px solid #588157;
+        }
+
+        .empty-courses {
+            color: #6b7280;
+            padding: 12px;
+            font-size: 14px;
+        }
+
+        .editor-meta {
+            color: #6b7280;
+            font-size: 13px;
+            margin-top: 6px;
+        }
+
+        .mobile-course-select {
+            display: none;
+            width: 100%;
+            margin-top: 10px;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            background: #fff;
+            text-align: center;
+            text-align-last: center;
+        }
+
+        .mobile-course-select option {
+            text-align: center;
+        }
+        
+
+        .md-toolbar {
+            padding: 10px 14px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .md-btn {
+            border: 1px solid #d1d5db;
+            background: #fff;
+            color: #111827;
+            border-radius: 8px;
+            padding: 6px 10px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .md-btn:hover {
+            background: #f9fafb;
+        }
+
+        .md-btn img {
+            width: 18px;
+            height: 18px;
+            object-fit: contain;
+            display: block;
+        }
+
+        .notes-editor {
+            flex: 1;
+            min-height: 0;
+            border: none;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 16px;
+            font-size: 15px;
+            line-height: 1.6;
+            font-family: inherit;
+            box-sizing: border-box;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+
+        .notes-editor-shell {
+            position: relative;
+            flex: 1;
+            min-height: 0;
+            overflow: hidden;
+        }
+
+        .selection-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .remote-selection {
+            position: absolute;
+            border-radius: 3px;
+            opacity: 0.28;
+        }
+
+        .collab-avatars-wrap {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .collab-avatar {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 700;
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .collab-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .collab-meta {
+            margin-top: 4px;
+            font-size: 12px;
+            color: #4b5563;
+        }
+
+        .notes-editor:focus {
+            outline: none;
+        }
+
+        .notes-editor:empty::before {
+            content: attr(data-placeholder);
+            color: #9ca3af;
+            pointer-events: none;
+        }
+
+        .notes-editor h1 {
+            font-size: 1.05rem;
+            font-weight: 700;
+            margin: 0.12em 0 0.18em;
+            color: #588157;
+        }
+
+        .notes-editor h2 {
+            font-size: 0.95rem;
+            font-weight: 700;
+            margin: 0.1em 0 0.14em;
+            color: #588157;
+        }
+
+        .notes-editor a {
+            color: #588157;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            cursor: pointer;
+        }
+
+        .notes-editor p {
+            margin: 0.08em 0 0.14em;
+        }
+
+        .notes-editor ul,
+        .notes-editor ol {
+            margin: 0.08em 0 0.14em;
+            padding-left: 1.2em;
+        }
+
+        .notes-editor li {
+            margin: 0.04em 0;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 5000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: #fff;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 500px;
+            max-height: 80vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 25px rgba(0,0,0,0.15);
+        }
+
+        .modal-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            color: #1f2937;
+            font-size: 1.1em;
+        }
+
+        .close {
+            font-size: 24px;
+            line-height: 1;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .close:hover {
+            color: #1f2937;
+        }
+
+        .symbol-btn {
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            background: #fff;
+        }
+
+        .symbol-btn:hover {
+            background: #f3f4f6;
+            border-color: #c7cfd9;
+        }
+
+        .save-btn {
+            background: #588157;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background: #4a6d49;
+        }
+
+        .save-btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 1000px) {
+            body {
+                overflow: auto;
+            }
+
+            #side-menu {
+                display: none;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 0px;
+            }
+
+            .notes-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .courses-panel {
+                display: none;
+                padding: 0px;
+            }
+
+            .editor-panel {
+                min-height: 420px;
+            }
+
+            .editor-panel .panel-header {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .mobile-course-select {
+                display: block;
+                order: -1;
+                margin-top: 0;
+                margin-bottom: 10px;
+            }
+
+            #selectedCourseTitle {
+                display: none;
+            }
+        }
+
+        /* Hide Liveblocks badge */
+        .liveblocks-badge, 
+        #liveblocks-badge,
+        [class*="liveblocks-badge"] {
+            display: none !important;
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+       
+    </style>
+</head>
+<body>
+    <div id="side-menu">
+        <div class="logo-header">
+            <a href="index.html?v=202602181csw">
+                <img class="logo-img" src="svg/logo-coursebook.svg?v=202602181csw" alt="StudyBoard">
+            </a>
+        </div>
+
+        <nav class="sidebar-nav">
+            <ul>
+                <li class="base-navigation-button">
+                    <a href="https://elearn.mu-varna.bg/ultra/course">
+                        <img class="svg-icon" src="svg/icon-blackboard.svg?v=202602181csw" style="filter: brightness(0) invert(1);">
+                        <span>Blackboard</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="account.html?v=202602181csw">
+                        <img class="svg-icon" src="svg/icon-account.svg?v=202602181csw">
+                        <span>Account</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="index.html?v=202602181csw">
+                        <img class="svg-icon" src="svg/icon-courses.svg?v=202602181csw">
+                        <span>Courses</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button active">
+                    <a href="notes.html?v=202602181csw">
+                        <img class="svg-icon" src="svg/icon-anamnesis.svg?v=202602181csw" style="filter: brightness(0) invert(1);">
+                        <span>Notes</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="calendar.html?v=202602181csw">
+                        <img class="svg-icon" src="svg/icon-calendar.svg?v=202602181csw">
+                        <span>Calendar</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="tools.html?v=202602181csw">
+                        <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=202602181csw" alt="Tools" />
+                        <span>Tools</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="text-editor.html?v=202602181csw">
+                        <img class="svg-icon" src="svg/icon-editor.svg?v=202602181csw" style="filter: brightness(0) invert(1);">
+                        <span>Editor</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button" id="admin-button" style="display: none;">
+                    <a href="admin.html?v=202602181csw">
+                        <img class="svg-icon" src="svg/icon-admin.svg?v=202602181csw" style="filter: brightness(0) invert(1);">
+                        <span>Admin Panel</span>
+                    </a>
+                </li>
+                <li class="base-navigation-button">
+                    <a href="#" onclick="handleLogout()">
+                        <img class="svg-icon" src="svg/icon-signout.svg?v=202602181csw">
+                        <span>Logout</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="sidebar-footer-links">
+            <span class="sidebar-footer-item">Privacy</span>
+            <span class="sidebar-footer-item">Terms</span>
+            <span class="sidebar-footer-item">Accessibility</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="notes-header">
+            <div>
+                <h1 class="notes-title">Course Notes</h1>
+            </div>
+            <div id="notesStatus" class="status-chip">Няма незапазени промени</div>
+        </div>
+
+        <div class="notes-layout">
+            <section class="courses-panel">
+                <div class="panel-header">
+                    <h2 class="panel-title">Предмети</h2>
+                    <input id="courseSearch" class="search-input" type="text" placeholder="Търси предмет...">
+                </div>
+                <ul id="coursesList" class="courses-list"></ul>
+            </section>
+
+            <section class="editor-panel">
+                <div class="panel-header">
+                    <h2 id="selectedCourseTitle" class="panel-title">Избери предмет</h2>
+                    <div id="selectedCourseMeta" class="editor-meta">Последен ъпдейт: няма</div>
+                    <div id="collabStatus" class="collab-meta">Няма активни редактори</div>
+                    <select id="courseSelectMobile" class="mobile-course-select"></select>
+                </div>
+                <div class="md-toolbar">
+                    <button type="button" class="md-btn" data-cmd="h1" title="H1"><img src="svg/md-editor/icon-h1.svg?v=202602181csw" alt="H1"></button>
+                    <button type="button" class="md-btn" data-cmd="h2" title="H2"><img src="svg/md-editor/icon-h2.svg?v=202602181csw" alt="H2"></button>
+                    <button type="button" class="md-btn" data-cmd="bold" title="Bold"><img src="svg/md-editor/icon-bold.svg?v=202602181csw" alt="Bold"></button>
+                    <button type="button" class="md-btn" data-cmd="italic" title="Italic"><img src="svg/md-editor/icon-italic.svg?v=202602181csw" alt="Italic"></button>
+                    <button type="button" class="md-btn" data-cmd="underline" title="Underline"><img src="svg/md-editor/icon-underline.svg?v=202602181csw" alt="Underline"></button>
+                    <button type="button" class="md-btn" data-cmd="bullet" title="Bullet list"><img src="svg/md-editor/icon-unordered.svg?v=202602181csw" alt="Bullet list"></button>
+                    <button type="button" class="md-btn" data-cmd="outdent" title="Outdent"><img src="svg/md-editor/icon-outdent.svg?v=202602181csw" alt="Outdent"></button>
+                    <button type="button" class="md-btn" data-cmd="indent" title="Indent"><img src="svg/md-editor/icon-indent.svg?v=202602181csw" alt="Indent"></button>
+                    <button type="button" class="md-btn" data-cmd="symbols" title="Insert symbols"><img src="svg/md-editor/icon-symbols.svg?v=202602181csw" alt="Symbols"></button>
+                    <button type="button" class="md-btn" data-cmd="link" title="Link"><img src="svg/md-editor/icon-link.svg?v=202602181csw" alt="Link"></button>
+                    <button type="button" class="md-btn" data-cmd="separator" title="Horizontal separator">---</button>
+                </div>
+                <div class="notes-editor-shell">
+                    <div id="courseNotesEditor" class="notes-editor" contenteditable="true" data-placeholder="Въведи бележки за избрания курс..."></div>
+                    <div id="selectionOverlay" class="selection-overlay"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <div id="symbolsModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>Insert Symbol</h2>
+                <span class="close" id="closeSymbolsModalBtn">&times;</span>
+            </div>
+            <div class="modal-body" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 400px; overflow-y: auto; padding: 16px;">
+                <button class="symbol-btn" data-symbol="↑">↑</button>
+                <button class="symbol-btn" data-symbol="↓">↓</button>
+                <button class="symbol-btn" data-symbol="←">←</button>
+                <button class="symbol-btn" data-symbol="→">→</button>
+                <button class="symbol-btn" data-symbol="↔">↔</button>
+                <button class="symbol-btn" data-symbol="α">α</button>
+                <button class="symbol-btn" data-symbol="β">β</button>
+                <button class="symbol-btn" data-symbol="γ">γ</button>
+                <button class="symbol-btn" data-symbol="δ">δ</button>
+                <button class="symbol-btn" data-symbol="ε">ε</button>
+                <button class="symbol-btn" data-symbol="μ">μ</button>
+                <button class="symbol-btn" data-symbol="≈">≈</button>
+                <button class="symbol-btn" data-symbol="≠">≠</button>
+                <button class="symbol-btn" data-symbol="≤">≤</button>
+                <button class="symbol-btn" data-symbol="≥">≥</button>
+                <button class="symbol-btn" data-symbol="±">±</button>
+                <button class="symbol-btn" data-symbol="÷">÷</button>
+                <button class="symbol-btn" data-symbol="°">°</button>
+                <button class="symbol-btn" data-symbol="℃">℃</button>
+                <button class="symbol-btn" data-symbol="t½">t½</button>
+            </div>
+            <div class="modal-footer" style="padding: 12px; border-top: 1px solid #e5e7eb; display: flex; align-items: center;">
+                <label style="display: flex; align-items: center; cursor: pointer; flex: 1;">
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleLogout() {
+            localStorage.removeItem('loggedInUser');
+            window.location.href = 'login.html';
+        }
+
+        (function() {
+            const firebaseConfig = {
+                apiKey: 'API_KEY',
+                authDomain: 'med-student-chat.firebaseapp.com',
+                databaseURL: 'https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app',
+                projectId: 'med-student-chat',
+                storageBucket: 'med-student-chat.appspot.com',
+                messagingSenderId: 'SENDER_ID',
+                appId: 'APP_ID'
+            };
+
+            const COURSE_NOTE_ROOT = 'course_notes';
+            const AUTOSAVE_DELAY_MS = 900;
+            const LIVEBLOCKS_PUBLIC_KEY = window.LIVEBLOCKS_PUBLIC_KEY || localStorage.getItem('liveblocksPublicKey') || 'pk_dev_VhAyqkWwvBtkq6z89qzRiYrXvJt1p3yWKgJ4v704ZTAxlZ0M0p7xj1apfeaYoSrr';
+            const LIVEBLOCKS_ROOM_PREFIX = 'course-notes-';
+
+            if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+
+            const state = {
+                courses: [],
+                filteredCourses: [],
+                selectedCourseId: null,
+                isDirty: false,
+                isSaving: false,
+                currentNoteRef: null,
+                noteListener: null,
+                hasLoadedCurrentNote: false,
+                autosaveTimer: null,
+                lastSavedHtml: '',
+                currentUser: null,
+                presenceTypingTimer: null,
+                isEditorFocused: false,
+                localIsTyping: false,
+                liveblocksModule: null,
+                liveblocksClient: null,
+                liveblocksRoom: null,
+                liveblocksLeave: null,
+                liveblocksDocBroadcastTimer: null,
+                liveblocksPollTimer: null,
+                liveblocksOthers: [],
+                liveblocksConnected: false,
+                liveblocksRenderHash: '',
+                liveblocksLastSelections: {},
+                liveblocksEnabled: !!LIVEBLOCKS_PUBLIC_KEY
+            };
+
+            const els = {
+                coursesList: document.getElementById('coursesList'),
+                courseSearch: document.getElementById('courseSearch'),
+                courseSelectMobile: document.getElementById('courseSelectMobile'),
+                selectedCourseTitle: document.getElementById('selectedCourseTitle'),
+                selectedCourseMeta: document.getElementById('selectedCourseMeta'),
+                collabStatus: document.getElementById('collabStatus'),
+                courseNotesEditor: document.getElementById('courseNotesEditor'),
+                selectionOverlay: document.getElementById('selectionOverlay'),
+                notesStatus: document.getElementById('notesStatus'),
+                mdButtons: Array.from(document.querySelectorAll('.md-btn'))
+            };
+
+            const symbolsModal = document.getElementById('symbolsModal');
+            const closeSymbolsModalBtn = document.getElementById('closeSymbolsModalBtn');
+
+            function setDraftState(isDirty) {
+                state.isDirty = isDirty;
+                els.notesStatus.textContent = isDirty ? 'Има незапазени промени' : 'Няма незапазени промени';
+                els.notesStatus.classList.remove('error');
+            }
+
+            function clearAutosaveTimer() {
+                if (state.autosaveTimer) {
+                    clearTimeout(state.autosaveTimer);
+                    state.autosaveTimer = null;
+                }
+            }
+
+            function colorFromUserId(userId) {
+                const text = String(userId || 'unknown');
+                let hash = 0;
+                for (let index = 0; index < text.length; index += 1) {
+                    hash = text.charCodeAt(index) + ((hash << 5) - hash);
+                }
+                const hue = Math.abs(hash) % 360;
+                return `hsl(${hue} 65% 45%)`;
+            }
+
+            function sanitizeAvatarUrl(url) {
+                const value = String(url || '').trim();
+                if (!value) return '';
+                if (value.startsWith('data:image/')) return value;
+                if (/^https?:\/\//i.test(value)) return value;
+                if (value.startsWith('/')) return value;
+                if (/^(javascript|vbscript):/i.test(value)) return '';
+                return value;
+            }
+
+            function escapeAttribute(value) {
+                return String(value || '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;');
+            }
+
+            function getCurrentSelectionOffsets() {
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0) return null;
+
+                const range = selection.getRangeAt(0);
+                if (!els.courseNotesEditor.contains(range.startContainer) || !els.courseNotesEditor.contains(range.endContainer)) {
+                    return null;
+                }
+
+                const startRange = document.createRange();
+                startRange.selectNodeContents(els.courseNotesEditor);
+                startRange.setEnd(range.startContainer, range.startOffset);
+                const start = getRangeTextLength(startRange);
+                const length = getRangeTextLength(range);
+
+                return {
+                    start,
+                    end: start + length
+                };
+            }
+
+            function isBlockLikeElement(node) {
+                if (!node || node.nodeType !== Node.ELEMENT_NODE) return false;
+                const tag = node.nodeName;
+                return tag === 'DIV' || tag === 'P' || tag === 'LI' || tag === 'H1' || tag === 'H2' || tag === 'H3' || tag === 'H4' || tag === 'BLOCKQUOTE';
+            }
+
+            function getRangeTextLength(range) {
+                const fragment = range.cloneContents();
+                let length = 0;
+
+                const walk = (node) => {
+                    if (!node) return;
+                    const children = Array.from(node.childNodes || []);
+                    children.forEach((child) => {
+                        if (child.nodeType === Node.TEXT_NODE) {
+                            length += (child.textContent || '').length;
+                        } else if (child.nodeType === Node.ELEMENT_NODE) {
+                            if (child.nodeName === 'BR') {
+                                length += 1;
+                            } else {
+                                walk(child);
+                                if (isBlockLikeElement(child)) {
+                                    length += 1;
+                                }
+                            }
+                        }
+                    });
+                };
+
+                walk(fragment);
+                if (length > 0) {
+                    const last = fragment.lastChild;
+                    if (last && isBlockLikeElement(last)) {
+                        length -= 1;
+                    }
+                }
+                return length;
+            }
+
+            function resolvePositionByOffset(root, targetOffset) {
+                const offset = Math.max(0, Number.isFinite(targetOffset) ? targetOffset : 0);
+
+                let current = 0;
+                let resolved = null;
+
+                const walk = (node) => {
+                    if (resolved || !node) return;
+                    const children = Array.from(node.childNodes || []);
+
+                    for (const child of children) {
+                        if (resolved) return;
+
+                        if (child.nodeType === Node.TEXT_NODE) {
+                            const len = (child.textContent || '').length;
+                            if (offset <= current + len) {
+                                resolved = { node: child, offset: Math.max(0, offset - current) };
+                                return;
+                            }
+                            current += len;
+                            continue;
+                        }
+
+                        if (child.nodeType !== Node.ELEMENT_NODE) continue;
+
+                        if (child.nodeName === 'BR') {
+                            if (offset <= current + 1) {
+                                const parent = child.parentNode;
+                                if (parent) {
+                                    const index = Array.prototype.indexOf.call(parent.childNodes, child);
+                                    resolved = { node: parent, offset: index + 1 };
+                                    return;
+                                }
+                            }
+                            current += 1;
+                            continue;
+                        }
+
+                        walk(child);
+                        if (resolved) return;
+
+                        if (isBlockLikeElement(child)) {
+                            if (offset <= current + 1) {
+                                const parent = child.parentNode;
+                                if (parent) {
+                                    const index = Array.prototype.indexOf.call(parent.childNodes, child);
+                                    resolved = { node: parent, offset: index + 1 };
+                                    return;
+                                }
+                            }
+                            current += 1;
+                        }
+                    }
+                };
+
+                walk(root);
+
+                if (resolved) {
+                    return resolved;
+                }
+
+                return { node: root, offset: root.childNodes.length };
+            }
+
+            function createRangeFromOffsets(root, start, end) {
+                if (!root || !Number.isFinite(start) || !Number.isFinite(end) || end < start) return null;
+
+                const startPos = resolvePositionByOffset(root, start);
+                const endPos = resolvePositionByOffset(root, end);
+                if (!startPos || !endPos || !startPos.node || !endPos.node) return null;
+
+                const range = document.createRange();
+                range.setStart(startPos.node, startPos.offset);
+                range.setEnd(endPos.node, endPos.offset);
+                return range;
+            }
+
+            function getEditorTextLength() {
+                const walker = document.createTreeWalker(els.courseNotesEditor, NodeFilter.SHOW_TEXT);
+                let length = 0;
+                while (walker.nextNode()) {
+                    length += (walker.currentNode.textContent || '').length;
+                }
+                return length;
+            }
+
+            function clearSelectionOverlay() {
+                if (els.selectionOverlay) {
+                    els.selectionOverlay.innerHTML = '';
+                }
+            }
+
+            function renderRemoteSelections(activeEntries) {
+                clearSelectionOverlay();
+            }
+
+            function stopLiveblocksPresence() {
+                if (state.liveblocksDocBroadcastTimer) {
+                    clearTimeout(state.liveblocksDocBroadcastTimer);
+                    state.liveblocksDocBroadcastTimer = null;
+                }
+                if (state.liveblocksPollTimer) {
+                    clearInterval(state.liveblocksPollTimer);
+                    state.liveblocksPollTimer = null;
+                }
+
+                if (state.liveblocksLeave) {
+                    state.liveblocksLeave();
+                }
+
+                state.liveblocksRoom = null;
+                state.liveblocksLeave = null;
+                state.liveblocksOthers = [];
+                state.liveblocksConnected = false;
+                state.liveblocksRenderHash = '';
+                state.liveblocksLastSelections = {};
+                clearSelectionOverlay();
+                if (els.collabStatus) {
+                    els.collabStatus.textContent = 'Няма активни редактори';
+                }
+            }
+
+            function buildLiveblocksPresencePayload(overrides = {}) {
+                const userId = state.currentUser?.userId || 'unknown';
+                return {
+                    userId,
+                    name: state.currentUser?.displayName || state.currentUser?.userName || userId,
+                    color: state.currentUser?.color || colorFromUserId(userId),
+                    avatar: sanitizeAvatarUrl(
+                        state.currentUser?.avatar ||
+                        state.currentUser?.avatarUrl ||
+                        state.currentUser?.photoURL ||
+                        state.currentUser?.profileImage ||
+                        state.currentUser?.profilePicture ||
+                        ''
+                    ),
+                    typing: !!state.localIsTyping,
+                    selection: state.isEditorFocused ? getCurrentSelectionOffsets() : null,
+                    ...overrides
+                };
+            }
+
+            function normalizeLiveblocksOthers(input) {
+                if (!input) return [];
+                if (Array.isArray(input)) return input;
+                if (typeof input.toArray === 'function') return input.toArray();
+                if (input.others && Array.isArray(input.others)) return input.others;
+                if (input.others && typeof input.others.toArray === 'function') return input.others.toArray();
+                try {
+                    return Array.from(input);
+                } catch (_error) {
+                    return [];
+                }
+            }
+
+            function renderLiveblocksOthers(othersInput, force = false) {
+                const others = normalizeLiveblocksOthers(othersInput);
+                if (!Array.isArray(others)) {
+                    clearSelectionOverlay();
+                    if (els.collabStatus) els.collabStatus.textContent = 'Няма активни редактори';
+                    return;
+                }
+
+                const entries = others.map((other) => other.presence || {}).filter(Boolean);
+                entries.forEach((entry) => {
+                    const uid = String(entry.userId || '');
+                    const sel = entry.selection;
+                    if (!uid) return;
+
+                    if (sel && Number.isFinite(sel.start) && Number.isFinite(sel.end) && sel.end >= sel.start) {
+                        state.liveblocksLastSelections[uid] = { start: sel.start, end: sel.end };
+                    } else if (entry.typing && state.liveblocksLastSelections[uid]) {
+                        entry.selection = { ...state.liveblocksLastSelections[uid] };
+                    }
+
+                    if (entry.typing && state.liveblocksLastSelections[uid]) {
+                        entry.selection = { ...state.liveblocksLastSelections[uid] };
+                    }
+                });
+
+                const renderHash = JSON.stringify(entries.map(item => ({
+                    userId: item.userId || '',
+                    name: item.name || '',
+                    typing: !!item.typing,
+                    start: item.selection?.start ?? null,
+                    end: item.selection?.end ?? null
+                })));
+
+                if (!force && renderHash === state.liveblocksRenderHash) {
+                    return;
+                }
+                state.liveblocksRenderHash = renderHash;
+
+                if (els.collabStatus) {
+                    if (entries.length > 0) {
+                        const uniqueUsers = [];
+                        const seen = new Set();
+                        entries.forEach((item) => {
+                            const uid = String(item.userId || item.name || 'unknown');
+                            if (seen.has(uid)) return;
+                            seen.add(uid);
+                            uniqueUsers.push(item);
+                        });
+
+                        const avatars = uniqueUsers.map((item) => {
+                            const color = item.color || colorFromUserId(item.userId);
+                            const name = item.name || 'Unknown';
+                            const initial = escapeHtml(name.charAt(0).toUpperCase() || '?');
+                            const safeTitle = escapeHtml(name);
+                            const avatarUrl = sanitizeAvatarUrl(item.avatar || '');
+                            if (avatarUrl) {
+                                return `<span class="collab-avatar" title="${safeTitle}" style="background:${color}"><img src="${escapeAttribute(avatarUrl)}" alt="${safeTitle}" referrerpolicy="no-referrer"></span>`;
+                            }
+                            return `<span class="collab-avatar" title="${safeTitle}" style="background:${color}">${initial}</span>`;
+                        }).join('');
+
+                        els.collabStatus.innerHTML = `<span class="collab-avatars-wrap"><span>Активни:</span>${avatars}</span>`;
+                    } else {
+                        els.collabStatus.textContent = 'Няма активни редактори';
+                    }
+                }
+
+                renderRemoteSelections(entries);
+            }
+
+            async function ensureLiveblocksModule() {
+                if (state.liveblocksModule) return;
+                state.liveblocksModule = await import('https://cdn.jsdelivr.net/npm/@liveblocks/client/+esm');
+            }
+
+            async function startLiveblocksPresence() {
+                if (!state.liveblocksEnabled || !state.selectedCourseId) return;
+
+                stopLiveblocksPresence();
+
+                try {
+                    const roomId = `${LIVEBLOCKS_ROOM_PREFIX}${state.selectedCourseId}`;
+                    if (els.collabStatus) {
+                        els.collabStatus.textContent = `Liveblocks: connecting (${roomId})...`;
+                        els.collabStatus.style.color = '#374151';
+                    }
+
+                    await ensureLiveblocksModule();
+                    if (!state.liveblocksClient) {
+                        state.liveblocksClient = state.liveblocksModule.createClient({
+                            publicApiKey: LIVEBLOCKS_PUBLIC_KEY
+                        });
+                    }
+
+                    const entered = state.liveblocksClient.enterRoom(roomId, {
+                        initialPresence: buildLiveblocksPresencePayload({ typing: false, selection: null })
+                    });
+
+                    state.liveblocksRoom = entered.room;
+                    state.liveblocksLeave = entered.leave;
+                    if (els.collabStatus) {
+                        els.collabStatus.textContent = `Liveblocks: joined ${roomId}`;
+                        els.collabStatus.style.color = '#166534';
+                    }
+
+                    if (typeof state.liveblocksRoom.subscribe === 'function') {
+                        state.liveblocksRoom.subscribe('status', (status) => {
+                            if (status === 'connected') {
+                                state.liveblocksConnected = true;
+                            } else if (status === 'connecting') {
+                                state.liveblocksConnected = false;
+                            } else {
+                                state.liveblocksConnected = false;
+                            }
+                        });
+                    }
+
+                    state.liveblocksRoom.subscribe('others', (others) => {
+                        const list = normalizeLiveblocksOthers(others);
+                        state.liveblocksOthers = list;
+                        renderLiveblocksOthers(list);
+                    });
+
+                    if (typeof state.liveblocksRoom.getOthers === 'function') {
+                        state.liveblocksPollTimer = setInterval(() => {
+                            try {
+                                const polled = state.liveblocksRoom.getOthers();
+                                const list = normalizeLiveblocksOthers(polled);
+                                state.liveblocksOthers = list;
+                                renderLiveblocksOthers(list);
+                            } catch (_error) {
+                            }
+                        }, 1500);
+                    }
+
+                    state.liveblocksRoom.subscribe('event', ({ event }) => {
+                        if (!event || event.type !== 'doc-update') return;
+                        if (event.userId === (state.currentUser?.userId || 'unknown')) return;
+                        if (typeof event.html !== 'string') return;
+                        if (event.html === getEditorHtml()) return;
+
+                        const remoteUserId = String(event.userId || '');
+                        if (remoteUserId && Number.isFinite(event.selectionStart) && Number.isFinite(event.selectionEnd)) {
+                            state.liveblocksLastSelections[remoteUserId] = {
+                                start: event.selectionStart,
+                                end: event.selectionEnd
+                            };
+                        }
+
+                        const userIsTyping = state.isEditorFocused && state.localIsTyping;
+                        if (!userIsTyping) {
+                            setEditorHtml(event.html);
+                            normalizeAuthorTitles();
+                            state.lastSavedHtml = normalizeHtml(event.html);
+                            setDraftState(false);
+                        }
+                    });
+                } catch (error) {
+                    console.error('Liveblocks init failed:', error);
+                    if (els.collabStatus) {
+                        const message = (error && error.message) ? error.message : 'init failed';
+                        els.collabStatus.textContent = `Liveblocks error: ${message}`;
+                        els.collabStatus.style.color = '#b91c1c';
+                    }
+                    stopLiveblocksPresence();
+                }
+            }
+
+            function scheduleLiveblocksDocBroadcast() {
+                if (!state.liveblocksRoom) return;
+                if (state.liveblocksDocBroadcastTimer) {
+                    clearTimeout(state.liveblocksDocBroadcastTimer);
+                }
+                state.liveblocksDocBroadcastTimer = setTimeout(() => {
+                    if (!state.liveblocksRoom) return;
+                    const html = getEditorHtml();
+                    const selection = getCurrentSelectionOffsets();
+                    state.liveblocksRoom.broadcastEvent({
+                        type: 'doc-update',
+                        userId: state.currentUser?.userId || 'unknown',
+                        html,
+                        selectionStart: Number.isFinite(selection?.start) ? selection.start : null,
+                        selectionEnd: Number.isFinite(selection?.end) ? selection.end : null,
+                        updatedAt: Date.now()
+                    });
+                }, 45);
+            }
+
+            function scheduleRealtimePresenceFlush(isTypingPulse = false) {
+                if (!state.liveblocksRoom) return;
+                if (isTypingPulse) {
+                    state.localIsTyping = true;
+                    if (state.presenceTypingTimer) clearTimeout(state.presenceTypingTimer);
+                    state.presenceTypingTimer = setTimeout(() => {
+                        state.localIsTyping = false;
+                        state.liveblocksRoom?.updatePresence(buildLiveblocksPresencePayload({ typing: false }));
+                    }, 1300);
+                }
+                setTimeout(() => {
+                    state.liveblocksRoom?.updatePresence(buildLiveblocksPresencePayload());
+                }, 70);
+            }
+
+            function normalizeSeparatorLines() {
+                const blocks = Array.from(els.courseNotesEditor.querySelectorAll('p,div'));
+                blocks.forEach((block) => {
+                    if (!block || !block.parentNode) return;
+                    if (block.querySelector('hr')) return;
+                    const text = (block.textContent || '').replace(/\u200b/g, '').trim();
+                    if (text !== '---') return;
+
+                    const hr = document.createElement('hr');
+                    hr.style.border = 'none';
+                    hr.style.borderTop = '1px solid #d1d5db';
+                    hr.style.margin = '8px 0';
+                    block.parentNode.replaceChild(hr, block);
+                });
+            }
+
+            function getCoursesFromGlobal() {
+                if (!Array.isArray(window.courses)) return [];
+                return window.courses
+                    .filter(course => {
+                        if (!course || !course.id || !course.title || course.isArchived) return false;
+                        const normalizedTitle = String(course.title).trim().toLowerCase();
+                        return normalizedTitle !== 'полезни линкове';
+                    })
+                    .map(course => ({ id: String(course.id), title: String(course.title) }))
+                    .sort((a, b) => a.title.localeCompare(b.title, 'bg'));
+            }
+
+            function renderCoursesList() {
+                els.coursesList.innerHTML = '';
+                els.courseSelectMobile.innerHTML = '';
+
+                if (!state.filteredCourses.length) {
+                    const li = document.createElement('li');
+                    li.className = 'empty-courses';
+                    li.textContent = 'Няма намерени предмети.';
+                    els.coursesList.appendChild(li);
+
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'Няма намерени предмети';
+                    els.courseSelectMobile.appendChild(option);
+                    return;
+                }
+
+                state.filteredCourses.forEach(course => {
+                    const option = document.createElement('option');
+                    option.value = course.id;
+                    option.textContent = course.title;
+                    if (course.id === state.selectedCourseId) option.selected = true;
+                    els.courseSelectMobile.appendChild(option);
+
+                    const li = document.createElement('li');
+                    li.className = 'course-item' + (course.id === state.selectedCourseId ? ' active' : '');
+                    li.textContent = course.title;
+                    li.dataset.courseId = course.id;
+                    li.addEventListener('click', async () => {
+                        if (course.id === state.selectedCourseId) return;
+                        if (state.isDirty) {
+                            const shouldDiscard = confirm('Има незапазени промени. Продължи без запазване?');
+                            if (!shouldDiscard) return;
+                        }
+                        await selectCourse(course.id, course.title);
+                    });
+                    els.coursesList.appendChild(li);
+                });
+            }
+
+            function financeDate(value) {
+                if (!value) return 'няма';
+                const date = new Date(value);
+                if (Number.isNaN(date.getTime())) return 'няма';
+                return date.toLocaleString('bg-BG');
+            }
+
+            function normalizeHtml(html) {
+                const text = String(html || '').trim();
+                return text ? html : '';
+            }
+
+            function plainTextToHtml(text) {
+                const safe = String(text || '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;')
+                    .replace(/\n/g, '<br>');
+                return safe;
+            }
+
+            function escapeHtml(text) {
+                return String(text || '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function htmlToPlainText(html) {
+                const temp = document.createElement('div');
+                temp.innerHTML = String(html || '');
+                return (temp.innerText || '').replace(/\r/g, '').trim();
+            }
+
+            function extractLocalContribution(baseText, localText) {
+                const base = String(baseText || '');
+                const local = String(localText || '');
+                if (!local.trim()) return '';
+                if (!base.trim()) return local.trim();
+
+                const max = Math.min(base.length, local.length);
+                let index = 0;
+                while (index < max && base[index] === local[index]) {
+                    index += 1;
+                }
+
+                const tail = local.slice(index).trim();
+                return tail || local.trim();
+            }
+
+            function mergeConcurrentHtml(currentHtml, baseHtml, localHtml, authorName) {
+                const currentNormalized = normalizeHtml(currentHtml);
+                const baseText = htmlToPlainText(baseHtml);
+                const localText = htmlToPlainText(localHtml);
+                const contribution = extractLocalContribution(baseText, localText);
+                if (!contribution) return currentNormalized;
+
+                const safeAuthor = escapeHtml(authorName || 'Unknown');
+                const safeContribution = escapeHtml(contribution).replace(/\n/g, '<br>');
+                const mergedBlock = `
+<p><br></p>
+<div data-author="${safeAuthor}" title="Автор: ${safeAuthor}">${safeContribution}</div>`;
+
+                return `${currentNormalized}${mergedBlock}`;
+            }
+
+            function getEditorHtml() {
+                return normalizeHtml(els.courseNotesEditor.innerHTML);
+            }
+
+            function setEditorHtml(html) {
+                const value = normalizeHtml(html);
+                els.courseNotesEditor.innerHTML = value;
+            }
+
+            function getCurrentNoteRef() {
+                if (!state.selectedCourseId) return null;
+                return firebase.database().ref(`${COURSE_NOTE_ROOT}/${state.selectedCourseId}`);
+            }
+
+            function renderCurrentMeta(value) {
+                const updatedBy = value?.updatedBy || 'Unknown';
+                const updatedAt = financeDate(value?.updatedAt);
+                els.selectedCourseMeta.textContent = `Последен ъпдейт: ${updatedAt}${updatedAt === 'няма' ? '' : ` · ${updatedBy}`}`;
+            }
+
+            function normalizeAuthorTitles() {
+                const authoredNodes = els.courseNotesEditor.querySelectorAll('[data-author]');
+                authoredNodes.forEach(node => {
+                    const author = node.getAttribute('data-author') || 'Unknown';
+                    node.setAttribute('title', `Автор: ${author}`);
+                });
+            }
+
+            function getCurrentSelectionBlock() {
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0) return null;
+
+                let node = selection.anchorNode;
+                if (!node) return null;
+                if (node.nodeType === Node.TEXT_NODE) {
+                    node = node.parentElement;
+                }
+
+                if (!(node instanceof Element)) return null;
+                if (!els.courseNotesEditor.contains(node)) return null;
+                const block = node.closest('p,div,h1,h2,h3,li,blockquote');
+                if (block && els.courseNotesEditor.contains(block)) return block;
+                return els.courseNotesEditor;
+            }
+
+            function markEditedBlockAuthor() {
+                const block = getCurrentSelectionBlock();
+                if (!block || block === els.courseNotesEditor) return;
+                const authorName = state.currentUser?.displayName || state.currentUser?.userName || state.currentUser?.userId || 'Unknown';
+                block.setAttribute('data-author', authorName);
+                block.setAttribute('data-author-id', state.currentUser?.userId || 'unknown');
+                block.setAttribute('title', `Автор: ${authorName}`);
+            }
+
+            function stopCurrentSubscription() {
+                clearAutosaveTimer();
+                if (state.currentNoteRef && state.noteListener) {
+                    state.currentNoteRef.off('value', state.noteListener);
+                }
+                stopLiveblocksPresence();
+                state.currentNoteRef = null;
+                state.noteListener = null;
+                state.hasLoadedCurrentNote = false;
+            }
+
+            async function subscribeCurrentNote() {
+                stopCurrentSubscription();
+
+                const ref = getCurrentNoteRef();
+                if (!ref) return;
+
+                state.currentNoteRef = ref;
+
+                try {
+                    const snapshot = await ref.get();
+                    const value = snapshot.val() || {};
+                    const noteHtml = typeof value.html === 'string'
+                        ? value.html
+                        : plainTextToHtml(typeof value.text === 'string' ? value.text : '');
+
+                    if (!state.isDirty || !state.hasLoadedCurrentNote) {
+                        setEditorHtml(noteHtml);
+                        normalizeAuthorTitles();
+                        state.lastSavedHtml = normalizeHtml(noteHtml);
+                        setDraftState(false);
+                    }
+
+                    renderCurrentMeta(value);
+                    state.hasLoadedCurrentNote = true;
+                } catch (error) {
+                    console.error('Failed loading course note:', error);
+                }
+
+                startLiveblocksPresence();
+            }
+
+            async function saveCurrentCourseNote(isAutoSave = false) {
+                if (state.isSaving) return;
+
+                const ref = getCurrentNoteRef();
+                if (!ref) return;
+
+                const html = getEditorHtml();
+                if (html === state.lastSavedHtml) {
+                    setDraftState(false);
+                    return;
+                }
+
+                state.isSaving = true;
+
+                try {
+                    const user = state.currentUser || await window.currentUserPromise;
+                    const updatedBy = user?.displayName || user?.userName || user?.userId || 'Unknown';
+                    const baseHtml = state.lastSavedHtml;
+
+                    const txResult = await ref.transaction((currentValue) => {
+                        const currentHtml = typeof currentValue?.html === 'string'
+                            ? currentValue.html
+                            : plainTextToHtml(typeof currentValue?.text === 'string' ? currentValue.text : '');
+
+                        const currentNormalized = normalizeHtml(currentHtml);
+                        const localNormalized = normalizeHtml(html);
+                        const baseNormalized = normalizeHtml(baseHtml);
+
+                        let finalHtml = localNormalized;
+                        if (currentNormalized && currentNormalized !== baseNormalized && currentNormalized !== localNormalized) {
+                            finalHtml = mergeConcurrentHtml(currentNormalized, baseNormalized, localNormalized, updatedBy);
+                        }
+
+                        return {
+                            html: finalHtml,
+                            text: htmlToPlainText(finalHtml),
+                            updatedAt: firebase.database.ServerValue.TIMESTAMP,
+                            updatedBy
+                        };
+                    });
+
+                    const savedValue = txResult?.snapshot?.val() || {};
+                    const savedHtml = typeof savedValue.html === 'string'
+                        ? savedValue.html
+                        : plainTextToHtml(typeof savedValue.text === 'string' ? savedValue.text : '');
+
+                    state.lastSavedHtml = normalizeHtml(savedHtml);
+                    if (state.lastSavedHtml !== normalizeHtml(getEditorHtml())) {
+                        setEditorHtml(state.lastSavedHtml);
+                        normalizeAuthorTitles();
+                    }
+
+                    setDraftState(false);
+                } catch (error) {
+                    console.error('Failed saving course note:', error);
+                    setDraftState(true);
+                } finally {
+                    state.isSaving = false;
+                }
+            }
+
+            function scheduleAutosave() {
+                clearAutosaveTimer();
+                state.autosaveTimer = setTimeout(() => {
+                    if (state.isDirty) {
+                        saveCurrentCourseNote(true);
+                    }
+                }, AUTOSAVE_DELAY_MS);
+            }
+
+            function toggleHeading(tagName) {
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0) return;
+                const range = selection.getRangeAt(0);
+                let node = range.startContainer;
+                if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+                if (!(node instanceof Element) || !els.courseNotesEditor.contains(node)) return;
+
+                const currentHeading = node.closest('h1,h2');
+                if (currentHeading && currentHeading.tagName.toLowerCase() === tagName.toLowerCase()) {
+                    document.execCommand('formatBlock', false, 'p');
+                } else {
+                    document.execCommand('formatBlock', false, tagName.toLowerCase());
+                }
+            }
+
+            function toggleLink() {
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0 || selection.isCollapsed) return;
+
+                let node = selection.anchorNode;
+                if (node && node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+                if (node instanceof Element) {
+                    const existingAnchor = node.closest('a');
+                    if (existingAnchor && els.courseNotesEditor.contains(existingAnchor)) {
+                        document.execCommand('unlink', false);
+                        return;
+                    }
+                }
+
+                const url = prompt('Въведи линк (https://...)');
+                if (!url) return;
+                const normalizedUrl = /^(https?:\/\/)/i.test(url) ? url : `https://${url}`;
+                document.execCommand('createLink', false, normalizedUrl);
+            }
+
+            function applyCommand(action) {
+                els.courseNotesEditor.focus();
+                if (action === 'h1') {
+                    toggleHeading('h1');
+                } else if (action === 'h2') {
+                    toggleHeading('h2');
+                } else if (action === 'bold') {
+                    document.execCommand('bold', false);
+                } else if (action === 'italic') {
+                    document.execCommand('italic', false);
+                } else if (action === 'underline') {
+                    document.execCommand('underline', false);
+                } else if (action === 'bullet') {
+                    document.execCommand('insertUnorderedList', false);
+                } else if (action === 'indent') {
+                    document.execCommand('indent', false);
+                } else if (action === 'outdent') {
+                    document.execCommand('outdent', false);
+                } else if (action === 'symbols') {
+                    symbolsModal.style.display = 'flex';
+                    return;
+                } else if (action === 'link') {
+                    toggleLink();
+                } else if (action === 'separator') {
+                    document.execCommand('insertHTML', false, '<hr style="border:none;border-top:1px solid #d1d5db;margin:8px 0;">');
+                }
+                markEditedBlockAuthor();
+                setDraftState(true);
+                scheduleAutosave();
+            }
+
+            function isSelectionInsideListItem() {
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0) return false;
+                let node = selection.anchorNode;
+                if (!node) return false;
+                if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
+                if (!(node instanceof Element)) return false;
+                if (!els.courseNotesEditor.contains(node)) return false;
+                return !!node.closest('li');
+            }
+
+            function applySearchFilter() {
+                const term = (els.courseSearch.value || '').trim().toLowerCase();
+                if (!term) {
+                    state.filteredCourses = [...state.courses];
+                } else {
+                    state.filteredCourses = state.courses.filter(course =>
+                        course.title.toLowerCase().includes(term)
+                    );
+                }
+                renderCoursesList();
+            }
+
+            async function selectCourse(courseId, courseTitle) {
+                state.selectedCourseId = courseId;
+                els.selectedCourseTitle.textContent = courseTitle;
+                if (els.courseSelectMobile.value !== courseId) {
+                    els.courseSelectMobile.value = courseId;
+                }
+
+                setDraftState(false);
+                await subscribeCurrentNote();
+
+                renderCoursesList();
+            }
+
+            async function init() {
+                const adminButton = document.getElementById('admin-button');
+                if (adminButton && window.currentUserPromise) {
+                    window.currentUserPromise.then(user => {
+                        if (user && user.isAdmin) {
+                            adminButton.style.display = 'list-item';
+                        }
+                    }).catch(error => {
+                        console.error('Error checking admin status:', error);
+                    });
+                }
+
+                els.courseNotesEditor.contentEditable = 'true';
+
+                try {
+                    state.currentUser = await window.currentUserPromise;
+                } catch (error) {
+                    console.error('Error loading current user:', error);
+                }
+
+                state.courses = getCoursesFromGlobal();
+                state.filteredCourses = [...state.courses];
+                renderCoursesList();
+
+                if (!state.liveblocksEnabled) {
+                    els.collabStatus.textContent = 'Liveblocks key липсва: realtime е изключен';
+                    els.collabStatus.style.color = '#b45309';
+                }
+
+                if (state.courses.length > 0) {
+                    await selectCourse(state.courses[0].id, state.courses[0].title);
+                } else {
+                    els.selectedCourseTitle.textContent = 'Няма налични предмети';
+                    els.courseNotesEditor.contentEditable = 'false';
+                    els.notesStatus.textContent = 'Няма налични предмети';
+                    els.notesStatus.classList.add('error');
+                }
+            }
+
+            els.courseSearch.addEventListener('input', applySearchFilter);
+
+            els.courseSelectMobile.addEventListener('change', async (event) => {
+                const courseId = event.target.value;
+                if (!courseId) return;
+                const course = state.courses.find(item => item.id === courseId) || state.filteredCourses.find(item => item.id === courseId);
+                if (!course) return;
+
+                if (state.isDirty && courseId !== state.selectedCourseId) {
+                    const shouldDiscard = confirm('Има незапазени промени. Продължи без запазване?');
+                    if (!shouldDiscard) {
+                        event.target.value = state.selectedCourseId || '';
+                        return;
+                    }
+                }
+
+                await selectCourse(course.id, course.title);
+            });
+
+            els.courseNotesEditor.addEventListener('input', () => {
+                normalizeSeparatorLines();
+                markEditedBlockAuthor();
+                setDraftState(true);
+                scheduleAutosave();
+                scheduleLiveblocksDocBroadcast();
+                scheduleRealtimePresenceFlush(true);
+            });
+
+            els.courseNotesEditor.addEventListener('focus', () => {
+                state.isEditorFocused = true;
+                scheduleRealtimePresenceFlush(false);
+            });
+
+            els.courseNotesEditor.addEventListener('blur', () => {
+                state.isEditorFocused = false;
+                state.localIsTyping = false;
+                state.liveblocksRoom?.updatePresence(buildLiveblocksPresencePayload({ typing: false, selection: null }));
+            });
+
+            els.courseNotesEditor.addEventListener('scroll', () => {
+                renderLiveblocksOthers(state.liveblocksOthers || [], true);
+            });
+
+            window.addEventListener('resize', () => {
+                renderLiveblocksOthers(state.liveblocksOthers || [], true);
+            });
+
+            document.addEventListener('selectionchange', () => {
+                if (!state.selectedCourseId) return;
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0) return;
+                const range = selection.getRangeAt(0);
+                if (!els.courseNotesEditor.contains(range.startContainer) || !els.courseNotesEditor.contains(range.endContainer)) return;
+                state.isEditorFocused = true;
+                scheduleRealtimePresenceFlush(false);
+            });
+
+            els.courseNotesEditor.addEventListener('click', (event) => {
+                const link = event.target instanceof Element ? event.target.closest('a') : null;
+                if (!link) return;
+
+                const href = link.getAttribute('href') || '';
+                if (!href) return;
+
+                event.preventDefault();
+                window.open(href, '_blank', 'noopener,noreferrer');
+            });
+
+            els.courseNotesEditor.addEventListener('keydown', (event) => {
+                if (event.key !== 'Tab') return;
+                if (!isSelectionInsideListItem()) return;
+
+                event.preventDefault();
+                document.execCommand(event.shiftKey ? 'outdent' : 'indent', false);
+                markEditedBlockAuthor();
+                setDraftState(true);
+                scheduleAutosave();
+            });
+
+            els.mdButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    applyCommand(btn.dataset.cmd);
+                });
+            });
+
+            if (closeSymbolsModalBtn) {
+                closeSymbolsModalBtn.addEventListener('click', () => {
+                    symbolsModal.style.display = 'none';
+                });
+            }
+
+            if (symbolsModal) {
+                symbolsModal.addEventListener('click', (event) => {
+                    if (event.target === symbolsModal) {
+                        symbolsModal.style.display = 'none';
+                    }
+                });
+            }
+
+            document.querySelectorAll('.symbol-btn').forEach(btn => {
+                btn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    const symbol = btn.getAttribute('data-symbol') || '';
+                    const shouldCopy = document.getElementById('symbolCopyCheckbox')?.checked;
+
+                    if (shouldCopy) {
+                        navigator.clipboard.writeText(symbol).catch(() => {});
+                    } else {
+                        els.courseNotesEditor.focus();
+                        document.execCommand('insertText', false, symbol);
+                        markEditedBlockAuthor();
+                        setDraftState(true);
+                        scheduleAutosave();
+                    }
+
+                    symbolsModal.style.display = 'none';
+                });
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
+
+                const key = (event.key || '').toLowerCase();
+                if (key === 's') {
+                    event.preventDefault();
+                    saveCurrentCourseNote(false);
+                } else if (key === 'b') {
+                    event.preventDefault();
+                    applyCommand('bold');
+                } else if (key === 'i') {
+                    event.preventDefault();
+                    applyCommand('italic');
+                } else if (key === 'u') {
+                    event.preventDefault();
+                    applyCommand('underline');
+                } else if (key === 'k') {
+                    event.preventDefault();
+                    applyCommand('link');
+                } else if (key === '8' && event.shiftKey) {
+                    event.preventDefault();
+                    applyCommand('bullet');
+                } else if (key === '1') {
+                    event.preventDefault();
+                    applyCommand('h1');
+                } else if (key === '2') {
+                    event.preventDefault();
+                    applyCommand('h2');
+                }
+            });
+
+            init();
+        })();
+    </script>
+
+    <script src="js/presence.js?v=202602171mhr"></script>
+    <script src="js/chat.js?v=202602181csw"></script>
+    <script src="js/mobile-nav.js?v=202602171mhr"></script>
+</body>
+</html>

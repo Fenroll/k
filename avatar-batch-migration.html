@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avatar Batch Migration</title>
+
+  <script src="js/auth-guard.js?v=202602181csw"></script>
+  <script src="js/user-identity.js?v=202602171mhr"></script>
+  <script src="js/admin-guard.js?v=2026021812ca"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      padding: 24px;
+      background: #f5f5f5;
+      color: #1f2937;
+      font-family: 'Open Sans', Arial, sans-serif;
+    }
+
+    .card {
+      max-width: 920px;
+      margin: 0 auto;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 18px;
+    }
+
+    h1 {
+      margin: 0 0 10px 0;
+      font-size: 24px;
+    }
+
+    .subtitle {
+      margin: 0 0 14px 0;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 14px 0;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      background: #588157;
+      color: #fff;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button.secondary {
+      background: #374151;
+    }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .status {
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      font-size: 14px;
+      margin-bottom: 12px;
+    }
+
+    .log {
+      width: 100%;
+      min-height: 360px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 10px;
+      box-sizing: border-box;
+      font-family: Consolas, monospace;
+      font-size: 12px;
+      background: #0f172a;
+      color: #d1fae5;
+      white-space: pre-wrap;
+      overflow-y: auto;
+    }
+
+    .warn {
+      background: #fff7ed;
+      border: 1px solid #fed7aa;
+      color: #9a3412;
+      border-radius: 8px;
+      padding: 10px;
+      font-size: 13px;
+      margin: 10px 0;
+    }
+  </style>
+  <script src="js/version-manager.js?v=202602181csw"></script>
+</head>
+<body>
+  <div class="card">
+    <h1>Avatar + Messages One-Time Migration</h1>
+    <p class="subtitle">Качва старите аватари в Cloudflare R2 като PNG (150px), обновява site_users.avatar URL и чисти userAvatar от старите chat съобщения.</p>
+
+    <div class="warn">
+      Изпълни веднъж от admin акаунт. Не затваряй tab-а докато тече.
+    </div>
+
+    <div class="actions">
+      <button id="runAllBtn">Run Full Migration</button>
+      <button id="migrateAvatarsBtn" class="secondary">Only Migrate Avatars</button>
+      <button id="cleanupMessagesBtn" class="secondary">Only Cleanup Messages</button>
+      <button id="cleanupNotesBtn" class="secondary">Only Cleanup Notes</button>
+      <button id="remapLegacyUserBtn" class="secondary">Remap user_nbs1vayfk</button>
+      <button id="clearLogBtn" class="secondary">Clear Log</button>
+    </div>
+
+    <div id="status" class="status">Ready</div>
+    <div id="log" class="log"></div>
+  </div>
+
+  <script>
+    (function() {
+      const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+      const firebaseConfig = {
+        apiKey: 'API_KEY',
+        authDomain: 'med-student-chat.firebaseapp.com',
+        databaseURL: 'https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app',
+        projectId: 'med-student-chat',
+        storageBucket: 'med-student-chat.appspot.com',
+        messagingSenderId: 'SENDER_ID',
+        appId: 'APP_ID'
+      };
+
+      if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      const db = firebase.database();
+      const statusEl = document.getElementById('status');
+      const logEl = document.getElementById('log');
+      const runAllBtn = document.getElementById('runAllBtn');
+      const migrateAvatarsBtn = document.getElementById('migrateAvatarsBtn');
+      const cleanupMessagesBtn = document.getElementById('cleanupMessagesBtn');
+      const cleanupNotesBtn = document.getElementById('cleanupNotesBtn');
+      const remapLegacyUserBtn = document.getElementById('remapLegacyUserBtn');
+      const clearLogBtn = document.getElementById('clearLogBtn');
+
+      const LEGACY_USER_ID = 'user_nbs1vayfk';
+      const NEW_USER_ID = '-OjcFQiwK9fgQpVJ2jli';
+
+      function setBusy(isBusy) {
+        runAllBtn.disabled = isBusy;
+        migrateAvatarsBtn.disabled = isBusy;
+        cleanupMessagesBtn.disabled = isBusy;
+        cleanupNotesBtn.disabled = isBusy;
+        remapLegacyUserBtn.disabled = isBusy;
+      }
+
+      function setStatus(text) {
+        statusEl.textContent = text;
+      }
+
+      function log(text) {
+        logEl.textContent += `[${new Date().toLocaleTimeString('bg-BG')}] ${text}\n`;
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+
+      function dataUrlToBlob(dataUrl) {
+        const parts = String(dataUrl || '').split(',');
+        if (parts.length !== 2) throw new Error('Invalid data URL');
+        const mimeMatch = parts[0].match(/:(.*?);/);
+        const mimeType = mimeMatch ? mimeMatch[1] : 'image/png';
+        const binary = atob(parts[1]);
+        const bytes = new Uint8Array(binary.length);
+        for (let index = 0; index < binary.length; index += 1) {
+          bytes[index] = binary.charCodeAt(index);
+        }
+        return new Blob([bytes], { type: mimeType });
+      }
+
+      function readBlobAsDataUrl(blob) {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = (event) => resolve(event.target.result || '');
+          reader.onerror = () => reject(new Error('FileReader error'));
+          reader.readAsDataURL(blob);
+        });
+      }
+
+      function loadImage(dataUrl) {
+        return new Promise((resolve, reject) => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error('Image load failed'));
+          img.src = dataUrl;
+        });
+      }
+
+      async function resizeToPng150(blob) {
+        const source = await readBlobAsDataUrl(blob);
+        const img = await loadImage(source);
+
+        let width = img.width;
+        let height = img.height;
+        const maxSize = 150;
+        if (width > height) {
+          if (width > maxSize) {
+            height *= maxSize / width;
+            width = maxSize;
+          }
+        } else if (height > maxSize) {
+          width *= maxSize / height;
+          height = maxSize;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.max(1, Math.round(width));
+        canvas.height = Math.max(1, Math.round(height));
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+        const pngBlob = await new Promise((resolve) => {
+          canvas.toBlob((createdBlob) => resolve(createdBlob), 'image/png');
+        });
+        if (!pngBlob) throw new Error('PNG conversion failed');
+        return pngBlob;
+      }
+
+      async function fetchImageBlob(url) {
+        const response = await fetch(url, { mode: 'cors' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const blob = await response.blob();
+        if (!blob.type.startsWith('image/')) throw new Error('Not an image');
+        return blob;
+      }
+
+      function getR2KeyFromUrl(url) {
+        if (!url || typeof url !== 'string' || !/^https?:\/\//i.test(url)) return null;
+        try {
+          const parsed = new URL(url);
+          if (!parsed.hostname.includes('coursebook.lol')) return null;
+          return decodeURIComponent(parsed.pathname.replace(/^\//, '')) || null;
+        } catch (_) {
+          return null;
+        }
+      }
+
+      async function uploadAvatar(uid, blob) {
+        const formData = new FormData();
+        formData.append('file', new File([blob], `avatar-${uid}.png`, { type: 'image/png' }));
+        formData.append('path', `avatars/${uid}/batch-${Date.now()}.png`);
+        formData.append('userName', 'avatar-batch-migration');
+
+        const response = await fetch(R2_WORKER_URL, {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          throw new Error(text || 'R2 upload failed');
+        }
+
+        const payload = await response.json();
+        if (!payload?.url) throw new Error('R2 URL missing');
+        return payload.url;
+      }
+
+      async function deleteR2ByUrl(url) {
+        const key = getR2KeyFromUrl(url);
+        if (!key) return;
+
+        await fetch(R2_WORKER_URL, {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ key })
+        });
+      }
+
+      async function migrateAvatarsOnly() {
+        log('Starting avatar migration...');
+        const usersSnap = await db.ref('site_users').once('value');
+        const users = usersSnap.val() || {};
+        const userEntries = Object.entries(users);
+        log(`Found ${userEntries.length} users.`);
+
+        let migrated = 0;
+        let skipped = 0;
+        let failed = 0;
+
+        for (const [uid, user] of userEntries) {
+          const avatar = user?.avatar;
+          if (!avatar || typeof avatar !== 'string') {
+            skipped += 1;
+            continue;
+          }
+
+          let sourceBlob;
+          try {
+            if (avatar.startsWith('data:image/')) {
+              sourceBlob = dataUrlToBlob(avatar);
+            } else if (/^https?:\/\//i.test(avatar)) {
+              sourceBlob = await fetchImageBlob(avatar);
+            } else {
+              skipped += 1;
+              continue;
+            }
+
+            const pngBlob = await resizeToPng150(sourceBlob);
+            const newUrl = await uploadAvatar(uid, pngBlob);
+
+            await db.ref(`site_users/${uid}`).update({ avatar: newUrl });
+
+            if (avatar !== newUrl) {
+              deleteR2ByUrl(avatar).catch(() => {});
+            }
+
+            migrated += 1;
+            log(`Migrated avatar for ${uid}`);
+          } catch (error) {
+            failed += 1;
+            log(`Failed avatar for ${uid}: ${error.message || error}`);
+          }
+        }
+
+        log(`Avatar migration done. Migrated=${migrated}, Skipped=${skipped}, Failed=${failed}`);
+        return { migrated, skipped, failed };
+      }
+
+      async function applyChunkedUpdates(updates, chunkSize = 400) {
+        const entries = Object.entries(updates);
+        for (let index = 0; index < entries.length; index += chunkSize) {
+          const chunk = Object.fromEntries(entries.slice(index, index + chunkSize));
+          await db.ref().update(chunk);
+          log(`Applied message cleanup chunk ${Math.floor(index / chunkSize) + 1}`);
+        }
+      }
+
+      async function cleanupMessagesOnly() {
+        log('Starting messages cleanup (remove userAvatar/userName/userColor)...');
+        const messagesRootSnap = await db.ref('messages').once('value');
+        const messagesRoot = messagesRootSnap.val() || {};
+
+        const updates = {};
+        let scanned = 0;
+        let cleanupTargets = 0;
+
+        for (const [docId, docMessages] of Object.entries(messagesRoot)) {
+          if (!docMessages || typeof docMessages !== 'object') continue;
+          for (const [msgId, msg] of Object.entries(docMessages)) {
+            scanned += 1;
+            if (!msg || typeof msg !== 'object') continue;
+
+            let messageTouched = false;
+            if (Object.prototype.hasOwnProperty.call(msg, 'userAvatar')) {
+              updates[`messages/${docId}/${msgId}/userAvatar`] = null;
+              messageTouched = true;
+            }
+            if (Object.prototype.hasOwnProperty.call(msg, 'userName')) {
+              updates[`messages/${docId}/${msgId}/userName`] = null;
+              messageTouched = true;
+            }
+            if (Object.prototype.hasOwnProperty.call(msg, 'userColor')) {
+              updates[`messages/${docId}/${msgId}/userColor`] = null;
+              messageTouched = true;
+            }
+
+            if (messageTouched) {
+              cleanupTargets += 1;
+            }
+          }
+        }
+
+        if (cleanupTargets > 0) {
+          await applyChunkedUpdates(updates, 400);
+        }
+
+        log(`Messages cleanup done. Scanned=${scanned}, Cleaned=${cleanupTargets}`);
+        return { scanned, cleanupTargets };
+      }
+
+      async function cleanupNotesOnly() {
+        log('Starting notes cleanup (remove userAvatar/userName/userColor)...');
+        const notesRootSnap = await db.ref('notes').once('value');
+        const notesRoot = notesRootSnap.val() || {};
+
+        const updates = {};
+        let scanned = 0;
+        let cleanupTargets = 0;
+
+        for (const [docId, docNotes] of Object.entries(notesRoot)) {
+          if (!docNotes || typeof docNotes !== 'object') continue;
+          for (const [noteId, note] of Object.entries(docNotes)) {
+            scanned += 1;
+            if (!note || typeof note !== 'object') continue;
+
+            let noteTouched = false;
+            if (Object.prototype.hasOwnProperty.call(note, 'userAvatar')) {
+              updates[`notes/${docId}/${noteId}/userAvatar`] = null;
+              noteTouched = true;
+            }
+            if (Object.prototype.hasOwnProperty.call(note, 'userName')) {
+              updates[`notes/${docId}/${noteId}/userName`] = null;
+              noteTouched = true;
+            }
+            if (Object.prototype.hasOwnProperty.call(note, 'userColor')) {
+              updates[`notes/${docId}/${noteId}/userColor`] = null;
+              noteTouched = true;
+            }
+
+            if (noteTouched) {
+              cleanupTargets += 1;
+            }
+          }
+        }
+
+        if (cleanupTargets > 0) {
+          await applyChunkedUpdates(updates, 400);
+        }
+
+        log(`Notes cleanup done. Scanned=${scanned}, Cleaned=${cleanupTargets}`);
+        return { scanned, cleanupTargets };
+      }
+
+      async function remapLegacyMessageUserId() {
+        log(`Starting legacy user remap: ${LEGACY_USER_ID} -> ${NEW_USER_ID}`);
+        const messagesRootSnap = await db.ref('messages').once('value');
+        const messagesRoot = messagesRootSnap.val() || {};
+
+        const updates = {};
+        let scanned = 0;
+        let remapped = 0;
+
+        for (const [docId, docMessages] of Object.entries(messagesRoot)) {
+          if (!docMessages || typeof docMessages !== 'object') continue;
+          for (const [msgId, msg] of Object.entries(docMessages)) {
+            scanned += 1;
+            if (msg && msg.userId === LEGACY_USER_ID) {
+              updates[`messages/${docId}/${msgId}/userId`] = NEW_USER_ID;
+              remapped += 1;
+            }
+          }
+        }
+
+        if (remapped > 0) {
+          await applyChunkedUpdates(updates, 400);
+        }
+
+        log(`Legacy remap done. Scanned=${scanned}, Remapped=${remapped}`);
+        return { scanned, remapped };
+      }
+
+      async function runWithLock(label, fn) {
+        setBusy(true);
+        setStatus(`Running: ${label}`);
+        try {
+          await fn();
+          setStatus(`Done: ${label}`);
+        } catch (error) {
+          log(`ERROR: ${error.message || error}`);
+          setStatus(`Failed: ${label}`);
+        } finally {
+          setBusy(false);
+        }
+      }
+
+      runAllBtn.addEventListener('click', () => runWithLock('full migration', async () => {
+        await migrateAvatarsOnly();
+        await cleanupMessagesOnly();
+        await cleanupNotesOnly();
+      }));
+
+      migrateAvatarsBtn.addEventListener('click', () => runWithLock('avatars migration', migrateAvatarsOnly));
+      cleanupMessagesBtn.addEventListener('click', () => runWithLock('messages cleanup', cleanupMessagesOnly));
+      cleanupNotesBtn.addEventListener('click', () => runWithLock('notes cleanup', cleanupNotesOnly));
+      remapLegacyUserBtn.addEventListener('click', () => runWithLock('legacy user remap', remapLegacyMessageUserId));
+      clearLogBtn.addEventListener('click', () => {
+        logEl.textContent = '';
+      });
+
+      setStatus('Ready');
+      log('Open this page as admin and click Run Full Migration.');
+    })();
+  </script>
+</body>
+</html>

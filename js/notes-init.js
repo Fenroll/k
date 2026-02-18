@@ -90,6 +90,15 @@ class NotesFirebaseREST {
     });
   }
 
+  startSiteUsersPolling(callback) {
+    this._ensureInit().then(() => {
+      const usersRef = firebase.database().ref('site_users');
+      usersRef.on('value', (snapshot) => {
+        callback(snapshot.val() || {});
+      });
+    });
+  }
+
   // --- CHANGED PATHS TO 'notes/' ---
 
   async sendMessage(text, replyTo = null, replyAuthor = null) {
@@ -100,8 +109,6 @@ class NotesFirebaseREST {
     
     const message = {
       userId: currentUser.userId,
-      userName: currentUser.userName,
-      userColor: currentUser.color,
       text: text.trim(),
       timestamp: firebase.database.ServerValue.TIMESTAMP,
     };
@@ -212,6 +219,8 @@ class NotesUIManager {
     this.lastMessages = [];
     this.reactionsCache = {};
     this.userNameMappings = {}; // For showing updated names on old messages
+    this.userProfiles = {};
+    this.avatarCache = new Map();
 
     // console.log('NotesUIManager: Constructor called for documentId:', documentId);
     this.init();
@@ -227,6 +236,14 @@ class NotesUIManager {
         if (this.lastMessages.length > 0) {
             this.renderMessages(this.lastMessages);
         }
+    });
+
+    this.db.startSiteUsersPolling((users) => {
+      this.userProfiles = users || {};
+      this.avatarCache.clear();
+      if (this.lastMessages.length > 0) {
+        this.renderMessages(this.lastMessages);
+      }
     });
     
     // Listen for reactions (Realtime) // Can be removed, less critical
@@ -256,6 +273,53 @@ class NotesUIManager {
         depth++;
     }
     return currentName;
+  }
+
+  getDisplayNameByUserId(userId, fallbackName = '') {
+    let rawName = fallbackName || '';
+
+    if (window.currentUser && userId && String(window.currentUser.userId) === String(userId)) {
+      rawName = window.currentUser.userName || window.currentUser.displayName || rawName;
+    }
+
+    if (this.userProfiles && userId) {
+      const profile = this.userProfiles[userId] || this.userProfiles[String(userId)];
+      if (profile) {
+        rawName = profile.displayName || profile.username || profile.userName || rawName;
+      }
+    }
+
+    const resolved = this.resolveName(rawName || 'Unknown');
+    return resolved || 'Unknown';
+  }
+
+  getUserInfo(userId, fallbackName = '') {
+    const cacheKey = userId ? `id:${String(userId)}` : (fallbackName ? `name:${String(fallbackName).toLowerCase()}` : null);
+    if (cacheKey && this.avatarCache.has(cacheKey)) {
+      return this.avatarCache.get(cacheKey);
+    }
+
+    let avatar = null;
+    let color = '#588157';
+
+    if (window.currentUser && userId && String(window.currentUser.userId) === String(userId)) {
+      avatar = window.currentUser.avatar || avatar;
+      color = window.currentUser.color || color;
+    }
+
+    if (this.userProfiles && userId) {
+      const profile = this.userProfiles[userId] || this.userProfiles[String(userId)];
+      if (profile) {
+        avatar = profile.avatar || avatar;
+        color = profile.color || color;
+      }
+    }
+
+    const info = { avatar, color };
+    if (cacheKey) {
+      this.avatarCache.set(cacheKey, info);
+    }
+    return info;
   }
 
   createUI() {
@@ -349,7 +413,7 @@ class NotesUIManager {
             background: #fff;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+          gap: 0;
         }
         
         .notes-input-area {
@@ -395,25 +459,63 @@ class NotesUIManager {
         /* Message Styles (Copied & Simplified from chat.js) */
         .note-message {
             position: relative;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
             transition: background 0.2s;
+          display: flex;
+          gap: 6px;
+          align-items: flex-start;
+        }
+        .note-message.note-message-continuation {
+          margin-top: -3px;
+          margin-bottom: 0;
+        }
+        .note-message.note-message-continuation .note-content {
+          padding-top: 2px;
         }
         .note-message:hover { background: #f8fafc; }
+        .note-avatar {
+          width: 24px;
+          height: 24px;
+          min-width: 24px;
+          min-height: 24px;
+          max-width: 24px;
+          max-height: 24px;
+          aspect-ratio: 1 / 1;
+          border-radius: 50%;
+          flex-shrink: 0;
+          object-fit: cover;
+          display: block;
+        }
+        .note-avatar-fallback {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          flex-shrink: 0;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          color: white;
+          font-size: 11px;
+          font-weight: 700;
+        }
         .note-content {
-            padding: 10px 10px 10px 10px;
+            padding: 8px 8px 8px 8px;
             border-radius: 12px;
             max-width: 100%;
             word-wrap: break-word;
+          flex: 1;
+          position: relative;
         }
         .note-header {
             display: flex;
             gap: 8px;
             align-items: baseline;
-            margin-bottom: 4px;
+          margin-bottom: 2px;
         }
         .note-author { font-weight: 600; font-size: 13px; color: var(--chat-text); }
         .note-time { font-size: 11px; color: var(--chat-text-light); }
-        .note-text { font-size: 13px; line-height: 1.4; color: var(--chat-text); padding: 8px 8px 8px 10px; border-radius: 8px;}
+        .note-text { font-size: 13px; line-height: 1.4; color: var(--chat-text); padding: 4px 10px; border-radius: 8px; word-break: break-word; overflow-wrap: anywhere; }
+        .note-text a { word-break: break-all; overflow-wrap: anywhere; }
         .note-reactions { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
         .reaction-badge { font-size: 14px !important; padding: 4px 8px !important; border-radius: 12px !important; }
         
@@ -525,22 +627,36 @@ class NotesUIManager {
       const wasAtBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 50;
       
       list.innerHTML = ''; // Full re-render for simplicity (or can optimize like chat.js)
-      
+
+      let prevMsg = null;
       messages.forEach(msg => {
-          const el = this.createMessageElement(msg, messages);
+          const isContinuation = !!(
+            prevMsg &&
+            prevMsg.userId === msg.userId &&
+            (msg.timestamp - prevMsg.timestamp < 3 * 60 * 1000)
+          );
+
+          const el = this.createMessageElement(msg, messages, isContinuation);
+          if (isContinuation) {
+            el.classList.add('note-message-continuation');
+          }
           list.appendChild(el);
+          prevMsg = msg;
       });
       
       if(wasAtBottom) this.scrollToBottom();
   }
   
-  createMessageElement(msg, allMessages) {
+  createMessageElement(msg, allMessages, isContinuation = false) {
       // Check if message belongs to current user (by userId OR userName like in chat.js)
       const isMe = (currentUser.userId && msg.userId === currentUser.userId) || (currentUser.legacyNotesId && msg.userId === currentUser.legacyNotesId);
       const el = document.createElement('div');
       el.className = 'note-message';
       el.dataset.id = msg.id;
-      const resolvedName = this.resolveName(msg.userName);
+      const resolvedName = this.getDisplayNameByUserId(msg.userId, msg.userName);
+      const userInfo = this.getUserInfo(msg.userId, resolvedName || msg.userName);
+      const currentAvatar = userInfo.avatar;
+      const currentColor = userInfo.color || msg.userColor || '#588157';
       
       // Reply content
       let replyHTML = '';
@@ -555,11 +671,26 @@ class NotesUIManager {
           }
       }
 
-      const bg = isMe ? '#e0f2fe' : 'var(--chat-secondary)';
+      const bg = isMe ? '#e8f5e9' : 'var(--chat-secondary)';
+      const initial = (resolvedName || '?').charAt(0).toUpperCase();
+      const avatarVisibility = isContinuation ? 'visibility:hidden;' : 'visibility:visible;';
+      const headerDisplay = isContinuation ? 'display:none;' : 'display:flex;';
+
+      let avatarHtml = '';
+      if (currentAvatar && typeof currentAvatar === 'string' && currentAvatar.length > 5) {
+        avatarHtml = `
+          <div style="width:24px;height:24px;position:relative;flex-shrink:0;">
+            <img src="${currentAvatar}" class="note-avatar" style="${avatarVisibility} width:24px; height:24px; border-radius:50%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="note-avatar-fallback" style="background:${currentColor}; ${avatarVisibility} display:none; position:absolute; inset:0;">${this.escapeHtml(initial)}</div>
+          </div>`;
+      } else {
+        avatarHtml = `<div class="note-avatar-fallback" style="${avatarVisibility} background:${currentColor};">${this.escapeHtml(initial)}</div>`;
+      }
       
       el.innerHTML = `
+        ${avatarHtml}
          <div class="note-content">
-             <div class="note-header">
+           <div class="note-header" style="${headerDisplay}">
                 <span class="note-author">${this.escapeHtml(resolvedName)}</span>
                 <span class="note-time">${new Date(msg.timestamp).toLocaleTimeString('bg-BG', {hour: '2-digit', minute:'2-digit'})}</span>
              </div>
@@ -601,11 +732,12 @@ class NotesUIManager {
       const preview = this.container.querySelector('#notes-reply-preview');
       
       input.dataset.replyTo = msg.id;
-      input.dataset.replyAuthor = msg.userName;
+      const replyAuthorName = this.getDisplayNameByUserId(msg.userId, msg.userName);
+      input.dataset.replyAuthor = replyAuthorName;
       
       preview.innerHTML = `
         <div class="reply-indicator" style="background: #f1f5f9; border-left: 3px solid #3b82f6; padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Replying to <b>${this.escapeHtml(msg.userName)}</b></span>
+            <span>Replying to <b>${this.escapeHtml(replyAuthorName)}</b></span>
             <button onclick="window.notesManager.cancelReply()" style="border:none;background:none;cursor:pointer;">✖</button>
         </div>
       `;
