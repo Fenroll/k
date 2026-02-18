@@ -9,4 +9,5 @@ routes = [
 
 [vars]
 FIREBASE_DB_URL = "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app"
-ALLOWED_ORIGINS = "https://coursebook.lol,http://localhost:5500,file://"
+ALLOWED_ORIGINS = "https://coursebook.lol,https://www.coursebook.lol,http://localhost:5500,file://"
+## For local file:// usage, browsers send Origin: null (handled explicitly in worker.js)

@@ -1,4 +1,7 @@
 const FULL_ACCESS = ["room:write", "comments:write"];
+const USER_CACHE_TTL_MS = 5 * 60 * 1000;
+const REQUEST_TIMEOUT_MS = 5000;
+const userCache = new Map();
 
 function json(data, status = 200, extraHeaders = {}) {
   return new Response(JSON.stringify(data), {
@@ -17,23 +20,65 @@ function parseAllowedOrigins(value) {
     .filter(Boolean);
 }
 
+async function fetchWithTimeout(resource, options = {}, timeoutMs = REQUEST_TIMEOUT_MS) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort("timeout"), timeoutMs);
+  try {
+    return await fetch(resource, {
+      ...options,
+      signal: controller.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+function isAllowedByDomainFallback(origin) {
+  try {
+    const parsed = new URL(origin);
+    const host = (parsed.hostname || "").toLowerCase();
+    if (host === "coursebook.lol" || host.endsWith(".coursebook.lol")) return true;
+    if (host === "localhost" || host === "127.0.0.1") return true;
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 function resolveCorsHeaders(request, env) {
   const requestOrigin = request.headers.get("Origin") || "";
   const allowedOrigins = parseAllowedOrigins(env.ALLOWED_ORIGINS);
+
+  if (requestOrigin === "null") {
+    return {
+      "Access-Control-Allow-Origin": "null",
+      "Access-Control-Allow-Methods": "POST,OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type,x-user-id",
+      "Access-Control-Max-Age": "86400",
+      Vary: "Origin",
+    };
+  }
 
   if (!requestOrigin) {
     return {
       "Access-Control-Allow-Origin": "*",
       "Access-Control-Allow-Methods": "POST,OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type,x-user-id",
+      "Access-Control-Max-Age": "86400",
     };
   }
 
-  if (allowedOrigins.length === 0 || allowedOrigins.includes(requestOrigin)) {
+  const explicitlyAllowed =
+    allowedOrigins.length === 0 ||
+    allowedOrigins.includes("*") ||
+    allowedOrigins.includes(requestOrigin);
+
+  if (explicitlyAllowed || isAllowedByDomainFallback(requestOrigin)) {
     return {
       "Access-Control-Allow-Origin": requestOrigin,
       "Access-Control-Allow-Methods": "POST,OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type,x-user-id",
+      "Access-Control-Max-Age": "86400",
       Vary: "Origin",
     };
   }
@@ -56,7 +101,7 @@ async function fetchFirebaseUser(userId, env) {
   }
 
   const encoded = encodeURIComponent(userId);
-  const response = await fetch(`${dbUrl}/site_users/${encoded}.json`, {
+  const response = await fetchWithTimeout(`${dbUrl}/site_users/${encoded}.json`, {
     method: "GET",
   });
 
@@ -66,6 +111,21 @@ async function fetchFirebaseUser(userId, env) {
   }
 
   return response.json();
+}
+
+async function getFirebaseUserCached(userId, env) {
+  const cacheEntry = userCache.get(userId);
+  const now = Date.now();
+  if (cacheEntry && cacheEntry.expiresAt > now) {
+    return cacheEntry.value;
+  }
+
+  const value = await fetchFirebaseUser(userId, env);
+  userCache.set(userId, {
+    value,
+    expiresAt: now + USER_CACHE_TTL_MS,
+  });
+  return value;
 }
 
 async function authorizeLiveblocks({ userId, room, userInfo, env }) {
@@ -79,7 +139,7 @@ async function authorizeLiveblocks({ userId, room, userInfo, env }) {
       ? { [room]: FULL_ACCESS }
       : { "course-notes-*": FULL_ACCESS };
 
-  const response = await fetch("https://api.liveblocks.io/v2/authorize-user", {
+  const response = await fetchWithTimeout("https://api.liveblocks.io/v2/authorize-user", {
     method: "POST",
     headers: {
       Authorization: `Bearer ${secret}`,
@@ -121,7 +181,10 @@ export default {
       return json({ ok: true }, 200, corsHeaders);
     }
 
-    if (url.pathname !== "/liveblocks-auth" || request.method !== "POST") {
+    if (
+      (url.pathname !== "/liveblocks-auth" && url.pathname !== "/liveblocks-auth/") ||
+      request.method !== "POST"
+    ) {
       return json({ error: "Not found" }, 404, corsHeaders);
     }
 
@@ -137,17 +200,22 @@ export default {
         return json({ error: "Missing userId" }, 401, corsHeaders);
       }
 
-      const firebaseUser = await fetchFirebaseUser(userId, env);
-      if (!firebaseUser || typeof firebaseUser !== "object") {
-        return json({ error: "User not found in Firebase" }, 403, corsHeaders);
+      let firebaseUser = null;
+      try {
+        firebaseUser = await getFirebaseUserCached(userId, env);
+      } catch (_error) {
+      }
+
+      if (firebaseUser && typeof firebaseUser !== "object") {
+        firebaseUser = null;
       }
 
       const userInfo = {
-        name: sanitizeString(firebaseUser.displayName, sanitizeString(body.name, userId)),
-        color: sanitizeString(firebaseUser.color, sanitizeString(body.color, "#4ECDC4")),
+        name: sanitizeString(firebaseUser?.displayName, sanitizeString(body.name, userId)),
+        color: sanitizeString(firebaseUser?.color, sanitizeString(body.color, "#4ECDC4")),
         avatar: sanitizeString(
-          firebaseUser.avatar,
-          sanitizeString(firebaseUser.avatarUrl, sanitizeString(body.avatar, ""))
+          firebaseUser?.avatar,
+          sanitizeString(firebaseUser?.avatarUrl, sanitizeString(body.avatar, ""))
         ),
       };
 
