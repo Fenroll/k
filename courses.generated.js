@@ -1,4 +1,4 @@
-window.coursesVersion = "202602191qtk";
+window.coursesVersion = "202602191r3x";
 window.courses = [
   {
     "id": "000001",
@@ -278,6 +278,17 @@ window.courses = [
           {
             "name": "20-msg-Белодробна хипертония 2.html",
             "path": "files/Вътрешни болести 1 ч/Пулмология/20-msg-Белодробна хипертония 2.html",
+            "type": "html"
+          }
+        ]
+      },
+      {
+        "name": "Ремватология",
+        "files": [],
+        "msgNotes": [
+          {
+            "name": "1-msg-Ревматоиден артрит.html",
+            "path": "files/Вътрешни болести 1 ч/Ремватология/1-msg-Ревматоиден артрит.html",
             "type": "html"
           }
         ]
@@ -645,4 +656,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "19.02.2026 22:36";
+window.buildTimestamp = "19.02.2026 22:43";

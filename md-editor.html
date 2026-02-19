@@ -4,13 +4,15 @@
   <script src="js/auth-guard.js?v=202602191r3x"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Тext Editor</title>
+  <title>Markdown Editor - WYSIWYG</title>
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=202602191r3x" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+  <!-- Mobile Navigation CSS -->
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202602191r3x">
   
   <style>
     * {
@@ -203,8 +205,8 @@
     }
 
     .toolbar select:hover {
-      background: rgba(88, 129, 87, 0.08);
-      color: #588157;
+      background: rgba(146, 64, 14, 0.08);
+      color: #92400e;
     }
 
     /* Main editor container */
@@ -240,16 +242,16 @@
     #editor h2,
     #editor h3,
     #editor h4 {
-      color: #588157;
+      color: #92400e;
       margin-top: 0.8em;
       margin-bottom: 0.15em;
       font-weight: 600;
     }
 
-    #editor h1 { font-size: 1.65em; color: #588157; }
-    #editor h2 { font-size: 1.3em; color: #588157; }
-    #editor h3 { font-size: 1.1em; color: #588157; margin-bottom: 0.1em; }
-    #editor h4 { font-size: 1.05em; color: #588157; margin-bottom: 0.1em; }
+    #editor h1 { font-size: 1.5em; color: #000000; }
+    #editor h2 { font-size: 1.3em; color: #000000; }
+    #editor h3 { font-size: 1.1em; color: #000000; margin-bottom: 0.1em; }
+    #editor h4 { font-size: 1.05em; color: #000000; margin-bottom: 0.1em; }
 
     #editor p {
       margin: 0.3em 0;
@@ -314,14 +316,9 @@
       margin-top: 0.1em;
     }
 
-    /* Reduce space between consecutive headings */
-    #editor h1 + h2,
-    #editor h1 + h3,
-    #editor h1 + h4,
-    #editor h2 + h3,
-    #editor h2 + h4,
+    /* Reduce space between h3 and h4 */
     #editor h3 + h4 {
-      margin-top: 0.2em;
+      margin-top: 0.3em;
     }
 
     #editor ul,
@@ -373,68 +370,94 @@
     }
 
     #editor blockquote {
-      border-left: 3px solid #6ea56e;
+      border-left: 3px solid #f59e0b;
       padding-left: 1em;
       margin: 0.5em 0;
       font-style: italic;
-      color: #3e7e3c;
+      color: #78350f;
     }
-
-    .editor-note {
-      text-decoration: underline dotted #a3b18a; /* ~Dry Sage dotted underline */
-      text-decoration-thickness: 2px;
-      text-underline-offset: 2px;
-      text-decoration-skip-ink: none;
-      cursor: help; /* Indicate hoverable element */
-      position: relative; /* Needed for tooltip positioning */
-    }
-
-
 
     #editor a {
-      color: inherit;
-      text-decoration: underline wavy #74b673;
-      text-decoration-thickness: 2px;
-      text-underline-offset: 2px;
-      text-decoration-skip-ink: none;
+      color: #f59e0b;
+      text-decoration: underline;
       cursor: pointer;
     }
 
     #editor a:hover {
-      color: inherit;
+      color: #d97706;
     }
 
-    .heading-color-btn,
-    .text-color-btn,
-    .highlight-color-btn {
+    .heading-color-btn {
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .heading-color-btn:hover:not(.active),
-    .text-color-btn:hover:not(.active),
-    .highlight-color-btn:hover:not(.active) {
+    .heading-color-btn:hover:not(.active) {
       transform: scale(1.1);
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
     }
 
-    .heading-color-btn.active,
-    .text-color-btn.active,
-    .highlight-color-btn.active {
+    .heading-color-btn.active {
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
       transform: scale(1.05);
     }
 
-    .heading-color-btn.active:hover,
-    .text-color-btn.active:hover,
-    .highlight-color-btn.active:hover {
+    .heading-color-btn.active:hover {
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
       transform: scale(1.05);
     }
 
     .heading-color-btn:focus,
-    .heading-color-btn:focus-visible,
+    .heading-color-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3) !important;
+      transform: scale(1.05) !important;
+    }
+
+    .text-color-btn {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .text-color-btn:hover:not(.active) {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .text-color-btn.active {
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
+      transform: scale(1.05);
+    }
+
+    .text-color-btn.active:hover {
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
+      transform: scale(1.05);
+    }
+
     .text-color-btn:focus,
-    .text-color-btn:focus-visible,
+    .text-color-btn:focus-visible {
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3) !important;
+      transform: scale(1.05) !important;
+    }
+
+    .highlight-color-btn {
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .highlight-color-btn:hover:not(.active) {
+      transform: scale(1.1);
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+    }
+
+    .highlight-color-btn.active {
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
+      transform: scale(1.05);
+    }
+
+    .highlight-color-btn.active:hover {
+      box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
+      transform: scale(1.05);
+    }
+
     .highlight-color-btn:focus,
     .highlight-color-btn:focus-visible {
       outline: none;
@@ -447,14 +470,11 @@
       margin: 0.75em 0;
       width: 100%;
       table-layout: auto;
-      position: relative;
-      --hover-row: -1;
-      --hover-col: -1;
     }
 
     #editor th,
     #editor td {
-      border: 1px solid rgba(2, 2, 2, 0.35);
+      border: 1px solid rgba(146, 64, 14, 0.35);
       padding: 6px 10px;
       text-align: left;
       vertical-align: top;
@@ -463,12 +483,12 @@
     }
 
     #editor thead th {
-      background: rgba(88, 129, 87, 0.13);
+      background: rgba(196, 127, 9, 0.08);
       font-weight: 600;
     }
 
     #editor tbody tr:nth-child(odd) {
-      background: rgba(88, 129, 87, 0.06); /* Very very slight tint of #588157 */
+      background: rgba(146, 64, 14, 0.03);
     }
 
     /* Raw code modal */
@@ -479,7 +499,7 @@
       width: 50px;
       height: 50px;
       border-radius: 50%;
-      background: #588157;
+      background: #92400e;
       color: #fff;
       border: none;
       cursor: pointer;
@@ -493,7 +513,7 @@
     }
 
     .raw-code-btn:hover {
-      background: #588157;
+      background: #b8520d;
       box-shadow: 0 6px 16px rgba(0,0,0,0.2);
       transform: scale(1.1);
     }
@@ -595,13 +615,13 @@
     }
 
     .modal-footer button.primary {
-      background: #588157;
+      background: #92400e;
       color: #fff;
-      border-color: #588157;
+      border-color: #92400e;
     }
 
     .modal-footer button.primary:hover {
-      background: #588157;
+      background: #b8520d;
     }
 
     /* File list styles */
@@ -649,14 +669,14 @@
     /* Course group header */
     .course-header {
       padding: 10px 16px;
-      background: #588157;
+      background: #f59e0b;
       color: #fff;
       font-weight: 600;
       font-size: 0.95em;
       position: sticky;
       top: 0;
       z-index: 1;
-      border-bottom: 2px solid #166534;
+      border-bottom: 2px solid #d97706;
     }
 
     .course-header.hidden {
@@ -667,17 +687,17 @@
       display: none;
     }
     .modal-footer button.primary:hover {
-      background: #588157;
+      background: #b8520d;
     }
 
     /* Keyboard shortcuts hint */
     .shortcuts-hint {
       padding: 8px 12px;
-      background: #f0fdf4;
-      border: 1px solid #bbf7d0;
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
       border-radius: 4px;
       font-size: 0.85em;
-      color: #166534;
+      color: #78350f;
       margin-left: auto;
     }
 
@@ -722,6 +742,11 @@
     }
 
     /* Table resize functionality */
+    #editor table {
+      border-collapse: collapse;
+      margin: 10px 0;
+      position: relative;
+    }
 
     #editor table td,
     #editor table th {
@@ -751,17 +776,21 @@
     /* Table cell focus/selection indicator */
     #editor table td:focus,
     #editor table th:focus {
-      outline: 2px solid #588157;
+      outline: 2px solid #7c3aed;
       outline-offset: -2px;
-      background: rgba(88, 129, 87, 0.05);
+      background: rgba(124, 58, 237, 0.05);
     }
 
     /* Table row hover effect */
     #editor table tr:hover {
-      /* background: none; */ /* Removed per user request */
+      background: rgba(124, 58, 237, 0.03);
     }
 
     /* Row/column hover indicators */
+    #editor table {
+      --hover-row: -1;
+      --hover-col: -1;
+    }
 
     /* Table row positioning */
     #editor table tr {
@@ -795,7 +824,7 @@
 
       /* Mobile font sizes for viewer */
       #editor h1 {
-        font-size: 1.65em;
+        font-size: 1.5em;
       }
 
       #editor h2 {
@@ -932,61 +961,6 @@
       background-color: #dc2626;
     }
 
-    /* Professional Color Picker Styles */
-    .color-picker-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: white;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      z-index: 1000;
-      min-width: 240px;
-      padding: 8px 0;
-    }
-
-    .theme-colors-grid {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 2px;
-      padding: 4px 8px;
-    }
-
-    .color-swatch {
-      width: 20px;
-      height: 20px;
-      border: 1px solid #e5e7eb;
-      border-radius: 3px;
-      cursor: pointer;
-      transition: all 0.15s ease;
-    }
-
-    .color-swatch:hover {
-      transform: scale(1.2);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      z-index: 10;
-      position: relative;
-    }
-
-    .standard-colors-row {
-      display: flex;
-      gap: 2px;
-      padding: 4px 8px;
-      justify-content: space-between;
-    }
-
-    .standard-colors-row .color-swatch {
-      width: 22px;
-      height: 22px;
-    }
-
-    /* Toggle button active state */
-    .toolbar button.toggle-btn.active {
-      background: #e8e8e8;
-      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
-    }
-
   </style>
   <script src="js/version-manager.js?v=202602191r3x"></script>
 </head>
@@ -1030,16 +1004,16 @@
       <!-- Text Color Button -->
       <div style="position: relative; display: inline-block;">
         <button id="textColorToggleBtn" title="Text Color"><img src="svg/md-editor/icon-text-color.svg?v=202602191r3x" alt="Text Color" class="toolbar-icon"></button>
-        <div id="textColorOptions" class="color-picker-dropdown" style="display: none;">
-          <div style="padding: 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase;">Theme Colors</div>
-          <div id="textThemeColors" class="theme-colors-grid"></div>
-          <div style="padding: 8px 8px 4px 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-top: 4px;">Standard Colors</div>
-          <div id="textStandardColors" class="standard-colors-row"></div>
-          <div style="padding: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px; display: flex; gap: 8px; align-items: center;">
-            <button id="removeTextColorBtn" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; flex: 1;">Remove Color</button>
-            <input type="text" id="textColorHexInput" placeholder="#1f2937" style="width: 80px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-family: monospace; font-size: 12px;">
-            <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px; padding: 2px;">
-          </div>
+        <div id="textColorOptions" style="position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 8px; flex-direction: row; flex-wrap: wrap; max-width: 250px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; gap: 6px; display: none !important; flex: 1;">
+          <button class="text-color-btn" data-color="#dd0a0ab7" title="Red" style="background-color: #dd0a0ab7; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#65a30d" title="Green" style="background-color: #65a30d; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#3b82f6" title="Blue" style="background-color: #3b82f6; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#eab308" title="Yellow" style="background-color: #eab308; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#7c2d12" title="Deep Orange" style="background-color: #7c2d12; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#7e22ce" title="Purple" style="background-color: #7e22ce; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="text-color-btn" data-color="#1f2937" title="Dark Gray" style="background-color: #1f2937; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button id="removeColorBtn" title="Remove Color" style="background-color: transparent; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #3b82f6; cursor: pointer; color: #3b82f6; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 16px; padding: 0;">✕</button>
+          <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 34px; cursor: pointer; border: none; border-radius: 4px;">
         </div>
       </div>
 
@@ -1051,24 +1025,25 @@
           <button class="heading-color-btn" data-color="#1f2937" title="Dark Gray" style="background-color: #1f2937; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
           <button class="heading-color-btn" data-color="#1e40af" title="Deep Blue" style="background-color: #1e40af; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
           <button class="heading-color-btn" data-color="#7c2d12" title="Deep Orange" style="background-color: #7c2d12; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#588157" title="Lime Green" style="background-color: #588157; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="heading-color-btn" data-color="#65a30d" title="Lime Green" style="background-color: #65a30d; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
           <button class="heading-color-btn" data-color="#7e22ce" title="Purple" style="background-color: #7e22ce; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
         </div>
       </div>
 
       <!-- Highlight Button -->
       <div style="position: relative; display: inline-block;">
-        <button id="highlightToggleBtn" title="Highlight"><img src="svg/md-editor/icon-highlight.svg?v=202602191r3x" alt="Highlight" class="toolbar-icon"></button>
-        <div id="highlightOptions" class="color-picker-dropdown" style="display: none;">
-          <div style="padding: 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase;">Theme Colors</div>
-          <div id="highlightThemeColors" class="theme-colors-grid"></div>
-          <div style="padding: 8px 8px 4px 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-top: 4px;">Standard Colors</div>
-          <div id="highlightStandardColors" class="standard-colors-row"></div>
-          <div style="padding: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px; display: flex; gap: 8px; align-items: center;">
-            <button id="removeHighlightBtn" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; flex: 1;">Remove Highlight</button>
-            <input type="text" id="highlightColorHexInput" placeholder="#ffeb3b" style="width: 80px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-family: monospace; font-size: 12px;">
-            <input type="color" id="highlightColorControl" value="#ffeb3b" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px; padding: 2px;">
-          </div>
+        <button id="highlightToggleBtn" title="Highlight (H)"><img src="svg/md-editor/icon-highlight.svg?v=202602191r3x" alt="Highlight" class="toolbar-icon"></button>
+        <div id="highlightOptions" style="position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 8px; flex-direction: row; flex-wrap: wrap; max-width: 250px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; gap: 6px; display: none !important; flex: 1;">
+          <button class="highlight-color-btn" data-color="#ffeb3b" title="Yellow" style="background-color: #ffeb3b; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="highlight-color-btn" data-color="#ff9800" title="Orange" style="background-color: #ff9800; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="highlight-color-btn" data-color="#f44336" title="Red" style="background-color: #f44336; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="highlight-color-btn" data-color="#e91e63" title="Pink" style="background-color: #e91e63; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="highlight-color-btn" data-color="#9c27b0" title="Purple" style="background-color: #9c27b0; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="highlight-color-btn" data-color="#2196f3" title="Blue" style="background-color: #2196f3; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="highlight-color-btn" data-color="#00bcd4" title="Cyan" style="background-color: #00bcd4; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button class="highlight-color-btn" data-color="#4caf50" title="Green" style="background-color: #4caf50; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+          <button id="removeHighlightBtn" title="Remove Highlight" style="background-color: transparent; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #f44336; cursor: pointer; color: #f44336; font-weight: bold; display: flex; align-items: center; justify-content: center; font-size: 16px; padding: 0;">✕</button>
+          <input type="color" id="highlightColorControl" value="#ffeb3b" style="width: 40px; height: 34px; cursor: pointer; border: none; border-radius: 4px;">
         </div>
       </div>
     </div>
@@ -1110,7 +1085,8 @@
     </div>
 
     <div class="toolbar-group">
-      <button id="quoteBtn" title="Toggle Quote (Ctrl+Q)" class="toggle-btn"><img src="svg/md-editor/icon-quote.svg?v=202602191r3x" alt="Quote" class="toolbar-icon"></button>
+      <button id="quoteBtn" title="Quote (Ctrl+Q)"><img src="svg/md-editor/icon-quote.svg?v=202602191r3x" alt="Quote" class="toolbar-icon"></button>
+      <button id="checklistBtn" title="Checkbox List"><img src="svg/md-editor/icon-checklist.svg?v=202602191r3x" alt="Checklist" class="toolbar-icon"></button>
       <button id="symbolsBtn" title="Insert Symbols"><img src="svg/md-editor/icon-symbols.svg?v=202602191r3x" alt="Symbols" class="toolbar-icon"></button>
     </div>
 
@@ -1118,7 +1094,6 @@
 
       <button id="linkBtn" title="Link"><img src="svg/md-editor/icon-link.svg?v=202602191r3x" alt="Bold" class="toolbar-icon"></button>
       <button id="imageBtn" title="Add Image"><img src="svg/md-editor/icon-image.svg?v=202602191r3x" alt="Image" class="toolbar-icon"></button>
-      <button id="noteBtn" title="Add Note"><img src="svg/md-editor/icon-note.svg?v=202602191r3x" alt="Note" class="toolbar-icon"></button>
       <button id="hrBtn" title="Horizontal Line"><svg width="18" height="18" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32s-14.33-32-32-32H64c-17.67 0-32 14.33-32 32z"/></svg></button>
       <button id="dashedLineBtn" title="Topic Divider (Dashed Line)"><img src="svg/md-editor/icon-dashed-line.svg?v=202602191r3x" alt="Dashed Line" class="toolbar-icon"></button>
     </div>
@@ -1262,9 +1237,9 @@
       </div>
       <div class="modal-body">
         <div style="margin-bottom: 16px;">
-          <label for="imageNameInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Image File Name or URL</label>
-          <input type="text" id="imageNameInput" placeholder="e.g., photo.png or https://example.com/photo.jpg" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
-          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">For local files, they must exist in assets/ folder</div>
+          <label for="imageNameInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Image File Name</label>
+          <input type="text" id="imageNameInput" placeholder="e.g., photo.png" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+          <div style="margin-top: 4px; font-size: 0.85em; color: #6b7280;">File must exist in assets/ folder</div>
         </div>
         <div style="margin-bottom: 16px;">
           <label for="imageAltInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Alt Text (Description)</label>
@@ -1293,35 +1268,11 @@
     </div>
   </div>
 
-  <!-- Add Note Modal -->
-  <div id="noteModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
-      <div class="modal-header">
-        <h2>Add Note</h2>
-        <span class="close" id="closeNoteModalBtn">&times;</span>
-      </div>
-      <div class="modal-body">
-        <div style="margin-bottom: 16px;">
-          <label for="noteSelectedTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Selected Text</label>
-          <input type="text" id="noteSelectedTextInput" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; background-color: #f3f4f6;" readonly>
-        </div>
-        <div style="margin-bottom: 16px;">
-          <label for="noteTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Note Content</label>
-          <textarea id="noteTextInput" placeholder="Paste your note content here..." style="width: 100%; height: 150px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: 'Open Sans', Arial, sans-serif; resize: vertical;"></textarea>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button id="cancelNoteBtn">Cancel</button>
-        <button class="primary" id="insertNoteBtn">Save Note</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Save File Modal -->
   <div id="saveFileModal" class="modal">
     <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
-        <h2>Save Text File</h2>
+        <h2>Save Markdown File</h2>
         <span class="close" id="closeSaveModalBtn">&times;</span>
       </div>
       <div class="modal-body">
@@ -1335,12 +1286,48 @@
           <input type="text" id="fileNameInput" placeholder="e.g., ХОББ, Белодробен карцином" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
         </div>
         <div style="padding: 10px; background: #f3f4f6; border-radius: 4px; font-size: 0.9em; color: #4b5563;">
-          <strong>Preview:</strong> <span id="fileNamePreview" style="color: #588157; font-family: monospace;">document.html</span>
+          <strong>Preview:</strong> <span id="fileNamePreview" style="color: #92400e; font-family: monospace;">document.html</span>
         </div>
       </div>
       <div class="modal-footer">
         <button id="cancelSaveBtn">Cancel</button>
         <button class="primary" id="confirmSaveBtn">Download</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checklist Modal -->
+  <div id="checklistModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h2>Create Checkbox List</h2>
+        <span class="close" id="closeChecklistModalBtn">&times;</span>
+      </div>
+      <div class="modal-body">
+        <div style="margin-bottom: 16px;">
+          <label for="checklistCountInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Number of Options</label>
+          <input type="number" id="checklistCountInput" placeholder="e.g., 4" value="4" min="1" max="20" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label for="checklistTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Paste Answer Text (one per line)</label>
+          <textarea id="checklistTextInput" placeholder="Paste each answer on a new line..." style="width: 100%; height: 120px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: monospace; resize: vertical;"></textarea>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500; color: #374151;">
+            <input type="checkbox" id="checklistHighlightCheckbox" checked style="margin-right: 8px; cursor: pointer;">
+            Highlight selected answer in red
+          </label>
+        </div>
+        <div style="margin-bottom: 16px;">
+          <label style="display: flex; align-items: center; cursor: pointer; font-weight: 500; color: #374151;">
+            <input type="checkbox" id="checklistBoldCheckbox" style="margin-right: 8px; cursor: pointer;">
+            Bold selected answer
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button id="cancelChecklistBtn">Cancel</button>
+        <button class="primary" id="confirmChecklistBtn">Insert</button>
       </div>
     </div>
   </div>
@@ -1511,7 +1498,7 @@
       <div class="modal-body">
         <!-- Tabs for combining mode -->
         <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
-          <button id="combineLocalTab" class="combine-tab-btn active" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid #588157; color: #588157; font-weight: 500;">Локални файлове</button>
+          <button id="combineLocalTab" class="combine-tab-btn active" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid #7c3aed; color: #7c3aed; font-weight: 500;">Локални файлове</button>
           <button id="combineCourseTab" class="combine-tab-btn" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280; font-weight: 500;">От курсове</button>
         </div>
 
@@ -1559,415 +1546,9 @@
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
   <script src="courses.generated.js?v=202602191r3x"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/presence.js?v=202602171mhr"></script>
 
   <script>
     const editor = document.getElementById('editor');
-
-    function getCourseContentKey(course) {
-      if (!course) return null;
-      return course._contentKey || course.id || null;
-    }
-
-    function mergeCourseContent(course, contentKey) {
-      if (!course || !contentKey || !window.courseContent || !window.courseContent[contentKey]) return;
-      const contentMap = window.courseContent[contentKey];
-
-      function mergeSection(section) {
-        if (section.msgNotes) {
-          section.msgNotes.forEach(note => {
-            if (!note.content && contentMap[note.path]) {
-              note.content = contentMap[note.path];
-            }
-          });
-        }
-        if (section.subsections) {
-          section.subsections.forEach(mergeSection);
-        }
-      }
-
-      if (course.sections) {
-        course.sections.forEach(mergeSection);
-      }
-      course._contentLoaded = true;
-    }
-
-    function loadCourseContent(courseOrId) {
-      return new Promise((resolve) => {
-        if (typeof courses === 'undefined') {
-          resolve(false);
-          return;
-        }
-
-        const course = typeof courseOrId === 'object'
-          ? courseOrId
-          : courses.find(c => c.id === courseOrId);
-
-        if (!course) {
-          resolve(false);
-          return;
-        }
-
-        if (course._contentLoaded) {
-          resolve(true);
-          return;
-        }
-
-        const contentKey = getCourseContentKey(course);
-        if (!contentKey) {
-          course._contentLoaded = true;
-          resolve(true);
-          return;
-        }
-
-        if (window.courseContent && window.courseContent[contentKey]) {
-          mergeCourseContent(course, contentKey);
-          resolve(true);
-          return;
-        }
-
-        const script = document.createElement('script');
-        const rawUrl = 'courses-data/' + contentKey + '.js';
-        script.src = (window.VersionManager && typeof window.VersionManager.versionedUrl === 'function')
-          ? window.VersionManager.versionedUrl(rawUrl)
-          : (rawUrl + ((window.coursesVersion || '') ? ('?v=' + window.coursesVersion) : ''));
-        script.onload = () => {
-          mergeCourseContent(course, contentKey);
-          resolve(true);
-        };
-        script.onerror = () => {
-          resolve(false);
-        };
-        document.head.appendChild(script);
-      });
-    }
-
-    async function ensureFileContent(file) {
-      if (!file) return file;
-      if (file.content) return file;
-
-      const resolveContentFromCourse = () => {
-        const course = file.courseRef;
-        const targetPath = file.path;
-        if (!course || !targetPath || !course.sections) return null;
-
-        let found = null;
-        const walk = (section) => {
-          if (found) return;
-
-          if (section.msgNotes) {
-            for (const note of section.msgNotes) {
-              if (note.path === targetPath && note.content) {
-                found = note.content;
-                return;
-              }
-            }
-          }
-
-          if (section.files) {
-            for (const f of section.files) {
-              if (f.path === targetPath && f.content) {
-                found = f.content;
-                return;
-              }
-            }
-          }
-
-          if (section.subsections) {
-            section.subsections.forEach(walk);
-          }
-        };
-
-        course.sections.forEach(walk);
-        return found;
-      };
-
-      if (file.courseRef) {
-        await loadCourseContent(file.courseRef);
-        if (!file.content) {
-          const resolvedContent = resolveContentFromCourse();
-          if (resolvedContent) {
-            file.content = resolvedContent;
-          }
-        }
-        if (file.content) return file;
-      }
-
-      if (file.path && window.location.protocol !== 'file:') {
-        try {
-          const encodedPath = file.path.split('/').map(encodeURIComponent).join('/');
-          const response = await fetch(encodedPath);
-          if (response.ok) {
-            file.content = await response.text();
-          }
-        } catch (_) {
-        }
-      }
-
-      return file;
-    }
-
-    function forEachSectionRecursive(section, callback) {
-      callback(section);
-      if (section.subsections && section.subsections.length > 0) {
-        section.subsections.forEach(subsection => forEachSectionRecursive(subsection, callback));
-      }
-    }
-
-    function showNotification(message, type = 'success') {
-      const notification = document.createElement('div');
-      notification.textContent = message;
-      
-      const colors = {
-        success: '#10b981',
-        warning: '#588157',
-        error: '#ef4444',
-        info: '#3b82f6'
-      };
-      
-      notification.style.cssText = `
-        position: fixed;
-        top: 70px;
-        right: 20px;
-        background-color: ${colors[type] || colors.info};
-        color: white;
-        padding: 12px 18px;
-        border-radius: 6px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 2000;
-        font-size: 14px;
-        opacity: 0;
-        transform: translateX(20px);
-        transition: opacity 0.3s ease, transform 0.3s ease;
-      `;
-      
-      document.body.appendChild(notification);
-      
-      // Animate in
-      setTimeout(() => {
-        notification.style.opacity = '1';
-        notification.style.transform = 'translateX(0)';
-      }, 10);
-      
-          // Animate out and remove
-          setTimeout(() => {
-            notification.style.opacity = '0';
-            notification.style.transform = 'translateX(20px)';
-            setTimeout(() => notification.remove(), 300);
-          }, 3000);
-        }
-      
-        function setupSimpleButton(buttonId, command) {
-          const button = document.getElementById(buttonId);
-          if (button) {
-            button.addEventListener('click', () => {
-              document.execCommand(command, false, null);
-              saveToHistory();
-              editor.focus();
-            });
-          }
-        }    
-    // ========================================
-    // 1. HEADER ENTER KEY LOGIC
-    // ========================================
-    /* editor.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        const selection = window.getSelection();
-        if (selection.rangeCount === 0) return;
-        
-        const range = selection.getRangeAt(0);
-        let node = range.startContainer;
-        
-        // Find the heading element if we're inside one
-        while (node && node !== editor) {
-          if (node.nodeType === 1 && /^H[1-4]$/.test(node.tagName)) {
-            // Check if cursor is at the start of the heading
-            const textNode = node.firstChild;
-            const isAtStart = range.startContainer === textNode && range.startOffset === 0;
-            
-            if (isAtStart || (range.startContainer === node && range.startOffset === 0)) {
-              e.preventDefault();
-              
-              // Create a new paragraph before the heading
-              const newParagraph = document.createElement('p');
-              newParagraph.innerHTML = '<br>';
-              node.parentNode.insertBefore(newParagraph, node);
-              
-              // Move cursor to the new paragraph
-              const newRange = document.createRange();
-              newRange.setStart(newParagraph, 0);
-              newRange.collapse(true);
-              selection.removeAllRanges();
-              selection.addRange(newRange);
-              
-              saveToHistory();
-              return;
-            }
-            break;
-          }
-          node = node.parentNode;
-        }
-      }
-    }); */
-    
-    // ========================================
-    // 2. PROFESSIONAL COLOR PICKER INITIALIZATION
-    // ========================================
-    const themeBaseColors = [
-      { name: 'Black', base: '#000000' },
-      { name: 'Gray', base: '#6B7280' },
-      { name: 'Blue', base: '#1E40AF' },
-      { name: 'Teal', base: '#0D9488' },
-      { name: 'Orange', base: '#EA580C' },
-      { name: 'Green', base: '#16A34A' },
-      { name: 'Cyan', base: '#0891B2' },
-      { name: 'Purple', base: '#7C3AED' },
-      { name: 'Pink', base: '#DB2777' },
-      { name: 'Red', base: '#DC2626' }
-    ];
-
-    const standardColors = [
-      '#7c2d12', '#FF0000', '#FFC000', '#FFFF00', '#588157',
-      '#00B050', '#00B0F0', '#0070C0', '#002060', '#7030A0'
-    ];
-
-    function generateShades(baseColor) {
-      const shades = [];
-      const hex = baseColor.replace('#', '');
-      const r = parseInt(hex.substring(0, 2), 16);
-      const g = parseInt(hex.substring(2, 4), 16);
-      const b = parseInt(hex.substring(4, 6), 16);
-      
-      // 5 shades: lighter to darker
-      for (let i = 0; i < 5; i++) {
-        const factor = 0.9 - (i * 0.2);
-        const newR = Math.round(255 - (255 - r) * factor);
-        const newG = Math.round(255 - (255 - g) * factor);
-        const newB = Math.round(255 - (255 - b) * factor);
-        shades.push(`#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`);
-      }
-      return shades;
-    }
-
-    function initializeColorPicker(themeGridId, standardRowId, onColorSelect) {
-      const themeGrid = document.getElementById(themeGridId);
-      const standardRow = document.getElementById(standardRowId);
-      
-      // Build theme colors grid
-      themeBaseColors.forEach(color => {
-        const shades = generateShades(color.base);
-        shades.forEach(shade => {
-          const swatch = document.createElement('div');
-          swatch.className = 'color-swatch';
-          swatch.style.backgroundColor = shade;
-          swatch.title = shade;
-          swatch.addEventListener('click', () => onColorSelect(shade));
-          themeGrid.appendChild(swatch);
-        });
-      });
-      
-      // Build standard colors row
-      standardColors.forEach(color => {
-        const swatch = document.createElement('div');
-        swatch.className = 'color-swatch';
-        swatch.style.backgroundColor = color;
-        swatch.title = color;
-        swatch.addEventListener('click', () => onColorSelect(color));
-        standardRow.appendChild(swatch);
-      });
-    }
-
-    // Saved selection for color pickers
-    let savedTextColorSelection = null;
-    let savedHighlightSelection = null;
-
-    // Initialize text color picker
-    initializeColorPicker('textThemeColors', 'textStandardColors', (color) => {
-      // Restore selection if saved
-      if (savedTextColorSelection) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedTextColorSelection);
-      }
-      applyFormatting('color', color);
-      document.getElementById('textColorOptions').style.display = 'none';
-      savedTextColorSelection = null;
-    });
-
-    // Initialize highlight color picker
-    initializeColorPicker('highlightThemeColors', 'highlightStandardColors', (color) => {
-      // Restore selection if saved
-      if (savedHighlightSelection) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedHighlightSelection);
-      }
-      applyFormatting('highlight', color);
-      document.getElementById('highlightOptions').style.display = 'none';
-      savedHighlightSelection = null;
-    });
-
-    // ========================================
-    // 3. TOGGLE QUOTE FUNCTIONALITY
-    // ========================================
-    function toggleBlockquote() {
-      const selection = window.getSelection();
-      if (selection.rangeCount === 0) return;
-      
-      let node = selection.anchorNode;
-      
-      // Find if we're inside a blockquote
-      while (node && node !== editor) {
-        if (node.nodeType === 1 && node.tagName === 'BLOCKQUOTE') {
-          // We're in a blockquote - remove it
-          const paragraph = document.createElement('p');
-          paragraph.innerHTML = node.innerHTML;
-          node.parentNode.replaceChild(paragraph, node);
-          
-          // Update button state
-          document.getElementById('quoteBtn').classList.remove('active');
-          saveToHistory();
-          editor.focus();
-          return;
-        }
-        node = node.parentNode;
-      }
-      
-      // Not in a blockquote - create one
-      document.execCommand('formatBlock', false, 'blockquote');
-      document.getElementById('quoteBtn').classList.add('active');
-      saveToHistory();
-      editor.focus();
-    }
-
-    // Update quote button active state on selection change
-    editor.addEventListener('click', updateQuoteButtonState);
-    editor.addEventListener('keyup', updateQuoteButtonState);
-
-    function updateQuoteButtonState() {
-      const selection = window.getSelection();
-      if (selection.rangeCount === 0) return;
-      
-      let node = selection.anchorNode;
-      let inQuote = false;
-      
-      while (node && node !== editor) {
-        if (node.nodeType === 1 && node.tagName === 'BLOCKQUOTE') {
-          inQuote = true;
-          break;
-        }
-        node = node.parentNode;
-      }
-      
-      const quoteBtn = document.getElementById('quoteBtn');
-      if (inQuote) {
-        quoteBtn.classList.add('active');
-      } else {
-        quoteBtn.classList.remove('active');
-      }
-    }
     
     // Set up MutationObserver to prevent nested lists
     const preventNestedLists = () => {
@@ -2194,24 +1775,20 @@
       editor.focus();
     }
 
+    function insertBlockquote() {
+      document.execCommand('formatBlock', false, 'blockquote');
+      saveToHistory();
+      editor.focus();
+    }
+
+    function insertChecklist() {
+      const checklistModal = document.getElementById('checklistModal');
+      checklistModal.style.display = 'flex';
+      document.getElementById('checklistCountInput').focus();
+    }
+
     // Variable to store cursor position when opening table modal
     let savedTableRange = null;
-
-    function saveSelection() {
-      const selection = window.getSelection();
-      if (selection.rangeCount > 0) {
-        return selection.getRangeAt(0).cloneRange();
-      }
-      return null;
-    }
-
-    function restoreSelection(range) {
-      if (range) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(range);
-      }
-    }
 
     function insertTable() {
       // CRITICAL: Save current cursor position BEFORE opening modal
@@ -2469,8 +2046,19 @@
       saveToHistory();
     }
 
+    function insertLink() {
+      const url = prompt('Enter URL:', 'https://');
+      const text = window.getSelection().toString() || 'Link';
+      if (url) {
+        document.execCommand('createLink', false, url);
+      }
+      saveToHistory();
+      editor.focus();
+    }
+
     // Store cursor position for image insertion
     let savedImageRange = null;
+    let savedChecklistRange = null;
 
     function insertImage() {
       // Save current cursor position
@@ -2483,6 +2071,18 @@
       const imageModal = document.getElementById('imageModal');
       imageModal.style.display = 'flex';
       document.getElementById('imageNameInput').focus();
+    }
+
+    function insertChecklist() {
+      // Save current cursor position BEFORE opening modal
+      const selection = window.getSelection();
+      if (selection.rangeCount > 0) {
+        savedChecklistRange = selection.getRangeAt(0);
+      }
+      
+      const checklistModal = document.getElementById('checklistModal');
+      checklistModal.style.display = 'flex';
+      document.getElementById('checklistCountInput').focus();
     }
 
     function insertHR() {
@@ -2504,7 +2104,7 @@
       
       // Create <hr> with dashed style
       const hr = document.createElement('hr');
-      hr.style.cssText = 'border: none; border-top: 2px dashed #73a372;';
+      hr.style.cssText = 'border: none; border-top: 2px dashed #8B6F47;';
       
       range.insertNode(hr);
       range.setStartAfter(hr);
@@ -2564,15 +2164,59 @@
       });
     });
 
-    setupSimpleButton('boldBtn', 'bold');
-    setupSimpleButton('italicBtn', 'italic');
-    setupSimpleButton('underlineBtn', 'underline');
-    setupSimpleButton('strikeBtn', 'strikethrough');
-    setupSimpleButton('subscriptBtn', 'subscript');
-    setupSimpleButton('superscriptBtn', 'superscript');
-    setupSimpleButton('alignLeftBtn', 'justifyLeft');
-    setupSimpleButton('alignCenterBtn', 'justifyCenter');
-    setupSimpleButton('alignRightBtn', 'justifyRight');
+    document.getElementById('boldBtn').addEventListener('click', () => {
+      document.execCommand('bold', false, null);
+      saveToHistory();
+      editor.focus();
+    });
+
+    document.getElementById('italicBtn').addEventListener('click', () => {
+      document.execCommand('italic', false, null);
+      saveToHistory();
+      editor.focus();
+    });
+
+    document.getElementById('underlineBtn').addEventListener('click', () => {
+      document.execCommand('underline', false, null);
+      saveToHistory();
+      editor.focus();
+    });
+
+    document.getElementById('strikeBtn').addEventListener('click', () => {
+      document.execCommand('strikethrough', false, null);
+      saveToHistory();
+      editor.focus();
+    });
+
+    document.getElementById('subscriptBtn').addEventListener('click', () => {
+      document.execCommand('subscript', false, null);
+      saveToHistory();
+      editor.focus();
+    });
+
+    document.getElementById('superscriptBtn').addEventListener('click', () => {
+      document.execCommand('superscript', false, null);
+      saveToHistory();
+      editor.focus();
+    });
+
+    document.getElementById('alignLeftBtn').addEventListener('click', () => {
+      document.execCommand('justifyLeft', false, null);
+      saveToHistory();
+      editor.focus();
+    });
+
+    document.getElementById('alignCenterBtn').addEventListener('click', () => {
+      document.execCommand('justifyCenter', false, null);
+      saveToHistory();
+      editor.focus();
+    });
+
+    document.getElementById('alignRightBtn').addEventListener('click', () => {
+      document.execCommand('justifyRight', false, null);
+      saveToHistory();
+      editor.focus();
+    });
 
     document.getElementById('indentBtn').addEventListener('click', () => {
       const selection = window.getSelection();
@@ -2593,7 +2237,16 @@
       }
       
       // If not in list, show notification
-      showNotification('⚠️ Indent works only in lists', 'warning');
+      const notification = document.createElement('div');
+      notification.textContent = '⚠️ Indent works only in lists';
+      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #f59e0b; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.transition = 'opacity 0.3s';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
     });
 
     document.getElementById('outdentBtn').addEventListener('click', () => {
@@ -2615,7 +2268,16 @@
       }
       
       // If not in list, show notification
-      showNotification('⚠️ Outdent works only in lists', 'warning');
+      const notification = document.createElement('div');
+      notification.textContent = '⚠️ Outdent works only in lists';
+      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #f59e0b; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.transition = 'opacity 0.3s';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
     });
 
     document.getElementById('ulBtn').addEventListener('click', () => {
@@ -2627,48 +2289,11 @@
     });
 
     document.getElementById('quoteBtn').addEventListener('click', () => {
-      toggleBlockquote();
+      insertBlockquote();
     });
 
-    // Link Button - Simple prompt
-    document.getElementById('linkBtn').addEventListener('click', () => {
-      const selection = window.getSelection();
-      
-      if (!selection.rangeCount || !selection.toString()) {
-        alert('Моля, избери текст първо');
-        return;
-      }
-      
-      const url = prompt('Въведи URL:');
-      
-      if (!url || url.trim() === '') {
-        return;
-      }
-      
-      // Get selected text
-      const selectedText = selection.toString();
-      const range = selection.getRangeAt(0);
-      
-      // Create link with wavy underline
-      const link = document.createElement('a');
-      link.href = url.trim();
-      link.textContent = selectedText;
-      link.style.textDecoration = 'underline wavy';
-      link.style.textDecorationSkipInk = 'none';
-      link.style.textDecorationColor = '#74b673';
-      
-      // Insert link
-      range.deleteContents();
-      range.insertNode(link);
-      
-      // Move cursor after link
-      range.setStartAfter(link);
-      range.collapse(true);
-      selection.removeAllRanges();
-      selection.addRange(range);
-      
-      saveToHistory();
-      editor.focus();
+    document.getElementById('checklistBtn').addEventListener('click', () => {
+      insertChecklist();
     });
 
     document.getElementById('symbolsBtn').addEventListener('click', () => {
@@ -2790,6 +2415,10 @@
       insertTable();
     });
 
+    document.getElementById('linkBtn').addEventListener('click', () => {
+      insertLink();
+    });
+
     document.getElementById('hrBtn').addEventListener('click', () => {
       insertHR();
     });
@@ -2818,75 +2447,67 @@
       e.stopPropagation();
       const textColorOptions = document.getElementById('textColorOptions');
       const isHidden = textColorOptions.style.display === 'none' || !textColorOptions.style.display;
-      
-      if (isHidden) {
-        // Save current selection
-        savedTextColorSelection = saveSelection();
-      }
-      
-      // Close highlight picker if open
-      document.getElementById('highlightOptions').style.display = 'none';
-      
-      textColorOptions.style.display = isHidden ? 'block' : 'none';
+      textColorOptions.style.display = isHidden ? 'flex' : 'none';
     });
 
     // Close text color dropdown when clicking outside
     document.addEventListener('click', (e) => {
       const textColorOptions = document.getElementById('textColorOptions');
       const textColorToggleBtn = document.getElementById('textColorToggleBtn');
-      if (textColorOptions && !textColorOptions.contains(e.target) && !textColorToggleBtn.contains(e.target)) {
+      if (!textColorOptions.contains(e.target) && !textColorToggleBtn.contains(e.target)) {
         textColorOptions.style.display = 'none';
       }
     });
 
+    // Text Color Control - Preset buttons
+    document.querySelectorAll('.text-color-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const color = btn.dataset.color;
+        applyFormatting('color', color);
+        
+        // Update color picker value
+        document.getElementById('textColorControl').value = color;
+        
+        // Update active button
+        document.querySelectorAll('.text-color-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Close dropdown
+        document.getElementById('textColorOptions').style.display = 'none';
+        
+        // Remove focus to hide hover state
+        btn.blur();
+      });
+    });
+
     // Text Color Control - Custom color picker
-    const textColorControl = document.getElementById('textColorControl');
-    const textColorHexInput = document.getElementById('textColorHexInput');
-
-    textColorControl.addEventListener('mousedown', () => {
-        savedTextColorSelection = saveSelection();
-    });
-    textColorHexInput.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
-        savedTextColorSelection = saveSelection();
-    });
-
-    textColorControl.addEventListener('input', (e) => {
+    document.getElementById('textColorControl').addEventListener('input', (e) => {
       const color = e.target.value;
-      textColorHexInput.value = color;
-      if (savedTextColorSelection) {
-        restoreSelection(savedTextColorSelection);
-      }
       applyFormatting('color', color);
-    });
-
-    textColorHexInput.addEventListener('change', (e) => {
-      let color = e.target.value.trim();
-      if (!color.startsWith('#')) {
-        color = '#' + color;
-      }
-      if (/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
-        textColorControl.value = color;
-        textColorControl.dispatchEvent(new Event('input', { bubbles: true }));
-      }
-    });
-
-    // Remove Text Color Button
-    document.getElementById('removeTextColorBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      if (savedTextColorSelection) {
-        restoreSelection(savedTextColorSelection);
-      }
       
+      // Remove active class from preset buttons when using custom color
+      document.querySelectorAll('.text-color-btn').forEach(b => b.classList.remove('active'));
+    });
+
+    // Remove Color Button
+    document.getElementById('removeColorBtn').addEventListener('click', (e) => {
+      e.preventDefault();
       const selection = window.getSelection();
+      
+      // If no selection or selection is in editor
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
-        alert('Please select text first');
+        alert('Моля, избери текст първо');
         return;
       }
 
+      // Remove color by applying default dark gray
       document.execCommand('foreColor', false, 'rgb(31, 41, 55)');
+      
+      // Close dropdown
       document.getElementById('textColorOptions').style.display = 'none';
-      savedTextColorSelection = null;
+      
+      // Mark as modified
       saveToHistory();
     });
 
@@ -2914,24 +2535,39 @@
         e.preventDefault();
         const color = btn.dataset.color;
         
+        // Update CSS for all headings with higher specificity
         const style = document.createElement('style');
         style.id = 'heading-color-style';
         const existingStyle = document.getElementById('heading-color-style');
         if (existingStyle) existingStyle.remove();
         
         style.textContent = `
-          #editor h1, #editor h2, #editor h3, #editor h4 { color: ${color} !important; }
+          #editor h1, 
+          #editor h2, 
+          #editor h3, 
+          #editor h4 { 
+            color: ${color} !important; 
+          }
         `;
         document.head.appendChild(style);
         
+        // Also apply directly to existing headers
         const headers = document.querySelectorAll('#editor h1, #editor h2, #editor h3, #editor h4');
-        headers.forEach(h => h.style.color = color);
+        headers.forEach(h => {
+          h.style.color = color;
+        });
         
+        // Update active button
         document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         
-        localStorage.setItem('textEditorHeadingColor', color);
+        // Save to localStorage
+        localStorage.setItem('mdEditorHeadingColor', color);
+        
+        // Close dropdown
         document.getElementById('headingColorOptions').style.display = 'none';
+        
+        // Remove focus to hide hover state
         btn.blur();
       });
     });
@@ -2941,73 +2577,67 @@
       e.preventDefault();
       e.stopPropagation();
       const highlightOptions = document.getElementById('highlightOptions');
-      const isHidden = highlightOptions.style.display === 'none' || !highlightOptions.style.display;
-      
-      if (isHidden) {
-        savedHighlightSelection = saveSelection();
-      }
-      
-      document.getElementById('textColorOptions').style.display = 'none';
-      highlightOptions.style.display = isHidden ? 'block' : 'none';
+      highlightOptions.style.display = highlightOptions.style.display === 'none' ? 'flex' : 'none';
     });
 
     // Close highlight dropdown when clicking outside
     document.addEventListener('click', (e) => {
       const highlightOptions = document.getElementById('highlightOptions');
       const highlightToggleBtn = document.getElementById('highlightToggleBtn');
-      if (highlightOptions && !highlightOptions.contains(e.target) && !highlightToggleBtn.contains(e.target)) {
+      if (!highlightOptions.contains(e.target) && !highlightToggleBtn.contains(e.target)) {
         highlightOptions.style.display = 'none';
       }
     });
 
+    // Highlight Control - Preset buttons
+    document.querySelectorAll('.highlight-color-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const color = btn.dataset.color;
+        applyFormatting('highlight', color);
+        
+        // Update color picker value
+        document.getElementById('highlightColorControl').value = color;
+        
+        // Update active button
+        document.querySelectorAll('.highlight-color-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        
+        // Close dropdown
+        document.getElementById('highlightOptions').style.display = 'none';
+        
+        // Remove focus to hide hover state
+        btn.blur();
+      });
+    });
+
     // Highlight Control - Custom color picker
-    const highlightColorControl = document.getElementById('highlightColorControl');
-    const highlightColorHexInput = document.getElementById('highlightColorHexInput');
-
-    highlightColorControl.addEventListener('mousedown', () => {
-        savedHighlightSelection = saveSelection();
-    });
-    highlightColorHexInput.addEventListener('mousedown', (e) => {
-        e.stopPropagation();
-        savedHighlightSelection = saveSelection();
-    });
-
-    highlightColorControl.addEventListener('input', (e) => {
+    document.getElementById('highlightColorControl').addEventListener('input', (e) => {
       const color = e.target.value;
-      highlightColorHexInput.value = color;
-      if (savedHighlightSelection) {
-        restoreSelection(savedHighlightSelection);
-      }
       applyFormatting('highlight', color);
-    });
-    
-    highlightColorHexInput.addEventListener('change', (e) => {
-        let color = e.target.value.trim();
-        if (!color.startsWith('#')) {
-            color = '#' + color;
-        }
-        if (/^#([0-9A-F]{3}){1,2}$/i.test(color)) {
-            highlightColorControl.value = color;
-            highlightColorControl.dispatchEvent(new Event('input', { bubbles: true }));
-        }
+      
+      // Remove active class from preset buttons when using custom color
+      document.querySelectorAll('.highlight-color-btn').forEach(b => b.classList.remove('active'));
     });
 
     // Remove Highlight Button
     document.getElementById('removeHighlightBtn').addEventListener('click', (e) => {
       e.preventDefault();
-      if (savedHighlightSelection) {
-        restoreSelection(savedHighlightSelection);
-      }
-      
       const selection = window.getSelection();
+      
+      // If no selection or selection is in editor
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
-        alert('Please select text first');
+        alert('Моля, избери текст първо');
         return;
       }
 
+      // Remove highlight using transparent/white background
       document.execCommand('backColor', false, 'transparent');
+      
+      // Close dropdown
       document.getElementById('highlightOptions').style.display = 'none';
-      savedHighlightSelection = null;
+      
+      // Mark as modified
       saveToHistory();
     });
 
@@ -3044,9 +2674,9 @@
       
       // Save to localStorage
       if (property === 'color') {
-        localStorage.setItem('textEditorTextColor', value);
+        localStorage.setItem('mdEditorTextColor', value);
       } else if (property === 'highlight') {
-        localStorage.setItem('textEditorHighlight', value);
+        localStorage.setItem('mdEditorHighlight', value);
       }
       
       // Mark as modified
@@ -3055,8 +2685,8 @@
 
     // Load saved default preferences on page load
     window.addEventListener('load', () => {
-      const savedTextColor = localStorage.getItem('textEditorTextColor');
-      const savedHeadingColor = localStorage.getItem('textEditorHeadingColor');
+      const savedTextColor = localStorage.getItem('mdEditorTextColor');
+      const savedHeadingColor = localStorage.getItem('mdEditorHeadingColor');
 
       if (savedTextColor) {
         document.getElementById('textColorControl').value = savedTextColor;
@@ -3101,9 +2731,9 @@
           btn.classList.add('active');
         }
       } else {
-        // If no saved color, activate the default (Lime Green)
+        // If no saved color, activate the default (Black)
         document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
-        const defaultBtn = document.querySelector('.heading-color-btn[data-color="#588157"]');
+        const defaultBtn = document.querySelector('.heading-color-btn[data-color="#000000"]');
         if (defaultBtn) {
           defaultBtn.classList.add('active');
           // Apply default heading color
@@ -3114,7 +2744,7 @@
             #editor h2, 
             #editor h3, 
             #editor h4 { 
-              color: #588157 !important; 
+              color: #000000 !important; 
             }
           `;
           document.head.appendChild(style);
@@ -3122,13 +2752,13 @@
           // Also apply directly to existing headers
           const headers = document.querySelectorAll('#editor h1, #editor h2, #editor h3, #editor h4');
           headers.forEach(h => {
-            h.style.color = '#588157';
+            h.style.color = '#000000';
           });
         }
       }
 
       // Load saved highlight color
-      const savedHighlight = localStorage.getItem('textEditorHighlight');
+      const savedHighlight = localStorage.getItem('mdEditorHighlight');
       if (savedHighlight) {
         document.getElementById('highlightColorControl').value = savedHighlight;
         // Clear all active classes first
@@ -3195,7 +2825,7 @@
         };
         
         // Update page title
-        document.title = fileName + ' — Text Editor';
+        document.title = fileName + ' — Markdown Editor';
       };
       reader.readAsText(file);
       
@@ -3203,7 +2833,7 @@
       e.target.value = '';
     });
 
-    // Open .md/.html file from courses data
+    // Open .md file from courses.generated.js
     document.getElementById('openCoursesBtn').addEventListener('click', () => {
       // Check if courses data is available
       if (typeof courses === 'undefined') {
@@ -3217,41 +2847,39 @@
         const courseName = course.title || course.name || 'Unknown';
         filesByCourse[courseName] = [];
         
-        if (!course.sections) return;
-        course.sections.forEach(rootSection => {
-          forEachSectionRecursive(rootSection, section => {
-            if (section.msgNotes) {
-              section.msgNotes.forEach(note => {
-                if (note.path && ((/\.md$/i.test(note.path) && note.type === 'markdown') || (/\.html$/i.test(note.path) && note.type === 'html') || (/\.txt$/i.test(note.path) && note.type === 'text'))) {
-                  filesByCourse[courseName].push({
-                    name: note.name,
-                    path: note.path,
-                    content: note.content,
-                    type: note.type,
-                    courseName: courseName,
-                    sectionName: section.name,
-                    courseRef: course
-                  });
-                }
-              });
-            }
-
-            if (section.files) {
-              section.files.forEach(file => {
-                if (file.path && file.path.match(/\.(html|md|txt)$/i)) {
-                  filesByCourse[courseName].push({
-                    name: file.name,
-                    path: file.path,
-                    content: file.content,
-                    type: file.type || (file.path.match(/\.html$/i) ? 'html' : 'markdown'),
-                    courseName: courseName,
-                    sectionName: section.name,
-                    courseRef: course
-                  });
-                }
-              });
-            }
-          });
+        course.sections.forEach(section => {
+          // Add msg notes (HTML files with msg prefix)
+          if (section.msgNotes) {
+            section.msgNotes.forEach(note => {
+              if (note.path && (/\.md$/i.test(note.path) && note.type === 'markdown') || (/\.html$/i.test(note.path) && note.type === 'html')) {
+                filesByCourse[courseName].push({
+                  name: note.name,
+                  path: note.path,
+                  content: note.content,
+                  type: note.type,
+                  courseName: courseName,
+                  sectionName: section.name
+                });
+              }
+            });
+          }
+          
+          // Add regular files (including msg-terms.html)
+          if (section.files) {
+            section.files.forEach(file => {
+              // Include any HTML or markdown files (like msg-terms.html)
+              if (file.path && (file.path.match(/\.(html|md|txt)$/i))) {
+                filesByCourse[courseName].push({
+                  name: file.name,
+                  path: file.path,
+                  content: file.content,
+                  type: file.type || (file.path.match(/\.html$/i) ? 'html' : 'markdown'),
+                  courseName: courseName,
+                  sectionName: section.name
+                });
+              }
+            });
+          }
         });
       });
       
@@ -3289,8 +2917,8 @@
             <div class="file-item-path">${file.sectionName}</div>
           `;
           
-          fileItem.addEventListener('click', async () => {
-            await loadFileFromCourses(file);
+          fileItem.addEventListener('click', () => {
+            loadFileFromCourses(file);
             document.getElementById('fileBrowserModal').style.display = 'none';
           });
           
@@ -3391,13 +3019,22 @@
       
       // Save to history and storage
       saveToHistory();
-localStorage.setItem('textEditorContent', htmlContent);
+      localStorage.setItem('mdEditorContent', htmlContent);
       
       // Close modal
       document.getElementById('htmlEditorModal').style.display = 'none';
       
       // Show confirmation
-      showNotification('✅ HTML updated successfully!', 'success');
+      const notification = document.createElement('div');
+      notification.textContent = '✅ HTML updated successfully!';
+      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.transition = 'opacity 0.3s';
+        notification.style.opacity = '0';
+        setTimeout(() => notification.remove(), 300);
+      }, 2000);
     });
 
     // HTML Editor Close
@@ -3443,16 +3080,7 @@ localStorage.setItem('textEditorContent', htmlContent);
     });
 
     // Function to load file from courses
-    async function loadFileFromCourses(file) {
-      await ensureFileContent(file);
-      if (!file.content) {
-        const protocolHint = window.location.protocol === 'file:'
-          ? ' (on file:// this file must be in msgNotes or loaded from courses-data)'
-          : '';
-        alert('Cannot load file content from courses: ' + (file.path || file.name) + protocolHint);
-        return;
-      }
-
+    function loadFileFromCourses(file) {
       // Set global base path for images
       const basePath = file.path.substring(0, file.path.lastIndexOf('/') + 1);
       if (window.location.protocol === 'file:') {
@@ -3499,7 +3127,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       };
       
       // Update page title
-      document.title = cleanName + ' — Text Editor';
+      document.title = cleanName + ' — Markdown Editor';
     }
 
     // Close file browser modal
@@ -3545,15 +3173,50 @@ localStorage.setItem('textEditorContent', htmlContent);
         return;
       }
       
+      // Clean the name: remove .html, .md, .txt extensions
       const cleanName = name.replace(/\.(html|md|txt)$/i, '');
       
-      let editorContentForBody = editor.innerHTML;
-
-      // Create a temporary container
+      // Get content
+      let editorContent = editor.innerHTML;
+      
+      // CRITICAL FIX: Process lists BEFORE doing any cleanup
+      const contentDiv = document.createElement('div');
+      contentDiv.innerHTML = editorContent;
+      
+      // Step 1: Clean up list structure first - ensure proper nesting
+      // Process each list to fix any broken structures
+      contentDiv.querySelectorAll('ul, ol').forEach(list => {
+        // For each list, go through its direct <li> children
+        Array.from(list.children).forEach(li => {
+          if (li.tagName === 'LI') {
+            let html = li.innerHTML;
+            
+            // Remove ONLY leading and trailing <br> tags in the TEXT content
+            // BUT preserve <br> tags before nested lists
+            // First, check if there's a nested list
+            const hasNestedList = li.querySelector('ul, ol') !== null;
+            
+            if (hasNestedList) {
+              // If has nested list, only remove trailing <br> after the nested list
+              html = html.replace(/<br\s*\/?>\s*$/gi, '');
+            } else {
+              // If no nested list, remove both leading and trailing <br>
+              html = html.replace(/^<br\s*\/?>/gi, '');
+              html = html.replace(/<br\s*\/?>\s*$/gi, '');
+            }
+            
+            li.innerHTML = html;
+          }
+        });
+      });
+      
+      editorContent = contentDiv.innerHTML;
+      
+      // Step 2: Create a temporary container
       const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = editorContentForBody;
-
-      // Remove hidden elements
+      tempDiv.innerHTML = editorContent;
+      
+      // Step 3: Remove hidden elements
       const removeHiddenElements = (element) => {
         const nodesToRemove = [];
         element.querySelectorAll('*').forEach(node => {
@@ -3564,39 +3227,39 @@ localStorage.setItem('textEditorContent', htmlContent);
         });
         nodesToRemove.reverse().forEach(n => n.remove());
       };
+      
       removeHiddenElements(tempDiv);
-      editorContentForBody = tempDiv.innerHTML;
-
-      // VERY CAREFULLY remove only COMPLETELY EMPTY <p> tags
+      editorContent = tempDiv.innerHTML;
+      
+      // Step 4: VERY CAREFULLY remove only COMPLETELY EMPTY <p> tags
+      // Do NOT remove <p> tags that contain any content or are near lists
       let prevContent;
       let iterations = 0;
       do {
-        prevContent = editorContentForBody;
+        prevContent = editorContent;
         iterations++;
-        editorContentForBody = editorContentForBody.replace(/<p>\s*<\/p>/g, '');
-        editorContentForBody = editorContentForBody.replace(/<p><br\s*\/?><\/p>/g, '');
-        editorContentForBody = editorContentForBody.replace(/<p>\s*<br\s*\/?>(\s*)<\/p>/g, '');
-      } while (editorContentForBody !== prevContent && iterations < 2);
-
-      // Fix image paths - handle both local assets and external URLs
-      // For local assets: ensure path starts with assets/
-      // For external URLs: keep them as-is
-      editorContentForBody = editorContentForBody.replace(/src="(?!https?:\/\/)([^"]*?)(assets\/[^"]*)"(?=[^>]*>)/g, 'src="$2"');
-      // Sync data-original-src with src for all images
-      editorContentForBody = editorContentForBody.replace(/(<img[^>]*src="([^"]*?)"[^>]*)data-original-src="[^"]*?"(?=[^>]*>)/g, '$1data-original-src="$2"');
-      // Remove local file paths
-      editorContentForBody = editorContentForBody.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
-
-      // Sanitize <style> blocks
-      const styleSanitizeDiv = document.createElement('div');
-      styleSanitizeDiv.innerHTML = editorContentForBody;
-      styleSanitizeDiv.querySelectorAll('style').forEach(styleEl => {
-        styleEl.textContent = styleEl.textContent.replace(/(^|\s)img\s*\{/g, '.markdown-body img {');
-      });
-      editorContentForBody = styleSanitizeDiv.innerHTML;
-
-      const savedHeadingColor = localStorage.getItem('textEditorHeadingColor') || '#588157';
+        
+        // Only remove <p> tags that are completely empty
+        editorContent = editorContent.replace(/<p>\s*<\/p>/g, '');
+        
+        // Only remove <p> with just <br> tags (these are spacing)
+        editorContent = editorContent.replace(/<p><br\s*\/?><\/p>/g, '');
+        editorContent = editorContent.replace(/<p>\s*<br\s*\/?>\s*<\/p>/g, '');
+        
+        // DO NOT try to remove <p> containing text or formatting
+        // This breaks lists completely
+        
+      } while (editorContent !== prevContent && iterations < 2);
       
+      // Step 5: Fix image paths
+      editorContent = editorContent.replace(/src="[^"]*?(assets\/[^"]*)"(?=[^>]*>)/g, 'src="$1"');
+      editorContent = editorContent.replace(/(<img[^>]*src="([^"]*?)"[^>]*)data-original-src="[^"]*?"(?=[^>]*>)/g, '$1data-original-src="$2"');
+      editorContent = editorContent.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
+      
+      // Get heading color from localStorage
+      const savedHeadingColor = localStorage.getItem('mdEditorHeadingColor') || '#000000';
+      
+      // Create standalone HTML file with embedded content
       const htmlDoc = `<!DOCTYPE html>
 <html lang="bg">
 <head>
@@ -3619,11 +3282,11 @@ localStorage.setItem('textEditorContent', htmlContent);
       margin-bottom: 0.15em;
       color: ${savedHeadingColor};
     }
-    h1 { font-size: 1.65em; }
+    h1 { font-size: 1.5em; }
     h2 { font-size: 1.3em; }
     h3 { font-size: 1.1em; margin-bottom: 0.1em; }
     h4 { font-size: 1.05em; margin-bottom: 0.1em; }
-    h1 + h2, h1 + h3, h1 + h4, h2 + h3, h2 + h4, h3 + h4 { margin-top: 0.2em; }
+    h3 + h4 { margin-top: 0.3em; }
     p { 
       margin: 0.3em 0; 
       white-space: pre-wrap;
@@ -3677,11 +3340,11 @@ localStorage.setItem('textEditorContent', htmlContent);
       padding: 0;
     }
     blockquote {
-      border-left: 3px solid #588157;
+      border-left: 3px solid #f59e0b;
       padding-left: 1em;
       margin: 0.5em 0;
       font-style: italic;
-      color: #166534;
+      color: #78350f;
     }
     table { 
       border-collapse: collapse; 
@@ -3690,7 +3353,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       table-layout: auto;
     }
     th, td { 
-      border: 1px solid rgba(2, 2, 2, 0.2);
+      border: 1px solid rgba(146, 64, 14, 0.35); 
       padding: 6px 10px; 
       text-align: left; 
       vertical-align: top;
@@ -3698,19 +3361,22 @@ localStorage.setItem('textEditorContent', htmlContent);
       line-height: 1.2;
     }
     thead th { 
-      background: rgba(88, 129, 87, 0.13); 
+      background: rgba(196, 127, 9, 0.08); 
       font-weight: 600; 
     }
     tbody tr:nth-child(odd) { 
-      background: rgba(88, 129, 87, 0.06); 
+      background: rgba(146, 64, 14, 0.03); 
     }
-    /* Image styles are handled by inline styles and data-width attributes */
-    a {
-      color: inherit; /* Changed to inherit */
-      text-decoration: underline;
+    img { 
+      max-width: 100%; 
+      height: auto; 
+    }
+    a { 
+      color: #f59e0b; 
+      text-decoration: underline; 
     }
     a:hover {
-      color: #74b673;
+      color: #d97706;
     }
     /* Keep <p> tags inside list items on same line (as they appear in editor) */
     li p {
@@ -3733,6 +3399,7 @@ localStorage.setItem('textEditorContent', htmlContent);
     }
     @media (max-width: 768px) {
       body {
+        max-width: 100%;
         margin: 0.5rem 0;
         padding: 0 0.5rem;
         font-size: 16px;
@@ -3746,170 +3413,10 @@ localStorage.setItem('textEditorContent', htmlContent);
       table { font-size: 0.9em; }
       th, td { padding: 4px 6px; }
     }
-    .editor-note {
-      text-decoration: underline dotted #a3b18a;
-      text-decoration-thickness: 2px;
-      text-underline-offset: 2px;
-      text-decoration-skip-ink: none;
-      cursor: help;
-      position: relative;
-    }
-    .note-tooltip {
-      display: none;
-      position: absolute;
-      background-color: #f0f7f0;
-      color: #1f2937;
-      border: 1px solid #588157;
-      border-radius: 4px;
-      padding: 8px 12px;
-      max-width: 500px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      z-index: 10000;
-      font-size: 0.9em;
-      line-height: 1.4;
-      word-wrap: break-word;
-    .note-tooltip ul, .note-tooltip ol {
-      margin: 0 !important;
-      padding-left: 20px !important;
-    }
-    .note-tooltip li {
-      margin: 0 0 0.1em 0 !important;
-      padding: 0 !important;
-      line-height: 1.2 !important;
-    }
-    .note-tooltip li:last-child {
-      margin-bottom: 0 !important;
-    }
   </style>
-  <script>
-    document.addEventListener('DOMContentLoaded', function() {
-      const tooltip = document.createElement('div');
-      tooltip.className = 'note-tooltip';
-      document.body.appendChild(tooltip);
-
-      function parseNoteMarkdown(text) {
-        if (!text) return '';
-        
-        let lines = text.split('\n');
-        let html = [];
-        let stack = [];
-        
-        for (let i = 0; i < lines.length; i++) {
-          let line = lines[i];
-          
-          let indentMatch = line.match(/^(\s*)/);
-          let indent = indentMatch ? indentMatch[1].length : 0;
-          let content = line.trim();
-          
-          let isUl = /^[-*]\s+(.+)/.test(content);
-          let isOl = /^\d+\.\s+(.+)/.test(content);
-          
-          if (isUl || isOl) {
-            let listType = isUl ? 'ul' : 'ol';
-            let match = isUl ? content.match(/^[-*]\s+(.+)/) : content.match(/^\d+\.\s+(.+)/);
-            let itemText = match[1];
-            
-            if (stack.length === 0) {
-              stack.push({ type: listType, indent: indent });
-              html.push('<' + listType + '>');
-            } else {
-              let last = stack[stack.length - 1];
-              
-              if (indent > last.indent) {
-                stack.push({ type: listType, indent: indent });
-                html.push('<' + listType + '>');
-              } else if (indent < last.indent) {
-                while (stack.length > 0 && stack[stack.length - 1].indent > indent) {
-                  let closed = stack.pop();
-                  html.push('</' + closed.type + '>');
-                }
-                if (stack.length === 0 || stack[stack.length - 1].indent !== indent) {
-                   stack.push({ type: listType, indent: indent });
-                   html.push('<' + listType + '>');
-                } else if (stack[stack.length - 1].type !== listType) {
-                   let closed = stack.pop();
-                   html.push('</' + closed.type + '>');
-                   stack.push({ type: listType, indent: indent });
-                   html.push('<' + listType + '>');
-                }
-              } else {
-                if (last.type !== listType) {
-                  let closed = stack.pop();
-                  html.push('</' + closed.type + '>');
-                  stack.push({ type: listType, indent: indent });
-                  html.push('<' + listType + '>');
-                }
-              }
-            }
-            html.push('<li>' + itemText + '</li>');
-          } else {
-            if (content !== '') {
-               while (stack.length > 0) {
-                 let closed = stack.pop();
-                 html.push('</' + closed.type + '>');
-               }
-            }
-            if (content) {
-              html.push(content + '<br>');
-            } else {
-              html.push('<br>');
-            }
-          }
-        }
-        
-        while (stack.length > 0) {
-          let closed = stack.pop();
-          html.push('</' + closed.type + '>');
-        }
-        
-        let result = html.join('')
-          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-          .replace(/__(.+?)__/g, '<strong>$1</strong>')
-          .replace(/\*(.+?)\*/g, '<em>$1</em>')
-          .replace(/_(.+?)_/g, '<em>$1</em>')
-          .replace(/\`(.+?)\`/g, '<code>$1</code>')
-          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
-        
-        result = result
-          .replace(/<br><ul>/g, '<ul>')
-          .replace(/<br><ol>/g, '<ol>')
-          .replace(/<\/ul><br>/g, '</ul>')
-          .replace(/<\/ol><br>/g, '</ol>');
-        
-        return result;
-      }
-
-      document.body.addEventListener('mouseover', function(e) {
-        if (e.target.classList.contains('editor-note')) {
-          const note = e.target.dataset.note;
-          if (note) {
-            tooltip.innerHTML = parseNoteMarkdown(note);
-            tooltip.style.display = 'block';
-            const rect = e.target.getBoundingClientRect();
-            tooltip.style.left = rect.left + 'px';
-            tooltip.style.top = (rect.bottom + 5) + 'px';
-          }
-        }
-      });
-
-      document.body.addEventListener('mouseout', function(e) {
-        if (e.target.classList.contains('editor-note')) {
-          setTimeout(() => {
-            if (!tooltip.matches(':hover')) {
-              tooltip.style.display = 'none';
-            }
-          }, 100);
-        }
-      });
-
-      tooltip.addEventListener('mouseleave', function() {
-        tooltip.style.display = 'none';
-      });
-    });
-  <\/script>
 </head>
 <body>
-${editorContentForBody}
+${editorContent}
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"><\/script>
 <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"><\/script>
 <script>
@@ -3974,8 +3481,6 @@ renderMathInElement(document.body, {
 
 
 
-
-
     // Image size preset selector
     document.getElementById('imageSizePreset').addEventListener('change', (e) => {
       const preset = e.target.value;
@@ -3996,21 +3501,13 @@ renderMathInElement(document.body, {
       const imageSize = document.getElementById('imageSizeInput').value || 100;
 
       if (!imageName) {
-        alert('Please enter image file name or URL');
+        alert('Please enter image file name');
         return;
       }
       
-      const isUrl = imageName.startsWith('http://') || imageName.startsWith('https://');
-
-      let imgSrc;
-      if (isUrl) {
-        imgSrc = imageName;
-      } else {
-        // Auto-add .png extension if missing and not a URL
-        if (!imageName.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
-          imageName = imageName + '.png';
-        }
-        imgSrc = 'assets/' + imageName;
+      // Auto-add .png extension if missing
+      if (!imageName.match(/\.(png|jpg|jpeg|gif|webp|svg)$/i)) {
+        imageName = imageName + '.png';
       }
       
       // Use saved range if available, otherwise get current selection
@@ -4025,13 +3522,12 @@ renderMathInElement(document.body, {
       }
       
       const img = document.createElement('img');
-      img.src = imgSrc;
+      img.src = 'assets/' + imageName;
       img.alt = imageAlt || imageName;
       img.style.maxWidth = imageSize + '%';
       img.style.height = 'auto';
       img.style.display = 'block';
-       img.style.minWidth = '300px'; // Removed
-      img.setAttribute('data-original-src', imgSrc);
+      img.setAttribute('data-original-src', 'assets/' + imageName);
       img.setAttribute('data-width', imageSize);
       
       range.insertNode(img);
@@ -4069,336 +3565,123 @@ renderMathInElement(document.body, {
       }
     });
 
-    // Note modal events
-    let savedNoteSelection = null; // Stores the Range of selected text
-    let uniqueNoteIdCounter = 0; // Simple counter for unique IDs
-    let noteTooltip = null; // Stores the tooltip element
-    let currentEditingNoteSpan = null; // Stores the <span> element being edited
-
-    document.getElementById('noteBtn').addEventListener('click', () => {
-      const selection = window.getSelection();
-      if (selection.rangeCount === 0 || selection.toString().length === 0) {
-        showNotification('Please select text in the editor first to add a note.', 'warning');
-        return;
+    // Checklist modal events
+    const checklistModal = document.getElementById('checklistModal');
+    
+    document.getElementById('closeChecklistModalBtn').addEventListener('click', () => {
+      checklistModal.style.display = 'none';
+    });
+    
+    document.getElementById('cancelChecklistBtn').addEventListener('click', () => {
+      checklistModal.style.display = 'none';
+    });
+    
+    checklistModal.addEventListener('click', (e) => {
+      if (e.target.id === 'checklistModal') {
+        checklistModal.style.display = 'none';
       }
-      savedNoteSelection = selection.getRangeAt(0).cloneRange();
-      currentEditingNoteSpan = null; // Reset for new note creation
+    });
+    
+    document.getElementById('confirmChecklistBtn').addEventListener('click', () => {
+      // Check if user pasted text in textarea
+      const textInput = document.getElementById('checklistTextInput').value.trim();
+      let count;
+      let customAnswers = [];
       
-      const noteModal = document.getElementById('noteModal');
-      document.getElementById('noteSelectedTextInput').value = selection.toString(); // Set selected text
-      document.getElementById('noteTextInput').value = ''; // Clear previous note
-      document.getElementById('insertNoteBtn').textContent = 'Save Note'; // Reset button text
-      noteModal.style.display = 'flex';
-      document.getElementById('noteTextInput').focus();
-    });
-    
-    document.getElementById('closeNoteModalBtn').addEventListener('click', () => {
-      document.getElementById('noteModal').style.display = 'none';
-      savedNoteSelection = null;
-      currentEditingNoteSpan = null;
-    });
-    
-    document.getElementById('cancelNoteBtn').addEventListener('click', () => {
-      document.getElementById('noteModal').style.display = 'none';
-      savedNoteSelection = null;
-      currentEditingNoteSpan = null;
-    });
-    
-    document.getElementById('noteModal').addEventListener('click', (e) => {
-      if (e.target.id === 'noteModal') {
-        document.getElementById('noteModal').style.display = 'none';
-        savedNoteSelection = null;
-        currentEditingNoteSpan = null;
-      }
-    });
-
-    document.getElementById('insertNoteBtn').addEventListener('click', () => {
-      const noteText = document.getElementById('noteTextInput').value.trim();
-      const selectedTextContent = document.getElementById('noteSelectedTextInput').value;
-
-      if (!noteText) {
-        showNotification('Please enter some text for the note.', 'warning');
-        return;
-      }
-
-      if (currentEditingNoteSpan) {
-        // Editing existing note
-        currentEditingNoteSpan.dataset.note = noteText;
-        // The text content of the span does not change during edit
-        showNotification('Note updated successfully!', 'success');
-        
-        // Save reference to the note span before clearing
-        const editedNoteSpan = currentEditingNoteSpan;
-        
-        document.getElementById('noteTextInput').value = '';
-        document.getElementById('noteModal').style.display = 'none';
-        savedNoteSelection = null;
-        currentEditingNoteSpan = null;
-        
-        saveToHistory();
-        
-        // Restore cursor position after the edited note span
-        requestAnimationFrame(() => {
-          const range = document.createRange();
-          range.setStartAfter(editedNoteSpan);
-          range.collapse(true);
-          
-          const sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
-          
-          editor.focus();
-        });
+      if (textInput) {
+        // Use pasted text to generate answers
+        customAnswers = textInput.split('\n').filter(line => line.trim().length > 0);
+        count = customAnswers.length;
       } else {
-        // Creating new note
-        if (!savedNoteSelection) {
-          showNotification('No text selected to attach the note to.', 'error');
+        // Use the number input
+        count = parseInt(document.getElementById('checklistCountInput').value) || 4;
+      }
+      
+      const doHighlight = document.getElementById('checklistHighlightCheckbox').checked;
+      const doBold = document.getElementById('checklistBoldCheckbox').checked;
+      
+      // Use saved range
+      let range = savedChecklistRange;
+      if (!range) {
+        const selection = window.getSelection();
+        if (selection.rangeCount === 0) {
+          alert('Please click in the editor first');
           return;
         }
-
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedNoteSelection);
-
-        // Create a unique ID for this note span
-        const noteId = `note-${Date.now()}-${uniqueNoteIdCounter++}`;
-
-        const noteSpan = document.createElement('span');
-        noteSpan.classList.add('editor-note'); // Add class for styling
-        noteSpan.dataset.note = noteText;
-        noteSpan.id = noteId;
-        noteSpan.textContent = selectedTextContent;
+        range = selection.getRangeAt(0);
+      }
+      
+      // Bulgarian letters: А, Б, В, Г, Д, ...
+      const bulgarianLetters = ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'Й', 'К', 'Л', 'М', 'Н', 'О', 'П', 'Р', 'С', 'Т', 'У'];
+      
+      // Build the HTML for the checklist
+      let checklistHtml = '<ul style="list-style-type: none; padding-left: 0;">';
+      for (let i = 1; i <= count; i++) {
+        const label = bulgarianLetters[i - 1];
+        const answerText = customAnswers.length > 0 ? customAnswers[i - 1] : `Option ${i}`;
         
-        // Ensure the selection is not empty before attempting to surround contents
-        if (savedNoteSelection.toString().length > 0) {
-          savedNoteSelection.deleteContents(); // Remove the selected text
-          savedNoteSelection.insertNode(noteSpan); // Insert the wrapped span
-        } else {
-          // If selection was empty, just insert the span with selected text as content
-          savedNoteSelection.insertNode(noteSpan);
-        }
-        
-        showNotification('Note added successfully!', 'success');
-        
-        document.getElementById('noteTextInput').value = '';
-        document.getElementById('noteModal').style.display = 'none';
-        savedNoteSelection = null;
-        currentEditingNoteSpan = null;
-        
-        saveToHistory();
-        
-        // Restore cursor position after the note span - use requestAnimationFrame for better timing
-        requestAnimationFrame(() => {
-          const range = document.createRange();
-          range.setStartAfter(noteSpan);
-          range.collapse(true);
+        checklistHtml += `<li style="margin-bottom: 8px; display: flex; align-items: center;"><span class="checklist-circle" style="display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; border: 1px solid #999; border-radius: 50%; margin-right: 8px; font-size: 12px; font-weight: bold; background-color: white; color: #000; transition: all 0.2s;">${label}</span><span class="checklist-item" style="cursor: pointer;">${answerText}</span></li>`;
+      }
+      checklistHtml += '</ul>';
+      
+      // Create a temporary container
+      const temp = document.createElement('div');
+      temp.innerHTML = checklistHtml;
+      
+      // Get the UL element
+      const ul = temp.querySelector('ul');
+      
+      // Add click handlers to checklist items
+      const items = ul.querySelectorAll('li');
+      items.forEach(item => {
+        item.addEventListener('click', function(e) {
+          e.stopPropagation();
+          const circle = this.querySelector('.checklist-circle');
+          const span = this.querySelector('.checklist-item');
+          const isSelected = circle.style.backgroundColor === 'rgb(0, 0, 0)';
           
-          const sel = window.getSelection();
-          sel.removeAllRanges();
-          sel.addRange(range);
-          
-          editor.focus();
+          if (isSelected) {
+            // Deselect
+            circle.style.backgroundColor = 'white';
+            circle.style.color = '#000';
+            if (doHighlight) span.style.color = 'inherit';
+            if (doBold) span.style.fontWeight = 'normal';
+          } else {
+            // Select
+            circle.style.backgroundColor = '#000';
+            circle.style.color = 'white';
+            if (doHighlight) span.style.color = '#ef4444';
+            if (doBold) span.style.fontWeight = 'bold';
+          }
         });
-      }
-    });
-
-    // Note tooltip creation and handling
-    function createNoteTooltip() {
-      noteTooltip = document.createElement('div');
-      noteTooltip.id = 'noteTooltip';
-      noteTooltip.style.cssText = `
-        position: absolute;
-        display: none;
-        background-color: #f0f7f0;
-        color: #1f2937;
-        padding: 8px 12px;
-        border-radius: 4px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-        max-width: 500px;
-        word-wrap: break-word;
-        z-index: 1000;
-        font-size: 0.9em;
-        line-height: 1.4;
-        border: 1px solid #588157; /* ~Fern */
-      `;
-      noteTooltip.id = 'noteTooltip';
+      });
       
-      // Add styles for compact lists in tooltips
-      if (!document.getElementById('note-tooltip-list-styles')) {
-        const style = document.createElement('style');
-        style.id = 'note-tooltip-list-styles';
-        style.textContent = `
-          #noteTooltip ul, #noteTooltip ol {
-            margin: 0 !important;
-            padding-left: 20px !important;
-          }
-          #noteTooltip li {
-            margin: 0 0 0.1em 0 !important;
-            padding: 0 !important;
-            line-height: 1.2 !important;
-          }
-          #noteTooltip li:last-child {
-            margin-bottom: 0 !important;
-          }
-        `;
-        document.head.appendChild(style);
-      }
+      // Insert the UL at cursor position
+      range.insertNode(ul);
       
-      document.body.appendChild(noteTooltip);
-    }
-
-    // Simple markdown parser for note tooltips
-    function parseNoteMarkdown(text) {
-      if (!text) return '';
+      // Add a line break after for spacing
+      const br = document.createElement('br');
+      range.setStartAfter(ul);
+      range.insertNode(br);
       
-      let lines = text.split('\n');
-      let html = [];
-      let stack = []; // Stack of { type: 'ul'|'ol', indent: number }
+      // Move cursor after the br
+      range.setStartAfter(br);
+      range.collapse(true);
       
-      for (let i = 0; i < lines.length; i++) {
-        let line = lines[i];
-        
-        // Calculate indentation
-        let indentMatch = line.match(/^(\s*)/);
-        let indent = indentMatch ? indentMatch[1].length : 0;
-        let content = line.trim();
-        
-        let isUl = /^[-*]\s+(.+)/.test(content);
-        let isOl = /^\d+\.\s+(.+)/.test(content);
-        
-        if (isUl || isOl) {
-          let listType = isUl ? 'ul' : 'ol';
-          let match = isUl ? content.match(/^[-*]\s+(.+)/) : content.match(/^\d+\.\s+(.+)/);
-          let itemText = match[1];
-          
-          if (stack.length === 0) {
-            // New list
-            stack.push({ type: listType, indent: indent });
-            html.push('<' + listType + '>');
-          } else {
-            let last = stack[stack.length - 1];
-            
-            if (indent > last.indent) {
-              // Nested list
-              stack.push({ type: listType, indent: indent });
-              html.push('<' + listType + '>');
-            } else if (indent < last.indent) {
-              // Close lists until indent matches
-              while (stack.length > 0 && stack[stack.length - 1].indent > indent) {
-                let closed = stack.pop();
-                html.push('</' + closed.type + '>');
-              }
-              // If stack empty or indent still mismatch (weird case), start new or append
-              if (stack.length === 0 || stack[stack.length - 1].indent !== indent) {
-                 stack.push({ type: listType, indent: indent });
-                 html.push('<' + listType + '>');
-              } else if (stack[stack.length - 1].type !== listType) {
-                 // Switch list type
-                 let closed = stack.pop();
-                 html.push('</' + closed.type + '>');
-                 stack.push({ type: listType, indent: indent });
-                 html.push('<' + listType + '>');
-              }
-            } else {
-              // Same indent
-              if (last.type !== listType) {
-                let closed = stack.pop();
-                html.push('</' + closed.type + '>');
-                stack.push({ type: listType, indent: indent });
-                html.push('<' + listType + '>');
-              }
-            }
-          }
-          html.push('<li>' + itemText + '</li>');
-        } else {
-          // Close all lists if line is not empty (or just break lists on empty line?)
-          // Standard MD: empty line breaks list.
-          // Here: assume anything not a list item breaks the list sequence if text exists
-          if (content !== '') {
-             while (stack.length > 0) {
-               let closed = stack.pop();
-               html.push('</' + closed.type + '>');
-             }
-          }
-          
-          if (content) {
-            html.push(content + '<br>');
-          } else {
-            // Empty line - if inside list, maybe keep it? No, simpler to break.
-            // If we are in a list, we might want to close it?
-            // Let's keep it simple: empty line = <br> but doesn't necessarily close list
-            // actually, standard MD: empty line separates blocks.
-            // let's behave like the previous one: preserve empty lines
-            html.push('<br>');
-          }
-        }
-      }
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
       
-      // Close remaining
-      while (stack.length > 0) {
-        let closed = stack.pop();
-        html.push('</' + closed.type + '>');
-      }
+      // Close modal and reset
+      document.getElementById('checklistModal').style.display = 'none';
+      document.getElementById('checklistCountInput').value = '4';
+      document.getElementById('checklistTextInput').value = '';
+      document.getElementById('checklistHighlightCheckbox').checked = true;
+      document.getElementById('checklistBoldCheckbox').checked = false;
+      savedChecklistRange = null; // Clear saved range
       
-      let result = html.join('')
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/__(.+?)__/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>')
-        .replace(/_(.+?)_/g, '<em>$1</em>')
-        .replace(/`(.+?)`/g, '<code>$1</code>')
-        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
-      
-      result = result
-        .replace(/<br><ul>/g, '<ul>')
-        .replace(/<br><ol>/g, '<ol>')
-        .replace(/<\/ul><br>/g, '</ul>')
-        .replace(/<\/ol><br>/g, '</ol>');
-      
-      return result;
-    }
-
-    editor.addEventListener('mouseover', (e) => {
-      if (e.target && e.target.classList.contains('editor-note')) {
-        const noteSpan = e.target;
-        const noteContent = noteSpan.dataset.note;
-        
-        if (noteContent) {
-          if (!noteTooltip) {
-            createNoteTooltip();
-          }
-          noteTooltip.innerHTML = parseNoteMarkdown(noteContent);
-          noteTooltip.style.display = 'block';
-
-          const rect = noteSpan.getBoundingClientRect();
-          noteTooltip.style.left = `${rect.left + window.scrollX}px`;
-          noteTooltip.style.top = `${rect.bottom + window.scrollY + 5}px`;
-        }
-      }
-    });
-
-    editor.addEventListener('mouseout', (e) => {
-      if (noteTooltip && e.target && e.target.classList.contains('editor-note')) {
-        noteTooltip.style.display = 'none';
-      }
-    });
-
-    // Initial tooltip creation on load
-    document.addEventListener('DOMContentLoaded', createNoteTooltip);
-
-    // Add double-click listener to edit existing notes
-    editor.addEventListener('dblclick', (e) => {
-      const target = e.target;
-      if (target && target.classList.contains('editor-note')) {
-        currentEditingNoteSpan = target;
-        savedNoteSelection = null; // Clear saved selection as we are editing an existing element
-
-        const noteModal = document.getElementById('noteModal');
-        document.getElementById('noteSelectedTextInput').value = target.textContent;
-        document.getElementById('noteTextInput').value = target.dataset.note;
-        document.getElementById('insertNoteBtn').textContent = 'Update Note'; // Change button text
-        noteModal.style.display = 'flex';
-        document.getElementById('noteTextInput').focus();
-      }
+      saveToHistory();
+      editor.focus();
     });
 
     // Table modal events
@@ -4429,20 +3712,18 @@ renderMathInElement(document.body, {
       const fragment = document.createRange().createContextualFragment(tableHTML);
       range.insertNode(fragment);
       
-      // Add a paragraph after table for spacing
-      const p = document.createElement('p');
-      p.innerHTML = '<br>';
+      // Add a line break after table for spacing
+      const br = document.createElement('br');
       range.setStartAfter(fragment.lastChild);
-      range.insertNode(p);
+      range.insertNode(br);
       
-      // Move cursor inside the new paragraph
-      const newRange = document.createRange();
-      newRange.setStart(p, 0);
-      newRange.collapse(true);
+      // Move cursor after the br
+      range.setStartAfter(br);
+      range.collapse(true);
       
       const selection = window.getSelection();
       selection.removeAllRanges();
-      selection.addRange(newRange);
+      selection.addRange(range);
       
       // Clear saved range
       savedTableRange = null;
@@ -4706,7 +3987,7 @@ renderMathInElement(document.body, {
       
       // Define default font sizes for each element type
       const defaultSizes = {
-        'h1': '1.65em',
+        'h1': '1.5em',
         'h2': '1.3em',
         'h3': '1.1em',
         'h4': '1.05em',
@@ -4839,7 +4120,7 @@ renderMathInElement(document.body, {
         .replace(/>/g, '&gt;');
       
       // Headers (h1-h4)
-      highlighted = highlighted.replace(/^(#{1,4})\s+(.*)$/gm, '<span style="color: #588157; font-weight: 600;">$1</span> <span style="color: #588157; font-weight: 600;">$2</span>');
+      highlighted = highlighted.replace(/^(#{1,4})\s+(.*)$/gm, '<span style="color: #92400e; font-weight: 600;">$1</span> <span style="color: #78350f; font-weight: 600;">$2</span>');
       
       // Bold **text**
       highlighted = highlighted.replace(/\*\*([^*]+)\*\*/g, '<span style="color: #1f2937; font-weight: 600;">**</span><span style="color: #374151; font-weight: 600;">$1</span><span style="color: #1f2937; font-weight: 600;">**</span>');
@@ -4857,22 +4138,22 @@ renderMathInElement(document.body, {
       highlighted = highlighted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<span style="color: #2563eb;">[</span><span style="color: #3b82f6;">$1</span><span style="color: #2563eb;">](</span><span style="color: #60a5fa; text-decoration: underline;">$2</span><span style="color: #2563eb;">)</span>');
       
       // Images ![alt](url)
-      highlighted = highlighted.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<span style="color: #588157;">![</span><span style="color: #588157;">$1</span><span style="color: #588157;">](</span><span style="color: #588157; text-decoration: underline;">$2</span><span style="color: #588157;">)</span>');
+      highlighted = highlighted.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<span style="color: #7c3aed;">![</span><span style="color: #8b5cf6;">$1</span><span style="color: #7c3aed;">](</span><span style="color: #a78bfa; text-decoration: underline;">$2</span><span style="color: #7c3aed;">)</span>');
       
       // Unordered list - keep original - or * marker
-      highlighted = highlighted.replace(/^(\s*)([-*])\s+(.*)$/gm, '$1<span style="color: #588157; font-weight: 600;">$2</span> <span style="color: #374151;">$3</span>');
+      highlighted = highlighted.replace(/^(\s*)([-*])\s+(.*)$/gm, '$1<span style="color: #f59e0b; font-weight: 600;">$2</span> <span style="color: #374151;">$3</span>');
       
       // Ordered list
-      highlighted = highlighted.replace(/^(\s*)(\d+)\.\s+(.*)$/gm, '$1<span style="color: #588157; font-weight: 600;">$2.</span> <span style="color: #374151;">$3</span>');
+      highlighted = highlighted.replace(/^(\s*)(\d+)\.\s+(.*)$/gm, '$1<span style="color: #f59e0b; font-weight: 600;">$2.</span> <span style="color: #374151;">$3</span>');
       
       // Blockquote
-      highlighted = highlighted.replace(/^(&gt;)\s+(.*)$/gm, '<span style="color: #74b673; font-weight: 600;">$1</span> <span style="color: #588157; font-style: italic;">$2</span>');
+      highlighted = highlighted.replace(/^(&gt;)\s+(.*)$/gm, '<span style="color: #d97706; font-weight: 600;">$1</span> <span style="color: #92400e; font-style: italic;">$2</span>');
       
       // Horizontal rule
       highlighted = highlighted.replace(/^---+$/gm, '<span style="color: #6b7280;">---</span>');
       
       // Dashed divider (topic separator)
-      highlighted = highlighted.replace(/^~~~+$/gm, '<span style="color: #73a372; border-bottom: 2px dashed #73a372; display: inline-block; padding-bottom: 2px;">~~~</span>');
+      highlighted = highlighted.replace(/^~~~+$/gm, '<span style="color: #8B6F47; border-bottom: 2px dashed #8B6F47; display: inline-block; padding-bottom: 2px;">~~~</span>');
       
       return highlighted;
     }
@@ -4995,6 +4276,66 @@ renderMathInElement(document.body, {
       alert('Моля, позиционирай курсора в списък');
     }
 
+    // Double-click to edit list item numbers
+    editor.addEventListener('dblclick', (e) => {
+      // Find if we're in an OL li
+      let li = e.target.closest('li');
+      
+      if (li && li.parentNode && li.parentNode.tagName === 'OL') {
+        e.preventDefault();
+        
+        // Find the current position in the list
+        const ol = li.parentNode;
+        const items = Array.from(ol.children);
+        const currentIndex = items.indexOf(li);
+        const currentNumber = currentIndex + 1;
+        
+        // Prompt user for new number
+        const newNumber = prompt(`Промени номера на list item (текущо: ${currentNumber}):`, currentNumber.toString());
+        
+        if (newNumber !== null && newNumber.trim() !== '') {
+          const num = parseInt(newNumber);
+          if (!isNaN(num) && num > 0) {
+            // Store the custom number as data attribute
+            li.setAttribute('data-ol-number', num);
+            
+            // Apply custom CSS if not already applied
+            if (!document.getElementById('custom-ol-numbers')) {
+              const style = document.createElement('style');
+              style.id = 'custom-ol-numbers';
+              style.textContent = `
+                ol li[data-ol-number] {
+                  list-style: none;
+                  counter-increment: none;
+                }
+                ol li[data-ol-number]::before {
+                  content: attr(data-ol-number) ". ";
+                  font-weight: inherit;
+                }
+              `;
+              document.head.appendChild(style);
+            }
+            
+            saveToHistory();
+            
+            // Show notification
+            const notification = document.createElement('div');
+            notification.textContent = `✓ Номер на list item промънен на ${num}`;
+            notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+              notification.style.transition = 'opacity 0.3s';
+              notification.style.opacity = '0';
+              setTimeout(() => notification.remove(), 300);
+            }, 2000);
+          } else {
+            alert('Моля, въведи положително число');
+          }
+        }
+      }
+    });
+
     // Keyboard shortcuts
     editor.addEventListener('keydown', (e) => {
       // Handle Delete/Backspace on dashed line dividers (works same as regular <hr>)
@@ -5007,39 +4348,6 @@ renderMathInElement(document.body, {
           // Find the actual element
           while (node && node !== editor && node.nodeType === 3) {
             node = node.parentNode;
-          }
-
-          // FIX: Handle Backspace after TABLE
-          if (e.key === 'Backspace' && node && (node.tagName === 'P' || node.tagName === 'DIV')) {
-             // Check if cursor is at start
-             if (range.collapsed && range.startOffset === 0) {
-                 const prev = node.previousElementSibling;
-                 if (prev && prev.tagName === 'TABLE') {
-                     // We are after a table
-                     e.preventDefault();
-                     
-                     // If paragraph is empty, remove it
-                     if (node.textContent.trim() === '') {
-                        node.remove();
-                     }
-                     
-                     // Move cursor to last cell of table
-                     const rows = prev.rows;
-                     if (rows.length > 0) {
-                       const lastRow = rows[rows.length - 1];
-                       if (lastRow.cells.length > 0) {
-                         const lastCell = lastRow.cells[lastRow.cells.length - 1];
-                         const newRange = document.createRange();
-                         newRange.selectNodeContents(lastCell);
-                         newRange.collapse(false);
-                         selection.removeAllRanges();
-                         selection.addRange(newRange);
-                       }
-                     }
-                     saveToHistory();
-                     return;
-                 }
-             }
           }
           
           // Check if adjacent to <hr>
@@ -5261,13 +4569,13 @@ renderMathInElement(document.body, {
           } else {
             e.preventDefault();
             // Apply last used text color
-            const lastColor = localStorage.getItem('textEditorTextColor') || '#1f2937';
+            const lastColor = localStorage.getItem('mdEditorTextColor') || '#1f2937';
             applyFormatting('color', lastColor);
             saveToHistory();
           }
         } else if (e.key === 'q' || e.key === 'Q' || e.key === 'я' || e.key === 'Я') {
           e.preventDefault();
-          toggleBlockquote();
+          insertBlockquote();
         } else if ((e.key === 'z' || e.key === 'Z'|| e.key === 'З' || e.key === 'з') && !e.shiftKey) {
           e.preventDefault();
           if (historyIndex > 0) {
@@ -5280,10 +4588,26 @@ renderMathInElement(document.body, {
             historyIndex++;
             editor.innerHTML = history[historyIndex];
           }
+        } else if (e.key === 'm' || e.key === 'M' || e.key === 'М' || e.key === 'м') {
+          if (e.shiftKey) {
+            e.preventDefault();
+            // Remove text color (reset to black)
+            const selection = window.getSelection();
+            if (selection.toString() && editor.contains(selection.anchorNode)) {
+              document.execCommand('foreColor', false, 'rgb(31, 41, 55)');
+              saveToHistory();
+            }
+          } else {
+            e.preventDefault();
+            // Apply last used text color
+            const lastColor = localStorage.getItem('mdEditorTextColor') || '#1f2937';
+            applyFormatting('color', lastColor);
+            saveToHistory();
+          }
         } else if ((e.key === 'c' || e.key === 'C' || e.key === 'С' || e.key === 'с') && e.altKey) {
           e.preventDefault();
           // Apply last used text color
-          const lastColor = localStorage.getItem('textEditorTextColor') || '#1f2937';
+          const lastColor = localStorage.getItem('mdEditorTextColor') || '#1f2937';
           applyFormatting('color', lastColor);
           saveToHistory();
         } else if (e.key === 'h' || e.key === 'H' || e.key === 'Х' || e.key === 'х') {
@@ -5298,7 +4622,7 @@ renderMathInElement(document.body, {
           } else {
             e.preventDefault();
             // Apply last used highlight color
-            const lastHighlight = localStorage.getItem('textEditorHighlight') || '#ffeb3b';
+            const lastHighlight = localStorage.getItem('mdEditorHighlight') || '#ffeb3b';
             applyFormatting('highlight', lastHighlight);
             saveToHistory();
           }
@@ -5394,7 +4718,7 @@ renderMathInElement(document.body, {
             } else if (text === '~~~' && node.tagName === 'P') {
               // Replace this paragraph with dashed <hr>
               const hr = document.createElement('hr');
-              hr.style.cssText = 'border: none; border-top: 2px dashed #73a372;';
+              hr.style.cssText = 'border: none; border-top: 2px dashed #8B6F47;';
               node.parentNode.replaceChild(hr, node);
               
               // Create new paragraph after hr and focus there
@@ -5488,12 +4812,6 @@ renderMathInElement(document.body, {
         // Also remove font-related attributes
         el.removeAttribute('size');
         el.removeAttribute('face');
-
-        // CRITICAL: Remove editor-note spans and replace with their text content
-        if (el.classList.contains('editor-note')) {
-          const textNode = document.createTextNode(el.textContent);
-          el.parentNode.replaceChild(textNode, el);
-        }
       });
       
       // CRITICAL: Convert any unwanted <div> elements to <p>
@@ -5655,23 +4973,30 @@ renderMathInElement(document.body, {
             return '*' + processChildren(node, insideListItem, depth) + '*';
           } else if (tag === 'u') {
             return '__' + processChildren(node, insideListItem, depth) + '__';
-          } else if (tag === 'span' && node.classList.contains('editor-note')) {
-            // Handle editor-note spans: just return their text content
-            return processChildren(node, insideListItem, depth);
           } else if (tag === 'code') {
             return '`' + processChildren(node, insideListItem, depth) + '`';
           } else if (tag === 'a') {
             return '[' + processChildren(node, insideListItem, depth) + '](' + (node.href || '#') + ')';
           } else if (tag === 'img') {
             const alt = node.getAttribute('alt') || '';
-            // Prefer data-original-src for local files, fall back to src for URLs
-            const src = node.getAttribute('data-original-src') || node.src;
-            const width = node.getAttribute('data-width'); // This should now be reliable from the editor's insertion logic
-            let titleAttribute = '';
-            if (width) {
-              titleAttribute = ` "width=${width}%"`; // Embed width information in the title part of markdown image
+            
+            // Generate path from alt text (all images are in assets/ folder)
+            // If alt is "ДН", generate "assets/ДН.png"
+            let src = '';
+            if (alt) {
+              // Try to detect file extension from src if it's not base64
+              let ext = '.png'; // default
+              if (node.src && !node.src.startsWith('data:')) {
+                const match = node.src.match(/\.([a-z]+)$/i);
+                if (match) ext = '.' + match[1];
+              }
+              src = 'assets/' + alt + ext;
             }
-            return `![${alt}](${src}${titleAttribute})`;
+            
+            // Skip if no alt text (can't generate filename)
+            if (!src) return '';
+            
+            return '![' + alt + '](' + src + ')';
           } else if (tag === 'blockquote') {
             return '> ' + processChildren(node, false, depth).trim() + '\n';
           } else if (tag === 'ul') {
@@ -5979,35 +5304,14 @@ renderMathInElement(document.body, {
     // Apply inline formatting (bold, italic, code, links, images)
     function applyInlineFormatting(text) {
       // Images must be processed before links
-      // Regex updated to capture optional title attribute
-      text = text.replace(/!\[(.*?)\]\((.*?)(?: "(.*?)")?\)/g, (match, alt, src, title) => {
-        let style = 'max-width:100%; height:auto; min-width:300px;'; // Default and min-width
-        let dataWidth = '';
-
-        if (title) {
-          const widthMatch = title.match(/width=(\d+)%/);
-          if (widthMatch && widthMatch[1]) {
-            style = `max-width:${widthMatch[1]}%; min-width:300px; height:auto;`; // min-width removed
-            dataWidth = ` data-width="${widthMatch[1]}"`;
-          }
-        }
-
+      text = text.replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
         // If we have a base path and src is relative, create absolute path for display
-        let finalSrc = src;
-        if (globalImageBasePath && !(src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:') || src.startsWith('file://'))) {
-          finalSrc = globalImageBasePath + src;
+        if (globalImageBasePath && !src.startsWith('http://') && !src.startsWith('https://') && !src.startsWith('data:') && !src.startsWith('file://')) {
+          const absoluteSrc = globalImageBasePath + src;
+          return `<img src="${absoluteSrc}" alt="${alt}" data-original-src="${src}" style="max-width:100%; height:auto;">`;
         }
-
-        // Add data-original-src for consistency if not already an online image
-        const dataOriginalSrc = (src.startsWith('http://') || src.startsWith('https://'))
-          ? `data-original-src="${src}"`
-          : `data-original-src="${src}"`; // Always store original src
-
-        // Scope image CSS to .markdown-body img in exported HTML (not global img)
-        // This is only for when generating <style> blocks for export, not for inline images
-        // If you have export logic that writes <style>img{...}</style>, change it to .markdown-body img{...}
-
-        return `<img src="${finalSrc}?v=202602171mhr" alt="${alt}" style="${style}"${dataWidth}${dataOriginalSrc}>`;
+        // Always preserve the original src in data-original-src
+        return `<img src="${src}" alt="${alt}" data-original-src="${src}" style="max-width:100%; height:auto;">`;
       });
       text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       text = text.replace(/__(.*?)__/g, '<u>$1</u>');
@@ -6070,7 +5374,7 @@ renderMathInElement(document.body, {
             
             // Update page title
             const cleanName = fileName.replace(/\.(md|txt|html)$/i, '').replace(/^\d+(\.\d+)?-/, '').replace(/^msg-/i, '');
-            document.title = cleanName + ' — Text Editor';
+            document.title = cleanName + ' — Markdown Editor';
             
             // Clear sessionStorage
             sessionStorage.removeItem('editFileContent');
@@ -6124,7 +5428,7 @@ renderMathInElement(document.body, {
           // Update page title
           if (filePath) {
             const fileName = filePath.split('/').pop();
-            document.title = fileName.replace(/\.(md|txt)$/i, '').replace(/^\d+-/, '').replace(/^msg-/i, '') + ' — Text Editor';
+            document.title = fileName.replace(/\.(md|txt)$/i, '').replace(/^\d+-/, '').replace(/^msg-/i, '') + ' — Markdown Editor';
           }
           
           // Clear URL parameters to prevent auto-reload on refresh
@@ -6247,7 +5551,7 @@ renderMathInElement(document.body, {
             historyIndex = 0;
             
             // Update page title
-            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' — Text Editor';
+            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' — Markdown Editor';
           })
           .catch(err => {
             const isFile = window.location.protocol === 'file:';
@@ -6259,7 +5563,7 @@ renderMathInElement(document.body, {
           });
       } else {
         // Load from localStorage if no path parameter
-        const saved = localStorage.getItem('textEditorContent');
+        const saved = localStorage.getItem('mdEditorContent');
         if (saved) {
           editor.innerHTML = saved;
           history = [saved];
@@ -6274,7 +5578,7 @@ renderMathInElement(document.body, {
       
       clearTimeout(editor.saveTimeout);
       editor.saveTimeout = setTimeout(() => {
-        localStorage.setItem('textEditorContent', editor.innerHTML);
+        localStorage.setItem('mdEditorContent', editor.innerHTML);
       }, 2000);
     });
 
@@ -6539,9 +5843,8 @@ renderMathInElement(document.body, {
       const link = document.createElement('a');
       link.href = '#' + selectedAnchor;
       link.textContent = linkText;
-      link.style.textDecoration = 'underline wavy';
-      link.style.textDecorationSkipInk = 'none';
-      link.style.textDecorationColor = '#74b673';
+      link.style.color = '#2563eb';
+      link.style.textDecoration = 'underline';
       link.style.cursor = 'pointer';
 
       // Insert at saved cursor position
@@ -6676,40 +5979,36 @@ renderMathInElement(document.body, {
       courses.forEach(course => {
         function searchSection(section, breadcrumb = '') {
           const currentPath = breadcrumb ? breadcrumb + ' > ' + section.name : course.title;
-
+          
           if (section.files) {
             section.files.forEach(file => {
-              if (file.path && /\.html$/i.test(file.path)) {
+              if (file.type === 'html' && file.content) {
                 allCourseFilesIndex.push({
                   ...file,
-                  type: file.type || 'html',
-                  breadcrumb: currentPath,
-                  courseRef: course
+                  breadcrumb: currentPath
                 });
               }
             });
           }
-
+          
           if (section.msgNotes) {
             section.msgNotes.forEach(note => {
-              if (note.path && /\.html$/i.test(note.path)) {
+              if (note.type === 'html' && note.content) {
                 allCourseFilesIndex.push({
                   ...note,
-                  type: note.type || 'html',
-                  breadcrumb: currentPath,
-                  courseRef: course
+                  breadcrumb: currentPath
                 });
               }
             });
           }
-
+          
           if (section.subsections) {
             section.subsections.forEach(subsection => {
               searchSection(subsection, currentPath);
             });
           }
         }
-
+        
         if (course.sections) {
           course.sections.forEach(section => {
             searchSection(section, course.title);
@@ -6750,8 +6049,8 @@ renderMathInElement(document.body, {
       currentCombineMode = 'local';
       combineLocalPanel.style.display = 'block';
       combineCoursePanel.style.display = 'none';
-      combineLocalTab.style.color = '#588157';
-      combineLocalTab.style.borderBottomColor = '#588157';
+      combineLocalTab.style.color = '#7c3aed';
+      combineLocalTab.style.borderBottomColor = '#7c3aed';
       combineCourseTab.style.color = '#6b7280';
       combineCourseTab.style.borderBottomColor = 'transparent';
     });
@@ -6762,8 +6061,8 @@ renderMathInElement(document.body, {
       combineCoursePanel.style.display = 'block';
       combineLocalTab.style.color = '#6b7280';
       combineLocalTab.style.borderBottomColor = 'transparent';
-      combineCourseTab.style.color = '#588157';
-      combineCourseTab.style.borderBottomColor = '#588157';
+      combineCourseTab.style.color = '#7c3aed';
+      combineCourseTab.style.borderBottomColor = '#7c3aed';
       renderCourseFilesList();
     });
 
@@ -6906,7 +6205,7 @@ renderMathInElement(document.body, {
           margin-bottom: 8px;
           cursor: pointer;
           user-select: none;
-          ${isSelected ? 'background: #eef2ff; border-color: #588157;' : ''}
+          ${isSelected ? 'background: #eef2ff; border-color: #7c3aed;' : ''}
         `;
 
         const checkbox = document.createElement('input');
@@ -6962,10 +6261,10 @@ renderMathInElement(document.body, {
           
           // Add separator between files (but not after the last one)
           if (i < uploadedFiles.length - 1) {
-            combinedHtml += '<hr style="border: none; border-top: 2px dashed #73a372;">';
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
             combinedHtml += '<p><br></p>';
             combinedHtml += '<p><br></p>';
-            combinedHtml += '<hr style="border: none; border-top: 2px dashed #73a372;">';
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
           }
         }
 
@@ -6983,10 +6282,6 @@ renderMathInElement(document.body, {
 
         for (let i = 0; i < selectedCourseFiles.length; i++) {
           const file = selectedCourseFiles[i];
-          await ensureFileContent(file);
-          if (!file.content) {
-            continue;
-          }
           
           // Extract HTML content
           if (file.type === 'html' || file.content.includes('<!DOCTYPE')) {
@@ -7000,10 +6295,10 @@ renderMathInElement(document.body, {
           
           // Add separator between files
           if (i < selectedCourseFiles.length - 1) {
-            combinedHtml += '<hr style="border: none; border-top: 2px dashed #73a372;">';
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
             combinedHtml += '<p><br></p>';
             combinedHtml += '<p><br></p>';
-            combinedHtml += '<hr style="border: none; border-top: 2px dashed #73a372;">';
+            combinedHtml += '<hr style="border: none; border-top: 2px dashed #8B6F47;">';
           }
         }
 
@@ -7033,11 +6328,16 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=202602171mhr"></script>
+  <!-- Firebase Scripts -->
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
+
+  <script src="js/user-identity.js?v=202404231000"></script>
     <!-- CHAT SYSTEM -->
+    <script src="js/presence.js?v=20260131"></script>
     <script src="js/chat.js?v=202602191r3x"></script>
   
-<script src="js/version-check.js?v=202602171mhr"></script>
+<script src="js/version-check.js"></script>
 </body>
 
 </html>
