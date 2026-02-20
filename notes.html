@@ -5,17 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Notes</title>
 
-    <script src="js/auth-guard.js?v=202602191r6m"></script>
+    <script src="js/auth-guard.js?v=2026022016l1"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=202602171mhr"></script>
-    <script src="courses.generated.js?v=202602191r6m"></script>
+    <script src="courses.generated.js?v=2026022016l1"></script>
 
-    <link rel="icon" href="favicon.svg?v=202602191r6m" type="image/svg+xml">
+    <link rel="icon" href="favicon.svg?v=2026022016l1" type="image/svg+xml">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202602191r6m">
-    <script src="js/version-manager.js?v=202602191r6m"></script>
+    <link rel="stylesheet" href="css/mobile-nav.css?v=2026022016l1">
+    <script src="js/version-manager.js?v=2026022016l1"></script>
 
     <style>
         body {
@@ -23,6 +23,7 @@
             font-family: 'Open Sans', Arial, sans-serif;
             margin: 0;
             display: flex;
+            height: 100vh;
             min-height: 100vh;
             overflow: hidden;
         }
@@ -142,6 +143,7 @@
             display: flex;
             flex-direction: column;
             gap: 16px;
+            height: 100vh;
             overflow: hidden;
         }
 
@@ -187,9 +189,11 @@
 
         .notes-layout {
             flex: 1;
+            height: 100%;
             min-height: 0;
             display: grid;
             grid-template-columns: 320px 1fr;
+            grid-template-rows: minmax(0, 1fr);
             gap: 16px;
         }
 
@@ -201,6 +205,8 @@
             display: flex;
             flex-direction: column;
             min-height: 0;
+            height: 100%;
+            overflow: hidden;
         }
 
         .courses-panel {
@@ -324,6 +330,7 @@
         .notes-editor {
             flex: 1;
             min-height: 0;
+            height: 100%;
             border: none;
             border-bottom: 1px solid #e5e7eb;
             padding: 16px;
@@ -331,7 +338,9 @@
             line-height: 1.6;
             font-family: inherit;
             box-sizing: border-box;
-            overflow-y: auto;
+            overflow-y: scroll;
+            overflow-x: hidden;
+            scrollbar-gutter: stable;
             white-space: pre-wrap;
         }
 
@@ -339,6 +348,8 @@
             position: relative;
             flex: 1;
             min-height: 0;
+            display: flex;
+            flex-direction: column;
             overflow: hidden;
         }
 
@@ -580,8 +591,8 @@
 <body>
     <div id="side-menu">
         <div class="logo-header">
-            <a href="index.html?v=202602191r6m">
-                <img class="logo-img" src="svg/logo-coursebook.svg?v=202602191r6m" alt="StudyBoard">
+            <a href="index.html?v=2026022016l1">
+                <img class="logo-img" src="svg/logo-coursebook.svg?v=2026022016l1" alt="StudyBoard">
             </a>
         </div>
 
@@ -589,55 +600,55 @@
             <ul>
                 <li class="base-navigation-button">
                     <a href="https://elearn.mu-varna.bg/ultra/course">
-                        <img class="svg-icon" src="svg/icon-blackboard.svg?v=202602191r6m" style="filter: brightness(0) invert(1);">
+                        <img class="svg-icon" src="svg/icon-blackboard.svg?v=2026022016l1" style="filter: brightness(0) invert(1);">
                         <span>Blackboard</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
-                    <a href="account.html?v=202602191r6m">
-                        <img class="svg-icon" src="svg/icon-account.svg?v=202602191r6m">
+                    <a href="account.html?v=2026022016l1">
+                        <img class="svg-icon" src="svg/icon-account.svg?v=2026022016l1">
                         <span>Account</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
-                    <a href="index.html?v=202602191r6m">
-                        <img class="svg-icon" src="svg/icon-courses.svg?v=202602191r6m">
+                    <a href="index.html?v=2026022016l1">
+                        <img class="svg-icon" src="svg/icon-courses.svg?v=2026022016l1">
                         <span>Courses</span>
                     </a>
                 </li>
                 <li class="base-navigation-button active">
-                    <a href="notes.html?v=202602191r6m">
-                        <img class="svg-icon" src="svg/icon-anamnesis.svg?v=202602191r6m" style="filter: brightness(0) invert(1);">
+                    <a href="notes.html?v=2026022016l1">
+                        <img class="svg-icon" src="svg/icon-anamnesis.svg?v=2026022016l1" style="filter: brightness(0) invert(1);">
                         <span>Notes</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
-                    <a href="calendar.html?v=202602191r6m">
-                        <img class="svg-icon" src="svg/icon-calendar.svg?v=202602191r6m">
+                    <a href="calendar.html?v=2026022016l1">
+                        <img class="svg-icon" src="svg/icon-calendar.svg?v=2026022016l1">
                         <span>Calendar</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
-                    <a href="tools.html?v=202602191r6m">
-                        <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=202602191r6m" alt="Tools" />
+                    <a href="tools.html?v=2026022016l1">
+                        <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=2026022016l1" alt="Tools" />
                         <span>Tools</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
-                    <a href="text-editor.html?v=202602191r6m">
-                        <img class="svg-icon" src="svg/icon-editor.svg?v=202602191r6m" style="filter: brightness(0) invert(1);">
+                    <a href="text-editor.html?v=2026022016l1">
+                        <img class="svg-icon" src="svg/icon-editor.svg?v=2026022016l1" style="filter: brightness(0) invert(1);">
                         <span>Editor</span>
                     </a>
                 </li>
                 <li class="base-navigation-button" id="admin-button" style="display: none;">
-                    <a href="admin.html?v=202602191r6m">
-                        <img class="svg-icon" src="svg/icon-admin.svg?v=202602191r6m" style="filter: brightness(0) invert(1);">
+                    <a href="admin.html?v=2026022016l1">
+                        <img class="svg-icon" src="svg/icon-admin.svg?v=2026022016l1" style="filter: brightness(0) invert(1);">
                         <span>Admin Panel</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
                     <a href="#" onclick="handleLogout()">
-                        <img class="svg-icon" src="svg/icon-signout.svg?v=202602191r6m">
+                        <img class="svg-icon" src="svg/icon-signout.svg?v=2026022016l1">
                         <span>Logout</span>
                     </a>
                 </li>
@@ -676,16 +687,16 @@
                     <select id="courseSelectMobile" class="mobile-course-select"></select>
                 </div>
                 <div class="md-toolbar">
-                    <button type="button" class="md-btn" data-cmd="h1" title="H1"><img src="svg/md-editor/icon-h1.svg?v=202602191r6m" alt="H1"></button>
-                    <button type="button" class="md-btn" data-cmd="h2" title="H2"><img src="svg/md-editor/icon-h2.svg?v=202602191r6m" alt="H2"></button>
-                    <button type="button" class="md-btn" data-cmd="bold" title="Bold"><img src="svg/md-editor/icon-bold.svg?v=202602191r6m" alt="Bold"></button>
-                    <button type="button" class="md-btn" data-cmd="italic" title="Italic"><img src="svg/md-editor/icon-italic.svg?v=202602191r6m" alt="Italic"></button>
-                    <button type="button" class="md-btn" data-cmd="underline" title="Underline"><img src="svg/md-editor/icon-underline.svg?v=202602191r6m" alt="Underline"></button>
-                    <button type="button" class="md-btn" data-cmd="bullet" title="Bullet list"><img src="svg/md-editor/icon-unordered.svg?v=202602191r6m" alt="Bullet list"></button>
-                    <button type="button" class="md-btn" data-cmd="outdent" title="Outdent"><img src="svg/md-editor/icon-outdent.svg?v=202602191r6m" alt="Outdent"></button>
-                    <button type="button" class="md-btn" data-cmd="indent" title="Indent"><img src="svg/md-editor/icon-indent.svg?v=202602191r6m" alt="Indent"></button>
-                    <button type="button" class="md-btn" data-cmd="symbols" title="Insert symbols"><img src="svg/md-editor/icon-symbols.svg?v=202602191r6m" alt="Symbols"></button>
-                    <button type="button" class="md-btn" data-cmd="link" title="Link"><img src="svg/md-editor/icon-link.svg?v=202602191r6m" alt="Link"></button>
+                    <button type="button" class="md-btn" data-cmd="h1" title="H1"><img src="svg/md-editor/icon-h1.svg?v=2026022016l1" alt="H1"></button>
+                    <button type="button" class="md-btn" data-cmd="h2" title="H2"><img src="svg/md-editor/icon-h2.svg?v=2026022016l1" alt="H2"></button>
+                    <button type="button" class="md-btn" data-cmd="bold" title="Bold"><img src="svg/md-editor/icon-bold.svg?v=2026022016l1" alt="Bold"></button>
+                    <button type="button" class="md-btn" data-cmd="italic" title="Italic"><img src="svg/md-editor/icon-italic.svg?v=2026022016l1" alt="Italic"></button>
+                    <button type="button" class="md-btn" data-cmd="underline" title="Underline"><img src="svg/md-editor/icon-underline.svg?v=2026022016l1" alt="Underline"></button>
+                    <button type="button" class="md-btn" data-cmd="bullet" title="Bullet list"><img src="svg/md-editor/icon-unordered.svg?v=2026022016l1" alt="Bullet list"></button>
+                    <button type="button" class="md-btn" data-cmd="outdent" title="Outdent"><img src="svg/md-editor/icon-outdent.svg?v=2026022016l1" alt="Outdent"></button>
+                    <button type="button" class="md-btn" data-cmd="indent" title="Indent"><img src="svg/md-editor/icon-indent.svg?v=2026022016l1" alt="Indent"></button>
+                    <button type="button" class="md-btn" data-cmd="symbols" title="Insert symbols"><img src="svg/md-editor/icon-symbols.svg?v=2026022016l1" alt="Symbols"></button>
+                    <button type="button" class="md-btn" data-cmd="link" title="Link"><img src="svg/md-editor/icon-link.svg?v=2026022016l1" alt="Link"></button>
                     <button type="button" class="md-btn" data-cmd="separator" title="Horizontal separator">---</button>
                 </div>
                 <div class="notes-editor-shell">
@@ -789,7 +800,8 @@
                 liveblocksConnected: false,
                 liveblocksRenderHash: '',
                 liveblocksLastSelections: {},
-                liveblocksEnabled: !!LIVEBLOCKS_AUTH_ENDPOINT
+                liveblocksEnabled: !!LIVEBLOCKS_AUTH_ENDPOINT,
+                localEditVersion: 0
             };
 
             const els = {
@@ -819,6 +831,10 @@
                     clearTimeout(state.autosaveTimer);
                     state.autosaveTimer = null;
                 }
+            }
+
+            function bumpLocalEditVersion() {
+                state.localEditVersion = (state.localEditVersion || 0) + 1;
             }
 
             function colorFromUserId(userId) {
@@ -1601,6 +1617,8 @@
                 if (!ref) return;
 
                 const html = getEditorHtml();
+                const normalizedHtmlAtStart = normalizeHtml(html);
+                const localEditVersionAtStart = state.localEditVersion;
                 if (html === state.lastSavedHtml) {
                     setDraftState(false);
                     return;
@@ -1641,7 +1659,22 @@
                         : plainTextToHtml(typeof savedValue.text === 'string' ? savedValue.text : '');
 
                     state.lastSavedHtml = normalizeHtml(savedHtml);
-                    if (state.lastSavedHtml !== normalizeHtml(getEditorHtml())) {
+
+                    const currentEditorHtml = normalizeHtml(getEditorHtml());
+                    const editedDuringSave =
+                        state.localEditVersion !== localEditVersionAtStart ||
+                        currentEditorHtml !== normalizedHtmlAtStart;
+
+                    if (editedDuringSave) {
+                        const stillDirty = currentEditorHtml !== state.lastSavedHtml;
+                        setDraftState(stillDirty);
+                        if (stillDirty) {
+                            scheduleAutosave();
+                        }
+                        return;
+                    }
+
+                    if (state.lastSavedHtml !== currentEditorHtml) {
                         setEditorHtml(state.lastSavedHtml);
                         normalizeAuthorTitles();
                     }
@@ -1727,6 +1760,7 @@
                     document.execCommand('insertHTML', false, '<hr style="border:none;border-top:1px solid #d1d5db;margin:8px 0;">');
                 }
                 markEditedBlockAuthor();
+                bumpLocalEditVersion();
                 setDraftState(true);
                 scheduleAutosave();
             }
@@ -1828,6 +1862,7 @@
             els.courseNotesEditor.addEventListener('input', () => {
                 normalizeSeparatorLines();
                 markEditedBlockAuthor();
+                bumpLocalEditVersion();
                 setDraftState(true);
                 scheduleAutosave();
                 scheduleLiveblocksDocBroadcast();
@@ -1881,6 +1916,7 @@
                 event.preventDefault();
                 document.execCommand(event.shiftKey ? 'outdent' : 'indent', false);
                 markEditedBlockAuthor();
+                bumpLocalEditVersion();
                 setDraftState(true);
                 scheduleAutosave();
             });
@@ -1917,6 +1953,7 @@
                         els.courseNotesEditor.focus();
                         document.execCommand('insertText', false, symbol);
                         markEditedBlockAuthor();
+                        bumpLocalEditVersion();
                         setDraftState(true);
                         scheduleAutosave();
                     }
@@ -1969,7 +2006,7 @@
     </script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=202602191r6m"></script>
+    <script src="js/chat.js?v=2026022016l1"></script>
     <script src="js/mobile-nav.js?v=202602171mhr"></script>
 </body>
 </html>
