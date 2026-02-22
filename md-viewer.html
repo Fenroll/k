@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=2026022016l1"></script>
+  <script src="js/auth-guard.js?v=202602221mef"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
   <!-- Favicon -->
-  <link rel="icon" href="favicon.svg?v=2026022016l1" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=202602221mef" type="image/svg+xml">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <!-- Mobile Navigation CSS -->
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026022016l1">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202602221mef">
   
   <!-- Firebase SDKs - Moved to head and using compat versions -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
@@ -430,31 +430,31 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="js/version-manager.js?v=2026022016l1"></script>
+  <script src="js/version-manager.js?v=202602221mef"></script>
 </head>
 <body>
   <header>
     <h1 id="docTitle">Преглед на документ</h1>
     <a class="btn" href="#" onclick="if (window.opener) { window.close(); } else if (document.referrer) { history.back(); } else { window.close(); } return false;" title="Назад">
-      <img src="svg/md-viewer/icon-close.svg?v=2026022016l1" alt="Назад" width="25" height="25">
+      <img src="svg/md-viewer/icon-close.svg?v=202602221mef" alt="Назад" width="25" height="25">
     </a>
     <button id="summaryBtn" class="btn" title="Summary">
-      <img src="svg/md-viewer/icon-summary.svg?v=2026022016l1" alt="Summary" width="20" height="20">
+      <img src="svg/md-viewer/icon-summary.svg?v=202602221mef" alt="Summary" width="20" height="20">
     </button>
     <button id="editBtn" class="btn" title="Редактирай">
-      <img src="svg/md-viewer/icon-edit.svg?v=2026022016l1" alt="Редактирай" width="20" height="20">
+      <img src="svg/md-viewer/icon-edit.svg?v=202602221mef" alt="Редактирай" width="20" height="20">
     </button>
     <button id="fontSizeBtn" class="btn" title="Change Font Size">
-      <img src="svg/md-viewer/icon-textsize.svg?v=2026022016l1" alt="Change Font Size" width="20" height="20">
+      <img src="svg/md-viewer/icon-textsize.svg?v=202602221mef" alt="Change Font Size" width="20" height="20">
     </button>
     <button id="notes-toggle-btn" class="btn" title="Бележки">
-      <img src="svg/md-viewer/icon-notes.svg?v=2026022016l1" alt="Бележки" width="20" height="20">
+      <img src="svg/md-viewer/icon-notes.svg?v=202602221mef" alt="Бележки" width="20" height="20">
     </button>
     <button id="prevH1Btn" class="btn" title="Предишно заглавие">
-      <img src="svg/md-viewer/icon-arrow-left.svg?v=2026022016l1" alt="Предишно" width="20" height="20">
+      <img src="svg/md-viewer/icon-arrow-left.svg?v=202602221mef" alt="Предишно" width="20" height="20">
     </button>
     <button id="nextH1Btn" class="btn" title="Следващо заглавие">
-      <img src="svg/md-viewer/icon-arrow-right.svg?v=2026022016l1" alt="Следващо" width="20" height="20">
+      <img src="svg/md-viewer/icon-arrow-right.svg?v=202602221mef" alt="Следващо" width="20" height="20">
     </button>
   </header>
   <main>
@@ -1387,6 +1387,7 @@
     function setupEditButton() {
       const editBtn = document.getElementById('editBtn');
       if (!editBtn) return;
+      if (editBtn.dataset.bound === '1') return;
       
       // Get the current file path from URL parameters
       const urlParams = new URLSearchParams(window.location.search);
@@ -1399,62 +1400,85 @@
           editBtn.classList.add('visible');
         }
         
-        editBtn.addEventListener('click', (e) => {
+        editBtn.dataset.bound = '1';
+
+        editBtn.addEventListener('click', async (e) => {
           e.preventDefault();
-          
-          // Find file content from courses data
-          const normalizedPath = filePath.replace(/\\/g, '/');
-          let fileData = null;
-          
-          function searchSection(section) {
-            if (section.files) {
-              for (const file of section.files) {
-                if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) {
-                  return file;
-                }
-              }
+
+          async function waitForCoursesData(maxAttempts = 40, intervalMs = 100) {
+            if (typeof courses !== 'undefined') return true;
+            for (let i = 0; i < maxAttempts; i++) {
+              await new Promise(resolve => setTimeout(resolve, intervalMs));
+              if (typeof courses !== 'undefined') return true;
             }
-            if (section.msgNotes) {
-              for (const note of section.msgNotes) {
-                if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) {
-                  return note;
-                }
-              }
-            }
-            if (section.subsections) {
-              for (const subsection of section.subsections) {
-                const result = searchSection(subsection);
-                if (result) return result;
-              }
-            }
-            return null;
+            return false;
           }
-          
-          // Search through courses
-          if (typeof courses !== 'undefined') {
+
+          function findFileInCoursesByPath(normalizedPath) {
+            if (typeof courses === 'undefined') return null;
+
+            function searchSection(section) {
+              if (section.files) {
+                for (const file of section.files) {
+                  if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) {
+                    return file;
+                  }
+                }
+              }
+              if (section.msgNotes) {
+                for (const note of section.msgNotes) {
+                  if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) {
+                    return note;
+                  }
+                }
+              }
+              if (section.subsections) {
+                for (const subsection of section.subsections) {
+                  const result = searchSection(subsection);
+                  if (result) return result;
+                }
+              }
+              return null;
+            }
+
             for (const course of courses) {
               if (course.sections) {
                 for (const section of course.sections) {
                   const result = searchSection(section);
                   if (result) {
-                    fileData = result;
-                    break;
+                    return { fileData: result, course };
                   }
                 }
               }
-              if (fileData) break;
             }
+
+            return null;
           }
           
-          if (fileData && fileData.content) {
+          // Find file content from courses data
+          const normalizedPath = decodeURIComponent(filePath).replace(/\\/g, '/');
+          const hasCourses = await waitForCoursesData();
+          if (!hasCourses) {
+            alert('Не беше заредена структурата на курсовете. Опитай отново след малко.');
+            return;
+          }
+
+          let result = findFileInCoursesByPath(normalizedPath);
+
+          if (result && result.course && typeof loadCourseContent === 'function') {
+            await loadCourseContent(result.course);
+            result = findFileInCoursesByPath(normalizedPath);
+          }
+          
+          if (result && result.fileData && result.fileData.content) {
             // Store content in sessionStorage to avoid URL length limits
-            sessionStorage.setItem('editFileContent', fileData.content);
+            sessionStorage.setItem('editFileContent', result.fileData.content);
             sessionStorage.setItem('editFilePath', filePath);
             
             // Navigate to md-editor
             window.location.href = `text-editor.html?editMode=true`;
           } else {
-            alert('Не беше намерено содържанието на файла. Файлът може да не е включен в courses.generated.js');
+            alert('Не беше намерено съдържание за този файл в courses-data.');
           }
         });
       }
@@ -1472,7 +1496,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=2026022016l1"></script>
+  <script src="courses.generated.js?v=202602221mef"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -1507,11 +1531,25 @@
   function _mergeCourseContent(course, contentKey) {
     if (!window.courseContent || !window.courseContent[contentKey]) return;
     var contentMap = window.courseContent[contentKey];
+    function getContentByPath(path) {
+      if (!path) return null;
+      var normalized = path.replace(/\\/g, '/');
+      return contentMap[path] || contentMap[normalized] || null;
+    }
     function mergeSection(section) {
       if (section.msgNotes) {
         section.msgNotes.forEach(function(note) {
-          if (!note.content && contentMap[note.path]) {
-            note.content = contentMap[note.path];
+          var noteContent = getContentByPath(note.path);
+          if (!note.content && noteContent) {
+            note.content = noteContent;
+          }
+        });
+      }
+      if (section.files) {
+        section.files.forEach(function(file) {
+          var fileContent = getContentByPath(file.path);
+          if (!file.content && fileContent) {
+            file.content = fileContent;
           }
         });
       }
@@ -1565,9 +1603,109 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026022016l1"></script>
+    <script src="js/chat.js?v=202602221mef"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
+
+  <script>
+    (function() {
+      const contentRoot = document.getElementById('content');
+      if (!contentRoot) return;
+
+      let tooltip = document.getElementById('noteTooltipViewer');
+      if (!tooltip) {
+        tooltip = document.createElement('div');
+        tooltip.id = 'noteTooltipViewer';
+        document.body.appendChild(tooltip);
+      }
+
+      tooltip.style.pointerEvents = 'none';
+
+      let activeNoteElement = null;
+
+      function escapeHtml(text) {
+        return String(text)
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function setTooltipContent(rawNote) {
+        const safe = escapeHtml(rawNote || '').replace(/\r\n|\r|\n/g, '<br>');
+        tooltip.innerHTML = safe;
+      }
+
+      function positionTooltipFor(el) {
+        const rect = el.getBoundingClientRect();
+        const pageX = window.scrollX || window.pageXOffset;
+        const pageY = window.scrollY || window.pageYOffset;
+
+        tooltip.style.display = 'block';
+
+        const tooltipRect = tooltip.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+
+        let left = rect.left + pageX;
+        let top = rect.bottom + pageY + 6;
+
+        if (left + tooltipRect.width > pageX + viewportWidth - 10) {
+          left = pageX + viewportWidth - tooltipRect.width - 10;
+        }
+        if (left < pageX + 10) {
+          left = pageX + 10;
+        }
+
+        tooltip.style.left = `${left}px`;
+        tooltip.style.top = `${top}px`;
+      }
+
+      function hideTooltip() {
+        tooltip.style.display = 'none';
+        activeNoteElement = null;
+      }
+
+      document.addEventListener('mouseover', function(e) {
+        const noteEl = e.target && e.target.closest ? e.target.closest('.editor-note[data-note]') : null;
+        if (!noteEl || !contentRoot.contains(noteEl)) return;
+
+        const noteText = noteEl.getAttribute('data-note');
+        if (!noteText) {
+          hideTooltip();
+          return;
+        }
+
+        activeNoteElement = noteEl;
+        setTooltipContent(noteText);
+        positionTooltipFor(noteEl);
+      });
+
+      document.addEventListener('mouseout', function(e) {
+        if (!activeNoteElement) return;
+
+        const leavingNote = e.target && e.target.closest ? e.target.closest('.editor-note[data-note]') : null;
+        if (!leavingNote) return;
+
+        const enteringNote = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.editor-note[data-note]') : null;
+        if (enteringNote === leavingNote) return;
+
+        hideTooltip();
+      });
+
+      window.addEventListener('scroll', function() {
+        if (activeNoteElement) {
+          positionTooltipFor(activeNoteElement);
+        }
+      }, { passive: true });
+
+      window.addEventListener('resize', function() {
+        if (activeNoteElement) {
+          positionTooltipFor(activeNoteElement);
+        }
+      });
+    })();
+  </script>
 
   <!-- H1 Navigation with Arrow Keys -->
   <script>

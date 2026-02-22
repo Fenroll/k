@@ -1,4 +1,4 @@
-window.coursesVersion = "2026022016l1";
+window.coursesVersion = "202602221mef";
 window.courses = [
   {
     "id": "000001",
@@ -236,11 +236,6 @@ window.courses = [
             "type": "html"
           },
           {
-            "name": "10-msg-Белодробен карцином.html",
-            "path": "files/Вътрешни болести 1 ч/Пулмология/10-msg-Белодробен карцином.html",
-            "type": "html"
-          },
-          {
             "name": "11-msg-Плеврални изливи.html",
             "path": "files/Вътрешни болести 1 ч/Пулмология/11-msg-Плеврални изливи.html",
             "type": "html"
@@ -258,11 +253,6 @@ window.courses = [
           {
             "name": "14-msg-Дифузни интерстициални фибрози.html",
             "path": "files/Вътрешни болести 1 ч/Пулмология/14-msg-Дифузни интерстициални фибрози.html",
-            "type": "html"
-          },
-          {
-            "name": "15-msg-Белодробен тромбоемболизъм.html",
-            "path": "files/Вътрешни болести 1 ч/Пулмология/15-msg-Белодробен тромбоемболизъм.html",
             "type": "html"
           },
           {
@@ -436,8 +426,20 @@ window.courses = [
             "url": "https://dermnetnz.org/"
           }
         ]
+      },
+      {
+        "name": "Теми",
+        "files": [],
+        "msgNotes": [
+          {
+            "name": "1-msg-Обривни елементи.html",
+            "path": "files/Дерматология и венерология/Теми/1-msg-Обривни елементи.html",
+            "type": "html"
+          }
+        ]
       }
-    ]
+    ],
+    "_contentKey": "000013"
   },
   {
     "id": "000001",
@@ -656,4 +658,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "20.02.2026 15:19";
+window.buildTimestamp = "22.02.2026 21:01";
