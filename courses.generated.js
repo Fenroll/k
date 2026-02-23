@@ -1,4 +1,4 @@
-window.coursesVersion = "202602221mef";
+window.coursesVersion = "202602231q5i";
 window.courses = [
   {
     "id": "000001",
@@ -347,7 +347,20 @@ window.courses = [
     "title": "Акушерство и Гинекология",
     "customText": "Преподавател:  ас. д-р Наталия Валентинова Мирчева",
     "isArchived": false,
-    "sections": []
+    "sections": [
+      {
+        "name": "Теми",
+        "files": [],
+        "msgNotes": [
+          {
+            "name": "1-msg-Аборт.html",
+            "path": "files/Акушерство и Гинекология/Теми/1-msg-Аборт.html",
+            "type": "html"
+          }
+        ]
+      }
+    ],
+    "_contentKey": "000005"
   },
   {
     "id": "000006",
@@ -658,4 +671,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "22.02.2026 21:01";
+window.buildTimestamp = "23.02.2026 22:22";
