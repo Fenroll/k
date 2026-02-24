@@ -1,4 +1,4 @@
-window.coursesVersion = "2026022412a1";
+window.coursesVersion = "202602241ol0";
 window.courses = [
   {
     "id": "000001",
@@ -277,8 +277,8 @@ window.courses = [
         "files": [],
         "msgNotes": [
           {
-            "name": "1-msg-Ревматоиден артрит.html",
-            "path": "files/Вътрешни болести 1 ч/Ремватология/1-msg-Ревматоиден артрит.html",
+            "name": "1-msg-Теми по Ревматология.html",
+            "path": "files/Вътрешни болести 1 ч/Ремватология/1-msg-Теми по Ревматология.html",
             "type": "html"
           }
         ]
@@ -671,4 +671,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "24.02.2026 13:46";
+window.buildTimestamp = "24.02.2026 21:48";
