@@ -1,4 +1,4 @@
-window.coursesVersion = "202602231q5i";
+window.coursesVersion = "2026022412a1";
 window.courses = [
   {
     "id": "000001",
@@ -671,4 +671,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "23.02.2026 22:22";
+window.buildTimestamp = "24.02.2026 13:46";
