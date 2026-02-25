@@ -1,4 +1,4 @@
-window.coursesVersion = "202602241ol0";
+window.coursesVersion = "202602251n1w";
 window.courses = [
   {
     "id": "000001",
@@ -387,7 +387,20 @@ window.courses = [
     "title": "Клинична лаборатория",
     "customText": "Преподавател: гл. ас. д-р Моника Тошкова Тодорова",
     "isArchived": false,
-    "sections": []
+    "sections": [
+      {
+        "name": "Теми",
+        "files": [],
+        "msgNotes": [
+          {
+            "name": "1-msg-Анемии.html",
+            "path": "files/Клинична лаборатория/Теми/1-msg-Анемии.html",
+            "type": "html"
+          }
+        ]
+      }
+    ],
+    "_contentKey": "000007"
   },
   {
     "id": "000008",
@@ -671,4 +684,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "24.02.2026 21:48";
+window.buildTimestamp = "25.02.2026 21:15";

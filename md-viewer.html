@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202602241ol0"></script>
+  <script src="js/auth-guard.js?v=202602251n1w"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
   <!-- Favicon -->
-  <link rel="icon" href="favicon.svg?v=202602241ol0" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=202602251n1w" type="image/svg+xml">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <!-- Mobile Navigation CSS -->
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202602241ol0">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202602251n1w">
   
   <!-- Firebase SDKs - Moved to head and using compat versions -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
@@ -263,7 +263,11 @@
       padding: 8px 12px;
       border-radius: 4px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      max-width: 500px;
+      width: fit-content;
+      max-width: min(700px, calc(100vw - 20px));
+      max-height: calc(100vh - 20px);
+      overflow: auto;
+      box-sizing: border-box;
       word-wrap: break-word;
       z-index: 10000;
       font-size: 0.9em;
@@ -281,6 +285,23 @@
     }
     #noteTooltipViewer li:last-child {
       margin-bottom: 0 !important;
+    }
+    #noteTooltipViewer h1, #noteTooltipViewer h2, #noteTooltipViewer h3, #noteTooltipViewer h4 {
+      margin: 0.25em 0 0.2em 0;
+      color: #2f5d50;
+      line-height: 1.25;
+      font-weight: 700;
+    }
+    #noteTooltipViewer h1 { font-size: 1.1em; }
+    #noteTooltipViewer h2 { font-size: 1.03em; }
+    #noteTooltipViewer h3 { font-size: 0.97em; }
+    #noteTooltipViewer h4 { font-size: 0.93em; }
+    #noteTooltipViewer img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0.35em 0;
+      border-radius: 6px;
     }
 
     /* Annotation styles */
@@ -430,31 +451,31 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="js/version-manager.js?v=202602241ol0"></script>
+  <script src="js/version-manager.js?v=202602251n1w"></script>
 </head>
 <body>
   <header>
     <h1 id="docTitle">Преглед на документ</h1>
     <a class="btn" href="#" onclick="if (window.opener) { window.close(); } else if (document.referrer) { history.back(); } else { window.close(); } return false;" title="Назад">
-      <img src="svg/md-viewer/icon-close.svg?v=202602241ol0" alt="Назад" width="25" height="25">
+      <img src="svg/md-viewer/icon-close.svg?v=202602251n1w" alt="Назад" width="25" height="25">
     </a>
     <button id="summaryBtn" class="btn" title="Summary">
-      <img src="svg/md-viewer/icon-summary.svg?v=202602241ol0" alt="Summary" width="20" height="20">
+      <img src="svg/md-viewer/icon-summary.svg?v=202602251n1w" alt="Summary" width="20" height="20">
     </button>
     <button id="editBtn" class="btn" title="Редактирай">
-      <img src="svg/md-viewer/icon-edit.svg?v=202602241ol0" alt="Редактирай" width="20" height="20">
+      <img src="svg/md-viewer/icon-edit.svg?v=202602251n1w" alt="Редактирай" width="20" height="20">
     </button>
     <button id="fontSizeBtn" class="btn" title="Change Font Size">
-      <img src="svg/md-viewer/icon-textsize.svg?v=202602241ol0" alt="Change Font Size" width="20" height="20">
+      <img src="svg/md-viewer/icon-textsize.svg?v=202602251n1w" alt="Change Font Size" width="20" height="20">
     </button>
     <button id="notes-toggle-btn" class="btn" title="Бележки">
-      <img src="svg/md-viewer/icon-notes.svg?v=202602241ol0" alt="Бележки" width="20" height="20">
+      <img src="svg/md-viewer/icon-notes.svg?v=202602251n1w" alt="Бележки" width="20" height="20">
     </button>
     <button id="prevH1Btn" class="btn" title="Предишно заглавие">
-      <img src="svg/md-viewer/icon-arrow-left.svg?v=202602241ol0" alt="Предишно" width="20" height="20">
+      <img src="svg/md-viewer/icon-arrow-left.svg?v=202602251n1w" alt="Предишно" width="20" height="20">
     </button>
     <button id="nextH1Btn" class="btn" title="Следващо заглавие">
-      <img src="svg/md-viewer/icon-arrow-right.svg?v=202602241ol0" alt="Следващо" width="20" height="20">
+      <img src="svg/md-viewer/icon-arrow-right.svg?v=202602251n1w" alt="Следващо" width="20" height="20">
     </button>
   </header>
   <main>
@@ -1496,7 +1517,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202602241ol0"></script>
+  <script src="courses.generated.js?v=202602251n1w"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -1603,7 +1624,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202602241ol0"></script>
+    <script src="js/chat.js?v=202602251n1w"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
 
@@ -1633,8 +1654,29 @@
       }
 
       function setTooltipContent(rawNote) {
-        const safe = escapeHtml(rawNote || '').replace(/\r\n|\r|\n/g, '<br>');
-        tooltip.innerHTML = safe;
+        const lines = String(rawNote || '').split(/\r\n|\r|\n/);
+        const rendered = lines.map((line) => {
+          const headingMatch = line.match(/^(#{1,4})\s+(.+)$/);
+          if (headingMatch) {
+            const level = headingMatch[1].length;
+            return `<h${level}>${escapeHtml(headingMatch[2])}</h${level}>`;
+          }
+          return escapeHtml(line);
+        }).join('<br>')
+          .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
+            const safeAlt = escapeHtml(alt);
+            const trimmedSrc = String(src || '').trim();
+            const isAllowedSrc = /^(https?:\/\/|data:image\/|\.\.?\/|\/)/i.test(trimmedSrc);
+            const safeSrc = isAllowedSrc ? trimmedSrc.replace(/"/g, '&quot;') : '#';
+            return `<img src="${safeSrc}" alt="${safeAlt}">`;
+          })
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/__(.+?)__/g, '<strong>$1</strong>')
+          .replace(/\*(.+?)\*/g, '<em>$1</em>')
+          .replace(/_(.+?)_/g, '<em>$1</em>')
+          .replace(/`(.+?)`/g, '<code>$1</code>')
+          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+        tooltip.innerHTML = rendered;
       }
 
       function positionTooltipFor(el) {
@@ -1655,6 +1697,14 @@
         }
         if (left < pageX + 10) {
           left = pageX + 10;
+        }
+
+        const maxTop = pageY + window.innerHeight - tooltipRect.height - 10;
+        if (top > maxTop) {
+          top = rect.top + pageY - tooltipRect.height - 6;
+        }
+        if (top < pageY + 10) {
+          top = pageY + 10;
         }
 
         tooltip.style.left = `${left}px`;
