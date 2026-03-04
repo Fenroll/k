@@ -1,4 +1,4 @@
-window.coursesVersion = "202602261j4p";
+window.coursesVersion = "202603041qu6";
 window.courses = [
   {
     "id": "000001",
@@ -274,7 +274,12 @@ window.courses = [
       },
       {
         "name": "Ремватология",
-        "files": [],
+        "files": [
+          {
+            "name": "Lecture 2 (WBC)_IVk M BEO_2026.pdf",
+            "path": "files/Вътрешни болести 1 ч/Ремватология/Lecture 2 (WBC)_IVk M BEO_2026.pdf"
+          }
+        ],
         "msgNotes": [
           {
             "name": "1-msg-Теми по Ревматология.html",
@@ -389,18 +394,51 @@ window.courses = [
     "isArchived": false,
     "sections": [
       {
-        "name": "Теми",
-        "files": [],
-        "msgNotes": [
+        "name": "Лекции",
+        "files": [
           {
-            "name": "1-msg-Анемии.html",
-            "path": "files/Клинична лаборатория/Теми/1-msg-Анемии.html",
-            "type": "html"
+            "name": "1. Анемии.url",
+            "path": "files/Клинична лаборатория/Лекции/1. Анемии.url",
+            "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/1.%20%D0%90%D0%BD%D0%B5%D0%BC%D0%B8%D0%B8.pdf"
+          },
+          {
+            "name": "1.1. Морфология на еритроцити.url",
+            "path": "files/Клинична лаборатория/Лекции/1.1. Морфология на еритроцити.url",
+            "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/1.1.%20%D0%9C%D0%BE%D1%80%D1%84%D0%BE%D0%BB%D0%BE%D0%B3%D0%B8%D1%8F%20%D0%BD%D0%B0%20%D0%B5%D1%80%D0%B8%D1%82%D1%80%D0%BE%D1%86%D0%B8%D1%82%D0%B8.pdf"
+          },
+          {
+            "name": "2. Бели кръвни клетки.url",
+            "path": "files/Клинична лаборатория/Лекции/2. Бели кръвни клетки.url",
+            "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/2.%20%D0%91%D0%B5%D0%BB%D0%B8%20%D0%BA%D1%80%D1%8A%D0%B2%D0%BD%D0%B8%20%D0%BA%D0%BB%D0%B5%D1%82%D0%BA%D0%B8.pdf"
+          },
+          {
+            "name": "3. Левкемия.url",
+            "path": "files/Клинична лаборатория/Лекции/3. Левкемия.url",
+            "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/3.%20%D0%9B%D0%B5%D0%B2%D0%BA%D0%B5%D0%BC%D0%B8%D1%8F.pdf"
+          }
+        ]
+      },
+      {
+        "name": "Упражнения",
+        "files": [
+          {
+            "name": "Упражнение 1.url",
+            "path": "files/Клинична лаборатория/Упражнения/Упражнение 1.url",
+            "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%201.pdf"
+          },
+          {
+            "name": "Упражнение 2.url",
+            "path": "files/Клинична лаборатория/Упражнения/Упражнение 2.url",
+            "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%202.pdf"
+          },
+          {
+            "name": "Упражнение 3.url",
+            "path": "files/Клинична лаборатория/Упражнения/Упражнение 3.url",
+            "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%203.pdf"
           }
         ]
       }
-    ],
-    "_contentKey": "000007"
+    ]
   },
   {
     "id": "000008",
@@ -684,4 +722,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "26.02.2026 19:50";
+window.buildTimestamp = "04.03.2026 22:37";
