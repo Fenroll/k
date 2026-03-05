@@ -1,4 +1,4 @@
-window.coursesVersion = "202603051ka9";
+window.coursesVersion = "202603051kfz";
 window.courses = [
   {
     "id": "000001",
@@ -151,22 +151,22 @@ window.courses = [
         ]
       },
       {
-        "name": "Общи",
+        "name": "Общи материали",
         "files": [
           {
             "name": "Съкратени теми.pdf",
-            "path": "files/Вътрешни болести 1 ч/Общи/Съкратени теми.pdf"
+            "path": "files/Вътрешни болести 1 ч/Общи материали/Съкратени теми.pdf"
           }
         ],
         "msgNotes": [
           {
             "name": "1-msg-Анамнеза и Статус.html",
-            "path": "files/Вътрешни болести 1 ч/Общи/1-msg-Анамнеза и Статус.html",
+            "path": "files/Вътрешни болести 1 ч/Общи материали/1-msg-Анамнеза и Статус.html",
             "type": "html"
           },
           {
             "name": "2-msg-Тестове От Мега за Изпит.html",
-            "path": "files/Вътрешни болести 1 ч/Общи/2-msg-Тестове От Мега за Изпит.html",
+            "path": "files/Вътрешни болести 1 ч/Общи материали/2-msg-Тестове От Мега за Изпит.html",
             "type": "html"
           }
         ]
@@ -736,4 +736,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "05.03.2026 20:15";
+window.buildTimestamp = "05.03.2026 20:19";
