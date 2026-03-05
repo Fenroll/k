@@ -1,4 +1,4 @@
-window.coursesVersion = "202603041r3j";
+window.coursesVersion = "2026030511by";
 window.courses = [
   {
     "id": "000001",
@@ -137,6 +137,27 @@ window.courses = [
             "name": "1-msg-Тестове От Мега.html",
             "path": "files/Вътрешни болести 1 ч/Изпит/1-msg-Тестове От Мега.html",
             "type": "html"
+          }
+        ]
+      },
+      {
+        "name": "Кардиология",
+        "files": [],
+        "subsections": [
+          {
+            "name": "Англоезични материали",
+            "files": [
+              {
+                "name": "Pathophysiology of Heart Disease.url",
+                "path": "files/Вътрешни болести 1 ч/Кардиология/Англоезични материали/Pathophysiology of Heart Disease.url",
+                "url": "https://drive.google.com/file/d/0B-G1oULku_r3UFNMSnJGRG5BWXc/view?resourcekey=0-KKKlV87yj61uhnkr9p7zsw"
+              },
+              {
+                "name": "The ECG Made Easy.url",
+                "path": "files/Вътрешни болести 1 ч/Кардиология/Англоезични материали/The ECG Made Easy.url",
+                "url": "https://pre-med.jumedicine.com/wp-content/uploads/sites/7/2020/10/The-ECG-Made-Easy-9th-Edition.pdf"
+              }
+            ]
           }
         ]
       },
@@ -416,6 +437,13 @@ window.courses = [
             "path": "files/Клинична лаборатория/Лекции/3. Левкемия.url",
             "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/3.%20%D0%9B%D0%B5%D0%B2%D0%BA%D0%B5%D0%BC%D0%B8%D1%8F.pdf"
           }
+        ],
+        "msgNotes": [
+          {
+            "name": "1-msg-Анемии.html",
+            "path": "files/Клинична лаборатория/Лекции/1-msg-Анемии.html",
+            "type": "html"
+          }
         ]
       },
       {
@@ -438,7 +466,8 @@ window.courses = [
           }
         ]
       }
-    ]
+    ],
+    "_contentKey": "000007"
   },
   {
     "id": "000008",
@@ -722,4 +751,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "04.03.2026 22:42";
+window.buildTimestamp = "05.03.2026 13:26";
