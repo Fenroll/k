@@ -1,4 +1,4 @@
-window.coursesVersion = "202603051k7r";
+window.coursesVersion = "202603051ka9";
 window.courses = [
   {
     "id": "000001",
@@ -130,17 +130,6 @@ window.courses = [
     "isArchived": false,
     "sections": [
       {
-        "name": "Изпит",
-        "files": [],
-        "msgNotes": [
-          {
-            "name": "1-msg-Тестове От Мега.html",
-            "path": "files/Вътрешни болести 1 ч/Изпит/1-msg-Тестове От Мега.html",
-            "type": "html"
-          }
-        ]
-      },
-      {
         "name": "Кардиология",
         "files": [],
         "subsections": [
@@ -165,18 +154,19 @@ window.courses = [
         "name": "Общи",
         "files": [
           {
-            "name": "Разписани теми по пропедевтика.docx",
-            "path": "files/Вътрешни болести 1 ч/Общи/Разписани теми по пропедевтика.docx"
-          },
-          {
             "name": "Съкратени теми.pdf",
             "path": "files/Вътрешни болести 1 ч/Общи/Съкратени теми.pdf"
           }
         ],
         "msgNotes": [
           {
-            "name": "msg-Анамнеза и Статус.html",
-            "path": "files/Вътрешни болести 1 ч/Общи/msg-Анамнеза и Статус.html",
+            "name": "1-msg-Анамнеза и Статус.html",
+            "path": "files/Вътрешни болести 1 ч/Общи/1-msg-Анамнеза и Статус.html",
+            "type": "html"
+          },
+          {
+            "name": "2-msg-Тестове От Мега за Изпит.html",
+            "path": "files/Вътрешни болести 1 ч/Общи/2-msg-Тестове От Мега за Изпит.html",
             "type": "html"
           }
         ]
@@ -746,4 +736,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "05.03.2026 20:14";
+window.buildTimestamp = "05.03.2026 20:15";
