@@ -1,4 +1,4 @@
-window.coursesVersion = "202603071kjr";
+window.coursesVersion = "2026030826m";
 window.courses = [
   {
     "id": "000001",
@@ -294,12 +294,7 @@ window.courses = [
       },
       {
         "name": "Ревматология",
-        "files": [
-          {
-            "name": "Lecture 2 (WBC)_IVk M BEO_2026.pdf",
-            "path": "files/Вътрешни болести 1 ч/Ревматология/Lecture 2 (WBC)_IVk M BEO_2026.pdf"
-          }
-        ],
+        "files": [],
         "msgNotes": [
           {
             "name": "1-msg-Теми по Ревматология.html",
@@ -762,4 +757,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "07.03.2026 20:21";
+window.buildTimestamp = "08.03.2026 00:47";
