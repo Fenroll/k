@@ -36,13 +36,27 @@ function normalizePriorityPath(path) {
 
   let normalized = path.trim();
 
+  // Decode once if the value is URL-encoded.
+  try {
+    normalized = decodeURIComponent(normalized);
+  } catch (_) { /* keep original */ }
+
+  // Strip file:// prefix if present.
+  normalized = normalized.replace(/^file:\/\//i, '');
+
   // Convert absolute paths like D:\...\files\... -> files/...
-  if (/^[a-zA-Z]:\\/.test(normalized)) {
+  if (/^[a-zA-Z]:[\\/]/.test(normalized)) {
     normalized = convertAbsoluteToRelativePath(normalized);
   }
 
   // Normalize separators and trim leading ./ or /
   normalized = normalized.replace(/\\/g, '/').replace(/^\.\//, '').replace(/^\/+/, '');
+
+  // If path still includes absolute location, keep only from files/ onward.
+  const filesPos = normalized.toLowerCase().indexOf('files/');
+  if (filesPos > 0) {
+    normalized = normalized.substring(filesPos);
+  }
 
   return normalized;
 }
@@ -79,30 +93,20 @@ function normalizePriorityPath(path) {
       if (data) {
         // Normalize loaded values so lookups in index.html are reliable.
         window.htmlPriority = {
-          1: normalizePriorityPath(data[1] || 'files/Клинична Патология/Колоквиум 3 - Отделителна и Нервна система/1-msg-Теми.html'),
-          2: normalizePriorityPath(data[2] || 'files/Дерматология и венерология/Теми/2-msg-Методи на изследване в дерматологията - клинични, лабораторни.html'),
-          3: normalizePriorityPath(data[3] || 'files/Клинична Генетика/Изпит/1-msg-Теми.html')
+          1: normalizePriorityPath(data[1] || data['1'] || ''),
+          2: normalizePriorityPath(data[2] || data['2'] || ''),
+          3: normalizePriorityPath(data[3] || data['3'] || '')
         };
       } else {
-        // Default values if not found in Firebase
-        window.htmlPriority = {
-          1: 'files/Клинична Патология/Колоквиум 3 - Отделителна и Нервна система/1-msg-Теми.html',
-          2: 'files/Дерматология и венерология/Теми/2-msg-Методи на изследване в дерматологията - клинични, лабораторни.html',
-          3: 'files/Клинична Генетика/Изпит/1-msg-Теми.html'
-        };
-        // Save default to Firebase if it doesn't exist
-        db.ref('/settings/html_priority').set(window.htmlPriority);
+        // Keep empty when not configured; admin.html is the source of truth.
+        window.htmlPriority = { 1: '', 2: '', 3: '' };
       }
       return window.htmlPriority;
     })
     .catch(error => {
       console.error("Error fetching htmlPriority from Firebase:", error);
-      // Fallback to hardcoded defaults in case of error
-      window.htmlPriority = {
-        1: 'files/Рентгенология/Изпит/1-msg-Теми.html',
-        2: 'files/Клинична Генетика/Изпит/2-msg-Въпроси.html',
-        3: 'files/Клинична Генетика/Изпит/1-msg-Теми.html'
-      };
+      // Fallback to empty config if Firebase read fails.
+      window.htmlPriority = { 1: '', 2: '', 3: '' };
       return window.htmlPriority;
     });
 })();
