@@ -1,4 +1,4 @@
-window.coursesVersion = "2026030826m";
+window.coursesVersion = "2026030817er";
 window.courses = [
   {
     "id": "000001",
@@ -528,11 +528,26 @@ window.courses = [
       },
       {
         "name": "Теми",
-        "files": [],
+        "files": [
+          {
+            "name": "Презентация за 3.pdf",
+            "path": "files/Дерматология и венерология/Теми/Презентация за 3.pdf"
+          }
+        ],
         "msgNotes": [
           {
             "name": "1-msg-Обривни елементи.html",
             "path": "files/Дерматология и венерология/Теми/1-msg-Обривни елементи.html",
+            "type": "html"
+          },
+          {
+            "name": "2-msg-Методи на изследване в дерматологията - клинични, лабораторни.html",
+            "path": "files/Дерматология и венерология/Теми/2-msg-Методи на изследване в дерматологията - клинични, лабораторни.html",
+            "type": "html"
+          },
+          {
+            "name": "3-msg-Лош текст за презентация.html",
+            "path": "files/Дерматология и венерология/Теми/3-msg-Лош текст за презентация.html",
             "type": "html"
           }
         ]
@@ -757,4 +772,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "08.03.2026 00:47";
+window.buildTimestamp = "08.03.2026 15:37";
