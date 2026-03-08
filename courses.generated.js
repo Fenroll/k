@@ -1,4 +1,4 @@
-window.coursesVersion = "2026030817ry";
+window.coursesVersion = "202603081apc";
 window.courses = [
   {
     "id": "000001",
@@ -345,8 +345,13 @@ window.courses = [
         "files": [],
         "msgNotes": [
           {
-            "name": "1-msg-Теми по Нервна система.html",
-            "path": "files/Клинична Патология/Колоквиум 3 - Отделителна и Нервна система/1-msg-Теми по Нервна система.html",
+            "name": "1-msg-Тест.html",
+            "path": "files/Клинична Патология/Колоквиум 3 - Отделителна и Нервна система/1-msg-Тест.html",
+            "type": "html"
+          },
+          {
+            "name": "3-msg-Теми по Нервна система.html",
+            "path": "files/Клинична Патология/Колоквиум 3 - Отделителна и Нервна система/3-msg-Теми по Нервна система.html",
             "type": "html"
           }
         ]
@@ -778,4 +783,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "08.03.2026 15:45";
+window.buildTimestamp = "08.03.2026 16:48";

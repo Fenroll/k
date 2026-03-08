@@ -63,8 +63,8 @@ function convertAbsoluteToRelativePath(absolutePath) {
       } else {
         // Default values if not found in Firebase
         window.htmlPriority = {
-          1: 'files/Рентгеология/Изпит/1-msg-Теми.html',
-          2: 'files/Клинична Генетика/Изпит/2-msg-Въпроси.html',
+          1: 'files\Клинична Патология\Колоквиум 3 - Отделителна и Нервна система\1-msg-Теми.html',
+          2: 'D:\Filen\Personal\Website\files\Дерматология и венерология\Теми\Презентация.url',
           3: 'files/Клинична Генетика/Изпит/1-msg-Теми.html'
         };
         // Save default to Firebase if it doesn't exist
