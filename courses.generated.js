@@ -1,4 +1,4 @@
-window.coursesVersion = "2026030817er";
+window.coursesVersion = "2026030817jv";
 window.courses = [
   {
     "id": "000001",
@@ -530,8 +530,9 @@ window.courses = [
         "name": "Теми",
         "files": [
           {
-            "name": "Презентация за 3.pdf",
-            "path": "files/Дерматология и венерология/Теми/Презентация за 3.pdf"
+            "name": "Презентация.url",
+            "path": "files/Дерматология и венерология/Теми/Презентация.url",
+            "url": "https://files.blackboard.lol/%D0%9F%D1%80%D0%B5%D0%B7%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F.pdf"
           }
         ],
         "msgNotes": [
@@ -772,4 +773,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "08.03.2026 15:37";
+window.buildTimestamp = "08.03.2026 15:40";
