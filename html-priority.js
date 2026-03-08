@@ -29,6 +29,24 @@ function convertAbsoluteToRelativePath(absolutePath) {
   return absolutePath;
 }
 
+// Normalize path for matching against courses note.path values.
+// Ensures relative path + forward slashes regardless of source format.
+function normalizePriorityPath(path) {
+  if (!path || typeof path !== 'string') return '';
+
+  let normalized = path.trim();
+
+  // Convert absolute paths like D:\...\files\... -> files/...
+  if (/^[a-zA-Z]:\\/.test(normalized)) {
+    normalized = convertAbsoluteToRelativePath(normalized);
+  }
+
+  // Normalize separators and trim leading ./ or /
+  normalized = normalized.replace(/\\/g, '/').replace(/^\.\//, '').replace(/^\/+/, '');
+
+  return normalized;
+}
+
 // Firebase initialization and data fetching for htmlPriority
 (function() {
   const firebaseConfig = {
@@ -59,12 +77,17 @@ function convertAbsoluteToRelativePath(absolutePath) {
     .then(snapshot => {
       const data = snapshot.val();
       if (data) {
-        window.htmlPriority = data;
+        // Normalize loaded values so lookups in index.html are reliable.
+        window.htmlPriority = {
+          1: normalizePriorityPath(data[1] || 'files/Клинична Патология/Колоквиум 3 - Отделителна и Нервна система/1-msg-Теми.html'),
+          2: normalizePriorityPath(data[2] || 'files/Дерматология и венерология/Теми/2-msg-Методи на изследване в дерматологията - клинични, лабораторни.html'),
+          3: normalizePriorityPath(data[3] || 'files/Клинична Генетика/Изпит/1-msg-Теми.html')
+        };
       } else {
         // Default values if not found in Firebase
         window.htmlPriority = {
-          1: 'files\Клинична Патология\Колоквиум 3 - Отделителна и Нервна система\1-msg-Теми.html',
-          2: 'files/Клинична Генетика/Изпит/2-msg-Въпроси.html',
+          1: 'files/Клинична Патология/Колоквиум 3 - Отделителна и Нервна система/1-msg-Теми.html',
+          2: 'files/Дерматология и венерология/Теми/2-msg-Методи на изследване в дерматологията - клинични, лабораторни.html',
           3: 'files/Клинична Генетика/Изпит/1-msg-Теми.html'
         };
         // Save default to Firebase if it doesn't exist
@@ -76,7 +99,7 @@ function convertAbsoluteToRelativePath(absolutePath) {
       console.error("Error fetching htmlPriority from Firebase:", error);
       // Fallback to hardcoded defaults in case of error
       window.htmlPriority = {
-        1: 'files/Рентгеология/Изпит/1-msg-Теми.html',
+        1: 'files/Рентгенология/Изпит/1-msg-Теми.html',
         2: 'files/Клинична Генетика/Изпит/2-msg-Въпроси.html',
         3: 'files/Клинична Генетика/Изпит/1-msg-Теми.html'
       };
