@@ -1,4 +1,4 @@
-window.coursesVersion = "2026030817jv";
+window.coursesVersion = "2026030817ry";
 window.courses = [
   {
     "id": "000001",
@@ -134,16 +134,21 @@ window.courses = [
         "files": [],
         "subsections": [
           {
-            "name": "Англоезични материали",
+            "name": "Материали",
             "files": [
               {
+                "name": "Как се разчита ЕКГ - Сотир Марчев.url",
+                "path": "files/Вътрешни болести 1 ч/Кардиология/Материали/Как се разчита ЕКГ - Сотир Марчев.url",
+                "url": "https://files.blackboard.lol/EKG_Marchev.pdf"
+              },
+              {
                 "name": "Pathophysiology of Heart Disease.url",
-                "path": "files/Вътрешни болести 1 ч/Кардиология/Англоезични материали/Pathophysiology of Heart Disease.url",
+                "path": "files/Вътрешни болести 1 ч/Кардиология/Материали/Pathophysiology of Heart Disease.url",
                 "url": "https://drive.google.com/file/d/0B-G1oULku_r3UFNMSnJGRG5BWXc/view?resourcekey=0-KKKlV87yj61uhnkr9p7zsw"
               },
               {
                 "name": "The ECG Made Easy.url",
-                "path": "files/Вътрешни болести 1 ч/Кардиология/Англоезични материали/The ECG Made Easy.url",
+                "path": "files/Вътрешни болести 1 ч/Кардиология/Материали/The ECG Made Easy.url",
                 "url": "https://pre-med.jumedicine.com/wp-content/uploads/sites/7/2020/10/The-ECG-Made-Easy-9th-Edition.pdf"
               }
             ]
@@ -773,4 +778,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "08.03.2026 15:40";
+window.buildTimestamp = "08.03.2026 15:45";
