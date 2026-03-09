@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=202603081b0o"></script>
+    <script src="js/auth-guard.js?v=202603091rjv"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=202602171mhr"></script>
@@ -9,8 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <link rel="icon" href="favicon.svg?v=202603081b0o" type="image/svg+xml">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202603081b0o">
+     <link rel="icon" href="favicon.svg?v=202603091rjv" type="image/svg+xml">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202603091rjv">
     <title>Admin Panel</title>
     <style>
         body {
@@ -485,10 +485,10 @@
             }
         }
     </style>
-  <script src="js/version-manager.js?v=202603081b0o"></script>
+  <script src="js/version-manager.js?v=202603091rjv"></script>
 </head>
 <body>
-    <a href="index.html?v=202603081b0o" class="btn back-btn">Go Back</a>
+    <a href="index.html?v=202603091rjv" class="btn back-btn">Go Back</a>
     <h1>Admin Panel</h1>
 
     <div id="notification-container"></div>
@@ -522,6 +522,19 @@
                 </div>
                 <button type="submit" class="btn">Create Account</button>
             </form>
+        </div>
+
+        <div class="admin-module">
+            <h2>Upload Size Limit</h2>
+            <div id="upload-limit-error" class="error-message"></div>
+            <div class="form-group">
+                <label for="upload-max-total-mb">Max total uploads (MB)</label>
+                <input type="text" id="upload-max-total-mb" placeholder="e.g. 300">
+            </div>
+            <div id="upload-limit-current" style="font-size: 0.9rem; color: #bdbdbd; margin-bottom: 0.9rem;">
+                Current limit: loading...
+            </div>
+            <button id="save-upload-limit" class="btn">Save Upload Limit</button>
         </div>
 
         <div class="admin-module">
@@ -1002,7 +1015,7 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=202603081b0o"></script>
+    <script src="courses.generated.js?v=202603091rjv"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=202602171mhr"></script>
     <script src="js/admin-visual-editor.js?v=202602171mhr"></script>

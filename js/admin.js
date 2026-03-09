@@ -37,8 +37,12 @@
         const closeModalBtn = modal.querySelector('.close-button');
         const saveChangesBtn = document.getElementById('save-user-changes');
         const resetPasswordBtn = document.getElementById('reset-password');
-        const deleteAccountBtn = document.getElementById('delete-account');
         const notificationContainer = document.getElementById('notification-container');
+
+        // Upload limit settings elements
+        const uploadMaxTotalMbInput = document.getElementById('upload-max-total-mb');
+        const uploadLimitCurrentText = document.getElementById('upload-limit-current');
+        const saveUploadLimitBtn = document.getElementById('save-upload-limit');
         
         // HTML Priority Settings elements
         const htmlPriorityForm = document.getElementById('html-priority-form-element');
@@ -251,10 +255,9 @@
                 const randomColor = generateRandomColor();
 
                 await newUserRef.set({
-                    uid: uid,
                     username: username,
                     displayName: displayName,
-                    password: btoa(password),
+                    password: password,
                     color: randomColor,
                     isAdmin: false,
                     createdAt: Date.now()
@@ -370,36 +373,65 @@
             }
         };
 
-        if (deleteAccountBtn) {
-            deleteAccountBtn.onclick = async () => {
-                const uid = document.getElementById('edit-user-uid').value;
-                const username = document.getElementById('edit-username').value || 'this user';
-
-                if (!uid) {
-                    showError('edit-user-error', 'User ID is missing.');
-                    return;
-                }
-
-                const confirmed = confirm(`Are you sure you want to delete account "${username}"? This action cannot be undone.`);
-                if (!confirmed) return;
-
-                try {
-                    await db.ref(`site_users/${uid}`).remove();
-                    showNotification(`Account "${username}" deleted successfully.`);
-                    modal.style.display = 'none';
-                } catch (error) {
-                    showError('edit-user-error', 'Failed to delete account: ' + (error.message || error));
-                    console.error(error);
-                }
-            };
-        }
-
 
         // Schedule Data (JSON) Management
         const scheduleJsonEditor = document.getElementById('schedule-json-editor');
         const loadScheduleJsonBtn = document.getElementById('load-schedule-json');
         const saveScheduleJsonBtn = document.getElementById('save-schedule-json');
         const scheduleJsonRef = db.ref('/settings/scheduleData');
+
+        // Upload limit settings
+        const uploadLimitSettingsRef = db.ref('/settings/uploadLimits');
+        const BYTES_IN_MB = 1024 * 1024;
+
+        function formatBytesAsMb(bytes) {
+            const mb = bytes / BYTES_IN_MB;
+            return Number.isInteger(mb) ? `${mb} MB` : `${mb.toFixed(2)} MB`;
+        }
+
+        uploadLimitSettingsRef.on('value', (snapshot) => {
+            const settings = snapshot.val() || {};
+            const currentLimitBytes = Number(settings.defaultMaxTotalBytes);
+
+            if (Number.isFinite(currentLimitBytes) && currentLimitBytes > 0) {
+                const currentLimitMb = currentLimitBytes / BYTES_IN_MB;
+                uploadMaxTotalMbInput.value = Number.isInteger(currentLimitMb)
+                    ? String(currentLimitMb)
+                    : currentLimitMb.toFixed(2);
+                uploadLimitCurrentText.textContent = `Current limit: ${formatBytesAsMb(currentLimitBytes)}`;
+            } else {
+                uploadMaxTotalMbInput.value = '';
+                uploadLimitCurrentText.textContent = 'Current limit: not set (worker fallback will be used)';
+            }
+
+            hideError('upload-limit-error');
+        });
+
+        if (saveUploadLimitBtn) {
+            saveUploadLimitBtn.addEventListener('click', async () => {
+                hideError('upload-limit-error');
+
+                const mbValue = Number(uploadMaxTotalMbInput.value);
+                if (!Number.isFinite(mbValue) || mbValue <= 0) {
+                    showError('upload-limit-error', 'Please enter a valid number greater than 0 (MB).');
+                    return;
+                }
+
+                const maxTotalBytes = Math.floor(mbValue * BYTES_IN_MB);
+
+                try {
+                    await uploadLimitSettingsRef.update({
+                        defaultMaxTotalBytes: maxTotalBytes,
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP,
+                        updatedBy: user.userName || user.username || 'admin'
+                    });
+                    showNotification(`Upload limit saved: ${formatBytesAsMb(maxTotalBytes)}`);
+                } catch (error) {
+                    console.error('Failed to save upload limit:', error);
+                    showError('upload-limit-error', 'Failed to save upload limit: ' + error.message);
+                }
+            });
+        }
 
         // Load from Firebase
         loadScheduleJsonBtn.addEventListener('click', async () => {

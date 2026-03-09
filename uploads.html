@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/auth-guard.js?v=202603091rjv"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Uploads</title>
+  <link rel="icon" href="favicon.svg?v=202603091rjv" type="image/svg+xml">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700&display=swap">
+  <style>
+    :root {
+      --bg: #f5f5f5;
+      --panel: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #588157;
+      --primary-dark: #476647;
+      --danger-bg: #fee2e2;
+      --danger-text: #991b1b;
+      --danger-btn: #b91c1c;
+      --danger-btn-dark: #991b1b;
+      --ok-bg: #dcfce7;
+      --ok-text: #166534;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: radial-gradient(circle at 20% 0%, #e3f1e3 0%, var(--bg) 52%);
+      color: var(--text);
+      font-family: 'Open Sans', Arial, sans-serif;
+    }
+
+    .page {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 22px 16px 32px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .title {
+      margin: 0;
+      font-size: 30px;
+      font-weight: 700;
+      color: #1f2937;
+      letter-spacing: 0.01em;
+    }
+
+    .btn {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: var(--primary-dark); }
+
+    .btn-secondary {
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: 0 16px 32px rgba(0, 0, 0, 0.07);
+      padding: 18px;
+    }
+
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(220px, 1fr) auto auto;
+      gap: 10px;
+      margin-bottom: 12px;
+      align-items: center;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .tab-btn {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      color: #374151;
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.2s ease;
+    }
+
+    .tab-btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .tab-btn.active {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: #fff;
+    }
+
+    .input,
+    .select {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 14px;
+      background: #fff;
+      color: #111827;
+    }
+
+    .stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+
+    .stat {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px 12px;
+      min-width: 130px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.75);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 4px;
+    }
+
+    .stat-value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .status {
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 12px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .status.show { display: block; }
+    .status.error {
+      background: var(--danger-bg);
+      color: var(--danger-text);
+      border: 1px solid #fecaca;
+    }
+
+    .status.ok {
+      background: var(--ok-bg);
+      color: var(--ok-text);
+      border: 1px solid #bbf7d0;
+    }
+
+    .table-wrap {
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      overflow: hidden;
+      background: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    thead th {
+      text-align: left;
+      font-size: 12px;
+      color: #6b7280;
+      font-weight: 700;
+      background: #f9fafb;
+      padding: 10px;
+      border-bottom: 1px solid #e5e7eb;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      position: sticky;
+      top: 0;
+      z-index: 2;
+    }
+
+    tbody td {
+      padding: 10px;
+      border-bottom: 1px solid #f3f4f6;
+      vertical-align: top;
+      font-size: 14px;
+      color: #1f2937;
+      word-break: break-word;
+    }
+
+    tbody tr:hover {
+      background: #f9fafb;
+    }
+
+    .file-name {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+
+    .file-type-icon {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .file-path {
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .uploader-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .uploader-avatar-link {
+      display: inline-flex;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      overflow: hidden;
+      border: 1px solid #d1d5db;
+      background: #f3f4f6;
+      text-decoration: none;
+    }
+
+    .uploader-avatar {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .uploader-avatar-fallback {
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      background: #e5e7eb;
+      color: #374151;
+      font-size: 11px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .action-link {
+      font-size: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      padding: 5px 8px;
+      color: #1f2937;
+      text-decoration: none;
+      background: #fff;
+      cursor: pointer;
+    }
+
+    .action-link:hover {
+      border-color: #9ca3af;
+      background: #f3f4f6;
+    }
+
+    .action-link.action-delete {
+      border-color: #fca5a5;
+      background: var(--danger-btn);
+      color: #fff;
+    }
+
+    .action-link.action-delete:hover {
+      border-color: #ef4444;
+      background: var(--danger-btn-dark);
+    }
+
+    .empty {
+      padding: 24px;
+      text-align: center;
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .loading {
+      padding: 24px;
+      text-align: center;
+      color: #374151;
+      font-size: 14px;
+    }
+
+    @media (max-width: 860px) {
+      .controls {
+        grid-template-columns: 1fr;
+      }
+
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+
+      thead { display: none; }
+
+      tbody tr {
+        border-bottom: 1px solid #e5e7eb;
+        padding: 8px;
+      }
+
+      tbody td {
+        border: 0;
+        padding: 6px 0;
+      }
+
+      tbody td::before {
+        content: attr(data-label);
+        display: block;
+        font-size: 11px;
+        color: #6b7280;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+        font-weight: 700;
+      }
+    }
+  </style>
+  <script src="js/version-manager.js?v=202603091rjv"></script>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div>
+        <h1 class="title">Uploads</h1>
+      </div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <a href="tools.html?v=202603091rjv" class="btn btn-secondary">Back To Tools</a>
+        <button id="refreshBtn" class="btn btn-primary" type="button">Refresh</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div id="statusBox" class="status"></div>
+
+      <div class="controls">
+        <input id="searchInput" class="input" type="text" placeholder="Search by filename, path, user, URL...">
+        <select id="sortSelect" class="select">
+          <option value="newest">Sort: Newest</option>
+          <option value="oldest">Sort: Oldest</option>
+          <option value="largest">Sort: Largest</option>
+          <option value="smallest">Sort: Smallest</option>
+          <option value="name">Sort: Name</option>
+        </select>
+        <select id="scopeSelect" class="select">
+          <option value="all">Scope: All Users</option>
+          <option value="mine">Scope: My Uploads</option>
+        </select>
+      </div>
+
+      <div class="tabs">
+        <button id="tabGeneral" class="tab-btn active" type="button">General Uploads</button>
+        <button id="tabAdminTextEditor" class="tab-btn" type="button" style="display:none;">Admin: Text-Editor</button>
+        <button id="tabAdminChatImages" class="tab-btn" type="button" style="display:none;">Admin: Chat Images</button>
+      </div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Records</div>
+          <div id="statRecords" class="stat-value">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Total Size</div>
+          <div id="statSize" class="stat-value">0 B</div>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th style="width:34%;">File</th>
+              <th style="width:12%;">Size</th>
+              <th style="width:16%;">Uploader</th>
+              <th style="width:16%;">Date</th>
+              <th style="width:22%;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr><td class="loading" colspan="5">Loading uploads...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/user-identity.js?v=202603091"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+
+  <script>
+    (function() {
+      const firebaseConfig = {
+        apiKey: 'API_KEY',
+        authDomain: 'med-student-chat.firebaseapp.com',
+        databaseURL: 'https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app',
+        projectId: 'med-student-chat',
+        storageBucket: 'med-student-chat.appspot.com',
+        messagingSenderId: 'SENDER_ID',
+        appId: 'APP_ID'
+      };
+
+      if (typeof firebase === 'undefined') {
+        showStatus('Firebase SDK is not available.', true);
+        return;
+      }
+
+      if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+
+      const db = firebase.database();
+      const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+      const tableBody = document.getElementById('tableBody');
+      const statRecords = document.getElementById('statRecords');
+      const statSize = document.getElementById('statSize');
+      const searchInput = document.getElementById('searchInput');
+      const sortSelect = document.getElementById('sortSelect');
+      const scopeSelect = document.getElementById('scopeSelect');
+      const refreshBtn = document.getElementById('refreshBtn');
+      const statusBox = document.getElementById('statusBox');
+      const tabGeneral = document.getElementById('tabGeneral');
+      const tabAdminTextEditor = document.getElementById('tabAdminTextEditor');
+      const tabAdminChatImages = document.getElementById('tabAdminChatImages');
+
+      let currentUserName = '';
+      let currentUserIsAdmin = false;
+      let activeTab = 'general';
+      let allRows = [];
+      let uploaderAvatarMap = new Map();
+
+      function normalizeIdentity(value) {
+        return String(value || '').trim().toLowerCase();
+      }
+
+      function isHttpUrl(value) {
+        return /^https?:\/\//i.test(String(value || '').trim());
+      }
+
+      function getUploaderAvatarUrl(uploaderName) {
+        const key = normalizeIdentity(uploaderName);
+        if (!key) return '';
+        return uploaderAvatarMap.get(key) || '';
+      }
+
+      async function loadUploaderAvatarMap() {
+        uploaderAvatarMap = new Map();
+        try {
+          const usersSnap = await db.ref('site_users').once('value');
+          const users = usersSnap.val() || {};
+
+          for (const uid of Object.keys(users)) {
+            const user = users[uid] || {};
+            const avatar = isHttpUrl(user.avatar) ? String(user.avatar).trim() : '';
+            if (!avatar) continue;
+
+            const aliases = [
+              uid,
+              user.uid,
+              user.userId,
+              user.username,
+              user.displayName,
+              user.userName
+            ];
+
+            for (const alias of aliases) {
+              const normalized = normalizeIdentity(alias);
+              if (!normalized) continue;
+              if (!uploaderAvatarMap.has(normalized)) {
+                uploaderAvatarMap.set(normalized, avatar);
+              }
+            }
+          }
+        } catch (error) {
+          console.warn('Could not load uploader avatars map:', error);
+        }
+      }
+
+      function deriveBucketTypeFromUrl(url) {
+        try {
+          const parsed = new URL(String(url || ''));
+          if (parsed.hostname === 'chat.coursebook.lol') return 'chat';
+          return 'default';
+        } catch (_) {
+          return 'default';
+        }
+      }
+
+      function deriveKeyFromUrl(url) {
+        try {
+          const parsed = new URL(String(url || ''));
+          return decodeURIComponent(parsed.pathname.replace(/^\//, ''));
+        } catch (_) {
+          return '';
+        }
+      }
+
+      function showStatus(message, isError) {
+        statusBox.textContent = message;
+        statusBox.className = 'status show ' + (isError ? 'error' : 'ok');
+      }
+
+      function clearStatus() {
+        statusBox.className = 'status';
+        statusBox.textContent = '';
+      }
+
+      function formatBytes(bytes) {
+        const n = Number(bytes);
+        if (!Number.isFinite(n) || n <= 0) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let value = n;
+        let i = 0;
+        while (value >= 1024 && i < units.length - 1) {
+          value /= 1024;
+          i += 1;
+        }
+        return (value >= 100 || i === 0 ? value.toFixed(0) : value.toFixed(2)) + ' ' + units[i];
+      }
+
+      function escapeHtml(value) {
+        return String(value || '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&#39;');
+      }
+
+      function normalizeTimestamp(input) {
+        if (typeof input === 'number' && Number.isFinite(input)) {
+          return input;
+        }
+
+        if (typeof input === 'string') {
+          const asNum = Number(input);
+          if (Number.isFinite(asNum) && asNum > 0) return asNum;
+          const parsed = Date.parse(input);
+          if (!Number.isNaN(parsed)) return parsed;
+        }
+
+        return 0;
+      }
+
+      function toDateString(ts) {
+        if (!ts) return '-';
+        try {
+          const d = new Date(ts);
+          return d.toLocaleString();
+        } catch (_) {
+          return '-';
+        }
+      }
+
+      function getFileNameFromPath(path) {
+        const value = String(path || '');
+        const parts = value.split('/');
+        return parts[parts.length - 1] || value;
+      }
+
+      function getRowExtension(row) {
+        const candidates = [
+          row && row.name ? String(row.name) : '',
+          row && row.path ? String(row.path) : '',
+          row && row.url ? String(row.url) : ''
+        ];
+
+        for (const raw of candidates) {
+          if (!raw) continue;
+          const normalized = raw.split('?')[0].split('#')[0];
+          const fileName = normalized.split('/').pop() || normalized;
+          const dot = fileName.lastIndexOf('.');
+          if (dot <= 0) continue;
+          const ext = fileName.slice(dot + 1).toLowerCase();
+          if (ext) return ext;
+        }
+
+        return '';
+      }
+
+      function getFileTypeIconPath(row) {
+        const ext = getRowExtension(row);
+
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'avif', 'heic'].includes(ext)) {
+          return 'svg/uploads/image-icon.svg';
+        }
+
+        if (ext === 'pdf') {
+          return 'svg/uploads/pdf-icon.svg';
+        }
+
+        if (['ppt', 'pptx'].includes(ext)) {
+          return 'svg/uploads/powerpoin-icon.svg';
+        }
+
+        if (['doc', 'docx', 'odt', 'rtf'].includes(ext)) {
+          return 'svg/uploads/word-icon.svg';
+        }
+
+        return 'svg/uploads/note-icon.svg';
+      }
+
+      function buildPublicUrl(domain, key) {
+        const safePath = String(key || '')
+          .split('/')
+          .map((segment) => encodeURIComponent(segment))
+          .join('/');
+        return String(domain || '').replace(/\/+$/, '') + '/' + safePath;
+      }
+
+      function normalizeRecord(item, pathHint, keyHint) {
+        if (!item || typeof item !== 'object') return null;
+
+        const url = item.url || item.fileUrl || item.downloadUrl || item.href || '';
+        const path = item.path || item.fullPath || item.filePath || item.key || pathHint || '';
+        const size = Number(item.size || item.fileSize || item.bytes || 0);
+        const uploader = item.uploadedBy || item.userName || item.uploader || item.owner || item.createdBy || '';
+        const uploadedAt = normalizeTimestamp(item.uploadedAt || item.createdAt || item.timestamp || item.date);
+        const bucketType = item.bucketType || deriveBucketTypeFromUrl(url);
+
+        let name = item.name || item.fileName || item.originalName || '';
+        if (!name) name = getFileNameFromPath(path || url);
+        if (!name) name = keyHint || 'Unnamed file';
+
+        let finalUrl = String(url || '').trim();
+        if (!finalUrl && path && !/^https?:\/\//i.test(path)) {
+          finalUrl = buildPublicUrl('https://files.coursebook.lol', String(path).replace(/^\/+/, ''));
+        }
+
+        if (!finalUrl) return null;
+
+        const resolvedKey = String(item.key || path || deriveKeyFromUrl(finalUrl)).replace(/^\/+/, '');
+
+        return {
+          id: keyHint || path || finalUrl,
+          name: String(name),
+          path: String(path || ''),
+          size: Number.isFinite(size) && size > 0 ? size : 0,
+          uploader: String(uploader || 'unknown'),
+          uploadedAt,
+          url: finalUrl,
+          key: resolvedKey,
+          bucketType
+        };
+      }
+
+      function normalizeR2Object(object, bucketType) {
+        if (!object || !object.key) return null;
+
+        const key = String(object.key);
+        const parts = key.split('/');
+        const uploader = parts.length > 1 ? parts[0] : 'unknown';
+        const name = getFileNameFromPath(key);
+        const uploadedAt = normalizeTimestamp(object.uploaded);
+        const size = Number(object.size || 0);
+        const domain = bucketType === 'chat' ? 'https://chat.coursebook.lol' : 'https://files.coursebook.lol';
+
+        return {
+          id: 'r2:' + key,
+          name,
+          path: key,
+          size: Number.isFinite(size) && size > 0 ? size : 0,
+          uploader,
+          uploadedAt,
+          url: buildPublicUrl(domain, key),
+          key,
+          bucketType
+        };
+      }
+
+      function canDeleteRow(row) {
+        if (!row || !row.key) return false;
+        if (currentUserIsAdmin) return true;
+        const me = normalizeIdentity(currentUserName);
+        if (!me) return false;
+        return normalizeIdentity(row.uploader) === me;
+      }
+
+      async function deleteUploadRow(row) {
+        if (!row || !row.key) {
+          showStatus('Cannot delete this file: missing key.', true);
+          return;
+        }
+
+        const ownerLabel = row.uploader ? `Owner: ${row.uploader}\n` : '';
+        const shouldDelete = window.confirm(`Delete this upload?\n\n${ownerLabel}${row.name}`);
+        if (!shouldDelete) return;
+
+        try {
+          const response = await fetch(R2_WORKER_URL, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              key: row.key,
+              bucketType: row.bucketType || 'default'
+            })
+          });
+
+          if (!response.ok) {
+            const text = await response.text();
+            throw new Error(text || `Delete failed (${response.status})`);
+          }
+
+          allRows = allRows.filter((item) => !(item.key === row.key && item.bucketType === row.bucketType));
+          showStatus('Upload deleted successfully.', false);
+          applyFiltersAndRender();
+        } catch (error) {
+          console.error('Delete upload error:', error);
+          showStatus('Failed to delete upload: ' + error.message, true);
+        }
+      }
+
+      async function loadFromWorkerBucket(bucketType) {
+        const records = [];
+        let cursor = '';
+        let pages = 0;
+
+        while (pages < 30) {
+          const url = new URL(R2_WORKER_URL);
+          url.searchParams.set('action', 'list');
+          url.searchParams.set('bucketType', bucketType);
+          url.searchParams.set('limit', '1000');
+          if (cursor) {
+            url.searchParams.set('cursor', cursor);
+          }
+
+          const response = await fetch(url.toString(), { method: 'GET' });
+          if (!response.ok) {
+            const text = await response.text();
+            throw new Error('Worker list failed (' + response.status + '): ' + text);
+          }
+
+          const payload = await response.json();
+          const objects = Array.isArray(payload.objects) ? payload.objects : [];
+          for (const object of objects) {
+            const normalized = normalizeR2Object(object, bucketType);
+            if (normalized) records.push(normalized);
+          }
+
+          pages += 1;
+          if (!payload.truncated || !payload.cursor) {
+            break;
+          }
+          cursor = payload.cursor;
+        }
+
+        return records;
+      }
+
+      async function loadFromWorkerFallback() {
+        const merged = [];
+        const defaultRows = await loadFromWorkerBucket('default');
+        merged.push.apply(merged, defaultRows);
+
+        // Chat bucket listing is optional; ignore failures so default bucket still works.
+        try {
+          const chatRows = await loadFromWorkerBucket('chat');
+          merged.push.apply(merged, chatRows);
+        } catch (_) {}
+
+        const unique = [];
+        const seen = new Set();
+        for (const row of merged) {
+          const key = row.id + '|' + row.url;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          unique.push(row);
+        }
+
+        return unique;
+      }
+
+      function collectRecords(node, pathParts, out) {
+        if (node == null) return;
+
+        if (Array.isArray(node)) {
+          for (let i = 0; i < node.length; i += 1) {
+            collectRecords(node[i], pathParts.concat(String(i)), out);
+          }
+          return;
+        }
+
+        if (typeof node !== 'object') return;
+
+        const keyHint = pathParts.length ? pathParts[pathParts.length - 1] : '';
+        const pathHint = pathParts.join('/');
+        const record = normalizeRecord(node, pathHint, keyHint);
+        if (record) {
+          out.push(record);
+          return;
+        }
+
+        const keys = Object.keys(node);
+        for (const key of keys) {
+          collectRecords(node[key], pathParts.concat(key), out);
+        }
+      }
+
+      function getRowSearchText(row) {
+        return (
+          row.name + ' ' +
+          row.path + ' ' +
+          row.uploader + ' ' +
+          row.url
+        ).toLowerCase();
+      }
+
+      function getRowCategoryHaystack(row) {
+        const parts = [
+          row && row.path ? String(row.path) : '',
+          row && row.url ? String(row.url) : '',
+          row && row.name ? String(row.name) : ''
+        ];
+
+        const raw = parts.join(' ').toLowerCase();
+        let decoded = '';
+        try {
+          decoded = decodeURIComponent(raw);
+        } catch (_) {
+          decoded = raw;
+        }
+
+        return raw + ' ' + decoded;
+      }
+
+      function isTextEditorRow(row) {
+        const haystack = getRowCategoryHaystack(row);
+        return haystack.includes('text-editor') || haystack.includes('text editor') || haystack.includes('text_editor');
+      }
+
+      function isChatImagesRow(row) {
+        const haystack = getRowCategoryHaystack(row);
+        return haystack.includes('chat-images') || haystack.includes('chat images') || haystack.includes('chat_images');
+      }
+
+      function isAvatarRow(row) {
+        const haystack = getRowCategoryHaystack(row);
+        return haystack.includes('/avatars/')
+          || haystack.includes(' avatar-')
+          || haystack.includes('avatar-')
+          || haystack.includes('avatar_batch')
+          || haystack.includes('avatar-batch-migration')
+          || haystack.includes('profile-avatar')
+          || haystack.includes('user-avatar');
+      }
+
+      function isRestrictedRow(row) {
+        return isTextEditorRow(row) || isChatImagesRow(row);
+      }
+
+      function updateTabUi() {
+        tabGeneral.classList.toggle('active', activeTab === 'general');
+        tabAdminTextEditor.classList.toggle('active', activeTab === 'admin-text-editor');
+        tabAdminChatImages.classList.toggle('active', activeTab === 'admin-chat-images');
+      }
+
+      function setActiveTab(nextTab) {
+        if (nextTab !== 'general' && !currentUserIsAdmin) {
+          return;
+        }
+        activeTab = nextTab;
+        updateTabUi();
+        applyFiltersAndRender();
+      }
+
+      function applyFiltersAndRender() {
+        const q = searchInput.value.trim().toLowerCase();
+        const sort = sortSelect.value;
+        const scope = scopeSelect.value;
+
+        let rows = allRows.slice();
+
+        if (scope === 'mine' && currentUserName) {
+          const me = currentUserName.toLowerCase();
+          rows = rows.filter((r) => String(r.uploader || '').toLowerCase() === me);
+        }
+
+        // Hide avatar image uploads globally from this page.
+        rows = rows.filter((r) => !isAvatarRow(r));
+
+        if (activeTab === 'general') {
+          rows = rows.filter((r) => !isRestrictedRow(r));
+        } else if (activeTab === 'admin-text-editor') {
+          if (!currentUserIsAdmin) {
+            rows = [];
+          } else {
+            rows = rows.filter((r) => isTextEditorRow(r));
+          }
+        } else if (activeTab === 'admin-chat-images') {
+          if (!currentUserIsAdmin) {
+            rows = [];
+          } else {
+            rows = rows.filter((r) => isChatImagesRow(r));
+          }
+        }
+
+        if (q) {
+          rows = rows.filter((r) => getRowSearchText(r).includes(q));
+        }
+
+        rows.sort((a, b) => {
+          if (sort === 'newest') return b.uploadedAt - a.uploadedAt;
+          if (sort === 'oldest') return a.uploadedAt - b.uploadedAt;
+          if (sort === 'largest') return b.size - a.size;
+          if (sort === 'smallest') return a.size - b.size;
+          return a.name.localeCompare(b.name);
+        });
+
+        statRecords.textContent = String(rows.length);
+        statSize.textContent = formatBytes(rows.reduce((sum, r) => sum + (r.size || 0), 0));
+
+        if (!rows.length) {
+          tableBody.innerHTML = '<tr><td class="empty" colspan="5">No uploads found for this filter.</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = rows.map((r, rowIndex) => {
+          const safeName = escapeHtml(r.name);
+          const safePath = escapeHtml(r.path || '-');
+          const safeUploader = escapeHtml(r.uploader || 'unknown');
+          const safeUrl = escapeHtml(r.url);
+          const safeDate = escapeHtml(toDateString(r.uploadedAt));
+          const safeIcon = escapeHtml(getFileTypeIconPath(r));
+          const avatarUrl = getUploaderAvatarUrl(r.uploader);
+          const safeAvatarUrl = escapeHtml(avatarUrl);
+          const uploaderInitial = escapeHtml((String(r.uploader || '?').trim().charAt(0) || '?').toUpperCase());
+          const uploaderHtml = avatarUrl
+            ? ('<span class="uploader-cell">' +
+                '<a class="uploader-avatar-link" href="' + safeAvatarUrl + '" target="_blank" rel="noopener noreferrer" title="Open avatar">' +
+                  '<img class="uploader-avatar" src="' + safeAvatarUrl + '" alt="avatar" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest(\'a\').style.display=\'none\'; this.closest(\'.uploader-cell\').querySelector(\'.uploader-avatar-fallback\').style.display=\'inline-flex\';">' +
+                '</a>' +
+                '<span class="uploader-avatar-fallback" style="display:none;">' + uploaderInitial + '</span>' +
+                '<span>' + safeUploader + '</span>' +
+              '</span>')
+            : ('<span class="uploader-cell">' +
+                '<span class="uploader-avatar-fallback">' + uploaderInitial + '</span>' +
+                '<span>' + safeUploader + '</span>' +
+              '</span>');
+
+          return (
+            '<tr>' +
+              '<td data-label="File">' +
+                '<div class="file-name">' +
+                  '<img class="file-type-icon" src="' + safeIcon + '" alt="file type" loading="lazy" onerror="this.src=\'svg/uploads/note-icon.svg\'">' +
+                  '<span>' + safeName + '</span>' +
+                '</div>' +
+              '</td>' +
+              '<td data-label="Size">' + escapeHtml(formatBytes(r.size)) + '</td>' +
+              '<td data-label="Uploader">' + uploaderHtml + '</td>' +
+              '<td data-label="Date">' + safeDate + '</td>' +
+              '<td data-label="Actions">' +
+                '<div class="actions">' +
+                  '<a class="action-link" href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">Open</a>' +
+                  '<a class="action-link" href="' + safeUrl + '" download>Download</a>' +
+                  '<button class="action-link js-copy-url" data-row-index="' + String(rowIndex) + '">Copy URL</button>' +
+                  (canDeleteRow(r) ? '<button class="action-link action-delete js-delete-upload" data-row-index="' + String(rowIndex) + '">Delete</button>' : '') +
+                '</div>' +
+              '</td>' +
+            '</tr>'
+          );
+        }).join('');
+
+        const copyButtons = tableBody.querySelectorAll('.js-copy-url');
+        copyButtons.forEach((btn) => {
+          btn.addEventListener('click', function(ev) {
+            ev.preventDefault();
+            const rowIndex = Number(btn.getAttribute('data-row-index'));
+            const url = Number.isFinite(rowIndex) && rows[rowIndex] ? rows[rowIndex].url : '';
+            if (!url) return;
+            navigator.clipboard.writeText(url)
+              .then(() => showStatus('URL copied to clipboard.', false))
+              .catch(() => showStatus('Could not copy URL. Browser denied clipboard access.', true));
+          });
+        });
+
+        const deleteButtons = tableBody.querySelectorAll('.js-delete-upload');
+        deleteButtons.forEach((btn) => {
+          btn.addEventListener('click', function(ev) {
+            ev.preventDefault();
+            const rowIndex = Number(btn.getAttribute('data-row-index'));
+            const row = Number.isFinite(rowIndex) ? rows[rowIndex] : null;
+            if (!row) return;
+            deleteUploadRow(row);
+          });
+        });
+      }
+
+      async function loadUploads() {
+        tableBody.innerHTML = '<tr><td class="loading" colspan="5">Loading uploads...</td></tr>';
+        clearStatus();
+
+        try {
+          const roots = ['uploads', 'uploadLogs', 'filesUploads'];
+          const merged = [];
+
+          for (const root of roots) {
+            const snap = await db.ref(root).once('value');
+            const value = snap.val();
+            if (!value) continue;
+            collectRecords(value, [root], merged);
+          }
+
+          const unique = [];
+          const seen = new Set();
+          for (const row of merged) {
+            const key = row.id + '|' + row.url;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            unique.push(row);
+          }
+
+          allRows = unique;
+
+          if (!allRows.length) {
+            const fallbackRows = await loadFromWorkerFallback();
+            allRows = fallbackRows;
+
+            if (!allRows.length) {
+              showStatus('No upload metadata found and worker listing returned no files.', true);
+            } else {
+              console.info('Loaded ' + allRows.length + ' file(s) from Cloudflare worker fallback.');
+              clearStatus();
+            }
+          } else {
+            showStatus('Loaded ' + allRows.length + ' upload record(s).', false);
+          }
+
+          applyFiltersAndRender();
+        } catch (error) {
+          console.error('Load uploads error:', error);
+          showStatus('Failed to load uploads: ' + error.message, true);
+          tableBody.innerHTML = '<tr><td class="empty" colspan="5">Could not load uploads.</td></tr>';
+        }
+      }
+
+      searchInput.addEventListener('input', applyFiltersAndRender);
+      sortSelect.addEventListener('change', applyFiltersAndRender);
+      scopeSelect.addEventListener('change', applyFiltersAndRender);
+      refreshBtn.addEventListener('click', loadUploads);
+      tabGeneral.addEventListener('click', () => setActiveTab('general'));
+      tabAdminTextEditor.addEventListener('click', () => setActiveTab('admin-text-editor'));
+      tabAdminChatImages.addEventListener('click', () => setActiveTab('admin-chat-images'));
+
+      if (window.currentUserPromise) {
+        window.currentUserPromise.then((user) => {
+          currentUserName = (user && (user.userName || user.username || user.displayName)) || '';
+          currentUserIsAdmin = Boolean(user && user.isAdmin);
+          tabAdminTextEditor.style.display = currentUserIsAdmin ? 'inline-flex' : 'none';
+          tabAdminChatImages.style.display = currentUserIsAdmin ? 'inline-flex' : 'none';
+          if (!currentUserIsAdmin) {
+            activeTab = 'general';
+          }
+          updateTabUi();
+          loadUploaderAvatarMap().finally(() => loadUploads());
+        }).catch(() => {
+          currentUserIsAdmin = false;
+          tabAdminTextEditor.style.display = 'none';
+          tabAdminChatImages.style.display = 'none';
+          activeTab = 'general';
+          updateTabUi();
+          loadUploaderAvatarMap().finally(() => loadUploads());
+        });
+      } else {
+        currentUserIsAdmin = false;
+        tabAdminTextEditor.style.display = 'none';
+        tabAdminChatImages.style.display = 'none';
+        activeTab = 'general';
+        updateTabUi();
+        loadUploaderAvatarMap().finally(() => loadUploads());
+      }
+    })();
+  </script>
+</body>
+</html>

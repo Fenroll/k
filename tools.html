@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202603081b0o"></script>
+  <script src="js/auth-guard.js?v=202603091rjv"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Tools</title>
   
   <!-- Favicon -->
-  <link rel="icon" href="favicon.svg?v=202603081b0o" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=202603091rjv" type="image/svg+xml">
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
   
@@ -216,6 +216,7 @@
 
     /* Upload Tool Styles */
     .drop-zone {
+      position: relative;
       border: 3px dashed #d1d5db;
       border-radius: 12px;
       padding: 60px 40px;
@@ -235,13 +236,25 @@
       background: #dbeafe;
       border-style: solid;
     }
-    
-    .drop-zone.drag-over .drop-zone-content {
-      display: none;
+
+    .drop-zone-active {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s;
     }
-    
+
+    .drop-zone.drag-over .drop-zone-content {
+      opacity: 0;
+      pointer-events: none;
+    }
+
     .drop-zone.drag-over .drop-zone-active {
-      display: block !important;
+      opacity: 1;
     }
     
     .drop-zone-content h3 {
@@ -360,6 +373,7 @@
 
       .upload-container,
       #financeTool > div,
+      #uploadsTool > div,
       #tool3Tool > div {
         max-width: 100% !important;
         margin: 16px auto !important;
@@ -419,8 +433,8 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202603081b0o">
-  <script src="js/version-manager.js?v=202603081b0o"></script>
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202603091rjv">
+  <script src="js/version-manager.js?v=202603091rjv"></script>
 </head>
 <body>
   <div class="layout">
@@ -429,71 +443,68 @@
       <div class="bb-inner-wrap">
         <div class="logo-header">
           <a href="https://elearn.mu-varna.bg" target="_blank" rel="noopener noreferrer">
-            <img class="logo-img" src="svg/logo-coursebook.svg?v=202603081b0o" alt="StudyBoard">
+            <img class="logo-img" src="svg/logo-coursebook.svg?v=202603091rjv" alt="StudyBoard">
           </a>
         </div>
         <nav class="sidebar-nav" aria-label="Main">
           <ul>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/course">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=202603081b0o" alt="blackboard" style="filter: brightness(0) invert(1);" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=202603091rjv" alt="blackboard" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Blackboard</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="account.html?v=202603081b0o">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=202603081b0o" alt="Account" />
+              <a href="account.html?v=202603091rjv">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=202603091rjv" alt="Account" />
                 <span class="link-text">Account</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="index.html?v=202603081b0o">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603081b0o" alt="Courses" />
+              <a href="index.html?v=202603091rjv">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603091rjv" alt="Courses" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="notes.html?v=202603081b0o">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=202603081b0o" alt="Notes" style="filter: brightness(0) invert(1);" />
+              <a href="notes.html?v=202603091rjv">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=202603091rjv" alt="Notes" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Notes</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="calendar.html?v=202603081b0o">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=202603081b0o" alt="Calendar" />
+              <a href="calendar.html?v=202603091rjv">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=202603091rjv" alt="Calendar" />
                 <span class="link-text">Calendar</span>
               </a>
             </li>
             <li class="base-navigation-button active">
-              <a href="tools.html?v=202603081b0o">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=202603081b0o" alt="Tools" />
+              <a href="tools.html?v=202603091rjv">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=202603091rjv" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=202603081b0o">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=202603081b0o" alt="Editor" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=202603091rjv">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=202603091rjv" alt="Editor" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Editor</span>
               </a>
             </li>
             <li class="base-navigation-button" id="admin-button" style="display: none;">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=202603081b0o">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=202603081b0o" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=202603091rjv">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=202603091rjv" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Admin Panel</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="#" onclick="handleLogout()">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=202603081b0o" alt="Sign Out" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=202603091rjv" alt="Sign Out" />
                 <span class="link-text">Sign Out</span>
               </a>
             </li>
           </ul>
         </nav>
         <div class="sidebar-footer-links">
-          <span class="sidebar-footer-item" onclick="showPrivacyModal()" style="cursor: pointer;">Privacy</span>
-          <span class="sidebar-footer-item" onclick="toggleVersionInfo()" style="cursor: pointer;">Version</span>
-          <span id="versionInfo" style="display: none; position: absolute; left: 100%; bottom: 0; margin-left: 20px; padding: 3px 20px; background: #333; color: white; border-radius: 6px; font-size: 0.85em; white-space: normal; box-shadow: 0 2px 10px rgba(0,0,0,0.3); max-width: calc(100vw - 280px);"></span>
         </div>
       </div>
     </div>
@@ -509,11 +520,11 @@
           <button class="test-menu-btn active" data-test="upload" data-emoji="📤" style="padding: 18px 24px; border: none; background: #588157; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(88, 129, 87, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
             📤 Качване на файлове
           </button>
+          <button class="test-menu-btn" data-test="uploads" data-emoji="📚" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            📚 Качени файлове
+          </button>
           <button class="test-menu-btn" data-test="finance" data-emoji="💶" id="financeMenuBtn" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
             💶 Финанси
-          </button>
-          <button class="test-menu-btn" data-test="tool3" data-emoji="📝" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
-            📝 инструмент 3 (скоро)
           </button>
         </div>
       </div>
@@ -522,7 +533,7 @@
         <!-- File Upload Container -->
         <div id="uploadTool" class="test-container" style="display: block;">
           <div class="upload-container" style="max-width: 800px; margin: 40px auto; padding: 30px;">
-            <h2 style="text-align: center; margin-bottom: 30px; color: #262626;">Качване на файлове в Cloudflare R2</h2>
+            <h2 style="text-align: center; margin-bottom: 30px; color: #262626;">Качване на файлове</h2>
             
             <!-- Drop Zone -->
             <div id="dropZone" class="drop-zone">
@@ -544,9 +555,8 @@
                 </div>
                 <input type="file" id="fileInput" multiple webkitdirectory directory style="display: none;">
                 <input type="file" id="singleFileInput" multiple style="display: none;">
-                <p style="font-size: 12px; color: #666; margin-top: 12px;">Избери отделни файлове или цяла папка с файлове</p>
               </div>
-              <div class="drop-zone-active" style="display: none;">
+              <div class="drop-zone-active">
                 <h3>Пуснете файловете тук</h3>
               </div>
             </div>
@@ -633,6 +643,64 @@
           </div>
         </div>
 
+        <div id="uploadsTool" class="test-container" style="display: none;">
+          <div style="max-width: 1300px; margin: 24px auto; padding: 18px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
+            <div style="display:flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
+              <h2 style="margin: 0; color: #1f2937;">Качени файлове</h2>
+              <button id="toolsUploadsRefreshBtn" class="btn btn-secondary" type="button">↻ Refresh</button>
+            </div>
+
+            <div id="toolsUploadsStatus" style="display:none; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 14px;"></div>
+
+            <div style="display: grid; grid-template-columns: minmax(220px, 1fr) auto auto; gap: 10px; margin-bottom: 12px; align-items: center;">
+              <input id="toolsUploadsSearch" type="text" placeholder="Search by filename, path, user, URL..." style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 14px; background: #fff; color: #111827;">
+              <select id="toolsUploadsSort" style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 14px; background: #fff; color: #111827;">
+                <option value="newest">Sort: Newest</option>
+                <option value="oldest">Sort: Oldest</option>
+                <option value="largest">Sort: Largest</option>
+                <option value="smallest">Sort: Smallest</option>
+                <option value="name">Sort: Name</option>
+              </select>
+              <select id="toolsUploadsScope" style="width: 100%; border: 1px solid #d1d5db; border-radius: 8px; padding: 10px 12px; font-size: 14px; background: #fff; color: #111827;">
+                <option value="all">Scope: All Users</option>
+                <option value="mine">Scope: My Uploads</option>
+              </select>
+            </div>
+
+            <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;">
+              <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; min-width: 130px;">
+                <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Records</div>
+                <div id="toolsUploadsStatRecords" style="font-size: 18px; font-weight: 700; color: #111827;">0</div>
+              </div>
+              <div style="background: #f9fafb; border: 1px solid #e5e7eb; border-radius: 10px; padding: 10px 12px; min-width: 130px;">
+                <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">Total Size</div>
+                <div id="toolsUploadsStatSize" style="font-size: 18px; font-weight: 700; color: #111827;">0 B</div>
+              </div>
+              <button id="toolsUploadsViewCycleBtn" type="button" style="appearance:none; font-family:inherit; display:inline-flex; flex-direction:column; align-items:flex-start; justify-content:center; background:#f9fafb; border:1px solid #e5e7eb; border-radius:10px; padding:10px 12px; min-width:210px; text-align:left; cursor:pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.75);">
+                <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">View</div>
+                <div id="toolsUploadsViewCycleValue" style="font-size: 18px; font-weight: 700; color: #111827;">General Uploads</div>
+              </button>
+            </div>
+
+            <div style="border: 1px solid #e5e7eb; border-radius: 10px; overflow: hidden; background: #fff;">
+              <table style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                <thead>
+                  <tr>
+                    <th style="text-align:left; font-size:12px; color:#6b7280; font-weight:700; background:#f9fafb; padding:10px; border-bottom:1px solid #e5e7eb; text-transform:uppercase; letter-spacing:0.02em; width:34%;">File</th>
+                    <th style="text-align:left; font-size:12px; color:#6b7280; font-weight:700; background:#f9fafb; padding:10px; border-bottom:1px solid #e5e7eb; text-transform:uppercase; letter-spacing:0.02em; width:12%;">Size</th>
+                    <th style="text-align:left; font-size:12px; color:#6b7280; font-weight:700; background:#f9fafb; padding:10px; border-bottom:1px solid #e5e7eb; text-transform:uppercase; letter-spacing:0.02em; width:16%;">Uploader</th>
+                    <th style="text-align:left; font-size:12px; color:#6b7280; font-weight:700; background:#f9fafb; padding:10px; border-bottom:1px solid #e5e7eb; text-transform:uppercase; letter-spacing:0.02em; width:16%;">Date</th>
+                    <th style="text-align:left; font-size:12px; color:#6b7280; font-weight:700; background:#f9fafb; padding:10px; border-bottom:1px solid #e5e7eb; text-transform:uppercase; letter-spacing:0.02em; width:22%;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="toolsUploadsTableBody">
+                  <tr><td colspan="5" style="padding:24px; text-align:center; color:#374151; font-size:14px;">Open this tab to load uploads...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <div id="tool3Tool" class="test-container" style="display: none;">
           <div style="max-width: 800px; margin: 40px auto; padding: 30px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); color: #6b7280; text-align: center;">
             Инструмент 3 предстои.
@@ -655,10 +723,11 @@
         });
         
         // Add active state to clicked button
-        e.target.style.borderColor = '';
-        e.target.style.background = '#588157';
-        e.target.style.color = 'white';
-        e.target.style.boxShadow = '0 4px 15px rgba(88, 129, 87, 0.2)';
+        const activeButton = e.currentTarget;
+        activeButton.style.borderColor = '';
+        activeButton.style.background = '#588157';
+        activeButton.style.color = 'white';
+        activeButton.style.boxShadow = '0 4px 15px rgba(88, 129, 87, 0.2)';
         
         // Hide all test containers
         document.querySelectorAll('.test-container').forEach(test => {
@@ -672,6 +741,11 @@
           document.getElementById('uploadTool').style.display = 'block';
         } else if (testType === 'finance') {
           document.getElementById('financeTool').style.display = 'block';
+        } else if (testType === 'uploads') {
+          document.getElementById('uploadsTool').style.display = 'block';
+          if (window.toolsUploadsModule && typeof window.toolsUploadsModule.init === 'function') {
+            window.toolsUploadsModule.init();
+          }
         } else if (testType === 'tool3') {
           document.getElementById('tool3Tool').style.display = 'block';
         }
@@ -738,6 +812,25 @@
     const progressBarFill = document.getElementById('progressBarFill');
     const uploadResults = document.getElementById('uploadResults');
     const uploadResultsList = document.getElementById('uploadResultsList');
+
+    const DROP_DEBUG = true;
+
+    function dropLog(...args) {
+      if (!DROP_DEBUG) return;
+      console.log('[TOOLS DROP]', ...args);
+    }
+
+    function dropWarn(...args) {
+      if (!DROP_DEBUG) return;
+      console.warn('[TOOLS DROP]', ...args);
+    }
+
+    dropLog('Init', {
+      hasDropZone: Boolean(dropZone),
+      hasFileInput: Boolean(fileInput),
+      hasSingleFileInput: Boolean(singleFileInput),
+      readyState: document.readyState
+    });
     
     // Format file size
     function formatFileSize(bytes) {
@@ -758,36 +851,128 @@
     });
     
     // Drag and drop
-    dropZone.addEventListener('dragover', (e) => {
+    // All drag/drop logic handled at the DOCUMENT level to guarantee events
+    // are never lost to child element re-targeting or z-index issues.
+    var dropDepth = 0;
+
+    function isInsideDropZone(target) {
+      if (!dropZone) return false;
+      try {
+        return target === dropZone || dropZone.contains(target);
+      } catch (err) {
+        dropWarn('isInsideDropZone failed', err);
+        return false;
+      }
+    }
+
+    document.addEventListener('dragenter', function(e) {
+      if (isInsideDropZone(e.target)) {
+        e.preventDefault();
+        dropDepth++;
+        dropZone.classList.add('drag-over');
+        dropLog('dragenter', { dropDepth });
+      }
+    }, false);
+
+    document.addEventListener('dragover', function(e) {
       e.preventDefault();
-      dropZone.classList.add('drag-over');
-    });
-    
-    dropZone.addEventListener('dragleave', () => {
-      dropZone.classList.remove('drag-over');
-    });
-    
-    dropZone.addEventListener('drop', (e) => {
+      const inside = isInsideDropZone(e.target);
+      if (e.dataTransfer) {
+        e.dataTransfer.dropEffect = inside ? 'copy' : 'none';
+      }
+    }, false);
+
+    document.addEventListener('dragleave', function(e) {
+      if (isInsideDropZone(e.target)) {
+        dropDepth--;
+        if (dropDepth <= 0) {
+          dropDepth = 0;
+          dropZone.classList.remove('drag-over');
+        }
+        dropLog('dragleave', { dropDepth });
+      }
+    }, false);
+
+    document.addEventListener('drop', function(e) {
       e.preventDefault();
-      dropZone.classList.remove('drag-over');
-      
-      const items = Array.from(e.dataTransfer.items);
-      const files = [];
-      
-      // Process dropped items (handles folders)
-      Promise.all(items.map(item => {
-        if (item.kind === 'file') {
-          const entry = item.webkitGetAsEntry();
-          if (entry) {
-            return traverseFileTree(entry);
+      if (dropZone) {
+        dropZone.classList.remove('drag-over');
+      }
+      dropDepth = 0;
+
+      const inside = isInsideDropZone(e.target);
+      dropLog('drop event', {
+        insideDropZone: inside,
+        targetTag: e.target && e.target.tagName ? e.target.tagName : null,
+        fileCount: e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files.length : 0,
+        itemCount: e.dataTransfer && e.dataTransfer.items ? e.dataTransfer.items.length : 0
+      });
+
+      if (!inside) return;
+
+      var dt = e.dataTransfer;
+      if (!dt || !dt.files || dt.files.length === 0) {
+        dropWarn('No files found on DataTransfer');
+        return;
+      }
+
+      var directFiles = Array.from(dt.files || []);
+
+      // For normal file drops, use DataTransfer.files directly.
+      // This path is the most reliable and avoids webkit entry hangs.
+      if (directFiles.length > 0) {
+        var items = dt.items ? Array.from(dt.items) : [];
+        var hasDirectoryEntry = false;
+
+        for (var i = 0; i < items.length; i++) {
+          if (items[i].kind === 'file' && typeof items[i].webkitGetAsEntry === 'function') {
+            var quickEntry = items[i].webkitGetAsEntry();
+            if (quickEntry && quickEntry.isDirectory) {
+              hasDirectoryEntry = true;
+              break;
+            }
           }
         }
-        return Promise.resolve([]);
-      })).then(results => {
-        results.forEach(fileArray => files.push(...fileArray));
-        handleFiles(files);
-      });
-    });
+
+        if (!hasDirectoryEntry) {
+          dropLog('Using direct dt.files path', { count: directFiles.length });
+          handleFiles(directFiles);
+          return;
+        }
+      }
+
+      // Directory-aware path (for dropped folders).
+      var dirItems = dt.items ? Array.from(dt.items) : [];
+      var directoryEntries = [];
+      for (var j = 0; j < dirItems.length; j++) {
+        if (dirItems[j].kind !== 'file' || typeof dirItems[j].webkitGetAsEntry !== 'function') continue;
+        var entry = dirItems[j].webkitGetAsEntry();
+        if (entry && (entry.isDirectory || entry.isFile)) {
+          directoryEntries.push(entry);
+        }
+      }
+
+      if (directoryEntries.length > 0) {
+        dropLog('Using directory entry traversal', { entryCount: directoryEntries.length });
+        Promise.all(directoryEntries.map(function(entry) { return traverseFileTree(entry); }))
+          .then(function(results) {
+            var files = results.flat();
+            dropLog('Entry traversal finished', { traversedCount: files.length, fallbackCount: directFiles.length });
+            handleFiles(files.length > 0 ? files : directFiles);
+          })
+          .catch(function(err) {
+            dropWarn('Entry traversal failed, using dt.files fallback', err);
+            handleFiles(directFiles);
+          });
+        return;
+      }
+
+      // Final fallback
+      if (directFiles.length > 0) {
+        dropLog('Using final dt.files fallback', { count: directFiles.length });
+        handleFiles(directFiles);
+      }
+    }, false);
     
     // Traverse folder tree
     function traverseFileTree(item, path = '') {
@@ -815,6 +1000,7 @@
     
     // Handle selected files
     function handleFiles(files) {
+      dropLog('handleFiles called', { incomingCount: files.length });
       files.forEach(file => {
         // Add fullPath if not set
         if (!file.fullPath) {
@@ -830,6 +1016,7 @@
       renderFileList();
       fileList.style.display = 'block';
       uploadResults.style.display = 'none';
+      dropLog('Selected files total', { selectedCount: selectedFiles.length });
     }
     
     // Render file list
@@ -906,7 +1093,18 @@
           } else {
             const errorText = await response.text();
             console.error('Upload error for', file.fullPath, ':', errorText);
-            results.push({ file: file.fullPath, status: 'error', message: errorText });
+            let errorMessage = errorText;
+            try {
+              const parsedError = JSON.parse(errorText);
+              if (parsedError && typeof parsedError.message === 'string') {
+                errorMessage = parsedError.message;
+              } else if (parsedError && typeof parsedError.error === 'string') {
+                errorMessage = parsedError.error;
+              }
+            } catch (_) {
+              // Keep raw error text when response is not JSON.
+            }
+            results.push({ file: file.fullPath, status: 'error', message: errorMessage });
           }
         } catch (error) {
           results.push({ file: file.fullPath, status: 'error', message: error.message });
@@ -924,7 +1122,10 @@
       uploadResultsList.innerHTML = results.map(result => `
         <div class="file-item">
           <div class="file-item-info">
-            <span class="file-item-name">${result.file}</span>
+            <div>
+              <span class="file-item-name">${result.file}</span>
+              ${result.status === 'error' && result.message ? `<div style="margin-top: 4px; color: #991b1b; font-size: 12px;">${result.message}</div>` : ''}
+            </div>
           </div>
           <span class="file-item-status ${result.status}">
             ${result.status === 'success' ? '✓ Качен' : '✗ Грешка'}
@@ -966,11 +1167,487 @@
        FIREBASE & CHAT WIDGET
        ============================================ -->
   <!-- Initialize Chat Widget -->
-    <script src="js/chat.js?v=202603081b0o"></script>
+    <script src="js/chat.js?v=202603091rjv"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
+  <script>
+    (function() {
+      const firebaseConfig = {
+        apiKey: 'API_KEY',
+        authDomain: 'med-student-chat.firebaseapp.com',
+        databaseURL: 'https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app',
+        projectId: 'med-student-chat',
+        storageBucket: 'med-student-chat.appspot.com',
+        messagingSenderId: 'SENDER_ID',
+        appId: 'APP_ID'
+      };
+
+      const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+      let initialized = false;
+      let currentUserName = '';
+      let currentUserIsAdmin = false;
+      let activeTab = 'general';
+      let allRows = [];
+      let uploaderAvatarMap = new Map();
+
+      function byId(id) { return document.getElementById(id); }
+      function normalizeIdentity(v) { return String(v || '').trim().toLowerCase(); }
+      function isHttpUrl(v) { return /^https?:\/\//i.test(String(v || '').trim()); }
+      function escapeHtml(v) { return String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;'); }
+
+      function showStatus(message, isError) {
+        const el = byId('toolsUploadsStatus');
+        if (!el) return;
+        el.textContent = message;
+        el.style.display = 'block';
+        el.style.background = isError ? '#fee2e2' : '#dcfce7';
+        el.style.color = isError ? '#991b1b' : '#166534';
+        el.style.border = isError ? '1px solid #fecaca' : '1px solid #bbf7d0';
+      }
+
+      function clearStatus() {
+        const el = byId('toolsUploadsStatus');
+        if (!el) return;
+        el.style.display = 'none';
+        el.textContent = '';
+      }
+
+      function formatBytes(bytes) {
+        const n = Number(bytes);
+        if (!Number.isFinite(n) || n <= 0) return '0 B';
+        const units = ['B', 'KB', 'MB', 'GB', 'TB'];
+        let value = n;
+        let i = 0;
+        while (value >= 1024 && i < units.length - 1) {
+          value /= 1024;
+          i += 1;
+        }
+        return (value >= 100 || i === 0 ? value.toFixed(0) : value.toFixed(2)) + ' ' + units[i];
+      }
+
+      function normalizeTimestamp(input) {
+        if (typeof input === 'number' && Number.isFinite(input)) return input;
+        if (typeof input === 'string') {
+          const asNum = Number(input);
+          if (Number.isFinite(asNum) && asNum > 0) return asNum;
+          const parsed = Date.parse(input);
+          if (!Number.isNaN(parsed)) return parsed;
+        }
+        return 0;
+      }
+
+      function toDateString(ts) {
+        if (!ts) return '-';
+        try { return new Date(ts).toLocaleString(); } catch (_) { return '-'; }
+      }
+
+      function getFileNameFromPath(path) {
+        const parts = String(path || '').split('/');
+        return parts[parts.length - 1] || String(path || '');
+      }
+
+      function getRowExtension(row) {
+        const candidates = [row && row.name, row && row.path, row && row.url];
+        for (const raw0 of candidates) {
+          const raw = String(raw0 || '');
+          if (!raw) continue;
+          const normalized = raw.split('?')[0].split('#')[0];
+          const fileName = normalized.split('/').pop() || normalized;
+          const dot = fileName.lastIndexOf('.');
+          if (dot <= 0) continue;
+          const ext = fileName.slice(dot + 1).toLowerCase();
+          if (ext) return ext;
+        }
+        return '';
+      }
+
+      function getFileTypeIconPath(row) {
+        const ext = getRowExtension(row);
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp', 'svg', 'avif', 'heic'].includes(ext)) return 'svg/uploads/image-icon.svg';
+        if (ext === 'pdf') return 'svg/uploads/pdf-icon.svg';
+        if (['ppt', 'pptx'].includes(ext)) return 'svg/uploads/powerpoin-icon.svg';
+        if (['doc', 'docx', 'odt', 'rtf'].includes(ext)) return 'svg/uploads/word-icon.svg';
+        return 'svg/uploads/note-icon.svg';
+      }
+
+      function buildPublicUrl(domain, key) {
+        const safePath = String(key || '').split('/').map((segment) => encodeURIComponent(segment)).join('/');
+        return String(domain || '').replace(/\/+$/, '') + '/' + safePath;
+      }
+
+      function deriveBucketTypeFromUrl(url) {
+        try {
+          const parsed = new URL(String(url || ''));
+          if (parsed.hostname === 'chat.coursebook.lol') return 'chat';
+        } catch (_) {}
+        return 'default';
+      }
+
+      function deriveKeyFromUrl(url) {
+        try {
+          const parsed = new URL(String(url || ''));
+          return decodeURIComponent(parsed.pathname.replace(/^\//, ''));
+        } catch (_) { return ''; }
+      }
+
+      async function loadUploaderAvatarMap(db) {
+        uploaderAvatarMap = new Map();
+        try {
+          const usersSnap = await db.ref('site_users').once('value');
+          const users = usersSnap.val() || {};
+          for (const uid of Object.keys(users)) {
+            const user = users[uid] || {};
+            const avatar = isHttpUrl(user.avatar) ? String(user.avatar).trim() : '';
+            if (!avatar) continue;
+            const aliases = [uid, user.uid, user.userId, user.username, user.displayName, user.userName];
+            for (const alias of aliases) {
+              const normalized = normalizeIdentity(alias);
+              if (!normalized) continue;
+              if (!uploaderAvatarMap.has(normalized)) uploaderAvatarMap.set(normalized, avatar);
+            }
+          }
+        } catch (_) {}
+      }
+
+      function getUploaderAvatarUrl(name) {
+        return uploaderAvatarMap.get(normalizeIdentity(name)) || '';
+      }
+
+      function normalizeRecord(item, pathHint, keyHint) {
+        if (!item || typeof item !== 'object') return null;
+        const url = item.url || item.fileUrl || item.downloadUrl || item.href || '';
+        const path = item.path || item.fullPath || item.filePath || item.key || pathHint || '';
+        const size = Number(item.size || item.fileSize || item.bytes || 0);
+        const uploader = item.uploadedBy || item.userName || item.uploader || item.owner || item.createdBy || '';
+        const uploadedAt = normalizeTimestamp(item.uploadedAt || item.createdAt || item.timestamp || item.date);
+        const bucketType = item.bucketType || deriveBucketTypeFromUrl(url);
+        let name = item.name || item.fileName || item.originalName || '';
+        if (!name) name = getFileNameFromPath(path || url);
+        if (!name) name = keyHint || 'Unnamed file';
+        let finalUrl = String(url || '').trim();
+        if (!finalUrl && path && !/^https?:\/\//i.test(path)) finalUrl = buildPublicUrl('https://files.coursebook.lol', String(path).replace(/^\/+/, ''));
+        if (!finalUrl) return null;
+        const resolvedKey = String(item.key || path || deriveKeyFromUrl(finalUrl)).replace(/^\/+/, '');
+        return { id: keyHint || path || finalUrl, name: String(name), path: String(path || ''), size: Number.isFinite(size) && size > 0 ? size : 0, uploader: String(uploader || 'unknown'), uploadedAt, url: finalUrl, key: resolvedKey, bucketType };
+      }
+
+      function normalizeR2Object(object, bucketType) {
+        if (!object || !object.key) return null;
+        const key = String(object.key);
+        const parts = key.split('/');
+        const uploader = parts.length > 1 ? parts[0] : 'unknown';
+        const name = getFileNameFromPath(key);
+        const uploadedAt = normalizeTimestamp(object.uploaded);
+        const size = Number(object.size || 0);
+        const domain = bucketType === 'chat' ? 'https://chat.coursebook.lol' : 'https://files.coursebook.lol';
+        return { id: 'r2:' + key, name, path: key, size: Number.isFinite(size) && size > 0 ? size : 0, uploader, uploadedAt, url: buildPublicUrl(domain, key), key, bucketType };
+      }
+
+      function collectRecords(node, pathParts, out) {
+        if (node == null) return;
+        if (Array.isArray(node)) {
+          for (let i = 0; i < node.length; i += 1) collectRecords(node[i], pathParts.concat(String(i)), out);
+          return;
+        }
+        if (typeof node !== 'object') return;
+        const keyHint = pathParts.length ? pathParts[pathParts.length - 1] : '';
+        const pathHint = pathParts.join('/');
+        const record = normalizeRecord(node, pathHint, keyHint);
+        if (record) {
+          out.push(record);
+          return;
+        }
+        for (const key of Object.keys(node)) collectRecords(node[key], pathParts.concat(key), out);
+      }
+
+      function getRowCategoryHaystack(row) {
+        const parts = [row && row.path ? String(row.path) : '', row && row.url ? String(row.url) : '', row && row.name ? String(row.name) : ''];
+        const raw = parts.join(' ').toLowerCase();
+        let decoded = '';
+        try { decoded = decodeURIComponent(raw); } catch (_) { decoded = raw; }
+        return raw + ' ' + decoded;
+      }
+
+      function isTextEditorRow(row) { const h = getRowCategoryHaystack(row); return h.includes('text-editor') || h.includes('text editor') || h.includes('text_editor'); }
+      function isChatImagesRow(row) { const h = getRowCategoryHaystack(row); return h.includes('chat-images') || h.includes('chat images') || h.includes('chat_images'); }
+      function isAvatarRow(row) {
+        const h = getRowCategoryHaystack(row);
+        return h.includes('/avatars/') || h.includes(' avatar-') || h.includes('avatar-') || h.includes('avatar_batch') || h.includes('avatar-batch-migration') || h.includes('profile-avatar') || h.includes('user-avatar');
+      }
+
+      function canDeleteRow(row) {
+        if (!row || !row.key) return false;
+        if (currentUserIsAdmin) return true;
+        const me = normalizeIdentity(currentUserName);
+        if (!me) return false;
+        return normalizeIdentity(row.uploader) === me;
+      }
+
+      async function loadFromWorkerBucket(bucketType) {
+        const records = [];
+        let cursor = '';
+        let pages = 0;
+        while (pages < 30) {
+          const url = new URL(R2_WORKER_URL);
+          url.searchParams.set('action', 'list');
+          url.searchParams.set('bucketType', bucketType);
+          url.searchParams.set('limit', '1000');
+          if (cursor) url.searchParams.set('cursor', cursor);
+          const response = await fetch(url.toString(), { method: 'GET' });
+          if (!response.ok) throw new Error('Worker list failed (' + response.status + ')');
+          const payload = await response.json();
+          const objects = Array.isArray(payload.objects) ? payload.objects : [];
+          for (const object of objects) {
+            const normalized = normalizeR2Object(object, bucketType);
+            if (normalized) records.push(normalized);
+          }
+          pages += 1;
+          if (!payload.truncated || !payload.cursor) break;
+          cursor = payload.cursor;
+        }
+        return records;
+      }
+
+      async function loadFromWorkerFallback() {
+        const merged = [];
+        merged.push.apply(merged, await loadFromWorkerBucket('default'));
+        try { merged.push.apply(merged, await loadFromWorkerBucket('chat')); } catch (_) {}
+        const unique = [];
+        const seen = new Set();
+        for (const row of merged) {
+          const key = row.id + '|' + row.url;
+          if (seen.has(key)) continue;
+          seen.add(key);
+          unique.push(row);
+        }
+        return unique;
+      }
+
+      function getAvailableViews() {
+        if (currentUserIsAdmin) {
+          return ['general', 'admin-text-editor', 'admin-chat-images'];
+        }
+        return ['general'];
+      }
+
+      function getViewLabel(value) {
+        if (value === 'admin-text-editor') return 'Admin: Text-Editor';
+        if (value === 'admin-chat-images') return 'Admin: Chat Images';
+        return 'General Uploads';
+      }
+
+      function syncViewCycleButton() {
+        const valueEl = byId('toolsUploadsViewCycleValue');
+        if (!valueEl) return;
+        valueEl.textContent = getViewLabel(activeTab);
+      }
+
+      async function deleteUploadRow(row) {
+        if (!row || !row.key) {
+          showStatus('Cannot delete this file: missing key.', true);
+          return;
+        }
+        const ownerLabel = row.uploader ? `Owner: ${row.uploader}\n` : '';
+        const ok = window.confirm(`Delete this upload?\n\n${ownerLabel}${row.name}`);
+        if (!ok) return;
+        try {
+          const response = await fetch(R2_WORKER_URL, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ key: row.key, bucketType: row.bucketType || 'default' })
+          });
+          if (!response.ok) throw new Error('Delete failed (' + response.status + ')');
+          allRows = allRows.filter((item) => !(item.key === row.key && item.bucketType === row.bucketType));
+          showStatus('Upload deleted successfully.', false);
+          renderRows();
+        } catch (error) {
+          showStatus('Failed to delete upload: ' + error.message, true);
+        }
+      }
+
+      function renderRows() {
+        const tableBody = byId('toolsUploadsTableBody');
+        const statRecords = byId('toolsUploadsStatRecords');
+        const statSize = byId('toolsUploadsStatSize');
+        const searchInput = byId('toolsUploadsSearch');
+        const sortSelect = byId('toolsUploadsSort');
+        const scopeSelect = byId('toolsUploadsScope');
+        if (!tableBody || !statRecords || !statSize || !searchInput || !sortSelect || !scopeSelect) return;
+
+        const q = String(searchInput.value || '').trim().toLowerCase();
+        const sort = sortSelect.value;
+        const scope = scopeSelect.value;
+
+        let rows = allRows.slice();
+        if (scope === 'mine' && currentUserName) rows = rows.filter((r) => String(r.uploader || '').toLowerCase() === currentUserName.toLowerCase());
+        rows = rows.filter((r) => !isAvatarRow(r));
+        if (activeTab === 'general') rows = rows.filter((r) => !(isTextEditorRow(r) || isChatImagesRow(r)));
+        else if (activeTab === 'admin-text-editor') rows = currentUserIsAdmin ? rows.filter((r) => isTextEditorRow(r)) : [];
+        else if (activeTab === 'admin-chat-images') rows = currentUserIsAdmin ? rows.filter((r) => isChatImagesRow(r)) : [];
+        if (q) rows = rows.filter((r) => (r.name + ' ' + r.path + ' ' + r.uploader + ' ' + r.url).toLowerCase().includes(q));
+
+        rows.sort((a, b) => {
+          if (sort === 'newest') return b.uploadedAt - a.uploadedAt;
+          if (sort === 'oldest') return a.uploadedAt - b.uploadedAt;
+          if (sort === 'largest') return b.size - a.size;
+          if (sort === 'smallest') return a.size - b.size;
+          return a.name.localeCompare(b.name);
+        });
+
+        statRecords.textContent = String(rows.length);
+        statSize.textContent = formatBytes(rows.reduce((sum, r) => sum + (r.size || 0), 0));
+
+        if (!rows.length) {
+          tableBody.innerHTML = '<tr><td colspan="5" style="padding:24px; text-align:center; color:#6b7280; font-size:14px;">No uploads found for this filter.</td></tr>';
+          return;
+        }
+
+        tableBody.innerHTML = rows.map((r, idx) => {
+          const safeName = escapeHtml(r.name);
+          const safeUploader = escapeHtml(r.uploader || 'unknown');
+          const safeUrl = escapeHtml(r.url);
+          const safeDate = escapeHtml(toDateString(r.uploadedAt));
+          const safeIcon = escapeHtml(getFileTypeIconPath(r));
+          const avatarUrl = getUploaderAvatarUrl(r.uploader);
+          const safeAvatarUrl = escapeHtml(avatarUrl);
+          const uploaderInitial = escapeHtml((String(r.uploader || '?').trim().charAt(0) || '?').toUpperCase());
+          const uploaderHtml = avatarUrl
+            ? ('<span style="display:inline-flex;align-items:center;gap:8px;">' +
+                '<a href="' + safeAvatarUrl + '" target="_blank" rel="noopener noreferrer" title="Open avatar" style="display:inline-flex;width:24px;height:24px;border-radius:999px;overflow:hidden;border:1px solid #d1d5db;background:#f3f4f6;text-decoration:none;">' +
+                  '<img src="' + safeAvatarUrl + '" alt="avatar" loading="lazy" referrerpolicy="no-referrer" style="width:100%;height:100%;object-fit:cover;display:block;" onerror="this.closest(\'a\').style.display=\'none\'; this.closest(\'span\').querySelector(\'.uaf\').style.display=\'inline-flex\';">' +
+                '</a>' +
+                '<span class="uaf" style="display:none;width:24px;height:24px;border-radius:999px;border:1px solid #d1d5db;background:#e5e7eb;color:#374151;font-size:11px;font-weight:700;align-items:center;justify-content:center;text-transform:uppercase;">' + uploaderInitial + '</span>' +
+                '<span>' + safeUploader + '</span>' +
+              '</span>')
+            : ('<span style="display:inline-flex;align-items:center;gap:8px;">' +
+                '<span style="width:24px;height:24px;border-radius:999px;border:1px solid #d1d5db;background:#e5e7eb;color:#374151;font-size:11px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;text-transform:uppercase;">' + uploaderInitial + '</span>' +
+                '<span>' + safeUploader + '</span>' +
+              '</span>');
+
+          return '<tr>' +
+            '<td style="padding:10px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;color:#1f2937;word-break:break-word;"><div style="display:inline-flex;align-items:center;gap:8px;font-weight:700;"><img src="' + safeIcon + '" alt="file type" loading="lazy" style="width:18px;height:18px;object-fit:contain;flex-shrink:0;" onerror="this.src=\'svg/uploads/note-icon.svg\'"><span>' + safeName + '</span></div></td>' +
+            '<td style="padding:10px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;color:#1f2937;">' + escapeHtml(formatBytes(r.size)) + '</td>' +
+            '<td style="padding:10px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;color:#1f2937;">' + uploaderHtml + '</td>' +
+            '<td style="padding:10px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;color:#1f2937;">' + safeDate + '</td>' +
+            '<td style="padding:10px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;color:#1f2937;">' +
+              '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
+                '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" style="font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;color:#1f2937;text-decoration:none;background:#fff;">Open</a>' +
+                '<a href="' + safeUrl + '" download style="font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;color:#1f2937;text-decoration:none;background:#fff;">Download</a>' +
+                '<button class="tools-uploads-copy" data-idx="' + idx + '" style="font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;color:#1f2937;background:#fff;cursor:pointer;">Copy URL</button>' +
+                (canDeleteRow(r) ? '<button class="tools-uploads-delete" data-idx="' + idx + '" style="font-size:12px;border:1px solid #fca5a5;border-radius:6px;padding:5px 8px;color:#fff;background:#b91c1c;cursor:pointer;">Delete</button>' : '') +
+              '</div>' +
+            '</td>' +
+          '</tr>';
+        }).join('');
+
+        tableBody.querySelectorAll('.tools-uploads-copy').forEach((btn) => {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const i = Number(btn.getAttribute('data-idx'));
+            const url = Number.isFinite(i) && rows[i] ? rows[i].url : '';
+            if (!url) return;
+            navigator.clipboard.writeText(url).then(() => showStatus('URL copied to clipboard.', false)).catch(() => showStatus('Could not copy URL.', true));
+          });
+        });
+
+        tableBody.querySelectorAll('.tools-uploads-delete').forEach((btn) => {
+          btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const i = Number(btn.getAttribute('data-idx'));
+            const row = Number.isFinite(i) ? rows[i] : null;
+            if (!row) return;
+            deleteUploadRow(row);
+          });
+        });
+      }
+
+      async function loadUploads(db) {
+        const tableBody = byId('toolsUploadsTableBody');
+        if (tableBody) tableBody.innerHTML = '<tr><td colspan="5" style="padding:24px; text-align:center; color:#374151; font-size:14px;">Loading uploads...</td></tr>';
+        clearStatus();
+        try {
+          const roots = ['uploads', 'uploadLogs', 'filesUploads'];
+          const merged = [];
+          for (const root of roots) {
+            const snap = await db.ref(root).once('value');
+            const value = snap.val();
+            if (!value) continue;
+            collectRecords(value, [root], merged);
+          }
+          const unique = [];
+          const seen = new Set();
+          for (const row of merged) {
+            const key = row.id + '|' + row.url;
+            if (seen.has(key)) continue;
+            seen.add(key);
+            unique.push(row);
+          }
+          allRows = unique;
+          if (!allRows.length) {
+            allRows = await loadFromWorkerFallback();
+            if (!allRows.length) showStatus('No upload metadata found and worker listing returned no files.', true);
+            else { console.info('Loaded ' + allRows.length + ' file(s) from Cloudflare worker fallback.'); clearStatus(); }
+          } else {
+            showStatus('Loaded ' + allRows.length + ' upload record(s).', false);
+          }
+          renderRows();
+        } catch (error) {
+          showStatus('Failed to load uploads: ' + error.message, true);
+          if (tableBody) tableBody.innerHTML = '<tr><td colspan="5" style="padding:24px; text-align:center; color:#6b7280; font-size:14px;">Could not load uploads.</td></tr>';
+        }
+      }
+
+      async function init() {
+        if (!byId('uploadsTool')) return;
+
+        if (typeof firebase === 'undefined') {
+          showStatus('Firebase SDK is not available.', true);
+          return;
+        }
+        if (!firebase.apps.length) {
+          firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.database();
+
+        if (!initialized) {
+          byId('toolsUploadsSearch').addEventListener('input', renderRows);
+          byId('toolsUploadsSort').addEventListener('change', renderRows);
+          byId('toolsUploadsScope').addEventListener('change', renderRows);
+          byId('toolsUploadsRefreshBtn').addEventListener('click', () => loadUploads(db));
+          byId('toolsUploadsViewCycleBtn').addEventListener('click', () => {
+            const views = getAvailableViews();
+            const currentIndex = views.indexOf(activeTab);
+            const nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % views.length;
+            activeTab = views[nextIndex];
+            syncViewCycleButton();
+            renderRows();
+          });
+          initialized = true;
+        }
+
+        if (window.currentUserPromise) {
+          try {
+            const user = await window.currentUserPromise;
+            currentUserName = (user && (user.userName || user.username || user.displayName)) || '';
+            currentUserIsAdmin = Boolean(user && user.isAdmin);
+          } catch (_) {
+            currentUserName = '';
+            currentUserIsAdmin = false;
+          }
+        }
+
+        if (!currentUserIsAdmin && activeTab !== 'general') activeTab = 'general';
+        syncViewCycleButton();
+
+        await loadUploaderAvatarMap(db);
+        await loadUploads(db);
+      }
+
+      window.toolsUploadsModule = { init };
+    })();
+  </script>
 <script>
   (function() {
     const firebaseConfig = {
@@ -1641,23 +2318,7 @@
       new ChatWidget();
     }
   });
-  
-  // Privacy modal
-  function showPrivacyModal() {
-    alert('Privacy policy coming soon!');
-  }
-  
-  // Version info
-  function toggleVersionInfo() {
-    const versionInfo = document.getElementById('versionInfo');
-    if (versionInfo.style.display === 'none') {
-      versionInfo.textContent = 'Version 2026.02.01';
-      versionInfo.style.display = 'block';
-    } else {
-      versionInfo.style.display = 'none';
-    }
-  }
-  
+
   // Logout
   function handleLogout() {
     if (confirm('Are you sure you want to logout?')) {

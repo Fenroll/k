@@ -13,18 +13,193 @@
  * 6. Update R2_WORKER_URL in tests.html with your worker URL
  */
 
+const DEFAULT_MAX_BUCKET_SIZE = 10 * 1024 * 1024 * 1024;
+const DEFAULT_UPLOAD_LIMITS_URL = 'https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app/settings/uploadLimits.json';
+const UPLOAD_LIMITS_CACHE_TTL_MS = 60 * 1000;
+
+let cachedUploadLimits = {
+  fetchedAt: 0,
+  data: null
+};
+
+function parsePositiveBytes(value) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : null;
+}
+
+function buildPublicObjectUrl(publicDomain, key) {
+  const safePath = String(key || '')
+    .split('/')
+    .map((segment) => encodeURIComponent(segment))
+    .join('/');
+  return `${publicDomain}/${safePath}`;
+}
+
+async function resolveUniqueObjectKey(bucket, desiredKey) {
+  const current = await bucket.head(desiredKey);
+  if (!current) {
+    return { key: desiredKey, wasDuplicate: false };
+  }
+
+  const lastSlash = desiredKey.lastIndexOf('/');
+  const dir = lastSlash >= 0 ? desiredKey.slice(0, lastSlash + 1) : '';
+  const fileName = lastSlash >= 0 ? desiredKey.slice(lastSlash + 1) : desiredKey;
+  const dot = fileName.lastIndexOf('.');
+  const hasExtension = dot > 0;
+  const baseName = hasExtension ? fileName.slice(0, dot) : fileName;
+  const extension = hasExtension ? fileName.slice(dot) : '';
+
+  for (let i = 2; i <= 200; i += 1) {
+    const candidate = `${dir}${baseName} (${i})${extension}`;
+    const exists = await bucket.head(candidate);
+    if (!exists) {
+      return { key: candidate, wasDuplicate: true };
+    }
+  }
+
+  const fallback = `${dir}${baseName}-${Date.now()}${extension}`;
+  return { key: fallback, wasDuplicate: true };
+}
+
+async function getUploadLimitsConfig(env) {
+  const now = Date.now();
+  if (cachedUploadLimits.data && (now - cachedUploadLimits.fetchedAt) < UPLOAD_LIMITS_CACHE_TTL_MS) {
+    return cachedUploadLimits.data;
+  }
+
+  const configUrl = env.UPLOAD_LIMITS_URL || DEFAULT_UPLOAD_LIMITS_URL;
+  const response = await fetch(configUrl, {
+    method: 'GET',
+    headers: {
+      'Accept': 'application/json'
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch upload limits (${response.status})`);
+  }
+
+  const data = await response.json();
+  cachedUploadLimits = {
+    fetchedAt: now,
+    data: data || {}
+  };
+
+  return cachedUploadLimits.data;
+}
+
+async function resolveMaxBucketSize(env, bucketType) {
+  const envDefaultLimit = parsePositiveBytes(env.UPLOAD_MAX_TOTAL_BYTES);
+  const envChatLimit = parsePositiveBytes(env.CHAT_UPLOAD_MAX_TOTAL_BYTES);
+  if (bucketType === 'chat' && envChatLimit) {
+    return envChatLimit;
+  }
+  if (bucketType !== 'chat' && envDefaultLimit) {
+    return envDefaultLimit;
+  }
+
+  try {
+    const settings = await getUploadLimitsConfig(env);
+    const firebaseDefaultLimit = parsePositiveBytes(settings.defaultMaxTotalBytes);
+    const firebaseChatLimit = parsePositiveBytes(settings.chatMaxTotalBytes);
+
+    if (bucketType === 'chat' && firebaseChatLimit) {
+      return firebaseChatLimit;
+    }
+    if (bucketType !== 'chat' && firebaseDefaultLimit) {
+      return firebaseDefaultLimit;
+    }
+  } catch (configError) {
+    console.error('Error loading upload limits config:', configError);
+  }
+
+  return DEFAULT_MAX_BUCKET_SIZE;
+}
+
 export default {
   async fetch(request, env) {
     // CORS headers for your domain
     const corsHeaders = {
       'Access-Control-Allow-Origin': '*', // Change to your domain in production
-      'Access-Control-Allow-Methods': 'POST, DELETE, OPTIONS',
+      'Access-Control-Allow-Methods': 'GET, POST, DELETE, OPTIONS',
       'Access-Control-Allow-Headers': 'Content-Type',
     };
 
     // Handle OPTIONS request for CORS
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders });
+    }
+
+    // Handle read-only list request
+    if (request.method === 'GET') {
+      try {
+        const url = new URL(request.url);
+        const action = url.searchParams.get('action') || '';
+
+        if (action !== 'list') {
+          return new Response(JSON.stringify({ error: 'Unsupported GET action' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const bucketType = url.searchParams.get('bucketType') || 'default';
+        const prefix = url.searchParams.get('prefix') || '';
+        const cursor = url.searchParams.get('cursor') || undefined;
+        const limitRaw = Number(url.searchParams.get('limit'));
+        const limit = Number.isFinite(limitRaw) && limitRaw > 0
+          ? Math.min(Math.floor(limitRaw), 1000)
+          : 1000;
+
+        let bucket;
+        if (bucketType === 'chat') {
+          bucket = env.CHATBUCKET;
+        } else {
+          bucket = env.R2BUCKET || env.R2_BUCKET || env['r2-upload'];
+        }
+
+        if (!bucket) {
+          return new Response(JSON.stringify({ error: 'Bucket not bound' }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const listed = await bucket.list({ prefix, cursor, limit });
+        const publicDomain = bucketType === 'chat'
+          ? 'https://chat.coursebook.lol'
+          : 'https://files.coursebook.lol';
+        const objects = (listed.objects || []).map((object) => ({
+          key: object.key,
+          size: object.size,
+          uploaded: object.uploaded,
+          etag: object.etag,
+          httpEtag: object.httpEtag,
+          url: buildPublicObjectUrl(publicDomain, object.key),
+          contentType: object.httpMetadata && object.httpMetadata.contentType
+            ? object.httpMetadata.contentType
+            : null
+        }));
+
+        return new Response(JSON.stringify({
+          success: true,
+          bucketType,
+          prefix,
+          objects,
+          truncated: Boolean(listed.truncated),
+          cursor: listed.cursor || null
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        return new Response(JSON.stringify({
+          error: 'List failed',
+          message: error.message
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
     }
 
     // Handle DELETE request
@@ -123,21 +298,29 @@ export default {
         });
       }
 
-      // Check bucket size limit (10GB = 10 * 1024 * 1024 * 1024 bytes)
-      const MAX_BUCKET_SIZE = 10 * 1024 * 1024 * 1024;
+      // Check configured total bucket size limit (fallback: 10GB)
+      const MAX_BUCKET_SIZE = await resolveMaxBucketSize(env, bucketType);
       let totalSize = 0;
       
       try {
-        const listed = await bucket.list();
-        for (const object of listed.objects) {
-          totalSize += object.size;
-        }
+        let cursor = undefined;
+        let truncated = false;
+
+        do {
+          const listed = await bucket.list({ cursor });
+          for (const object of listed.objects) {
+            totalSize += object.size;
+          }
+
+          truncated = Boolean(listed.truncated);
+          cursor = listed.cursor;
+        } while (truncated && cursor);
         
         // Check if adding this file would exceed the limit
         if (totalSize + file.size > MAX_BUCKET_SIZE) {
           return new Response(JSON.stringify({ 
             error: 'Storage limit exceeded',
-            message: `Bucket storage limit of 10GB would be exceeded. Current: ${(totalSize / (1024 * 1024 * 1024)).toFixed(2)}GB, File: ${(file.size / (1024 * 1024)).toFixed(2)}MB`,
+            message: `Bucket storage limit would be exceeded. Current: ${(totalSize / (1024 * 1024)).toFixed(2)}MB, File: ${(file.size / (1024 * 1024)).toFixed(2)}MB, Max: ${(MAX_BUCKET_SIZE / (1024 * 1024)).toFixed(2)}MB`,
             currentSize: totalSize,
             fileSize: file.size,
             maxSize: MAX_BUCKET_SIZE
@@ -159,7 +342,9 @@ export default {
       // Preserve Unicode letters (including Cyrillic, etc.) but remove path-breaking chars
       const safeUserName = userName.replace(/[\/\\:*?"<>|]/g, '_');
       
-      const key = `${safeUserName}/${timestamp}/${fileName}`;
+      const requestedKey = `${safeUserName}/${timestamp}/${fileName}`;
+      const uniqueKeyResult = await resolveUniqueObjectKey(bucket, requestedKey);
+      const key = uniqueKeyResult.key;
 
       // Upload to R2 - use arrayBuffer instead of stream for better compatibility
       const fileData = await file.arrayBuffer();
@@ -179,7 +364,9 @@ export default {
       return new Response(JSON.stringify({
         success: true,
         key: key,
-        url: `${publicDomain}/${key}`,
+        requestedKey,
+        duplicateResolved: uniqueKeyResult.wasDuplicate,
+        url: buildPublicObjectUrl(publicDomain, key),
         size: file.size,
         name: file.name
       }), {
