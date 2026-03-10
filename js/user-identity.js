@@ -138,7 +138,7 @@ async function createAndInitUser() {
 
         user._populate({
             userId: guestId,
-            userName: `Guest-${guestId.substring(6, 10)}`, // e.g., Guest-cd23
+          userName: `guest-${guestId.substring(6, 10)}`,
             color: guestColor,
             isGuest: true,
             legacyChatId: null, 

@@ -1,4 +1,4 @@
-window.coursesVersion = "202603091s2h";
+window.coursesVersion = "202603101mce";
 window.courses = [
   {
     "id": "000001",
@@ -80,6 +80,11 @@ window.courses = [
         "name": "Тежки Учебни Материали",
         "files": [
           {
+            "name": "Ball pool.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/Ball pool.url",
+            "url": "https://bloob.io/8ballpool"
+          },
+          {
             "name": "Cookie Clicker.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Cookie Clicker.url",
             "url": "https://orteil.dashnet.org/cookieclicker/"
@@ -103,6 +108,11 @@ window.courses = [
             "name": "skribbl.io.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/skribbl.io.url",
             "url": "https://skribbl.io/"
+          },
+          {
+            "name": "Table Tennis.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/Table Tennis.url",
+            "url": "https://gamesnacks.com/games/tabletennis#eids=95381967,95379098"
           },
           {
             "name": "Timeguessr.url",
@@ -783,4 +793,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "09.03.2026 23:03";
+window.buildTimestamp = "10.03.2026 21:00";
