@@ -1,4 +1,4 @@
-window.coursesVersion = "202603111fvb";
+window.coursesVersion = "202603111g0q";
 window.courses = [
   {
     "id": "000001",
@@ -169,10 +169,6 @@ window.courses = [
         "name": "Общи материали",
         "files": [
           {
-            "name": "Разписани теми по пропедевтика.docx",
-            "path": "files/Вътрешни болести 1 ч/Общи материали/Разписани теми по пропедевтика.docx"
-          },
-          {
             "name": "Съкратени теми.pdf",
             "path": "files/Вътрешни болести 1 ч/Общи материали/Съкратени теми.pdf"
           }
@@ -186,11 +182,6 @@ window.courses = [
           {
             "name": "2-msg-Тестове От Мега за Изпит.html",
             "path": "files/Вътрешни болести 1 ч/Общи материали/2-msg-Тестове От Мега за Изпит.html",
-            "type": "html"
-          },
-          {
-            "name": "msg-Анамнеза и Статус.html",
-            "path": "files/Вътрешни болести 1 ч/Общи материали/msg-Анамнеза и Статус.html",
             "type": "html"
           }
         ]
@@ -790,4 +781,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "11.03.2026 18:40";
+window.buildTimestamp = "11.03.2026 18:43";
