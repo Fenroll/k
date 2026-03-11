@@ -1,4 +1,4 @@
-window.coursesVersion = "202603101mce";
+window.coursesVersion = "202603111f0h";
 window.courses = [
   {
     "id": "000001",
@@ -489,6 +489,11 @@ window.courses = [
             "name": "Упражнение 3.url",
             "path": "files/Клинична лаборатория/Упражнения/Упражнение 3.url",
             "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%203.pdf"
+          },
+          {
+            "name": "Упражнение 4.url",
+            "path": "files/Клинична лаборатория/Упражнения/Упражнение 4.url",
+            "url": "https://files.coursebook.lol/%D0%9F%D0%B0%D0%B8%D1%81%D0%B8%D0%B9/2026-03-11/%D0%9B%D0%B5%D0%B2%D0%BA%D0%B5%D0%BC%D0%B8%D1%8F.pdf"
           }
         ]
       }
@@ -793,4 +798,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "10.03.2026 21:00";
+window.buildTimestamp = "11.03.2026 18:21";
