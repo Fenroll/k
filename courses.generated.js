@@ -1,4 +1,4 @@
-window.coursesVersion = "202603111f0h";
+window.coursesVersion = "202603111f4y";
 window.courses = [
   {
     "id": "000001",
@@ -476,23 +476,23 @@ window.courses = [
         "name": "Упражнения",
         "files": [
           {
-            "name": "Упражнение 1.url",
-            "path": "files/Клинична лаборатория/Упражнения/Упражнение 1.url",
+            "name": "1. Клинична лаборатория. Контрол на качеството.url",
+            "path": "files/Клинична лаборатория/Упражнения/1. Клинична лаборатория. Контрол на качеството.url",
             "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%201.pdf"
           },
           {
-            "name": "Упражнение 2.url",
-            "path": "files/Клинична лаборатория/Упражнения/Упражнение 2.url",
+            "name": "2. Анемии.url",
+            "path": "files/Клинична лаборатория/Упражнения/2. Анемии.url",
             "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%202.pdf"
           },
           {
-            "name": "Упражнение 3.url",
-            "path": "files/Клинична лаборатория/Упражнения/Упражнение 3.url",
+            "name": "3. ДКК.url",
+            "path": "files/Клинична лаборатория/Упражнения/3. ДКК.url",
             "url": "https://files.blackboard.lol/%D0%9A%D0%BB%D0%B8%D0%BD%D0%B8%D1%87%D0%BD%D0%B0%20%D0%BB%D0%B0%D0%B1%D0%BE%D1%80%D0%B0%D1%82%D0%BE%D1%80%D0%B8%D1%8F/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%203.pdf"
           },
           {
-            "name": "Упражнение 4.url",
-            "path": "files/Клинична лаборатория/Упражнения/Упражнение 4.url",
+            "name": "4. Левкемии.url",
+            "path": "files/Клинична лаборатория/Упражнения/4. Левкемии.url",
             "url": "https://files.coursebook.lol/%D0%9F%D0%B0%D0%B8%D1%81%D0%B8%D0%B9/2026-03-11/%D0%9B%D0%B5%D0%B2%D0%BA%D0%B5%D0%BC%D0%B8%D1%8F.pdf"
           }
         ]
@@ -798,4 +798,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "11.03.2026 18:21";
+window.buildTimestamp = "11.03.2026 18:24";
