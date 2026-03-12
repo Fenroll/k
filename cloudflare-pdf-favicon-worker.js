@@ -34,10 +34,18 @@ function isHtmlNavigationRequest(request) {
   return accept.includes('text/html');
 }
 
+function isLikelyMobileBrowser(request) {
+  const userAgent = (request.headers.get('user-agent') || '').toLowerCase();
+  return /android|iphone|ipad|ipod|mobile/.test(userAgent);
+}
+
 function shouldWrapPdf(request, url) {
   if (request.method !== 'GET') return false;
   if (!url.pathname.toLowerCase().endsWith('.pdf')) return false;
   if (url.searchParams.get('raw') === '1') return false;
+  // iOS/Android PDF viewers can fail for iframe-wrapped PDFs (especially with non-ASCII names).
+  // Serving raw PDF directly on mobile is more reliable.
+  if (isLikelyMobileBrowser(request)) return false;
   return isHtmlNavigationRequest(request);
 }
 
