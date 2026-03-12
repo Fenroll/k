@@ -1,4 +1,4 @@
-window.coursesVersion = "20260312suo";
+window.coursesVersion = "2026031218z7";
 window.courses = [
   {
     "id": "000001",
@@ -80,29 +80,14 @@ window.courses = [
         "name": "Тежки Учебни Материали",
         "files": [
           {
-            "name": "Ball pool.url",
-            "path": "files/Blackboard Help/Тежки Учебни Материали/Ball pool.url",
-            "url": "https://bloob.io/8ballpool"
-          },
-          {
-            "name": "Cookie Clicker.url",
-            "path": "files/Blackboard Help/Тежки Учебни Материали/Cookie Clicker.url",
-            "url": "https://orteil.dashnet.org/cookieclicker/"
+            "name": "Github Games.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/Github Games.url",
+            "url": "https://githubgames.gitlab.io/"
           },
           {
             "name": "GuessWhereYouAre.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/GuessWhereYouAre.url",
             "url": "https://guesswhereyouare.com/"
-          },
-          {
-            "name": "Neal Fun.url",
-            "path": "files/Blackboard Help/Тежки Учебни Материали/Neal Fun.url",
-            "url": "https://neal.fun/"
-          },
-          {
-            "name": "Random Street View.url",
-            "path": "files/Blackboard Help/Тежки Учебни Материали/Random Street View.url",
-            "url": "https://randomstreetview.com/"
           },
           {
             "name": "skribbl.io.url",
@@ -123,11 +108,6 @@ window.courses = [
             "name": "Uno.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Uno.url",
             "url": "https://uno.guilherr.me/"
-          },
-          {
-            "name": "Ztype.url",
-            "path": "files/Blackboard Help/Тежки Учебни Материали/Ztype.url",
-            "url": "https://zty.pe/"
           }
         ]
       }
@@ -701,4 +681,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "12.03.2026 10:23";
+window.buildTimestamp = "12.03.2026 16:11";

@@ -18,6 +18,7 @@
 
 const DEFAULT_FAVICON_URL = 'https://coursebook.lol/favicon.ico';
 const DEFAULT_SITE_TITLE = 'Coursebook';
+const WORKER_VERSION = '2026-03-12.3';
 
 function htmlEscape(value) {
   return String(value)
@@ -127,6 +128,7 @@ function buildObjectHeaders(object, etag) {
 
   headers.set('Accept-Ranges', 'bytes');
   headers.set('ETag', etag);
+  headers.set('X-Worker-Version', WORKER_VERSION);
 
   if (object.uploaded) {
     headers.set('Last-Modified', new Date(object.uploaded).toUTCString());
@@ -137,6 +139,23 @@ function buildObjectHeaders(object, etag) {
   }
 
   return headers;
+}
+
+function toAsciiFilename(value) {
+  return String(value)
+    .replace(/[^\x20-\x7E]+/g, '_')
+    .replace(/"/g, '')
+    .trim() || 'file';
+}
+
+function setPdfContentDisposition(headers, key) {
+  const fileName = key.split('/').pop() || 'file.pdf';
+  const asciiFallback = toAsciiFilename(fileName);
+  const utf8Encoded = encodeURIComponent(fileName);
+  headers.set(
+    'Content-Disposition',
+    `inline; filename="${asciiFallback}"; filename*=UTF-8''${utf8Encoded}`
+  );
 }
 
 function resolveObjectKeyFromPath(pathname) {
@@ -157,9 +176,53 @@ function resolveObjectKeyFromPath(pathname) {
     .join('/');
 }
 
+function decodeSegmentOnce(segment) {
+  try {
+    return decodeURIComponent(segment);
+  } catch {
+    return segment;
+  }
+}
+
+function decodeSegmentTwice(segment) {
+  const once = decodeSegmentOnce(segment);
+  // Some clients may send double-encoded paths; a second decode can recover the real key.
+  return once.includes('%') ? decodeSegmentOnce(once) : once;
+}
+
+function buildKeyCandidatesFromPath(pathname) {
+  const cleanPath = pathname.replace(/^\/+/, '');
+  if (!cleanPath) return [];
+
+  const rawSegments = cleanPath.split('/');
+  const decodedOnce = rawSegments.map(decodeSegmentOnce).join('/');
+  const decodedTwice = rawSegments.map(decodeSegmentTwice).join('/');
+
+  const candidates = [
+    resolveObjectKeyFromPath(pathname),
+    decodedOnce,
+    decodedTwice,
+    decodedOnce.normalize('NFC'),
+    decodedOnce.normalize('NFD'),
+    decodedTwice.normalize('NFC'),
+    decodedTwice.normalize('NFD'),
+    cleanPath
+  ];
+
+  const unique = [];
+  const seen = new Set();
+  for (const candidate of candidates) {
+    if (!candidate || seen.has(candidate)) continue;
+    seen.add(candidate);
+    unique.push(candidate);
+  }
+
+  return unique;
+}
+
 async function serveRawObject(request, env, url) {
-  const key = resolveObjectKeyFromPath(url.pathname);
-  if (!key) {
+  const keyCandidates = buildKeyCandidatesFromPath(url.pathname);
+  if (!keyCandidates.length) {
     return new Response('Not found', { status: 404 });
   }
 
@@ -168,9 +231,32 @@ async function serveRawObject(request, env, url) {
     return new Response('FILES_BUCKET binding missing', { status: 500 });
   }
 
-  const head = await bucket.head(key);
-  if (!head) {
+  let key = '';
+  let head = null;
+  for (const candidate of keyCandidates) {
+    const testHead = await bucket.head(candidate);
+    if (testHead) {
+      key = candidate;
+      head = testHead;
+      break;
+    }
+  }
+
+  if (!head || !key) {
     return new Response('Not found', { status: 404 });
+  }
+
+  const etag = head.httpEtag || head.etag || '"unknown"';
+  const headHeaders = buildObjectHeaders(head, etag);
+  if (key.toLowerCase().endsWith('.pdf')) {
+    setPdfContentDisposition(headHeaders, key);
+  }
+
+  // Keep HEAD simple and deterministic: mobile download managers often probe
+  // with HEAD before GET, and expect a normal 200 + full Content-Length.
+  if (request.method === 'HEAD') {
+    headHeaders.set('Content-Length', String(head.size));
+    return new Response(null, { status: 200, headers: headHeaders });
   }
 
   const rangeHeader = request.headers.get('range');
@@ -187,18 +273,14 @@ async function serveRawObject(request, env, url) {
     return new Response('Not found', { status: 404 });
   }
 
-  const etag = object.httpEtag || head.httpEtag || object.etag || head.etag || '"unknown"';
-  const headers = buildObjectHeaders(object, etag);
-
-  if (request.method === 'HEAD') {
-    const contentLength = object.range?.length ?? object.size;
-    if (typeof contentLength === 'number') {
-      headers.set('Content-Length', String(contentLength));
-    }
-    return new Response(null, { status: object.range ? 206 : 200, headers });
+  const requestedRange = Boolean(range);
+  const responseEtag = object.httpEtag || head.httpEtag || object.etag || head.etag || '"unknown"';
+  const headers = buildObjectHeaders(object, responseEtag);
+  if (key.toLowerCase().endsWith('.pdf')) {
+    setPdfContentDisposition(headers, key);
   }
 
-  if (object.range && typeof object.range.offset === 'number' && typeof object.range.length === 'number') {
+  if (requestedRange && object.range && typeof object.range.offset === 'number' && typeof object.range.length === 'number') {
     const start = object.range.offset;
     const end = start + object.range.length - 1;
     headers.set('Content-Range', `bytes ${start}-${end}/${head.size}`);

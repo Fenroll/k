@@ -20,14 +20,14 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=20260312suo"></script>
+  <script src="js/auth-guard.js?v=2026031218z7"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Calendar</title>
   
   <!-- Favicon -->
-  <link rel="icon" href="favicon.svg?v=20260312suo" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=2026031218z7" type="image/svg+xml">
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
@@ -191,20 +191,46 @@
   
   /* Current Information Panel */
   .info-panel {
-    background: #fff;
+    background: linear-gradient(180deg, #fbfdf9 0%, #ffffff 100%);
     border-radius: 8px;
     padding: 24px;
     margin-top: 24px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    box-shadow: 0 6px 18px rgba(52, 78, 65, 0.12);
     position: relative;
     min-height: 50px; /* Add this to reserve space */
     transition: opacity 0.3s ease-in-out; /* Add for smooth transition */
+    border: 1px solid #d8e2d2;
+  }
+
+  .schedule-notes-header {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding-bottom: 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .schedule-notes-heading {
+    min-width: 0;
+    text-align: center;
+  }
+
+  .schedule-notes-title {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    color: #3a5a40;
+    line-height: 1.2;
+    margin-bottom: 6px;
   }
 
   .schedule-notes-edit-btn {
     position: absolute;
-    top: 12px;
-    right: 12px;
+    top: 0;
+    right: 0;
     border: none;
     border-radius: 6px;
     padding: 7px 12px;
@@ -221,12 +247,10 @@
   }
 
   .schedule-notes-last-edit {
-    position: absolute;
-    top: 16px;
-    left: 16px;
+    position: static;
     color: #6b7280;
-    font-size: 12px;
-    max-width: calc(100% - 140px);
+    font-size: 13px;
+    max-width: 100%;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -234,41 +258,45 @@
   
   .info-panel-content {
     color: #374151;
-    line-height: 1.6;
+    line-height: 1.72;
+    font-size: 15px;
   }
   
   .info-panel-content h1 {
-    font-size: 24px;
+    font-size: 25px;
     color: #111827;
-    margin: 0 0 16px 0;
+    margin: 0 0 14px 0;
     font-weight: 600;
+    line-height: 1.3;
   }
   
   .info-panel-content h2 {
     font-size: 20px;
     color: #1f2937;
-    margin: 24px 0 12px 0;
+    margin: 26px 0 12px 0;
     font-weight: 600;
+    line-height: 1.35;
   }
   
   .info-panel-content h3 {
     font-size: 16px;
     color: #588157;
-    margin: 16px 0 8px 0;
+    margin: 18px 0 8px 0;
     font-weight: 600;
+    line-height: 1.4;
   }
   
   .info-panel-content p {
-    margin: 8px 0;
+    margin: 10px 0;
   }
   
   .info-panel-content ul {
-    margin: 8px 0;
+    margin: 12px 0;
     padding-left: 24px;
   }
   
   .info-panel-content li {
-    margin: 4px 0;
+    margin: 6px 0;
   }
   
   .info-panel-content strong {
@@ -1268,22 +1296,40 @@
   }
 
   @media (max-width: 768px) {
+    .schedule-notes-header {
+      gap: 8px;
+      align-items: stretch;
+      flex-direction: column;
+      padding-bottom: 10px;
+      margin-bottom: 12px;
+    }
+
+    .schedule-notes-title {
+      font-size: 24px;
+      margin-bottom: 4px;
+    }
+
     .schedule-notes-last-edit {
       position: static;
-      margin-bottom: 8px;
+      margin-bottom: 0;
       max-width: 100%;
       white-space: normal;
     }
 
     .schedule-notes-edit-btn {
-      top: 10px;
-      right: 10px;
+      position: static;
+      align-self: center;
       padding: 6px 11px;
+    }
+
+    .info-panel-content {
+      font-size: 14px;
+      line-height: 1.68;
     }
   }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260312suo">
-  <script src="js/version-manager.js?v=20260312suo"></script>
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026031218z7">
+  <script src="js/version-manager.js?v=2026031218z7"></script>
 </head>
 <body>
   <div class="layout">
@@ -1292,62 +1338,62 @@
       <div class="bb-inner-wrap">
         <div class="logo-header">
           <a href="https://elearn.mu-varna.bg" target="_blank" rel="noopener noreferrer">
-            <img class="logo-img" src="svg/logo-coursebook.svg?v=20260312suo" alt="StudyBoard">
+            <img class="logo-img" src="svg/logo-coursebook.svg?v=2026031218z7" alt="StudyBoard">
           </a>
         </div>
         <nav class="sidebar-nav" aria-label="Main">
           <ul>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/course">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=20260312suo" alt="blackboard" style="filter: brightness(0) invert(1);" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=2026031218z7" alt="blackboard" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Blackboard</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="account.html?v=20260312suo">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=20260312suo" alt="Account" />
+              <a href="account.html?v=2026031218z7">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=2026031218z7" alt="Account" />
                 <span class="link-text">Account</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="index.html?v=20260312suo">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=20260312suo" alt="Courses" />
+              <a href="index.html?v=2026031218z7">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=2026031218z7" alt="Courses" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="notes.html?v=20260312suo">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=20260312suo" alt="Notes" style="filter: brightness(0) invert(1);" />
+              <a href="notes.html?v=2026031218z7">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=2026031218z7" alt="Notes" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Notes</span>
               </a>
             </li>
             <li class="base-navigation-button active">
-              <a href="calendar.html?v=20260312suo">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=20260312suo" alt="Calendar" />
+              <a href="calendar.html?v=2026031218z7">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=2026031218z7" alt="Calendar" />
                 <span class="link-text">Calendar</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="tools.html?v=20260312suo">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=20260312suo" alt="Tools" />
+              <a href="tools.html?v=2026031218z7">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=2026031218z7" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=20260312suo">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=20260312suo" alt="Editor" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=2026031218z7">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=2026031218z7" alt="Editor" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Editor</span>
               </a>
             </li>
             <li class="base-navigation-button" id="admin-button" style="display: none;">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=20260312suo">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=20260312suo" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=2026031218z7">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=2026031218z7" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Admin Panel</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="#" onclick="handleLogout()">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=20260312suo" alt="Sign Out" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=2026031218z7" alt="Sign Out" />
                 <span class="link-text">Sign Out</span>
               </a>
             </li>
@@ -1420,8 +1466,13 @@
         
         <!-- Current Information Panel -->
         <div id="currentInfoPanel" class="info-panel">
-          <div id="scheduleNotesLastEdit" class="schedule-notes-last-edit">Last edit: —</div>
-          <button id="editScheduleNotesBtn" class="schedule-notes-edit-btn" type="button">Edit</button>
+          <div class="schedule-notes-header">
+            <div class="schedule-notes-heading">
+              <div class="schedule-notes-title">Schedule Notes</div>
+              <div id="scheduleNotesLastEdit" class="schedule-notes-last-edit">Last edit: —</div>
+            </div>
+            <button id="editScheduleNotesBtn" class="schedule-notes-edit-btn" type="button">Edit</button>
+          </div>
           <div class="info-panel-content" id="infoContent">
             Loading schedule notes...
           </div>
@@ -1724,7 +1775,13 @@
       if (!lastEditedAt) return 'Last edit: —';
       const date = new Date(lastEditedAt);
       if (Number.isNaN(date.getTime())) return 'Last edit: —';
-      return `Last edit: ${date.toLocaleString('bg-BG')}`;
+      const formatted = date.toLocaleString('bg-BG', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+      return `Last edit: ${formatted}`;
     }
 
     function renderScheduleNotesContent(markdown) {
@@ -1732,7 +1789,14 @@
       if (!infoContent) return;
 
       if (markdown && markdown.trim()) {
-        infoContent.innerHTML = marked.parse(markdown);
+        const lines = markdown
+          .split(/\r?\n/)
+          .map(line => line.trim())
+          .filter(Boolean);
+
+        infoContent.innerHTML = lines
+          .map(line => `<h2>${marked.parseInline(line)}</h2>`)
+          .join('');
       } else {
         infoContent.innerHTML = '<p>Няма въведени бележки. Натисни <strong>Edit</strong>, за да добавиш.</p>';
       }
@@ -3069,7 +3133,7 @@
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260312suo"></script>
+    <script src="js/chat.js?v=2026031218z7"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>
