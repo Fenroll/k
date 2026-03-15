@@ -1,4 +1,4 @@
-window.coursesVersion = "202603151aer";
+window.coursesVersion = "202603151pf0";
 window.courses = [
   {
     "id": "000001",
@@ -449,13 +449,7 @@ window.courses = [
       },
       {
         "name": "Теми",
-        "files": [
-          {
-            "name": "Презентация.url",
-            "path": "files/Дерматология и венерология/Теми/Презентация.url",
-            "url": "https://files.blackboard.lol/%D0%9F%D1%80%D0%B5%D0%B7%D0%B5%D0%BD%D1%82%D0%B0%D1%86%D0%B8%D1%8F.pdf"
-          }
-        ],
+        "files": [],
         "msgNotes": [
           {
             "name": "1-msg-Обривни елементи.html",
@@ -694,4 +688,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "15.03.2026 16:42";
+window.buildTimestamp = "15.03.2026 22:06";
