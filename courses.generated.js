@@ -1,4 +1,4 @@
-window.coursesVersion = "202603151aag";
+window.coursesVersion = "202603151aer";
 window.courses = [
   {
     "id": "000001",
@@ -224,11 +224,7 @@ window.courses = [
           {
             "name": "Микроскопски препарати.url",
             "path": "files/Клинична Патология/Изпит/Микроскопски препарати.url",
-            "url": "https://drive.google.com/drive/folders/1-1ziHM_kr1W7g4Ouz1jiRHLYO50K9bp0?fbclid=IwY2xjawNc3kFleHRuA2FlbQIxMQABHpt3tIXQPstWNc5xRu7UChncimTB-https://files.coursebook.lol/%D0%9F%D0%B0%D0%B8%D1%81%D0%B8%D0%B9/2026-03-15/%D0%BC%D0%B8%D0%BA%D1%80%D0%BE%D1%81%D0%BA%D0%BE%D0%BF%D1%81%D0%BA%D0%B8-%D0%BF%D1%80%D0%B5%D0%BF%D0%B0%D1%80%D0%B0%D1%82%D0%B8-1.pdf"
-          },
-          {
-            "name": "микроскопски-препарати-1.pdf",
-            "path": "files/Клинична Патология/Изпит/микроскопски-препарати-1.pdf"
+            "url": "https://files.coursebook.lol/%D0%9F%D0%B0%D0%B8%D1%81%D0%B8%D0%B9/2026-03-15/%D0%BC%D0%B8%D0%BA%D1%80%D0%BE%D1%81%D0%BA%D0%BE%D0%BF%D1%81%D0%BA%D0%B8-%D0%BF%D1%80%D0%B5%D0%BF%D0%B0%D1%80%D0%B0%D1%82%D0%B8-1.pdf"
           },
           {
             "name": "Препарати видеа.url",
@@ -698,4 +694,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "15.03.2026 16:39";
+window.buildTimestamp = "15.03.2026 16:42";
