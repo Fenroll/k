@@ -100,8 +100,9 @@
         }
         
         function generateRandomPassword() {
-            const length = 8;
-            const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+            const length = 10;
+            // Avoid ambiguous characters (O/0, I/l/1) to reduce manual typing mistakes.
+            const charset = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789";
             let retVal = "";
             for (let i = 0, n = charset.length; i < length; ++i) {
                 retVal += charset.charAt(Math.floor(Math.random() * n));
@@ -257,7 +258,7 @@
                 await newUserRef.set({
                     username: username,
                     displayName: displayName,
-                    password: password,
+                    password: btoa(password),
                     color: randomColor,
                     isAdmin: false,
                     createdAt: Date.now()
@@ -336,17 +337,36 @@
         
         saveChangesBtn.onclick = async () => {
             const uid = document.getElementById('edit-user-uid').value;
-            const newUsername = document.getElementById('edit-username').value;
-            const newDisplayName = document.getElementById('edit-displayname').value;
+            const newUsername = document.getElementById('edit-username').value.trim();
+            const newDisplayName = document.getElementById('edit-displayname').value.trim();
             const showInMembersList = document.getElementById('edit-show-in-members').checked;
 
+            if (!uid || !newUsername || !newDisplayName) {
+                showError('edit-user-error', 'Username and display name are required.');
+                return;
+            }
+
             try {
+                const duplicateSnapshot = await db.ref('site_users').orderByChild('username').equalTo(newUsername).once('value');
+                let hasDuplicate = false;
+                duplicateSnapshot.forEach((child) => {
+                    if (child.key !== uid) {
+                        hasDuplicate = true;
+                    }
+                });
+
+                if (hasDuplicate) {
+                    showError('edit-user-error', 'Username already exists.');
+                    return;
+                }
+
                 await db.ref(`site_users/${uid}`).update({
                     username: newUsername,
                     displayName: newDisplayName,
                     showInMembersList: showInMembersList
                 });
                 showNotification('User updated successfully!');
+                hideError('edit-user-error');
                 modal.style.display = 'none';
             } catch (error) {
                 showError('edit-user-error', 'Failed to update user.');
@@ -365,6 +385,9 @@
                 await db.ref(`site_users/${uid}`).update({
                     password: btoa(newPassword)
                 });
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(newPassword).catch(() => {});
+                }
                 prompt("Password reset successfully. Please copy the new password:", newPassword);
                 modal.style.display = 'none';
             } catch (error) {
