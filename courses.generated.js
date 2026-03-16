@@ -1,4 +1,4 @@
-window.coursesVersion = "202603161dee";
+window.coursesVersion = "202603161f28";
 window.courses = [
   {
     "id": "000001",
@@ -90,6 +90,11 @@ window.courses = [
             "url": "https://guesswhereyouare.com/"
           },
           {
+            "name": "kartbros.io.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/kartbros.io.url",
+            "url": "https://kartbros.io/"
+          },
+          {
             "name": "skribbl.io.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/skribbl.io.url",
             "url": "https://skribbl.io/"
@@ -98,6 +103,11 @@ window.courses = [
             "name": "Table Tennis.url",
             "path": "files/Blackboard Help/Тежки Учебни Материали/Table Tennis.url",
             "url": "https://gamesnacks.com/games/tabletennis#eids=95381967,95379098"
+          },
+          {
+            "name": "tetr.io.url",
+            "path": "files/Blackboard Help/Тежки Учебни Материали/tetr.io.url",
+            "url": "https://tetr.io/"
           },
           {
             "name": "Timeguessr.url",
@@ -699,4 +709,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "16.03.2026 17:47";
+window.buildTimestamp = "16.03.2026 18:22";
