@@ -741,6 +741,7 @@ class ChatUIManager {
     this.notificationsDisabled = localStorage.getItem(`notificationsDisabled_${documentId}`) === 'true';
     this.unreadCount = 0;
     this.lastMessages = [];  // Съхранявам предишни съобщения
+    this.lastRenderedLastMessageId = null;
     this.userNameMappings = {}; // Карта за стари към нови имена
     this.reactionsCache = {}; // Кеш за реакции
     this.activeUsers = {}; // Списък с активни потребители за логика с реакции
@@ -2086,10 +2087,11 @@ class ChatUIManager {
     
     // Check if the last message is new
     const lastMsgId = messages.length > 0 ? messages[messages.length - 1].id : null;
-    const oldLastMsgId = this.lastMessages && this.lastMessages.length > 0 ? this.lastMessages[this.lastMessages.length - 1].id : null;
+    const oldLastMsgId = this.lastRenderedLastMessageId;
     const hasNewMessage = lastMsgId !== oldLastMsgId;
 
-    this.lastMessages = messages;
+    this.lastMessages = messages.slice();
+    this.lastRenderedLastMessageId = lastMsgId;
 
     // Re-render reactions from cache
     this.renderAllReactions();

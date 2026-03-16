@@ -1,4 +1,4 @@
-window.coursesVersion = "202603161f28";
+window.coursesVersion = "202603161fnb";
 window.courses = [
   {
     "id": "000001",
@@ -481,11 +481,6 @@ window.courses = [
             "name": "2-msg-Методи на изследване в дерматологията - клинични, лабораторни.html",
             "path": "files/Дерматология и венерология/Теми/2-msg-Методи на изследване в дерматологията - клинични, лабораторни.html",
             "type": "html"
-          },
-          {
-            "name": "3-msg-Лош текст за презентация.html",
-            "path": "files/Дерматология и венерология/Теми/3-msg-Лош текст за презентация.html",
-            "type": "html"
           }
         ]
       }
@@ -709,4 +704,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "16.03.2026 18:22";
+window.buildTimestamp = "16.03.2026 18:35";
