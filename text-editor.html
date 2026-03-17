@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202603161jef"></script>
+  <script src="js/auth-guard.js?v=202603171569"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
   <!-- Favicon -->
-  <link rel="icon" href="favicon.svg?v=202603161jef" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=202603171569" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
@@ -242,23 +242,43 @@
     #editor h4 {
       color: #588157;
       margin-top: 0.8em;
-      margin-bottom: 0.15em;
+      margin-bottom: 0;
       font-weight: 600;
     }
 
     #editor h1 { font-size: 1.65em; color: #588157; }
     #editor h2 { font-size: 1.3em; color: #588157; }
-    #editor h3 { font-size: 1.1em; color: #588157; margin-bottom: 0.1em; }
-    #editor h4 { font-size: 1.05em; color: #588157; margin-bottom: 0.1em; }
+    #editor h3 { font-size: 1.1em; color: #588157; margin-bottom: 0; }
+    #editor h4 { font-size: 1.05em; color: #588157; margin-bottom: 0; }
 
     #editor p {
       margin: 0.3em 0;
       white-space: pre-wrap;
     }
 
+    #editor hr {
+      margin: 0.45em 0 0.2em;
+    }
+
+    #editor hr + h1,
+    #editor hr + h2,
+    #editor hr + h3,
+    #editor hr + h4 {
+      margin-top: 0.2em;
+    }
+
+    #editor hr + p,
+    #editor hr + ul,
+    #editor hr + ol,
+    #editor hr + blockquote,
+    #editor hr + pre,
+    #editor hr + table {
+      margin-top: 0.08em;
+    }
+
     /* CRITICAL: Fix for list formatting - prevent <p> tags from breaking lists */
     #editor ul, #editor ol {
-      margin: 0.5em 0;
+      margin: 0.2em 0;
       padding-left: 1.5em;
       list-style-position: outside;
     }
@@ -279,21 +299,21 @@
     /* Prevent nested list paragraph issues */
     #editor li > ul,
     #editor li > ol {
-      margin: 0.3em 0 0 0;
+      margin: 0.15em 0 0 0;
       padding-left: 1.5em;
     }
 
     /* Ensure list structure is clean */
     #editor ul ul, #editor ul ol,
     #editor ol ul, #editor ol ol {
-      margin-top: 0.2em;
+      margin-top: 0.1em;
       padding-left: 1.5em;
     }
 
     /* Reduce space between paragraph and following list */
     #editor p + ul,
     #editor p + ol {
-      margin-top: -0.5em;
+      margin-top: 0.2em;
     }
 
     /* Reduce space between heading and following content */
@@ -309,7 +329,7 @@
     #editor h2 + ol,
     #editor h3 + ol,
     #editor h4 + ol {
-      margin-top: 0.1em;
+      margin-top: 0;
     }
 
     /* Reduce space between consecutive headings */
@@ -324,12 +344,12 @@
 
     #editor ul,
     #editor ol {
-      margin: 0.3em 0;
+      margin: 0.2em 0;
       padding-left: 1.5em;
     }
 
     #editor li {
-      margin: 0.15em 0;
+      margin: 0.2em 0;
     }
 
     #editor ul ul {
@@ -986,48 +1006,48 @@
     }
 
   </style>
-  <script src="js/version-manager.js?v=202603161jef"></script>
+  <script src="js/version-manager.js?v=202603171569"></script>
 </head>
 <body>
   <!-- Toolbar -->
   <div class="toolbar">
     <div class="toolbar-group" style="position: relative; display: inline-block;">
-      <button id="formatToggleBtn" title="Format"><img src="svg/md-editor/icon-format.svg?v=202603161jef" alt="Format" class="toolbar-icon"></button>
+      <button id="formatToggleBtn" title="Format"><img src="svg/md-editor/icon-format.svg?v=202603171569" alt="Format" class="toolbar-icon"></button>
       <div id="formatOptions" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 180px;">
         <div class="format-option" data-format="p" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
-          <img src="svg/md-editor/icon-format.svg?v=202603161jef" alt="Normal" class="toolbar-icon">
+          <img src="svg/md-editor/icon-format.svg?v=202603171569" alt="Normal" class="toolbar-icon">
           <span>Normal</span>
         </div>
         <div class="format-option" data-format="h1" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
-          <img src="svg/md-editor/icon-h1.svg?v=202603161jef" alt="H1" class="toolbar-icon">
+          <img src="svg/md-editor/icon-h1.svg?v=202603171569" alt="H1" class="toolbar-icon">
           <span>Heading 1</span>
         </div>
         <div class="format-option" data-format="h2" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
-          <img src="svg/md-editor/icon-h2.svg?v=202603161jef" alt="H2" class="toolbar-icon">
+          <img src="svg/md-editor/icon-h2.svg?v=202603171569" alt="H2" class="toolbar-icon">
           <span>Heading 2</span>
         </div>
         <div class="format-option" data-format="h3" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
-          <img src="svg/md-editor/icon-h3.svg?v=202603161jef" alt="H3" class="toolbar-icon">
+          <img src="svg/md-editor/icon-h3.svg?v=202603171569" alt="H3" class="toolbar-icon">
           <span>Heading 3</span>
         </div>
         <div class="format-option" data-format="h4" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
-          <img src="svg/md-editor/icon-h4.svg?v=202603161jef" alt="H4" class="toolbar-icon">
+          <img src="svg/md-editor/icon-h4.svg?v=202603171569" alt="H4" class="toolbar-icon">
           <span>Heading 4</span>
         </div>
       </div>
     </div>
 
     <div class="toolbar-group">
-      <button id="boldBtn" title="Bold (Ctrl+B)"><img src="svg/md-editor/icon-bold.svg?v=202603161jef" alt="Bold" class="toolbar-icon"></button>
-      <button id="italicBtn" title="Italic (Ctrl+I)"><img src="svg/md-editor/icon-italic.svg?v=202603161jef" alt="Italic" class="toolbar-icon"></button>
-      <button id="underlineBtn" title="Underline (Ctrl+U)"><img src="svg/md-editor/icon-underline.svg?v=202603161jef" alt="Underline" class="toolbar-icon"></button>
-      <button id="strikeBtn" title="Strikethrough"><img src="svg/md-editor/icon-strikethrough.svg?v=202603161jef" alt="Strikethrough" class="toolbar-icon"></button>
-      <button id="subscriptBtn" title="Subscript"><img src="svg/md-editor/icon-subscript.svg?v=202603161jef" alt="Subscript" class="toolbar-icon"></button>
-      <button id="superscriptBtn" title="Superscript"><img src="svg/md-editor/icon-superscript.svg?v=202603161jef" alt="Superscript" class="toolbar-icon"></button>
+      <button id="boldBtn" title="Bold (Ctrl+B)"><img src="svg/md-editor/icon-bold.svg?v=202603171569" alt="Bold" class="toolbar-icon"></button>
+      <button id="italicBtn" title="Italic (Ctrl+I)"><img src="svg/md-editor/icon-italic.svg?v=202603171569" alt="Italic" class="toolbar-icon"></button>
+      <button id="underlineBtn" title="Underline (Ctrl+U)"><img src="svg/md-editor/icon-underline.svg?v=202603171569" alt="Underline" class="toolbar-icon"></button>
+      <button id="strikeBtn" title="Strikethrough"><img src="svg/md-editor/icon-strikethrough.svg?v=202603171569" alt="Strikethrough" class="toolbar-icon"></button>
+      <button id="subscriptBtn" title="Subscript"><img src="svg/md-editor/icon-subscript.svg?v=202603171569" alt="Subscript" class="toolbar-icon"></button>
+      <button id="superscriptBtn" title="Superscript"><img src="svg/md-editor/icon-superscript.svg?v=202603171569" alt="Superscript" class="toolbar-icon"></button>
       
       <!-- Text Color Button -->
       <div style="position: relative; display: inline-block;">
-        <button id="textColorToggleBtn" title="Text Color"><img src="svg/md-editor/icon-text-color.svg?v=202603161jef" alt="Text Color" class="toolbar-icon"></button>
+        <button id="textColorToggleBtn" title="Text Color"><img src="svg/md-editor/icon-text-color.svg?v=202603171569" alt="Text Color" class="toolbar-icon"></button>
         <div id="textColorOptions" class="color-picker-dropdown" style="display: none;">
           <div style="padding: 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase;">Theme Colors</div>
           <div id="textThemeColors" class="theme-colors-grid"></div>
@@ -1043,7 +1063,7 @@
 
       <!-- Heading Color Button -->
       <div style="position: relative; display: inline-block;">
-        <button id="headingColorToggleBtn" title="Heading Color"><img src="svg/md-editor/icon-heading-clor.svg?v=202603161jef" alt="Heading Color" class="toolbar-icon"></button>
+        <button id="headingColorToggleBtn" title="Heading Color"><img src="svg/md-editor/icon-heading-clor.svg?v=202603171569" alt="Heading Color" class="toolbar-icon"></button>
         <div id="headingColorOptions" style="position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 8px; flex-direction: row; flex-wrap: wrap; max-width: 250px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; gap: 6px; display: none !important; flex: 1;">
           <button class="heading-color-btn" data-color="#000000" title="Black" style="background-color: #000000; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
           <button class="heading-color-btn" data-color="#1f2937" title="Dark Gray" style="background-color: #1f2937; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
@@ -1056,7 +1076,7 @@
 
       <!-- Highlight Button -->
       <div style="position: relative; display: inline-block;">
-        <button id="highlightToggleBtn" title="Highlight"><img src="svg/md-editor/icon-highlight.svg?v=202603161jef" alt="Highlight" class="toolbar-icon"></button>
+        <button id="highlightToggleBtn" title="Highlight"><img src="svg/md-editor/icon-highlight.svg?v=202603171569" alt="Highlight" class="toolbar-icon"></button>
         <div id="highlightOptions" class="color-picker-dropdown" style="display: none;">
           <div style="padding: 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase;">Theme Colors</div>
           <div id="highlightThemeColors" class="theme-colors-grid"></div>
@@ -1072,79 +1092,79 @@
     </div>
 
     <div class="toolbar-group">
-      <button id="alignLeftBtn" title="Align Left"><img src="svg/md-editor/icon-align-left.svg?v=202603161jef" alt="Align Left" class="toolbar-icon"></button>
-      <button id="alignCenterBtn" title="Align Center"><img src="svg/md-editor/icon-align-center.svg?v=202603161jef" alt="Align Center" class="toolbar-icon"></button>
-      <button id="alignRightBtn" title="Align Right"><img src="svg/md-editor/icon-align-right.svg?v=202603161jef" alt="Align Right" class="toolbar-icon"></button>
+      <button id="alignLeftBtn" title="Align Left"><img src="svg/md-editor/icon-align-left.svg?v=202603171569" alt="Align Left" class="toolbar-icon"></button>
+      <button id="alignCenterBtn" title="Align Center"><img src="svg/md-editor/icon-align-center.svg?v=202603171569" alt="Align Center" class="toolbar-icon"></button>
+      <button id="alignRightBtn" title="Align Right"><img src="svg/md-editor/icon-align-right.svg?v=202603171569" alt="Align Right" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
-      <button id="ulBtn" title="Unordered List (Ctrl+Shift+U)"><img src="svg/md-editor/icon-unordered.svg?v=202603161jef" alt="Unordered List" class="toolbar-icon"></button>
-      <button id="olBtn" title="Ordered List (Ctrl+Shift+O)"><img src="svg/md-editor/icon-ordered.svg?v=202603161jef" alt="Ordered List" class="toolbar-icon"></button>
+      <button id="ulBtn" title="Unordered List (Ctrl+Shift+U)"><img src="svg/md-editor/icon-unordered.svg?v=202603171569" alt="Unordered List" class="toolbar-icon"></button>
+      <button id="olBtn" title="Ordered List (Ctrl+Shift+O)"><img src="svg/md-editor/icon-ordered.svg?v=202603171569" alt="Ordered List" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
-      <button id="outdentBtn" title="Outdent (Shift+Tab)"><img src="svg/md-editor/icon-outdent.svg?v=202603161jef" alt="Outdent" class="toolbar-icon"></button>
-      <button id="indentBtn" title="Indent (Tab)"><img src="svg/md-editor/icon-indent.svg?v=202603161jef" alt="Indent" class="toolbar-icon"></button>
+      <button id="outdentBtn" title="Outdent (Shift+Tab)"><img src="svg/md-editor/icon-outdent.svg?v=202603171569" alt="Outdent" class="toolbar-icon"></button>
+      <button id="indentBtn" title="Indent (Tab)"><img src="svg/md-editor/icon-indent.svg?v=202603171569" alt="Indent" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group" style="position: relative;">
-      <button id="tableBtn" title="Insert Table"><img src="svg/md-editor/icon-table.svg?v=202603161jef" alt="Table" class="toolbar-icon"></button>
-      <button id="editTableBtn" title="Edit table with Tables Generator"><img src="svg/md-editor/icon-edit-table.svg?v=202603161jef" alt="Edit Table" class="toolbar-icon"></button>
+      <button id="tableBtn" title="Insert Table"><img src="svg/md-editor/icon-table.svg?v=202603171569" alt="Table" class="toolbar-icon"></button>
+      <button id="editTableBtn" title="Edit table with Tables Generator"><img src="svg/md-editor/icon-edit-table.svg?v=202603171569" alt="Edit Table" class="toolbar-icon"></button>
       <!-- Table Options Dropdown Menu -->
       <div id="tableOptionsMenu" class="table-options-menu" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 220px; white-space: nowrap;">
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=202603161jef"  alt="Table" class="toolbar-icon"> Insert row above</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=202603161jef"  alt="Table" class="toolbar-icon"> Insert row below</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableColumnBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=202603161jef"  alt="Table" class="toolbar-icon"> Insert column left</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableColumnAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=202603161jef"  alt="Table" class="toolbar-icon"> Insert column right</div>
+      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=202603171569"  alt="Table" class="toolbar-icon"> Insert row above</div>
+      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=202603171569"  alt="Table" class="toolbar-icon"> Insert row below</div>
+      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableColumnBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=202603171569"  alt="Table" class="toolbar-icon"> Insert column left</div>
+      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableColumnAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=202603171569"  alt="Table" class="toolbar-icon"> Insert column right</div>
       <hr style="margin: 4px 0; border: none; border-top: 1px solid #eee;">
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTableRow(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=202603161jef"  alt="Table" class="toolbar-icon">Remove Table Row</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTableColumn(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=202603161jef"  alt="Table" class="toolbar-icon"> Delete column</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTable(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=202603161jef"  alt="Table" class="toolbar-icon"> Delete table</div>
+      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTableRow(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=202603171569"  alt="Table" class="toolbar-icon">Remove Table Row</div>
+      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTableColumn(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=202603171569"  alt="Table" class="toolbar-icon"> Delete column</div>
+      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTable(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=202603171569"  alt="Table" class="toolbar-icon"> Delete table</div>
       <hr style="margin: 4px 0; border: none; border-top: 1px solid #eee;">
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); setCellBackgroundColor(); closeTableMenu();"><img src="svg/md-editor/icon-table-colors.svg?v=202603161jef"  alt="Table" class="toolbar-icon"> Set Cell Background Color</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); mergeTableCells(); closeTableMenu();"><img src="svg/md-editor/icon-cell-merge.svg?v=202603161jef"  alt="Table" class="toolbar-icon"> Merge cells</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); splitTableCell(); closeTableMenu();"><img src="svg/md-editor/icon-split-cells.svg?v=202603161jef"  alt="Table" class="toolbar-icon"> Split cell</div>
+      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); setCellBackgroundColor(); closeTableMenu();"><img src="svg/md-editor/icon-table-colors.svg?v=202603171569"  alt="Table" class="toolbar-icon"> Set Cell Background Color</div>
+      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); mergeTableCells(); closeTableMenu();"><img src="svg/md-editor/icon-cell-merge.svg?v=202603171569"  alt="Table" class="toolbar-icon"> Merge cells</div>
+      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); splitTableCell(); closeTableMenu();"><img src="svg/md-editor/icon-split-cells.svg?v=202603171569"  alt="Table" class="toolbar-icon"> Split cell</div>
       </div>
     </div>
 
     <div class="toolbar-group">
-      <button id="quoteBtn" title="Toggle Quote (Ctrl+Q)" class="toggle-btn"><img src="svg/md-editor/icon-quote.svg?v=202603161jef" alt="Quote" class="toolbar-icon"></button>
-      <button id="symbolsBtn" title="Insert Symbols"><img src="svg/md-editor/icon-symbols.svg?v=202603161jef" alt="Symbols" class="toolbar-icon"></button>
+      <button id="quoteBtn" title="Toggle Quote (Ctrl+Q)" class="toggle-btn"><img src="svg/md-editor/icon-quote.svg?v=202603171569" alt="Quote" class="toolbar-icon"></button>
+      <button id="symbolsBtn" title="Insert Symbols"><img src="svg/md-editor/icon-symbols.svg?v=202603171569" alt="Symbols" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
 
-      <button id="linkBtn" title="Link"><img src="svg/md-editor/icon-link.svg?v=202603161jef" alt="Bold" class="toolbar-icon"></button>
-      <button id="imageBtn" title="Add Image"><img src="svg/md-editor/icon-image.svg?v=202603161jef" alt="Image" class="toolbar-icon"></button>
-      <button id="noteBtn" title="Add Note"><img src="svg/md-editor/icon-note.svg?v=202603161jef" alt="Note" class="toolbar-icon"></button>
+      <button id="linkBtn" title="Link"><img src="svg/md-editor/icon-link.svg?v=202603171569" alt="Bold" class="toolbar-icon"></button>
+      <button id="imageBtn" title="Add Image"><img src="svg/md-editor/icon-image.svg?v=202603171569" alt="Image" class="toolbar-icon"></button>
+      <button id="noteBtn" title="Add Note"><img src="svg/md-editor/icon-note.svg?v=202603171569" alt="Note" class="toolbar-icon"></button>
       <button id="hrBtn" title="Horizontal Line"><svg width="18" height="18" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32s-14.33-32-32-32H64c-17.67 0-32 14.33-32 32z"/></svg></button>
-      <button id="dashedLineBtn" title="Topic Divider (Dashed Line)"><img src="svg/md-editor/icon-dashed-line.svg?v=202603161jef" alt="Dashed Line" class="toolbar-icon"></button>
+      <button id="dashedLineBtn" title="Topic Divider (Dashed Line)"><img src="svg/md-editor/icon-dashed-line.svg?v=202603171569" alt="Dashed Line" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
-      <button id="undoBtn" title="Undo (Ctrl+Z)"><img src="svg/md-editor/icon-undo.svg?v=202603161jef" alt="Undo" class="toolbar-icon"></button>
-      <button id="redoBtn" title="Redo (Ctrl+Y)"><img src="svg/md-editor/icon-redo.svg?v=202603161jef" alt="Redo" class="toolbar-icon"></button>
+      <button id="undoBtn" title="Undo (Ctrl+Z)"><img src="svg/md-editor/icon-undo.svg?v=202603171569" alt="Undo" class="toolbar-icon"></button>
+      <button id="redoBtn" title="Redo (Ctrl+Y)"><img src="svg/md-editor/icon-redo.svg?v=202603171569" alt="Redo" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
-      <button id="openLocalBtn" title="Open file from computer"><img src="svg/md-editor/icon-open-local.svg?v=202603161jef" alt="Open Local" class="toolbar-icon"></button>
-      <button id="openCoursesBtn" title="Open file from courses"><img src="svg/md-editor/icon-open-courses.svg?v=202603161jef" alt="Open Courses" class="toolbar-icon"></button>
-      <button id="anchorLinkBtn" title="Create/Link Anchors"><img src="svg/md-editor/icon-anchor-link.svg?v=202603161jef" alt="Anchor Link" class="toolbar-icon"></button>
-      <button id="htmlEditorBtn" title="Edit HTML/Source Code"><img src="svg/md-editor/icon-html-editor.svg?v=202603161jef" alt="HTML Editor" class="toolbar-icon"></button>
-      <button id="combineFilesBtn" title="Combine HTML files"><img src="svg/md-editor/icon-combine-files.svg?v=202603161jef" alt="Combine Files" class="toolbar-icon"></button>
+      <button id="openLocalBtn" title="Open file from computer"><img src="svg/md-editor/icon-open-local.svg?v=202603171569" alt="Open Local" class="toolbar-icon"></button>
+      <button id="openCoursesBtn" title="Open file from courses"><img src="svg/md-editor/icon-open-courses.svg?v=202603171569" alt="Open Courses" class="toolbar-icon"></button>
+      <button id="anchorLinkBtn" title="Create/Link Anchors"><img src="svg/md-editor/icon-anchor-link.svg?v=202603171569" alt="Anchor Link" class="toolbar-icon"></button>
+      <button id="htmlEditorBtn" title="Edit HTML/Source Code"><img src="svg/md-editor/icon-html-editor.svg?v=202603171569" alt="HTML Editor" class="toolbar-icon"></button>
+      <button id="combineFilesBtn" title="Combine HTML files"><img src="svg/md-editor/icon-combine-files.svg?v=202603171569" alt="Combine Files" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
-      <button id="downloadBtn" title="Download as .html file"><img src="svg/md-editor/icon-download.svg?v=202603161jef" alt="Download" class="toolbar-icon"></button>
-      <button id="clearBtn" title="Clear all content"><img src="svg/md-editor/icon-clear.svg?v=202603161jef" alt="Clear" class="toolbar-icon"></button>
-      <button id="shortcutsBtn" title="Show keyboard shortcuts"><img src="svg/md-editor/icon-shortcuts.svg?v=202603161jef" alt="Shortcuts" class="toolbar-icon"></button>
-      <button id="resetFontSizeBtn" title="Reset font size to default"><img src="svg/md-editor/icon-reset-font-size.svg?v=202603161jef" alt="Reset Font Size" class="toolbar-icon"></button>
+      <button id="downloadBtn" title="Download as .html file"><img src="svg/md-editor/icon-download.svg?v=202603171569" alt="Download" class="toolbar-icon"></button>
+      <button id="clearBtn" title="Clear all content"><img src="svg/md-editor/icon-clear.svg?v=202603171569" alt="Clear" class="toolbar-icon"></button>
+      <button id="shortcutsBtn" title="Show keyboard shortcuts"><img src="svg/md-editor/icon-shortcuts.svg?v=202603171569" alt="Shortcuts" class="toolbar-icon"></button>
+      <button id="resetFontSizeBtn" title="Reset font size to default"><img src="svg/md-editor/icon-reset-font-size.svg?v=202603171569" alt="Reset Font Size" class="toolbar-icon"></button>
     </div>
 
     <div class="toolbar-group">
-      <button id="geminiBtn" title="Send to Gemini AI"><img src="svg/md-editor/icon-gemini.svg?v=202603161jef" alt="Gemini" class="toolbar-icon"></button>
-      <button id="chatgptBtn" title="Open ChatGPT"><img src="svg/md-editor/icon-chatgpt.svg?v=202603161jef" alt="ChatGPT" class="toolbar-icon"></button>
-      <button id="uptodateBtn" title="Open UpToDate"><img src="svg/md-editor/icon-uptodate.svg?v=202603161jef" alt="UpToDate" class="toolbar-icon"></button>
+      <button id="geminiBtn" title="Send to Gemini AI"><img src="svg/md-editor/icon-gemini.svg?v=202603171569" alt="Gemini" class="toolbar-icon"></button>
+      <button id="chatgptBtn" title="Open ChatGPT"><img src="svg/md-editor/icon-chatgpt.svg?v=202603171569" alt="ChatGPT" class="toolbar-icon"></button>
+      <button id="uptodateBtn" title="Open UpToDate"><img src="svg/md-editor/icon-uptodate.svg?v=202603171569" alt="UpToDate" class="toolbar-icon"></button>
     </div>
   </div>
 
@@ -1160,19 +1180,19 @@
 
   <!-- Table context menu -->
   <div id="tableContextMenu" class="table-context-menu">
-    <button id="addRowBefore"><img src="svg/md-editor/icon-add.svg?v=202603161jef" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Row Above</button>
-    <button id="addRowAfter"><img src="svg/md-editor/icon-add.svg?v=202603161jef" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Row Below</button>
-    <button id="deleteRow"><img src="svg/md-editor/icon-deleteTable.svg?v=202603161jef" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Row</button>
+    <button id="addRowBefore"><img src="svg/md-editor/icon-add.svg?v=202603171569" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Row Above</button>
+    <button id="addRowAfter"><img src="svg/md-editor/icon-add.svg?v=202603171569" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Row Below</button>
+    <button id="deleteRow"><img src="svg/md-editor/icon-deleteTable.svg?v=202603171569" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Row</button>
     <hr style="margin: 4px 0; border: none; border-top: 1px solid #e5e7eb;">
-    <button id="addColBefore"><img src="svg/md-editor/icon-add.svg?v=202603161jef" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Column Before</button>
-    <button id="addColAfter"><img src="svg/md-editor/icon-add.svg?v=202603161jef" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Column After</button>
-    <button id="deleteCol"><img src="svg/md-editor/icon-deleteTable.svg?v=202603161jef" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Column</button>
+    <button id="addColBefore"><img src="svg/md-editor/icon-add.svg?v=202603171569" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Column Before</button>
+    <button id="addColAfter"><img src="svg/md-editor/icon-add.svg?v=202603171569" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Add Column After</button>
+    <button id="deleteCol"><img src="svg/md-editor/icon-deleteTable.svg?v=202603171569" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Column</button>
     <hr style="margin: 4px 0; border: none; border-top: 1px solid #e5e7eb;">
-    <button id="mergeCells"><img src="svg/md-editor/icon-cell-merge.svg?v=202603161jef" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Merge Cells</button>
-    <button id="splitCell"><img src="svg/md-editor/icon-split-cells.svg?v=202603161jef" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Split Cell</button>
-    <button id="setCellBg"><img src="svg/md-editor/icon-table-colors.svg?v=202603161jef" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Cell Background</button>
+    <button id="mergeCells"><img src="svg/md-editor/icon-cell-merge.svg?v=202603171569" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Merge Cells</button>
+    <button id="splitCell"><img src="svg/md-editor/icon-split-cells.svg?v=202603171569" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Split Cell</button>
+    <button id="setCellBg"><img src="svg/md-editor/icon-table-colors.svg?v=202603171569" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Cell Background</button>
     <hr style="margin: 4px 0; border: none; border-top: 1px solid #e5e7eb;">
-    <button id="deleteTableCtx"><img src="svg/md-editor/icon-deleteTable.svg?v=202603161jef" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Table</button>
+    <button id="deleteTableCtx"><img src="svg/md-editor/icon-deleteTable.svg?v=202603171569" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Table</button>
   </div>
 
 
@@ -1553,7 +1573,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202603161jef"></script>
+  <script src="courses.generated.js?v=202603171569"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -3801,8 +3821,8 @@ localStorage.setItem('textEditorContent', htmlContent);
       });
       editorContentForBody = styleSanitizeDiv.innerHTML;
 
-      // Normalize any rendered KaTeX remnants back to editable LaTeX text
-      editorContentForBody = normalizeHtmlForEditor(editorContentForBody);
+      // Normalize and aggressively remove non-essential span wrappers for clean exports.
+      editorContentForBody = normalizeHtmlForEditor(editorContentForBody, { stripNonEssentialSpans: true });
 
       const savedHeadingColor = localStorage.getItem('textEditorHeadingColor') || '#588157';
       
@@ -3825,26 +3845,43 @@ localStorage.setItem('textEditorContent', htmlContent);
     h1, h2, h3, h4 { 
       font-weight: 600; 
       margin-top: 0.8em;
-      margin-bottom: 0.15em;
+      margin-bottom: 0;
       color: ${savedHeadingColor};
     }
     h1 { font-size: 1.65em; }
     h2 { font-size: 1.3em; }
-    h3 { font-size: 1.1em; margin-bottom: 0.1em; }
-    h4 { font-size: 1.05em; margin-bottom: 0.1em; }
+    h3 { font-size: 1.1em; margin-bottom: 0; }
+    h4 { font-size: 1.05em; margin-bottom: 0; }
     h1 + h2, h1 + h3, h1 + h4, h2 + h3, h2 + h4, h3 + h4 { margin-top: 0.2em; }
     p { 
       margin: 0.3em 0; 
       white-space: pre-wrap;
     }
-    p + ul, p + ol { margin-top: -0.5em; }
+    hr {
+      margin: 0.45em 0 0.2em;
+    }
+    hr + h1,
+    hr + h2,
+    hr + h3,
+    hr + h4 {
+      margin-top: 0.2em;
+    }
+    hr + p,
+    hr + ul,
+    hr + ol,
+    hr + blockquote,
+    hr + pre,
+    hr + table {
+      margin-top: 0.08em;
+    }
+    p + ul, p + ol { margin-top: 0.2em; }
     h1 + p, h2 + p, h3 + p, h4 + p,
     h1 + ul, h2 + ul, h3 + ul, h4 + ul,
     h1 + ol, h2 + ol, h3 + ol, h4 + ol { 
-      margin-top: 0.1em; 
+      margin-top: 0; 
     }
     ul, ol { 
-      margin: 0.5em 0; 
+      margin: 0.2em 0; 
       padding-left: 1.5em; 
       list-style-position: outside;
     }
@@ -3855,11 +3892,11 @@ localStorage.setItem('textEditorContent', htmlContent);
       display: inline;
     }
     li > ul, li > ol {
-      margin: 0.3em 0 0 0;
+      margin: 0.15em 0 0 0;
       padding-left: 1.5em;
     }
     ul ul, ul ol, ol ul, ol ol {
-      margin-top: 0.2em;
+      margin-top: 0.1em;
       padding-left: 1.5em;
     }
     ul ul { list-style-type: circle; }
@@ -3930,13 +3967,13 @@ localStorage.setItem('textEditorContent', htmlContent);
     /* Prevent nested list paragraph issues */
     li > ul,
     li > ol {
-      margin: 0.3em 0 0 0;
+      margin: 0.15em 0 0 0;
       padding-left: 1.5em;
     }
     /* Ensure list structure is clean */
     ul ul, ul ol,
     ol ul, ol ol {
-      margin-top: 0.2em;
+      margin-top: 0.1em;
       padding-left: 1.5em;
     }
     @media (max-width: 768px) {
@@ -3945,14 +3982,14 @@ localStorage.setItem('textEditorContent', htmlContent);
         padding: 0 0.5rem;
         font-size: 16px;
       }
-      h1 { font-size: 1.3em; }
-      h2 { font-size: 1.1em; }
-      h3 { font-size: 1em; }
-      p { margin: 0.5em 0; }
-      ul, ol { padding-left: 1.2em; }
-      li { margin: 0.1em 0; }
+      h1 { font-size: 1.65em; }
+      h2 { font-size: 1.3em; }
+      h3 { font-size: 1.1em; }
+      p { margin: 0.3em 0; }
+      ul, ol { padding-left: 1.5em; }
+      li { margin: 0.2em 0; }
       table { font-size: 0.9em; }
-      th, td { padding: 4px 6px; }
+      th, td { padding: 6px 10px; }
     }
     .editor-note {
       text-decoration: underline dotted #a3b18a;
@@ -5568,6 +5605,56 @@ renderMathInElement(document.body, {
         if (selection.rangeCount) {
           const range = selection.getRangeAt(0);
           let node = range.startContainer;
+
+          const findClosestBlock = (startNode) => {
+            let current = startNode;
+            while (current && current !== editor) {
+              if (current.nodeType === 1 && /^(P|DIV|H1|H2|H3|H4|BLOCKQUOTE|PRE)$/.test(current.tagName)) {
+                return current;
+              }
+              current = current.parentNode;
+            }
+            return null;
+          };
+
+          const isRangeAtStartOfElement = (inputRange, element) => {
+            if (!inputRange || !element) return false;
+            const probe = inputRange.cloneRange();
+            probe.selectNodeContents(element);
+            probe.setEnd(inputRange.startContainer, inputRange.startOffset);
+            return probe.toString().length === 0;
+          };
+
+          const isMergeableTextBlock = (el) => {
+            if (!el || el.nodeType !== 1) return false;
+            return /^(P|DIV|H1|H2|H3|H4|BLOCKQUOTE|PRE)$/.test(el.tagName);
+          };
+
+          const removeBoundaryBreakArtifacts = (prevBlock, currentBlock) => {
+            const isWhitespaceText = (n) => n && n.nodeType === Node.TEXT_NODE && n.textContent.trim() === '';
+
+            // Remove trailing whitespace and one synthetic trailing <br> from previous block.
+            let last = prevBlock.lastChild;
+            while (isWhitespaceText(last)) {
+              const prevSibling = last.previousSibling;
+              last.remove();
+              last = prevSibling;
+            }
+            if (last && last.nodeType === Node.ELEMENT_NODE && last.tagName === 'BR') {
+              last.remove();
+            }
+
+            // Remove one leading synthetic <br> from current block before moving content.
+            let first = currentBlock.firstChild;
+            while (isWhitespaceText(first)) {
+              const nextSibling = first.nextSibling;
+              first.remove();
+              first = nextSibling;
+            }
+            if (first && first.nodeType === Node.ELEMENT_NODE && first.tagName === 'BR') {
+              first.remove();
+            }
+          };
           
           // Find the actual element
           while (node && node !== editor && node.nodeType === 3) {
@@ -5605,6 +5692,40 @@ renderMathInElement(document.body, {
                      return;
                  }
              }
+          }
+
+          // FIX: Keep caret stable when joining blocks with Backspace at line start.
+          if (e.key === 'Backspace' && range.collapsed) {
+            const currentBlock = findClosestBlock(range.startContainer);
+            if (currentBlock && isRangeAtStartOfElement(range, currentBlock)) {
+              const prev = currentBlock.previousElementSibling;
+              if (isMergeableTextBlock(prev)) {
+                e.preventDefault();
+
+                removeBoundaryBreakArtifacts(prev, currentBlock);
+
+                const joinRange = document.createRange();
+                joinRange.setStart(prev, prev.childNodes.length);
+                joinRange.collapse(true);
+
+                const hasOnlyBreak = currentBlock.childNodes.length === 1
+                  && currentBlock.firstChild.nodeType === 1
+                  && currentBlock.firstChild.tagName === 'BR';
+
+                if (!hasOnlyBreak) {
+                  while (currentBlock.firstChild) {
+                    prev.appendChild(currentBlock.firstChild);
+                  }
+                }
+
+                currentBlock.remove();
+
+                selection.removeAllRanges();
+                selection.addRange(joinRange);
+                saveToHistory();
+                return;
+              }
+            }
           }
           
           // Check if adjacent to <hr>
@@ -5965,10 +6086,82 @@ renderMathInElement(document.body, {
       });
     }
 
+    function cleanupInlineFontArtifacts() {
+      const artifactProperties = new Set(['font-size', 'font-family', 'white-space-collapse']);
+
+      // Convert deprecated <font> tags to spans so we can sanitize consistently.
+      editor.querySelectorAll('font').forEach(fontNode => {
+        if (!fontNode.isConnected || !fontNode.parentNode) return;
+
+        const replacement = document.createElement('span');
+        const color = fontNode.getAttribute('color');
+        if (color) {
+          replacement.style.color = color;
+        }
+
+        while (fontNode.firstChild) {
+          replacement.appendChild(fontNode.firstChild);
+        }
+
+        fontNode.replaceWith(replacement);
+      });
+
+      editor.querySelectorAll('[style]').forEach(node => {
+        if (node.classList && node.classList.contains('editor-note')) return;
+        if (node.hasAttribute('data-note')) return;
+
+        const declarations = (node.getAttribute('style') || '')
+          .split(';')
+          .map(part => part.trim())
+          .filter(Boolean)
+          .filter(part => {
+            const idx = part.indexOf(':');
+            if (idx === -1) return false;
+            const property = part.slice(0, idx).trim().toLowerCase();
+            return !artifactProperties.has(property);
+          });
+
+        if (declarations.length === 0) {
+          node.removeAttribute('style');
+        } else {
+          node.setAttribute('style', declarations.join('; '));
+        }
+      });
+
+      editor.querySelectorAll('[size], [face]').forEach(node => {
+        node.removeAttribute('size');
+        node.removeAttribute('face');
+      });
+
+      editor.querySelectorAll('span').forEach(span => {
+        if (span.classList.contains('editor-note') || span.hasAttribute('data-note')) return;
+
+        const meaningfulAttributes = Array.from(span.attributes).filter(attr => {
+          const name = attr.name.toLowerCase();
+          const value = (attr.value || '').trim();
+
+          if (name === 'style') return value.length > 0;
+          if (name === 'class' || name === 'id' || name.startsWith('data-') || name.startsWith('aria-') || name === 'title' || name === 'role') {
+            return value.length > 0;
+          }
+
+          return value.length > 0;
+        });
+
+        if (meaningfulAttributes.length > 0) return;
+
+        while (span.firstChild) {
+          span.parentNode.insertBefore(span.firstChild, span);
+        }
+        span.remove();
+      });
+    }
+
     // Save to history on input and detect "---" for horizontal rule
     editor.addEventListener('input', () => {
       repairInvalidHeadingStructureInEditor();
       cleanupHeadingInlineArtifacts();
+      cleanupInlineFontArtifacts();
 
       // Debounced history save (don't save on every keystroke)
       clearTimeout(editor.historyTimeout);
@@ -6460,6 +6653,15 @@ renderMathInElement(document.body, {
 
           return value.length > 0;
         });
+
+        if (options.stripNonEssentialSpans) {
+          const isNoteSpan = spanNode.classList.contains('editor-note') || spanNode.hasAttribute('data-note');
+          const hasStyle = !!spanNode.getAttribute('style');
+          if (!isNoteSpan && !hasStyle) {
+            unwrapNode(spanNode);
+            return;
+          }
+        }
 
         if (!hasMeaningfulAttributes) {
           unwrapNode(spanNode);
@@ -8035,7 +8237,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603161jef"></script>
+    <script src="js/chat.js?v=202603171569"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>

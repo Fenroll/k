@@ -1,4 +1,4 @@
-window.coursesVersion = "202603161jef";
+window.coursesVersion = "202603171569";
 window.courses = [
   {
     "id": "000001",
@@ -312,6 +312,11 @@ window.courses = [
           {
             "name": "1-msg-Обща Неврология.html",
             "path": "files/Неврология/Обща неврология/1-msg-Обща Неврология.html",
+            "type": "html"
+          },
+          {
+            "name": "4-msg-Глупости.html",
+            "path": "files/Неврология/Обща неврология/4-msg-Глупости.html",
             "type": "html"
           }
         ]
@@ -704,4 +709,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "16.03.2026 19:56";
+window.buildTimestamp = "17.03.2026 14:49";
