@@ -1,17 +1,17 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603171569"></script>
+  <script src="js/auth-guard.js?v=2026031715gu"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
   <!-- Favicon -->
-  <link rel="icon" href="favicon.svg?v=202603171569" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <!-- Mobile Navigation CSS -->
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202603171569">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026031715gu">
   
   <!-- Firebase SDKs - Moved to head and using compat versions -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
@@ -236,7 +236,7 @@
     .markdown-body h2 + h3,
     .markdown-body h2 + h4,
     .markdown-body h3 + h4 {
-      margin-top: 0.2em;
+      margin-top: 0.1em;
     }
 
     /* Additional list styles */
@@ -484,31 +484,31 @@
   </script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="js/version-manager.js?v=202603171569"></script>
+  <script src="js/version-manager.js?v=2026031715gu"></script>
 </head>
 <body>
   <header>
     <h1 id="docTitle">Преглед на документ</h1>
     <a class="btn" href="#" onclick="if (window.opener) { window.close(); } else if (document.referrer) { history.back(); } else { window.close(); } return false;" title="Назад">
-      <img src="svg/md-viewer/icon-close.svg?v=202603171569" alt="Назад" width="25" height="25">
+      <img src="svg/md-viewer/icon-close.svg?v=2026031715gu" alt="Назад" width="25" height="25">
     </a>
     <button id="summaryBtn" class="btn" title="Summary">
-      <img src="svg/md-viewer/icon-summary.svg?v=202603171569" alt="Summary" width="20" height="20">
+      <img src="svg/md-viewer/icon-summary.svg?v=2026031715gu" alt="Summary" width="20" height="20">
     </button>
     <button id="editBtn" class="btn" title="Редактирай">
-      <img src="svg/md-viewer/icon-edit.svg?v=202603171569" alt="Редактирай" width="20" height="20">
+      <img src="svg/md-viewer/icon-edit.svg?v=2026031715gu" alt="Редактирай" width="20" height="20">
     </button>
     <button id="fontSizeBtn" class="btn" title="Change Font Size">
-      <img src="svg/md-viewer/icon-textsize.svg?v=202603171569" alt="Change Font Size" width="20" height="20">
+      <img src="svg/md-viewer/icon-textsize.svg?v=2026031715gu" alt="Change Font Size" width="20" height="20">
     </button>
     <button id="notes-toggle-btn" class="btn" title="Бележки">
-      <img src="svg/md-viewer/icon-notes.svg?v=202603171569" alt="Бележки" width="20" height="20">
+      <img src="svg/md-viewer/icon-notes.svg?v=2026031715gu" alt="Бележки" width="20" height="20">
     </button>
     <button id="prevH1Btn" class="btn" title="Предишно заглавие">
-      <img src="svg/md-viewer/icon-arrow-left.svg?v=202603171569" alt="Предишно" width="20" height="20">
+      <img src="svg/md-viewer/icon-arrow-left.svg?v=2026031715gu" alt="Предишно" width="20" height="20">
     </button>
     <button id="nextH1Btn" class="btn" title="Следващо заглавие">
-      <img src="svg/md-viewer/icon-arrow-right.svg?v=202603171569" alt="Следващо" width="20" height="20">
+      <img src="svg/md-viewer/icon-arrow-right.svg?v=2026031715gu" alt="Следващо" width="20" height="20">
     </button>
   </header>
   <main>
@@ -862,6 +862,7 @@
         #content h1 + p, #content h2 + p, #content h3 + p, #content h4 + p,
         #content h1 + ul, #content h2 + ul, #content h3 + ul, #content h4 + ul,
         #content h1 + ol, #content h2 + ol, #content h3 + ol, #content h4 + ol { margin-top: 0 !important; }
+        #content h1 + h2, #content h1 + h3, #content h1 + h4, #content h2 + h3, #content h2 + h4, #content h3 + h4 { margin-top: 0.1em !important; }
         #content ul, #content ol { margin: 0.2em 0 !important; padding-left: 1.5em !important; list-style-position: outside !important; }
         #content li > ul, #content li > ol { margin-top: 0.15em !important; }
         #content ul ul, #content ul ol, #content ol ul, #content ol ol { margin-top: 0.1em !important; }
@@ -1609,7 +1610,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603171569"></script>
+  <script src="courses.generated.js?v=2026031715gu"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -1716,7 +1717,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603171569"></script>
+    <script src="js/chat.js?v=2026031715gu"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
 
