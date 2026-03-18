@@ -2,7 +2,27 @@
 class AccountSystem {
     constructor() {
         this.db = null;
-        this.user = null; // Custom user object: { uid (permanent), username (for login), displayName, color }
+        this.user = null; // Custom user object: { uid (permanent), username (for login), displayName, color, preferredFont }
+        this.defaultPreferredFont = 'open-sans';
+        this.fontLabels = {
+            'open-sans': 'Open Sans',
+            'noto-sans': 'Noto Sans',
+            'roboto': 'Roboto',
+            'fira-sans': 'Fira Sans',
+            'rubik': 'Rubik'
+        };
+        this.fontStacks = {
+            'open-sans': "'Open Sans', Arial, sans-serif",
+            'noto-sans': "'Noto Sans', Arial, sans-serif",
+            'roboto': "'Roboto', Arial, sans-serif",
+            'fira-sans': "'Fira Sans', Arial, sans-serif",
+            'rubik': "'Rubik', Arial, sans-serif"
+        };
+        this.fontAliases = {
+            'ibm-plex-sans': 'roboto',
+            'pt-sans': 'fira-sans',
+            'ubuntu': 'fira-sans'
+        };
 
         // DOM elements will be assigned in init()
         this.registerForm = null;
@@ -14,6 +34,7 @@ class AccountSystem {
         this.changeUsernameForm = null;
         this.changeDisplaynameForm = null;
         this.changeColorForm = null;
+        this.changeFontForm = null;
         this.deleteAccountForm = null;
     }
 
@@ -28,6 +49,20 @@ class AccountSystem {
         } catch (error) {
             return passwordValue;
         }
+    }
+
+    normalizePreferredFont(preferredFontValue) {
+        const rawKey = (preferredFontValue || this.defaultPreferredFont).toString().trim().toLowerCase();
+        const normalized = this.fontAliases[rawKey] || rawKey;
+        return this.fontLabels[normalized] ? normalized : this.defaultPreferredFont;
+    }
+
+    applyFontPreview(fontKey) {
+        const previewWrap = document.getElementById('font-preview-wrap');
+        if (!previewWrap) return;
+        const normalizedKey = this.normalizePreferredFont(fontKey);
+        const stack = this.fontStacks[normalizedKey] || this.fontStacks[this.defaultPreferredFont];
+        previewWrap.style.setProperty('--preview-font-family', stack);
     }
 
     async init() {
@@ -48,10 +83,11 @@ class AccountSystem {
             this.changeUsernameForm = document.getElementById('change-username-form');
             this.changeDisplaynameForm = document.getElementById('change-displayname-form');
             this.changeColorForm = document.getElementById('change-color-form');
+            this.changeFontForm = document.getElementById('change-font-form');
             this.changeAvatarForm = document.getElementById('change-avatar-form');
             this.deleteAccountForm = document.getElementById('delete-account-form');
 
-            if (!this.accountInfo || !this.loadingSpinner || !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm || !this.deleteAccountForm) {
+            if (!this.accountInfo || !this.loadingSpinner || !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm || !this.changeFontForm || !this.deleteAccountForm) {
                 console.error("Account page UI elements not found. Aborting.");
                 return;
             }
@@ -87,12 +123,17 @@ class AccountSystem {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     const plainPassword = this.decodeStoredPassword(userData.password);
+                    const preferredFont = this.normalizePreferredFont(userData.preferredFont);
                     
                     // Reconstruct the user object for the session with the decoded password.
-                    this.user = { ...userData, password: plainPassword };
+                    this.user = { ...userData, password: plainPassword, preferredFont };
 
                     // Update localStorage with the fresh, correct data.
                     localStorage.setItem('loggedInUser', JSON.stringify(this.user));
+
+                    if (!userData.preferredFont || preferredFont !== userData.preferredFont) {
+                        await userRef.update({ preferredFont });
+                    }
                     console.log('Session refreshed from DB for user:', this.user.username);
                 } else { // Keep, error message
                     throw new Error("User not found in database.");
@@ -179,6 +220,22 @@ class AccountSystem {
                 document.getElementById('new-color').value = this.user.color || '#7c3aed';
                 this.showForm('change-color');
             });
+            document.getElementById('show-change-font-btn').addEventListener('click', () => {
+                const fontSelect = document.getElementById('new-font');
+                if (fontSelect) {
+                    const normalizedKey = this.normalizePreferredFont(this.user.preferredFont);
+                    fontSelect.value = normalizedKey;
+                    this.applyFontPreview(normalizedKey);
+                }
+                this.showForm('change-font');
+            });
+
+            const fontSelect = document.getElementById('new-font');
+            if (fontSelect) {
+                fontSelect.addEventListener('change', () => {
+                    this.applyFontPreview(fontSelect.value);
+                });
+            }
             document.getElementById('show-change-avatar-btn').addEventListener('click', () => this.showForm('change-avatar'));
 
             // Cancel buttons
@@ -211,6 +268,12 @@ class AccountSystem {
                 e.preventDefault();
                 const newColor = document.getElementById('new-color').value;
                 this.changeColor(newColor);
+            });
+
+            document.getElementById('change-font-form-element').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const newFont = document.getElementById('new-font').value;
+                this.changeFont(newFont);
             });
             
             document.getElementById('change-avatar-form-element').addEventListener('submit', (e) => {
@@ -274,6 +337,7 @@ class AccountSystem {
                     displayName: displayName,
                     password: btoa(password), // Simple encoding, NOT for security
                     color: this.generateRandomColor(),
+                    preferredFont: this.defaultPreferredFont,
                     createdAt: Date.now()
                 };
 
@@ -346,7 +410,8 @@ class AccountSystem {
                     const userColor = userData.color || this.generateRandomColor();
                     // The permanent UID is the key of the record in the database
                     // After migration, userData contains the full new object.
-                    this.user = { ...userData, password: storedPassword, color: userColor };
+                    const preferredFont = this.normalizePreferredFont(userData.preferredFont);
+                    this.user = { ...userData, password: storedPassword, color: userColor, preferredFont };
                     localStorage.setItem('loggedInUser', JSON.stringify(this.user));
 
                     // Device tracking
@@ -363,6 +428,9 @@ class AccountSystem {
                     // If user had no color, save the new one to DB
                     if (!userData.color) {
                         await this.db.ref(`site_users/${userKey}`).update({ color: userColor });
+                    }
+                    if (!userData.preferredFont || preferredFont !== userData.preferredFont) {
+                        await this.db.ref(`site_users/${userKey}`).update({ preferredFont });
                     }
                 } else {
                     this.showError('login-error', 'Грешно потребителско име или парола.');
@@ -532,6 +600,34 @@ class AccountSystem {
         } catch (error) {
             console.error("Color change error:", error);
             this.showError('change-color-error', 'Възникна грешка.');
+            this.updateUI();
+        } finally {
+            this.loadingSpinner.style.display = 'none';
+        }
+    }
+
+    async changeFont(newFont) {
+        const normalizedFont = this.normalizePreferredFont(newFont);
+        if (!this.fontLabels[normalizedFont]) {
+            this.showError('change-font-error', 'Невалиден избор на шрифт.');
+            return;
+        }
+
+        this.loadingSpinner.style.display = 'block';
+        this.showForm(null);
+        this.hideError('change-font-error');
+
+        try {
+            const userRef = this.db.ref(`site_users/${this.user.uid}`);
+            await userRef.update({ preferredFont: normalizedFont });
+
+            this.user.preferredFont = normalizedFont;
+            localStorage.setItem('loggedInUser', JSON.stringify(this.user));
+
+            this.updateUI();
+        } catch (error) {
+            console.error('Font change error:', error);
+            this.showError('change-font-error', 'Възникна грешка.');
             this.updateUI();
         } finally {
             this.loadingSpinner.style.display = 'none';
@@ -744,6 +840,12 @@ class AccountSystem {
                     colorPreview.style.backgroundColor = this.user.color || '#ccc';
                 }
 
+                const fontValue = document.getElementById('user-font');
+                if (fontValue) {
+                    const fontKey = this.normalizePreferredFont(this.user.preferredFont);
+                    fontValue.textContent = this.fontLabels[fontKey] || this.fontLabels[this.defaultPreferredFont];
+                }
+
                 const avatarPreview = document.getElementById('user-avatar-preview');
                 if (avatarPreview) {
                     avatarPreview.src = this.user.avatar || 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjY2NjIiBzdHJva2Utd2lkdGg9IjIiPjxjaXJjbGUgY3g9IjEyIiBjeT0iMTIiIHI9IjEwIi8+PHBhdGggZD0iTTEyIDE2cy0yLTItNC0ybTggMHMtMiAyLTQgMiIvPjwvc3ZnPg=='; // Simple placeholder
@@ -773,6 +875,7 @@ class AccountSystem {
             if (this.changeUsernameForm) this.changeUsernameForm.style.display = 'none';
             if (this.changeDisplaynameForm) this.changeDisplaynameForm.style.display = 'none';
             if (this.changeColorForm) this.changeColorForm.style.display = 'none';
+            if (this.changeFontForm) this.changeFontForm.style.display = 'none';
             if (this.changeAvatarForm) this.changeAvatarForm.style.display = 'none';
             if (this.deleteAccountForm) this.deleteAccountForm.style.display = 'none';
             
@@ -781,6 +884,7 @@ class AccountSystem {
             else if (formId === 'change-username' && this.changeUsernameForm) this.changeUsernameForm.style.display = 'block';
             else if (formId === 'change-displayname' && this.changeDisplaynameForm) this.changeDisplaynameForm.style.display = 'block';
             else if (formId === 'change-color' && this.changeColorForm) this.changeColorForm.style.display = 'block';
+            else if (formId === 'change-font' && this.changeFontForm) this.changeFontForm.style.display = 'block';
             else if (formId === 'change-avatar' && this.changeAvatarForm) this.changeAvatarForm.style.display = 'block';
             else if (formId === 'delete-account' && this.deleteAccountForm) this.deleteAccountForm.style.display = 'block';
         }

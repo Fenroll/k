@@ -1,12 +1,15 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=20260318zhw"></script>
+  <script src="js/auth-guard.js?v=202603181cfs"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Fira+Sans:wght@400;500;700&family=Rubik:wght@400;500;700&display=swap">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
@@ -23,6 +26,7 @@
       --fg: #1f2937;
       --card: #ffffff;
       --border: #e5e7eb;
+      --app-ui-font: 'Open Sans', Arial, sans-serif;
     }
     * { box-sizing: border-box; }
     html { margin: 0; padding: 0; }
@@ -30,7 +34,7 @@
     body {
       margin: 0;
       padding: 0;
-      font-family: 'Open Sans', Arial, sans-serif;
+      font-family: var(--app-ui-font);
       background: var(--bg);
       color: var(--fg);
       line-height: 1.6;
@@ -456,6 +460,34 @@
   </style>
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script>
+    (function applyUserPreferredFont() {
+      const fontMap = {
+        'open-sans': "'Open Sans', Arial, sans-serif",
+        'noto-sans': "'Noto Sans', Arial, sans-serif",
+        'roboto': "'Roboto', Arial, sans-serif",
+        'fira-sans': "'Fira Sans', Arial, sans-serif",
+        // Legacy keys kept for compatibility with old saved preferences
+        'ibm-plex-sans': "'Roboto', Arial, sans-serif",
+        'pt-sans': "'Fira Sans', Arial, sans-serif",
+        'ubuntu': "'Fira Sans', Arial, sans-serif",
+        'rubik': "'Rubik', Arial, sans-serif"
+      };
+
+      let preferredFont = 'open-sans';
+      try {
+        const raw = localStorage.getItem('loggedInUser');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.preferredFont) {
+            preferredFont = String(parsed.preferredFont).toLowerCase();
+          }
+        }
+      } catch (_) {
+      }
+
+      document.documentElement.style.setProperty('--app-ui-font', fontMap[preferredFont] || fontMap['open-sans']);
+    })();
+
     // Configure marked.js to handle custom image width
     marked.use({
       renderer: {
@@ -852,6 +884,14 @@
       const styleTag = document.createElement('style');
       styleTag.id = 'viewer-spacing-overrides';
       styleTag.textContent = `
+        body, header, main, #content,
+        #content h1, #content h2, #content h3, #content h4, #content h5, #content h6,
+        #content p, #content li, #content th, #content td, #content blockquote, #content a {
+          font-family: var(--app-ui-font) !important;
+        }
+        #content pre, #content code {
+          font-family: Consolas, 'Courier New', monospace !important;
+        }
         #content h1, #content h2, #content h3, #content h4 { margin-top: 0.7em !important; margin-bottom: 0 !important; }
         #content h3, #content h4 { margin-bottom: 0 !important; }
         #content p { margin: 0.3em 0 !important; white-space: pre-wrap !important; }
@@ -1610,7 +1650,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260318zhw"></script>
+  <script src="courses.generated.js?v=202603181cfs"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -1717,7 +1757,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260318zhw"></script>
+    <script src="js/chat.js?v=202603181cfs"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
 
@@ -2160,7 +2200,7 @@
   <style>
     /* Notes Widget Styles */
     #notes-widget { --notes-primary: #588157; --notes-secondary: #efebe9; --notes-border: #588157; --notes-text: #2c1810; --notes-text-light: #6d4c41; }
-    .notes-widget { position: fixed; bottom: 20px; left: 20px; z-index: 4999; font-family: 'Open Sans', Arial, sans-serif; }
+    .notes-widget { position: fixed; bottom: 20px; left: 20px; z-index: 4999; font-family: var(--app-ui-font); }
     .notes-panel { position: fixed; bottom: 90px; left: 20px; width: 400px; height: 500px; background: white; border-radius: 12px; box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16); display: flex; flex-direction: column; opacity: 0; pointer-events: none; transform: translateY(20px); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
     .notes-header { padding: 16px; border-bottom: 1px solid var(--notes-border); display: flex; justify-content: space-between; align-items: flex-start; background: linear-gradient(135deg, #588157 0%, #588157 100%); color: white; border-radius: 12px 12px 0 0; }
     .notes-header-title h3 { margin: 0 0 4px 0; font-size: 16px; font-weight: 600; }

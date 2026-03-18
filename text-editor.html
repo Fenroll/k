@@ -1,18 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260318zhw"></script>
+  <script src="js/auth-guard.js?v=202603181cfs"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Fira+Sans:wght@400;500;700&family=Rubik:wght@400;500;700&display=swap">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   
   <style>
+    :root {
+      --app-ui-font: 'Open Sans', Arial, sans-serif;
+    }
+
     * {
       box-sizing: border-box;
     }
@@ -24,7 +30,7 @@
     }
 
     body {
-      font-family: 'Open Sans', Arial, sans-serif;
+      font-family: var(--app-ui-font);
       background: #fafafa;
       display: flex;
       flex-direction: column;
@@ -178,7 +184,7 @@
       border-radius: 0;
       cursor: pointer;
       font-size: 0.95em;
-      font-family: 'Open Sans', Arial, sans-serif;
+      font-family: var(--app-ui-font);
       font-weight: 400;
       transition: all 0.15s ease;
       height: 36px;
@@ -197,7 +203,7 @@
       border-radius: 6px;
       cursor: pointer;
       font-size: 0.9em;
-      font-family: 'Open Sans', Arial, sans-serif;
+      font-family: var(--app-ui-font);
       font-weight: 500;
       transition: all 0.2s;
     }
@@ -220,7 +226,7 @@
       flex: 1;
       padding: 12px 200px;
       font-size: 16px;
-      font-family: 'Open Sans', Arial, sans-serif;
+      font-family: var(--app-ui-font);
       outline: none;
       overflow-y: auto;
       background: #fff;
@@ -1321,7 +1327,7 @@
         </div>
         <div style="margin-bottom: 16px;">
           <label for="noteTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Note Content</label>
-          <textarea id="noteTextInput" placeholder="Paste your note content here..." style="width: 100%; height: 150px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: 'Open Sans', Arial, sans-serif; resize: vertical;"></textarea>
+          <textarea id="noteTextInput" placeholder="Paste your note content here..." style="width: 100%; height: 150px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: var(--app-ui-font); resize: vertical;"></textarea>
         </div>
       </div>
       <div class="modal-footer">
@@ -1573,13 +1579,44 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260318zhw"></script>
+  <script src="courses.generated.js?v=202603181cfs"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
 
   <script>
     const editor = document.getElementById('editor');
+
+    const APP_FONT_STACKS = {
+      'open-sans': "'Open Sans', Arial, sans-serif",
+      'noto-sans': "'Noto Sans', Arial, sans-serif",
+      'roboto': "'Roboto', Arial, sans-serif",
+      'fira-sans': "'Fira Sans', Arial, sans-serif",
+      // Legacy keys kept for compatibility with old saved preferences
+      'ibm-plex-sans': "'Roboto', Arial, sans-serif",
+      'pt-sans': "'Fira Sans', Arial, sans-serif",
+      'ubuntu': "'Fira Sans', Arial, sans-serif",
+      'rubik': "'Rubik', Arial, sans-serif"
+    };
+
+    function applyUserPreferredFont() {
+      let preferredFontKey = 'open-sans';
+      try {
+        const raw = localStorage.getItem('loggedInUser');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.preferredFont) {
+            preferredFontKey = String(parsed.preferredFont).toLowerCase();
+          }
+        }
+      } catch (_) {
+      }
+
+      const fontStack = APP_FONT_STACKS[preferredFontKey] || APP_FONT_STACKS['open-sans'];
+      document.documentElement.style.setProperty('--app-ui-font', fontStack);
+    }
+
+    applyUserPreferredFont();
 
     function getCourseContentKey(course) {
       if (!course) return null;
@@ -8265,7 +8302,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260318zhw"></script>
+    <script src="js/chat.js?v=202603181cfs"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
