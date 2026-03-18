@@ -9,7 +9,7 @@
     let activeTab = '';
     // Check for index.html or root
     if (page === 'index.html' || page === '') activeTab = 'courses';
-    else if (page.includes('anamnesis')) activeTab = 'anamnesis';
+    else if (page.includes('notes') || page.includes('anamnesis')) activeTab = 'notes';
     else if (page.includes('calendar')) activeTab = 'calendar';
     
     // HTML Structure
@@ -19,9 +19,9 @@
             <img src="svg/icon-courses.svg" alt="Courses">
             <span>Courses</span>
         </a>
-        <a href="anamnesis.html" class="bottom-nav-item ${activeTab === 'anamnesis' ? 'active' : ''}">
-            <img src="svg/icon-anamnesis.svg" alt="Anamnesis">
-            <span>Anamnesis</span>
+        <a href="notes.html" class="bottom-nav-item ${activeTab === 'notes' ? 'active' : ''}">
+            <img src="svg/icon-anamnesis.svg" alt="Notes">
+            <span>Notes</span>
         </a>
         <a href="calendar.html" class="bottom-nav-item ${activeTab === 'calendar' ? 'active' : ''}">
             <img src="svg/icon-calendar.svg" alt="Calendar">
@@ -70,14 +70,7 @@
         const bodyDark = body && body.classList.contains('dark-mode');
         const htmlDark = html && (html.classList.contains('dark-mode') || html.getAttribute('data-theme') === 'dark');
 
-        let storedDark = false;
-        try {
-            storedDark = localStorage.getItem('index-copy-theme') === 'dark';
-        } catch (error) {
-            storedDark = false;
-        }
-
-        return Boolean(bodyDark || htmlDark || storedDark);
+        return Boolean(bodyDark || htmlDark);
     }
 
     function syncMobileNavTheme() {
@@ -104,9 +97,15 @@
     syncMobileNavTheme();
 
     const body = document.body;
-    if (body && typeof MutationObserver !== 'undefined') {
+    const html = document.documentElement;
+    if (typeof MutationObserver !== 'undefined') {
         const observer = new MutationObserver(syncMobileNavTheme);
-        observer.observe(body, { attributes: true, attributeFilter: ['class'] });
+        if (body) {
+            observer.observe(body, { attributes: true, attributeFilter: ['class'] });
+        }
+        if (html) {
+            observer.observe(html, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+        }
     }
 
     // Event Listeners
