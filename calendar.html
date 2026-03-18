@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202603181kfv"></script>
+  <script src="js/auth-guard.js?v=202603181li0"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1415,44 +1415,44 @@
 
   /* Dark mode event cards: muted jewel-tone palette */
   body.dark-mode .event-card {
-    border: 1px solid rgba(190, 200, 210, 0.12) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.45) !important;
+    border: 1px solid rgba(168, 178, 191, 0.18) !important;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5) !important;
   }
 
   body.dark-mode .type-exercise {
-    background: linear-gradient(135deg, #1d4f9b 0%, #2673DD 100%) !important;
-    border-left: 3px solid #7da8e8 !important;
-    color: #e6f0ff !important;
+    background: #315ab3 !important;
+    border-left: 3px solid #85a9ea !important;
+    color: #eaf6ff !important;
   }
 
   body.dark-mode .type-test {
-    background: linear-gradient(135deg, #1f5d6f 0%, #2c8199 100%) !important;
-    border-left: 3px solid #78b4c4 !important;
-    color: #e2f4f8 !important;
+    background: #186565 !important;
+    border-left: 3px solid #63c2b8 !important;
+    color: #e9fffb !important;
   }
 
   body.dark-mode .type-lecture {
-    background: linear-gradient(135deg, #2f3f4b 0%, #405665 100%) !important;
-    border-left: 3px solid #748ea1 !important;
-    color: #e1eaf0 !important;
+    background: #49637B !important;
+    border-left: 3px solid #d2dcec !important;
+    color: #eef2ff !important;
   }
 
   body.dark-mode .type-important-lecture {
-    background: linear-gradient(135deg, #2f4f3d 0%, #4c7657 100%) !important;
-    border-left: 3px solid #588156 !important;
-    color: #e3efe3 !important;
+    background: #2e6247 !important;
+    border-left: 3px solid #7acf95 !important;
+    color: #ecfff3 !important;
   }
 
   body.dark-mode .type-exam {
-    background: linear-gradient(135deg, #7f2028 0%, #A82830 100%) !important;
-    border-left: 3px solid #d47f85 !important;
-    color: #ffe9eb !important;
+    background: #d94a4a !important;
+    border-left: 3px solid #ffb1b1 !important;
+    color: #ffeff3 !important;
   }
 
   body.dark-mode .type-makeup {
-    background: linear-gradient(135deg, #6e4522 0%, #8a592d 100%) !important;
-    border-left: 3px solid #c39565 !important;
-    color: #f6e8d8 !important;
+    background: #744c21 !important;
+    border-left: 3px solid #e0a566 !important;
+    color: #fff4e8 !important;
   }
 
   body.dark-mode .type-exercise .event-time,
@@ -1582,7 +1582,7 @@
     border-color: #3f3f3f !important;
   }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202603181ivo">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260318navdark2">
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
@@ -1591,9 +1591,17 @@
       const THEME_KEY = 'index-copy-theme';
       const stored = localStorage.getItem(THEME_KEY);
       const useDark = stored === 'dark';
+      const root = document.documentElement;
       if (useDark) {
         document.body.classList.add('dark-mode');
+        root.classList.add('dark-mode');
+        root.setAttribute('data-theme', 'dark');
+      } else {
+        root.classList.remove('dark-mode');
+        root.removeAttribute('data-theme');
       }
+
+      window.dispatchEvent(new Event('themechange'));
     })();
   </script>
   <div class="layout">
@@ -3398,10 +3406,10 @@
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603181kfv"></script>
+    <script src="js/chat.js?v=202603181li0"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>
-<script src="js/mobile-nav.js?v=20260318navfix"></script>
+<script src="js/mobile-nav.js?v=20260318navdark2"></script>
 </body>
     </html>

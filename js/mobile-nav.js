@@ -2,6 +2,8 @@
     // Prevent double initialization
     if (document.getElementById('bottom-nav')) return;
 
+    const THEME_KEY = 'index-copy-theme';
+
     // Detect current page to set active state
     const path = window.location.pathname;
     const page = path.split('/').pop() || 'index.html';
@@ -64,13 +66,32 @@
     div.innerHTML = navHTML;
     document.body.appendChild(div);
 
+    function getStoredThemePreference() {
+        try {
+            return localStorage.getItem(THEME_KEY);
+        } catch (err) {
+            return null;
+        }
+    }
+
     function isDarkThemeEnabled() {
         const body = document.body;
         const html = document.documentElement;
         const bodyDark = body && body.classList.contains('dark-mode');
         const htmlDark = html && (html.classList.contains('dark-mode') || html.getAttribute('data-theme') === 'dark');
+        const storedTheme = getStoredThemePreference();
+        const storedDark = storedTheme === 'dark';
 
-        return Boolean(bodyDark || htmlDark);
+        let prefersDark = false;
+        if (window.matchMedia) {
+            prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+
+        if (storedTheme === 'light') {
+            return Boolean(bodyDark || htmlDark);
+        }
+
+        return Boolean(bodyDark || htmlDark || storedDark || prefersDark);
     }
 
     function syncMobileNavTheme() {
@@ -95,6 +116,9 @@
     }
 
     syncMobileNavTheme();
+    window.requestAnimationFrame(syncMobileNavTheme);
+    window.setTimeout(syncMobileNavTheme, 80);
+    window.setTimeout(syncMobileNavTheme, 300);
 
     const body = document.body;
     const html = document.documentElement;
@@ -105,6 +129,21 @@
         }
         if (html) {
             observer.observe(html, { attributes: true, attributeFilter: ['class', 'data-theme'] });
+        }
+    }
+
+    window.addEventListener('pageshow', syncMobileNavTheme);
+    window.addEventListener('focus', syncMobileNavTheme);
+    document.addEventListener('visibilitychange', syncMobileNavTheme);
+    window.addEventListener('storage', syncMobileNavTheme);
+    window.addEventListener('themechange', syncMobileNavTheme);
+
+    if (window.matchMedia) {
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        if (typeof mediaQuery.addEventListener === 'function') {
+            mediaQuery.addEventListener('change', syncMobileNavTheme);
+        } else if (typeof mediaQuery.addListener === 'function') {
+            mediaQuery.addListener(syncMobileNavTheme);
         }
     }
 
@@ -168,6 +207,10 @@
                 adminLink.style.display = 'flex';
             }
         });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', syncMobileNavTheme, { once: true });
     }
 
 })();
