@@ -9,7 +9,7 @@
     let activeTab = '';
     // Check for index.html or root
     if (page === 'index.html' || page === '') activeTab = 'courses';
-    else if (page.includes('notes')) activeTab = 'notes';
+    else if (page.includes('anamnesis')) activeTab = 'anamnesis';
     else if (page.includes('calendar')) activeTab = 'calendar';
     
     // HTML Structure
@@ -19,9 +19,9 @@
             <img src="svg/icon-courses.svg" alt="Courses">
             <span>Courses</span>
         </a>
-        <a href="notes.html" class="bottom-nav-item ${activeTab === 'notes' ? 'active' : ''}">
-            <img src="svg/icon-anamnesis.svg" alt="Notes">
-            <span>Notes</span>
+        <a href="anamnesis.html" class="bottom-nav-item ${activeTab === 'anamnesis' ? 'active' : ''}">
+            <img src="svg/icon-anamnesis.svg" alt="Anamnesis">
+            <span>Anamnesis</span>
         </a>
         <a href="calendar.html" class="bottom-nav-item ${activeTab === 'calendar' ? 'active' : ''}">
             <img src="svg/icon-calendar.svg" alt="Calendar">
@@ -63,6 +63,51 @@
     const div = document.createElement('div');
     div.innerHTML = navHTML;
     document.body.appendChild(div);
+
+    function isDarkThemeEnabled() {
+        const body = document.body;
+        const html = document.documentElement;
+        const bodyDark = body && body.classList.contains('dark-mode');
+        const htmlDark = html && (html.classList.contains('dark-mode') || html.getAttribute('data-theme') === 'dark');
+
+        let storedDark = false;
+        try {
+            storedDark = localStorage.getItem('index-copy-theme') === 'dark';
+        } catch (error) {
+            storedDark = false;
+        }
+
+        return Boolean(bodyDark || htmlDark || storedDark);
+    }
+
+    function syncMobileNavTheme() {
+        const useDark = isDarkThemeEnabled();
+        const bottomNav = document.getElementById('bottom-nav');
+        const menuOverlay = document.getElementById('others-menu-overlay');
+
+        if (bottomNav) {
+            bottomNav.classList.toggle('dark-mode', useDark);
+        }
+
+        if (menuOverlay) {
+            menuOverlay.classList.toggle('dark-mode', useDark);
+            const menuContent = menuOverlay.querySelector('.others-menu-content');
+            if (menuContent) {
+                menuContent.classList.toggle('dark-mode', useDark);
+            }
+
+            const menuItems = menuOverlay.querySelectorAll('.others-menu-item');
+            menuItems.forEach(item => item.classList.toggle('dark-mode', useDark));
+        }
+    }
+
+    syncMobileNavTheme();
+
+    const body = document.body;
+    if (body && typeof MutationObserver !== 'undefined') {
+        const observer = new MutationObserver(syncMobileNavTheme);
+        observer.observe(body, { attributes: true, attributeFilter: ['class'] });
+    }
 
     // Event Listeners
     const toggleBtn = document.getElementById('others-toggle');

@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202603181j7u"></script>
+  <script src="js/auth-guard.js?v=202603181jna"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1417,6 +1417,66 @@
     background: #181818 !important;
   }
 
+  /* Dark mode event cards: brighter, punchier type colors */
+  body.dark-mode .event-card {
+    box-shadow: 0 3px 10px rgba(0,0,0,0.38) !important;
+  }
+
+  /* Blue family: exercise + test */
+  body.dark-mode .type-exercise {
+    background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 100%) !important;
+    border-left: 3px solid #3b82f6 !important;
+    color: #1e3a8a !important;
+  }
+
+  body.dark-mode .type-test {
+    background: linear-gradient(135deg, #dbeafe 0%, #7dd3fc 100%) !important;
+    border-left: 3px solid #0284c7 !important;
+    color: #0c4a6e !important;
+  }
+
+  /* Light gray family: lecture + important lecture */
+  body.dark-mode .type-lecture {
+    background: linear-gradient(135deg, #f3f4f6 0%, #d1d5db 100%) !important;
+    border-left: 3px solid #9ca3af !important;
+    color: #374151 !important;
+  }
+
+  body.dark-mode .type-important-lecture {
+    background: linear-gradient(135deg, #e5e7eb 0%, #cbd5e1 100%) !important;
+    border-left: 3px solid #6b7280 !important;
+    color: #1f2937 !important;
+  }
+
+  /* Red family: exam + makeup */
+  body.dark-mode .type-exam {
+    background: linear-gradient(135deg, #fecaca 0%, #fca5a5 100%) !important;
+    border-left: 3px solid #ef4444 !important;
+    color: #7f1d1d !important;
+  }
+
+  body.dark-mode .type-makeup {
+    background: linear-gradient(135deg, #fee2e2 0%, #fca5a5 100%) !important;
+    border-left: 3px solid #dc2626 !important;
+    color: #881337 !important;
+  }
+
+  body.dark-mode .type-exercise .event-time,
+  body.dark-mode .type-exercise .event-location,
+  body.dark-mode .type-test .event-time,
+  body.dark-mode .type-test .event-location,
+  body.dark-mode .type-lecture .event-time,
+  body.dark-mode .type-lecture .event-location,
+  body.dark-mode .type-important-lecture .event-time,
+  body.dark-mode .type-important-lecture .event-location,
+  body.dark-mode .type-exam .event-time,
+  body.dark-mode .type-exam .event-location,
+  body.dark-mode .type-makeup .event-time,
+  body.dark-mode .type-makeup .event-location {
+    color: inherit !important;
+    opacity: 0.92;
+  }
+
   body.dark-mode .time-label {
     color: #9ca3af !important;
     border-right-color: #303030 !important;
@@ -1524,7 +1584,7 @@
     border-color: #3f3f3f !important;
   }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202603181ivo">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202603151sxu">
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
@@ -3340,10 +3400,10 @@
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603181j7u"></script>
+    <script src="js/chat.js?v=202603181jna"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>
-<script src="js/mobile-nav.js?v=202603181ivo"></script>
+<script src="js/mobile-nav.js?v=202602171mhr"></script>
 </body>
     </html>

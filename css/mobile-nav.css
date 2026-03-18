@@ -248,57 +248,69 @@
         opacity: 0.7;
     }
 
-    body.dark-mode .bottom-nav {
+    body.dark-mode .bottom-nav,
+    .bottom-nav.dark-mode {
         background: #0f0f0f;
         border-top: 1px solid #303030;
         box-shadow: 0 -2px 10px rgba(0,0,0,0.35);
     }
 
-    body.dark-mode .bottom-nav-item {
+    body.dark-mode .bottom-nav-item,
+    .bottom-nav.dark-mode .bottom-nav-item {
         color: #9ca3af;
     }
 
-    body.dark-mode .bottom-nav-item.active {
+    body.dark-mode .bottom-nav-item.active,
+    .bottom-nav.dark-mode .bottom-nav-item.active {
         color: #588157;
     }
 
-    body.dark-mode .bottom-nav-item img {
+    body.dark-mode .bottom-nav-item img,
+    .bottom-nav.dark-mode .bottom-nav-item img {
         filter: brightness(0) invert(1);
         opacity: 0.72;
     }
 
-    body.dark-mode .bottom-nav-item.active img {
+    body.dark-mode .bottom-nav-item.active img,
+    .bottom-nav.dark-mode .bottom-nav-item.active img {
         opacity: 1;
         filter: invert(48%) sepia(13%) saturate(1478%) hue-rotate(63deg) brightness(95%) contrast(87%);
     }
 
-    body.dark-mode .bottom-nav-item svg {
+    body.dark-mode .bottom-nav-item svg,
+    .bottom-nav.dark-mode .bottom-nav-item svg {
         fill: #9ca3af;
     }
 
-    body.dark-mode .bottom-nav-item.active svg {
+    body.dark-mode .bottom-nav-item.active svg,
+    .bottom-nav.dark-mode .bottom-nav-item.active svg {
         fill: #588157;
     }
 
-    body.dark-mode .others-menu-overlay {
+    body.dark-mode .others-menu-overlay,
+    .others-menu-overlay.dark-mode {
         background: rgba(0,0,0,0.65);
     }
 
-    body.dark-mode .others-menu-content {
+    body.dark-mode .others-menu-content,
+    .others-menu-content.dark-mode {
         background: #181818;
         border: 1px solid #303030;
         box-shadow: 0 8px 24px rgba(0,0,0,0.45);
     }
 
-    body.dark-mode .others-menu-item {
+    body.dark-mode .others-menu-item,
+    .others-menu-item.dark-mode {
         color: #f1f1f1;
     }
 
-    body.dark-mode .others-menu-item:active {
+    body.dark-mode .others-menu-item:active,
+    .others-menu-item.dark-mode:active {
         background: #252525;
     }
 
-    body.dark-mode .others-menu-item img {
+    body.dark-mode .others-menu-item img,
+    .others-menu-item.dark-mode img {
         filter: brightness(0) invert(1);
         opacity: 0.72;
     }
