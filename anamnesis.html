@@ -6,13 +6,13 @@
     <title>Anamnesis</title>
     
     <!-- Scripts -->
-    <script src="js/auth-guard.js?v=202603181cfs"></script>
+    <script src="js/auth-guard.js?v=202603181i8e"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=202602171mhr"></script>
+    <script src="js/user-identity.js?v=20260127"></script>
     
     <!-- Fonts & Icons -->
-    <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
+    <link rel="icon" href="favicon.svg?v=7" type="image/svg+xml">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -52,13 +52,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 2px solid #1d1b1b;
+            border-bottom: 1px solid #1d1b1b;
         }
         
         .logo-img {
             width: 240px !important;
             height: 50px !important;
             object-fit: contain;
+            padding-left: 70px !important;    
             padding-top: 4px !important;
         }
         
@@ -514,8 +515,7 @@
             }
         }
     </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026031715gu">
-  <script src="js/version-manager.js?v=2026031715gu"></script>
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260129">
 </head>
 <body>
 
@@ -525,8 +525,8 @@
     <!-- Sidebar (Structure from calendar.html) -->
     <div id="side-menu">
         <div class="logo-header">
-            <a href="index.html?v=2026031715gu">
-                <img class="logo-img" src="svg/logo-coursebook.svg?v=2026031715gu" alt="StudyBoard">
+            <a href="index.html">
+                <img class="logo-img" src="svg/logo-coursebook.svg" alt="StudyBoard">
             </a>
         </div>
         
@@ -534,56 +534,56 @@
             <ul>
                 <li class="base-navigation-button">
                     <a href="https://elearn.mu-varna.bg/ultra/course">
-                        <img class="svg-icon" src="svg/icon-blackboard.svg?v=2026031715gu" style="filter: brightness(0) invert(1);">
+                        <img class="svg-icon" src="svg/icon-blackboard.svg" style="filter: brightness(0) invert(1);">
                         <span>Blackboard</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
-                    <a href="account.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-account.svg?v=2026031715gu">
+                    <a href="account.html?v=2026013112">
+                        <img class="svg-icon" src="svg/icon-account.svg">
                         <span>Account</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
-                    <a href="index.html?v=2026031715gu"> <!-- Link back to Courses -->
-                        <img class="svg-icon" src="svg/icon-courses.svg?v=2026031715gu">
+                    <a href="index.html"> <!-- Link back to Courses -->
+                        <img class="svg-icon" src="svg/icon-courses.svg">
                         <span>Courses</span>
                     </a>
                 </li>
                 <li class="base-navigation-button active">
-                    <a href="anamnesis.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-anamnesis.svg?v=2026031715gu" style="filter: brightness(0) invert(1);">
+                    <a href="anamnesis.html">
+                        <img class="svg-icon" src="svg/icon-anamnesis.svg" style="filter: brightness(0) invert(1);">
                         <span>Anamnesis</span>
                     </a>
                 </li>
                 
                 <li class="base-navigation-button">
-                    <a href="calendar.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-calendar.svg?v=2026031715gu">
+                    <a href="calendar.html">
+                        <img class="svg-icon" src="svg/icon-calendar.svg">
                         <span>Calendar</span>
                     </a>
                 </li>
+     <a href="tools.html">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg" alt="Tools" />
+                <span class="link-text">Tools</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
                 <li class="base-navigation-button">
-                    <a href="tools.html?v=2026031715gu">
-                        <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=2026031715gu" alt="Tools" />
-                        <span>Tools</span>
-                    </a>
-                </li>
-                <li class="base-navigation-button">
-                    <a href="text-editor.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-editor.svg?v=2026031715gu" style="filter: brightness(0) invert(1);">
+                    <a href="text-editor.html">
+                        <img class="svg-icon" src="svg/icon-editor.svg" style="filter: brightness(0) invert(1);">
                         <span>Editor</span>
                     </a>
                 </li>
                 <li class="base-navigation-button" id="admin-button" style="display: none;">
-                    <a href="admin.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-admin.svg?v=2026031715gu" style="filter: brightness(0) invert(1);">
+                    <a href="admin.html">
+                        <img class="svg-icon" src="svg/icon-admin.svg" style="filter: brightness(0) invert(1);">
                         <span>Admin Panel</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
                     <a href="#" onclick="handleLogout()">
-                        <img class="svg-icon" src="svg/icon-signout.svg?v=2026031715gu">
+                        <img class="svg-icon" src="svg/icon-signout.svg">
                         <span>Logout</span>
                     </a>
                 </li>
@@ -591,7 +591,6 @@
         </nav>
         
         <div class="sidebar-footer-links">
-            <span class="sidebar-footer-item">Privacy</span>
             <span class="sidebar-footer-item">Terms</span>
             <span class="sidebar-footer-item">Accessibility</span>
         </div>
@@ -664,7 +663,7 @@
                                                 <label>Пол</label>
                                                 <select name="gender" class="form-control">
                                                     <option value="M">Мъж</option>
-                                                    <option value="F">Жена</option>
+                                                    <option value="F">Женат</option>
                                                 </select>
                                             </div>
                                         </div>
@@ -859,11 +858,11 @@
         <div class="spinner"></div>
     </div>
 
-    <script src="js/anamnesis.js?v=202602171mhr"></script>
+    <script src="js/anamnesis.js?v=20260129_v1"></script>
     
     <!-- CHAT SYSTEM -->
-    <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=202603181cfs"></script>
+    <script src="js/presence.js?v=20260131"></script>
+    <script src="js/chat.js?v=202603181i8e"></script>
 
     <script>
         function handleLogout() {
@@ -900,6 +899,6 @@
             }
         });
     </script>
-<script src="js/mobile-nav.js?v=202602171mhr"></script>
+<script src="js/mobile-nav.js?v=20260129"></script>
 </body>
 </html>

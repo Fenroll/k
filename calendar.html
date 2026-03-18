@@ -20,14 +20,14 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202603181cfs"></script>
+  <script src="js/auth-guard.js?v=202603181i8e"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Calendar</title>
   
   <!-- Favicon -->
-  <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=202603151sxu" type="image/svg+xml">
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
@@ -71,7 +71,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-bottom: 2px solid #1d1b1b;
+      border-bottom: 1px solid #1d1b1b;
     }
   
   .logo-img {
@@ -175,6 +175,12 @@
     display: flex;
     align-items: center;
     border-bottom: 1px solid #d3cdcd;
+  }
+
+  .main-content > .main-header {
+    position: sticky;
+    top: 0;
+    z-index: 1200;
   }
   
   .page-title {
@@ -1327,73 +1333,273 @@
       line-height: 1.68;
     }
   }
+
+  body.dark-mode {
+    background: #0f0f0f !important;
+    color: #f1f1f1;
+  }
+
+  body.dark-mode #side-menu,
+  body.dark-mode .logo-header,
+  body.dark-mode .sidebar-nav a,
+  body.dark-mode .sidebar-nav a:hover,
+  body.dark-mode .sidebar-footer-links,
+  body.dark-mode .sidebar-footer-item {
+    background: #0f0f0f !important;
+    color: #f1f1f1 !important;
+  }
+
+  body.dark-mode .logo-header {
+    border-bottom-color: #343a42 !important;
+  }
+
+  body.dark-mode .sidebar-nav .active a {
+    background: #1a1a1a !important;
+  }
+
+  body.dark-mode .sidebar-nav .active a::before {
+    background: #588157 !important;
+  }
+
+  body.dark-mode .sidebar-nav .svg-icon {
+    filter: brightness(0) invert(1) !important;
+  }
+
+  body.dark-mode .main-content,
+  body.dark-mode .schedule-container {
+    background: #0f0f0f !important;
+  }
+
+  body.dark-mode .main-header {
+    background: #0f0f0f !important;
+    color: #f1f1f1 !important;
+    border-bottom-color: #343a42 !important;
+  }
+
+  body.dark-mode .page-title,
+  body.dark-mode .week-info,
+  body.dark-mode .week-number,
+  body.dark-mode .schedule-notes-last-edit,
+  body.dark-mode .info-panel-content,
+  body.dark-mode .info-panel-content strong,
+  body.dark-mode .exam-section-title,
+  body.dark-mode .exam-info-value,
+  body.dark-mode .exam-info-label,
+  body.dark-mode .modal-info-label,
+  body.dark-mode .modal-info-value,
+  body.dark-mode #examAdditionalInfo {
+    color: #f1f1f1 !important;
+  }
+
+  body.dark-mode #infoContent,
+  body.dark-mode #infoContent * {
+    color: #f1f1f1 !important;
+  }
+
+  body.dark-mode .week-selector,
+  body.dark-mode .calendar-wrapper,
+  body.dark-mode .info-panel,
+  body.dark-mode .modal-content,
+  body.dark-mode .exam-card,
+  body.dark-mode .exam-info-row,
+  body.dark-mode .exam-info-item {
+    background: #181818 !important;
+    border-color: #303030 !important;
+    color: #f1f1f1 !important;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.35) !important;
+  }
+
+  body.dark-mode .exam-card {
+    border-left-color: #588157 !important;
+  }
+
+  body.dark-mode .calendar-grid {
+    background: #181818 !important;
+  }
+
+  body.dark-mode .time-label {
+    color: #9ca3af !important;
+    border-right-color: #303030 !important;
+  }
+
+  body.dark-mode .header-cell {
+    border-right-color: #343a42 !important;
+  }
+
+  body.dark-mode .vertical-line {
+    border-right-color: #303030 !important;
+  }
+
+  body.dark-mode .grid-line {
+    border-top-color: #2a2a2a !important;
+  }
+
+  body.dark-mode .grid-line.hour-marker {
+    border-top-color: #3a3a3a !important;
+  }
+
+  body.dark-mode .schedule-notes-header,
+  body.dark-mode .exam-card-header,
+  body.dark-mode .info-panel-content hr,
+  body.dark-mode #calculatorSection {
+    border-bottom-color: #303030 !important;
+  }
+
+  body.dark-mode .modal-close {
+    color: #9ca3af !important;
+  }
+
+  body.dark-mode .modal-close:hover {
+    background: #2a2a2a !important;
+    color: #f1f1f1 !important;
+  }
+
+  body.dark-mode .schedule-notes-modal-error {
+    color: #fca5a5 !important;
+  }
+
+  body.dark-mode .schedule-notes-btn.cancel {
+    background: #2c2c2c !important;
+    color: #f1f1f1 !important;
+  }
+
+  body.dark-mode .schedule-notes-btn.save,
+  body.dark-mode .schedule-notes-edit-btn,
+  body.dark-mode .week-btn {
+    background: #588157 !important;
+    color: #fff !important;
+  }
+
+  body.dark-mode .schedule-notes-btn.save:hover,
+  body.dark-mode .schedule-notes-edit-btn:hover,
+  body.dark-mode .week-btn:hover {
+    background: #344e41 !important;
+  }
+
+  body.dark-mode .week-btn:disabled {
+    background: #4b5563 !important;
+    color: #e5e7eb !important;
+  }
+
+  body.dark-mode #modalAdditionalInfo code,
+  body.dark-mode .info-panel-content code {
+    background: #2a2a2a !important;
+    color: #f1f1f1 !important;
+  }
+
+  body.dark-mode #modalAdditionalInfo table thead,
+  body.dark-mode #modalAdditionalInfo table th,
+  body.dark-mode #examAdditionalInfo table thead,
+  body.dark-mode #examAdditionalInfo table th {
+    background-color: #202020 !important;
+    color: #f1f1f1 !important;
+  }
+
+  body.dark-mode #modalAdditionalInfo table td,
+  body.dark-mode #modalAdditionalInfo table th,
+  body.dark-mode #examAdditionalInfo table td,
+  body.dark-mode #examAdditionalInfo table th {
+    border-color: #303030 !important;
+  }
+
+  body.dark-mode #modalAdditionalInfo table tbody tr:nth-child(odd),
+  body.dark-mode #examAdditionalInfo table tbody tr:nth-child(odd) {
+    background-color: #171717 !important;
+  }
+
+  body.dark-mode #modalAdditionalInfo table tbody tr:hover,
+  body.dark-mode #examAdditionalInfo table tbody tr:hover {
+    background-color: #232323 !important;
+  }
+
+  body.dark-mode .calc-input-group label {
+    color: #d1d5db !important;
+  }
+
+  body.dark-mode .calc-input-group input,
+  body.dark-mode .calc-input-group select,
+  body.dark-mode #scheduleNotesEditor {
+    background: #121212 !important;
+    color: #f1f1f1 !important;
+    border-color: #3f3f3f !important;
+  }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026031715gu">
-  <script src="js/version-manager.js?v=2026031715gu"></script>
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202603151sxu">
+  <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
+  <script>
+    (function applySavedTheme() {
+      const THEME_KEY = 'index-copy-theme';
+      const stored = localStorage.getItem(THEME_KEY);
+      const useDark = stored === 'dark' || (!stored && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (useDark) {
+        document.body.classList.add('dark-mode');
+      }
+    })();
+  </script>
   <div class="layout">
     <!-- Sidebar -->
     <div id="side-menu">
       <div class="bb-inner-wrap">
         <div class="logo-header">
           <a href="https://elearn.mu-varna.bg" target="_blank" rel="noopener noreferrer">
-            <img class="logo-img" src="svg/logo-coursebook.svg?v=2026031715gu" alt="StudyBoard">
+            <img class="logo-img" src="svg/logo-coursebook.svg?v=202603151sxu" alt="StudyBoard">
           </a>
         </div>
         <nav class="sidebar-nav" aria-label="Main">
           <ul>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/course">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=2026031715gu" alt="blackboard" style="filter: brightness(0) invert(1);" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=202603151sxu" alt="blackboard" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Blackboard</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="account.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=2026031715gu" alt="Account" />
+              <a href="account.html?v=202603151sxu">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=202603151sxu" alt="Account" />
                 <span class="link-text">Account</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="index.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=2026031715gu" alt="Courses" />
+              <a href="index.html?v=202603151sxu">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603151sxu" alt="Courses" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="notes.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=2026031715gu" alt="Notes" style="filter: brightness(0) invert(1);" />
+              <a href="notes.html?v=202603151sxu">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=202603151sxu" alt="Notes" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Notes</span>
               </a>
             </li>
             <li class="base-navigation-button active">
-              <a href="calendar.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=2026031715gu" alt="Calendar" />
+              <a href="calendar.html?v=202603151sxu">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=202603151sxu" alt="Calendar" />
                 <span class="link-text">Calendar</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="tools.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=2026031715gu" alt="Tools" />
+              <a href="tools.html?v=202603151sxu">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=202603151sxu" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=2026031715gu" alt="Editor" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=202603151sxu">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=202603151sxu" alt="Editor" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Editor</span>
               </a>
             </li>
             <li class="base-navigation-button" id="admin-button" style="display: none;">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=2026031715gu" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=202603151sxu">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=202603151sxu" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Admin Panel</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="#" onclick="handleLogout()">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=2026031715gu" alt="Sign Out" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=202603151sxu" alt="Sign Out" />
                 <span class="link-text">Sign Out</span>
               </a>
             </li>
@@ -2567,7 +2773,8 @@
         vLine.className = 'vertical-line';
         vLine.style.gridColumn = c;
         vLine.style.gridRow = `1 / ${gridEndRow}`;
-        vLine.style.borderLeft = '1px solid #f4f4f4';
+        const dividerColor = document.body.classList.contains('dark-mode') ? '#303030' : '#f4f4f4';
+        vLine.style.borderLeft = `1px solid ${dividerColor}`;
         grid.appendChild(vLine);
       }
 
@@ -3133,7 +3340,7 @@
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603181cfs"></script>
+    <script src="js/chat.js?v=202603181i8e"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>

@@ -57,7 +57,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            border-bottom: 2px solid #1d1b1b;
+            border-bottom: 1px solid #1d1b1b;
         }
 
         .logo-img {
@@ -531,6 +531,150 @@
             cursor: not-allowed;
         }
 
+        body.dark-mode {
+            background: #0f0f0f;
+            color: #f1f1f1;
+        }
+
+        body.dark-mode .main-content {
+            background: #0f0f0f;
+        }
+
+        body.dark-mode #side-menu,
+        body.dark-mode .logo-header {
+            background: #0f0f0f;
+            border-bottom-color: #303030;
+        }
+
+        body.dark-mode .sidebar-nav a {
+            background: #0f0f0f;
+            color: #f1f1f1 !important;
+        }
+
+        body.dark-mode .sidebar-nav a:hover {
+            background: #0f0f0f;
+        }
+
+        body.dark-mode .sidebar-nav .active a {
+            background: #1a1a1a;
+        }
+
+        body.dark-mode .sidebar-nav .active a::before {
+            background: #588157;
+        }
+
+        body.dark-mode .sidebar-nav .svg-icon {
+            filter: brightness(0) invert(1);
+        }
+
+        body.dark-mode .sidebar-footer-links,
+        body.dark-mode .sidebar-footer-item {
+            color: #cdcdcd;
+        }
+
+        body.dark-mode .notes-header,
+        body.dark-mode .courses-panel,
+        body.dark-mode .editor-panel,
+        body.dark-mode .modal-content {
+            background: #181818;
+            border-color: #303030;
+            color: #f1f1f1;
+        }
+
+        body.dark-mode .notes-title,
+        body.dark-mode .panel-title,
+        body.dark-mode .editor-meta,
+        body.dark-mode .collab-meta,
+        body.dark-mode .notes-subtitle {
+            color: #f1f1f1;
+        }
+
+        body.dark-mode .panel-header,
+        body.dark-mode .md-toolbar,
+        body.dark-mode .notes-editor,
+        body.dark-mode .modal-header,
+        body.dark-mode .modal-footer {
+            border-color: #303030;
+        }
+
+        body.dark-mode .search-input,
+        body.dark-mode .mobile-course-select,
+        body.dark-mode .notes-editor {
+            background: #121212;
+            color: #f1f1f1;
+            border-color: #3f3f3f;
+        }
+
+        body.dark-mode .course-item {
+            color: #f1f1f1;
+        }
+
+        body.dark-mode .course-item:hover {
+            background: #252525;
+        }
+
+        body.dark-mode .course-item.active {
+            background: rgba(88, 129, 87, 0.2);
+            color: #f1f1f1;
+            border-left-color: #588157;
+        }
+
+        body.dark-mode .md-btn,
+        body.dark-mode .symbol-btn {
+            background: #202020;
+            color: #f1f1f1;
+            border-color: #3f3f3f;
+        }
+
+        body.dark-mode .md-btn img {
+            filter: brightness(0) invert(1);
+        }
+
+        body.dark-mode .md-btn:hover,
+        body.dark-mode .symbol-btn:hover {
+            background: #2a2a2a;
+            border-color: #4a4a4a;
+        }
+
+        body.dark-mode .status-chip {
+            border-color: #3f3f3f;
+            background: #1a1a1a;
+            color: #d1d5db;
+        }
+
+        body.dark-mode .status-chip.error {
+            border-color: #7f1d1d;
+            background: #2d1414;
+            color: #fca5a5;
+        }
+
+        body.dark-mode .save-btn {
+            background: #588157;
+            color: #fff;
+        }
+
+        body.dark-mode .save-btn:hover {
+            background: #4a6d49;
+        }
+
+        body.dark-mode .save-btn:disabled {
+            background: #4b5563;
+        }
+
+        body.dark-mode .notes-editor h1,
+        body.dark-mode .notes-editor h2,
+        body.dark-mode .notes-editor a {
+            color: #588157;
+        }
+
+        body.dark-mode .close {
+            color: #9ca3af;
+        }
+
+        body.dark-mode .close:hover {
+            color: #f1f1f1;
+        }
+
         @media (max-width: 1000px) {
             body {
                 overflow: auto;
@@ -744,6 +888,15 @@
             localStorage.removeItem('loggedInUser');
             window.location.href = 'login.html';
         }
+
+        (function applySavedTheme() {
+            const THEME_KEY = 'index-copy-theme';
+            const stored = localStorage.getItem(THEME_KEY);
+            const useDark = stored === 'dark' || (!stored && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            if (useDark) {
+                document.body.classList.add('dark-mode');
+            }
+        })();
 
         (function() {
             const firebaseConfig = {
@@ -1271,7 +1424,7 @@
                     state.liveblocksLeave = entered.leave;
                     if (els.collabStatus) {
                         els.collabStatus.textContent = `Liveblocks: joined ${roomId}`;
-                        els.collabStatus.style.color = '#166534';
+                        els.collabStatus.style.color = '#588157';
                     }
 
                     if (typeof state.liveblocksRoom.subscribe === 'function') {

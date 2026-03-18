@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026031715gu"></script>
+  <script src="js/auth-guard.js?v=202603101mce"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Tools</title>
   
   <!-- Favicon -->
-  <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
+  <link rel="icon" href="favicon.svg?v=202603101mce" type="image/svg+xml">
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
   
@@ -38,18 +38,13 @@
       min-width: 200px !important;
       min-height: 107px !important;
       max-width: 200px !important;
-      max-height: 107px !important;
       text-align: center;
-      border-bottom: none;
-      margin: 0 !important;
-      padding: 0 !important;
-      overflow: hidden;
       flex: 0 0 107px !important;
       box-sizing: content-box;
       display: flex;
       align-items: center;
       justify-content: center;
-      border-bottom: 2px solid #1d1b1b;
+      border-bottom: 1px solid #1d1b1b;
     }
     
     .logo-header > a {
@@ -63,10 +58,7 @@
       width: 240px !important;
       height: 50px !important;
       object-fit: contain;
-      padding-top: 1px !important;
-      margin: 0 !important;
-      display: block;
-      box-sizing: content-box;
+      padding-top: 4px !important;
     }
     
     .sidebar-nav ul {
@@ -163,12 +155,18 @@
       background: #fff;
       color: #000;
       width: 100%;
-      height: 107px;
+      height: 108px;
       display: flex;
       align-items: center;
       border-bottom: 1px solid #d3cdcd;
     }
-    
+
+    .main-content > .main-header {
+      position: sticky;
+      top: 0;
+      z-index: 1200;
+    }
+            
     .page-title {
       font-size: 30px !important;
       margin-left: 30px !important;
@@ -487,9 +485,228 @@
         display: none !important;
       }
     }
+
+    body.dark-mode {
+      background: #0f0f0f !important;
+      color: #f1f1f1;
+    }
+
+    body.dark-mode #side-menu,
+    body.dark-mode .logo-header,
+    body.dark-mode .sidebar-nav a,
+    body.dark-mode .sidebar-nav a:hover,
+    body.dark-mode .sidebar-footer-links,
+    body.dark-mode .sidebar-footer-item {
+      background: #0f0f0f !important;
+      color: #f1f1f1 !important;
+    }
+
+    body.dark-mode .sidebar-nav .active a {
+      background: #1a1a1a !important;
+    }
+
+    body.dark-mode .sidebar-nav .active a::before {
+      background: #588157 !important;
+    }
+
+    body.dark-mode .sidebar-nav .svg-icon {
+      filter: brightness(0) invert(1) !important;
+    }
+
+    body.dark-mode .logo-header {
+      border-bottom: 1px solid #343a42 !important;
+    }
+
+    body.dark-mode .main-content,
+    body.dark-mode .tools-menu,
+    body.dark-mode .content {
+      background: #0f0f0f !important;
+      color: #f1f1f1 !important;
+    }
+
+
+    body.dark-mode .main-header {
+      background: #0f0f0f !important;
+      color: #f1f1f1 !important;
+          border-bottom-color: #343a42 !important;
+    }
+
+    body.dark-mode .page-title {
+      color: #f1f1f1 !important;
+    }
+
+    body.dark-mode .drop-zone,
+    body.dark-mode .upload-container,
+    body.dark-mode #financeTool > div,
+    body.dark-mode #uploadsTool > div,
+    body.dark-mode #tool3Tool > div,
+    body.dark-mode #toolsUploadsTableWrap {
+      background: #181818 !important;
+      color: #f1f1f1 !important;
+      border-color: #303030 !important;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3) !important;
+    }
+
+    body.dark-mode .drop-zone {
+      border-color: #3f3f3f !important;
+    }
+
+    body.dark-mode .drop-zone:hover,
+    body.dark-mode .drop-zone.drag-over {
+      border-color: #588157 !important;
+      background: #1f2620 !important;
+    }
+
+    body.dark-mode .drop-zone-content h3,
+    body.dark-mode .drop-zone-content p,
+    body.dark-mode h2,
+    body.dark-mode h3,
+    body.dark-mode #financeMonthLabel,
+    body.dark-mode #financeMyDonationText,
+    body.dark-mode #financeLastUpdate {
+      color: #f1f1f1 !important;
+    }
+
+    body.dark-mode .btn-secondary {
+      background: #222 !important;
+      color: #f1f1f1 !important;
+      border: none !important;
+    }
+
+    body.dark-mode .btn-secondary:hover {
+      background: #2c2c2c !important;
+    }
+
+    body.dark-mode .btn-primary,
+    body.dark-mode .btn-success {
+      background: #588157 !important;
+      color: #fff !important;
+      border: none !important;
+    }
+
+    body.dark-mode .btn-primary:hover,
+    body.dark-mode .btn-success:hover {
+      background: #476647 !important;
+    }
+
+    body.dark-mode .test-menu-btn {
+      background: #181818 !important;
+      color: #d1d5db !important;
+      border: none !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.35) !important;
+    }
+
+    body.dark-mode .test-menu-btn.active {
+      background: #588157 !important;
+      color: #fff !important;
+      box-shadow: 0 4px 15px rgba(88, 129, 87, 0.3) !important;
+    }
+
+    body.dark-mode .file-item {
+      background: #202020 !important;
+      border-color: #303030 !important;
+    }
+
+    body.dark-mode .file-item-name,
+    body.dark-mode .file-item-size {
+      color: #e5e7eb !important;
+    }
+
+    body.dark-mode .file-item-status.uploading {
+      background: #1e3a8a !important;
+      color: #dbeafe !important;
+    }
+
+    body.dark-mode .file-item-status.success {
+      background: #14532d !important;
+      color: #bbf7d0 !important;
+    }
+
+    body.dark-mode .file-item-status.error {
+      background: #7f1d1d !important;
+      color: #fecaca !important;
+    }
+
+    body.dark-mode .progress-bar {
+      background: #2a2a2a !important;
+    }
+
+    body.dark-mode .progress-bar-fill {
+      background: linear-gradient(90deg, #588157, #6b9b6a) !important;
+    }
+
+    body.dark-mode textarea,
+    body.dark-mode input,
+    body.dark-mode select,
+    body.dark-mode #toolsUploadsSearch,
+    body.dark-mode #toolsUploadsSort,
+    body.dark-mode #toolsUploadsScope {
+      background: #121212 !important;
+      color: #f1f1f1 !important;
+      border-color: #3f3f3f !important;
+    }
+
+    body.dark-mode #financeAdminPanel > div,
+    body.dark-mode #financeDonationsSection,
+    body.dark-mode #financeMyDonationCard {
+      background: #181818 !important;
+      border-color: #303030 !important;
+    }
+
+    body.dark-mode #financeAdminPanel > div:nth-of-type(2) > div:first-child {
+      background: #122319 !important;
+      border-color: #166534 !important;
+    }
+
+    body.dark-mode #financeAdminPanel > div:nth-of-type(2) > div:last-child {
+      background: #2d1414 !important;
+      border-color: #7f1d1d !important;
+    }
+
+    body.dark-mode #financeIncomePreview,
+    body.dark-mode #financeExpensePreview {
+      background: #121212 !important;
+      color: #f1f1f1 !important;
+    }
+
+    body.dark-mode #financeIncomePreview {
+      border: 1px solid #588157 !important;
+    }
+
+    body.dark-mode #financeExpensePreview {
+      border: 1px solid #ef4444 !important;
+    }
+
+    body.dark-mode #toolsUploadsTable thead th {
+      background: #202020 !important;
+      color: #d1d5db !important;
+      border-bottom-color: #303030 !important;
+    }
+
+    body.dark-mode #toolsUploadsTable tbody td {
+      border-bottom-color: #303030 !important;
+      color: #e5e7eb !important;
+    }
+
+    body.dark-mode #toolsUploadsViewCycleBtn,
+    body.dark-mode #toolsUploadsRefreshBtn,
+    body.dark-mode #financePrevMonthBtn,
+    body.dark-mode #financeNextMonthBtn,
+    body.dark-mode #financeReloadBtn,
+    body.dark-mode #financeSaveBtn,
+    body.dark-mode #uploadBtn,
+    body.dark-mode #clearFilesBtn,
+    body.dark-mode #toolsUploadsTable .tools-uploads-copy,
+    body.dark-mode #toolsUploadsTable .tools-uploads-delete {
+      border: none !important;
+    }
+
+    body.dark-mode #toolsUploadsTable img[alt="file type"] {
+      filter: brightness(0) invert(1) !important;
+    }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026031715gu">
-  <script src="js/version-manager.js?v=2026031715gu"></script>
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202603101mce">
+  <script src="js/version-manager.js?v=202603101mce"></script>
 </head>
 <body>
   <div class="layout">
@@ -498,62 +715,62 @@
       <div class="bb-inner-wrap">
         <div class="logo-header">
           <a href="https://elearn.mu-varna.bg" target="_blank" rel="noopener noreferrer">
-            <img class="logo-img" src="svg/logo-coursebook.svg?v=2026031715gu" alt="StudyBoard">
+            <img class="logo-img" src="svg/logo-coursebook.svg?v=202603101mce" alt="StudyBoard">
           </a>
         </div>
         <nav class="sidebar-nav" aria-label="Main">
           <ul>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/course">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=2026031715gu" alt="blackboard" style="filter: brightness(0) invert(1);" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=202603101mce" alt="blackboard" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Blackboard</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="account.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=2026031715gu" alt="Account" />
+              <a href="account.html?v=202603101mce">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=202603101mce" alt="Account" />
                 <span class="link-text">Account</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="index.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=2026031715gu" alt="Courses" />
+              <a href="index.html?v=202603101mce">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603101mce" alt="Courses" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="notes.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=2026031715gu" alt="Notes" style="filter: brightness(0) invert(1);" />
+              <a href="notes.html?v=202603101mce">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=202603101mce" alt="Notes" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Notes</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a href="calendar.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=2026031715gu" alt="Calendar" />
+              <a href="calendar.html?v=202603101mce">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=202603101mce" alt="Calendar" />
                 <span class="link-text">Calendar</span>
               </a>
             </li>
             <li class="base-navigation-button active">
-              <a href="tools.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=2026031715gu" alt="Tools" />
+              <a href="tools.html?v=202603101mce">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=202603101mce" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=2026031715gu" alt="Editor" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=202603101mce">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=202603101mce" alt="Editor" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Editor</span>
               </a>
             </li>
             <li class="base-navigation-button" id="admin-button" style="display: none;">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=2026031715gu" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=202603101mce">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=202603101mce" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Admin Panel</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="#" onclick="handleLogout()">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=2026031715gu" alt="Sign Out" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=202603101mce" alt="Sign Out" />
                 <span class="link-text">Sign Out</span>
               </a>
             </li>
@@ -570,7 +787,7 @@
       </header>
       
       <!-- Tools Menu -->
-      <div class="tools-menu" style="padding: 30px 20px; background: #f5f5f5; border-bottom: 1px solid #e5e7eb;">
+      <div class="tools-menu" style="padding: 30px 20px; background: #f5f5f5;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto;">
           <button class="test-menu-btn active" data-test="upload" data-emoji="📤" style="padding: 18px 24px; border: none; background: #588157; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(88, 129, 87, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
             📤 Качване на файлове
@@ -766,19 +983,32 @@
   </div>
 
   <script>
+    (function applySavedTheme() {
+      const THEME_KEY = 'index-copy-theme';
+      const stored = localStorage.getItem(THEME_KEY);
+      const useDark = stored === 'dark' || (!stored && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      if (useDark) {
+        document.body.classList.add('dark-mode');
+      }
+    })();
+
     // Test menu functionality
     document.querySelectorAll('.test-menu-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
+        const isDarkMode = document.body.classList.contains('dark-mode');
+
         // Remove active state from all buttons
         document.querySelectorAll('.test-menu-btn').forEach(b => {
+          b.classList.remove('active');
           b.style.borderColor = '';
-          b.style.background = 'white';
-          b.style.color = '#666';
-          b.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+          b.style.background = isDarkMode ? '#181818' : 'white';
+          b.style.color = isDarkMode ? '#d1d5db' : '#666';
+          b.style.boxShadow = isDarkMode ? '0 2px 8px rgba(0,0,0,0.35)' : '0 2px 8px rgba(0,0,0,0.08)';
         });
         
         // Add active state to clicked button
         const activeButton = e.currentTarget;
+        activeButton.classList.add('active');
         activeButton.style.borderColor = '';
         activeButton.style.background = '#588157';
         activeButton.style.color = 'white';
@@ -1222,7 +1452,7 @@
        FIREBASE & CHAT WIDGET
        ============================================ -->
   <!-- Initialize Chat Widget -->
-    <script src="js/chat.js?v=2026031715gu"></script>
+    <script src="js/chat.js?v=202603101mce"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
@@ -1734,7 +1964,7 @@
       { aliases: ['паисий', 'paisiy'], label: 'Owner' }
     ];
 
-    const FINANCE_BLUE = '#2563eb';
+    const FINANCE_BLUE = '#588157';
 
     const MIN_FINANCE_MONTH = new Date(2026, 0, 1);
 
@@ -1777,7 +2007,7 @@
       html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
       html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
       html = html.replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/g, '<u>$1</u>');
-      html = html.replace(/(\d+(?:[\.,]\d+)?)\s*€/g, `<span style="color:${FINANCE_BLUE}; font-weight:700;">$1€</span>`);
+      html = html.replace(/(\d+(?:[\.,]\d+)?)\s*(€|EUR)/gi, `<span style="color:${FINANCE_BLUE}; font-weight:700;">$1 $2</span>`);
       html = html.replace(/(^|\n)-\s+/g, '$1• ');
       html = html.replace(/\n/g, '<br>');
 

@@ -1086,7 +1086,7 @@ class ChatUIManager {
                 transition: all 0.2s;
             }
             .btn-mention { background: var(--chat-primary); color: white; }
-            .btn-mention:hover { background: #6d28d9; }
+            .btn-mention:hover { background: #588157; }
         `;
         document.head.appendChild(style);
     }
@@ -2140,7 +2140,9 @@ class ChatUIManager {
     const resolvedName = this._resolveMessageAuthorName(msg);
 
     const isCurrentUser = (window.currentUser.userId && msg.userId === window.currentUser.userId) || (window.currentUser.legacyChatId && msg.userId === window.currentUser.legacyChatId);
-    const messageBgColor = isCurrentUser ? '#e8f5e9' : 'var(--chat-secondary)';
+    const isDarkChat = document.body.classList.contains('dark-mode') && !document.body.classList.contains('chat-force-light');
+    const messageBgColor = isCurrentUser ? (isDarkChat ? '#588157' : '#E8F5E9') : 'var(--chat-secondary)';
+    const messageTextColor = isCurrentUser ? '#000000' : '#000000';
 
     // Avatar Logic
     let avatarHtml = '';
@@ -2190,7 +2192,7 @@ class ChatUIManager {
           
           <div class="message-bubble-container" style="position: relative; width: fit-content; display: flex; flex-direction: column;">
              ${replyHTML}
-             <div class="message-text" data-raw-text="${this.escapeHtml(msg.text)}" style="background-color: ${messageBgColor}; text-align: left; max-width: 100%; width: fit-content;">
+             <div class="message-text" data-raw-text="${this.escapeHtml(msg.text)}" style="background-color: ${messageBgColor}; color: ${messageTextColor}; text-align: left; max-width: 100%; width: fit-content;">
             ${this.linkifyText(msg.text)}
             ${msg.edited ? `<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>` : ''}
           </div>
@@ -3481,6 +3483,13 @@ class ChatUIManager {
 
   // Wait for the user identity to be resolved before doing anything else
   await window.currentUserPromise;
+
+  // Keep chat light-only on explicit editor/viewer pages.
+  const pagePath = String(window.location.pathname || '').toLowerCase();
+  const chatForceLight = pagePath.includes('text-editor') || pagePath.includes('md-viewer');
+  if (chatForceLight) {
+    document.body.classList.add('chat-force-light');
+  }
   
   let attempts = 0;
   const maxAttempts = 20;
@@ -3632,10 +3641,11 @@ class ChatUIManager {
 }
 .gif-search-input {
   width: 100%;
-  padding: 6px 10px;
+  box-sizing: border-box;
+  padding: 5px 9px;
   border: 1px solid #ddd;
   border-radius: 20px;
-  font-size: 13px;
+  font-size: 12px;
   outline: none;
 }
 .gif-results {
@@ -3663,6 +3673,84 @@ class ChatUIManager {
   --chat-border: #a3b18a;
   --chat-text: #000000;
   --chat-text-light: #000000;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget {
+  --chat-primary: #588157;
+  --chat-secondary: #202420;
+  --chat-border: #343a42;
+  --chat-text: #f1f1f1;
+  --chat-text-light: #cbd5e1;
+  --chat-self-message-bg: rgba(88, 129, 87, 0.32);
+  --chat-other-message-bg: #2b3136;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget .chat-panel,
+body.dark-mode:not(.chat-force-light) #chat-widget .chat-input-area,
+body.dark-mode:not(.chat-force-light) #chat-widget .chat-user-info,
+body.dark-mode:not(.chat-force-light) #chat-widget .chat-active-users,
+body.dark-mode:not(.chat-force-light) #chat-widget .chat-plus-menu,
+body.dark-mode:not(.chat-force-light) #chat-widget .gif-picker-container,
+body.dark-mode:not(.chat-force-light) #chat-widget .mention-suggestions,
+body.dark-mode:not(.chat-force-light) #chat-widget .chat-date-separator span {
+  background: #181818 !important;
+  color: var(--chat-text) !important;
+  border-color: var(--chat-border) !important;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget .message-text {
+  background: var(--chat-other-message-bg) !important;
+  color: var(--chat-text) !important;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget .reaction-badge {
+  background: #f0f0f0 !important;
+  color: #111827 !important;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget .message-actions button:hover {
+  background: #2b3136 !important;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget .message-actions img {
+  filter: brightness(0) invert(1);
+}
+body.dark-mode:not(.chat-force-light) #chat-widget .chat-input {
+  background: #121212;
+  color: var(--chat-text);
+}
+body.dark-mode:not(.chat-force-light) #chat-widget .chat-input::placeholder {
+  color: #94a3b8;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget .suggestion-item:hover,
+body.dark-mode:not(.chat-force-light) #chat-widget .suggestion-item.active,
+body.dark-mode:not(.chat-force-light) #chat-widget .active-user:hover,
+body.dark-mode:not(.chat-force-light) #chat-widget .plus-menu-item:hover {
+  background: #252b31 !important;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget .message-options-menu,
+body.dark-mode:not(.chat-force-light) #chat-widget .reaction-picker,
+body.dark-mode:not(.chat-force-light) #chat-widget .gif-picker-header {
+  background: #181818 !important;
+  color: var(--chat-text) !important;
+  border-color: var(--chat-border) !important;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget .gif-search-input {
+  background: #121212;
+  color: var(--chat-text);
+  border-color: var(--chat-border);
+}
+body.dark-mode:not(.chat-force-light) .user-profile-modal {
+  background: #181818;
+  color: var(--chat-text);
+}
+body.dark-mode:not(.chat-force-light) .profile-modal-name,
+body.dark-mode:not(.chat-force-light) .profile-modal-close,
+body.dark-mode:not(.chat-force-light) .profile-modal-info,
+body.dark-mode:not(.chat-force-light) .info-item,
+body.dark-mode:not(.chat-force-light) .info-label,
+body.dark-mode:not(.chat-force-light) .profile-modal-status {
+  color: var(--chat-text) !important;
+}
+body.dark-mode:not(.chat-force-light) .profile-modal-info {
+  background: #202420;
+}
+body.dark-mode:not(.chat-force-light) .profile-modal-close:hover {
+  color: #ffffff;
 }
 .chat-widget {
   position: fixed;

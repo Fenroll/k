@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202603181cfs"></script>
+  <script src="js/auth-guard.js?v=202603181i8e"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -34,7 +34,7 @@
   font-family: 'Open Sans', Arial, sans-serif;
   font-weight: 400;
   position: absolute;
-  top: 0;
+      top: 1px;
   left: 0;
   right: 0;
   width: 100%;
@@ -548,7 +548,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-weight: 600;
-  color: #92400e;
+  color: #588157;
   font-size: 1.05em;
 }
 
@@ -992,24 +992,25 @@
       min-height: 100vh;
       box-shadow: 2px 0 8px rgba(0,0,0,0.04);
     }
-  .logo-header {
-  background: #262626;
-  width: 200px !important;
-  height: 107px !important;
-  min-width: 200px !important;
-  min-height: 107px !important;
-  max-width: 200px !important;
-  max-height: 107px !important;
-  text-align: center;
-  border-bottom: none;
-  margin: 0 !important;
-  padding: 0 !important;
-  overflow: hidden;
-  flex: 0 0 107px !important;
-  box-sizing: content-box;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    .logo-header {
+      background: #262626;
+      width: 200px !important;
+      height: 107px !important;
+      min-width: 200px !important;
+      min-height: 107px !important;
+      max-width: 200px !important;
+      max-height: 107px !important;
+      text-align: center;
+      border-bottom: none;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden;
+      flex: 0 0 107px !important;
+      box-sizing: content-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-bottom: 1px solid #1d1b1b;
     }
     .logo-header > a {
       display: block;
@@ -1021,6 +1022,7 @@
       width: 240px !important;
       height: 50px !important;
       object-fit: contain;
+      padding-top: 4px !important;
     }
     .sidebar-nav ul {
       list-style: none;
@@ -1094,7 +1096,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=202603181cfs"></script>
+  <script src="courses.generated.js?v=202603181i8e"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
@@ -1640,7 +1642,7 @@ document.addEventListener('DOMContentLoaded', function() {
   <style>
   body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
     .layout { display: flex; min-height: 100vh; }
-  .logo-header { background: #262626; height: 107px; min-height: 107px; max-height: 107px; text-align: center; border-bottom: 2px solid #1d1b1b; padding: 0; display: flex; align-items: center; justify-content: center; }
+  .logo-header { background: #262626; height: 107px; min-height: 107px; max-height: 107px; text-align: center; border-bottom: 1px solid #1d1b1b; padding: 0; display: flex; align-items: center; justify-content: center; }
     .logo-img { width: 200px; margin-top: 3px; }
     .sidebar-profile {
       margin-left: 8px;
@@ -1670,6 +1672,11 @@ document.addEventListener('DOMContentLoaded', function() {
   align-items: center;
   border-bottom: 1px solid #d3cdcd;
   /* outline removed, keep only border-bottom */
+    }
+    .main-content > .main-header {
+  position: sticky;
+  top: 0;
+  z-index: 1200;
     }
     .main-header .page-title {
       font-weight: 400 !important;
@@ -1967,7 +1974,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=202603181cfs"></script>
+<script src="js/chat.js?v=202603181i8e"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -3165,6 +3172,203 @@ document.addEventListener('click', function(event) {
     closePrivacyModal();
   }
 });
+</script>
+
+<style>
+body.dark-mode {
+  background: #0f0f0f !important;
+  color: #f1f1f1 !important;
+}
+
+body.dark-mode .main-content,
+body.dark-mode .course-org-list,
+body.dark-mode .filter-bar,
+body.dark-mode .overlay-content,
+body.dark-mode .overlay-main-content,
+body.dark-mode .text-modal-content,
+body.dark-mode #privacyModal .text-modal-content {
+  background: #0f0f0f !important;
+  color: #f1f1f1 !important;
+}
+
+body.dark-mode .main-header,
+body.dark-mode .overlay-header,
+body.dark-mode .msg-note-content,
+body.dark-mode .annotation-modal-content,
+body.dark-mode .filter-search-input,
+body.dark-mode .filter-select,
+body.dark-mode .text-modal-content,
+body.dark-mode .right-overlay {
+  background: #181818 !important;
+  color: #f1f1f1 !important;
+  border-color: #303030 !important;
+}
+
+body.dark-mode .element-card {
+  background: #181818 !important;
+  color: #f1f1f1 !important;
+  border-top: 1px solid #303030 !important;
+  border-right: 1px solid #303030 !important;
+  border-bottom: 1px solid #303030 !important;
+  /* Keep border-left accent color from existing course color logic */
+}
+
+body.dark-mode .course-title,
+body.dark-mode .course-custom-text,
+body.dark-mode .course-id,
+body.dark-mode .status-open,
+body.dark-mode .status-moreinfo,
+body.dark-mode .overlay-header .page-title,
+body.dark-mode .filter-label,
+body.dark-mode .text-modal-title,
+body.dark-mode .text-modal-body,
+body.dark-mode .msg-note-content,
+body.dark-mode .event-info-overlay,
+body.dark-mode .event-info-overlay li,
+body.dark-mode .event-info-overlay p,
+body.dark-mode #privacyModal,
+body.dark-mode #privacyModal p,
+body.dark-mode #privacyModal li {
+  color: #f1f1f1 !important;
+}
+
+
+
+body.dark-mode .status-moreinfo,
+body.dark-mode .status-instructors,
+body.dark-mode .markdown-content a,
+body.dark-mode .event-info-overlay a,
+body.dark-mode .overlay-main-content a {
+  color: #a3b18a !important;
+}
+
+body.dark-mode .filter-search-input,
+body.dark-mode .filter-select {
+  border-color: #3f3f3f !important;
+  background: #121212 !important;
+}
+
+body.dark-mode .filter-label {
+  background: #0f0f0f !important;
+  color: #aaaaaa !important;
+}
+
+body.dark-mode .filter-search-icon,
+body.dark-mode .filter-select-arrow {
+  color: #aaaaaa !important;
+  fill: #aaaaaa !important;
+}
+
+body.dark-mode .sidebar-nav a {
+  background: #0f0f0f !important;
+  color: #f1f1f1 !important;
+}
+
+body.dark-mode .sidebar-nav a:hover {
+  background: #0f0f0f !important;
+}
+
+body.dark-mode .sidebar-nav .active a,
+body.dark-mode .sidebar-nav li.active a {
+  background: #1a1a1a !important;
+}
+
+body.dark-mode .logo-header,
+body.dark-mode .base-courses-header-container,
+body.dark-mode .base-footer,
+body.dark-mode #side-menu {
+  background: #0f0f0f !important;
+}
+
+body.dark-mode .sidebar-nav .active a::before,
+body.dark-mode .sidebar-nav li.active a::before {
+  background: #588157 !important;
+}
+
+body.dark-mode .sidebar-nav .svg-icon {
+  filter: brightness(0) invert(1) !important;
+}
+
+body.dark-mode .main-header,
+body.dark-mode .overlay-header {
+  border-bottom: 1px solid #303030 !important;
+}
+
+body.dark-mode .main-header {
+  background: #0f0f0f !important;
+}
+
+body.dark-mode .others-label {
+  color: #ffffff !important;
+}
+
+body.dark-mode .archive-separator {
+  background-color: #303030 !important;
+}
+
+body.dark-mode .overlay-main-content section {
+  background: #1a1a1a !important;
+  border: 1px solid #303030 !important;
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35) !important;
+}
+
+
+
+body.dark-mode .msg-note,
+body.dark-mode .msg-note:hover,
+body.dark-mode .msg-note-html,
+body.dark-mode .msg-note-html:hover {
+  border-left-color: #588157 !important;
+  box-shadow: none !important;
+}
+
+
+body.dark-mode .msg-note-content {
+  border-top-color: rgba(146, 64, 14, 0.2) !important;
+}
+
+body.dark-mode .folder-toggle-arrow {
+  background: linear-gradient(180deg, #2f3832 0%, #273029 100%) !important;
+  color: #d9e2d0 !important;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.dark-mode .element-card::after,
+body.dark-mode .main-header,
+body.dark-mode .overlay-header,
+body.dark-mode .sidebar-nav a,
+body.dark-mode .base-footer,
+body.dark-mode .logo-header {
+  border-color: #343a42 !important;
+}
+
+body.dark-mode .text-modal {
+  background-color: rgba(12, 14, 16, 0.78) !important;
+}
+
+body.dark-mode .element-card::after {
+  background-color: #303030 !important;
+}
+
+</style>
+
+<script>
+(function() {
+  const THEME_KEY = 'index-copy-theme';
+
+  function setDarkMode(enabled) {
+    document.body.classList.toggle('dark-mode', enabled);
+  }
+
+  function getInitialPreference() {
+    const stored = localStorage.getItem(THEME_KEY);
+    if (stored === 'dark') return true;
+    if (stored === 'light') return false;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  setDarkMode(getInitialPreference());
+})();
 </script>
     </body>
     </html>
