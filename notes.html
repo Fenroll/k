@@ -892,7 +892,7 @@
         (function applySavedTheme() {
             const THEME_KEY = 'index-copy-theme';
             const stored = localStorage.getItem(THEME_KEY);
-            const useDark = stored === 'dark' || (!stored && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+            const useDark = stored === 'dark';
             if (useDark) {
                 document.body.classList.add('dark-mode');
             }

@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202603181ivo"></script>
+  <script src="js/auth-guard.js?v=202603181cfs"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -548,7 +548,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-weight: 600;
-  color: #588157;
+  color: #92400e;
   font-size: 1.05em;
 }
 
@@ -992,25 +992,24 @@
       min-height: 100vh;
       box-shadow: 2px 0 8px rgba(0,0,0,0.04);
     }
-    .logo-header {
-      background: #262626;
-      width: 200px !important;
-      height: 107px !important;
-      min-width: 200px !important;
-      min-height: 107px !important;
-      max-width: 200px !important;
-      max-height: 107px !important;
-      text-align: center;
-      border-bottom: none;
-      margin: 0 !important;
-      padding: 0 !important;
-      overflow: hidden;
-      flex: 0 0 107px !important;
-      box-sizing: content-box;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid #1d1b1b;
+  .logo-header {
+  background: #262626;
+  width: 200px !important;
+  height: 107px !important;
+  min-width: 200px !important;
+  min-height: 107px !important;
+  max-width: 200px !important;
+  max-height: 107px !important;
+  text-align: center;
+  border-bottom: none;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden;
+  flex: 0 0 107px !important;
+  box-sizing: content-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
     }
     .logo-header > a {
       display: block;
@@ -1022,7 +1021,6 @@
       width: 240px !important;
       height: 50px !important;
       object-fit: contain;
-      padding-top: 4px !important;
     }
     .sidebar-nav ul {
       list-style: none;
@@ -1096,7 +1094,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=202603181ivo"></script>
+  <script src="courses.generated.js?v=202603181cfs"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
@@ -1974,7 +1972,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=202603181ivo"></script>
+<script src="js/chat.js?v=202603181cfs"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -3193,6 +3191,7 @@ body.dark-mode #privacyModal .text-modal-content {
 
 body.dark-mode .main-header,
 body.dark-mode .overlay-header,
+body.dark-mode .msg-note,
 body.dark-mode .msg-note-content,
 body.dark-mode .annotation-modal-content,
 body.dark-mode .filter-search-input,
@@ -3222,6 +3221,7 @@ body.dark-mode .overlay-header .page-title,
 body.dark-mode .filter-label,
 body.dark-mode .text-modal-title,
 body.dark-mode .text-modal-body,
+body.dark-mode .msg-note-title,
 body.dark-mode .msg-note-content,
 body.dark-mode .event-info-overlay,
 body.dark-mode .event-info-overlay li,
@@ -3232,10 +3232,15 @@ body.dark-mode #privacyModal li {
   color: #f1f1f1 !important;
 }
 
-
+body.dark-mode .event-info-overlay h1,
+body.dark-mode .event-info-overlay h2,
+body.dark-mode .msg-note-title {
+  color: #a3b18a !important;
+}
 
 body.dark-mode .status-moreinfo,
 body.dark-mode .status-instructors,
+body.dark-mode .msg-note-content a,
 body.dark-mode .markdown-content a,
 body.dark-mode .event-info-overlay a,
 body.dark-mode .overlay-main-content a {
@@ -3295,7 +3300,7 @@ body.dark-mode .overlay-header {
 }
 
 body.dark-mode .main-header {
-  background: #0f0f0f !important;
+  background: #0b0b0b !important;
 }
 
 body.dark-mode .others-label {
@@ -3312,19 +3317,8 @@ body.dark-mode .overlay-main-content section {
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35) !important;
 }
 
-
-
-body.dark-mode .msg-note,
-body.dark-mode .msg-note:hover,
-body.dark-mode .msg-note-html,
-body.dark-mode .msg-note-html:hover {
-  border-left-color: #588157 !important;
-  box-shadow: none !important;
-}
-
-
-body.dark-mode .msg-note-content {
-  border-top-color: rgba(146, 64, 14, 0.2) !important;
+body.dark-mode .overlay-main-content .msg-note {
+  background: #202020 !important;
 }
 
 body.dark-mode .folder-toggle-arrow {
@@ -3363,7 +3357,8 @@ body.dark-mode .element-card::after {
   function getInitialPreference() {
     const stored = localStorage.getItem(THEME_KEY);
     if (stored === 'dark') return true;
-    return false;
+    if (stored === 'light') return false;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
   }
 
   setDarkMode(getInitialPreference());
