@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202603181lpy"></script>
+  <script src="js/auth-guard.js?v=202603181mpa"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1335,7 +1335,7 @@
   }
 
   body.dark-mode {
-    background: #0f0f0f !important;
+    background: #121212 !important;
     color: #f1f1f1;
   }
 
@@ -1345,7 +1345,7 @@
   body.dark-mode .sidebar-nav a:hover,
   body.dark-mode .sidebar-footer-links,
   body.dark-mode .sidebar-footer-item {
-    background: #0f0f0f !important;
+    background: #121212 !important;
     color: #f1f1f1 !important;
   }
 
@@ -1367,11 +1367,11 @@
 
   body.dark-mode .main-content,
   body.dark-mode .schedule-container {
-    background: #0f0f0f !important;
+    background: #121212 !important;
   }
 
   body.dark-mode .main-header {
-    background: #0f0f0f !important;
+    background: #121212 !important;
     color: #f1f1f1 !important;
     border-bottom-color: #343a42 !important;
   }
@@ -1420,8 +1420,8 @@
   }
 
   body.dark-mode .type-exercise {
-    background: #4682B4 !important;
-    border-left: 3px solid #85a9ea !important;
+    background: #37538C important;
+    border-left: 3px solid #445f94 !important;
     color: #eaf6ff !important;
   }
 
@@ -1432,7 +1432,7 @@
   }
 
   body.dark-mode .type-lecture {
-    background: #878f97 !important;
+    background: #b1b1b1 !important;
     border-left: 3px solid #d2dcec !important;
     color: #eef2ff !important;
   }
@@ -3400,13 +3400,369 @@
     });
   </script>
 
+  <script>
+    // Temporary developer tool: open calendar with ?exerciseColorPreview=1 to fine-tune dark-mode exercise color.
+    (function initExerciseColorPreviewTool() {
+      const params = new URLSearchParams(window.location.search);
+      if (!params.has('exerciseColorPreview')) return;
+
+      const STORAGE_KEY = 'calendar-exercise-dark-preview-color';
+      const STYLE_ID = 'exercise-dark-preview-style';
+
+      function clamp(value, min, max) {
+        return Math.min(max, Math.max(min, value));
+      }
+
+      function hsvToRgb(h, s, v) {
+        const sat = s / 100;
+        const val = v / 100;
+        const c = val * sat;
+        const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
+        const m = val - c;
+        let r = 0;
+        let g = 0;
+        let b = 0;
+
+        if (h >= 0 && h < 60) {
+          r = c; g = x; b = 0;
+        } else if (h < 120) {
+          r = x; g = c; b = 0;
+        } else if (h < 180) {
+          r = 0; g = c; b = x;
+        } else if (h < 240) {
+          r = 0; g = x; b = c;
+        } else if (h < 300) {
+          r = x; g = 0; b = c;
+        } else {
+          r = c; g = 0; b = x;
+        }
+
+        return {
+          r: Math.round((r + m) * 255),
+          g: Math.round((g + m) * 255),
+          b: Math.round((b + m) * 255)
+        };
+      }
+
+      function rgbToHex(r, g, b) {
+        const toHex = (n) => n.toString(16).padStart(2, '0');
+        return '#' + toHex(r) + toHex(g) + toHex(b);
+      }
+
+      function hexToRgb(hex) {
+        const normalized = (hex || '').replace('#', '').trim();
+        if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return null;
+        return {
+          r: parseInt(normalized.slice(0, 2), 16),
+          g: parseInt(normalized.slice(2, 4), 16),
+          b: parseInt(normalized.slice(4, 6), 16)
+        };
+      }
+
+      function rgbToHsv(r, g, b) {
+        const rn = r / 255;
+        const gn = g / 255;
+        const bn = b / 255;
+        const max = Math.max(rn, gn, bn);
+        const min = Math.min(rn, gn, bn);
+        const delta = max - min;
+
+        let h = 0;
+        if (delta !== 0) {
+          if (max === rn) {
+            h = 60 * (((gn - bn) / delta) % 6);
+          } else if (max === gn) {
+            h = 60 * (((bn - rn) / delta) + 2);
+          } else {
+            h = 60 * (((rn - gn) / delta) + 4);
+          }
+        }
+        if (h < 0) h += 360;
+
+        const s = max === 0 ? 0 : (delta / max) * 100;
+        const v = max * 100;
+
+        return { h: Math.round(h), s: Math.round(s), v: Math.round(v) };
+      }
+
+      function getInitialHex() {
+        const stored = localStorage.getItem(STORAGE_KEY);
+        if (stored && /^#[0-9a-fA-F]{6}$/.test(stored)) return stored;
+
+        const sample = document.querySelector('.type-exercise');
+        if (sample) {
+          const bg = getComputedStyle(sample).backgroundColor;
+          const match = bg.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/i);
+          if (match) {
+            return rgbToHex(Number(match[1]), Number(match[2]), Number(match[3]));
+          }
+        }
+
+        return '#155F95';
+      }
+
+      const styleEl = document.createElement('style');
+      styleEl.textContent = `
+        .exercise-color-preview-panel {
+          position: fixed;
+          right: 16px;
+          top: 84px;
+          z-index: 12000;
+          width: 260px;
+          background: #ffffff;
+          border: 1px solid #d1d5db;
+          border-radius: 10px;
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+          padding: 10px;
+          font-family: 'Open Sans', Arial, sans-serif;
+          user-select: none;
+        }
+        body.dark-mode .exercise-color-preview-panel {
+          background: #171717;
+          border-color: #343a42;
+          color: #e5e7eb;
+        }
+        .exercise-color-preview-header {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          margin-bottom: 8px;
+          font-size: 12px;
+          font-weight: 700;
+        }
+        .exercise-color-preview-header button {
+          border: none;
+          background: transparent;
+          cursor: pointer;
+          font-size: 16px;
+          color: inherit;
+          line-height: 1;
+          padding: 0 4px;
+        }
+        .exercise-color-preview-note {
+          font-size: 11px;
+          opacity: 0.8;
+          margin-bottom: 8px;
+        }
+        .exercise-sv-wrap {
+          position: relative;
+          width: 100%;
+          height: 150px;
+          border-radius: 8px;
+          overflow: hidden;
+          cursor: crosshair;
+          border: 1px solid rgba(148, 163, 184, 0.6);
+        }
+        .exercise-sv-white,
+        .exercise-sv-black {
+          position: absolute;
+          inset: 0;
+          pointer-events: none;
+        }
+        .exercise-sv-white {
+          background: linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, 0) 100%);
+        }
+        .exercise-sv-black {
+          background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000 100%);
+        }
+        .exercise-sv-cursor {
+          position: absolute;
+          width: 12px;
+          height: 12px;
+          border: 2px solid #ffffff;
+          border-radius: 50%;
+          box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
+          transform: translate(-6px, -6px);
+          pointer-events: none;
+        }
+        .exercise-hue-slider {
+          margin-top: 10px;
+          width: 100%;
+          -webkit-appearance: none;
+          appearance: none;
+          height: 10px;
+          border-radius: 999px;
+          background: linear-gradient(90deg, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
+          outline: none;
+        }
+        .exercise-hue-slider::-webkit-slider-thumb {
+          -webkit-appearance: none;
+          width: 14px;
+          height: 14px;
+          border-radius: 50%;
+          border: 2px solid #fff;
+          background: #111;
+          box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
+          cursor: pointer;
+        }
+        .exercise-preview-row {
+          margin-top: 10px;
+          display: grid;
+          grid-template-columns: 32px 1fr auto;
+          gap: 8px;
+          align-items: center;
+        }
+        .exercise-preview-swatch {
+          width: 32px;
+          height: 32px;
+          border-radius: 6px;
+          border: 1px solid rgba(148, 163, 184, 0.6);
+        }
+        .exercise-hex-input {
+          width: 100%;
+          border: 1px solid #cbd5e1;
+          border-radius: 6px;
+          padding: 6px 8px;
+          font-size: 12px;
+          text-transform: uppercase;
+          background: #fff;
+          color: #111827;
+        }
+        body.dark-mode .exercise-hex-input {
+          background: #0f141a;
+          border-color: #39424d;
+          color: #f1f5f9;
+        }
+        .exercise-reset-btn {
+          border: 1px solid #cbd5e1;
+          background: #fff;
+          color: #111827;
+          border-radius: 6px;
+          padding: 6px 8px;
+          font-size: 11px;
+          cursor: pointer;
+        }
+        body.dark-mode .exercise-reset-btn {
+          background: #111827;
+          border-color: #374151;
+          color: #e5e7eb;
+        }
+      `;
+      document.head.appendChild(styleEl);
+
+      const panel = document.createElement('div');
+      panel.className = 'exercise-color-preview-panel';
+      panel.innerHTML = `
+        <div class="exercise-color-preview-header">
+          <span>Exercise Color Preview</span>
+          <button type="button" id="exercisePreviewClose" aria-label="Close">&times;</button>
+        </div>
+        <div class="exercise-color-preview-note">Temporary tool. Updates only body.dark-mode .type-exercise.</div>
+        <div class="exercise-sv-wrap" id="exerciseSvWrap">
+          <div class="exercise-sv-white"></div>
+          <div class="exercise-sv-black"></div>
+          <div class="exercise-sv-cursor" id="exerciseSvCursor"></div>
+        </div>
+        <input id="exerciseHueSlider" class="exercise-hue-slider" type="range" min="0" max="360" step="1" value="0">
+        <div class="exercise-preview-row">
+          <div id="exercisePreviewSwatch" class="exercise-preview-swatch"></div>
+          <input id="exerciseHexInput" class="exercise-hex-input" type="text" maxlength="7" value="#155F95">
+          <button id="exercisePreviewReset" class="exercise-reset-btn" type="button">Reset</button>
+        </div>
+      `;
+      document.body.appendChild(panel);
+
+      const svWrap = document.getElementById('exerciseSvWrap');
+      const svCursor = document.getElementById('exerciseSvCursor');
+      const hueSlider = document.getElementById('exerciseHueSlider');
+      const swatch = document.getElementById('exercisePreviewSwatch');
+      const hexInput = document.getElementById('exerciseHexInput');
+      const closeBtn = document.getElementById('exercisePreviewClose');
+      const resetBtn = document.getElementById('exercisePreviewReset');
+
+      const initialHex = getInitialHex();
+      const initialRgb = hexToRgb(initialHex) || { r: 21, g: 95, b: 149 };
+      let state = rgbToHsv(initialRgb.r, initialRgb.g, initialRgb.b);
+      let draggingSv = false;
+
+      function applyPreviewColor(hex) {
+        let previewStyle = document.getElementById(STYLE_ID);
+        if (!previewStyle) {
+          previewStyle = document.createElement('style');
+          previewStyle.id = STYLE_ID;
+          document.head.appendChild(previewStyle);
+        }
+        previewStyle.textContent = `body.dark-mode .type-exercise { background: ${hex} !important; }`;
+      }
+
+      function updateUiAndApply() {
+        const rgb = hsvToRgb(state.h, state.s, state.v);
+        const hex = rgbToHex(rgb.r, rgb.g, rgb.b).toUpperCase();
+        const hueColor = rgbToHex(...Object.values(hsvToRgb(state.h, 100, 100))).toUpperCase();
+
+        svWrap.style.background = hueColor;
+        hueSlider.value = String(state.h);
+        swatch.style.background = hex;
+        hexInput.value = hex;
+
+        const x = (state.s / 100) * svWrap.clientWidth;
+        const y = ((100 - state.v) / 100) * svWrap.clientHeight;
+        svCursor.style.left = `${x}px`;
+        svCursor.style.top = `${y}px`;
+
+        applyPreviewColor(hex);
+        localStorage.setItem(STORAGE_KEY, hex);
+      }
+
+      function setSvFromPointer(clientX, clientY) {
+        const rect = svWrap.getBoundingClientRect();
+        const x = clamp(clientX - rect.left, 0, rect.width);
+        const y = clamp(clientY - rect.top, 0, rect.height);
+        state.s = Math.round((x / rect.width) * 100);
+        state.v = Math.round(100 - ((y / rect.height) * 100));
+        updateUiAndApply();
+      }
+
+      hueSlider.addEventListener('input', () => {
+        state.h = Number(hueSlider.value);
+        updateUiAndApply();
+      });
+
+      svWrap.addEventListener('mousedown', (event) => {
+        draggingSv = true;
+        setSvFromPointer(event.clientX, event.clientY);
+      });
+
+      window.addEventListener('mousemove', (event) => {
+        if (!draggingSv) return;
+        setSvFromPointer(event.clientX, event.clientY);
+      });
+
+      window.addEventListener('mouseup', () => {
+        draggingSv = false;
+      });
+
+      hexInput.addEventListener('change', () => {
+        const parsed = hexToRgb(hexInput.value);
+        if (!parsed) {
+          updateUiAndApply();
+          return;
+        }
+        state = rgbToHsv(parsed.r, parsed.g, parsed.b);
+        updateUiAndApply();
+      });
+
+      closeBtn.addEventListener('click', () => {
+        panel.remove();
+      });
+
+      resetBtn.addEventListener('click', () => {
+        state = rgbToHsv(21, 95, 149);
+        localStorage.removeItem(STORAGE_KEY);
+        updateUiAndApply();
+      });
+
+      updateUiAndApply();
+    })();
+  </script>
+
 <!-- ============================================
          CHAT SYSTEM - Complete (Firebase REST + UI)
          ============================================ -->
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603181lpy"></script>
+    <script src="js/chat.js?v=202603181mpa"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>

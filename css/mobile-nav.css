@@ -250,7 +250,7 @@
 
     body.dark-mode .bottom-nav,
     .bottom-nav.dark-mode {
-        background: #0f0f0f;
+        background: #121212;
         border-top: 1px solid #303030;
         box-shadow: 0 -2px 10px rgba(0,0,0,0.35);
     }

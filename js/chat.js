@@ -1573,7 +1573,7 @@ class ChatUIManager {
     const sidebarEl = this.container.querySelector('.chat-active-users');
     if (sidebarEl) {
       sidebarEl.innerHTML = `
-        <div id="active-users-list" style="padding: 4px 4px; font-size: 11px; color: #6b7280;"></div>
+        <div id="active-users-list" style="padding: 4px 4px; font-size: 11px; color: var(--chat-text-light);"></div>
       `;
     }
 
@@ -1683,7 +1683,7 @@ class ChatUIManager {
             `<img src="${user.avatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">` :
             `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${user.color}; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: bold; flex-shrink: 0;">${user.userName.charAt(0).toUpperCase()}</div>`
           }
-          <span style="font-size: 12px; flex: 1; min-width: 0; display: flex; align-items: center; ${user.isMe ? 'font-weight: bold; color: var(--fg);' : ''}">
+          <span style="font-size: 12px; flex: 1; min-width: 0; display: flex; align-items: center; color: var(--chat-text-light); ${user.isMe ? 'font-weight: bold; color: var(--chat-text);' : ''}">
             <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; max-width: 100%;">${user.userName}</span>
             ${mobileIcon}
           </span>
@@ -1692,9 +1692,9 @@ class ChatUIManager {
     };
 
     usersListEl.innerHTML = `
-      <strong>Online (${count}):</strong><br>
+      <strong style="color: var(--chat-text);">Online (${count}):</strong><br>
       ${onlineUsers.map(renderUserItem).join('')}
-      ${offlineUsers.length > 0 ? `<div style="height: 4px;"></div><strong style="margin-top: 0; display: block;">Offline:</strong>${offlineUsers.map(renderUserItem).join('')}` : ''}
+      ${offlineUsers.length > 0 ? `<div style="height: 4px;"></div><strong style="margin-top: 0; display: block; color: var(--chat-text);">Offline:</strong>${offlineUsers.map(renderUserItem).join('')}` : ''}
     `;
 
     // Add click listeners
@@ -2122,13 +2122,19 @@ class ChatUIManager {
       messagesMapObj[m.id] = m;
     });
 
+    const isDarkChat = document.body.classList.contains('dark-mode') && !document.body.classList.contains('chat-force-light');
+
     // Ако има reply, намери оригиналното съобщение
     let replyHTML = '';
     if (msg.replyTo && messagesMapObj[msg.replyTo]) {
       const originalMsg = messagesMapObj[msg.replyTo];
+      const replyBg = isDarkChat ? '#2b3138' : '#f1f5f9';
+      const replyBorder = isDarkChat ? '#4b5563' : '#cbd5e1';
+      const replyText = isDarkChat ? '#e2e8f0' : '#1f2937';
+      const replyAuthor = isDarkChat ? '#f8fafc' : '#111827';
       replyHTML = `
-         <div style="background: #f1f5f9; border-left: 3px solid #cbd5e1; padding: 4px 8px; margin-bottom: 4px; font-size: 11px; border-radius: 4px; opacity: 0.8;">
-           <b>${this.escapeHtml(msg.replyAuthor || 'Someone')}:</b> ${this.linkifyText(originalMsg.text.substring(0, 50))}...
+         <div style="background: ${replyBg}; border-left: 3px solid ${replyBorder}; color: ${replyText}; padding: 4px 8px; margin-bottom: 4px; font-size: 11px; border-radius: 4px; opacity: 0.92;">
+           <b style="color: ${replyAuthor};">${this.escapeHtml(msg.replyAuthor || 'Someone')}:</b> ${this.linkifyText(originalMsg.text.substring(0, 50))}...
          </div>
       `;
     }
@@ -2140,7 +2146,6 @@ class ChatUIManager {
     const resolvedName = this._resolveMessageAuthorName(msg);
 
     const isCurrentUser = (window.currentUser.userId && msg.userId === window.currentUser.userId) || (window.currentUser.legacyChatId && msg.userId === window.currentUser.legacyChatId);
-    const isDarkChat = document.body.classList.contains('dark-mode') && !document.body.classList.contains('chat-force-light');
     const messageBgColor = isCurrentUser ? (isDarkChat ? '#588157' : '#E8F5E9') : 'var(--chat-secondary)';
     const messageTextColor = isCurrentUser ? '#000000' : '#000000';
 
@@ -2184,8 +2189,10 @@ class ChatUIManager {
 
     const actionClass = isCurrentUser ? '' : 'two-btns';
 
+    const selfMessageClass = isCurrentUser ? ' is-self-message' : '';
+
     const htmlString = `
-      <div class="chat-message" data-user-id="${msg.userId}" data-message-id="${msg.id}" data-message-key="${msg.key}" style="position: relative; display: flex; gap: 8px; margin-bottom: ${marginBottom}; flex-direction: row;">
+      <div class="chat-message${selfMessageClass}" data-user-id="${msg.userId}" data-message-id="${msg.id}" data-message-key="${msg.key}" style="position: relative; display: flex; gap: 8px; margin-bottom: ${marginBottom}; flex-direction: row;">
         ${avatarHtml}
         <div class="message-content" style="flex: 1; align-items: flex-start; display: flex; flex-direction: column; min-width: 0;">
           ${headerHtml}
@@ -2938,12 +2945,19 @@ class ChatUIManager {
     if (oldPicker) oldPicker.remove();
 
     const emojis = ['👍', '👎', '😂', '❤️', '😭', '😮', '🐐'];
+    const isDarkChat = document.body.classList.contains('dark-mode') && !document.body.classList.contains('chat-force-light');
+    const pickerBg = isDarkChat ? '#1a1f25' : '#ffffff';
+    const pickerText = isDarkChat ? '#e5e7eb' : '#1f2937';
+    const pickerHover = isDarkChat ? '#2f353c' : 'var(--chat-secondary)';
+    const customBtnBg = isDarkChat ? '#2b3138' : '#f3f4f6';
+    const customBtnText = isDarkChat ? '#d1d5db' : '#6b7280';
     
     const picker = document.createElement('div');
     picker.className = 'reaction-picker';
     picker.style.cssText = `
       position: fixed;
-      background: white;
+      background: ${pickerBg};
+      color: ${pickerText};
       border: 1px solid var(--chat-border);
       border-radius: 20px;
       padding: 6px 10px;
@@ -2969,7 +2983,7 @@ class ChatUIManager {
         align-items: center;
         justify-content: center;
       `;
-      btn.addEventListener('mouseenter', () => btn.style.background = 'var(--chat-secondary)');
+      btn.addEventListener('mouseenter', () => btn.style.background = pickerHover);
       btn.addEventListener('mouseleave', () => btn.style.background = 'none');
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -2995,7 +3009,7 @@ class ChatUIManager {
     `;
     customBtn.title = "Добави друга реакция";
     customBtn.style.cssText = `
-      background: #f3f4f6;
+      background: ${customBtnBg};
       border: none;
       width: 28px;
       height: 28px;
@@ -3005,7 +3019,7 @@ class ChatUIManager {
       align-items: center;
       justify-content: center;
       margin-left: 4px;
-      color: #6b7280;
+      color: ${customBtnText};
       transition: all 0.2s;
     `;
     customBtn.addEventListener('click', (e) => {
@@ -3143,6 +3157,8 @@ class ChatUIManager {
     const reactionsForMessage = this.reactionsCache ? this.reactionsCache[messageId] : null;
     if (!reactionsForMessage) return '';
 
+    const isDarkChat = document.body.classList.contains('dark-mode') && !document.body.classList.contains('chat-force-light');
+
     const reactionCounts = {};
     const myReactions = {};
     
@@ -3168,7 +3184,7 @@ class ChatUIManager {
 
     return Object.keys(reactionCounts).map(emoji => `
         <button class="reaction-badge" data-emoji="${emoji}" data-message-id="${messageId}" 
-          style="background: ${myReactions[emoji] ? '#93c5fd' : '#f0f0f0'}; border: none; border-radius: 12px; padding: 4px 8px; margin-right: 4px; cursor: pointer; font-size: 12px; font-weight: ${myReactions[emoji] ? 'bold' : 'normal'};">
+          style="background: ${myReactions[emoji] ? (isDarkChat ? '#2f5f47' : '#93c5fd') : (isDarkChat ? '#2f353b' : '#f0f0f0')}; color: ${isDarkChat ? '#e5e7eb' : '#111827'}; border: ${isDarkChat ? '1px solid #46505a' : 'none'}; border-radius: 12px; padding: 4px 8px; margin-right: 4px; cursor: pointer; font-size: 12px; font-weight: ${myReactions[emoji] ? 'bold' : 'normal'};">
           ${emoji} <span>${reactionCounts[emoji]}</span>
         </button>
       `).join('');
@@ -3699,9 +3715,15 @@ body.dark-mode:not(.chat-force-light) #chat-widget .message-text {
   background: var(--chat-other-message-bg) !important;
   color: var(--chat-text) !important;
 }
+body.dark-mode:not(.chat-force-light) #chat-widget .chat-message.is-self-message .message-text {
+  background: var(--chat-self-message-bg) !important;
+  color: #eaf6ef !important;
+  border: 1px solid rgba(130, 190, 145, 0.45);
+}
 body.dark-mode:not(.chat-force-light) #chat-widget .reaction-badge {
-  background: #f0f0f0 !important;
-  color: #111827 !important;
+  background: #2f353b !important;
+  color: #e5e7eb !important;
+  border: 1px solid #46505a;
 }
 body.dark-mode:not(.chat-force-light) #chat-widget .message-actions button:hover {
   background: #2b3136 !important;
@@ -3728,6 +3750,13 @@ body.dark-mode:not(.chat-force-light) #chat-widget .gif-picker-header {
   background: #181818 !important;
   color: var(--chat-text) !important;
   border-color: var(--chat-border) !important;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget #active-users-list {
+  color: #d4dde8 !important;
+}
+body.dark-mode:not(.chat-force-light) #chat-widget #active-users-list strong,
+body.dark-mode:not(.chat-force-light) #chat-widget #active-users-list .active-user-item span {
+  color: #edf2f7 !important;
 }
 body.dark-mode:not(.chat-force-light) #chat-widget .gif-search-input {
   background: #121212;
