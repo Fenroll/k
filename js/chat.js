@@ -64,6 +64,17 @@ class ChatFirebaseREST {
     throw new Error("Firebase not initialized. Check SDK loading and configuration.");
   }
 
+  _trackCleanup(cleanupFn) {
+    if (typeof cleanupFn === 'function') {
+      this.unsubscribers.push(cleanupFn);
+    }
+  }
+
+  _trackRealtimeListener(ref, eventName, callback) {
+    ref.on(eventName, callback);
+    this._trackCleanup(() => ref.off(eventName, callback));
+  }
+
   _guestNameFromId(userId) {
     if (typeof userId !== 'string' || !userId.startsWith('guest_')) return null;
     return `guest-${userId.substring(6, 10)}`;
@@ -264,11 +275,11 @@ class ChatFirebaseREST {
     this._ensureInit().then(() => {
         const mappingsRef = firebase.database().ref(`name_mappings`);
 
-        const unsubscribe = mappingsRef.on('value', (snapshot) => {
+        const onMappings = (snapshot) => {
             const mappings = snapshot.val() || {};
             callback(mappings);
-        });
-        this.unsubscribers.push(unsubscribe);
+        };
+        this._trackRealtimeListener(mappingsRef, 'value', onMappings);
     });
   }
 
@@ -316,7 +327,7 @@ class ChatFirebaseREST {
   startTypingPolling(callback) {
     this._ensureInit().then(() => {
         const typingRef = firebase.database().ref(`typing/${this.documentId}`);
-        const unsubscribe = typingRef.on('value', (snapshot) => {
+        const onTyping = (snapshot) => {
             const typingData = snapshot.val() || {};
             // Filter out stale typing indicators (older than 10 seconds)
             const activeTyping = {};
@@ -332,8 +343,8 @@ class ChatFirebaseREST {
             });
             
             callback(activeTyping);
-        });
-        this.unsubscribers.push(unsubscribe);
+          };
+          this._trackRealtimeListener(typingRef, 'value', onTyping);
     });
   }
 
@@ -352,7 +363,7 @@ class ChatFirebaseREST {
         // Only listen for messages AFTER the ones we already have
         const q = messagesRef.orderByChild('timestamp').startAfter(latestTimestamp);
 
-        const unsubscribe = q.on('child_added', (snapshot) => {
+        const onChildAdded = (snapshot) => {
             const val = snapshot.val();
             const newMessage = this._normalizeMessageAuthor({
                 ...val,
@@ -373,19 +384,19 @@ class ChatFirebaseREST {
                 
                 callback(this.messages);
             }
-        });
-        this.unsubscribers.push(unsubscribe);
+            };
+            this._trackRealtimeListener(q, 'child_added', onChildAdded);
         
         // Listen for deletions (all messages, not just new ones)
         const qAll = messagesRef.orderByChild('timestamp');
-        const unsubscribeRemoved = qAll.on('child_removed', (snapshot) => {
+            const onChildRemoved = (snapshot) => {
             this.messages = this.messages.filter(m => m.id !== snapshot.key);
             callback(this.messages);
-        });
-        this.unsubscribers.push(unsubscribeRemoved);
+            };
+            this._trackRealtimeListener(qAll, 'child_removed', onChildRemoved);
         
         // Listen for changes (edits)
-        const unsubscribeChanged = qAll.on('child_changed', (snapshot) => {
+            const onChildChanged = (snapshot) => {
             const val = snapshot.val();
             const idx = this.messages.findIndex(m => m.id === snapshot.key);
             if (idx !== -1) {
@@ -397,8 +408,8 @@ class ChatFirebaseREST {
                 });
                 callback(this.messages);
             }
-        });
-        this.unsubscribers.push(unsubscribeChanged);
+            };
+            this._trackRealtimeListener(qAll, 'child_changed', onChildChanged);
     });
   }
 
@@ -455,13 +466,13 @@ class ChatFirebaseREST {
     this._ensureInit().then(() => {
         const lastReadRef = firebase.database().ref(`last_read/${this.documentId}/${safeUserName}`);
 
-        const unsubscribe = lastReadRef.on('value', (snapshot) => {
+      const onLastRead = (snapshot) => {
             const lastReadId = snapshot.val();
             if (lastReadId) {
                 callback(lastReadId);
             } // Can be removed, frequent
-        });
-        this.unsubscribers.push(unsubscribe);
+      };
+      this._trackRealtimeListener(lastReadRef, 'value', onLastRead);
     });
   }
 
@@ -527,11 +538,11 @@ class ChatFirebaseREST {
     this._ensureInit().then(() => {
         const reactionsRef = firebase.database().ref(`reactions/${this.documentId}`);
 
-        const unsubscribe = reactionsRef.on('value', (snapshot) => {
+        const onReactions = (snapshot) => {
             const reactions = snapshot.val() || {};
             callback(reactions);
-        });
-        this.unsubscribers.push(unsubscribe);
+        };
+        this._trackRealtimeListener(reactionsRef, 'value', onReactions);
     });
   }
 
@@ -543,9 +554,10 @@ class ChatFirebaseREST {
         const offsetRef = firebase.database().ref(".info/serverTimeOffset");
 
         let serverTimeOffset = 0;
-        offsetRef.on("value", (snap) => {
+        const onOffset = (snap) => {
             serverTimeOffset = snap.val() || 0;
-        });
+        };
+        this._trackRealtimeListener(offsetRef, 'value', onOffset);
 
         let allSiteUsers = {};     
         let allOnlineAuthData = {}; 
@@ -677,28 +689,28 @@ class ChatFirebaseREST {
 
         // Run cleanup/refresh every 30 seconds to handle grace period expirations
         const refreshInterval = setInterval(processAndCallback, 60000);
-        this.unsubscribers.push(() => clearInterval(refreshInterval));
+        this._trackCleanup(() => clearInterval(refreshInterval));
 
         // Listen for all site users (for username and color)
-        const unsubscribeSiteUsers = siteUsersRef.on('value', (snapshot) => {
+        const onSiteUsers = (snapshot) => {
             allSiteUsers = snapshot.val() || {};
             processAndCallback();
-        });
-        this.unsubscribers.push(unsubscribeSiteUsers);
+        };
+        this._trackRealtimeListener(siteUsersRef, 'value', onSiteUsers);
 
         // Listen for authenticated users online presence data
-        const unsubscribeOnlineUsers = onlineUsersRef.on('value', (snapshot) => {
+        const onOnlineUsers = (snapshot) => {
             allOnlineAuthData = snapshot.val() || {};
             processAndCallback(); // Recalculate and update when online status changes
-        });
-        this.unsubscribers.push(unsubscribeOnlineUsers);
+        };
+        this._trackRealtimeListener(onlineUsersRef, 'value', onOnlineUsers);
 
         // New: Listen for guest users online presence data
-        const unsubscribeOnlineGuests = onlineGuestsRef.on('value', (snapshot) => {
+        const onOnlineGuests = (snapshot) => {
             allOnlineGuestData = snapshot.val() || {};
             processAndCallback(); // Recalculate and update when guest online status changes
-        });
-        this.unsubscribers.push(unsubscribeOnlineGuests);
+        };
+        this._trackRealtimeListener(onlineGuestsRef, 'value', onOnlineGuests);
     });
   }
 
@@ -707,7 +719,13 @@ class ChatFirebaseREST {
     this.listeners = [];
 
     // Unsubscribe from all listeners
-    this.unsubscribers.forEach(unsub => unsub()); // Can be removed, internal logic
+    this.unsubscribers.forEach((cleanupFn) => {
+      try {
+        if (typeof cleanupFn === 'function') cleanupFn();
+      } catch (err) {
+        console.error('Listener cleanup error:', err);
+      }
+    }); // Can be removed, internal logic
     this.unsubscribers = [];
 
     // Clear heartbeat
@@ -1138,7 +1156,7 @@ class ChatUIManager {
       this.chatFirebase.startNameMappingsPolling((mappings) => {
           this.userNameMappings = mappings;
           if (this.lastMessages.length > 0) {
-              this.renderMessages(this.lastMessages);
+            this.refreshRenderedMessageMetadata();
           }
       });
       
@@ -1176,7 +1194,7 @@ class ChatUIManager {
         // Re-render messages ONCE when profiles first load to update avatars
         if (!profilesLoaded && Object.keys(this.userProfiles).length > 0 && this.lastMessages.length > 0) {
           profilesLoaded = true;
-          this.renderMessages(this.lastMessages);
+          this.refreshRenderedMessageMetadata();
         }
       });
 
@@ -1836,16 +1854,6 @@ class ChatUIManager {
     };
   }
 
-  async handleAdminCommand(commandObj) {
-      const cmd = commandObj.substring(7).trim(); // Remove "/admin "
-
-      if (cmd === 'deletechat') {
-          if(confirm("⚠ WARNING: This will delete ALL chat history globally! Are you sure?")) {
-              await window.deleteAllChatMessages('admin');
-          }
-      }
-  }
-
   async handleSendMessage() {
     const input = this.container.querySelector('.chat-input');
     const text = input.value;
@@ -1857,14 +1865,6 @@ class ChatUIManager {
         await this.editMessage(this.editingMessage.key, text);
         return;
     }
-
-    // --- ADMIN COMMANDS ---
-    if (text.startsWith('/admin ')) {
-       await this.handleAdminCommand(text);
-       input.value = '';
-       return;
-    }
-    // ----------------------
 
     // Провери дали има reply
     const replyTo = input.dataset.replyTo;
@@ -1980,6 +1980,189 @@ class ChatUIManager {
 
     if (messageRemoved) {
         this.hideReactionTooltip();
+    }
+
+    const getDateKey = (timestamp) => new Date(timestamp).toLocaleDateString('en-US', {
+      day: 'numeric', month: 'long', year: 'numeric'
+    });
+
+    // Fast path: if exactly one new message was appended and prior order is unchanged,
+    // append only the new node instead of rebuilding the entire message list.
+    const previousMessages = Array.isArray(this.lastMessages) ? this.lastMessages : [];
+    const isAppendOnlyUpdate =
+      !messageRemoved &&
+      messages.length === previousMessages.length + 1 &&
+      previousMessages.every((prevMsg, idx) => prevMsg.id === messages[idx].id);
+
+    if (isAppendOnlyUpdate) {
+      const newMsg = messages[messages.length - 1];
+      const prevMsg = messages.length > 1 ? messages[messages.length - 2] : null;
+
+      const newDateStr = new Date(newMsg.timestamp).toLocaleDateString('en-US', {
+        day: 'numeric', month: 'long', year: 'numeric'
+      });
+      const prevDateStr = prevMsg
+        ? new Date(prevMsg.timestamp).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })
+        : null;
+
+      if (newDateStr !== prevDateStr) {
+        const dateSep = document.createElement('div');
+        dateSep.className = 'chat-date-separator';
+        dateSep.dataset.date = newDateStr;
+        dateSep.innerHTML = `<span>${newDateStr}</span>`;
+        messagesContainer.appendChild(dateSep);
+      }
+
+      const isContinuation = !!(prevMsg && prevMsg.userId === newMsg.userId && (newMsg.timestamp - prevMsg.timestamp < 3 * 60 * 1000));
+      const newMessageEl = this.createMessageElement(newMsg, messages, isContinuation);
+      messagesContainer.appendChild(newMessageEl);
+
+      if (!newMessageEl.hasAttribute('data-listeners-attached')) {
+        this.attachMessageListeners(newMessageEl);
+        newMessageEl.setAttribute('data-listeners-attached', 'true');
+      }
+
+      this.recalculateUnreadCount(messages);
+      this.updateActiveCount();
+
+      this.lastMessages = messages.slice();
+      this.lastRenderedLastMessageId = newMsg.id;
+
+      this.renderAllReactions();
+
+      if (this.activeTyping && Object.keys(this.activeTyping).length > 0) {
+        this.renderTypingIndicators(this.activeTyping);
+      }
+
+      this.observeLazyImages();
+
+      if (scrollWasAtBottom) {
+        setTimeout(() => {
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }, 50);
+      }
+
+      return;
+    }
+
+    // Fast path: if exactly one existing message was edited (same message IDs/order),
+    // update only that message node.
+    const isSameOrderAndIds =
+      !messageRemoved &&
+      messages.length === previousMessages.length &&
+      messages.every((msg, idx) => msg.id === previousMessages[idx].id);
+
+    if (isSameOrderAndIds) {
+      const changedIndexes = [];
+      messages.forEach((msg, idx) => {
+        const prev = previousMessages[idx];
+        if ((msg.text || '') !== (prev.text || '') ||
+            !!msg.edited !== !!prev.edited ||
+            (msg.replyTo || '') !== (prev.replyTo || '') ||
+            (msg.replyAuthor || '') !== (prev.replyAuthor || '')) {
+          changedIndexes.push(idx);
+        }
+      });
+
+      if (changedIndexes.length === 1) {
+        const changedIndex = changedIndexes[0];
+        const changedMsg = messages[changedIndex];
+        const prevMsg = changedIndex > 0 ? messages[changedIndex - 1] : null;
+        const isContinuation = !!(prevMsg && prevMsg.userId === changedMsg.userId && (changedMsg.timestamp - prevMsg.timestamp < 3 * 60 * 1000));
+
+        const existingEl = messagesContainer.querySelector(`.chat-message[data-message-id="${changedMsg.id}"]`);
+        if (existingEl) {
+          const replacementEl = this.createMessageElement(changedMsg, messages, isContinuation);
+          existingEl.replaceWith(replacementEl);
+          if (!replacementEl.hasAttribute('data-listeners-attached')) {
+            this.attachMessageListeners(replacementEl);
+            replacementEl.setAttribute('data-listeners-attached', 'true');
+          }
+
+          this.recalculateUnreadCount(messages);
+          this.updateActiveCount();
+
+          this.lastMessages = messages.slice();
+          this.lastRenderedLastMessageId = messages.length > 0 ? messages[messages.length - 1].id : null;
+
+          this.renderAllReactions();
+          if (this.activeTyping && Object.keys(this.activeTyping).length > 0) {
+            this.renderTypingIndicators(this.activeTyping);
+          }
+          this.observeLazyImages();
+          return;
+        }
+      }
+    }
+
+    // Fast path: if exactly one message was deleted while order stayed consistent,
+    // update only adjacent continuation visuals and date separator if needed.
+    const isSingleDelete =
+      messageRemoved &&
+      previousMessages.length === messages.length + 1;
+
+    if (isSingleDelete) {
+      let i = 0;
+      let j = 0;
+      let removedIndex = -1;
+
+      while (i < previousMessages.length && j < messages.length) {
+        if (previousMessages[i].id === messages[j].id) {
+          i++;
+          j++;
+        } else if (removedIndex === -1) {
+          removedIndex = i;
+          i++;
+        } else {
+          removedIndex = -1;
+          break;
+        }
+      }
+
+      if (removedIndex === -1 && i === previousMessages.length - 1 && j === messages.length) {
+        removedIndex = i;
+        i++;
+      }
+
+      const validSingleDelete = removedIndex !== -1 && i === previousMessages.length && j === messages.length;
+      if (validSingleDelete) {
+        const removedMsg = previousMessages[removedIndex];
+        const removedDateKey = getDateKey(removedMsg.timestamp);
+        const hasRemainingOnDate = messages.some(m => getDateKey(m.timestamp) === removedDateKey);
+        if (!hasRemainingOnDate) {
+          const orphanSeparator = messagesContainer.querySelector(`.chat-date-separator[data-date="${removedDateKey}"]`);
+          if (orphanSeparator) orphanSeparator.remove();
+        }
+
+        const affectedIndex = removedIndex;
+        if (affectedIndex < messages.length) {
+          const affectedMsg = messages[affectedIndex];
+          const prevMsg = affectedIndex > 0 ? messages[affectedIndex - 1] : null;
+          const isContinuation = !!(prevMsg && prevMsg.userId === affectedMsg.userId && (affectedMsg.timestamp - prevMsg.timestamp < 3 * 60 * 1000));
+          const affectedEl = messagesContainer.querySelector(`.chat-message[data-message-id="${affectedMsg.id}"]`);
+          if (affectedEl) {
+            const replacementEl = this.createMessageElement(affectedMsg, messages, isContinuation);
+            affectedEl.replaceWith(replacementEl);
+            if (!replacementEl.hasAttribute('data-listeners-attached')) {
+              this.attachMessageListeners(replacementEl);
+              replacementEl.setAttribute('data-listeners-attached', 'true');
+            }
+          }
+        }
+
+        this.recalculateUnreadCount(messages);
+        this.updateActiveCount();
+
+        this.lastMessages = messages.slice();
+        this.lastRenderedLastMessageId = messages.length > 0 ? messages[messages.length - 1].id : null;
+
+        this.renderAllReactions();
+        if (this.activeTyping && Object.keys(this.activeTyping).length > 0) {
+          this.renderTypingIndicators(this.activeTyping);
+        }
+        this.observeLazyImages();
+        return;
+      }
     }
 
     // 2. Build complete message list with date separators
@@ -2114,6 +2297,52 @@ class ChatUIManager {
   fullRenderMessages(messages, messagesContainer) {
     // This is now legacy but kept for reference or edge cases
     this.renderMessages(messages);
+  }
+
+  refreshRenderedMessageMetadata() {
+    const messagesContainer = this.container && this.container.querySelector('.chat-messages');
+    if (!messagesContainer || !Array.isArray(this.lastMessages) || this.lastMessages.length === 0) return;
+
+    const messagesById = new Map();
+    this.lastMessages.forEach((msg, idx) => {
+      messagesById.set(String(msg.id), { msg, idx });
+    });
+
+    messagesContainer.querySelectorAll('.chat-message[data-message-id]').forEach((el) => {
+      const messageId = String(el.dataset.messageId || '');
+      const entry = messagesById.get(messageId);
+      if (!entry) return;
+
+      const { msg, idx } = entry;
+
+      // Keep mapped/renamed author labels in sync without rebuilding the whole list.
+      const authorEl = el.querySelector('.message-author');
+      if (authorEl) {
+        const latestAuthor = this._resolveMessageAuthorName(msg);
+        if (authorEl.textContent !== latestAuthor) {
+          authorEl.textContent = latestAuthor;
+        }
+      }
+
+      // If profile avatars become available after initial render, upgrade only affected rows.
+      const userInfo = this.getUserInfo(msg.userId, msg.userName);
+      const hasRealAvatar = !!(userInfo && typeof userInfo.avatar === 'string' && userInfo.avatar.length > 5);
+      if (!hasRealAvatar) return;
+
+      const currentImg = el.querySelector('img.message-avatar');
+      const placeholder = el.querySelector('.message-avatar-container > .message-avatar:not(img)');
+      const shouldUpgradeAvatar = !currentImg || (placeholder && placeholder.style.display !== 'none');
+      if (!shouldUpgradeAvatar) return;
+
+      const prevMsg = idx > 0 ? this.lastMessages[idx - 1] : null;
+      const isContinuation = !!(prevMsg && prevMsg.userId === msg.userId && (msg.timestamp - prevMsg.timestamp < 3 * 60 * 1000));
+      const replacement = this.createMessageElement(msg, this.lastMessages, isContinuation);
+      el.replaceWith(replacement);
+      if (!replacement.hasAttribute('data-listeners-attached')) {
+        this.attachMessageListeners(replacement);
+        replacement.setAttribute('data-listeners-attached', 'true');
+      }
+    });
   }
 
   createMessageElement(msg, messagesMap, isContinuation) {
@@ -3488,10 +3717,7 @@ class ChatUIManager {
           // Update the global currentUser object
           Object.assign(window.currentUser, newUserData);
           
-          // Force an immediate presence update with the new data (e.g., new color)
-          if (window.chatManager && window.chatManager.chatFirebase) {
-              window.chatManager.chatFirebase.forceUpdatePresence();
-          }
+          // Presence is managed by site-wide presence.js; no direct chat-side force update call.
         }
       } catch (e) { console.error('Error processing storage event:', e); }
     }
@@ -4436,39 +4662,6 @@ window.resetChat = function() {
   localStorage.removeItem('userName');
   localStorage.removeItem('userColor');
   console.log('✅ Ресет завършен! Напиши в консолата: location.reload()');
-};
-
-window.deleteAllChatMessages = async function(password) {
-  if (!password) {
-    console.error('❌ Парола не е дадена! Използвай: window.deleteAllChatMessages("admin")');
-    return false;
-  }
-
-  if (password !== 'admin') {
-    console.error('❌ ГРЕШНА ПАРОЛА!');
-    return false;
-  }
-
-  try {
-    const baseURL = 'https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app';
-    const messagesRef = `${baseURL}/messages/global-chat.json`; // Fix: target global-chat
-    const reactionsRef = `${baseURL}/reactions/global-chat.json`; // Fix: target global-chat
-
-    // Изтрий съобщенията
-    const msgResponse = await fetch(messagesRef, { method: 'DELETE' });
-    if (!msgResponse.ok) throw new Error('Грешка при изтриване на съобщенията');
-
-    // Изтрий реакциите
-    const reactResponse = await fetch(reactionsRef, { method: 'DELETE' });
-    if (!reactResponse.ok) throw new Error('Грешка при изтриване на реакциите');
-
-    console.log('✅ ЧАТ ИЗТРИТ УСПЕШНО! Всички съобщения и реакции са премахнати.');
-    console.log('💡 Напиши: location.reload() за да видиш промените');
-    return true;
-  } catch (error) {
-    console.error('❌ Грешка при изтриване на чата:', error);
-    return false;
-  }
 };
 
 // console.log('💡 Команди: resetChat() - ресет на име');
