@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603181n4i"></script>
+  <script src="js/auth-guard.js?v=2026031911vs"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
@@ -175,6 +175,23 @@
     
     /* Italic text */
     .markdown-body em { font-style: italic; }
+
+    /* Keep line spacing stable for exported superscript/subscript content. */
+    .markdown-body sup,
+    .markdown-body sub {
+      font-size: 0.75em;
+      line-height: 0;
+      position: relative;
+      vertical-align: baseline;
+    }
+
+    .markdown-body sup {
+      top: -0.45em;
+    }
+
+    .markdown-body sub {
+      bottom: -0.2em;
+    }
 
     /* Lists - CRITICAL: Fix for list formatting */
     .markdown-body ul,
@@ -1650,7 +1667,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603181n4i"></script>
+  <script src="courses.generated.js?v=2026031911vs"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -1757,7 +1774,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603181n4i"></script>
+    <script src="js/chat.js?v=2026031911vs"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
 

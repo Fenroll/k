@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202603181n4i"></script>
+  <script src="js/auth-guard.js?v=2026031911vs"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -372,6 +372,23 @@
 
     #editor em {
       font-style: italic;
+    }
+
+    /* Keep line spacing stable when using native superscript/subscript commands. */
+    #editor sup,
+    #editor sub {
+      font-size: 0.75em;
+      line-height: 0;
+      position: relative;
+      vertical-align: baseline;
+    }
+
+    #editor sup {
+      top: -0.45em;
+    }
+
+    #editor sub {
+      bottom: -0.2em;
     }
 
     #editor code {
@@ -1579,7 +1596,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202603181n4i"></script>
+  <script src="courses.generated.js?v=2026031911vs"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2025,6 +2042,38 @@
         quoteBtn.classList.remove('active');
       }
     }
+
+    function updateSuperSubButtonState() {
+      const supBtn = document.getElementById('superscriptBtn');
+      const subBtn = document.getElementById('subscriptBtn');
+      if (!supBtn || !subBtn) return;
+
+      const selection = window.getSelection();
+      const anchorNode = selection && selection.rangeCount > 0 ? selection.anchorNode : null;
+      const isInEditor = !!(anchorNode && editor.contains(anchorNode));
+
+      if (!isInEditor) {
+        supBtn.classList.remove('active');
+        subBtn.classList.remove('active');
+        return;
+      }
+
+      let isSupActive = false;
+      let isSubActive = false;
+      try {
+        isSupActive = document.queryCommandState('superscript');
+        isSubActive = document.queryCommandState('subscript');
+      } catch (err) {
+        // Ignore unsupported queryCommandState errors in some browsers.
+      }
+
+      supBtn.classList.toggle('active', !!isSupActive);
+      subBtn.classList.toggle('active', !!isSubActive);
+    }
+
+    document.addEventListener('selectionchange', updateSuperSubButtonState);
+    editor.addEventListener('keyup', updateSuperSubButtonState);
+    editor.addEventListener('click', updateSuperSubButtonState);
     
     // Set up MutationObserver to prevent nested lists
     const preventNestedLists = () => {
@@ -2850,6 +2899,15 @@
     setupSimpleButton('alignLeftBtn', 'justifyLeft');
     setupSimpleButton('alignCenterBtn', 'justifyCenter');
     setupSimpleButton('alignRightBtn', 'justifyRight');
+
+    const subscriptBtn = document.getElementById('subscriptBtn');
+    const superscriptBtn = document.getElementById('superscriptBtn');
+    if (subscriptBtn) {
+      subscriptBtn.addEventListener('click', () => setTimeout(updateSuperSubButtonState, 0));
+    }
+    if (superscriptBtn) {
+      superscriptBtn.addEventListener('click', () => setTimeout(updateSuperSubButtonState, 0));
+    }
 
     document.getElementById('indentBtn').addEventListener('click', () => {
       const selection = window.getSelection();
@@ -8302,7 +8360,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603181n4i"></script>
+    <script src="js/chat.js?v=2026031911vs"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
