@@ -1657,6 +1657,10 @@
 
       function isTextEditorRow(row) { const h = getRowCategoryHaystack(row); return h.includes('text-editor') || h.includes('text editor') || h.includes('text_editor'); }
       function isChatImagesRow(row) { const h = getRowCategoryHaystack(row); return h.includes('chat-images') || h.includes('chat images') || h.includes('chat_images'); }
+      function isNotesImagesRow(row) {
+        const h = getRowCategoryHaystack(row);
+        return h.includes('notes-images') || h.includes('notes images') || h.includes('notes_images');
+      }
       function isAvatarRow(row) {
         const h = getRowCategoryHaystack(row);
         return h.includes('/avatars/') || h.includes(' avatar-') || h.includes('avatar-') || h.includes('avatar_batch') || h.includes('avatar-batch-migration') || h.includes('profile-avatar') || h.includes('user-avatar');
@@ -1712,7 +1716,7 @@
 
       function getAvailableViews() {
         if (currentUserIsAdmin) {
-          return ['general', 'admin-text-editor', 'admin-chat-images'];
+          return ['general', 'admin-text-editor', 'admin-chat-images', 'admin-notes-images'];
         }
         return ['general'];
       }
@@ -1720,6 +1724,7 @@
       function getViewLabel(value) {
         if (value === 'admin-text-editor') return 'Admin: Text-Editor';
         if (value === 'admin-chat-images') return 'Admin: Chat Images';
+        if (value === 'admin-notes-images') return 'Admin: Notes Images';
         return 'General Uploads';
       }
 
@@ -1768,9 +1773,10 @@
         let rows = allRows.slice();
         if (scope === 'mine' && currentUserName) rows = rows.filter((r) => String(r.uploader || '').toLowerCase() === currentUserName.toLowerCase());
         rows = rows.filter((r) => !isAvatarRow(r));
-        if (activeTab === 'general') rows = rows.filter((r) => !(isTextEditorRow(r) || isChatImagesRow(r)));
+        if (activeTab === 'general') rows = rows.filter((r) => !(isTextEditorRow(r) || isChatImagesRow(r) || isNotesImagesRow(r)));
         else if (activeTab === 'admin-text-editor') rows = currentUserIsAdmin ? rows.filter((r) => isTextEditorRow(r)) : [];
         else if (activeTab === 'admin-chat-images') rows = currentUserIsAdmin ? rows.filter((r) => isChatImagesRow(r)) : [];
+        else if (activeTab === 'admin-notes-images') rows = currentUserIsAdmin ? rows.filter((r) => isNotesImagesRow(r)) : [];
         if (q) rows = rows.filter((r) => (r.name + ' ' + r.path + ' ' + r.uploader + ' ' + r.url).toLowerCase().includes(q));
 
         rows.sort((a, b) => {

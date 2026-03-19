@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202603191jw5"></script>
+  <script src="js/auth-guard.js?v=202603191ovg"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1596,7 +1596,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202603191jw5"></script>
+  <script src="courses.generated.js?v=202603191ovg"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -1837,12 +1837,91 @@
                 editor.focus();
                 return;
               }
+
+              if (command === 'justifyLeft' || command === 'justifyCenter' || command === 'justifyRight') {
+                const selectedImage = getSelectedImageInEditor();
+                if (selectedImage) {
+                  const alignMap = {
+                    justifyLeft: 'left',
+                    justifyCenter: 'center',
+                    justifyRight: 'right'
+                  };
+                  applyAlignmentToImageElement(selectedImage, alignMap[command]);
+                  saveToHistory();
+                  editor.focus();
+                  return;
+                }
+              }
+
               document.execCommand(command, false, null);
               saveToHistory();
               editor.focus();
             });
           }
-        }    
+        }
+
+        let lastClickedEditorImage = null;
+
+        function getSelectedImageInEditor() {
+          const selection = window.getSelection();
+          if (!selection || selection.rangeCount === 0) return null;
+
+          const range = selection.getRangeAt(0);
+          let node = range.startContainer;
+
+          if (node && node.nodeType === Node.TEXT_NODE) {
+            node = node.parentElement;
+          }
+
+          if (node instanceof HTMLImageElement && editor.contains(node)) {
+            return node;
+          }
+
+          if (node instanceof Element) {
+            const closestImage = node.closest('img');
+            if (closestImage && editor.contains(closestImage)) {
+              return closestImage;
+            }
+          }
+
+          if (range.startContainer instanceof Element) {
+            const childAtCursor = range.startContainer.childNodes[range.startOffset];
+            if (childAtCursor instanceof HTMLImageElement && editor.contains(childAtCursor)) {
+              return childAtCursor;
+            }
+          }
+
+          if (lastClickedEditorImage && editor.contains(lastClickedEditorImage)) {
+            return lastClickedEditorImage;
+          }
+
+          return null;
+        }
+
+        function applyAlignmentToImageElement(img, align = 'left') {
+          if (!(img instanceof HTMLImageElement)) return;
+
+          const normalizedAlign = align === 'center' || align === 'right' ? align : 'left';
+
+          img.style.display = 'block';
+          img.style.float = 'none';
+          img.style.marginTop = '8px';
+          img.style.marginBottom = '8px';
+
+          if (normalizedAlign === 'center') {
+            img.style.marginLeft = 'auto';
+            img.style.marginRight = 'auto';
+          } else if (normalizedAlign === 'right') {
+            img.style.marginLeft = 'auto';
+            img.style.marginRight = '0';
+          } else {
+            img.style.marginLeft = '0';
+            img.style.marginRight = 'auto';
+          }
+
+          img.setAttribute('data-align', normalizedAlign);
+        }
+    
     // ========================================
     // 1. HEADER ENTER KEY LOGIC
     // ========================================
@@ -2722,6 +2801,8 @@
       img.style.display = 'block';
       img.setAttribute('data-original-src', imgSrc);
       img.setAttribute('data-width', widthPercent);
+      img.setAttribute('data-align', 'left');
+      applyAlignmentToImageElement(img, 'left');
 
       range.deleteContents();
       range.insertNode(img);
@@ -2899,6 +2980,14 @@
     setupSimpleButton('alignLeftBtn', 'justifyLeft');
     setupSimpleButton('alignCenterBtn', 'justifyCenter');
     setupSimpleButton('alignRightBtn', 'justifyRight');
+
+    editor.addEventListener('click', (event) => {
+      if (event.target instanceof HTMLImageElement && editor.contains(event.target)) {
+        lastClickedEditorImage = event.target;
+      } else {
+        lastClickedEditorImage = null;
+      }
+    });
 
     const subscriptBtn = document.getElementById('subscriptBtn');
     const superscriptBtn = document.getElementById('superscriptBtn');
@@ -4072,7 +4161,19 @@ localStorage.setItem('textEditorContent', htmlContent);
     tbody tr:nth-child(odd) { 
       background: rgba(88, 129, 87, 0.06); 
     }
-    /* Image styles are handled by inline styles and data-width attributes */
+    /* Image alignment rules for exported content and md-viewer */
+    img[data-align="left"] {
+      display: block;
+      margin: 8px auto 8px 0;
+    }
+    img[data-align="center"] {
+      display: block;
+      margin: 8px auto;
+    }
+    img[data-align="right"] {
+      display: block;
+      margin: 8px 0 8px auto;
+    }
     a {
       color: inherit; /* Changed to inherit */
       text-decoration: underline;
@@ -4612,6 +4713,32 @@ renderMathInElement(document.body, {
           return;
         }
 
+        const hasSelectionText = savedNoteSelection.toString().trim().length > 0;
+        if (!hasSelectionText) {
+          showNotification('Please select text in the editor first to add a note.', 'warning');
+          return;
+        }
+
+        const selectionClone = savedNoteSelection.cloneContents();
+        const blockInSelection = selectionClone.querySelector('p,div,h1,h2,h3,h4,ul,ol,li,table,tr,td,th,blockquote,pre,hr');
+        if (blockInSelection) {
+          showNotification('Notes can be attached only to inline text selection, not entire blocks.', 'warning');
+          return;
+        }
+
+        const startEl = savedNoteSelection.startContainer.nodeType === Node.TEXT_NODE
+          ? savedNoteSelection.startContainer.parentElement
+          : savedNoteSelection.startContainer;
+        const endEl = savedNoteSelection.endContainer.nodeType === Node.TEXT_NODE
+          ? savedNoteSelection.endContainer.parentElement
+          : savedNoteSelection.endContainer;
+        const startNote = startEl && startEl.closest ? startEl.closest('.editor-note') : null;
+        const endNote = endEl && endEl.closest ? endEl.closest('.editor-note') : null;
+        if (startNote || endNote) {
+          showNotification('Editing nested notes is not allowed. Remove existing note first.', 'warning');
+          return;
+        }
+
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(savedNoteSelection);
@@ -4623,16 +4750,15 @@ renderMathInElement(document.body, {
         noteSpan.classList.add('editor-note'); // Add class for styling
         noteSpan.dataset.note = noteText;
         noteSpan.id = noteId;
-        noteSpan.textContent = selectedTextContent;
-        
-        // Ensure the selection is not empty before attempting to surround contents
-        if (savedNoteSelection.toString().length > 0) {
-          savedNoteSelection.deleteContents(); // Remove the selected text
-          savedNoteSelection.insertNode(noteSpan); // Insert the wrapped span
-        } else {
-          // If selection was empty, just insert the span with selected text as content
-          savedNoteSelection.insertNode(noteSpan);
+        const extracted = savedNoteSelection.extractContents();
+        if (!extracted || !extracted.textContent || !extracted.textContent.trim()) {
+          showNotification('Please select text in the editor first to add a note.', 'warning');
+          return;
         }
+        noteSpan.appendChild(extracted);
+        
+        // Insert inline note span at original selection position.
+        savedNoteSelection.insertNode(noteSpan);
         
         showNotification('Note added successfully!', 'success');
         
@@ -5739,17 +5865,84 @@ renderMathInElement(document.body, {
             return null;
           };
 
+          const resolveBlockFromRange = (inputRange) => {
+            if (!inputRange) return null;
+
+            const direct = findClosestBlock(inputRange.startContainer);
+            if (direct) return direct;
+
+            if (inputRange.startContainer === editor) {
+              const idx = inputRange.startOffset;
+              const left = idx > 0 ? editor.childNodes[idx - 1] : null;
+              const right = idx < editor.childNodes.length ? editor.childNodes[idx] : null;
+
+              const fromLeft = left ? findClosestBlock(left) : null;
+              if (fromLeft) return fromLeft;
+
+              const fromRight = right ? findClosestBlock(right) : null;
+              if (fromRight) return fromRight;
+            }
+
+            return null;
+          };
+
           const isRangeAtStartOfElement = (inputRange, element) => {
             if (!inputRange || !element) return false;
             const probe = inputRange.cloneRange();
             probe.selectNodeContents(element);
             probe.setEnd(inputRange.startContainer, inputRange.startOffset);
-            return probe.toString().length === 0;
+
+            const fragment = probe.cloneContents();
+            let length = 0;
+
+            const walk = (node) => {
+              if (!node) return;
+              if (node.nodeType === Node.TEXT_NODE) {
+                length += (node.textContent || '').length;
+                return;
+              }
+              if (node.nodeType === Node.ELEMENT_NODE && node.tagName === 'BR') {
+                length += 1;
+              }
+              const children = node.childNodes || [];
+              for (let i = 0; i < children.length; i += 1) {
+                walk(children[i]);
+              }
+            };
+
+            walk(fragment);
+            return length === 0;
           };
 
           const isMergeableTextBlock = (el) => {
             if (!el || el.nodeType !== 1) return false;
             return /^(P|DIV|H1|H2|H3|H4|BLOCKQUOTE|PRE)$/.test(el.tagName);
+          };
+
+          const isEffectivelyEmptyParagraphBlock = (el) => {
+            if (!el || el.nodeType !== 1) return false;
+            if (!/^(P|DIV)$/.test(el.tagName)) return false;
+            const text = (el.textContent || '').replace(/\u200B/g, '').trim();
+            if (text.length > 0) return false;
+            const hasOnlyBreakOrWhitespace = Array.from(el.childNodes).every((child) => {
+              if (child.nodeType === Node.TEXT_NODE) return (child.textContent || '').trim() === '';
+              if (child.nodeType === Node.ELEMENT_NODE) return child.tagName === 'BR';
+              return false;
+            });
+            return hasOnlyBreakOrWhitespace || el.childNodes.length === 0;
+          };
+
+          const isEffectivelyEmptyHeadingBlock = (el) => {
+            if (!el || el.nodeType !== 1) return false;
+            if (!/^H[1-4]$/.test(el.tagName)) return false;
+            const text = (el.textContent || '').replace(/\u200B/g, '').trim();
+            if (text.length > 0) return false;
+            const hasOnlyBreakOrWhitespace = Array.from(el.childNodes).every((child) => {
+              if (child.nodeType === Node.TEXT_NODE) return (child.textContent || '').trim() === '';
+              if (child.nodeType === Node.ELEMENT_NODE) return child.tagName === 'BR';
+              return false;
+            });
+            return hasOnlyBreakOrWhitespace || el.childNodes.length === 0;
           };
 
           const removeBoundaryBreakArtifacts = (prevBlock, currentBlock) => {
@@ -5816,12 +6009,63 @@ renderMathInElement(document.body, {
              }
           }
 
-          // FIX: Keep caret stable when joining blocks with Backspace at line start.
+          // Safe block merge behavior on Backspace at line start.
           if (e.key === 'Backspace' && range.collapsed) {
-            const currentBlock = findClosestBlock(range.startContainer);
+            const currentBlock = resolveBlockFromRange(range);
             if (currentBlock && isRangeAtStartOfElement(range, currentBlock)) {
               const prev = currentBlock.previousElementSibling;
-              if (isMergeableTextBlock(prev)) {
+
+              // Allow removing empty heading lines directly.
+              if (isEffectivelyEmptyHeadingBlock(currentBlock)) {
+                e.preventDefault();
+                const fallback = prev || currentBlock.nextElementSibling || editor;
+                currentBlock.remove();
+
+                const keepRange = document.createRange();
+                if (fallback === editor) {
+                  keepRange.setStart(editor, editor.childNodes.length);
+                } else if (fallback.nodeType === Node.ELEMENT_NODE) {
+                  keepRange.selectNodeContents(fallback);
+                  keepRange.collapse(false);
+                } else {
+                  keepRange.setStart(editor, editor.childNodes.length);
+                }
+
+                selection.removeAllRanges();
+                selection.addRange(keepRange);
+                saveToHistory();
+                return;
+              }
+
+              // Remove horizontal rule directly above when pressing Backspace at start.
+              if (prev && prev.tagName === 'HR') {
+                e.preventDefault();
+                prev.remove();
+                saveToHistory();
+                return;
+              }
+
+              // If there is an empty paragraph-like line above, remove only that line.
+              if (isEffectivelyEmptyParagraphBlock(prev)) {
+                e.preventDefault();
+                const keepRange = document.createRange();
+                keepRange.setStart(currentBlock, 0);
+                keepRange.collapse(true);
+                prev.remove();
+                selection.removeAllRanges();
+                selection.addRange(keepRange);
+                saveToHistory();
+                return;
+              }
+
+              // Prevent heading from collapsing into non-text structures (table, hr, etc.).
+              if (/^H[1-4]$/.test(currentBlock.tagName) && prev && !isMergeableTextBlock(prev)) {
+                e.preventDefault();
+                return;
+              }
+
+              // Join adjacent text-like blocks while keeping caret stable.
+              if (isMergeableTextBlock(prev) && isMergeableTextBlock(currentBlock)) {
                 e.preventDefault();
 
                 removeBoundaryBreakArtifacts(prev, currentBlock);
@@ -5841,7 +6085,6 @@ renderMathInElement(document.body, {
                 }
 
                 currentBlock.remove();
-
                 selection.removeAllRanges();
                 selection.addRange(joinRange);
                 saveToHistory();
@@ -5852,12 +6095,6 @@ renderMathInElement(document.body, {
           
           // Check if adjacent to <hr>
           if (node && node.nodeType === 1) {
-            if (e.key === 'Backspace' && node.previousSibling && node.previousSibling.tagName === 'HR') {
-              e.preventDefault();
-              node.previousSibling.remove();
-              saveToHistory();
-              return;
-            }
             if (e.key === 'Delete' && node.nextSibling && node.nextSibling.tagName === 'HR') {
               e.preventDefault();
               node.nextSibling.remove();
@@ -5874,6 +6111,95 @@ renderMathInElement(document.body, {
         if (selection.rangeCount) {
           const range = selection.getRangeAt(0);
           let node = range.startContainer;
+
+          const findClosestTextBlock = (startNode) => {
+            let current = startNode;
+            if (current && current.nodeType === Node.TEXT_NODE) current = current.parentNode;
+            while (current && current !== editor) {
+              if (current.nodeType === 1 && /^(P|DIV|H1|H2|H3|H4|BLOCKQUOTE|PRE)$/.test(current.tagName)) {
+                return current;
+              }
+              current = current.parentNode;
+            }
+            return null;
+          };
+
+          const isRangeAtStartOfElementForEnter = (inputRange, element) => {
+            if (!inputRange || !element) return false;
+            const probe = inputRange.cloneRange();
+            probe.selectNodeContents(element);
+            probe.setEnd(inputRange.startContainer, inputRange.startOffset);
+
+            const fragment = probe.cloneContents();
+            let length = 0;
+            const walk = (n) => {
+              if (!n) return;
+              if (n.nodeType === Node.TEXT_NODE) {
+                length += (n.textContent || '').length;
+                return;
+              }
+              if (n.nodeType === Node.ELEMENT_NODE && n.tagName === 'BR') {
+                length += 1;
+              }
+              const children = n.childNodes || [];
+              for (let i = 0; i < children.length; i += 1) walk(children[i]);
+            };
+            walk(fragment);
+            return length === 0;
+          };
+
+          // If caret is inside a note span, force next line outside that span.
+          const noteAnchor = node && node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+          const noteSpan = (noteAnchor instanceof Element) ? noteAnchor.closest('.editor-note') : null;
+          if (noteSpan && editor.contains(noteSpan)) {
+            const listAncestor = noteSpan.closest('li');
+            if (!listAncestor) {
+              e.preventDefault();
+              const block = noteSpan.closest('p,div,h1,h2,h3,h4,blockquote,pre') || noteSpan.parentElement;
+              const isAtStart = block ? isRangeAtStartOfElementForEnter(range, block) : false;
+              const newParagraph = document.createElement('p');
+              newParagraph.innerHTML = '<br>';
+
+              if (block && block.parentNode) {
+                if (isAtStart) {
+                  block.parentNode.insertBefore(newParagraph, block);
+                } else {
+                  block.parentNode.insertBefore(newParagraph, block.nextSibling);
+                }
+              } else {
+                editor.appendChild(newParagraph);
+              }
+
+              const newRange = document.createRange();
+              if (isAtStart && block) {
+                const firstTextNode = block.firstChild && block.firstChild.nodeType === Node.TEXT_NODE
+                  ? block.firstChild
+                  : null;
+                if (firstTextNode) {
+                  newRange.setStart(firstTextNode, 0);
+                } else {
+                  newRange.setStart(block, 0);
+                }
+              } else {
+                newRange.setStart(newParagraph, 0);
+              }
+              newRange.collapse(true);
+              selection.removeAllRanges();
+              selection.addRange(newRange);
+              saveToHistory();
+              return;
+            }
+          }
+
+          // Inside table cell: keep native behavior.
+          while (node && node !== editor) {
+            if (node.nodeType === 1 && (node.tagName === 'TD' || node.tagName === 'TH')) {
+              return;
+            }
+            node = node.parentNode;
+          }
+
+          node = range.startContainer;
           
           // Check if we're inside a list item
           while (node && node !== editor) {
@@ -5884,6 +6210,40 @@ renderMathInElement(document.body, {
             }
             node = node.parentNode;
           }
+
+          // At start of a block, Enter creates a new paragraph above (not below).
+          const currentBlock = findClosestTextBlock(range.startContainer);
+          if (currentBlock && isRangeAtStartOfElementForEnter(range, currentBlock)) {
+            e.preventDefault();
+            const newParagraph = document.createElement('p');
+            newParagraph.innerHTML = '<br>';
+            currentBlock.parentNode.insertBefore(newParagraph, currentBlock);
+
+            const newRange = document.createRange();
+            const firstTextNode = currentBlock.firstChild && currentBlock.firstChild.nodeType === Node.TEXT_NODE
+              ? currentBlock.firstChild
+              : null;
+            if (firstTextNode) {
+              newRange.setStart(firstTextNode, 0);
+            } else {
+              newRange.setStart(currentBlock, 0);
+            }
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+            saveToHistory();
+            return;
+          }
+
+          // Outside lists/tables always insert paragraph to keep empty lines as separate <p> blocks.
+          e.preventDefault();
+          try {
+            document.execCommand('defaultParagraphSeparator', false, 'p');
+          } catch (_) {
+          }
+          document.execCommand('insertParagraph', false, null);
+          saveToHistory();
+          return;
         }
       }
       
@@ -6376,6 +6736,62 @@ renderMathInElement(document.body, {
     // Handle copy events - convert to clean markdown
     editor.addEventListener('copy', (e) => {
       const selection = window.getSelection();
+
+      const resolveCopiedImage = () => {
+        if (!selection || selection.rangeCount === 0) {
+          return (lastClickedEditorImage && editor.contains(lastClickedEditorImage)) ? lastClickedEditorImage : null;
+        }
+
+        const range = selection.getRangeAt(0);
+
+        // Expanded selection containing an image.
+        if (!range.collapsed) {
+          const fragment = range.cloneContents();
+          const selectedImage = fragment.querySelector('img');
+          if (selectedImage) {
+            return selectedImage;
+          }
+        }
+
+        // Collapsed caret directly before/after/inside image.
+        let startNode = range.startContainer;
+        if (startNode === editor) {
+          const right = editor.childNodes[range.startOffset] || null;
+          const left = range.startOffset > 0 ? editor.childNodes[range.startOffset - 1] : null;
+          if (right instanceof HTMLImageElement) return right;
+          if (left instanceof HTMLImageElement) return left;
+        }
+
+        if (startNode && startNode.nodeType === Node.TEXT_NODE) {
+          startNode = startNode.parentElement;
+        }
+
+        if (startNode instanceof HTMLImageElement && editor.contains(startNode)) return startNode;
+        if (startNode instanceof Element) {
+          const closest = startNode.closest('img');
+          if (closest && editor.contains(closest)) return closest;
+        }
+
+        return (lastClickedEditorImage && editor.contains(lastClickedEditorImage)) ? lastClickedEditorImage : null;
+      };
+
+      const copiedImage = resolveCopiedImage();
+      if (copiedImage) {
+        e.preventDefault();
+        const imageUrl = copiedImage.getAttribute('data-original-src')
+          || copiedImage.getAttribute('data-src')
+          || copiedImage.getAttribute('src')
+          || '';
+
+        if (!imageUrl) return;
+
+        e.clipboardData.setData('text/plain', imageUrl);
+        e.clipboardData.setData('text/uri-list', imageUrl);
+        e.clipboardData.setData('text/html', `<a href="${escapeHtml(imageUrl)}">${escapeHtml(imageUrl)}</a>`);
+        showNotification('Image link copied', 'success');
+        return;
+      }
+
       if (selection.toString().length === 0) return;
       
       e.preventDefault();
@@ -6421,6 +6837,21 @@ renderMathInElement(document.body, {
 
     // Handle paste events - convert markdown to HTML and insert
     editor.addEventListener('paste', async (e) => {
+      const stripMarkdownFenceWrappers = (inputText) => {
+        let value = String(inputText || '');
+
+        // Remove full-wrapper fenced blocks like ```markdown ... ``` or ```md ... ```
+        const wrappedFence = value.match(/^\s*```(?:markdown|md)?\s*\r?\n([\s\S]*?)\r?\n\s*```\s*$/i);
+        if (wrappedFence) {
+          return wrappedFence[1];
+        }
+
+        // Remove standalone fence lines that are often included by AI responses.
+        value = value.replace(/^\s*```(?:markdown|md)?\s*\r?\n?/i, '');
+        value = value.replace(/\r?\n?\s*```\s*$/i, '');
+        return value;
+      };
+
       const clipboardItems = Array.from((e.clipboardData && e.clipboardData.items) || []);
       const imageItem = clipboardItems.find(item => item.kind === 'file' && item.type.startsWith('image/'));
 
@@ -6454,7 +6885,8 @@ renderMathInElement(document.body, {
       }
 
       e.preventDefault();
-      const text = e.clipboardData.getData('text/plain');
+      const rawText = e.clipboardData.getData('text/plain');
+      const text = stripMarkdownFenceWrappers(rawText);
       
       // Get current selection
       const selection = window.getSelection();
@@ -6976,10 +7408,29 @@ renderMathInElement(document.body, {
             // Prefer data-original-src for local files, fall back to src for URLs
             const src = node.getAttribute('data-original-src') || node.src;
             const width = node.getAttribute('data-width'); // This should now be reliable from the editor's insertion logic
-            let titleAttribute = '';
-            if (width) {
-              titleAttribute = ` "width=${width}%"`; // Embed width information in the title part of markdown image
+            let align = (node.getAttribute('data-align') || '').trim().toLowerCase();
+
+            if (!align) {
+              const marginLeft = (node.style.marginLeft || '').trim().toLowerCase();
+              const marginRight = (node.style.marginRight || '').trim().toLowerCase();
+
+              if (marginLeft === 'auto' && marginRight === 'auto') {
+                align = 'center';
+              } else if (marginLeft === 'auto' && (marginRight === '0' || marginRight === '0px')) {
+                align = 'right';
+              } else {
+                align = 'left';
+              }
             }
+
+            const titleParts = [];
+            if (width) {
+              titleParts.push(`width=${width}%`);
+            }
+            if (align) {
+              titleParts.push(`align=${align}`);
+            }
+            const titleAttribute = titleParts.length ? ` "${titleParts.join(' ')}"` : '';
             return `![${alt}](${src}${titleAttribute})`;
           } else if (tag === 'blockquote') {
             return '> ' + processChildren(node, false, depth).trim() + '\n';
@@ -7297,15 +7748,27 @@ renderMathInElement(document.body, {
       // Images must be processed before links
       // Regex updated to capture optional title attribute
       text = text.replace(/!\[(.*?)\]\((.*?)(?: "(.*?)")?\)/g, (match, alt, src, title) => {
-        let style = 'width:auto; max-width:100%; height:auto;';
+        let style = 'width:auto; max-width:100%; height:auto; display:block; margin:8px auto 8px 0;';
         let dataWidth = '';
+        let dataAlign = ' data-align="left"';
 
         if (title) {
           const widthMatch = title.match(/width=(\d+)%/);
           if (widthMatch && widthMatch[1]) {
-            style = `width:auto; max-width:${widthMatch[1]}%; height:auto;`;
+            style = `width:auto; max-width:${widthMatch[1]}%; height:auto; display:block; margin:8px auto 8px 0;`;
             dataWidth = ` data-width="${widthMatch[1]}"`;
           }
+
+          const alignMatch = title.match(/align=(left|center|right)/i);
+          const align = alignMatch && alignMatch[1] ? alignMatch[1].toLowerCase() : 'left';
+          if (align === 'center') {
+            style = style.replace(/margin:[^;]*;/i, 'margin:8px auto;');
+          } else if (align === 'right') {
+            style = style.replace(/margin:[^;]*;/i, 'margin:8px 0 8px auto;');
+          } else {
+            style = style.replace(/margin:[^;]*;/i, 'margin:8px auto 8px 0;');
+          }
+          dataAlign = ` data-align="${align}"`;
         }
 
         // If we have a base path and src is relative, create absolute path for display
@@ -7323,7 +7786,7 @@ renderMathInElement(document.body, {
         // This is only for when generating <style> blocks for export, not for inline images
         // If you have export logic that writes <style>img{...}</style>, change it to .markdown-body img{...}
 
-        return `<img src="${finalSrc}?v=202602171mhr" alt="${alt}" style="${style}"${dataWidth}${dataOriginalSrc}>`;
+        return `<img src="${finalSrc}?v=202602171mhr" alt="${alt}" style="${style}"${dataWidth}${dataAlign}${dataOriginalSrc}>`;
       });
       text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       text = text.replace(/__(.*?)__/g, '<u>$1</u>');
@@ -8360,7 +8823,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603191jw5"></script>
+    <script src="js/chat.js?v=202603191ovg"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>

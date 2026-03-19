@@ -446,6 +446,114 @@
             margin: 0.04em 0;
         }
 
+        .notes-editor img {
+            display: block;
+            max-width: 100%;
+            height: auto;
+            margin: 8px 0;
+            border-radius: 8px;
+            background: #f3f4f6;
+        }
+
+        .notes-editor img.notes-lazy-image {
+            opacity: 0.75;
+            filter: blur(2px);
+            transition: opacity 0.2s ease, filter 0.2s ease;
+        }
+
+        .notes-editor img.notes-image-loaded {
+            opacity: 1;
+            filter: none;
+        }
+
+        .image-modal-body {
+            padding: 16px;
+        }
+
+        .image-modal-body label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 13px;
+        }
+
+        .image-modal-input {
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .image-upload-row {
+            margin-top: 12px;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+
+        .image-upload-controls {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .image-upload-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #588157;
+            background: #588157;
+            color: #ffffff;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .image-upload-name {
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .image-upload-status {
+            margin-top: 8px;
+            min-height: 18px;
+            font-size: 12px;
+            color: #6b7280;
+        }
+
+        .image-modal-footer {
+            padding: 12px 16px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+        }
+
+        .image-modal-btn {
+            border: 1px solid #d1d5db;
+            background: #fff;
+            color: #111827;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .image-modal-btn.primary {
+            border-color: #588157;
+            background: #588157;
+            color: #fff;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -836,6 +944,7 @@
                     <button type="button" class="md-btn" data-cmd="bullet" title="Bullet list"><img src="svg/md-editor/icon-unordered.svg?v=2026031715gu" alt="Bullet list"></button>
                     <button type="button" class="md-btn" data-cmd="outdent" title="Outdent"><img src="svg/md-editor/icon-outdent.svg?v=2026031715gu" alt="Outdent"></button>
                     <button type="button" class="md-btn" data-cmd="indent" title="Indent"><img src="svg/md-editor/icon-indent.svg?v=2026031715gu" alt="Indent"></button>
+                    <button type="button" class="md-btn" data-cmd="image" title="Insert image"><img src="svg/md-editor/icon-image.svg?v=2026031715gu" alt="Image"></button>
                     <button type="button" class="md-btn" data-cmd="symbols" title="Insert symbols"><img src="svg/md-editor/icon-symbols.svg?v=2026031715gu" alt="Symbols"></button>
                     <button type="button" class="md-btn" data-cmd="link" title="Link"><img src="svg/md-editor/icon-link.svg?v=2026031715gu" alt="Link"></button>
                     <button type="button" class="md-btn" data-cmd="separator" title="Horizontal separator">---</button>
@@ -883,6 +992,32 @@
         </div>
     </div>
 
+    <div id="imageModal" class="modal">
+        <div class="modal-content" style="max-width: 560px;">
+            <div class="modal-header">
+                <h2>Add Image</h2>
+                <span class="close" id="closeImageModalBtn">&times;</span>
+            </div>
+            <div class="image-modal-body">
+                <label for="imageUrlInput">Image URL</label>
+                <input id="imageUrlInput" class="image-modal-input" type="text" placeholder="https://example.com/image.jpg">
+
+                <div class="image-upload-row">
+                    <div class="image-upload-controls">
+                        <input type="file" id="imageUploadFileInput" accept="image/*" style="display:none;">
+                        <label class="image-upload-btn" for="imageUploadFileInput">Choose image</label>
+                        <span id="imageUploadFileName" class="image-upload-name"></span>
+                    </div>
+                    <div id="imageUploadStatus" class="image-upload-status"></div>
+                </div>
+            </div>
+            <div class="image-modal-footer">
+                <button type="button" id="cancelImageBtn" class="image-modal-btn">Cancel</button>
+                <button type="button" id="insertImageBtn" class="image-modal-btn primary">Insert</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function handleLogout() {
             localStorage.removeItem('loggedInUser');
@@ -912,6 +1047,8 @@
             const COURSE_NOTE_ROOT = 'course_notes';
             const AUTOSAVE_DELAY_MS = 900;
             const LIVEBLOCKS_START_DELAY_MS = 260;
+            const NOTES_R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+            const NOTES_IMAGE_LAZY_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
             const LIVEBLOCKS_AUTH_ENDPOINT =
                 window.LIVEBLOCKS_AUTH_ENDPOINT ||
                 localStorage.getItem('liveblocksAuthEndpoint') ||
@@ -951,7 +1088,9 @@
                 liveblocksRenderHash: '',
                 liveblocksLastSelections: {},
                 liveblocksEnabled: !!LIVEBLOCKS_AUTH_ENDPOINT,
-                localEditVersion: 0
+                localEditVersion: 0,
+                imageObserver: null,
+                savedImageRange: null
             };
 
             const els = {
@@ -969,6 +1108,14 @@
 
             const symbolsModal = document.getElementById('symbolsModal');
             const closeSymbolsModalBtn = document.getElementById('closeSymbolsModalBtn');
+            const imageModal = document.getElementById('imageModal');
+            const closeImageModalBtn = document.getElementById('closeImageModalBtn');
+            const cancelImageBtn = document.getElementById('cancelImageBtn');
+            const insertImageBtn = document.getElementById('insertImageBtn');
+            const imageUrlInput = document.getElementById('imageUrlInput');
+            const imageUploadFileInput = document.getElementById('imageUploadFileInput');
+            const imageUploadFileName = document.getElementById('imageUploadFileName');
+            const imageUploadStatus = document.getElementById('imageUploadStatus');
 
             function setDraftState(isDirty) {
                 state.isDirty = isDirty;
@@ -1606,6 +1753,63 @@
                 return text ? html : '';
             }
 
+            function setImageUploadStatus(message, isError = false) {
+                if (!imageUploadStatus) return;
+                imageUploadStatus.textContent = message || '';
+                imageUploadStatus.style.color = isError ? '#dc2626' : '#6b7280';
+            }
+
+            function getUploadUserName() {
+                const user = state.currentUser || {};
+                return user.userName || user.displayName || user.userId || 'anonymous';
+            }
+
+            function sanitizeUploadFileName(fileName) {
+                const normalized = String(fileName || 'image.png').replace(/\s+/g, '-').toLowerCase();
+                return normalized.replace(/[^a-z0-9._-]/g, '') || 'image.png';
+            }
+
+            function buildCloudflareImagePath(fileName) {
+                const now = new Date();
+                const year = String(now.getFullYear());
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const timestamp = now.getTime();
+                const safeName = sanitizeUploadFileName(fileName);
+                return `notes-images/${year}/${month}/${timestamp}-${safeName}`;
+            }
+
+            async function uploadImageFileToCloudflare(file, statusPrefix = 'Uploading image') {
+                if (!file) throw new Error('No file selected');
+                if (!file.type || !file.type.startsWith('image/')) {
+                    throw new Error('Selected file is not an image');
+                }
+
+                setImageUploadStatus(`${statusPrefix}...`);
+
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('path', buildCloudflareImagePath(file.name));
+                formData.append('userName', getUploadUserName());
+
+                const response = await fetch(NOTES_R2_WORKER_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(errorText || 'Upload failed');
+                }
+
+                const data = await response.json();
+                if (!data || !data.url) {
+                    throw new Error('Upload succeeded but no URL was returned');
+                }
+
+                setImageUploadStatus('Upload complete. URL is ready.');
+                return data.url;
+            }
+
             function plainTextToHtml(text) {
                 const safe = String(text || '')
                     .replace(/&/g, '&amp;')
@@ -1665,12 +1869,167 @@
             }
 
             function getEditorHtml() {
-                return normalizeHtml(els.courseNotesEditor.innerHTML);
+                const clone = els.courseNotesEditor.cloneNode(true);
+                clone.querySelectorAll('img').forEach((img) => {
+                    const dataSrc = img.getAttribute('data-src');
+                    if (dataSrc) {
+                        img.setAttribute('src', dataSrc);
+                    }
+                    img.removeAttribute('data-src');
+                    img.classList.remove('notes-lazy-image');
+                    img.classList.remove('notes-image-loaded');
+                });
+                return normalizeHtml(clone.innerHTML);
             }
 
             function setEditorHtml(html) {
                 const value = normalizeHtml(html);
                 els.courseNotesEditor.innerHTML = value;
+                setupLazyLoadingForEditorImages();
+            }
+
+            function setupLazyObserver() {
+                if (state.imageObserver) return;
+                if (typeof IntersectionObserver === 'undefined') return;
+
+                state.imageObserver = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (!entry.isIntersecting) return;
+                        const img = entry.target;
+                        if (!(img instanceof HTMLImageElement)) return;
+
+                        const dataSrc = img.getAttribute('data-src');
+                        if (!dataSrc) {
+                            state.imageObserver.unobserve(img);
+                            return;
+                        }
+
+                        img.src = dataSrc;
+                        img.removeAttribute('data-src');
+                        img.classList.remove('notes-lazy-image');
+                        img.classList.add('notes-image-loaded');
+                        state.imageObserver.unobserve(img);
+                    });
+                }, {
+                    root: els.courseNotesEditor,
+                    rootMargin: '100px',
+                    threshold: 0.01
+                });
+            }
+
+            function setupLazyLoadingForEditorImages() {
+                setupLazyObserver();
+
+                const images = Array.from(els.courseNotesEditor.querySelectorAll('img'));
+                images.forEach((img) => {
+                    img.loading = 'lazy';
+                    img.decoding = 'async';
+                    img.referrerPolicy = 'no-referrer';
+
+                    const currentSrc = img.getAttribute('src');
+                    const currentDataSrc = img.getAttribute('data-src');
+
+                    if (!currentDataSrc && currentSrc && currentSrc !== NOTES_IMAGE_LAZY_PLACEHOLDER) {
+                        img.setAttribute('data-src', currentSrc);
+                        img.setAttribute('src', NOTES_IMAGE_LAZY_PLACEHOLDER);
+                        img.classList.add('notes-lazy-image');
+                        img.classList.remove('notes-image-loaded');
+                    }
+
+                    if (state.imageObserver && img.getAttribute('data-src')) {
+                        state.imageObserver.observe(img);
+                    }
+                });
+            }
+
+            function rememberImageInsertRange() {
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0) {
+                    state.savedImageRange = null;
+                    return;
+                }
+                const range = selection.getRangeAt(0);
+                if (!els.courseNotesEditor.contains(range.startContainer) || !els.courseNotesEditor.contains(range.endContainer)) {
+                    state.savedImageRange = null;
+                    return;
+                }
+                state.savedImageRange = range.cloneRange();
+            }
+
+            function getImageInsertRange() {
+                if (state.savedImageRange) return state.savedImageRange;
+
+                const selection = window.getSelection();
+                if (!selection || selection.rangeCount === 0) return null;
+                const range = selection.getRangeAt(0);
+                if (!els.courseNotesEditor.contains(range.startContainer) || !els.courseNotesEditor.contains(range.endContainer)) {
+                    return null;
+                }
+                return range;
+            }
+
+            function closeImageModal() {
+                if (!imageModal) return;
+                imageModal.style.display = 'none';
+                if (imageUploadFileInput) imageUploadFileInput.value = '';
+                if (imageUploadFileName) imageUploadFileName.textContent = '';
+                setImageUploadStatus('');
+            }
+
+            function openImageModal() {
+                rememberImageInsertRange();
+                if (!imageModal) return;
+                imageModal.style.display = 'flex';
+                if (imageUrlInput) imageUrlInput.focus();
+                setImageUploadStatus('');
+            }
+
+            function insertImageAtSelection(src) {
+                const imageSrc = String(src || '').trim();
+                if (!imageSrc) return false;
+
+                const range = getImageInsertRange();
+                if (!range) {
+                    alert('Click in the editor before inserting an image.');
+                    return false;
+                }
+
+                els.courseNotesEditor.focus();
+
+                const image = document.createElement('img');
+                image.src = imageSrc;
+                image.alt = 'Image';
+                image.setAttribute('data-src', imageSrc);
+                image.loading = 'lazy';
+                image.decoding = 'async';
+                image.referrerPolicy = 'no-referrer';
+                image.classList.add('notes-lazy-image');
+
+                range.deleteContents();
+                range.insertNode(image);
+
+                const paragraph = document.createElement('p');
+                paragraph.innerHTML = '<br>';
+                image.parentNode.insertBefore(paragraph, image.nextSibling);
+
+                const newRange = document.createRange();
+                newRange.setStart(paragraph, 0);
+                newRange.collapse(true);
+
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(newRange);
+                state.savedImageRange = newRange.cloneRange();
+
+                setupLazyLoadingForEditorImages();
+
+                markEditedBlockAuthor();
+                bumpLocalEditVersion();
+                setDraftState(true);
+                scheduleAutosave();
+                scheduleLiveblocksDocBroadcast();
+                scheduleRealtimePresenceFlush(true);
+                return true;
             }
 
             function getCurrentNoteRef() {
@@ -1901,6 +2260,9 @@
                     document.execCommand('indent', false);
                 } else if (action === 'outdent') {
                     document.execCommand('outdent', false);
+                } else if (action === 'image') {
+                    openImageModal();
+                    return;
                 } else if (action === 'symbols') {
                     symbolsModal.style.display = 'flex';
                     return;
@@ -2011,6 +2373,7 @@
 
             els.courseNotesEditor.addEventListener('input', () => {
                 normalizeSeparatorLines();
+                setupLazyLoadingForEditorImages();
                 markEditedBlockAuthor();
                 bumpLocalEditVersion();
                 setDraftState(true);
@@ -2018,6 +2381,43 @@
                 scheduleLiveblocksDocBroadcast();
                 scheduleRealtimePresenceFlush(true);
             });
+
+            els.courseNotesEditor.addEventListener('paste', async (event) => {
+                const clipboardItems = Array.from((event.clipboardData && event.clipboardData.items) || []);
+                const imageItem = clipboardItems.find((item) => item.kind === 'file' && item.type && item.type.startsWith('image/'));
+                if (!imageItem) return;
+
+                event.preventDefault();
+
+                const file = imageItem.getAsFile();
+                if (!file) return;
+
+                rememberImageInsertRange();
+
+                const previousStatus = els.notesStatus ? els.notesStatus.textContent : '';
+                if (els.notesStatus) {
+                    els.notesStatus.textContent = 'Uploading pasted image...';
+                    els.notesStatus.classList.remove('error');
+                }
+
+                try {
+                    const uploadedUrl = await uploadImageFileToCloudflare(file, 'Uploading pasted image');
+                    insertImageAtSelection(uploadedUrl);
+                } catch (error) {
+                    console.error('Pasted image upload failed:', error);
+                    if (els.notesStatus) {
+                        els.notesStatus.textContent = 'Image upload failed: ' + (error && error.message ? error.message : 'unknown error');
+                        els.notesStatus.classList.add('error');
+                    }
+                } finally {
+                    if (els.notesStatus && !state.isDirty) {
+                        els.notesStatus.textContent = previousStatus || 'Няма незапазени промени';
+                    }
+                }
+            });
+
+            els.courseNotesEditor.addEventListener('mouseup', rememberImageInsertRange);
+            els.courseNotesEditor.addEventListener('keyup', rememberImageInsertRange);
 
             els.courseNotesEditor.addEventListener('focus', () => {
                 state.isEditorFocused = true;
@@ -2083,6 +2483,97 @@
                 });
             }
 
+            if (closeImageModalBtn) {
+                closeImageModalBtn.addEventListener('click', () => {
+                    closeImageModal();
+                });
+            }
+
+            if (cancelImageBtn) {
+                cancelImageBtn.addEventListener('click', () => {
+                    closeImageModal();
+                });
+            }
+
+            if (imageModal) {
+                imageModal.addEventListener('click', (event) => {
+                    if (event.target === imageModal) {
+                        closeImageModal();
+                    }
+                });
+
+                imageModal.addEventListener('paste', async (event) => {
+                    const clipboardItems = event.clipboardData?.items || [];
+                    const imageItem = Array.from(clipboardItems).find((item) => item.type && item.type.startsWith('image/'));
+                    if (!imageItem) return;
+
+                    event.preventDefault();
+                    const file = imageItem.getAsFile();
+                    if (!file) return;
+
+                    try {
+                        const uploadedUrl = await uploadImageFileToCloudflare(file, 'Uploading pasted image');
+                        if (imageUrlInput) imageUrlInput.value = uploadedUrl;
+                        if (imageUploadFileInput) imageUploadFileInput.value = '';
+                        if (imageUploadFileName) imageUploadFileName.textContent = '';
+                    } catch (error) {
+                        console.error('Clipboard image upload failed:', error);
+                        setImageUploadStatus('Upload failed: ' + (error.message || 'unknown error'), true);
+                    }
+                });
+            }
+
+            if (imageUploadFileInput) {
+                imageUploadFileInput.addEventListener('change', (event) => {
+                    const file = event.target.files && event.target.files[0] ? event.target.files[0] : null;
+                    if (imageUploadFileName) {
+                        imageUploadFileName.textContent = file ? file.name : '';
+                    }
+                    if (file && imageUrlInput) {
+                        imageUrlInput.value = '';
+                    }
+                    setImageUploadStatus('');
+                });
+            }
+
+            if (insertImageBtn) {
+                insertImageBtn.addEventListener('click', async () => {
+                    const rawUrl = imageUrlInput ? imageUrlInput.value.trim() : '';
+                    const uploadFile = imageUploadFileInput && imageUploadFileInput.files ? imageUploadFileInput.files[0] : null;
+
+                    let finalUrl = rawUrl;
+                    if (uploadFile) {
+                        const originalText = insertImageBtn.textContent;
+                        insertImageBtn.disabled = true;
+                        insertImageBtn.textContent = 'Uploading...';
+                        try {
+                            finalUrl = await uploadImageFileToCloudflare(uploadFile, 'Uploading selected image');
+                            if (imageUrlInput) imageUrlInput.value = finalUrl;
+                        } catch (error) {
+                            console.error('Cloudflare upload failed:', error);
+                            setImageUploadStatus('Upload failed: ' + (error.message || 'unknown error'), true);
+                            alert('Cloudflare upload failed: ' + (error.message || 'unknown error'));
+                            return;
+                        } finally {
+                            insertImageBtn.disabled = false;
+                            insertImageBtn.textContent = originalText;
+                        }
+                    }
+
+                    if (!finalUrl) {
+                        alert('Enter an image URL or choose an image file.');
+                        return;
+                    }
+
+                    const normalizedUrl = /^(https?:\/\/|data:image\/)/i.test(finalUrl) ? finalUrl : `https://${finalUrl}`;
+                    const inserted = insertImageAtSelection(normalizedUrl);
+                    if (!inserted) return;
+
+                    if (imageUrlInput) imageUrlInput.value = '';
+                    closeImageModal();
+                });
+            }
+
             if (symbolsModal) {
                 symbolsModal.addEventListener('click', (event) => {
                     if (event.target === symbolsModal) {
@@ -2116,6 +2607,7 @@
                 if (!(event.ctrlKey || event.metaKey) || event.altKey) return;
 
                 const key = (event.key || '').toLowerCase();
+                const code = event.code || '';
                 if (key === 's') {
                     event.preventDefault();
                     saveCurrentCourseNote(false);
@@ -2128,6 +2620,9 @@
                 } else if (key === 'u') {
                     event.preventDefault();
                     applyCommand('underline');
+                } else if (code === 'KeyG') {
+                    event.preventDefault();
+                    applyCommand('bullet');
                 } else if (key === 'k') {
                     event.preventDefault();
                     applyCommand('link');
