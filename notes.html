@@ -1876,6 +1876,7 @@
                         img.setAttribute('src', dataSrc);
                     }
                     img.removeAttribute('data-src');
+                    img.removeAttribute('data-lazy-loaded');
                     img.classList.remove('notes-lazy-image');
                     img.classList.remove('notes-image-loaded');
                 });
@@ -1906,6 +1907,7 @@
 
                         img.src = dataSrc;
                         img.removeAttribute('data-src');
+                        img.setAttribute('data-lazy-loaded', '1');
                         img.classList.remove('notes-lazy-image');
                         img.classList.add('notes-image-loaded');
                         state.imageObserver.unobserve(img);
@@ -1928,6 +1930,13 @@
 
                     const currentSrc = img.getAttribute('src');
                     const currentDataSrc = img.getAttribute('data-src');
+                    const alreadyLazyLoaded = img.getAttribute('data-lazy-loaded') === '1' || img.classList.contains('notes-image-loaded');
+
+                    if (alreadyLazyLoaded) {
+                        img.classList.remove('notes-lazy-image');
+                        img.classList.add('notes-image-loaded');
+                        return;
+                    }
 
                     if (!currentDataSrc && currentSrc && currentSrc !== NOTES_IMAGE_LAZY_PLACEHOLDER) {
                         img.setAttribute('data-src', currentSrc);
