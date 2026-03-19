@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603191q93"></script>
+  <script src="js/auth-guard.js?v=202603191t7i"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
@@ -182,6 +182,44 @@
 
     .markdown-body img[data-align="right"] {
       margin: 8px 0 8px auto;
+    }
+
+    .markdown-body .audio-link-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0.2em 0;
+      max-width: 100%;
+      vertical-align: middle;
+    }
+
+    .markdown-body .audio-link-icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #588157;
+      border-radius: 999px;
+      background: #f0f7f0;
+      color: #2f5d50;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    .markdown-body .audio-link-inline audio {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    .markdown-body .audio-link-icon img {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      pointer-events: none;
     }
 
     /* Links */
@@ -527,6 +565,21 @@
     // Configure marked.js to handle custom image width
     marked.use({
       renderer: {
+        link(href, title, text) {
+          const rawHref = String(href || '').trim();
+          const rawText = String(text || 'Audio').trim() || 'Audio';
+          const isMp3 = /\.mp3(?:[?#].*)?$/i.test(rawHref);
+
+          if (!isMp3) {
+            const safeHref = rawHref.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeText = rawText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            const safeTitle = title ? String(title).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;') : '';
+            return `<a href="${safeHref}"${safeTitle ? ` title="${safeTitle}"` : ''}>${safeText}</a>`;
+          }
+
+          const safeHref = rawHref.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return `<span class="audio-link-inline" data-audio-src="${safeHref}"><button type="button" class="audio-link-icon" aria-label="Play audio" title="Play audio"><img src="svg/md-editor/icon-sound.svg" alt="Play audio"></button><audio preload="none" src="${safeHref}"></audio></span>`;
+        },
         image(href, title, text) {
           let style = 'max-width:100%; height:auto; display:block; margin:8px auto 8px 0;';
           let dataWidth = '';
@@ -1050,6 +1103,24 @@
     }
 
     initGenerousImageLoading();
+
+    document.addEventListener('click', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const audioButton = target.closest('.audio-link-icon');
+      if (!audioButton) return;
+
+      event.preventDefault();
+      const wrap = audioButton.closest('.audio-link-inline');
+      const audio = wrap ? wrap.querySelector('audio') : null;
+      if (!audio) return;
+
+      if (audio.paused) {
+        audio.play().catch(() => {});
+      } else {
+        audio.pause();
+      }
+    });
 
     (function(){
       function getParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
@@ -1699,7 +1770,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603191q93"></script>
+  <script src="courses.generated.js?v=202603191t7i"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -1806,7 +1877,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603191q93"></script>
+    <script src="js/chat.js?v=202603191t7i"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
 

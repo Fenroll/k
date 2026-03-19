@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202603191q93"></script>
+  <script src="js/auth-guard.js?v=202603191t7i"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -443,6 +443,44 @@
 
     #editor a:hover {
       color: inherit;
+    }
+
+    #editor .audio-link-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0.2em 0;
+      max-width: 100%;
+      vertical-align: middle;
+    }
+
+    #editor .audio-link-icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #588157;
+      border-radius: 999px;
+      background: #f0f7f0;
+      color: #2f5d50;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+
+    #editor .audio-link-inline audio {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+
+    #editor .audio-link-icon img {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      pointer-events: none;
     }
 
     .heading-color-btn,
@@ -1596,7 +1634,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202603191q93"></script>
+  <script src="courses.generated.js?v=202603191t7i"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2915,6 +2953,74 @@
       editor.focus();
     }
 
+    function insertTopicDividerSection() {
+      const selection = window.getSelection();
+      if (!selection.rangeCount) return;
+
+      const range = selection.getRangeAt(0);
+      const savedRange = range.cloneRange();
+
+      const findAncestor = (node, predicate) => {
+        while (node && node !== editor) {
+          if (node.nodeType === Node.ELEMENT_NODE && predicate(node)) return node;
+          node = node.parentNode;
+        }
+        return null;
+      };
+
+      const blockTags = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'PRE']);
+      const currentHeading = findAncestor(range.startContainer, (el) => /^H[1-6]$/.test(el.tagName));
+      const currentBlock = findAncestor(range.startContainer, (el) => blockTags.has(el.tagName));
+
+      const isAtStartOfElement = (targetEl) => {
+        if (!targetEl) return false;
+        const probe = savedRange.cloneRange();
+        probe.selectNodeContents(targetEl);
+        probe.setEnd(savedRange.startContainer, savedRange.startOffset);
+        return probe.toString().length === 0;
+      };
+
+      const makeDashedDivider = () => {
+        const divider = document.createElement('hr');
+        const separatorColor = getCurrentHeadingColor();
+        divider.style.cssText = `border: none; border-top: 2px dashed ${separatorColor};`;
+        divider.dataset.separatorStyle = 'dashed';
+        return divider;
+      };
+
+      const fragment = document.createDocumentFragment();
+      const topDivider = makeDashedDivider();
+      const spacer1 = document.createElement('p');
+      spacer1.innerHTML = '<br>';
+      const spacer2 = document.createElement('p');
+      spacer2.innerHTML = '<br>';
+      const bottomDivider = makeDashedDivider();
+
+      fragment.appendChild(topDivider);
+      fragment.appendChild(spacer1);
+      fragment.appendChild(spacer2);
+      fragment.appendChild(bottomDivider);
+
+      if (currentHeading && currentHeading.parentNode) {
+        const insertBeforeHeading = isAtStartOfElement(currentHeading);
+        currentHeading.parentNode.insertBefore(fragment, insertBeforeHeading ? currentHeading : currentHeading.nextSibling);
+      } else if (currentBlock && currentBlock.parentNode && isAtStartOfElement(currentBlock)) {
+        currentBlock.parentNode.insertBefore(fragment, currentBlock);
+      } else {
+        range.insertNode(fragment);
+      }
+
+      const afterBottom = document.createRange();
+      afterBottom.setStartAfter(bottomDivider);
+      afterBottom.collapse(true);
+      selection.removeAllRanges();
+      selection.addRange(afterBottom);
+
+      repairInvalidHeadingStructureInEditor();
+      saveToHistory();
+      editor.focus();
+    }
+
     function insertHR() {
       insertDivider({ dashed: false });
     }
@@ -3054,6 +3160,38 @@
       toggleBlockquote();
     });
 
+    function isMp3LinkUrl(url) {
+      return /\.mp3(?:[?#].*)?$/i.test(String(url || '').trim());
+    }
+
+    function createAudioInlineElement(url, labelText = 'Audio') {
+      const safeUrl = String(url || '').trim();
+
+      const wrap = document.createElement('span');
+      wrap.className = 'audio-link-inline';
+      wrap.setAttribute('contenteditable', 'false');
+      wrap.setAttribute('data-audio-src', safeUrl);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'audio-link-icon';
+      btn.setAttribute('aria-label', 'Play audio');
+      btn.title = 'Play audio';
+
+      const icon = document.createElement('img');
+      icon.src = 'svg/md-editor/icon-sound.svg';
+      icon.alt = 'Play audio';
+      btn.appendChild(icon);
+
+      const audio = document.createElement('audio');
+      audio.preload = 'none';
+      audio.src = safeUrl;
+
+      wrap.appendChild(btn);
+      wrap.appendChild(audio);
+      return wrap;
+    }
+
     // Link Button - Simple prompt
     document.getElementById('linkBtn').addEventListener('click', () => {
       const selection = window.getSelection();
@@ -3072,10 +3210,27 @@
       // Get selected text
       const selectedText = selection.toString();
       const range = selection.getRangeAt(0);
+
+      const normalizedUrl = url.trim();
+
+      if (isMp3LinkUrl(normalizedUrl)) {
+        const audioInline = createAudioInlineElement(normalizedUrl, selectedText || 'Audio');
+        range.deleteContents();
+        range.insertNode(audioInline);
+
+        range.setStartAfter(audioInline);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+
+        saveToHistory();
+        editor.focus();
+        return;
+      }
       
       // Create link with wavy underline
       const link = document.createElement('a');
-      link.href = url.trim();
+      link.href = normalizedUrl;
       link.textContent = selectedText;
       link.style.textDecoration = 'underline wavy';
       link.style.textDecorationSkipInk = 'none';
@@ -3218,8 +3373,17 @@
       insertHR();
     });
 
-    document.getElementById('dashedLineBtn').addEventListener('click', () => {
-      insertDashedLine();
+    document.getElementById('dashedLineBtn').addEventListener('click', (e) => {
+      if (e.shiftKey) {
+        insertTopicDividerSection();
+      } else {
+        insertDashedLine();
+      }
+    });
+
+    document.getElementById('dashedLineBtn').addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      insertTopicDividerSection();
     });
 
     document.getElementById('undoBtn').addEventListener('click', () => {
@@ -4173,6 +4337,40 @@ localStorage.setItem('textEditorContent', htmlContent);
     img[data-align="right"] {
       display: block;
       margin: 8px 0 8px auto;
+    }
+    .audio-link-inline {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin: 0.2em 0;
+      max-width: 100%;
+      vertical-align: middle;
+    }
+    .audio-link-icon {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #588157;
+      border-radius: 999px;
+      background: #f0f7f0;
+      color: #2f5d50;
+      cursor: pointer;
+      font-size: 14px;
+      line-height: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 auto;
+    }
+    .audio-link-inline audio {
+      display: none;
+      width: 0;
+      height: 0;
+    }
+    .audio-link-icon img {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      pointer-events: none;
     }
     a {
       color: inherit; /* Changed to inherit */
@@ -6674,7 +6872,13 @@ renderMathInElement(document.body, {
       // Instead of innerHTML which breaks cursor position
       const emptyParagraphs = editor.querySelectorAll('p');
       emptyParagraphs.forEach(p => {
-        if (p.textContent.trim() === '' && !p.querySelector('input, img, br')) {
+        const rawText = (p.textContent || '').replace(/\u200B/g, '');
+        const hasVisibleText = rawText.length > 0;
+        const hasStructuralContent = !!p.querySelector('input, img, br, table, ul, ol, blockquote, audio, .audio-link-inline');
+        const hasAttributes = p.attributes.length > 0;
+
+        // Preserve intentional blank lines; only remove truly empty artifact paragraphs.
+        if (!hasVisibleText && !hasStructuralContent && !hasAttributes && p.childNodes.length === 0) {
           p.remove();
         }
       });
@@ -6980,7 +7184,8 @@ renderMathInElement(document.body, {
         const hasOnlyBr = p.children.length === 1 && p.querySelector('br') && textContent === '';
         const isEmpty = textContent === '' && !p.querySelector('img, input, table, ul, ol, h1, h2, h3, h4, h5, h6, blockquote');
         
-        if (isEmpty || hasOnlyBr) {
+        // Preserve intentionally added blank lines (especially around topic dividers).
+        if (isEmpty && !hasOnlyBr) {
           // Only remove if it's not between list items (to preserve list structure)
           const prevSibling = p.previousElementSibling;
           const nextSibling = p.nextElementSibling;
@@ -7000,6 +7205,21 @@ renderMathInElement(document.body, {
     });
     // Click handler for links (Ctrl+Click to open)
     editor.addEventListener('click', (e) => {
+      const audioButton = e.target instanceof Element ? e.target.closest('.audio-link-icon') : null;
+      if (audioButton) {
+        e.preventDefault();
+        const audioWrap = audioButton.closest('.audio-link-inline');
+        const audio = audioWrap ? audioWrap.querySelector('audio') : null;
+        if (audio) {
+          if (audio.paused) {
+            audio.play().catch(() => {});
+          } else {
+            audio.pause();
+          }
+        }
+        return;
+      }
+
       // Check if clicking on a link
       let target = e.target;
       
@@ -7399,6 +7619,17 @@ renderMathInElement(document.body, {
           } else if (tag === 'span' && node.classList.contains('editor-note')) {
             // Handle editor-note spans: just return their text content
             return processChildren(node, insideListItem, depth);
+          } else if (tag === 'span' && node.classList.contains('audio-link-inline')) {
+            const audioEl = node.querySelector('audio[src]');
+            if (!audioEl) return processChildren(node, insideListItem, depth);
+            const src = audioEl.getAttribute('src') || '';
+            const linkEl = node.querySelector('a[href]');
+            const label = (linkEl ? linkEl.textContent : '') || 'Audio';
+            return '[' + label + '](' + src + ')';
+          } else if (tag === 'audio') {
+            const src = node.getAttribute('src') || '';
+            if (!src) return '';
+            return '[Audio](' + src + ')';
           } else if (tag === 'code') {
             return '`' + processChildren(node, insideListItem, depth) + '`';
           } else if (tag === 'a') {
@@ -7738,6 +7969,19 @@ renderMathInElement(document.body, {
 
     // Apply inline formatting (bold, italic, code, links, images)
     function applyInlineFormatting(text) {
+      const escapeHtmlInline = (value) => String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      const escapeAttributeInline = (value) => String(value || '')
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+
+      const isMp3Url = (url) => /\.mp3(?:[?#].*)?$/i.test(String(url || '').trim());
+
       const mathSegments = [];
       text = text.replace(/\$\$[\s\S]+?\$\$|\\\[[\s\S]+?\\\]|\\\([\s\S]+?\\\)|\$(?:\\\$|[^$])+\$/g, (match) => {
         const token = `@@MATH_${mathSegments.length}@@`;
@@ -7792,7 +8036,17 @@ renderMathInElement(document.body, {
       text = text.replace(/__(.*?)__/g, '<u>$1</u>');
       text = text.replace(/\*(.*?)\*/g, '<em>$1</em>');
       text = text.replace(/`(.*?)`/g, '<code>$1</code>');
-      text = text.replace(/\[(.*?)\]\((.*?)\)/g, '<a href="$2">$1</a>');
+      text = text.replace(/\[(.*?)\]\((.*?)\)/g, (match, label, href) => {
+        const rawHref = String(href || '').trim();
+        const rawLabel = String(label || '').trim() || 'Audio';
+        if (!isMp3Url(rawHref)) {
+          return `<a href="${escapeAttributeInline(rawHref)}">${label}</a>`;
+        }
+
+        const safeHref = escapeAttributeInline(rawHref);
+        const safeLabel = escapeHtmlInline(rawLabel);
+        return `<span class="audio-link-inline" contenteditable="false" data-audio-src="${safeHref}"><button type="button" class="audio-link-icon" aria-label="Play audio" title="Play audio"><img src="svg/md-editor/icon-sound.svg" alt="Play audio"></button><audio preload="none" src="${safeHref}"></audio></span>`;
+      });
       // Handle <br> tags
       text = text.replace(/<br\s*\/?>/gi, '<br>');
 
@@ -8823,7 +9077,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603191q93"></script>
+    <script src="js/chat.js?v=202603191t7i"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
