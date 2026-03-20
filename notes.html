@@ -864,13 +864,13 @@
                 </li>
                 <li class="base-navigation-button">
                     <a href="index.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-courses.svg?v=2026031715gu">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603151sxu" alt="Courses" style="filter: brightness(0) invert(1);" />
                         <span>Courses</span>
                     </a>
                 </li>
                 <li class="base-navigation-button active">
                     <a href="notes.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-anamnesis.svg?v=2026031715gu" style="filter: brightness(0) invert(1);">
+                        <img class="svg-icon" src="svg/icon-notebook.svg" style="filter: brightness(0) invert(1);">
                         <span>Notes</span>
                     </a>
                 </li>
@@ -895,7 +895,7 @@
                 <li class="base-navigation-button" id="admin-button" style="display: none;">
                     <a href="admin.html?v=2026031715gu">
                         <img class="svg-icon" src="svg/icon-admin.svg?v=2026031715gu" style="filter: brightness(0) invert(1);">
-                        <span>Admin Panel</span>
+                        <span>Admin</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
@@ -2324,14 +2324,30 @@
 
             async function init() {
                 const adminButton = document.getElementById('admin-button');
-                if (adminButton && window.currentUserPromise) {
-                    window.currentUserPromise.then(user => {
-                        if (user && user.isAdmin) {
-                            adminButton.style.display = 'list-item';
+                if (adminButton) {
+                    const isAdminByRole = (candidate) => {
+                        return Boolean(candidate && (candidate.isAdmin || String(candidate.role || '').toLowerCase() === 'admin'));
+                    };
+
+                    try {
+                        const cachedRaw = localStorage.getItem('loggedInUser');
+                        if (cachedRaw) {
+                            const cachedUser = JSON.parse(cachedRaw);
+                            if (isAdminByRole(cachedUser)) {
+                                adminButton.style.display = 'list-item';
+                            }
                         }
-                    }).catch(error => {
-                        console.error('Error checking admin status:', error);
-                    });
+                    } catch (_) {
+                        // Ignore malformed cache and continue with async check.
+                    }
+
+                    if (window.currentUserPromise) {
+                        window.currentUserPromise.then(user => {
+                            adminButton.style.display = isAdminByRole(user) ? 'list-item' : 'none';
+                        }).catch(error => {
+                            console.error('Error checking admin status:', error);
+                        });
+                    }
                 }
 
                 els.courseNotesEditor.contentEditable = 'true';

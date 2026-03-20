@@ -6,7 +6,7 @@
     <title>Anamnesis</title>
     
     <!-- Scripts -->
-    <script src="js/auth-guard.js?v=20260320shh"></script>
+    <script src="js/auth-guard.js?v=20260320u59"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=20260127"></script>
@@ -546,7 +546,7 @@
                 </li>
                 <li class="base-navigation-button">
                     <a href="index.html"> <!-- Link back to Courses -->
-                        <img class="svg-icon" src="svg/icon-courses.svg">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603151sxu" alt="Courses" style="filter: brightness(0) invert(1);" />
                         <span>Courses</span>
                     </a>
                 </li>
@@ -578,7 +578,7 @@
                 <li class="base-navigation-button" id="admin-button" style="display: none;">
                     <a href="admin.html">
                         <img class="svg-icon" src="svg/icon-admin.svg" style="filter: brightness(0) invert(1);">
-                        <span>Admin Panel</span>
+                        <span>Admin</span>
                     </a>
                 </li>
                 <li class="base-navigation-button">
@@ -862,7 +862,7 @@
     
     <!-- CHAT SYSTEM -->
     <script src="js/presence.js?v=20260131"></script>
-    <script src="js/chat.js?v=20260320shh"></script>
+    <script src="js/chat.js?v=20260320u59"></script>
 
     <script>
         function handleLogout() {
@@ -885,19 +885,37 @@
             });
         }
 
-        // Admin button check
-        document.addEventListener('DOMContentLoaded', function() {
+        // Admin button check (cache-first to prevent reload flicker)
+        function updateAdminButtonVisibility() {
             const adminButton = document.getElementById('admin-button');
-            if (adminButton && window.currentUserPromise) {
-            window.currentUserPromise.then(user => {
-                if (user && user.isAdmin) {
-                adminButton.style.display = 'list-item';
+            if (!adminButton) return;
+
+            const isAdminByRole = (candidate) => {
+                return Boolean(candidate && (candidate.isAdmin || String(candidate.role || '').toLowerCase() === 'admin'));
+            };
+
+            try {
+                const cachedRaw = localStorage.getItem('loggedInUser');
+                if (cachedRaw) {
+                    const cachedUser = JSON.parse(cachedRaw);
+                    if (isAdminByRole(cachedUser)) {
+                        adminButton.style.display = 'list-item';
+                    }
                 }
-            }).catch(error => {
-                console.error("Error checking admin status:", error);
-            });
+            } catch (_) {
+                // Ignore malformed cache and continue with async check.
             }
-        });
+
+            if (window.currentUserPromise) {
+                window.currentUserPromise.then(user => {
+                    adminButton.style.display = isAdminByRole(user) ? 'list-item' : 'none';
+                }).catch(error => {
+                    console.error("Error checking admin status:", error);
+                });
+            }
+        }
+
+        updateAdminButtonVisibility();
     </script>
 <script src="js/mobile-nav.js?v=20260129"></script>
 </body>

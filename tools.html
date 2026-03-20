@@ -734,13 +734,13 @@
             </li>
             <li class="base-navigation-button">
               <a href="index.html?v=202603101mce">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603101mce" alt="Courses" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603151sxu" alt="Courses" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a href="notes.html?v=202603101mce">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=202603101mce" alt="Notes" style="filter: brightness(0) invert(1);" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-notebook.svg" alt="Notes" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Notes</span>
               </a>
             </li>
@@ -765,7 +765,7 @@
             <li class="base-navigation-button" id="admin-button" style="display: none;">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=202603101mce">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=202603101mce" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
-                <span class="link-text">Admin Panel</span>
+                <span class="link-text">Admin</span>
               </a>
             </li>
             <li class="base-navigation-button">
@@ -1429,19 +1429,37 @@
   </script>
   
   <script>
-    // Show admin button if user is admin
-    document.addEventListener('DOMContentLoaded', function() {
+    // Show admin button (cache-first to prevent reload flicker)
+    function updateAdminButtonVisibility() {
       const adminButton = document.getElementById('admin-button');
-      if (adminButton && window.currentUserPromise) {
-        window.currentUserPromise.then(user => {
-          if (user && user.isAdmin) {
+      if (!adminButton) return;
+
+      const isAdminByRole = (candidate) => {
+        return Boolean(candidate && (candidate.isAdmin || String(candidate.role || '').toLowerCase() === 'admin'));
+      };
+
+      try {
+        const cachedRaw = localStorage.getItem('loggedInUser');
+        if (cachedRaw) {
+          const cachedUser = JSON.parse(cachedRaw);
+          if (isAdminByRole(cachedUser)) {
             adminButton.style.display = 'list-item';
           }
+        }
+      } catch (_) {
+        // Ignore malformed cache and continue with async check.
+      }
+
+      if (window.currentUserPromise) {
+        window.currentUserPromise.then(user => {
+          adminButton.style.display = isAdminByRole(user) ? 'list-item' : 'none';
         }).catch(error => {
           console.error("Error checking admin status for button visibility:", error);
         });
       }
-    });
+    }
+
+    updateAdminButtonVisibility();
   </script>
   
   <script src="js/user-identity.js?v=202602171mhr"></script>

@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260320shh"></script>
+  <script src="js/auth-guard.js?v=20260320u59"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1096,7 +1096,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=20260320shh"></script>
+  <script src="courses.generated.js?v=20260320u59"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
@@ -1132,13 +1132,13 @@
             </li>
             <li class="base-navigation-button active">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="index.html?v=202603151sxu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603151sxu" alt="Courses" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603151sxu" alt="Courses" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="notes.html?v=202603151sxu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-anamnesis.svg?v=202603151sxu" alt="Notes" style="filter: brightness(0) invert(1);" />
+                <img class="svg-icon" width="22" height="22" src="svg/icon-notebook.svg" alt="Notes" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Notes</span>
               </a>
             </li>
@@ -1163,7 +1163,7 @@
             <li class="base-navigation-button" id="admin-button" style="display: none;">
               <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=202603151sxu">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=202603151sxu" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
-                <span class="link-text">Admin Panel</span>
+                <span class="link-text">Admin</span>
               </a>
             </li>
             <li class="base-navigation-button">
@@ -1620,19 +1620,37 @@ document.addEventListener('DOMContentLoaded', function() {
       window.location.href = 'login.html';
     }
 
-    // Admin button visibility logic
-    document.addEventListener('DOMContentLoaded', function() {
+    // Admin button visibility logic (cache-first to prevent reload flicker)
+    function updateAdminButtonVisibility() {
       const adminButton = document.getElementById('admin-button');
-      if (adminButton && window.currentUserPromise) {
-        window.currentUserPromise.then(user => {
-          if (user && user.isAdmin) {
+      if (!adminButton) return;
+
+      const isAdminByRole = (candidate) => {
+        return Boolean(candidate && (candidate.isAdmin || String(candidate.role || '').toLowerCase() === 'admin'));
+      };
+
+      try {
+        const cachedRaw = localStorage.getItem('loggedInUser');
+        if (cachedRaw) {
+          const cachedUser = JSON.parse(cachedRaw);
+          if (isAdminByRole(cachedUser)) {
             adminButton.style.display = 'list-item';
           }
+        }
+      } catch (_) {
+        // Ignore malformed cache and continue with async check.
+      }
+
+      if (window.currentUserPromise) {
+        window.currentUserPromise.then(user => {
+          adminButton.style.display = isAdminByRole(user) ? 'list-item' : 'none';
         }).catch(() => {
           // Silent fail for admin status
         });
       }
-    });
+    }
+
+    updateAdminButtonVisibility();
 
     if (searchInput) {
       searchInput.addEventListener('input', filterCourses);
@@ -1643,7 +1661,7 @@ document.addEventListener('DOMContentLoaded', function() {
   body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
     .layout { display: flex; min-height: 100vh; }
   .logo-header { background: #262626; height: 107px; min-height: 107px; max-height: 107px; text-align: center; border-bottom: 1px solid #1d1b1b; padding: 0; display: flex; align-items: center; justify-content: center; }
-    .logo-img { width: 200px; margin-top: 3px; }
+    .logo-img { width: 240px !important; height: 50px !important; object-fit: contain; padding-top: 4px !important; }
     .sidebar-profile {
       margin-left: 8px;
       font-weight: 500;
@@ -1974,7 +1992,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=20260320shh"></script>
+<script src="js/chat.js?v=20260320u59"></script>
 
 <!-- Chat widget is injected by chat.js -->
 

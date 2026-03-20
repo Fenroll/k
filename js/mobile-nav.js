@@ -13,6 +13,7 @@
     if (page === 'index.html' || page === '') activeTab = 'courses';
     else if (page.includes('notes') || page.includes('anamnesis')) activeTab = 'notes';
     else if (page.includes('calendar')) activeTab = 'calendar';
+    else if (page.includes('tools')) activeTab = 'tools';
     
     // HTML Structure
     const navHTML = `
@@ -22,7 +23,7 @@
             <span>Courses</span>
         </a>
         <a href="notes.html" class="bottom-nav-item ${activeTab === 'notes' ? 'active' : ''}">
-            <img src="svg/icon-anamnesis.svg" alt="Notes">
+            <img src="svg/icon-notebook.svg" alt="Notes">
             <span>Notes</span>
         </a>
         <a href="calendar.html" class="bottom-nav-item ${activeTab === 'calendar' ? 'active' : ''}">
@@ -45,14 +46,18 @@
             <a href="account.html" class="others-menu-item">
                 <img src="svg/icon-account.svg" alt="Account"> Account
             </a>
-            <a href="tools.html" class="others-menu-item">
-                <img src="svg/icon-tools.svg" alt="Tools"> Tools
+            <a href="tools.html"  class="others-menu-item">
+                <img src="svg/icon-tools.svg" alt="Tools">
+            <span>Tools</span>
+              </a>
+            <a href="anamnesis.html" class="others-menu-item">
+                <img src="svg/icon-anamnesis.svg" alt="Anamnesis"> Anamnesis
             </a>
             <a href="text-editor.html" class="others-menu-item">
                 <img src="svg/icon-editor.svg" alt="Editor"> Editor
             </a>
             <a href="admin.html" class="others-menu-item" id="mobile-admin-link" style="display: none;">
-                <img src="svg/icon-admin.svg" alt="Admin"> Admin Panel
+                <img src="svg/icon-admin.svg" alt="Admin"> Admin 
             </a>
             <a href="#" id="mobile-logout" class="others-menu-item">
                 <img src="svg/icon-signout.svg" alt="Logout"> Logout
