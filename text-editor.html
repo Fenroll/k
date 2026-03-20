@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260320u59"></script>
+  <script src="js/auth-guard.js?v=20260320128n"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1387,6 +1387,19 @@
           <label for="noteTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Note Content</label>
           <textarea id="noteTextInput" placeholder="Paste your note content here..." style="width: 100%; height: 150px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: var(--app-ui-font); resize: vertical;"></textarea>
         </div>
+        <div style="margin-bottom: 4px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb;">
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px;">
+            <input type="file" id="noteImageUploadFileInput" accept="image/*" style="display: none;">
+            <label for="noteImageUploadFileInput" style="display: inline-flex; align-items: center; justify-content: center; padding: 8px 12px; border-radius: 8px; border: 1px solid #588157; background: #588157; color: #ffffff; font-weight: 600; font-size: 12px; cursor: pointer;">Choose image</label>
+            <span id="noteImageUploadFileName" style="font-size: 12px; color: #6b7280;"></span>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+            <input type="text" id="noteImageUrlInput" placeholder="or paste image URL" style="flex: 1 1 220px; min-width: 200px; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px;">
+            <label for="noteImageWidthInput" style="font-size: 12px; color: #374151;">Width %</label>
+            <input type="number" id="noteImageWidthInput" min="10" max="100" value="100" style="width: 74px; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; font-size: 13px;">
+            <button type="button" id="insertNoteImageBtn" style="padding: 8px 12px; border: 1px solid #588157; background: #ffffff; color: #2f5d50; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer;">Insert image in note</button>
+          </div>
+        </div>
       </div>
       <div class="modal-footer">
         <button id="removeNoteBtn" style="display: none; background: #ef4444; color: #fff; border-color: #ef4444; margin-right: auto;">Remove Note</button>
@@ -1637,7 +1650,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260320u59"></script>
+  <script src="courses.generated.js?v=20260320128n"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2824,20 +2837,73 @@
       return selection.getRangeAt(0);
     }
 
+    function applyIntrinsicWidthToImage(img) {
+      if (!(img instanceof HTMLImageElement)) return;
+
+      const rawPercent = Number(img.getAttribute('data-width'));
+      const widthPercent = Math.min(100, Math.max(10, Number.isFinite(rawPercent) ? rawPercent : 100));
+
+      const applyWidth = () => {
+        const naturalWidth = Number(img.naturalWidth) || 0;
+        if (!naturalWidth) return;
+
+        const targetWidthPx = (naturalWidth * widthPercent) / 100;
+        img.style.width = `${targetWidthPx}px`;
+        img.style.maxWidth = 'none';
+        img.style.height = 'auto';
+        img.style.display = 'block';
+      };
+
+      if (img.complete && img.naturalWidth) {
+        applyWidth();
+      } else {
+        img.addEventListener('load', applyWidth, { once: true });
+      }
+    }
+
+    function applyIntrinsicWidthsInEditor(root = editor) {
+      if (!root || !root.querySelectorAll) return;
+      root.querySelectorAll('img[data-width]').forEach(applyIntrinsicWidthToImage);
+    }
+
+    let editorImageWidthObserver = null;
+    function ensureEditorImageWidthObserver() {
+      if (editorImageWidthObserver || !editor) return;
+
+      editorImageWidthObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (!(node instanceof Element)) return;
+
+            if (node.matches && node.matches('img[data-width]')) {
+              applyIntrinsicWidthToImage(node);
+            }
+
+            if (node.querySelectorAll) {
+              node.querySelectorAll('img[data-width]').forEach(applyIntrinsicWidthToImage);
+            }
+          });
+        });
+      });
+
+      editorImageWidthObserver.observe(editor, { childList: true, subtree: true });
+      applyIntrinsicWidthsInEditor(editor);
+    }
+
     function insertImageAtRange(imgSrc, imageAlt, imageSize, preferredRange = null) {
       const range = getImageInsertRange(preferredRange);
       if (!range) {
         throw new Error('Please click in the editor first');
       }
 
-      const widthPercent = Number(imageSize) || 100;
+      const widthPercent = Math.min(100, Math.max(10, Number(imageSize) || 100));
       const altText = imageAlt || 'Image';
 
       const img = document.createElement('img');
       img.src = imgSrc;
       img.alt = altText;
-      img.style.width = 'auto';
-      img.style.maxWidth = widthPercent + '%';
+      img.style.width = widthPercent + '%';
+      img.style.maxWidth = '100%';
       img.style.height = 'auto';
       img.style.display = 'block';
       img.setAttribute('data-original-src', imgSrc);
@@ -2847,6 +2913,7 @@
 
       range.deleteContents();
       range.insertNode(img);
+      applyIntrinsicWidthToImage(img);
 
       const br = document.createElement('br');
       range.setStartAfter(img);
@@ -2872,6 +2939,8 @@
       setImageUploadStatus('');
       document.getElementById('imageNameInput').focus();
     }
+
+    ensureEditorImageWidthObserver();
 
     function getCurrentHeadingColor() {
       return localStorage.getItem('textEditorHeadingColor') || '#588157';
@@ -4705,6 +4774,7 @@ renderMathInElement(document.body, {
     
     document.getElementById('insertImageBtn').addEventListener('click', async () => {
       let imageName = document.getElementById('imageNameInput').value.trim();
+      imageName = imageName.replace(/[.,;:!?]+$/g, '');
       const imageSize = document.getElementById('imageSizeInput').value || 100;
       const uploadFile = document.getElementById('imageUploadFileInput').files[0];
 
@@ -4783,6 +4853,10 @@ renderMathInElement(document.body, {
       const noteModal = document.getElementById('noteModal');
       noteModal.style.display = 'none';
       document.getElementById('noteTextInput').value = '';
+      document.getElementById('noteImageUrlInput').value = '';
+      document.getElementById('noteImageWidthInput').value = '100';
+      document.getElementById('noteImageUploadFileInput').value = '';
+      document.getElementById('noteImageUploadFileName').textContent = '';
       document.getElementById('noteSelectedTextInput').value = '';
       document.getElementById('insertNoteBtn').textContent = 'Save Note';
       document.getElementById('removeNoteBtn').style.display = 'none';
@@ -5048,6 +5122,93 @@ renderMathInElement(document.body, {
     }
 
     const noteTextInput = document.getElementById('noteTextInput');
+    const noteImageUrlInput = document.getElementById('noteImageUrlInput');
+    const noteImageWidthInput = document.getElementById('noteImageWidthInput');
+    const noteImageUploadFileInput = document.getElementById('noteImageUploadFileInput');
+    const noteImageUploadFileName = document.getElementById('noteImageUploadFileName');
+    const insertNoteImageBtn = document.getElementById('insertNoteImageBtn');
+
+    function insertTextAtTextareaCursor(textarea, text) {
+      const start = textarea.selectionStart || 0;
+      const end = textarea.selectionEnd || 0;
+      const prefix = textarea.value.slice(0, start);
+      const suffix = textarea.value.slice(end);
+      textarea.value = prefix + text + suffix;
+      const nextPos = start + text.length;
+      textarea.setSelectionRange(nextPos, nextPos);
+      textarea.focus();
+    }
+
+    noteImageUploadFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+      noteImageUploadFileName.textContent = file ? file.name : '';
+    });
+
+    insertNoteImageBtn.addEventListener('click', async () => {
+      let src = (noteImageUrlInput.value || '').trim().replace(/[.,;:!?]+$/g, '');
+      const uploadFile = noteImageUploadFileInput.files && noteImageUploadFileInput.files[0]
+        ? noteImageUploadFileInput.files[0]
+        : null;
+
+      if (uploadFile) {
+        try {
+          insertNoteImageBtn.disabled = true;
+          insertNoteImageBtn.textContent = 'Uploading...';
+          src = await uploadImageFileToCloudflare(uploadFile, 'Uploading note image');
+        } catch (error) {
+          alert('Note image upload failed: ' + error.message);
+          return;
+        } finally {
+          insertNoteImageBtn.disabled = false;
+          insertNoteImageBtn.textContent = 'Insert image in note';
+        }
+      }
+
+      if (!src) {
+        alert('Choose an image file or paste an image URL for the note.');
+        return;
+      }
+
+      const widthValue = Math.min(100, Math.max(10, Number(noteImageWidthInput.value) || 100));
+      const markdownImage = `![Image](${src} "width=${widthValue}%")`;
+      const needsLeadingNewline = noteTextInput.value.length > 0 && !noteTextInput.value.endsWith('\n');
+      insertTextAtTextareaCursor(noteTextInput, `${needsLeadingNewline ? '\n' : ''}${markdownImage}\n`);
+
+      noteImageUrlInput.value = '';
+      noteImageUploadFileInput.value = '';
+      noteImageUploadFileName.textContent = '';
+    });
+
+    noteTextInput.addEventListener('paste', async (e) => {
+      const clipboardItems = Array.from((e.clipboardData && e.clipboardData.items) || []);
+      const imageItem = clipboardItems.find(item => item.kind === 'file' && item.type.startsWith('image/'));
+      if (!imageItem) return;
+
+      e.preventDefault();
+
+      const file = imageItem.getAsFile();
+      if (!file) return;
+
+      try {
+        insertNoteImageBtn.disabled = true;
+        insertNoteImageBtn.textContent = 'Uploading...';
+        const src = await uploadImageFileToCloudflare(file, 'Uploading note image');
+        const widthValue = Math.min(100, Math.max(10, Number(noteImageWidthInput.value) || 100));
+        const markdownImage = `![Image](${src} "width=${widthValue}%")`;
+        const needsLeadingNewline = noteTextInput.value.length > 0 && !noteTextInput.value.endsWith('\n');
+        insertTextAtTextareaCursor(noteTextInput, `${needsLeadingNewline ? '\n' : ''}${markdownImage}\n`);
+
+        noteImageUrlInput.value = '';
+        noteImageUploadFileInput.value = '';
+        noteImageUploadFileName.textContent = '';
+      } catch (error) {
+        alert('Note image upload failed: ' + error.message);
+      } finally {
+        insertNoteImageBtn.disabled = false;
+        insertNoteImageBtn.textContent = 'Insert image in note';
+      }
+    });
+
     noteTextInput.addEventListener('keydown', (e) => {
       if (!(e.ctrlKey || e.metaKey)) return;
 
@@ -5227,6 +5388,10 @@ renderMathInElement(document.body, {
     // Simple markdown parser for note tooltips
     function parseNoteMarkdown(text) {
       if (!text) return '';
+
+      const stripTrailingUrlPunctuation = (value) => String(value || '')
+        .trim()
+        .replace(/[.,;:!?]+$/g, '');
       
       let lines = text.split('\n');
       let html = [];
@@ -5323,14 +5488,37 @@ renderMathInElement(document.body, {
         html.push('</' + closed.type + '>');
       }
       
+      const protectedTokens = [];
+      const makeToken = (htmlSnippet) => {
+        const token = `@@NOTETOKEN${protectedTokens.length}@@`;
+        protectedTokens.push(htmlSnippet);
+        return token;
+      };
+
       let result = html.join('')
-        .replace(/!\[(.*?)\]\((.*?)\)/g, '<img data-note-src="$2" alt="$1" loading="lazy" decoding="async">')
+        .replace(/!\[(.*?)\]\((.*?)(?: "(.*?)")?\)/g, (match, alt, src, title) => {
+          const safeSrc = stripTrailingUrlPunctuation(src);
+          let widthValue = '100';
+          const widthMatch = String(title || '').match(/width=(\d+)%/i);
+          if (widthMatch && widthMatch[1]) {
+            widthValue = String(Math.min(100, Math.max(10, Number(widthMatch[1]) || 100)));
+          }
+          return makeToken(`<img data-note-src="${safeSrc}" data-note-width="${widthValue}" alt="${alt}" loading="lazy" decoding="async">`);
+        })
+        .replace(/\[(.+?)\]\((.+?)\)/g, (match, label, href) => {
+          const safeHref = stripTrailingUrlPunctuation(href);
+          return makeToken(`<a href="${safeHref}" target="_blank">${label}</a>`);
+        })
         .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
         .replace(/__(.+?)__/g, '<strong>$1</strong>')
         .replace(/\*(.+?)\*/g, '<em>$1</em>')
         .replace(/_(.+?)_/g, '<em>$1</em>')
-        .replace(/`(.+?)`/g, '<code>$1</code>')
-        .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>');
+        .replace(/`(.+?)`/g, '<code>$1</code>');
+
+      result = result.replace(/@@NOTETOKEN(\d+)@@/g, (match, index) => {
+        const i = Number(index);
+        return Number.isInteger(i) && protectedTokens[i] !== undefined ? protectedTokens[i] : match;
+      });
       
       result = result
         .replace(/<br><ul>/g, '<ul>')
@@ -5346,11 +5534,35 @@ renderMathInElement(document.body, {
         return;
       }
 
+      const applyIntrinsicWidthToNoteImage = (img) => {
+        const rawPercent = Number(img.getAttribute('data-note-width'));
+        const widthPercent = Math.min(100, Math.max(10, Number.isFinite(rawPercent) ? rawPercent : 100));
+
+        const applyWidth = () => {
+          const naturalWidth = Number(img.naturalWidth) || 0;
+          if (!naturalWidth) return;
+          const targetWidthPx = (naturalWidth * widthPercent) / 100;
+          img.style.width = `${targetWidthPx}px`;
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+          img.style.display = 'block';
+          img.style.margin = '0.35em 0';
+          img.style.borderRadius = '6px';
+        };
+
+        if (img.complete && img.naturalWidth) {
+          applyWidth();
+        } else {
+          img.addEventListener('load', applyWidth, { once: true });
+        }
+      };
+
       noteTooltip.querySelectorAll('img[data-note-src]').forEach(img => {
         const src = img.getAttribute('data-note-src');
         if (!src) return;
         img.setAttribute('src', src);
         img.removeAttribute('data-note-src');
+        applyIntrinsicWidthToNoteImage(img);
       });
     }
 
@@ -7060,6 +7272,13 @@ renderMathInElement(document.body, {
         return value;
       };
 
+      const stripCitationArtifacts = (inputText) => {
+        let value = String(inputText || '');
+        value = value.replace(/\[cite_start\]/gi, '');
+        value = value.replace(/\[cite:\s*\d+(?:\s*,\s*\d+)*\s*\]/gi, '');
+        return value;
+      };
+
       const clipboardItems = Array.from((e.clipboardData && e.clipboardData.items) || []);
       const imageItem = clipboardItems.find(item => item.kind === 'file' && item.type.startsWith('image/'));
 
@@ -7094,7 +7313,7 @@ renderMathInElement(document.body, {
 
       e.preventDefault();
       const rawText = e.clipboardData.getData('text/plain');
-      const text = stripMarkdownFenceWrappers(rawText);
+      const text = stripCitationArtifacts(stripMarkdownFenceWrappers(rawText));
       
       // Get current selection
       const selection = window.getSelection();
@@ -7984,6 +8203,10 @@ renderMathInElement(document.body, {
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
 
+      const stripTrailingUrlPunctuation = (value) => String(value || '')
+        .trim()
+        .replace(/[.,;:!?]+$/g, '');
+
       const isMp3Url = (url) => /\.mp3(?:[?#].*)?$/i.test(String(url || '').trim());
 
       const mathSegments = [];
@@ -7996,15 +8219,15 @@ renderMathInElement(document.body, {
       // Images must be processed before links
       // Regex updated to capture optional title attribute
       text = text.replace(/!\[(.*?)\]\((.*?)(?: "(.*?)")?\)/g, (match, alt, src, title) => {
-        let style = 'width:auto; max-width:100%; height:auto; display:block; margin:8px auto 8px 0;';
-        let dataWidth = '';
+        src = stripTrailingUrlPunctuation(src);
+        let style = 'width:auto; max-width:none; height:auto; display:block; margin:8px auto 8px 0;';
+        let widthValue = '100';
         let dataAlign = ' data-align="left"';
 
         if (title) {
           const widthMatch = title.match(/width=(\d+)%/);
           if (widthMatch && widthMatch[1]) {
-            style = `width:auto; max-width:${widthMatch[1]}%; height:auto; display:block; margin:8px auto 8px 0;`;
-            dataWidth = ` data-width="${widthMatch[1]}"`;
+            widthValue = String(Math.min(100, Math.max(10, Number(widthMatch[1]) || 100)));
           }
 
           const alignMatch = title.match(/align=(left|center|right)/i);
@@ -8034,7 +8257,11 @@ renderMathInElement(document.body, {
         // This is only for when generating <style> blocks for export, not for inline images
         // If you have export logic that writes <style>img{...}</style>, change it to .markdown-body img{...}
 
-        return `<img src="${finalSrc}?v=202602171mhr" alt="${alt}" style="${style}"${dataWidth}${dataAlign}${dataOriginalSrc}>`;
+        const srcWithVersion = (finalSrc.startsWith('http://') || finalSrc.startsWith('https://'))
+          ? finalSrc
+          : `${finalSrc}?v=202602171mhr`;
+
+        return `<img src="${srcWithVersion}" alt="${alt}" style="${style}" data-width="${widthValue}"${dataAlign}${dataOriginalSrc}>`;
       });
       text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
       text = text.replace(/__(.*?)__/g, '<u>$1</u>');
@@ -9081,7 +9308,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260320u59"></script>
+    <script src="js/chat.js?v=20260320128n"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
