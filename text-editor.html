@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260320128n"></script>
+  <script src="js/auth-guard.js?v=2026032015vi"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1259,6 +1259,11 @@
     <button id="deleteTableCtx"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Table</button>
   </div>
 
+  <!-- Audio context menu -->
+  <div id="audioContextMenu" class="table-context-menu">
+    <button id="deleteAudioCtx"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" style="width: 16px; height: 16px; margin-right: 6px; vertical-align: middle;"> Delete Audio</button>
+  </div>
+
 
 
   <!-- Shortcuts modal -->
@@ -1650,7 +1655,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260320128n"></script>
+  <script src="courses.generated.js?v=2026032015vi"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -5744,10 +5749,57 @@ renderMathInElement(document.body, {
 
     // Table context menu functionality
     const tableContextMenu = document.getElementById('tableContextMenu');
+    const audioContextMenu = document.getElementById('audioContextMenu');
     let contextMenuCell = null;
+    let contextMenuAudioTarget = null;
+
+    function resolveAudioContextTarget(target) {
+      if (!(target instanceof Element)) return null;
+
+      const inline = target.closest('.audio-link-inline');
+      if (inline) return inline;
+
+      const button = target.closest('.audio-link-icon');
+      if (button) {
+        const parent = button.parentElement;
+        if (parent) {
+          const audioSibling = Array.from(parent.children).find((el) => el.tagName === 'AUDIO');
+          if (audioSibling) return { button, audio: audioSibling };
+        }
+
+        if (button.nextElementSibling && button.nextElementSibling.tagName === 'AUDIO') {
+          return { button, audio: button.nextElementSibling };
+        }
+      }
+
+      const audio = target.closest('audio');
+      if (audio) {
+        const parent = audio.parentElement;
+        if (parent) {
+          const buttonSibling = Array.from(parent.children).find((el) => el.classList && el.classList.contains('audio-link-icon'));
+          if (buttonSibling) return { button: buttonSibling, audio };
+        }
+        return audio;
+      }
+
+      return null;
+    }
 
     // Show context menu on right-click in table
     editor.addEventListener('contextmenu', (e) => {
+      const audioTarget = resolveAudioContextTarget(e.target);
+      if (audioTarget) {
+        e.preventDefault();
+        contextMenuAudioTarget = audioTarget;
+        contextMenuCell = null;
+        tableContextMenu.classList.remove('active');
+
+        audioContextMenu.style.left = e.pageX + 'px';
+        audioContextMenu.style.top = e.pageY + 'px';
+        audioContextMenu.classList.add('active');
+        return;
+      }
+
       let node = e.target;
       
       // Check if click is inside a table cell
@@ -5756,6 +5808,8 @@ renderMathInElement(document.body, {
           e.preventDefault();
           
           contextMenuCell = node;
+          contextMenuAudioTarget = null;
+          audioContextMenu.classList.remove('active');
           
           // Position the context menu
           tableContextMenu.style.left = e.pageX + 'px';
@@ -5771,6 +5825,30 @@ renderMathInElement(document.body, {
     // Hide context menu on click outside
     document.addEventListener('click', () => {
       tableContextMenu.classList.remove('active');
+      audioContextMenu.classList.remove('active');
+    });
+
+    document.getElementById('deleteAudioCtx').addEventListener('click', () => {
+      if (contextMenuAudioTarget) {
+        if (contextMenuAudioTarget instanceof Element && contextMenuAudioTarget.classList.contains('audio-link-inline')) {
+          contextMenuAudioTarget.remove();
+          saveToHistory();
+        } else if (contextMenuAudioTarget instanceof HTMLAudioElement) {
+          contextMenuAudioTarget.remove();
+          saveToHistory();
+        } else if (contextMenuAudioTarget.audio || contextMenuAudioTarget.button) {
+          if (contextMenuAudioTarget.audio && contextMenuAudioTarget.audio.parentNode) {
+            contextMenuAudioTarget.audio.remove();
+          }
+          if (contextMenuAudioTarget.button && contextMenuAudioTarget.button.parentNode) {
+            contextMenuAudioTarget.button.remove();
+          }
+          saveToHistory();
+        }
+      }
+
+      contextMenuAudioTarget = null;
+      audioContextMenu.classList.remove('active');
     });
 
     // Context menu actions
@@ -7157,19 +7235,45 @@ renderMathInElement(document.body, {
     editor.addEventListener('copy', (e) => {
       const selection = window.getSelection();
 
+      const isCopyableContentImage = (img) => {
+        if (!(img instanceof HTMLImageElement)) return false;
+        if (!editor.contains(img)) return false;
+        if (img.closest('.audio-link-icon') || img.closest('.audio-link-inline')) return false;
+
+        const src = String(img.getAttribute('src') || '').toLowerCase();
+        const alt = String(img.getAttribute('alt') || '').toLowerCase();
+        if (src.includes('svg/md-editor/icon-sound.svg')) return false;
+        if (alt === 'play audio') return false;
+
+        return true;
+      };
+
       const resolveCopiedImage = () => {
         if (!selection || selection.rangeCount === 0) {
-          return (lastClickedEditorImage && editor.contains(lastClickedEditorImage)) ? lastClickedEditorImage : null;
+          return isCopyableContentImage(lastClickedEditorImage) ? lastClickedEditorImage : null;
         }
 
         const range = selection.getRangeAt(0);
 
         // Expanded selection containing an image.
         if (!range.collapsed) {
+          if ((selection.toString() || '').trim().length > 0) {
+            return null;
+          }
+
           const fragment = range.cloneContents();
           const selectedImage = fragment.querySelector('img');
           if (selectedImage) {
-            return selectedImage;
+            const src = String(selectedImage.getAttribute('src') || '').toLowerCase();
+            const alt = String(selectedImage.getAttribute('alt') || '').toLowerCase();
+            if (src.includes('svg/md-editor/icon-sound.svg') || alt === 'play audio') {
+              return null;
+            }
+
+            const editorImage = editor.querySelector(`img[src="${CSS.escape(selectedImage.getAttribute('src') || '')}"]`);
+            if (isCopyableContentImage(editorImage)) {
+              return editorImage;
+            }
           }
         }
 
@@ -7178,21 +7282,21 @@ renderMathInElement(document.body, {
         if (startNode === editor) {
           const right = editor.childNodes[range.startOffset] || null;
           const left = range.startOffset > 0 ? editor.childNodes[range.startOffset - 1] : null;
-          if (right instanceof HTMLImageElement) return right;
-          if (left instanceof HTMLImageElement) return left;
+          if (right instanceof HTMLImageElement && isCopyableContentImage(right)) return right;
+          if (left instanceof HTMLImageElement && isCopyableContentImage(left)) return left;
         }
 
         if (startNode && startNode.nodeType === Node.TEXT_NODE) {
           startNode = startNode.parentElement;
         }
 
-        if (startNode instanceof HTMLImageElement && editor.contains(startNode)) return startNode;
+        if (startNode instanceof HTMLImageElement && isCopyableContentImage(startNode)) return startNode;
         if (startNode instanceof Element) {
           const closest = startNode.closest('img');
-          if (closest && editor.contains(closest)) return closest;
+          if (closest && isCopyableContentImage(closest)) return closest;
         }
 
-        return (lastClickedEditorImage && editor.contains(lastClickedEditorImage)) ? lastClickedEditorImage : null;
+        return isCopyableContentImage(lastClickedEditorImage) ? lastClickedEditorImage : null;
       };
 
       const copiedImage = resolveCopiedImage();
@@ -7430,12 +7534,49 @@ renderMathInElement(document.body, {
     editor.addEventListener('click', (e) => {
       const audioButton = e.target instanceof Element ? e.target.closest('.audio-link-icon') : null;
       if (audioButton) {
+        const resolveAudioForButton = (button) => {
+          const wrap = button.closest('.audio-link-inline');
+          if (wrap) {
+            const wrappedAudio = wrap.querySelector('audio');
+            if (wrappedAudio) return { audio: wrappedAudio, source: 'wrapped' };
+          }
+
+          const directNext = button.nextElementSibling;
+          if (directNext && directNext.tagName === 'AUDIO') {
+            return { audio: directNext, source: 'direct-next-sibling' };
+          }
+
+          const parent = button.parentElement;
+          if (parent) {
+            const siblingAudio = Array.from(parent.children).find((el) => el.tagName === 'AUDIO');
+            if (siblingAudio) return { audio: siblingAudio, source: 'same-parent' };
+          }
+
+          const nearbyContainer = button.closest('p, li, div, td, th, blockquote');
+          if (nearbyContainer) {
+            const allButtons = Array.from(nearbyContainer.querySelectorAll('.audio-link-icon'));
+            const index = allButtons.indexOf(button);
+            const allAudios = Array.from(nearbyContainer.querySelectorAll('audio'));
+            if (index >= 0 && allAudios[index]) {
+              return { audio: allAudios[index], source: 'indexed-nearby' };
+            }
+          }
+
+          return { audio: null, source: 'not-found' };
+        };
+
         e.preventDefault();
+        const resolvedAudio = resolveAudioForButton(audioButton);
         const audioWrap = audioButton.closest('.audio-link-inline');
-        const audio = audioWrap ? audioWrap.querySelector('audio') : null;
+        const audio = resolvedAudio.audio;
         if (audio) {
           if (audio.paused) {
-            audio.play().catch(() => {});
+            const playPromise = audio.play();
+            if (playPromise && typeof playPromise.then === 'function') {
+              playPromise.catch(() => {
+                // Ignore playback promise rejections (e.g. policy blocks) silently.
+              });
+            }
           } else {
             audio.pause();
           }
@@ -9308,7 +9449,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260320128n"></script>
+    <script src="js/chat.js?v=2026032015vi"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
