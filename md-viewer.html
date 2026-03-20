@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603191ugh"></script>
+  <script src="js/auth-guard.js?v=20260320shh"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
@@ -182,6 +182,70 @@
 
     .markdown-body img[data-align="right"] {
       margin: 8px 0 8px auto;
+    }
+
+    .markdown-body img.md-enlargeable-image {
+      cursor: zoom-in;
+    }
+
+    .image-lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0, 0, 0, 0.88);
+      padding: 14px;
+    }
+
+    .image-lightbox.is-open {
+      display: flex;
+    }
+
+    .image-lightbox-stage {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    .image-lightbox-image {
+      max-width: min(96vw, 1800px);
+      max-height: 88vh;
+      width: auto;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: 0 12px 42px rgba(0, 0, 0, 0.45);
+      user-select: none;
+      -webkit-user-drag: none;
+      transform: translate3d(0, 0, 0) scale(1);
+      transform-origin: center center;
+      will-change: transform;
+      touch-action: none;
+      cursor: zoom-in;
+    }
+
+    body.image-lightbox-open {
+      overflow: hidden;
+      touch-action: none;
+    }
+
+    @media (max-width: 768px) {
+      .image-lightbox {
+        padding: 8px;
+      }
+
+      .image-lightbox-image {
+        max-width: 100vw;
+        max-height: 86vh;
+        border-radius: 4px;
+      }
     }
 
     .markdown-body .audio-link-inline {
@@ -541,6 +605,12 @@
     <div id="content" class="markdown-body">Зареждане…</div>
   </main>
 
+  <div id="imageLightbox" class="image-lightbox" aria-hidden="true">
+    <div id="imageLightboxStage" class="image-lightbox-stage">
+      <img id="imageLightboxImage" class="image-lightbox-image" src="" alt="Увеличено изображение">
+    </div>
+  </div>
+
   <script>
     // Font size button setup - runs after content div exists
     (function() {
@@ -752,6 +822,7 @@
     let mdImageIntersectionObserver = null;
     let mdImageMutationObserver = null;
     let mdImageScrollBound = false;
+    let mdLightboxBound = false;
 
     function promoteNearbyImages(root) {
       const viewportTop = window.scrollY - IMAGE_PRELOAD_MARGIN_PX;
@@ -779,6 +850,10 @@
           img.dataset.mdImageConfigured = '1';
           img.setAttribute('decoding', 'async');
           img.setAttribute('loading', 'lazy');
+        }
+
+        if (!img.closest('.audio-link-inline')) {
+          img.classList.add('md-enlargeable-image');
         }
 
         if (index < IMAGE_EAGER_COUNT) {
@@ -839,6 +914,268 @@
       }
 
       configureContentImages(root);
+    }
+
+    function initImageLightbox() {
+      if (mdLightboxBound) return;
+
+      const root = document.getElementById('content');
+      const overlay = document.getElementById('imageLightbox');
+      const overlayStage = document.getElementById('imageLightboxStage');
+      const overlayImage = document.getElementById('imageLightboxImage');
+      if (!root || !overlay || !overlayStage || !overlayImage) return;
+
+      const minScale = 1;
+      const maxScale = 6;
+      let scale = 1;
+      let translateX = 0;
+      let translateY = 0;
+      let dragging = false;
+      let pointerMoved = false;
+      const pointers = new Map();
+      let dragPointerId = null;
+      let dragStartX = 0;
+      let dragStartY = 0;
+      let dragStartTranslateX = 0;
+      let dragStartTranslateY = 0;
+      let pinchStartDistance = 0;
+      let pinchStartScale = 1;
+      let pinchStartTranslateX = 0;
+      let pinchStartTranslateY = 0;
+      let pinchStartMidpoint = null;
+
+      const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+      const clampTranslation = () => {
+        const stageWidth = overlayStage.clientWidth || window.innerWidth;
+        const stageHeight = overlayStage.clientHeight || window.innerHeight;
+        const imageWidth = overlayImage.clientWidth || 0;
+        const imageHeight = overlayImage.clientHeight || 0;
+
+        if (!imageWidth || !imageHeight) {
+          translateX = 0;
+          translateY = 0;
+          return;
+        }
+
+        const scaledWidth = imageWidth * scale;
+        const scaledHeight = imageHeight * scale;
+
+        const maxOffsetX = Math.max(0, (scaledWidth - stageWidth) / 2);
+        const maxOffsetY = Math.max(0, (scaledHeight - stageHeight) / 2);
+
+        translateX = clamp(translateX, -maxOffsetX, maxOffsetX);
+        translateY = clamp(translateY, -maxOffsetY, maxOffsetY);
+      };
+
+      const applyTransform = () => {
+        clampTranslation();
+        overlayImage.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
+        overlayImage.style.cursor = scale > 1 ? (dragging ? 'grabbing' : 'grab') : 'zoom-in';
+      };
+
+      const resetTransform = () => {
+        scale = 1;
+        translateX = 0;
+        translateY = 0;
+        dragging = false;
+        pointerMoved = false;
+        pointers.clear();
+        dragPointerId = null;
+        pinchStartDistance = 0;
+        pinchStartScale = 1;
+        pinchStartTranslateX = 0;
+        pinchStartTranslateY = 0;
+        pinchStartMidpoint = null;
+        applyTransform();
+      };
+
+      const distanceBetween = (a, b) => {
+        const dx = b.clientX - a.clientX;
+        const dy = b.clientY - a.clientY;
+        return Math.hypot(dx, dy);
+      };
+
+      const midpointBetween = (a, b) => ({
+        x: (a.clientX + b.clientX) / 2,
+        y: (a.clientY + b.clientY) / 2
+      });
+
+      const closeLightbox = () => {
+        overlay.classList.remove('is-open');
+        overlay.setAttribute('aria-hidden', 'true');
+        overlayImage.setAttribute('src', '');
+        document.body.classList.remove('image-lightbox-open');
+        resetTransform();
+      };
+
+      const openLightbox = (img) => {
+        if (!(img instanceof HTMLImageElement)) return;
+        if (img.closest('.audio-link-inline')) return;
+
+        const src = img.currentSrc || img.getAttribute('src') || '';
+        if (!src) return;
+
+        overlayImage.setAttribute('src', src);
+        overlayImage.setAttribute('alt', img.getAttribute('alt') || 'Увеличено изображение');
+
+        overlay.classList.add('is-open');
+        overlay.setAttribute('aria-hidden', 'false');
+        document.body.classList.add('image-lightbox-open');
+        requestAnimationFrame(() => {
+          resetTransform();
+        });
+      };
+
+      root.addEventListener('click', (event) => {
+        const target = event.target;
+        if (!(target instanceof Element)) return;
+
+        const img = target.closest('img.md-enlargeable-image');
+        if (!img || !root.contains(img)) return;
+
+        event.preventDefault();
+        openLightbox(img);
+      });
+
+      overlayStage.addEventListener('wheel', (event) => {
+        if (!overlay.classList.contains('is-open')) return;
+
+        event.preventDefault();
+
+        const previousScale = scale;
+        const factor = Math.exp(-event.deltaY * 0.0016);
+        const nextScale = clamp(previousScale * factor, minScale, maxScale);
+        if (Math.abs(nextScale - previousScale) < 0.001) return;
+
+        const rect = overlayImage.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        const relativeX = event.clientX - centerX;
+        const relativeY = event.clientY - centerY;
+
+        scale = nextScale;
+        translateX = ((translateX + relativeX) * (scale / previousScale)) - relativeX;
+        translateY = ((translateY + relativeY) * (scale / previousScale)) - relativeY;
+        applyTransform();
+      }, { passive: false });
+
+      overlayStage.addEventListener('pointerdown', (event) => {
+        if (!overlay.classList.contains('is-open')) return;
+
+        pointers.set(event.pointerId, { clientX: event.clientX, clientY: event.clientY, pointerType: event.pointerType });
+        pointerMoved = false;
+
+        if (pointers.size === 2) {
+          const [a, b] = Array.from(pointers.values());
+          pinchStartDistance = Math.max(1, distanceBetween(a, b));
+          pinchStartScale = scale;
+          pinchStartTranslateX = translateX;
+          pinchStartTranslateY = translateY;
+          pinchStartMidpoint = midpointBetween(a, b);
+          dragging = false;
+          dragPointerId = null;
+        } else if (pointers.size === 1 && scale > 1) {
+          dragging = true;
+          dragPointerId = event.pointerId;
+          dragStartX = event.clientX;
+          dragStartY = event.clientY;
+          dragStartTranslateX = translateX;
+          dragStartTranslateY = translateY;
+          try { overlayStage.setPointerCapture(event.pointerId); } catch (_) {}
+        }
+      });
+
+      overlayStage.addEventListener('pointermove', (event) => {
+        if (!overlay.classList.contains('is-open') || !pointers.has(event.pointerId)) return;
+
+        const previousPoint = pointers.get(event.pointerId);
+        if (previousPoint && (Math.abs(previousPoint.clientX - event.clientX) > 2 || Math.abs(previousPoint.clientY - event.clientY) > 2)) {
+          pointerMoved = true;
+        }
+
+        pointers.set(event.pointerId, { clientX: event.clientX, clientY: event.clientY, pointerType: event.pointerType });
+
+        if (pointers.size >= 2) {
+          const [a, b] = Array.from(pointers.values());
+          const currentDistance = Math.max(1, distanceBetween(a, b));
+          const currentMidpoint = midpointBetween(a, b);
+
+          const nextScale = clamp((currentDistance / pinchStartDistance) * pinchStartScale, minScale, maxScale);
+          scale = nextScale;
+          translateX = pinchStartTranslateX + (currentMidpoint.x - pinchStartMidpoint.x);
+          translateY = pinchStartTranslateY + (currentMidpoint.y - pinchStartMidpoint.y);
+          applyTransform();
+          return;
+        }
+
+        if (dragging && dragPointerId === event.pointerId && scale > 1) {
+          translateX = dragStartTranslateX + (event.clientX - dragStartX);
+          translateY = dragStartTranslateY + (event.clientY - dragStartY);
+          applyTransform();
+        }
+      });
+
+      const onPointerUpOrCancel = (event) => {
+        pointers.delete(event.pointerId);
+        if (dragPointerId === event.pointerId) {
+          dragging = false;
+          dragPointerId = null;
+        }
+
+        if (pointers.size === 1 && scale > 1) {
+          const [remainingPointerId, point] = Array.from(pointers.entries())[0];
+          dragPointerId = remainingPointerId;
+          dragStartX = point.clientX;
+          dragStartY = point.clientY;
+          dragStartTranslateX = translateX;
+          dragStartTranslateY = translateY;
+          dragging = true;
+        }
+
+        if (scale <= 1.001) {
+          scale = 1;
+          translateX = 0;
+          translateY = 0;
+          applyTransform();
+        }
+      };
+
+      overlayStage.addEventListener('pointerup', onPointerUpOrCancel);
+      overlayStage.addEventListener('pointercancel', onPointerUpOrCancel);
+
+      overlay.addEventListener('click', (event) => {
+        if (event.target === overlay || event.target === overlayStage) {
+          closeLightbox();
+        }
+      });
+
+      overlayImage.addEventListener('dblclick', (event) => {
+        event.preventDefault();
+        if (scale > 1) {
+          resetTransform();
+        } else {
+          scale = 2;
+          applyTransform();
+        }
+      });
+
+      overlayStage.addEventListener('click', (event) => {
+        if (event.target === overlayImage) {
+          if (!pointerMoved && scale <= 1) {
+            closeLightbox();
+          }
+        }
+        pointerMoved = false;
+      });
+
+      document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' && overlay.classList.contains('is-open')) {
+          closeLightbox();
+        }
+      });
+
+      mdLightboxBound = true;
     }
 
     function applyViewerSpacingOverrides() {
@@ -965,6 +1302,7 @@
     }
 
     initGenerousImageLoading();
+    initImageLightbox();
 
     let activeViewerAudio = null;
     let activeViewerAudioButton = null;
@@ -1746,7 +2084,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603191ugh"></script>
+  <script src="courses.generated.js?v=20260320shh"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -1853,7 +2191,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603191ugh"></script>
+    <script src="js/chat.js?v=20260320shh"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
 
