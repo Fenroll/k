@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026032015vi"></script>
+  <script src="js/auth-guard.js?v=20260320199i"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1655,7 +1655,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=2026032015vi"></script>
+  <script src="courses.generated.js?v=20260320199i"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2854,7 +2854,7 @@
 
         const targetWidthPx = (naturalWidth * widthPercent) / 100;
         img.style.width = `${targetWidthPx}px`;
-        img.style.maxWidth = 'none';
+        img.style.maxWidth = '100%';
         img.style.height = 'auto';
         img.style.display = 'block';
       };
@@ -8361,7 +8361,7 @@ renderMathInElement(document.body, {
       // Regex updated to capture optional title attribute
       text = text.replace(/!\[(.*?)\]\((.*?)(?: "(.*?)")?\)/g, (match, alt, src, title) => {
         src = stripTrailingUrlPunctuation(src);
-        let style = 'width:auto; max-width:none; height:auto; display:block; margin:8px auto 8px 0;';
+        let style = 'width:auto; max-width:100%; height:auto; display:block; margin:8px auto 8px 0;';
         let widthValue = '100';
         let dataAlign = ' data-align="left"';
 
@@ -9449,7 +9449,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026032015vi"></script>
+    <script src="js/chat.js?v=20260320199i"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>

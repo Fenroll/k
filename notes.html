@@ -1919,6 +1919,41 @@
                 });
             }
 
+            function isCloudflareManagedImageUrl(url) {
+                const value = String(url || '').trim().toLowerCase();
+                if (!value) return false;
+                if (value.startsWith('data:image/')) return false;
+                return value.includes('coursebook.lol')
+                    || value.includes('r2.dev')
+                    || value.includes('cloudflare');
+            }
+
+            function removeBrokenCloudflareImage(img) {
+                if (!(img instanceof HTMLImageElement)) return;
+                if (!els.courseNotesEditor.contains(img)) return;
+
+                const originalSrc = img.getAttribute('data-src') || img.getAttribute('src') || '';
+                if (!isCloudflareManagedImageUrl(originalSrc)) return;
+
+                const parent = img.parentElement;
+                img.remove();
+
+                if (parent && (parent.tagName === 'P' || parent.tagName === 'DIV')) {
+                    const text = (parent.textContent || '').trim();
+                    const hasMedia = parent.querySelector('img,video,audio,iframe');
+                    if (!text && !hasMedia) {
+                        parent.remove();
+                    }
+                }
+
+                markEditedBlockAuthor();
+                bumpLocalEditVersion();
+                setDraftState(true);
+                scheduleAutosave();
+                scheduleLiveblocksDocBroadcast();
+                scheduleRealtimePresenceFlush(true);
+            }
+
             function setupLazyLoadingForEditorImages() {
                 setupLazyObserver();
 
@@ -1927,6 +1962,13 @@
                     img.loading = 'lazy';
                     img.decoding = 'async';
                     img.referrerPolicy = 'no-referrer';
+
+                    if (img.dataset.notesErrorBound !== '1') {
+                        img.addEventListener('error', () => {
+                            removeBrokenCloudflareImage(img);
+                        });
+                        img.dataset.notesErrorBound = '1';
+                    }
 
                     const currentSrc = img.getAttribute('src');
                     const currentDataSrc = img.getAttribute('data-src');
