@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202603201mzl"></script>
+  <script src="js/auth-guard.js?v=2026032117hu"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1096,7 +1096,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=202603201mzl"></script>
+  <script src="courses.generated.js?v=2026032117hu"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
@@ -1992,7 +1992,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=202603201mzl"></script>
+<script src="js/chat.js?v=2026032117hu"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -2437,6 +2437,21 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
               `https://api.faviconkit.com/${hostname}/64`,
               `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
               `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
+            ]
+          };
+        }
+
+        // Force Drive links to use a Drive icon instead of the generic Google icon.
+        if (hostname === 'drive.google.com' || hostname.endsWith('.drive.google.com')) {
+          return {
+            primary: 'https://www.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png',
+            fallbacks: [
+              'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_folder_x16.png',
+              `https://www.google.com/s2/favicons?domain=drive.google.com&sz=64`,
+              `https://${hostname}/favicon.ico`,
+              `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
+              `https://icon.horse/icon/${hostname}`,
+              `https://api.faviconkit.com/${hostname}/64`
             ]
           };
         }
