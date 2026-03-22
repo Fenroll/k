@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603221b6q"></script>
+  <script src="js/auth-guard.js?v=202603221bcx"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
@@ -2116,7 +2116,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603221b6q"></script>
+  <script src="courses.generated.js?v=202603221bcx"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2223,7 +2223,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603221b6q"></script>
+    <script src="js/chat.js?v=202603221bcx"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
 
@@ -2246,6 +2246,8 @@
       let touchStartY = 0;
       let touchMoved = false;
       let touchStartedInsideTooltip = false;
+      let suppressClickUntil = 0;
+      const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
 
       function escapeHtml(text) {
         return String(text)
@@ -2349,35 +2351,37 @@
         touchStartedInsideTooltip = false;
       }, { passive: true });
 
-      document.addEventListener('mouseover', function(e) {
-        const noteEl = e.target && e.target.closest ? e.target.closest('.editor-note[data-note]') : null;
-        if (!noteEl || !contentRoot.contains(noteEl)) return;
+      if (supportsHover) {
+        document.addEventListener('mouseover', function(e) {
+          const noteEl = e.target && e.target.closest ? e.target.closest('.editor-note[data-note]') : null;
+          if (!noteEl || !contentRoot.contains(noteEl)) return;
 
-        const noteText = noteEl.getAttribute('data-note');
-        if (!noteText) {
+          const noteText = noteEl.getAttribute('data-note');
+          if (!noteText) {
+            hideTooltip();
+            return;
+          }
+
+          activeNoteElement = noteEl;
+          setTooltipContent(noteText);
+          positionTooltipFor(noteEl);
+        });
+
+        document.addEventListener('mouseout', function(e) {
+          if (!activeNoteElement) return;
+
+          const leavingNote = e.target && e.target.closest ? e.target.closest('.editor-note[data-note]') : null;
+          if (!leavingNote) return;
+
+          const enteringTooltip = e.relatedTarget && tooltip.contains(e.relatedTarget);
+          if (enteringTooltip) return;
+
+          const enteringNote = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.editor-note[data-note]') : null;
+          if (enteringNote === leavingNote) return;
+
           hideTooltip();
-          return;
-        }
-
-        activeNoteElement = noteEl;
-        setTooltipContent(noteText);
-        positionTooltipFor(noteEl);
-      });
-
-      document.addEventListener('mouseout', function(e) {
-        if (!activeNoteElement) return;
-
-        const leavingNote = e.target && e.target.closest ? e.target.closest('.editor-note[data-note]') : null;
-        if (!leavingNote) return;
-
-        const enteringTooltip = e.relatedTarget && tooltip.contains(e.relatedTarget);
-        if (enteringTooltip) return;
-
-        const enteringNote = e.relatedTarget && e.relatedTarget.closest ? e.relatedTarget.closest('.editor-note[data-note]') : null;
-        if (enteringNote === leavingNote) return;
-
-        hideTooltip();
-      });
+        });
+      }
 
       document.addEventListener('touchstart', function(e) {
         if (!activeNoteElement) return;
@@ -2407,14 +2411,37 @@
       }, { passive: true });
 
       document.addEventListener('touchend', function(e) {
-        if (!activeNoteElement || touchStartedInsideTooltip || touchMoved) return;
+        if (touchStartedInsideTooltip || touchMoved) return;
+
         const touchedNote = e.target && e.target.closest ? e.target.closest('.editor-note[data-note]') : null;
-        if (touchedNote && touchedNote === activeNoteElement) {
+        if (touchedNote && contentRoot.contains(touchedNote)) {
+          const noteText = touchedNote.getAttribute('data-note');
+          if (!noteText) {
+            hideTooltip();
+            suppressClickUntil = Date.now() + 600;
+            return;
+          }
+
+          if (activeNoteElement === touchedNote) {
+            hideTooltip();
+          } else {
+            activeNoteElement = touchedNote;
+            setTooltipContent(noteText);
+            positionTooltipFor(touchedNote);
+          }
+          suppressClickUntil = Date.now() + 600;
+          return;
+        }
+
+        if (activeNoteElement) {
           hideTooltip();
+          suppressClickUntil = Date.now() + 600;
         }
       }, { passive: true });
 
       document.addEventListener('click', function(e) {
+        if (Date.now() < suppressClickUntil) return;
+
         const noteEl = e.target && e.target.closest ? e.target.closest('.editor-note[data-note]') : null;
         if (noteEl && contentRoot.contains(noteEl)) {
           const noteText = noteEl.getAttribute('data-note');
