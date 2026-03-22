@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603221sy8"></script>
+  <script src="js/auth-guard.js?v=202603233ea"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
@@ -21,6 +21,11 @@
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
   
   <style>
+    /* Avoid browser find matching hidden KaTeX accessibility text. */
+    .katex .katex-mathml {
+      display: none !important;
+    }
+
     :root {
       --bg: #fafafa;
       --fg: #1f2937;
@@ -1311,6 +1316,7 @@
                 ],
                 throwOnError: false
               });
+              root.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
             } catch (e) {
               console.error('KaTeX error:', e);
             }
@@ -1546,6 +1552,7 @@
                 ],
                 throwOnError: false
               });
+              root.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
             } catch (e) {
               console.error('KaTeX error:', e);
             }
@@ -1640,6 +1647,7 @@
                 ],
                 throwOnError: false
               });
+              root.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
             } catch (e) {
               console.error('KaTeX error:', e);
             }
@@ -1777,6 +1785,7 @@
                     ],
                     throwOnError: false
                   });
+                  contentDiv.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
                 } catch (e) {
                   console.error('KaTeX error (recovery):', e);
                 }
@@ -2116,7 +2125,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603221sy8"></script>
+  <script src="courses.generated.js?v=202603233ea"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2223,7 +2232,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603221sy8"></script>
+    <script src="js/chat.js?v=202603233ea"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
 
@@ -2318,6 +2327,7 @@
 
       function hideTooltip() {
         tooltip.style.display = 'none';
+        tooltip.innerHTML = '';
         activeNoteElement = null;
       }
 
@@ -2836,6 +2846,7 @@
           ],
           throwOnError: false
         });
+        root.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
       }
 
       // Re-wrap tables

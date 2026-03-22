@@ -2271,6 +2271,24 @@
       return firebase.database().ref(`finance/monthly/${getMonthKey(date)}`);
     }
 
+    async function ensureFinanceMonthExists(date) {
+      const ref = financeRefForMonth(date);
+      const members = await loadDonationMembersList();
+      const defaultDonations = mergeDonationsByMembers([], members);
+      const autoPayload = {
+        incomeMarkdown: '',
+        expenseMarkdown: '',
+        donations: defaultDonations,
+        updatedBy: 'System',
+        updatedAt: firebase.database.ServerValue.TIMESTAMP,
+        autoCreated: true
+      };
+
+      const txn = await ref.transaction((current) => current || autoPayload);
+      const value = (txn && txn.snapshot && txn.snapshot.val()) || autoPayload;
+      return { value, wasCreated: Boolean(txn && txn.committed) };
+    }
+
 
     function setFinanceStatus(message, isError = false) {
       const statusEl = document.getElementById('financeStatus');
@@ -2617,8 +2635,18 @@
       setMonthLabel();
 
       try {
-        const snap = await financeRefForMonth(state.monthDate).once('value');
-        const value = snap.val() || {};
+        let value = {};
+        let wasAutoCreated = false;
+
+        if (state.isAdmin) {
+          const ensured = await ensureFinanceMonthExists(state.monthDate);
+          value = ensured.value || {};
+          wasAutoCreated = ensured.wasCreated;
+        } else {
+          const snap = await financeRefForMonth(state.monthDate).once('value');
+          value = snap.val() || {};
+        }
+
         const members = await loadDonationMembersList();
         const donationRows = mergeDonationsByMembers(Array.isArray(value.donations) ? value.donations : [], members);
 

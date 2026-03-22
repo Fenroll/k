@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202603221sy8"></script>
+  <script src="js/auth-guard.js?v=202603233ea"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,6 +15,11 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   
   <style>
+    /* Avoid browser find matching hidden KaTeX accessibility text. */
+    .katex .katex-mathml {
+      display: none !important;
+    }
+
     :root {
       --app-ui-font: 'Open Sans', Arial, sans-serif;
     }
@@ -1657,7 +1662,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202603221sy8"></script>
+  <script src="courses.generated.js?v=202603233ea"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -7550,6 +7555,7 @@ renderMathInElement(document.body, {
             ],
             throwOnError: false
           });
+          tempDiv.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
         } catch (err) {
           console.warn('KaTeX paste rendering failed:', err);
         }
@@ -8016,6 +8022,7 @@ renderMathInElement(document.body, {
           ],
           throwOnError: false
         });
+        editor.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
       } catch (error) {
         console.warn('KaTeX render in editor failed:', error);
       }
@@ -9523,7 +9530,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603221sy8"></script>
+    <script src="js/chat.js?v=202603233ea"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
