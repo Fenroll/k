@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=2026032117hu"></script>
+  <script src="js/auth-guard.js?v=202603221ayq"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
@@ -2116,7 +2116,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=2026032117hu"></script>
+  <script src="courses.generated.js?v=202603221ayq"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2223,7 +2223,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026032117hu"></script>
+    <script src="js/chat.js?v=202603221ayq"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
 
@@ -2414,7 +2414,27 @@
         }
       }, { passive: true });
 
-      document.addEventListener('click', function() {
+      document.addEventListener('click', function(e) {
+        const noteEl = e.target && e.target.closest ? e.target.closest('.editor-note[data-note]') : null;
+        if (noteEl && contentRoot.contains(noteEl)) {
+          const noteText = noteEl.getAttribute('data-note');
+          if (!noteText) {
+            hideTooltip();
+            return;
+          }
+
+          if (activeNoteElement === noteEl) {
+            hideTooltip();
+          } else {
+            activeNoteElement = noteEl;
+            setTooltipContent(noteText);
+            positionTooltipFor(noteEl);
+          }
+          return;
+        }
+
+        if (tooltip.contains(e.target)) return;
+
         if (activeNoteElement) {
           hideTooltip();
         }
