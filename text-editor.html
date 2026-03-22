@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202603221nxm"></script>
+  <script src="js/auth-guard.js?v=202603221sy8"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1288,6 +1288,8 @@
           <li style="margin: 8px 0;"><strong>Ctrl+2</strong> - Heading 2</li>
           <li style="margin: 8px 0;"><strong>Ctrl+3</strong> - Heading 3</li>
           <li style="margin: 8px 0;"><strong>Ctrl+4</strong> - Heading 4</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+Shift+J</strong> - Previous H1 heading</li>
+          <li style="margin: 8px 0;"><strong>Ctrl+Shift+K</strong> - Next H1 heading</li>
         </ul>
         <h3>Lists & Blocks</h3>
         <ul style="list-style: none; padding: 0;">
@@ -1655,7 +1657,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202603221nxm"></script>
+  <script src="courses.generated.js?v=202603221sy8"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -6338,6 +6340,64 @@ renderMathInElement(document.body, {
     }
 
     // Keyboard shortcuts
+    function getEditorH1NavigationState() {
+      const h1Elements = Array.from(editor.querySelectorAll('h1'));
+      if (!h1Elements.length) {
+        return { h1Elements, currentIndex: -1 };
+      }
+
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        let node = range.startContainer;
+        if (node && node.nodeType === Node.TEXT_NODE) node = node.parentNode;
+
+        if (node && node.nodeType === Node.ELEMENT_NODE) {
+          const insideHeading = node.closest('h1');
+          if (insideHeading && editor.contains(insideHeading)) {
+            const idx = h1Elements.indexOf(insideHeading);
+            if (idx !== -1) {
+              return { h1Elements, currentIndex: idx };
+            }
+          }
+        }
+
+        const caret = range.cloneRange();
+        caret.collapse(true);
+        for (let i = h1Elements.length - 1; i >= 0; i--) {
+          const h1Start = document.createRange();
+          h1Start.selectNodeContents(h1Elements[i]);
+          h1Start.collapse(true);
+          if (h1Start.compareBoundaryPoints(Range.START_TO_START, caret) <= 0) {
+            return { h1Elements, currentIndex: i };
+          }
+        }
+      }
+
+      return { h1Elements, currentIndex: 0 };
+    }
+
+    function jumpToEditorH1(index, h1Elements) {
+      if (!Array.isArray(h1Elements) || index < 0 || index >= h1Elements.length) return;
+      const target = h1Elements[index];
+
+      target.scrollIntoView({ behavior: 'auto', block: 'center' });
+
+      const range = document.createRange();
+      range.selectNodeContents(target);
+      range.collapse(true);
+      const selection = window.getSelection();
+      selection.removeAllRanges();
+      selection.addRange(range);
+
+      target.style.transition = 'background-color 0.3s ease';
+      const originalBg = target.style.backgroundColor;
+      target.style.backgroundColor = 'rgba(88, 129, 87, 0.15)';
+      setTimeout(() => {
+        target.style.backgroundColor = originalBg;
+      }, 600);
+    }
+
     editor.addEventListener('keydown', (e) => {
       // Handle Delete/Backspace on dashed line dividers (works same as regular <hr>)
       if (e.key === 'Delete' || e.key === 'Backspace') {
@@ -6862,7 +6922,21 @@ renderMathInElement(document.body, {
       }
       
       if (e.ctrlKey || e.metaKey) {
-        if (e.key === 'b') {
+        if (e.shiftKey && e.code === 'KeyJ') {
+          e.preventDefault();
+          const state = getEditorH1NavigationState();
+          if (state.h1Elements.length > 0) {
+            const prevIndex = (state.currentIndex - 1 + state.h1Elements.length) % state.h1Elements.length;
+            jumpToEditorH1(prevIndex, state.h1Elements);
+          }
+        } else if (e.shiftKey && e.code === 'KeyK') {
+          e.preventDefault();
+          const state = getEditorH1NavigationState();
+          if (state.h1Elements.length > 0) {
+            const nextIndex = (state.currentIndex + 1) % state.h1Elements.length;
+            jumpToEditorH1(nextIndex, state.h1Elements);
+          }
+        } else if (e.key === 'b') {
           e.preventDefault();
           if (!toggleBoldForSelectedNotes()) {
             document.execCommand('bold', false, null);
@@ -9449,7 +9523,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603221nxm"></script>
+    <script src="js/chat.js?v=202603221sy8"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
