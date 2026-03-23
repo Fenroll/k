@@ -3602,9 +3602,17 @@ class ChatUIManager {
 
         // Превърти до долу веднага и след малко закъснение (заради анимацията)
         this.scrollToBottom();
+        requestAnimationFrame(() => this.scrollToBottom());
         setTimeout(() => this.scrollToBottom(), 100);
         setTimeout(() => this.scrollToBottom(), 300);
+        if (isMobileLike) {
+          setTimeout(() => this.scrollToBottom(), 520);
+        }
       } else {
+        const input = this.container.querySelector('.chat-input');
+        if (input && document.activeElement === input) {
+          input.blur();
+        }
         clearIconRestoreTimer();
         this._iconRestoreTimer = setTimeout(() => {
           this.container.classList.remove('chat-open');

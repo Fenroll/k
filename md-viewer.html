@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603231cnq"></script>
+  <script src="js/auth-guard.js?v=202603231cz7"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -2173,7 +2173,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603231cnq"></script>
+  <script src="courses.generated.js?v=202603231cz7"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2280,9 +2280,9 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603231cnq"></script>
+    <script src="js/chat.js?v=202603231cz7"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
-  <script src="js/notes-init.js?v=20260323m5"></script>
+  <script src="js/notes-init.js?v=20260323m6"></script>
 
   <script>
     (function() {
@@ -2340,12 +2340,41 @@
         const activeEl = document.activeElement;
         const isWidgetInputFocused = !!(activeEl && activeEl.closest && activeEl.closest('#chat-widget .chat-input, #notes-widget-container .notes-input'));
         if (!isWidgetInputFocused) return;
-        e.stopPropagation();
+        e.stopImmediatePropagation();
       };
 
       document.addEventListener('keydown', stopViewerKeyInterception, true);
       document.addEventListener('keypress', stopViewerKeyInterception, true);
       document.addEventListener('keyup', stopViewerKeyInterception, true);
+
+      const blurIfInputInHiddenWidget = () => {
+        const activeEl = document.activeElement;
+        if (!(activeEl instanceof Element)) return;
+
+        const chatInput = activeEl.closest('#chat-widget .chat-input');
+        if (chatInput) {
+          const panel = document.querySelector('#chat-widget .chat-panel');
+          if (!panel || !panel.classList.contains('open')) {
+            activeEl.blur();
+            return;
+          }
+        }
+
+        const notesInput = activeEl.closest('#notes-widget-container .notes-input');
+        if (notesInput) {
+          const notesWidget = document.getElementById('notes-widget-container');
+          if (!notesWidget || notesWidget.classList.contains('hidden')) {
+            activeEl.blur();
+          }
+        }
+      };
+
+      document.addEventListener('click', () => {
+        setTimeout(blurIfInputInHiddenWidget, 0);
+      }, true);
+      document.addEventListener('pointerup', () => {
+        setTimeout(blurIfInputInHiddenWidget, 0);
+      }, true);
 
       if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', setKeyboardOffset, { passive: true });
