@@ -356,8 +356,8 @@ class NotesUIManager {
             bottom: 20px;
             left: 20px;
             width: 350px;
-            height: calc(100vh - 100px); /* Tall up to header */
-            max-height: 800px;
+            height: min(800px, calc(100dvh - 100px));
+            max-height: calc(100dvh - 24px);
             background: #fff;
             border-radius: 12px;
             box-shadow: 0 5px 25px rgba(0,0,0,0.2);
@@ -409,6 +409,8 @@ class NotesUIManager {
         .notes-messages {
             flex: 1;
             overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          overscroll-behavior: contain;
             padding: 12px;
             background: #fff;
             display: flex;
@@ -418,6 +420,7 @@ class NotesUIManager {
         
         .notes-input-area {
             padding: 12px;
+          padding-bottom: calc(12px + env(safe-area-inset-bottom));
             border-top: 1px solid #bcaaa4;
             background: #fff;
             border-radius: 0 0 12px 12px;
@@ -433,7 +436,7 @@ class NotesUIManager {
             border: 1px solid #bcaaa4;
             border-radius: 8px;
             outline: none;
-            font-size: 13px;
+          font-size: 16px;
             resize: none;
             overflow: hidden;
             transition: all 0.2s;
@@ -539,6 +542,29 @@ class NotesUIManager {
         }
         
         .reaction-picker { z-index: 10001; }
+
+        @supports not (height: 100dvh) {
+          .notes-widget {
+            height: calc(100vh - 100px);
+            max-height: 800px;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .notes-widget {
+            left: 10px;
+            right: 10px;
+            width: auto;
+            bottom: max(10px, env(safe-area-inset-bottom));
+            height: min(72dvh, calc(100dvh - 88px));
+            max-height: calc(100dvh - 20px);
+          }
+
+          .notes-widget.notes-keyboard-open {
+            bottom: max(8px, env(safe-area-inset-bottom));
+            height: min(66dvh, calc(100dvh - 70px));
+          }
+        }
     `;
     const styleEl = document.createElement('style');
     styleEl.textContent = css;
@@ -570,6 +596,30 @@ class NotesUIManager {
     
     const sendBtn = this.container.querySelector('.notes-send-btn');
     const input = this.container.querySelector('.notes-input');
+    const isCoarsePointer = () => window.matchMedia('(pointer: coarse)').matches;
+    let lockedScrollY = null;
+
+    const lockPageScroll = () => {
+      if (!isCoarsePointer() || lockedScrollY !== null) return;
+      lockedScrollY = window.scrollY || window.pageYOffset || 0;
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${lockedScrollY}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
+      document.body.style.width = '100%';
+    };
+
+    const unlockPageScroll = () => {
+      if (lockedScrollY === null) return;
+      const restoreY = lockedScrollY;
+      lockedScrollY = null;
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
+      document.body.style.width = '';
+      window.scrollTo(0, restoreY);
+    };
     
     const sendMessage = () => {
         const text = input.value;
@@ -595,10 +645,28 @@ class NotesUIManager {
         }
     });
     
-    // Auto-resize textarea
+    // Auto-resize textarea with cap to reduce mobile layout jumping
+    const maxInputHeight = 140;
     input.addEventListener('input', () => {
         input.style.height = 'auto';
-        input.style.height = (input.scrollHeight) + 'px';
+      const nextHeight = Math.min(input.scrollHeight, maxInputHeight);
+      input.style.height = nextHeight + 'px';
+      input.style.overflowY = input.scrollHeight > maxInputHeight ? 'auto' : 'hidden';
+    });
+
+    input.addEventListener('focus', () => {
+      this.container.classList.add('notes-keyboard-open');
+      lockPageScroll();
+    });
+
+    input.addEventListener('blur', () => {
+      this.container.classList.remove('notes-keyboard-open');
+      setTimeout(unlockPageScroll, 0);
+    });
+
+    this.container.querySelector('.notes-close-btn').addEventListener('click', () => {
+      this.container.classList.remove('notes-keyboard-open');
+      unlockPageScroll();
     });
   }
 
