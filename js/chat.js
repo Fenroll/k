@@ -873,7 +873,6 @@ class ChatUIManager {
         if (avatar && color) return { avatar, color };
       }
     }
-    
     // 4. Check activeUsers by name
     if (this.activeUsers && userName) {
       const searchName = userName.toLowerCase();
@@ -2486,14 +2485,14 @@ class ChatUIManager {
     if (optionsBtn) {
       optionsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.showMessageOptions(optionsBtn.dataset.messageId, optionsBtn.dataset.messageKey, optionsBtn, null, msgEl);
+        this.showMessageOptions(optionsBtn.dataset.messageId, optionsBtn.dataset.messageKey, optionsBtn, null, msgEl, 'owner-only');
       });
     }
 
     msgEl.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      this.showMessageOptions(msgEl.dataset.messageId, msgEl.dataset.messageKey, msgEl, e, msgEl);
+      this.showMessageOptions(msgEl.dataset.messageId, msgEl.dataset.messageKey, msgEl, e, msgEl, 'full');
     });
 
     // Add listener for profile view
@@ -2632,7 +2631,7 @@ class ChatUIManager {
     document.addEventListener('keydown', escHandler);
   }
 
-  showMessageOptions(messageId, messageKey, anchorEl, triggerEvent = null, messageEl = null) {
+  showMessageOptions(messageId, messageKey, anchorEl, triggerEvent = null, messageEl = null, mode = 'full') {
     const existingMenu = document.getElementById('message-options-menu');
     if (existingMenu) existingMenu.remove();
 
@@ -2644,15 +2643,10 @@ class ChatUIManager {
     menu.id = 'message-options-menu';
     menu.className = 'message-options-menu';
     
+    const isOwnerOnly = mode === 'owner-only';
     menu.innerHTML = `
-      <div class="message-option-item reply">
-        <img src="svg/chat/icon-reply.svg" alt="Reply">
-        Reply
-      </div>
-      <div class="message-option-item reaction">
-        <img src="svg/chat/icon-reaction.svg" alt="Reaction">
-        Reaction
-      </div>
+      ${isOwnerOnly ? '' : '<div class="message-option-item reply"><img src="svg/chat/icon-reply.svg" alt="Reply">Reply</div>'}
+      ${isOwnerOnly ? '' : '<div class="message-option-item reaction"><img src="svg/chat/icon-reaction.svg" alt="Reaction">Reaction</div>'}
       <div class="message-option-item edit">
         <img src="svg/chat/icon-edit.svg" alt="Edit">
         Edit
@@ -2685,18 +2679,24 @@ class ChatUIManager {
     menu.style.top = top + 'px';
     menu.style.left = left + 'px';
 
-    menu.querySelector('.reply').onclick = () => {
-      menu.remove();
-      const targetMsgEl = sourceMessageEl || document.querySelector(`.chat-message[data-message-id="${messageId}"]`);
-      if (targetMsgEl) {
-        this.startReply(messageId, targetMsgEl);
-      }
-    };
+    const replyItem = menu.querySelector('.reply');
+    if (replyItem) {
+      replyItem.onclick = () => {
+        menu.remove();
+        const targetMsgEl = sourceMessageEl || document.querySelector(`.chat-message[data-message-id="${messageId}"]`);
+        if (targetMsgEl) {
+          this.startReply(messageId, targetMsgEl);
+        }
+      };
+    }
 
-    menu.querySelector('.reaction').onclick = () => {
-      menu.remove();
-      this.showReactionPicker(messageId);
-    };
+    const reactionItem = menu.querySelector('.reaction');
+    if (reactionItem) {
+      reactionItem.onclick = () => {
+        menu.remove();
+        this.showReactionPicker(messageId);
+      };
+    }
 
     const editItem = menu.querySelector('.edit');
     const deleteItem = menu.querySelector('.delete');
@@ -3577,6 +3577,19 @@ class ChatUIManager {
     }
     this.isOpen = !this.isOpen;
     const chatPanel = this.container.querySelector('.chat-panel');
+
+    const clearIconRestoreTimer = () => {
+      if (this._iconRestoreTimer) {
+        clearTimeout(this._iconRestoreTimer);
+        this._iconRestoreTimer = null;
+      }
+    };
+
+    if (this.isOpen) {
+      clearIconRestoreTimer();
+      this.container.classList.add('chat-open');
+    }
+
     if (chatPanel) {
       chatPanel.classList.toggle('open', this.isOpen);
       if (this.isOpen) {
@@ -3590,6 +3603,12 @@ class ChatUIManager {
         this.scrollToBottom();
         setTimeout(() => this.scrollToBottom(), 100);
         setTimeout(() => this.scrollToBottom(), 300);
+      } else {
+        clearIconRestoreTimer();
+        this._iconRestoreTimer = setTimeout(() => {
+          this.container.classList.remove('chat-open');
+          this._iconRestoreTimer = null;
+        }, 220);
       }
     }
   }
@@ -4135,6 +4154,7 @@ body.dark-mode:not(.chat-force-light) .profile-modal-close:hover {
   box-shadow: 0 5px 40px rgba(0, 0, 0, 0.16);
   display: flex;
   flex-direction: column;
+  overflow: hidden;
   opacity: 0;
   pointer-events: none;
   transform: translateY(20px);
@@ -4144,6 +4164,29 @@ body.dark-mode:not(.chat-force-light) .profile-modal-close:hover {
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);
+}
+@media (min-width: 601px) {
+  .chat-widget .chat-icon {
+    transform-origin: bottom right;
+  }
+
+  .chat-widget.chat-open .chat-icon {
+    opacity: 0;
+    transform: scale(0.72) translateY(10px);
+    pointer-events: none;
+  }
+
+  .chat-widget .chat-panel {
+    bottom: 20px;
+    right: 20px;
+    transform-origin: bottom right;
+    transform: translateY(16px) scale(0.18);
+    will-change: transform, opacity;
+  }
+
+  .chat-widget .chat-panel.open {
+    transform: translateY(0) scale(1);
+  }
 }
 .chat-header {
   padding: 16px;
@@ -4497,10 +4540,21 @@ body.dark-mode:not(.chat-force-light) .profile-modal-close:hover {
   .chat-panel {
     width: calc(100vw - 40px);
     height: 65vh;
-    bottom: 100px;
-    right: 20px;
-    left: 20px;
+    bottom: 10px;
+    right: 10px;
+    left: auto;
     max-width: none;
+    transform-origin: bottom right;
+    transform: translateY(16px) scale(0.22);
+    border-radius: 12px;
+  }
+  .chat-panel.open {
+    transform: translateY(0) scale(1);
+  }
+  .chat-widget.chat-open .chat-icon {
+    opacity: 0;
+    transform: scale(0.78) translateY(8px);
+    pointer-events: none;
   }
   .chat-active-users {
     display: none;

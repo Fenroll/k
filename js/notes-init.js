@@ -585,24 +585,33 @@ class NotesUIManager {
 
         @media (max-width: 768px) {
           .notes-widget {
-            left: 10px;
-            right: 10px;
+            left: 8px;
+            right: 8px;
+            top: max(8px, env(safe-area-inset-top));
+            bottom: max(8px, env(safe-area-inset-bottom));
             width: auto;
-            bottom: max(10px, env(safe-area-inset-bottom));
-            height: min(72dvh, calc(100dvh - 88px));
-            max-height: calc(100dvh - 20px);
+            height: auto;
+            max-height: none;
           }
 
           .notes-widget.notes-keyboard-open {
-            bottom: max(8px, env(safe-area-inset-bottom));
-            height: min(66dvh, calc(100dvh - 70px));
+            top: max(4px, env(safe-area-inset-top));
+            bottom: max(4px, env(safe-area-inset-bottom));
           }
 
           html.notes-widget-open,
           body.notes-widget-open {
             overflow: hidden !important;
             overscroll-behavior: none;
-            touch-action: manipulation;
+          }
+
+          html.notes-widget-open #chat-widget .chat-icon,
+          body.notes-widget-open #chat-widget .chat-icon,
+          html.notes-widget-open #chat-toggle,
+          body.notes-widget-open #chat-toggle {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
           }
         }
     `;
@@ -618,7 +627,6 @@ class NotesUIManager {
     // So let's double check styles.
 
     // Event listeners
-    this.container.querySelector('.notes-close-btn').addEventListener('click', () => this.toggle());
     
     // Modify input area for inline button
     const inputArea = this.container.querySelector('.notes-input-area');
@@ -636,12 +644,56 @@ class NotesUIManager {
     
     const sendBtn = this.container.querySelector('.notes-send-btn');
     const input = this.container.querySelector('.notes-input');
+    const closeBtn = this.container.querySelector('.notes-close-btn');
     this.inputEl = input;
 
     this.setPageScrollLocked = (locked) => {
       document.documentElement.classList.toggle('notes-widget-open', Boolean(locked));
       document.body.classList.toggle('notes-widget-open', Boolean(locked));
     };
+
+    this.isMobileViewport = () => window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+    this.setChatToggleHidden = (hidden) => {
+      const chatToggleBtn = document.getElementById('chat-toggle');
+      if (!chatToggleBtn) return;
+      if (hidden) {
+        chatToggleBtn.dataset.notesHidden = '1';
+        chatToggleBtn.style.display = 'none';
+      } else {
+        if (chatToggleBtn.dataset.notesHidden === '1') {
+          chatToggleBtn.style.display = '';
+          delete chatToggleBtn.dataset.notesHidden;
+        }
+      }
+    };
+
+    this.scrollToBottomReliable = () => {
+      this.scrollToBottom();
+      requestAnimationFrame(() => this.scrollToBottom());
+      setTimeout(() => this.scrollToBottom(), 120);
+      setTimeout(() => this.scrollToBottom(), 300);
+    };
+
+    const forceInputFocusable = () => {
+      if (!this.inputEl) return;
+      this.inputEl.disabled = false;
+      this.inputEl.readOnly = false;
+      this.inputEl.removeAttribute('disabled');
+      this.inputEl.removeAttribute('readonly');
+      this.inputEl.style.webkitUserSelect = 'text';
+      this.inputEl.style.userSelect = 'text';
+    };
+
+    input.addEventListener('touchstart', () => {
+      forceInputFocusable();
+      setTimeout(() => {
+        if (this.isVisible && this.inputEl) this.inputEl.focus({ preventScroll: true });
+      }, 0);
+    }, { passive: true });
+
+    input.addEventListener('pointerdown', () => {
+      forceInputFocusable();
+    });
     
     const sendMessage = () => {
         const text = input.value;
@@ -693,30 +745,68 @@ class NotesUIManager {
       }
     });
 
-    this.container.querySelector('.notes-close-btn').addEventListener('click', () => {
-      this.container.classList.remove('notes-keyboard-open');
-      this.setPageScrollLocked(false);
+    closeBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.closeNotes();
     });
+
+    closeBtn.addEventListener('pointerdown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.closeNotes();
+    });
+
+    closeBtn.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.closeNotes();
+    }, { passive: false });
+
+    closeBtn.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.closeNotes();
+    });
+
+  }
+
+  openNotes() {
+    this.isVisible = true;
+    this.container.classList.remove('hidden');
+    this.setPageScrollLocked(true);
+    if (this.isMobileViewport()) {
+      this.setChatToggleHidden(true);
+    }
+    this.scrollToBottomReliable();
+    const tryFocus = () => {
+      if (this.inputEl && this.isVisible) {
+        this.inputEl.disabled = false;
+        this.inputEl.readOnly = false;
+        this.inputEl.focus({ preventScroll: true });
+      }
+    };
+    setTimeout(tryFocus, 20);
+    setTimeout(tryFocus, 120);
+  }
+
+  closeNotes() {
+    this.isVisible = false;
+    this.cancelReply();
+    this.cancelEditing();
+    if (this.inputEl) this.inputEl.blur();
+    this.container.classList.add('hidden');
+    this.container.classList.remove('notes-keyboard-open');
+    this.setPageScrollLocked(false);
+    this.setChatToggleHidden(false);
   }
 
   toggle() {
-    this.isVisible = !this.isVisible;
-    if(this.isVisible) {
-        // console.log('NotesUIManager: Toggling notes widget ON.'); // Can be removed, frequent
-        this.container.classList.remove('hidden');
-        this.setPageScrollLocked(true);
-        this.scrollToBottom();
-        setTimeout(() => {
-          if (this.inputEl && this.isVisible) {
-            this.inputEl.focus();
-          }
-        }, 40);
-    } else { // Can be removed, frequent
-        // console.log('NotesUIManager: Toggling notes widget OFF.');
-        this.container.classList.add('hidden');
-        this.container.classList.remove('notes-keyboard-open');
-        this.setPageScrollLocked(false);
+    if (this.isVisible) {
+      this.closeNotes();
+      return;
     }
+    this.openNotes();
   }
   
   scrollToBottom() {
@@ -858,7 +948,7 @@ class NotesUIManager {
                <button class="note-action-btn react-btn" title="React">
                  <img src="svg/chat/icon-reaction.svg" alt="Reaction" style="width: 16px; height: 16px">
                </button>
-               ${isMe ? '<button class="note-action-btn delete-btn" title="Delete"><img src="svg/chat/icon-delete.svg" alt="Delete" style="width: 16px; height: 16px"></button>' : ''}
+               ${isMe ? '<button class="note-action-btn options-btn" title="More options"><img src="svg/chat/icon-three-dots-vertical.svg" alt="More" style="width: 16px; height: 16px"></button>' : ''}
                </div>
              </div>
              <div class="note-reactions" id="reactions-${msg.id}">${this.generateReactionsHTML(msg.id)}</div>
@@ -872,20 +962,24 @@ class NotesUIManager {
           this.showReactionPicker(msg.id, e.target);
       });
 
+      if (isMe) {
+        const optionsBtn = el.querySelector('.options-btn');
+        if (optionsBtn) {
+          optionsBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.showMessageOptions(msg, e, optionsBtn, 'owner-only');
+          });
+        }
+      }
+
         el.addEventListener('contextmenu', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          this.showMessageOptions(msg, e);
+          this.showMessageOptions(msg, e, null, 'full');
         });
       
       const reactionsEl = el.querySelector(`#reactions-${msg.id}`);
       if (reactionsEl) this.attachReactionListeners(reactionsEl);
-
-
-      if(isMe){
-          el.querySelector('.delete-btn').addEventListener('click', () => this.db.deleteMessage(msg.key));
-      }
-      
       return el;
   }
   
@@ -903,13 +997,17 @@ class NotesUIManager {
       preview.innerHTML = `
         <div class="reply-indicator" style="background: #f1f5f9; border-left: 3px solid #3b82f6; padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
             <span>Replying to <b>${this.escapeHtml(replyAuthorName)}</b></span>
-            <button onclick="window.notesManager.cancelReply()" style="border:none;background:none;cursor:pointer;">✖</button>
+            <button type="button" onpointerdown="window.notesManager.cancelReply(event); return false;" onclick="window.notesManager.cancelReply(event); return false;" style="border:none;background:none;cursor:pointer;">✖</button>
         </div>
       `;
       input.focus();
   }
   
-  cancelReply() {
+  cancelReply(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
       const input = this.container.querySelector('.notes-input');
       input.dataset.replyTo = '';
       input.dataset.replyAuthor = '';
@@ -954,7 +1052,7 @@ class NotesUIManager {
       }
   }
 
-  showMessageOptions(msg, event) {
+  showMessageOptions(msg, event, anchorEl = null, mode = 'full') {
       const existing = document.getElementById('message-options-menu');
       if (existing) existing.remove();
       if (!msg) return;
@@ -964,9 +1062,10 @@ class NotesUIManager {
       menu.id = 'message-options-menu';
       menu.className = 'message-options-menu';
 
+      const isOwnerOnly = mode === 'owner-only';
       menu.innerHTML = `
-        <div class="message-option-item reply"><img src="svg/chat/icon-reply.svg" alt="Reply">Reply</div>
-        <div class="message-option-item reaction"><img src="svg/chat/icon-reaction.svg" alt="Reaction">Reaction</div>
+        ${isOwnerOnly ? '' : '<div class="message-option-item reply"><img src="svg/chat/icon-reply.svg" alt="Reply">Reply</div>'}
+        ${isOwnerOnly ? '' : '<div class="message-option-item reaction"><img src="svg/chat/icon-reaction.svg" alt="Reaction">Reaction</div>'}
         <div class="message-option-item edit ${isMe ? '' : 'disabled'}"><img src="svg/chat/icon-edit.svg" alt="Edit">Edit</div>
         <div class="message-option-item delete ${isMe ? '' : 'disabled'}"><img src="svg/chat/icon-delete.svg" alt="Delete">Delete</div>
       `;
@@ -976,6 +1075,12 @@ class NotesUIManager {
       const menuRect = menu.getBoundingClientRect();
       let left = (event && Number.isFinite(event.clientX)) ? event.clientX : 20;
       let top = (event && Number.isFinite(event.clientY)) ? event.clientY : 20;
+
+      if (anchorEl && anchorEl.getBoundingClientRect) {
+        const rect = anchorEl.getBoundingClientRect();
+        left = rect.right - menuRect.width;
+        top = rect.bottom + 5;
+      }
 
       if (left + menuRect.width > window.innerWidth - 10) {
         left = window.innerWidth - menuRect.width - 10;
@@ -989,14 +1094,20 @@ class NotesUIManager {
       menu.style.left = `${left}px`;
       menu.style.top = `${top}px`;
 
-      menu.querySelector('.reply').onclick = () => {
-        menu.remove();
-        this.startReply(msg);
-      };
-      menu.querySelector('.reaction').onclick = () => {
-        menu.remove();
-        this.showReactionPicker(msg.id, event && event.target ? event.target : document.body);
-      };
+      const replyItem = menu.querySelector('.reply');
+      if (replyItem) {
+        replyItem.onclick = () => {
+          menu.remove();
+          this.startReply(msg);
+        };
+      }
+      const reactionItem = menu.querySelector('.reaction');
+      if (reactionItem) {
+        reactionItem.onclick = () => {
+          menu.remove();
+          this.showReactionPicker(msg.id, event && event.target ? event.target : document.body);
+        };
+      }
 
       const editItem = menu.querySelector('.edit');
       if (isMe && editItem) {
