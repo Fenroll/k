@@ -587,17 +587,18 @@ class NotesUIManager {
           .notes-widget {
             left: max(8px, env(safe-area-inset-left));
             right: max(8px, env(safe-area-inset-right));
-            top: auto;
+            top: max(8px, env(safe-area-inset-top));
             bottom: calc(max(8px, env(safe-area-inset-bottom)) + var(--mobile-keyboard-offset, 0px));
             width: auto;
-            height: min(84dvh, calc(100dvh - 16px));
+            height: auto;
             max-height: none;
             transform: none;
           }
 
           .notes-widget.notes-keyboard-open {
+            top: max(4px, env(safe-area-inset-top));
             bottom: calc(max(4px, env(safe-area-inset-bottom)) + var(--mobile-keyboard-offset, 0px));
-            height: min(78dvh, calc(100dvh - 10px));
+            height: auto;
           }
 
           .notes-widget.hidden {

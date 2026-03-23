@@ -3594,7 +3594,18 @@ class ChatUIManager {
       chatPanel.classList.toggle('open', this.isOpen);
       if (this.isOpen) {
         const input = this.container.querySelector('.chat-input');
-        // if (input) input.focus(); // Removed to prevent keyboard popup on mobile
+        const isMobileLike = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+        if (input && isMobileLike) {
+          const focusInput = () => {
+            input.disabled = false;
+            input.readOnly = false;
+            input.focus({ preventScroll: true });
+          };
+          focusInput();
+          setTimeout(focusInput, 16);
+          setTimeout(focusInput, 120);
+          setTimeout(focusInput, 260);
+        }
         
         // Маркирай съобщенията като прочетени
         this.markAsRead();
@@ -4539,7 +4550,8 @@ body.dark-mode:not(.chat-force-light) .profile-modal-close:hover {
 @media (max-width: 600px) {
   .chat-panel {
     width: min(720px, calc(100vw - 16px));
-    height: min(84dvh, calc(100dvh - 16px));
+    height: auto;
+    top: max(8px, env(safe-area-inset-top));
     bottom: calc(max(8px, env(safe-area-inset-bottom)) + var(--mobile-keyboard-offset, 0px));
     right: auto;
     left: 50%;
