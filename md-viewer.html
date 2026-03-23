@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603231d84"></script>
+  <script src="js/auth-guard.js?v=202603231gjf"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -2173,7 +2173,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603231d84"></script>
+  <script src="courses.generated.js?v=202603231gjf"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2280,9 +2280,9 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603231d84"></script>
+    <script src="js/chat.js?v=202603231gjf"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
-  <script src="js/notes-init.js?v=20260323m7"></script>
+  <script src="js/notes-init.js?v=20260323m8"></script>
 
   <script>
     (function() {
@@ -2336,75 +2336,6 @@
         }
       }, true);
 
-      const stopViewerKeyInterception = (e) => {
-        const activeEl = document.activeElement;
-        const isWidgetInputFocused = !!(activeEl && activeEl.closest && activeEl.closest('#chat-widget .chat-input, #notes-widget-container .notes-input'));
-        if (!isWidgetInputFocused) return;
-        e.stopImmediatePropagation();
-      };
-
-      document.addEventListener('keydown', stopViewerKeyInterception, true);
-      document.addEventListener('keypress', stopViewerKeyInterception, true);
-      document.addEventListener('keyup', stopViewerKeyInterception, true);
-
-      const getOpenWidgetInput = () => {
-        const notesWidget = document.getElementById('notes-widget-container');
-        const notesOpen = !!(notesWidget && !notesWidget.classList.contains('hidden'));
-        if (notesOpen) {
-          const notesInput = notesWidget.querySelector('.notes-input');
-          if (notesInput) return notesInput;
-        }
-
-        const chatPanel = document.querySelector('#chat-widget .chat-panel');
-        const chatOpen = !!(chatPanel && chatPanel.classList.contains('open'));
-        if (chatOpen) {
-          const chatInput = chatPanel.querySelector('.chat-input');
-          if (chatInput) return chatInput;
-        }
-
-        return null;
-      };
-
-      const isEditableElement = (el) => {
-        if (!(el instanceof Element)) return false;
-        const tag = (el.tagName || '').toUpperCase();
-        return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
-      };
-
-      const blurStrayEditableFocus = () => {
-        const activeEl = document.activeElement;
-        const openInput = getOpenWidgetInput();
-
-        if (openInput) {
-          // There is an open widget; keep focus in its input only.
-          if (activeEl === openInput) return;
-          if (activeEl instanceof Element && activeEl.closest('#chat-widget, #notes-widget-container') && !isEditableElement(activeEl)) return;
-
-          if (isEditableElement(activeEl)) {
-            activeEl.blur();
-          }
-
-          setTimeout(() => {
-            const stillOpenInput = getOpenWidgetInput();
-            if (!stillOpenInput) return;
-            if (document.activeElement !== stillOpenInput) {
-              stillOpenInput.focus({ preventScroll: true });
-            }
-          }, 0);
-          return;
-        }
-
-        // No open widget: ensure no hidden/stray editable keeps keyboard alive.
-        if (isEditableElement(activeEl)) {
-          activeEl.blur();
-        }
-      };
-
-      document.addEventListener('focusin', () => {
-        if (!isMobile()) return;
-        blurStrayEditableFocus();
-      }, true);
-
       const blurIfInputInHiddenWidget = () => {
         const activeEl = document.activeElement;
         if (!(activeEl instanceof Element)) return;
@@ -2429,20 +2360,10 @@
 
       document.addEventListener('click', () => {
         setTimeout(blurIfInputInHiddenWidget, 0);
-        if (isMobile()) setTimeout(blurStrayEditableFocus, 0);
       }, true);
       document.addEventListener('pointerup', () => {
         setTimeout(blurIfInputInHiddenWidget, 0);
-        if (isMobile()) setTimeout(blurStrayEditableFocus, 0);
       }, true);
-
-      // Observe open/close state changes and immediately normalize focus target.
-      const observer = new MutationObserver(() => {
-        if (!isMobile()) return;
-        blurIfInputInHiddenWidget();
-        blurStrayEditableFocus();
-      });
-      observer.observe(document.body, { subtree: true, attributes: true, attributeFilter: ['class'] });
 
       if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', setKeyboardOffset, { passive: true });
@@ -2906,7 +2827,10 @@
       // Listen for arrow key presses
       document.addEventListener('keydown', (e) => {
         const activeEl = document.activeElement;
-        if (isOverlayWidgetTarget(activeEl) || isOverlayWidgetTarget(e.target)) {
+        const isWidgetTarget = (el) => {
+          return !!(el && el.closest && el.closest('#chat-widget, #notes-widget-container, #update-notification, #message-options-menu, .reaction-picker'));
+        };
+        if (isWidgetTarget(activeEl) || isWidgetTarget(e.target)) {
           return;
         }
         // Ignore if user is typing in an input field
