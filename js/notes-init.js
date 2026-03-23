@@ -564,6 +564,13 @@ class NotesUIManager {
             bottom: max(8px, env(safe-area-inset-bottom));
             height: min(66dvh, calc(100dvh - 70px));
           }
+
+          html.notes-widget-open,
+          body.notes-widget-open {
+            overflow: hidden !important;
+            overscroll-behavior: none;
+            touch-action: manipulation;
+          }
         }
     `;
     const styleEl = document.createElement('style');
@@ -596,29 +603,11 @@ class NotesUIManager {
     
     const sendBtn = this.container.querySelector('.notes-send-btn');
     const input = this.container.querySelector('.notes-input');
-    const isCoarsePointer = () => window.matchMedia('(pointer: coarse)').matches;
-    let lockedScrollY = null;
+    this.inputEl = input;
 
-    const lockPageScroll = () => {
-      if (!isCoarsePointer() || lockedScrollY !== null) return;
-      lockedScrollY = window.scrollY || window.pageYOffset || 0;
-      document.body.style.position = 'fixed';
-      document.body.style.top = `-${lockedScrollY}px`;
-      document.body.style.left = '0';
-      document.body.style.right = '0';
-      document.body.style.width = '100%';
-    };
-
-    const unlockPageScroll = () => {
-      if (lockedScrollY === null) return;
-      const restoreY = lockedScrollY;
-      lockedScrollY = null;
-      document.body.style.position = '';
-      document.body.style.top = '';
-      document.body.style.left = '';
-      document.body.style.right = '';
-      document.body.style.width = '';
-      window.scrollTo(0, restoreY);
+    this.setPageScrollLocked = (locked) => {
+      document.documentElement.classList.toggle('notes-widget-open', Boolean(locked));
+      document.body.classList.toggle('notes-widget-open', Boolean(locked));
     };
     
     const sendMessage = () => {
@@ -656,17 +645,19 @@ class NotesUIManager {
 
     input.addEventListener('focus', () => {
       this.container.classList.add('notes-keyboard-open');
-      lockPageScroll();
+      this.setPageScrollLocked(true);
     });
 
     input.addEventListener('blur', () => {
       this.container.classList.remove('notes-keyboard-open');
-      setTimeout(unlockPageScroll, 0);
+      if (!this.isVisible) {
+        this.setPageScrollLocked(false);
+      }
     });
 
     this.container.querySelector('.notes-close-btn').addEventListener('click', () => {
       this.container.classList.remove('notes-keyboard-open');
-      unlockPageScroll();
+      this.setPageScrollLocked(false);
     });
   }
 
@@ -675,10 +666,18 @@ class NotesUIManager {
     if(this.isVisible) {
         // console.log('NotesUIManager: Toggling notes widget ON.'); // Can be removed, frequent
         this.container.classList.remove('hidden');
+        this.setPageScrollLocked(true);
         this.scrollToBottom();
+        setTimeout(() => {
+          if (this.inputEl && this.isVisible) {
+            this.inputEl.focus();
+          }
+        }, 40);
     } else { // Can be removed, frequent
         // console.log('NotesUIManager: Toggling notes widget OFF.');
         this.container.classList.add('hidden');
+        this.container.classList.remove('notes-keyboard-open');
+        this.setPageScrollLocked(false);
     }
   }
   
