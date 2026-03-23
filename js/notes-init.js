@@ -175,6 +175,18 @@ class NotesFirebaseREST {
     } catch (e) { console.error('NotesFirebaseREST: Delete message error:', e); return false; }
   }
 
+  async updateMessage(messageKey, updates) {
+    await this._ensureInit();
+    try {
+      const messageRef = firebase.database().ref(`notes/${this.documentId}/${messageKey}`);
+      await messageRef.update(updates || {});
+      return true;
+    } catch (e) {
+      console.error('NotesFirebaseREST: Update message error:', e);
+      return false;
+    }
+  }
+
   async addReaction(messageId, emoji) {
     return this.setReaction(messageId, emoji, true);
   }
@@ -221,6 +233,7 @@ class NotesUIManager {
     this.userNameMappings = {}; // For showing updated names on old messages
     this.userProfiles = {};
     this.avatarCache = new Map();
+    this.editingMessage = null;
 
     // console.log('NotesUIManager: Constructor called for documentId:', documentId);
     this.init();
@@ -409,9 +422,10 @@ class NotesUIManager {
         .notes-messages {
             flex: 1;
             overflow-y: auto;
+          overflow-x: hidden;
           -webkit-overflow-scrolling: touch;
           overscroll-behavior: contain;
-            padding: 12px;
+            padding: 12px 0 20px 0;
             background: #fff;
             display: flex;
             flex-direction: column;
@@ -462,11 +476,15 @@ class NotesUIManager {
         /* Message Styles (Copied & Simplified from chat.js) */
         .note-message {
             position: relative;
-            margin-bottom: 1px;
             transition: background 0.2s;
           display: flex;
-          gap: 6px;
+          gap: 8px;
           align-items: flex-start;
+          animation: slideIn 0.3s ease;
+        }
+        @keyframes slideIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
         }
         .note-message.note-message-continuation {
           margin-top: -3px;
@@ -477,12 +495,12 @@ class NotesUIManager {
         }
         .note-message:hover { background: #f8fafc; }
         .note-avatar {
-          width: 24px;
-          height: 24px;
-          min-width: 24px;
-          min-height: 24px;
-          max-width: 24px;
-          max-height: 24px;
+          width: 32px;
+          height: 32px;
+          min-width: 32px;
+          min-height: 32px;
+          max-width: 32px;
+          max-height: 32px;
           aspect-ratio: 1 / 1;
           border-radius: 50%;
           flex-shrink: 0;
@@ -490,23 +508,26 @@ class NotesUIManager {
           display: block;
         }
         .note-avatar-fallback {
-          width: 24px;
-          height: 24px;
+          width: 32px;
+          height: 32px;
           border-radius: 50%;
           flex-shrink: 0;
           display: flex;
           align-items: center;
           justify-content: center;
           color: white;
-          font-size: 11px;
+          font-size: 14px;
           font-weight: 700;
         }
         .note-content {
-            padding: 8px 8px 8px 8px;
-            border-radius: 12px;
-            max-width: 100%;
-            word-wrap: break-word;
           flex: 1;
+          display: flex;
+          flex-direction: column;
+          gap: 2px;
+          margin-right: 80px;
+          min-width: 0;
+          max-width: 100%;
+          word-wrap: break-word;
           position: relative;
         }
         .note-header {
@@ -517,17 +538,23 @@ class NotesUIManager {
         }
         .note-author { font-weight: 600; font-size: 13px; color: var(--chat-text); }
         .note-time { font-size: 11px; color: var(--chat-text-light); }
-        .note-text { font-size: 13px; line-height: 1.4; color: var(--chat-text); padding: 4px 10px; border-radius: 8px; word-break: break-word; overflow-wrap: anywhere; }
+        .note-text { font-size: 13px; line-height: 1.4; color: var(--chat-text); padding: 4px 10px; border-radius: 8px; word-break: break-word; overflow-wrap: anywhere; box-sizing: border-box; max-width: 100%; width: fit-content; }
         .note-text a { word-break: break-all; overflow-wrap: anywhere; }
         .note-reactions { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
         .reaction-badge { font-size: 14px !important; padding: 4px 8px !important; border-radius: 12px !important; }
         
         /* Action buttons */
         .note-actions {
-            position: absolute; top: 4px; right: 4px;
+          position: absolute;
+          top: 50%;
+          transform: translateY(-50%);
+          right: -79px;
             display: none; background: white; border-radius: 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+          gap: 2px;
+          z-index: 10;
         }
+        .note-actions.two-btns { right: -53px; }
         .note-message:hover .note-actions { display: flex; }
         .note-action-btn {
             background: none; border: none; cursor: pointer; padding: 4px;
@@ -542,6 +569,12 @@ class NotesUIManager {
         }
         
         .reaction-picker { z-index: 10001; }
+
+        .message-option-item.disabled {
+          opacity: 0.45;
+          cursor: default;
+          pointer-events: none;
+        }
 
         @supports not (height: 100dvh) {
           .notes-widget {
@@ -617,11 +650,16 @@ class NotesUIManager {
         const replyTo = input.dataset.replyTo;
         const replyAuthor = input.dataset.replyAuthor;
         
-        this.db.sendMessage(text, replyTo, replyAuthor).then(success => {
+        const savePromise = this.editingMessage
+          ? this.db.updateMessage(this.editingMessage.key, { text: text.trim(), edited: true })
+          : this.db.sendMessage(text, replyTo, replyAuthor);
+
+        savePromise.then(success => {
             if(success) {
                 input.value = '';
                 input.style.height = 'auto';
                 this.cancelReply();
+            this.cancelEditing();
             }
         });
     };
@@ -686,29 +724,74 @@ class NotesUIManager {
       if(list) list.scrollTop = list.scrollHeight;
   }
 
+  buildMessageRenderSignature(msg, isContinuation) {
+      return [
+          msg.id || '',
+          msg.key || '',
+          msg.userId || '',
+          msg.userName || '',
+          msg.text || '',
+          msg.timestamp || '',
+          msg.replyTo || '',
+          msg.replyAuthor || '',
+          msg.edited ? '1' : '0',
+          isContinuation ? '1' : '0'
+      ].join('|');
+  }
+
   renderMessages(messages) {
       const list = this.container.querySelector('#notes-messages-list');
       if(!list) return;
       
       // console.log('NotesUIManager: Rendering messages.'); // Can be removed, frequent
       const wasAtBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 50;
-      
-      list.innerHTML = ''; // Full re-render for simplicity (or can optimize like chat.js)
+
+      const existingById = new Map();
+      list.querySelectorAll('.note-message[data-id]').forEach((el) => {
+          existingById.set(el.dataset.id, el);
+      });
+
+      const nextIds = new Set();
 
       let prevMsg = null;
-      messages.forEach(msg => {
+      messages.forEach((msg, index) => {
           const isContinuation = !!(
             prevMsg &&
             prevMsg.userId === msg.userId &&
             (msg.timestamp - prevMsg.timestamp < 3 * 60 * 1000)
           );
 
-          const el = this.createMessageElement(msg, messages, isContinuation);
-          if (isContinuation) {
-            el.classList.add('note-message-continuation');
+          const id = String(msg.id || '');
+          if (id) nextIds.add(id);
+
+          const signature = this.buildMessageRenderSignature(msg, isContinuation);
+          const existing = existingById.get(id);
+          const expectedNodeAtIndex = list.children[index] || null;
+
+          let targetEl = existing;
+          if (!existing) {
+            targetEl = this.createMessageElement(msg, messages, isContinuation);
+            list.insertBefore(targetEl, expectedNodeAtIndex);
+          } else if (existing.dataset.renderSig !== signature) {
+            const replacement = this.createMessageElement(msg, messages, isContinuation);
+            existing.replaceWith(replacement);
+            targetEl = replacement;
           }
-          list.appendChild(el);
+
+          targetEl.dataset.renderSig = signature;
+
+          const nodeAfterUpdates = list.children[index] || null;
+          if (targetEl !== nodeAfterUpdates) {
+            list.insertBefore(targetEl, nodeAfterUpdates);
+          }
+
           prevMsg = msg;
+      });
+
+      existingById.forEach((el, id) => {
+          if (!nextIds.has(id)) {
+            el.remove();
+          }
       });
       
       if(wasAtBottom) this.scrollToBottom();
@@ -718,8 +801,11 @@ class NotesUIManager {
       // Check if message belongs to current user (by userId OR userName like in chat.js)
       const isMe = (currentUser.userId && msg.userId === currentUser.userId) || (currentUser.legacyNotesId && msg.userId === currentUser.legacyNotesId);
       const el = document.createElement('div');
-      el.className = 'note-message';
+      el.className = `note-message${isMe ? ' is-self-message' : ''}`;
       el.dataset.id = msg.id;
+      el.dataset.userId = msg.userId || '';
+      el.dataset.messageKey = msg.key || '';
+      el.dataset.renderSig = this.buildMessageRenderSignature(msg, isContinuation);
       const resolvedName = this.getDisplayNameByUserId(msg.userId, msg.userName);
       const userInfo = this.getUserInfo(msg.userId, resolvedName || msg.userName);
       const currentAvatar = userInfo.avatar;
@@ -742,12 +828,13 @@ class NotesUIManager {
       const initial = (resolvedName || '?').charAt(0).toUpperCase();
       const avatarVisibility = isContinuation ? 'visibility:hidden;' : 'visibility:visible;';
       const headerDisplay = isContinuation ? 'display:none;' : 'display:flex;';
+      const actionClass = isMe ? '' : 'two-btns';
 
       let avatarHtml = '';
       if (currentAvatar && typeof currentAvatar === 'string' && currentAvatar.length > 5) {
         avatarHtml = `
-          <div style="width:24px;height:24px;position:relative;flex-shrink:0;">
-            <img src="${currentAvatar}" class="note-avatar" style="${avatarVisibility} width:24px; height:24px; border-radius:50%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+          <div style="width:32px;height:32px;position:relative;flex-shrink:0;">
+            <img src="${currentAvatar}" class="note-avatar" style="${avatarVisibility} width:32px; height:32px; border-radius:50%; object-fit:cover; display:block;" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
             <div class="note-avatar-fallback" style="background:${currentColor}; ${avatarVisibility} display:none; position:absolute; inset:0;">${this.escapeHtml(initial)}</div>
           </div>`;
       } else {
@@ -762,17 +849,19 @@ class NotesUIManager {
                 <span class="note-time">${new Date(msg.timestamp).toLocaleTimeString('bg-BG', {hour: '2-digit', minute:'2-digit'})}</span>
              </div>
              ${replyHTML}
-             <div class="note-text" style="background:${bg}">${this.linkify(msg.text)}</div>
-             <div class="note-reactions" id="reactions-${msg.id}">${this.generateReactionsHTML(msg.id)}</div>
-         </div>
-         <div class="note-actions">
-             <button class="note-action-btn reply-btn" title="Reply">
+             <div class="note-bubble-container" style="position: relative; width: fit-content; display: flex; flex-direction: column;">
+               <div class="note-text" style="background:${bg}">${this.linkify(msg.text)}${msg.edited ? '<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>' : ''}</div>
+               <div class="note-actions ${actionClass}">
+               <button class="note-action-btn reply-btn" title="Reply">
                  <img src="svg/chat/icon-reply.svg" alt="Reply" style="width: 16px; height: 16px">
-             </button>
-             <button class="note-action-btn react-btn" title="React">
+               </button>
+               <button class="note-action-btn react-btn" title="React">
                  <img src="svg/chat/icon-reaction.svg" alt="Reaction" style="width: 16px; height: 16px">
-             </button>
-             ${isMe ? '<button class="note-action-btn delete-btn" title="Delete"><img src="svg/chat/icon-delete.svg" alt="Delete" style="width: 16px; height: 16px"></button>' : ''}
+               </button>
+               ${isMe ? '<button class="note-action-btn delete-btn" title="Delete"><img src="svg/chat/icon-delete.svg" alt="Delete" style="width: 16px; height: 16px"></button>' : ''}
+               </div>
+             </div>
+             <div class="note-reactions" id="reactions-${msg.id}">${this.generateReactionsHTML(msg.id)}</div>
          </div>
       `;
       
@@ -782,6 +871,12 @@ class NotesUIManager {
           e.stopPropagation();
           this.showReactionPicker(msg.id, e.target);
       });
+
+        el.addEventListener('contextmenu', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.showMessageOptions(msg, e);
+        });
       
       const reactionsEl = el.querySelector(`#reactions-${msg.id}`);
       if (reactionsEl) this.attachReactionListeners(reactionsEl);
@@ -795,6 +890,9 @@ class NotesUIManager {
   }
   
   startReply(msg) {
+      if (this.editingMessage) {
+        this.cancelEditing();
+      }
       const input = this.container.querySelector('.notes-input');
       const preview = this.container.querySelector('#notes-reply-preview');
       
@@ -818,14 +916,123 @@ class NotesUIManager {
       // console.log('NotesUIManager: Reply cancelled.'); // Can be removed
       this.container.querySelector('#notes-reply-preview').innerHTML = '';
   }
+
+  startEditing(msg) {
+      if (!msg || !msg.key) return;
+
+      this.cancelReply();
+      this.editingMessage = { id: msg.id, key: msg.key };
+
+      const input = this.container.querySelector('.notes-input');
+      const preview = this.container.querySelector('#notes-reply-preview');
+      if (!input || !preview) return;
+
+      input.value = msg.text || '';
+      input.style.height = 'auto';
+      const maxInputHeight = 140;
+      const nextHeight = Math.min(input.scrollHeight, maxInputHeight);
+      input.style.height = nextHeight + 'px';
+      input.style.overflowY = input.scrollHeight > maxInputHeight ? 'auto' : 'hidden';
+
+      preview.innerHTML = `
+        <div class="reply-indicator" style="background: #fef3c7; border-left: 3px solid #d97706; padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <span>Editing message</span>
+            <button onclick="window.notesManager.cancelEditing()" style="border:none;background:none;cursor:pointer;">✖</button>
+        </div>
+      `;
+
+      input.focus();
+      const end = input.value.length;
+      input.setSelectionRange(end, end);
+  }
+
+  cancelEditing() {
+      this.editingMessage = null;
+      const preview = this.container.querySelector('#notes-reply-preview');
+      if (preview && preview.textContent && /Editing message/i.test(preview.textContent)) {
+        preview.innerHTML = '';
+      }
+  }
+
+  showMessageOptions(msg, event) {
+      const existing = document.getElementById('message-options-menu');
+      if (existing) existing.remove();
+      if (!msg) return;
+
+      const isMe = (currentUser.userId && msg.userId === currentUser.userId) || (currentUser.legacyNotesId && msg.userId === currentUser.legacyNotesId);
+      const menu = document.createElement('div');
+      menu.id = 'message-options-menu';
+      menu.className = 'message-options-menu';
+
+      menu.innerHTML = `
+        <div class="message-option-item reply"><img src="svg/chat/icon-reply.svg" alt="Reply">Reply</div>
+        <div class="message-option-item reaction"><img src="svg/chat/icon-reaction.svg" alt="Reaction">Reaction</div>
+        <div class="message-option-item edit ${isMe ? '' : 'disabled'}"><img src="svg/chat/icon-edit.svg" alt="Edit">Edit</div>
+        <div class="message-option-item delete ${isMe ? '' : 'disabled'}"><img src="svg/chat/icon-delete.svg" alt="Delete">Delete</div>
+      `;
+
+      document.body.appendChild(menu);
+
+      const menuRect = menu.getBoundingClientRect();
+      let left = (event && Number.isFinite(event.clientX)) ? event.clientX : 20;
+      let top = (event && Number.isFinite(event.clientY)) ? event.clientY : 20;
+
+      if (left + menuRect.width > window.innerWidth - 10) {
+        left = window.innerWidth - menuRect.width - 10;
+      }
+      if (top + menuRect.height > window.innerHeight - 10) {
+        top = window.innerHeight - menuRect.height - 10;
+      }
+      if (left < 10) left = 10;
+      if (top < 10) top = 10;
+
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
+
+      menu.querySelector('.reply').onclick = () => {
+        menu.remove();
+        this.startReply(msg);
+      };
+      menu.querySelector('.reaction').onclick = () => {
+        menu.remove();
+        this.showReactionPicker(msg.id, event && event.target ? event.target : document.body);
+      };
+
+      const editItem = menu.querySelector('.edit');
+      if (isMe && editItem) {
+        editItem.onclick = () => {
+          menu.remove();
+          this.startEditing(msg);
+        };
+      }
+
+      const deleteItem = menu.querySelector('.delete');
+      if (isMe && deleteItem) {
+        deleteItem.onclick = () => {
+          menu.remove();
+          this.db.deleteMessage(msg.key);
+        };
+      }
+
+      setTimeout(() => {
+        const close = (e) => {
+          if (!menu.contains(e.target)) {
+            menu.remove();
+            document.removeEventListener('mousedown', close);
+            document.removeEventListener('touchstart', close);
+          }
+        };
+        document.addEventListener('mousedown', close);
+        document.addEventListener('touchstart', close, { passive: true });
+      }, 0);
+  }
   
   showReactionPicker(msgId, targetBtn) {
        // Simple picker
-       const existing = document.querySelector('.reaction-picker');
+      const existing = document.querySelector('.reaction-picker');
        if(existing) existing.remove();
        
        const emojis1 = ['👍', '👎', '😂', '❤️', '😮', '🐐'];
-       const emojis2 = ['А', 'Б', 'В', 'Г', 'Д', 'Е'];
 
        const picker = document.createElement('div');
        picker.className = 'reaction-picker';
@@ -852,12 +1059,27 @@ class NotesUIManager {
        };
 
        picker.appendChild(createRow(emojis1));
-       picker.appendChild(createRow(emojis2));
        
-       const rect = targetBtn.getBoundingClientRect();
-       picker.style.left = (rect.left - 100) + 'px';
-       picker.style.top = (rect.top - 80) + 'px';
        document.body.appendChild(picker);
+
+       const targetRect = targetBtn && targetBtn.getBoundingClientRect ? targetBtn.getBoundingClientRect() : null;
+       const pickerRect = picker.getBoundingClientRect();
+       let left = targetRect ? (targetRect.left + targetRect.width / 2 - pickerRect.width / 2) : ((window.innerWidth - pickerRect.width) / 2);
+       let top = targetRect ? (targetRect.top - pickerRect.height - 8) : ((window.innerHeight - pickerRect.height) / 2);
+
+       if (left < 10) left = 10;
+       if (left + pickerRect.width > window.innerWidth - 10) {
+         left = window.innerWidth - pickerRect.width - 10;
+       }
+       if (top < 10) {
+         top = targetRect ? (targetRect.bottom + 8) : 10;
+       }
+       if (top + pickerRect.height > window.innerHeight - 10) {
+         top = window.innerHeight - pickerRect.height - 10;
+       }
+
+       picker.style.left = `${Math.round(left)}px`;
+       picker.style.top = `${Math.round(top)}px`;
        
        // Close on click outside
        setTimeout(() => {

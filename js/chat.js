@@ -2428,23 +2428,24 @@ class ChatUIManager {
           
           <div class="message-bubble-container" style="position: relative; width: fit-content; display: flex; flex-direction: column;">
              ${replyHTML}
-             <div class="message-text" data-raw-text="${this.escapeHtml(msg.text)}" style="background-color: ${messageBgColor}; color: ${messageTextColor}; text-align: left; max-width: 100%; width: fit-content;">
-            ${this.linkifyText(msg.text)}
-            ${msg.edited ? `<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>` : ''}
-          </div>
-             
-        <div class="message-actions ${actionClass}">
-          <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Отговори">
-            <img src="svg/chat/icon-reply.svg" alt="Reply" style="width: 16px; height: 16px">
-          </button>
-          <button class="message-reaction-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Добави реакция">
-            <img src="svg/chat/icon-reaction.svg" alt="Reaction" style="width: 16px; height: 16px">
-          </button>
-          ${isCurrentUser ? `
-          <button class="message-options-btn" data-message-id="${msg.id}" data-message-key="${msg.key}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Още опции">
-            <img src="svg/chat/icon-three-dots-vertical.svg" alt="More" style="width: 16px; height: 16px">
-          </button>` : ''}
-        </div>
+             <div class="message-main-row" style="position: relative; width: fit-content; display: flex; flex-direction: column;">
+               <div class="message-text" data-raw-text="${this.escapeHtml(msg.text)}" style="background-color: ${messageBgColor}; color: ${messageTextColor}; text-align: left; max-width: 100%; width: fit-content;">
+                 ${this.linkifyText(msg.text)}
+                 ${msg.edited ? `<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>` : ''}
+               </div>
+               <div class="message-actions ${actionClass}">
+                 <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Отговори">
+                   <img src="svg/chat/icon-reply.svg" alt="Reply" style="width: 16px; height: 16px">
+                 </button>
+                 <button class="message-reaction-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Добави реакция">
+                   <img src="svg/chat/icon-reaction.svg" alt="Reaction" style="width: 16px; height: 16px">
+                 </button>
+                 ${isCurrentUser ? `
+                 <button class="message-options-btn" data-message-id="${msg.id}" data-message-key="${msg.key}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Още опции">
+                   <img src="svg/chat/icon-three-dots-vertical.svg" alt="More" style="width: 16px; height: 16px">
+                 </button>` : ''}
+               </div>
+             </div>
           </div>
 
           <div class="message-reactions" data-message-id="${msg.id}" style="justify-content: flex-start;">${reactionsHTML}</div>
@@ -2485,9 +2486,15 @@ class ChatUIManager {
     if (optionsBtn) {
       optionsBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.showMessageOptions(optionsBtn.dataset.messageId, optionsBtn.dataset.messageKey, optionsBtn);
+        this.showMessageOptions(optionsBtn.dataset.messageId, optionsBtn.dataset.messageKey, optionsBtn, null, msgEl);
       });
     }
+
+    msgEl.addEventListener('contextmenu', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      this.showMessageOptions(msgEl.dataset.messageId, msgEl.dataset.messageKey, msgEl, e, msgEl);
+    });
 
     // Add listener for profile view
     const avatar = msgEl.querySelector('.message-avatar');
@@ -2625,15 +2632,27 @@ class ChatUIManager {
     document.addEventListener('keydown', escHandler);
   }
 
-  showMessageOptions(messageId, messageKey, anchorEl) {
+  showMessageOptions(messageId, messageKey, anchorEl, triggerEvent = null, messageEl = null) {
     const existingMenu = document.getElementById('message-options-menu');
     if (existingMenu) existingMenu.remove();
+
+    const sourceMessageEl = messageEl || document.querySelector(`.chat-message[data-message-id="${messageId}"]`);
+    const messageUserId = sourceMessageEl ? String(sourceMessageEl.dataset.userId || '') : '';
+    const isOwner = this._getMyUserIds().includes(messageUserId);
 
     const menu = document.createElement('div');
     menu.id = 'message-options-menu';
     menu.className = 'message-options-menu';
     
     menu.innerHTML = `
+      <div class="message-option-item reply">
+        <img src="svg/chat/icon-reply.svg" alt="Reply">
+        Reply
+      </div>
+      <div class="message-option-item reaction">
+        <img src="svg/chat/icon-reaction.svg" alt="Reaction">
+        Reaction
+      </div>
       <div class="message-option-item edit">
         <img src="svg/chat/icon-edit.svg" alt="Edit">
         Edit
@@ -2646,34 +2665,69 @@ class ChatUIManager {
 
     document.body.appendChild(menu);
 
-    const rect = anchorEl.getBoundingClientRect();
     const menuRect = menu.getBoundingClientRect();
+    const rect = anchorEl.getBoundingClientRect();
 
     let top = rect.bottom + 5;
     let left = rect.right - menuRect.width;
 
+    if (triggerEvent && Number.isFinite(triggerEvent.clientX) && Number.isFinite(triggerEvent.clientY)) {
+      left = triggerEvent.clientX;
+      top = triggerEvent.clientY;
+    }
+
     if (top + menuRect.height > window.innerHeight) top = rect.top - menuRect.height - 5;
     if (left < 10) left = 10;
+    if (left + menuRect.width > window.innerWidth - 10) left = window.innerWidth - menuRect.width - 10;
+    if (top < 10) top = 10;
+    if (top + menuRect.height > window.innerHeight - 10) top = window.innerHeight - menuRect.height - 10;
 
     menu.style.top = top + 'px';
     menu.style.left = left + 'px';
 
-    menu.querySelector('.edit').onclick = () => {
+    menu.querySelector('.reply').onclick = () => {
       menu.remove();
-      this.startEditing(messageId, messageKey);
+      const targetMsgEl = sourceMessageEl || document.querySelector(`.chat-message[data-message-id="${messageId}"]`);
+      if (targetMsgEl) {
+        this.startReply(messageId, targetMsgEl);
+      }
     };
-    menu.querySelector('.delete').onclick = () => {
+
+    menu.querySelector('.reaction').onclick = () => {
       menu.remove();
-      this.deleteMessage(messageKey);
+      this.showReactionPicker(messageId);
     };
+
+    const editItem = menu.querySelector('.edit');
+    const deleteItem = menu.querySelector('.delete');
+
+    if (!isOwner) {
+      editItem.style.opacity = '0.45';
+      editItem.style.pointerEvents = 'none';
+      deleteItem.style.opacity = '0.45';
+      deleteItem.style.pointerEvents = 'none';
+    }
+
+    if (isOwner) {
+      menu.querySelector('.edit').onclick = () => {
+        menu.remove();
+        this.startEditing(messageId, messageKey);
+      };
+      menu.querySelector('.delete').onclick = () => {
+        menu.remove();
+        this.deleteMessage(messageKey);
+      };
+    }
 
     const closeMenu = (e) => {
       if (!menu.contains(e.target) && e.target !== anchorEl) {
         menu.remove();
         document.removeEventListener('mousedown', closeMenu);
+        document.removeEventListener('touchstart', closeMenu);
       }
     };
     document.addEventListener('mousedown', closeMenu);
+    document.addEventListener('touchstart', closeMenu, { passive: true });
   }
 
   startEditing(messageId, messageKey) {
@@ -3287,8 +3341,10 @@ class ChatUIManager {
         document.removeEventListener('click', closePicker);
       }
     };
-    
-    document.addEventListener('click', closePicker);
+
+    setTimeout(() => {
+      document.addEventListener('click', closePicker);
+    }, 0);
   }
 
   async addReaction(messageId, emoji) {
