@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603231b11"></script>
+  <script src="js/auth-guard.js?v=202603231bnd"></script>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
@@ -2173,7 +2173,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603231b11"></script>
+  <script src="courses.generated.js?v=202603231bnd"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2280,9 +2280,65 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603231b11"></script>
+    <script src="js/chat.js?v=202603231bnd"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
-  <script src="js/notes-init.js?v=20260323d"></script>
+  <script src="js/notes-init.js?v=20260323m2"></script>
+
+  <script>
+    (function() {
+      const isMobile = () => window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+
+      const setKeyboardOffset = () => {
+        if (!isMobile()) {
+          document.documentElement.style.setProperty('--mobile-keyboard-offset', '0px');
+          return;
+        }
+
+        const vv = window.visualViewport;
+        if (!vv) {
+          document.documentElement.style.setProperty('--mobile-keyboard-offset', '0px');
+          return;
+        }
+
+        const inset = Math.max(0, window.innerHeight - (vv.height + vv.offsetTop));
+        document.documentElement.style.setProperty('--mobile-keyboard-offset', `${Math.round(inset)}px`);
+      };
+
+      const focusInputAfterOpen = (selector) => {
+        const tryFocus = () => {
+          const el = document.querySelector(selector);
+          if (!el) return;
+          el.disabled = false;
+          el.readOnly = false;
+          el.focus({ preventScroll: true });
+        };
+
+        setTimeout(tryFocus, 16);
+        setTimeout(tryFocus, 120);
+        setTimeout(tryFocus, 260);
+      };
+
+      document.addEventListener('pointerdown', (e) => {
+        const target = e.target;
+        if (!(target instanceof Element) || !isMobile()) return;
+
+        if (target.closest('#notes-toggle-btn')) {
+          focusInputAfterOpen('#notes-widget-container .notes-input');
+        } else if (target.closest('#chat-toggle')) {
+          focusInputAfterOpen('#chat-widget .chat-input');
+        }
+      }, true);
+
+      if (window.visualViewport) {
+        window.visualViewport.addEventListener('resize', setKeyboardOffset, { passive: true });
+        window.visualViewport.addEventListener('scroll', setKeyboardOffset, { passive: true });
+      }
+
+      window.addEventListener('resize', setKeyboardOffset, { passive: true });
+      window.addEventListener('orientationchange', () => setTimeout(setKeyboardOffset, 150), { passive: true });
+      setKeyboardOffset();
+    })();
+  </script>
 
   <script>
     (function() {
