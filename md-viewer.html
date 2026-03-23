@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=20260323183w"></script>
+  <script src="js/auth-guard.js?v=2026032318cl"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Course Viewer</title>
@@ -2173,7 +2173,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260323183w"></script>
+  <script src="courses.generated.js?v=2026032318cl"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2280,7 +2280,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260323183w"></script>
+    <script src="js/chat.js?v=2026032318cl"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202602171mhr"></script>
 
@@ -2315,6 +2315,43 @@
           .replace(/'/g, '&#39;');
       }
 
+      function stripTrailingUrlPunctuation(value) {
+        return String(value || '').trim().replace(/[.,;:!?]+$/g, '');
+      }
+
+      function applyIntrinsicWidthToTooltipImage(img) {
+        const rawPercent = Number(img.getAttribute('data-note-width'));
+        const widthPercent = Math.min(100, Math.max(10, Number.isFinite(rawPercent) ? rawPercent : 100));
+
+        const applyWidth = () => {
+          const naturalWidth = Number(img.naturalWidth) || 0;
+          if (!naturalWidth) return;
+          const targetWidthPx = (naturalWidth * widthPercent) / 100;
+          img.style.width = `${targetWidthPx}px`;
+          img.style.maxWidth = '100%';
+          img.style.height = 'auto';
+          img.style.display = 'block';
+          img.style.margin = '0.35em 0';
+          img.style.borderRadius = '6px';
+        };
+
+        if (img.complete && img.naturalWidth) {
+          applyWidth();
+        } else {
+          img.addEventListener('load', applyWidth, { once: true });
+        }
+      }
+
+      function loadTooltipImagesNow() {
+        tooltip.querySelectorAll('img[data-note-src]').forEach((img) => {
+          const src = img.getAttribute('data-note-src');
+          if (!src) return;
+          img.setAttribute('src', src);
+          img.removeAttribute('data-note-src');
+          applyIntrinsicWidthToTooltipImage(img);
+        });
+      }
+
       function setTooltipContent(rawNote) {
         const lines = String(rawNote || '').split(/\r\n|\r|\n/);
         const rendered = lines.map((line) => {
@@ -2325,12 +2362,21 @@
           }
           return escapeHtml(line);
         }).join('<br>')
-          .replace(/!\[(.*?)\]\((.*?)\)/g, (match, alt, src) => {
+          .replace(/!\[(.*?)\]\((.*?)(?:\s+(?:"(.*?)"|&quot;(.*?)&quot;))?\)/g, (match, alt, src, titleQuoted, titleEscaped) => {
             const safeAlt = escapeHtml(alt);
-            const trimmedSrc = String(src || '').trim();
+            const title = titleQuoted || titleEscaped || '';
+            const srcWithoutTitle = String(src || '')
+              .replace(/\s+(?:"[^"]*"|&quot;[^&]*&quot;)\s*$/i, '')
+              .trim();
+            const trimmedSrc = stripTrailingUrlPunctuation(srcWithoutTitle);
             const isAllowedSrc = /^(https?:\/\/|data:image\/|\.\.?\/|\/)/i.test(trimmedSrc);
             const safeSrc = isAllowedSrc ? trimmedSrc.replace(/"/g, '&quot;') : '#';
-            return `<img src="${safeSrc}" alt="${safeAlt}">`;
+            let widthValue = '100';
+            const widthMatch = String(title || '').match(/width=(\d+)%/i);
+            if (widthMatch && widthMatch[1]) {
+              widthValue = String(Math.min(100, Math.max(10, Number(widthMatch[1]) || 100)));
+            }
+            return `<img data-note-src="${safeSrc}" data-note-width="${widthValue}" alt="${safeAlt}" loading="lazy" decoding="async">`;
           })
           .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
           .replace(/__(.+?)__/g, '<strong>$1</strong>')
@@ -2339,6 +2385,7 @@
           .replace(/`(.+?)`/g, '<code>$1</code>')
           .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
         tooltip.innerHTML = rendered;
+        loadTooltipImagesNow();
       }
 
       function positionTooltipFor(el) {
