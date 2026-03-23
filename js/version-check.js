@@ -57,6 +57,15 @@
       gap: 8px;
     `;
 
+    if (window.matchMedia('(max-width: 768px), (pointer: coarse)').matches) {
+      notification.style.left = '50%';
+      notification.style.right = 'auto';
+      notification.style.transform = 'translateX(-50%)';
+      notification.style.width = 'calc(100vw - 24px)';
+      notification.style.maxWidth = '420px';
+      notification.style.top = 'max(12px, env(safe-area-inset-top))';
+    }
+
     // Check if we are in md-viewer or other sub-pages
     const isViewer = window.location.pathname.includes('md-viewer.html');
     const additionalInstruction = isViewer 

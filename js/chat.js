@@ -1889,7 +1889,6 @@ class ChatUIManager {
       
       // Reset textarea height after sending
       input.style.height = 'auto';
-      
       input.focus();
       
       // Премахни reply indicator
@@ -3565,7 +3564,6 @@ class ChatUIManager {
         </div>
         <button onclick="const input = this.closest('.chat-input-area').querySelector('.chat-input'); if(input) { input.dataset.replyTo=''; input.dataset.replyAuthor=''; input.dataset.replyText=''; } this.closest('.reply-indicator').remove();" style="border:none;background:none;cursor:pointer;font-size:16px;color:#64748b;padding: 0 4px; line-height: 1;">✕</button>
       `;
-
       input.focus();
     }
   }
@@ -3595,18 +3593,8 @@ class ChatUIManager {
       if (this.isOpen) {
         const input = this.container.querySelector('.chat-input');
         const isMobileLike = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
-        const pagePath = String(window.location.pathname || '').toLowerCase();
-        const shouldAutoFocus = !(isMobileLike && pagePath.includes('md-viewer'));
-        if (input && isMobileLike && shouldAutoFocus) {
-          const focusInput = () => {
-            input.disabled = false;
-            input.readOnly = false;
-            input.focus({ preventScroll: true });
-          };
-          focusInput();
-          setTimeout(focusInput, 16);
-          setTimeout(focusInput, 120);
-          setTimeout(focusInput, 260);
+        if (input && !isMobileLike) {
+          input.focus();
         }
         
         // Маркирай съобщенията като прочетени

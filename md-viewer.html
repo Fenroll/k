@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603231c7t"></script>
+  <script src="js/auth-guard.js?v=202603231cnq"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -2173,7 +2173,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603231c7t"></script>
+  <script src="courses.generated.js?v=202603231cnq"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2280,9 +2280,9 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603231c7t"></script>
+    <script src="js/chat.js?v=202603231cnq"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
-  <script src="js/notes-init.js?v=20260323m4"></script>
+  <script src="js/notes-init.js?v=20260323m5"></script>
 
   <script>
     (function() {
@@ -2336,6 +2336,17 @@
         }
       }, true);
 
+      const stopViewerKeyInterception = (e) => {
+        const activeEl = document.activeElement;
+        const isWidgetInputFocused = !!(activeEl && activeEl.closest && activeEl.closest('#chat-widget .chat-input, #notes-widget-container .notes-input'));
+        if (!isWidgetInputFocused) return;
+        e.stopPropagation();
+      };
+
+      document.addEventListener('keydown', stopViewerKeyInterception, true);
+      document.addEventListener('keypress', stopViewerKeyInterception, true);
+      document.addEventListener('keyup', stopViewerKeyInterception, true);
+
       if (window.visualViewport) {
         window.visualViewport.addEventListener('resize', setKeyboardOffset, { passive: true });
         window.visualViewport.addEventListener('scroll', setKeyboardOffset, { passive: true });
@@ -2368,6 +2379,11 @@
       let touchStartedInsideTooltip = false;
       let suppressClickUntil = 0;
       const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+      function isOverlayWidgetTarget(target) {
+        if (!(target instanceof Element)) return false;
+        return Boolean(target.closest('#chat-widget, #notes-widget-container, #update-notification, #message-options-menu, .reaction-picker'));
+      }
 
       function escapeHtml(text) {
         return String(text)
@@ -2552,6 +2568,7 @@
       }
 
       document.addEventListener('touchstart', function(e) {
+        if (isOverlayWidgetTarget(e.target)) return;
         if (!activeNoteElement) return;
         touchStartedInsideTooltip = tooltip.contains(e.target);
         if (!touchStartedInsideTooltip) {
@@ -2570,6 +2587,7 @@
       }, { passive: true });
 
       document.addEventListener('touchmove', function(e) {
+        if (isOverlayWidgetTarget(e.target)) return;
         if (!activeNoteElement || touchStartedInsideTooltip) return;
         const touch = e.touches && e.touches[0];
         if (!touch) return;
@@ -2579,6 +2597,7 @@
       }, { passive: true });
 
       document.addEventListener('touchend', function(e) {
+        if (isOverlayWidgetTarget(e.target)) return;
         if (touchStartedInsideTooltip || touchMoved) return;
 
         const touchedNote = e.target && e.target.closest ? e.target.closest('.editor-note[data-note]') : null;
@@ -2789,8 +2808,12 @@
 
       // Listen for arrow key presses
       document.addEventListener('keydown', (e) => {
+        const activeEl = document.activeElement;
+        if (isOverlayWidgetTarget(activeEl) || isOverlayWidgetTarget(e.target)) {
+          return;
+        }
         // Ignore if user is typing in an input field
-        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || (activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable))) {
           return;
         }
         
@@ -2914,7 +2937,7 @@
     .notes-list::-webkit-scrollbar-track { background: transparent; }
     .notes-list::-webkit-scrollbar-thumb { background: var(--notes-border); border-radius: 3px; }
   </style>
-<script src="js/version-check.js?v=202602171mhr"></script>
+<script src="js/version-check.js?v=20260323m1"></script>
 <!-- Hydration Script: Ensures fresh content on reload even if sessionKey is present -->
 <script>
   (function() {
