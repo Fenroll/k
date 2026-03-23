@@ -3595,7 +3595,9 @@ class ChatUIManager {
       if (this.isOpen) {
         const input = this.container.querySelector('.chat-input');
         const isMobileLike = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
-        if (input && isMobileLike) {
+        const pagePath = String(window.location.pathname || '').toLowerCase();
+        const shouldAutoFocus = !(isMobileLike && pagePath.includes('md-viewer'));
+        if (input && isMobileLike && shouldAutoFocus) {
           const focusInput = () => {
             input.disabled = false;
             input.readOnly = false;

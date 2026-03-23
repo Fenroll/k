@@ -785,15 +785,20 @@ class NotesUIManager {
       this.setChatToggleHidden(true);
     }
     this.scrollToBottomReliable();
-    const tryFocus = () => {
-      if (this.inputEl && this.isVisible) {
-        this.inputEl.disabled = false;
-        this.inputEl.readOnly = false;
-        this.inputEl.focus({ preventScroll: true });
-      }
-    };
-    setTimeout(tryFocus, 20);
-    setTimeout(tryFocus, 120);
+
+    const pagePath = String(window.location.pathname || '').toLowerCase();
+    const shouldAutoFocus = !(this.isMobileViewport() && pagePath.includes('md-viewer'));
+    if (shouldAutoFocus) {
+      const tryFocus = () => {
+        if (this.inputEl && this.isVisible) {
+          this.inputEl.disabled = false;
+          this.inputEl.readOnly = false;
+          this.inputEl.focus({ preventScroll: true });
+        }
+      };
+      setTimeout(tryFocus, 20);
+      setTimeout(tryFocus, 120);
+    }
   }
 
   closeNotes() {

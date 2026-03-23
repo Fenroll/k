@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202603231bzo"></script>
+  <script src="js/auth-guard.js?v=202603231c7t"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -2173,7 +2173,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202603231bzo"></script>
+  <script src="courses.generated.js?v=202603231c7t"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2280,9 +2280,9 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202603231bzo"></script>
+    <script src="js/chat.js?v=202603231c7t"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
-  <script src="js/notes-init.js?v=20260323m3"></script>
+  <script src="js/notes-init.js?v=20260323m4"></script>
 
   <script>
     (function() {
@@ -2304,29 +2304,12 @@
         document.documentElement.style.setProperty('--mobile-keyboard-offset', `${Math.round(inset)}px`);
       };
 
-      const focusInputAfterOpen = (selector) => {
-        const tryFocus = () => {
-          const el = document.querySelector(selector);
-          if (!el) return;
-          el.disabled = false;
-          el.readOnly = false;
-          el.focus({ preventScroll: true });
-          setKeyboardOffset();
-        };
-
-        setTimeout(tryFocus, 16);
-        setTimeout(tryFocus, 120);
-        setTimeout(tryFocus, 260);
-      };
-
       const onToggleIntent = (target) => {
         if (!(target instanceof Element) || !isMobile()) return;
         if (target.closest('#notes-toggle-btn')) {
           setKeyboardOffset();
-          focusInputAfterOpen('#notes-widget-container .notes-input');
         } else if (target.closest('#chat-toggle')) {
           setKeyboardOffset();
-          focusInputAfterOpen('#chat-widget .chat-input');
         }
       };
 
