@@ -1226,6 +1226,70 @@ class NotesUIManager {
     });
   }
 
+  showReactionTooltip(badgeElement) {
+    this.hideReactionTooltip();
+
+    const msgId = badgeElement.dataset.msgid;
+    const emoji = badgeElement.dataset.emoji;
+    if (!msgId || !emoji) return;
+
+    const usersObj = this.reactionsCache?.[msgId]?.[emoji];
+    if (!usersObj) return;
+
+    const reactorIds = Object.keys(usersObj).filter((uid) => usersObj[uid] === true);
+    if (!reactorIds.length) return;
+
+    const messageMap = {};
+    this.lastMessages.forEach((m) => {
+      if (m && m.userId && !messageMap[m.userId]) {
+        messageMap[m.userId] = m.userName || '';
+      }
+    });
+
+    const namesHtml = reactorIds.map((uid) => {
+      const fallback = messageMap[uid] || '';
+      const resolved = this.getDisplayNameByUserId(uid, fallback);
+      const isMe = currentUser && currentUser.userId && String(currentUser.userId) === String(uid);
+      return isMe ? `<strong>${this.escapeHtml(resolved)} (Аз)</strong>` : this.escapeHtml(resolved);
+    }).join('<br>');
+
+    const tooltip = document.createElement('div');
+    tooltip.id = 'notes-reaction-tooltip';
+    tooltip.style.cssText = `
+      position: fixed;
+      background: #111827;
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      line-height: 1.35;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.28);
+      z-index: 10003;
+      pointer-events: none;
+      max-width: min(260px, calc(100vw - 24px));
+    `;
+    tooltip.innerHTML = namesHtml;
+    document.body.appendChild(tooltip);
+
+    const badgeRect = badgeElement.getBoundingClientRect();
+    const tooltipRect = tooltip.getBoundingClientRect();
+    let left = badgeRect.left + (badgeRect.width / 2) - (tooltipRect.width / 2);
+    let top = badgeRect.top - tooltipRect.height - 6;
+
+    if (left < 10) left = 10;
+    if (left + tooltipRect.width > window.innerWidth - 10) left = window.innerWidth - tooltipRect.width - 10;
+    if (top < 10) top = badgeRect.bottom + 6;
+    if (top + tooltipRect.height > window.innerHeight - 10) top = window.innerHeight - tooltipRect.height - 10;
+
+    tooltip.style.left = `${Math.round(left)}px`;
+    tooltip.style.top = `${Math.round(top)}px`;
+  }
+
+  hideReactionTooltip() {
+    const tooltip = document.getElementById('notes-reaction-tooltip');
+    if (tooltip) tooltip.remove();
+  }
+
   generateReactionsHTML(msgId) {
     const reactions = this.reactionsCache[msgId];
     if (!reactions) return '';
@@ -1270,6 +1334,14 @@ class NotesUIManager {
                   this.db.addReaction(msgId, emoji);
               }
           });
+
+              btn.addEventListener('mouseenter', (e) => {
+                this.showReactionTooltip(e.currentTarget);
+              });
+
+              btn.addEventListener('mouseleave', () => {
+                this.hideReactionTooltip();
+              });
       });
   }
 
