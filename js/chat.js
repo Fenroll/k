@@ -1279,6 +1279,10 @@ class ChatUIManager {
       root: this.container.querySelector('.chat-messages'),
       rootMargin: '50px' // Start loading 50px before image enters viewport
     });
+
+    // If messages were rendered before observer init (e.g. fast cache/poll callback on refresh),
+    // attach observation now so images don't stay stuck until next message update.
+    this.observeLazyImages();
   }
 
   observeLazyImages() {
@@ -3596,6 +3600,10 @@ class ChatUIManager {
         if (input && !isMobileLike) {
           input.focus();
         }
+
+        // Re-bind lazy observers on open to handle browsers that miss intersections
+        // when messages were rendered while the panel was hidden.
+        this.observeLazyImages();
         
         // Маркирай съобщенията като прочетени
         this.markAsRead();
