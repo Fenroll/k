@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026033018jc"></script>
+  <script src="js/auth-guard.js?v=2026033019iv"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1096,7 +1096,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=2026033018jc"></script>
+  <script src="courses.generated.js?v=2026033019iv"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
@@ -1992,7 +1992,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=2026033018jc"></script>
+<script src="js/chat.js?v=2026033019iv"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -2375,7 +2375,8 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
     //custom icons
     window.customLinkIconRules = [
       { pathExact: 'files/Вътрешни болести 1 ч/Кардиология/Англоезични материали/Pathophysiology of Heart Disease.url', icon: 'svg/icon-book.svg' },
-      { pathExact: 'files/Вътрешни болести 1 ч/Кардиология/Англоезични материали/The ECG Made Easy.url', icon: 'svg/icon-book.svg' }
+      { pathExact: 'files/Вътрешни болести 1 ч/Кардиология/Англоезични материали/The ECG Made Easy.url', icon: 'svg/icon-book.svg' },
+      { pathExact: 'files/Blackboard Help/Много Тежки Учебни Материали/link.txt#4', icon: 'https://www.google.com/s2/favicons?domain=doctordle.org&sz=64' }
     ];
 
     //custom h3 order
@@ -2681,7 +2682,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
             const customIconUrl = getCustomLinkIconForFile(file);
             const autoFavicon = customIconUrl ? { primary: '', fallbacks: [] } : getAutoFaviconUrlsForFile(file);
             const faviconUrl = customIconUrl || autoFavicon.primary;
-            const iconFilterStyle = customIconUrl
+            const iconFilterStyle = (customIconUrl && !/^https?:\/\//i.test(customIconUrl))
               ? 'filter: brightness(0) saturate(100%) invert(46%) sepia(16%) saturate(1067%) hue-rotate(69deg) brightness(95%) contrast(89%);'
               : '';
 
