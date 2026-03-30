@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=2026032413h4"></script>
+  <script src="js/auth-guard.js?v=2026033018jc"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -645,6 +645,12 @@
     align-items: center;
     justify-content: center;
   }
+
+  /* Prevent ghost close-button/content paint when overlay is not open (mobile Safari flicker). */
+  .modal-overlay:not(.open) .modal-content,
+  .modal-overlay:not(.open) .modal-close {
+    display: none !important;
+  }
   
   .modal-content {
     background: #fff;
@@ -1021,6 +1027,11 @@
       overflow: hidden;
       position: fixed;
       width: 100%;
+    }
+
+    /* Avoid modal close button flicker over the mobile menu overlay */
+    body.menu-open .modal-close {
+      display: none !important;
     }
     
     /* Mobile menu overlay */
@@ -3064,6 +3075,9 @@
 
     // Open exam info modal
     function showExamModal(exam) {
+      // Keep only one overlay modal visible at a time.
+      closeModal();
+
       const examAdditionalInfo = document.getElementById('examAdditionalInfo');
       const infoHtml = resolveAdditionalInfoHtml(exam);
       exam.additionalInfoHtml = infoHtml;
@@ -3158,6 +3172,9 @@
 
     // Open modal with event details
     function openModal(event) {
+      // Keep only one overlay modal visible at a time.
+      closeExamModal();
+
       const displayName = event.fullName || event.subject;
       document.getElementById('modalSubject').textContent = displayName;
       document.getElementById('modalType').textContent = event.type || '-';
@@ -3780,7 +3797,7 @@
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026032413h4"></script>
+    <script src="js/chat.js?v=2026033018jc"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>
