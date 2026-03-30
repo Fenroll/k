@@ -35,6 +35,14 @@ function buildPublicObjectUrl(publicDomain, key) {
   return `${publicDomain}/${safePath}`;
 }
 
+function sanitizeDownloadFileName(name, fallback = 'download') {
+  const value = String(name || '').trim() || fallback;
+  return value
+    .replace(/[\r\n]/g, ' ')
+    .replace(/[\\/]/g, '_')
+    .replace(/"/g, "'");
+}
+
 async function resolveUniqueObjectKey(bucket, desiredKey) {
   const current = await bucket.head(desiredKey);
   if (!current) {
@@ -136,20 +144,7 @@ export default {
         const url = new URL(request.url);
         const action = url.searchParams.get('action') || '';
 
-        if (action !== 'list') {
-          return new Response(JSON.stringify({ error: 'Unsupported GET action' }), {
-            status: 400,
-            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-          });
-        }
-
         const bucketType = url.searchParams.get('bucketType') || 'default';
-        const prefix = url.searchParams.get('prefix') || '';
-        const cursor = url.searchParams.get('cursor') || undefined;
-        const limitRaw = Number(url.searchParams.get('limit'));
-        const limit = Number.isFinite(limitRaw) && limitRaw > 0
-          ? Math.min(Math.floor(limitRaw), 1000)
-          : 1000;
 
         let bucket;
         if (bucketType === 'chat') {
@@ -164,6 +159,60 @@ export default {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' }
           });
         }
+
+        if (action === 'download') {
+          const key = (url.searchParams.get('key') || '').replace(/^\/+/, '');
+          if (!key) {
+            return new Response(JSON.stringify({ error: 'No key provided' }), {
+              status: 400,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+
+          const object = await bucket.get(key);
+          if (!object) {
+            return new Response(JSON.stringify({ error: 'Object not found' }), {
+              status: 404,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+
+          const requestedName = url.searchParams.get('filename') || key.split('/').pop() || 'download';
+          const fileName = sanitizeDownloadFileName(requestedName, 'download');
+          const headers = new Headers(corsHeaders);
+
+          if (object.httpMetadata && typeof object.httpMetadata.contentType === 'string' && object.httpMetadata.contentType) {
+            headers.set('Content-Type', object.httpMetadata.contentType);
+          } else {
+            headers.set('Content-Type', 'application/octet-stream');
+          }
+
+          if (Number.isFinite(object.size) && object.size >= 0) {
+            headers.set('Content-Length', String(object.size));
+          }
+
+          headers.set('Content-Disposition', `attachment; filename="${fileName}"; filename*=UTF-8''${encodeURIComponent(fileName)}`);
+          headers.set('Cache-Control', 'private, no-store');
+
+          return new Response(object.body, {
+            status: 200,
+            headers
+          });
+        }
+
+        if (action !== 'list') {
+          return new Response(JSON.stringify({ error: 'Unsupported GET action' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const prefix = url.searchParams.get('prefix') || '';
+        const cursor = url.searchParams.get('cursor') || undefined;
+        const limitRaw = Number(url.searchParams.get('limit'));
+        const limit = Number.isFinite(limitRaw) && limitRaw > 0
+          ? Math.min(Math.floor(limitRaw), 1000)
+          : 1000;
 
         const listed = await bucket.list({ prefix, cursor, limit });
         const publicDomain = bucketType === 'chat'

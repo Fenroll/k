@@ -696,6 +696,7 @@
     body.dark-mode #financeSaveBtn,
     body.dark-mode #uploadBtn,
     body.dark-mode #clearFilesBtn,
+    body.dark-mode #toolsUploadsTable .tools-uploads-download,
     body.dark-mode #toolsUploadsTable .tools-uploads-copy,
     body.dark-mode #toolsUploadsTable .tools-uploads-delete {
       border: none !important;
@@ -1965,12 +1966,82 @@
             '<td style="padding:10px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;color:#1f2937;">' +
               '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
                 '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" style="font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;color:#1f2937;text-decoration:none;background:#fff;">Open</a>' +
+                '<button class="tools-uploads-download" data-idx="' + idx + '" style="font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;color:#1f2937;background:#fff;cursor:pointer;">Download</button>' +
                 '<button class="tools-uploads-copy" data-idx="' + idx + '" style="font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;color:#1f2937;background:#fff;cursor:pointer;">Copy URL</button>' +
                 (canDeleteRow(r) ? '<button class="tools-uploads-delete" data-idx="' + idx + '" style="font-size:12px;border:1px solid #fca5a5;border-radius:6px;padding:5px 8px;color:#fff;background:#b91c1c;cursor:pointer;">Delete</button>' : '') +
               '</div>' +
             '</td>' +
           '</tr>';
         }).join('');
+
+        tableBody.querySelectorAll('.tools-uploads-download').forEach((btn) => {
+          btn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            const i = Number(btn.getAttribute('data-idx'));
+            const row = Number.isFinite(i) ? rows[i] : null;
+            if (!row || !row.url) return;
+
+            const fileName = String(row.name || getFileNameFromPath(row.path || row.url) || 'download');
+
+            const buildWorkerDownloadUrl = () => {
+              if (!row.key) return '';
+              const endpoint = new URL(R2_WORKER_URL);
+              endpoint.searchParams.set('action', 'download');
+              endpoint.searchParams.set('bucketType', row.bucketType || 'default');
+              endpoint.searchParams.set('key', row.key);
+              endpoint.searchParams.set('filename', fileName);
+              return endpoint.toString();
+            };
+
+            const triggerDirectDownload = () => {
+              const a = document.createElement('a');
+              a.href = row.url;
+              a.download = fileName;
+              a.rel = 'noopener noreferrer';
+              a.style.display = 'none';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+            };
+
+            const triggerUrlDownload = (url) => {
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = fileName;
+              a.rel = 'noopener noreferrer';
+              a.style.display = 'none';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+            };
+
+            try {
+              const workerUrl = buildWorkerDownloadUrl();
+              const targetUrl = workerUrl || row.url;
+              const response = await fetch(targetUrl, { method: 'GET', mode: 'cors' });
+              if (!response.ok) throw new Error('HTTP ' + response.status);
+
+              const blob = await response.blob();
+              const blobUrl = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = blobUrl;
+              a.download = fileName;
+              a.style.display = 'none';
+              document.body.appendChild(a);
+              a.click();
+              a.remove();
+              setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+            } catch (_) {
+              // Some sources block CORS blob downloads; fallback to URL download attempts.
+              const workerUrl = buildWorkerDownloadUrl();
+              if (workerUrl) {
+                triggerUrlDownload(workerUrl);
+              } else {
+                triggerDirectDownload();
+              }
+            }
+          });
+        });
 
         tableBody.querySelectorAll('.tools-uploads-copy').forEach((btn) => {
           btn.addEventListener('click', function(e) {
