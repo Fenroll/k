@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=2026033111yt"></script>
+  <script src="js/auth-guard.js?v=202603311q0w"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -492,6 +492,30 @@
       display: block;
       margin: 0.35em 0;
       border-radius: 6px;
+    }
+    #noteTooltipViewer .note-table-scroll {
+      overflow-x: auto;
+      margin: 0.3em 0;
+    }
+    #noteTooltipViewer table {
+      border-collapse: collapse;
+      width: max-content;
+      max-width: 100%;
+      min-width: 220px;
+      background: #ffffff;
+    }
+    #noteTooltipViewer th,
+    #noteTooltipViewer td {
+      border: 1px solid rgba(88, 129, 87, 0.35);
+      padding: 4px 8px;
+      text-align: left;
+      vertical-align: top;
+      line-height: 1.3;
+      white-space: nowrap;
+    }
+    #noteTooltipViewer thead th {
+      background: rgba(88, 129, 87, 0.12);
+      font-weight: 600;
     }
 
     @media (max-width: 768px) {
@@ -2180,7 +2204,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=2026033111yt"></script>
+  <script src="courses.generated.js?v=202603311q0w"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2287,7 +2311,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026033111yt"></script>
+    <script src="js/chat.js?v=202603311q0w"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=20260324a"></script>
 
@@ -2457,15 +2481,152 @@
       }
 
       function setTooltipContent(rawNote) {
+        const splitTableCells = (line) => String(line || '')
+          .trim()
+          .replace(/^\|/, '')
+          .replace(/\|$/, '')
+          .split('|')
+          .map((cell) => cell.trim());
+
+        const isTableSeparatorLine = (line) => {
+          const cells = splitTableCells(line);
+          return cells.length > 0 && cells.every((cell) => /^:?-{3,}:?$/.test(cell));
+        };
+
+        const getTableAlignment = (cell) => {
+          if (/^:-{3,}:$/.test(cell)) return 'center';
+          if (/^-{3,}:$/.test(cell)) return 'right';
+          if (/^:-{3,}$/.test(cell)) return 'left';
+          return '';
+        };
+
         const lines = String(rawNote || '').split(/\r\n|\r|\n/);
-        const rendered = lines.map((line) => {
-          const headingMatch = line.match(/^(#{1,4})\s+(.+)$/);
+        const html = [];
+        const stack = [];
+
+        for (let i = 0; i < lines.length; i++) {
+          const line = lines[i];
+          const indentMatch = line.match(/^(\s*)/);
+          const indent = indentMatch ? indentMatch[1].length : 0;
+          const content = line.trim();
+          const nextLine = i + 1 < lines.length ? lines[i + 1].trim() : '';
+
+          const maybeTableHeader = content.includes('|') && splitTableCells(content).length >= 2;
+          const maybeTableSeparator = nextLine.includes('|') && isTableSeparatorLine(nextLine);
+
+          if (maybeTableHeader && maybeTableSeparator) {
+            while (stack.length > 0) {
+              const closed = stack.pop();
+              html.push('</' + closed.type + '>');
+            }
+
+            const headerCells = splitTableCells(content);
+            const alignCells = splitTableCells(nextLine);
+
+            html.push('<div class="note-table-scroll"><table><thead><tr>');
+            headerCells.forEach((cell, idx) => {
+              const align = getTableAlignment(alignCells[idx] || '');
+              const alignAttr = align ? ` style="text-align:${align};"` : '';
+              html.push('<th' + alignAttr + '>' + escapeHtml(cell) + '</th>');
+            });
+            html.push('</tr></thead><tbody>');
+
+            i += 2;
+            while (i < lines.length) {
+              const rowLine = lines[i].trim();
+              if (!rowLine || !rowLine.includes('|')) break;
+              if (isTableSeparatorLine(rowLine)) {
+                i++;
+                continue;
+              }
+
+              const rowCells = splitTableCells(rowLine);
+              if (rowCells.length === 0) {
+                i++;
+                continue;
+              }
+
+              html.push('<tr>');
+              rowCells.forEach((cell, idx) => {
+                const align = getTableAlignment(alignCells[idx] || '');
+                const alignAttr = align ? ` style="text-align:${align};"` : '';
+                html.push('<td' + alignAttr + '>' + escapeHtml(cell) + '</td>');
+              });
+              html.push('</tr>');
+              i++;
+            }
+
+            html.push('</tbody></table></div>');
+            i--;
+            continue;
+          }
+
+          const isUl = /^[-*]\s+(.+)/.test(content);
+          const isOl = /^\d+\.\s+(.+)/.test(content);
+
+          if (isUl || isOl) {
+            const listType = isUl ? 'ul' : 'ol';
+            const match = isUl ? content.match(/^[-*]\s+(.+)/) : content.match(/^\d+\.\s+(.+)/);
+            const itemText = match ? match[1] : '';
+
+            if (stack.length === 0) {
+              stack.push({ type: listType, indent: indent });
+              html.push('<' + listType + '>');
+            } else {
+              const last = stack[stack.length - 1];
+              if (indent > last.indent) {
+                stack.push({ type: listType, indent: indent });
+                html.push('<' + listType + '>');
+              } else if (indent < last.indent) {
+                while (stack.length > 0 && stack[stack.length - 1].indent > indent) {
+                  const closed = stack.pop();
+                  html.push('</' + closed.type + '>');
+                }
+                if (stack.length === 0 || stack[stack.length - 1].indent !== indent) {
+                  stack.push({ type: listType, indent: indent });
+                  html.push('<' + listType + '>');
+                } else if (stack[stack.length - 1].type !== listType) {
+                  const closed = stack.pop();
+                  html.push('</' + closed.type + '>');
+                  stack.push({ type: listType, indent: indent });
+                  html.push('<' + listType + '>');
+                }
+              } else if (last.type !== listType) {
+                const closed = stack.pop();
+                html.push('</' + closed.type + '>');
+                stack.push({ type: listType, indent: indent });
+                html.push('<' + listType + '>');
+              }
+            }
+
+            html.push('<li>' + escapeHtml(itemText) + '</li>');
+            continue;
+          }
+
+          if (content !== '') {
+            while (stack.length > 0) {
+              const closed = stack.pop();
+              html.push('</' + closed.type + '>');
+            }
+          }
+
+          const headingMatch = content.match(/^(#{1,4})\s+(.+)$/);
           if (headingMatch) {
             const level = headingMatch[1].length;
-            return `<h${level}>${escapeHtml(headingMatch[2])}</h${level}>`;
+            html.push('<h' + level + '>' + escapeHtml(headingMatch[2]) + '</h' + level + '>');
+          } else if (content) {
+            html.push(escapeHtml(content) + '<br>');
+          } else {
+            html.push('<br>');
           }
-          return escapeHtml(line);
-        }).join('<br>')
+        }
+
+        while (stack.length > 0) {
+          const closed = stack.pop();
+          html.push('</' + closed.type + '>');
+        }
+
+        let rendered = html.join('')
           .replace(/!\[(.*?)\]\((.*?)(?:\s+(?:"(.*?)"|&quot;(.*?)&quot;))?\)/g, (match, alt, src, titleQuoted, titleEscaped) => {
             const safeAlt = escapeHtml(alt);
             const title = titleQuoted || titleEscaped || '';
@@ -2487,7 +2648,12 @@
           .replace(/\*(.+?)\*/g, '<em>$1</em>')
           .replace(/_(.+?)_/g, '<em>$1</em>')
           .replace(/`(.+?)`/g, '<code>$1</code>')
-          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>');
+          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+          .replace(/<br><ul>/g, '<ul>')
+          .replace(/<br><ol>/g, '<ol>')
+          .replace(/<\/ul><br>/g, '</ul>')
+          .replace(/<\/ol><br>/g, '</ol>');
+
         tooltip.innerHTML = rendered;
         loadTooltipImagesNow();
       }
