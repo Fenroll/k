@@ -132,6 +132,8 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        position: relative;
+        overflow: hidden;
         text-decoration: none;
         color: #888;
         font-size: 11px;
@@ -142,6 +144,29 @@
         cursor: pointer;
         padding: 4px 0 0 0;
         font-family: 'Open Sans', sans-serif;
+        -webkit-tap-highlight-color: rgba(128, 128, 128, 0.18);
+        user-select: none;
+    }
+
+    /* Touch feedback circle around the icon area (mobile press state) */
+    .bottom-nav-item::after {
+        content: '';
+        position: absolute;
+        top: 16px;
+        left: 50%;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: rgba(120, 120, 120, 0.24);
+        transform: translateX(-50%) scale(0.7);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.14s ease, opacity 0.14s ease;
+    }
+
+    .bottom-nav-item:active::after {
+        opacity: 1;
+        transform: translateX(-50%) scale(1);
     }
     
     .bottom-nav-item.active {
