@@ -54,6 +54,7 @@
 			const siteTitle = String(env.SITE_TITLE || 'Coursebook');
 			const siteBaseUrl = String(env.SITE_BASE_URL || 'https://coursebook.lol/');
 			const chatScriptUrl = String(env.CHAT_SCRIPT_URL || 'https://coursebook.lol/js/chat.js');
+			const presenceScriptUrl = String(env.PRESENCE_SCRIPT_URL || 'https://coursebook.lol/js/presence.js');
 			const userIdentityScriptUrl = String(env.USER_IDENTITY_SCRIPT_URL || 'https://coursebook.lol/js/user-identity.js');
 			const sessionBridgeUrl = String(env.SESSION_BRIDGE_URL || 'https://coursebook.lol/session-bridge.html');
 			const firebaseAppCompatUrl = String(env.FIREBASE_APP_COMPAT_URL || 'https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js');
@@ -108,6 +109,7 @@
 		(async function () {
 			const bridgeUrl = ${JSON.stringify(sessionBridgeUrl)};
 			const userIdentityUrl = ${JSON.stringify(userIdentityScriptUrl)};
+				const presenceUrl = ${JSON.stringify(presenceScriptUrl)};
 			const chatUrl = ${JSON.stringify(chatScriptUrl)};
 
 			function loadScript(src, defer) {
@@ -181,6 +183,7 @@
 
 			try {
 				await loadScript(userIdentityUrl, false);
+					await loadScript(presenceUrl, false);
 				await loadScript(chatUrl, true);
 			} catch (err) {
 				console.error('PDF chat bootstrap error:', err);

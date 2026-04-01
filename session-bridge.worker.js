@@ -33,7 +33,9 @@ export default {
       const allowedOrigins = new Set([
         'https://files.coursebook.lol',
         'https://chat.coursebook.lol',
-        'https://coursebook.lol'
+        'https://coursebook.lol',
+        'https://files.blackboard.lol',
+        'https://blackboard.lol'
       ]);
 
       window.addEventListener('message', function (event) {

@@ -1,7 +1,0 @@
-name = "session-bridge"
-main = "session-bridge.worker.js"
-compatibility_date = "2026-04-01"
-
-[[routes]]
-pattern = "coursebook.lol/session-bridge.html"
-zone_name = "coursebook.lol"
