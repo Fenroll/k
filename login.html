@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bg">
 <head>
     <meta charset="UTF-8">
@@ -7,8 +7,6 @@
     <title>Login</title>
     <!-- Favicon -->
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
-  <link rel="icon" href="favicon.ico?v=20260401ios" sizes="any">
-  <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios">
     <style>
         body {
             font-family: 'Segoe UI', sans-serif;
@@ -187,9 +185,8 @@
                 console.error("Fatal error during app initialization:", error);
                 const container = document.querySelector('.account-container');
                 if (container) {
-                    container.innerHTML = `<p style="color: #ef4444; text-align: center; font-weight: bold;">Ð’ÑŠÐ·Ð½Ð¸ÐºÐ½Ð° ÐºÑ€Ð¸Ñ‚Ð¸Ñ‡Ð½Ð° Ð³Ñ€ÐµÑˆÐºÐ°: ${error.message}. ÐŸÑ€Ð¾Ð²ÐµÑ€ÐµÑ‚Ðµ ÐºÐ¾Ð½Ð·Ð¾Ð»Ð°Ñ‚Ð° (F12).</p>`;
+                    container.innerHTML = `<p style="color: #ef4444; text-align: center; font-weight: bold;">Възникна критична грешка: ${error.message}. Проверете конзолата (F12).</p>`;
                 }
             }
         })();
     </script>
-

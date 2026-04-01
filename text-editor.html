@@ -1,14 +1,12 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202604011rqg"></script>
+  <script src="js/auth-guard.js?v=202604011r6o"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Ð¢ext Editor</title>
+  <title>Тext Editor</title>
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
-  <link rel="icon" href="favicon.ico?v=20260401ios" sizes="any">
-  <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Fira+Sans:wght@400;500;700&family=Rubik:wght@400;500;700&display=swap">
@@ -1278,7 +1276,7 @@
     <div class="modal-content" style="max-width: 600px;">
       <div class="modal-header">
         <h2>Keyboard Shortcuts</h2>
-        <button class="close-btn" id="closeShortcutsBtn">âœ•</button>
+        <button class="close-btn" id="closeShortcutsBtn">✕</button>
       </div>
       <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
         <h3>Formatting</h3>
@@ -1438,7 +1436,7 @@
         </div>
         <div style="margin-bottom: 16px;">
           <label for="fileNameInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">File Name</label>
-          <input type="text" id="fileNameInput" placeholder="e.g., Ð¥ÐžÐ‘Ð‘, Ð‘ÐµÐ»Ð¾Ð´Ñ€Ð¾Ð±ÐµÐ½ ÐºÐ°Ñ€Ñ†Ð¸Ð½Ð¾Ð¼" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+          <input type="text" id="fileNameInput" placeholder="e.g., ХОББ, Белодробен карцином" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
         </div>
         <div style="padding: 10px; background: #f3f4f6; border-radius: 4px; font-size: 0.9em; color: #4b5563;">
           <strong>Preview:</strong> <span id="fileNamePreview" style="color: #588157; font-family: monospace;">document.html</span>
@@ -1486,11 +1484,11 @@
         <p style="margin-bottom: 16px; color: #6b7280;">Select merge direction:</p>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <button id="mergeRightBtn" style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; background: white; transition: all 0.2s;">
-            <div style="font-size: 24px; margin-bottom: 4px;">â†’</div>
+            <div style="font-size: 24px; margin-bottom: 4px;">→</div>
             <div>Merge Right</div>
           </button>
           <button id="mergeDownBtn" style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; background: white; transition: all 0.2s;">
-            <div style="font-size: 24px; margin-bottom: 4px;">â†“</div>
+            <div style="font-size: 24px; margin-bottom: 4px;">↓</div>
             <div>Merge Down</div>
           </button>
         </div>
@@ -1508,27 +1506,27 @@
         <span class="close" id="closeSymbolsModalBtn">&times;</span>
       </div>
       <div class="modal-body" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 400px; overflow-y: auto;">
-        <button class="symbol-btn" data-symbol="â†‘" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â†‘</button>
-        <button class="symbol-btn" data-symbol="â†“" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â†“</button>
-        <button class="symbol-btn" data-symbol="â†" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â†</button>
-        <button class="symbol-btn" data-symbol="â†’" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â†’</button>
-        <button class="symbol-btn" data-symbol="â†”" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â†”</button>
-        <button class="symbol-btn" data-symbol="Î±" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Î±</button>
-        <button class="symbol-btn" data-symbol="Î²" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Î²</button>
-        <button class="symbol-btn" data-symbol="Î³" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Î³</button>
-        <button class="symbol-btn" data-symbol="Î´" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Î´</button>
-        <button class="symbol-btn" data-symbol="Îµ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Îµ</button>
-        <button class="symbol-btn" data-symbol="Î¼" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Î¼</button>
-        <button class="symbol-btn" data-symbol="â‰ˆ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â‰ˆ</button>
-        <button class="symbol-btn" data-symbol="â‰ " style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â‰ </button>
-        <button class="symbol-btn" data-symbol="â‰¤" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â‰¤</button>
-        <button class="symbol-btn" data-symbol="â‰¥" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â‰¥</button>
-        <button class="symbol-btn" data-symbol="Â±" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Â±</button>
-        <button class="symbol-btn" data-symbol="Ã·" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Ã·</button>
-        <button class="symbol-btn" data-symbol="Â°" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Â°</button>
-        <button class="symbol-btn" data-symbol="â„ƒ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â„ƒ</button>
-        <button class="symbol-btn" data-symbol="â€°" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â€°</button>
-        <button class="symbol-btn" data-symbol="tÂ½" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">tÂ½</button>
+        <button class="symbol-btn" data-symbol="↑" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↑</button>
+        <button class="symbol-btn" data-symbol="↓" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↓</button>
+        <button class="symbol-btn" data-symbol="←" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">←</button>
+        <button class="symbol-btn" data-symbol="→" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">→</button>
+        <button class="symbol-btn" data-symbol="↔" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↔</button>
+        <button class="symbol-btn" data-symbol="α" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">α</button>
+        <button class="symbol-btn" data-symbol="β" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">β</button>
+        <button class="symbol-btn" data-symbol="γ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">γ</button>
+        <button class="symbol-btn" data-symbol="δ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">δ</button>
+        <button class="symbol-btn" data-symbol="ε" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">ε</button>
+        <button class="symbol-btn" data-symbol="μ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">μ</button>
+        <button class="symbol-btn" data-symbol="≈" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≈</button>
+        <button class="symbol-btn" data-symbol="≠" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≠</button>
+        <button class="symbol-btn" data-symbol="≤" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≤</button>
+        <button class="symbol-btn" data-symbol="≥" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≥</button>
+        <button class="symbol-btn" data-symbol="±" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">±</button>
+        <button class="symbol-btn" data-symbol="÷" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">÷</button>
+        <button class="symbol-btn" data-symbol="°" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">°</button>
+        <button class="symbol-btn" data-symbol="℃" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">℃</button>
+        <button class="symbol-btn" data-symbol="‰" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">‰</button>
+        <button class="symbol-btn" data-symbol="t½" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">t½</button>
       </div>
       <div class="modal-footer" style="padding: 12px; border-top: 1px solid #e5e7eb; display: flex; align-items: center;">
         <label style="display: flex; align-items: center; cursor: pointer; flex: 1;">
@@ -1543,7 +1541,7 @@
   <div class="modal" id="anchorLinkModal">
     <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
-        <h2>ðŸ”— Create/Link Anchors</h2>
+        <h2>🔗 Create/Link Anchors</h2>
         <span class="close" id="closeAnchorLinkModalBtn">&times;</span>
       </div>
       <div class="modal-body">
@@ -1561,7 +1559,7 @@
           </div>
           <div style="margin-bottom: 16px;">
             <label for="anchorTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Anchor Text</label>
-            <input type="text" id="anchorTextInput" placeholder="e.g., Topic 1 â€“ Introduction" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+            <input type="text" id="anchorTextInput" placeholder="e.g., Topic 1 – Introduction" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
           </div>
           <div style="margin-bottom: 16px;">
             <label for="anchorHeadingTypeInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Heading Type</label>
@@ -1597,9 +1595,9 @@
   <div id="htmlEditorModal">
     <div class="html-editor-container">
       <div class="html-editor-header">
-        <h2>ðŸ“„ HTML Source Code Editor</h2>
+        <h2>📄 HTML Source Code Editor</h2>
         <div class="html-editor-actions">
-          <button id="htmlEditorSaveBtn" class="html-editor-button html-editor-save">ðŸ’¾ Save & Update</button>
+          <button id="htmlEditorSaveBtn" class="html-editor-button html-editor-save">💾 Save & Update</button>
           <button id="htmlEditorCloseBtn" class="html-editor-button html-editor-close">Close</button>
         </div>
       </div>
@@ -1611,60 +1609,60 @@
   <div id="combineFilesModal" class="modal">
     <div class="modal-content" style="max-width: 800px;">
       <div class="modal-header">
-        <h2>ÐšÐ¾Ð¼Ð±Ð¸Ð½Ð¸Ñ€Ð°Ð¹ HTML Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ</h2>
+        <h2>Комбинирай HTML файлове</h2>
         <span class="close" id="closeCombineFilesBtn">&times;</span>
       </div>
       <div class="modal-body">
         <!-- Tabs for combining mode -->
         <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
-          <button id="combineLocalTab" class="combine-tab-btn active" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid #588157; color: #588157; font-weight: 500;">Ð›Ð¾ÐºÐ°Ð»Ð½Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ</button>
-          <button id="combineCourseTab" class="combine-tab-btn" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280; font-weight: 500;">ÐžÑ‚ ÐºÑƒÑ€ÑÐ¾Ð²Ðµ</button>
+          <button id="combineLocalTab" class="combine-tab-btn active" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid #588157; color: #588157; font-weight: 500;">Локални файлове</button>
+          <button id="combineCourseTab" class="combine-tab-btn" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280; font-weight: 500;">От курсове</button>
         </div>
 
         <!-- Local Files Tab -->
         <div id="combineLocalPanel" class="combine-panel">
           <div style="margin-bottom: 16px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ð˜Ð·Ð±ÐµÑ€Ð¸ HTML Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ:</label>
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Избери HTML файлове:</label>
             <input type="file" id="combineFilesInput" accept=".html" multiple style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
           </div>
           
           <div style="margin-bottom: 16px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ð ÐµÐ´Ð¾ÑÐ»ÐµÐ´ Ð½Ð° Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ:</label>
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Редослед на файлове:</label>
             <div id="filesList" style="border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; min-height: 200px; padding: 12px; max-height: 300px; overflow-y: auto;">
-              <div style="color: #9ca3af; text-align: center; padding: 20px;">ÐšÐ°Ñ‡Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð·Ð° Ð´Ð° Ð³Ð¸ Ð²Ð¸Ð´Ð¸Ñˆ Ñ‚ÑƒÐº</div>
+              <div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>
             </div>
           </div>
 
           <div style="display: flex; gap: 8px; justify-content: space-between; font-size: 0.85em; color: #6b7280;">
-            <div>ðŸ’¡ ÐœÐ¾Ð¶ÐµÑˆ Ð´Ð° Ð¿Ñ€ÐµÐ¼ÐµÑÑ‚Ð²Ð°Ñˆ Ñ„Ð°Ð¹Ð»Ð¾Ð²ÐµÑ‚Ðµ Ð·Ð° Ð´Ð° Ð¿Ñ€Ð¾Ð¼ÐµÐ½Ð¸Ñˆ Ñ€ÐµÐ´Ð¾ÑÐ»ÐµÐ´Ð°</div>
+            <div>💡 Можеш да преместваш файловете за да промениш редоследа</div>
           </div>
         </div>
 
         <!-- Courses Tab -->
         <div id="combineCoursePanel" class="combine-panel" style="display: none;">
           <div style="margin-bottom: 16px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ð¢ÑŠÑ€ÑÐ¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð¾Ñ‚ ÐºÑƒÑ€ÑÐ¾Ð²Ðµ:</label>
-            <input type="text" id="combineFileSearch" placeholder="Ð¢ÑŠÑ€ÑÐ¸ Ð¿Ð¾ Ð¸Ð¼Ðµ..." style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Търси файлове от курсове:</label>
+            <input type="text" id="combineFileSearch" placeholder="Търси по име..." style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
           </div>
           
           <div style="margin-bottom: 16px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ð˜Ð·Ð±Ñ€Ð°Ð½Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ:</label>
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Избрани файлове:</label>
             <div id="courseFilesList" style="border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; min-height: 200px; padding: 12px; max-height: 300px; overflow-y: auto;">
-              <div style="color: #9ca3af; text-align: center; padding: 20px;">Ð˜Ð·Ð±ÐµÑ€Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð¾Ñ‚ ÐºÑƒÑ€ÑÐ¾Ð²Ðµ</div>
+              <div style="color: #9ca3af; text-align: center; padding: 20px;">Избери файлове от курсове</div>
             </div>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button id="closeCombineFilesBtn2">ÐžÑ‚Ð¼ÐµÐ½Ð¸</button>
-        <button class="primary" id="saveCombineFilesBtn">ÐšÐ¾Ð¼Ð±Ð¸Ð½Ð¸Ñ€Ð°Ð¹ Ð¸ Ð²Ð¼ÑŠÐºÐ½Ð¸</button>
+        <button id="closeCombineFilesBtn2">Отмени</button>
+        <button class="primary" id="saveCombineFilesBtn">Комбинирай и вмъкни</button>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202604011rqg"></script>
+  <script src="courses.generated.js?v=202604011r6o"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2348,7 +2346,7 @@
         return paragraph;
       };
       
-      // Ð—Ð°Ð¿Ð°Ð·Ð¸ Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ñ˜Ð°Ñ‚Ð° Ð½Ð° ÐºÑƒÑ€ÑÐ¾Ñ€Ð¾Ñ‚
+      // Запази позицијата на курсорот
       const preCaretRange = range.cloneRange();
       preCaretRange.selectNodeContents(editor);
       preCaretRange.setEnd(range.startContainer, range.startOffset);
@@ -2356,7 +2354,7 @@
       
       let node = range.commonAncestorContainer;
       
-      // ÐÐºÐ¾ Ðµ text node, Ð¾Ð´Ð¸ Ð´Ð¾ parent
+      // Ако е text node, оди до parent
       if (node.nodeType === 3) {
         node = node.parentNode;
       }
@@ -2386,7 +2384,7 @@
         return !Array.from(candidate.children).some(child => structuralBlockTags.has(child.tagName.toLowerCase()));
       };
 
-      // ÐžÐ´Ð¸ Ð½Ð°Ð³Ð¾Ñ€Ðµ Ð´Ð¾Ð´ÐµÐºÐ° Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÑˆ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð¸Ñ€Ð°Ñ‡ÐºÐ¸ Ð±Ð»Ð¾Ðº
+      // Оди нагоре додека не найдеш форматирачки блок
       while (node && node !== editor) {
         const tagName = node.tagName.toLowerCase();
         if (['h1', 'h2', 'h3', 'h4', 'p'].includes(tagName) || isSimpleDivBlock(node)) {
@@ -2395,7 +2393,7 @@
         node = node.parentNode;
       }
       
-      // ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð´Ð°Ð»Ð¸ Ð¸Ð¼Ð°Ð¼Ðµ Ð²Ð°Ð»Ð¸Ð´ÐµÐ½ Ð±Ð»Ð¾Ðº ÐµÐ»ÐµÐ¼ÐµÐ½Ñ‚
+      // Проверка дали имаме валиден блок елемент
       if (!node || node === editor) {
         return;
       }
@@ -2411,29 +2409,29 @@
         return;
       }
       
-      // Ð—Ð°Ð¼ÐµÐ½Ð° Ð½Ð° Ð±Ð»Ð¾Ðº ÐµÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¾Ñ‚
+      // Замена на блок елементот
       const targetTag = (tagName === tag) ? 'p' : tag;
       const newEl = document.createElement(targetTag);
       
-      // ÐšÐ¾Ð¿Ð¸Ñ€Ð°Ñ˜ Ð´ÐµÑ‚ÐµÐ»Ñ˜Ð°
+      // Копирај детелја
       while (node.firstChild) {
         const child = node.firstChild;
         newEl.appendChild(child);
       }
       
-      // Ð—Ð°Ñ‡ÑƒÐ²Ð°Ñ˜ text-align Ð°ÐºÐ¾ Ð¿Ð¾ÑÑ‚Ð¾Ð¸
+      // Зачувај text-align ако постои
       const oldAlign = node.style.textAlign;
       if (oldAlign) {
         newEl.style.textAlign = oldAlign;
       }
       
-      // Ð—Ð°Ð¼ÐµÐ½Ð¸ Ð²Ð¾ DOM
+      // Замени во DOM
       node.parentNode.replaceChild(newEl, node);
 
       // Keep headings structurally valid in the live editor DOM.
       repairInvalidHeadingStructureInEditor();
       
-      // Ð’Ñ€Ð°Ñ‚Ð¸ Ñ„Ð¾ÐºÑƒÑ Ð½Ð° Ð¸ÑÑ‚Ð° Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ñ˜Ð°
+      // Врати фокус на иста позиција
       const newRange = document.createRange();
       const sel = window.getSelection();
       
@@ -2693,7 +2691,7 @@
 
     function addTableColumnBefore() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      if (!cell) return alert('Позиционирай курсора в таблица');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
       
@@ -2707,7 +2705,7 @@
 
     function addTableColumnAfter() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      if (!cell) return alert('Позиционирай курсора в таблица');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
       
@@ -2721,7 +2719,7 @@
 
     function deleteTableColumn() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      if (!cell) return alert('Позиционирай курсора в таблица');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
       
@@ -2733,7 +2731,7 @@
 
     function addTableRowBefore() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      if (!cell) return alert('Позиционирай курсора в таблица');
       const table = getTableFromCell(cell);
       const row = cell.closest('tr');
       const newRow = document.createElement('tr');
@@ -2748,7 +2746,7 @@
 
     function addTableRowAfter() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      if (!cell) return alert('Позиционирай курсора в таблица');
       const table = getTableFromCell(cell);
       const row = cell.closest('tr');
       const newRow = document.createElement('tr');
@@ -2763,7 +2761,7 @@
 
     function deleteTableRow() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      if (!cell) return alert('Позиционирай курсора в таблица');
       const row = cell.closest('tr');
       row.remove();
       saveToHistory();
@@ -2771,7 +2769,7 @@
 
     function deleteTable() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      if (!cell) return alert('Позиционирай курсора в таблица');
       const table = getTableFromCell(cell);
       table.remove();
       saveToHistory();
@@ -2779,16 +2777,16 @@
 
     function mergeTableCells() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      if (!cell) return alert('Позиционирай курсора в таблица');
       
       const row = cell.closest('tr');
-      if (!row) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      if (!row) return alert('Позиционирай курсора в таблица');
       
       // Get current cell index and next cell
       const cellIndex = cell.cellIndex;
       const nextCell = row.cells[cellIndex + 1];
       
-      if (!nextCell) return alert('ÐÑÐ¼Ð°Ñˆ ÑÐ»ÐµÐ´Ð²Ð°Ñ‰Ð° ÐºÐ»ÐµÑ‚ÐºÐ° Ð·Ð° Ð¼ÑŠÑ€Ð´Ð¶Ð²Ð°Ð½Ðµ');
+      if (!nextCell) return alert('Нямаш следваща клетка за мърджване');
       
       // Merge content
       cell.textContent = (cell.textContent + ' ' + nextCell.textContent).trim();
@@ -2805,8 +2803,8 @@
 
     function setCellBackgroundColor() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
-      const color = prompt('Ð¦Ð²ÑÑ‚ (hex):', '#FAF594');
+      if (!cell) return alert('Позиционирай курсора в таблица');
+      const color = prompt('Цвят (hex):', '#FAF594');
       if (color) {
         cell.style.backgroundColor = color;
         saveToHistory();
@@ -2815,11 +2813,11 @@
 
     function splitTableCell() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      if (!cell) return alert('Позиционирай курсора в таблица');
       
       const colspan = parseInt(cell.getAttribute('colspan')) || 1;
       
-      if (colspan <= 1) return alert('ÐšÐ»ÐµÑ‚ÐºÐ°Ñ‚Ð° Ð½ÑÐ¼Ð° colspan Ð·Ð° Ñ€Ð°Ð·Ð´ÐµÐ»ÑÐ½Ðµ');
+      if (colspan <= 1) return alert('Клетката няма colspan за разделяне');
       
       const row = cell.closest('tr');
       const cellIndex = cell.cellIndex;
@@ -3378,7 +3376,7 @@
       }
       
       // If not in list, show notification
-      showNotification('âš ï¸ Indent works only in lists', 'warning');
+      showNotification('⚠️ Indent works only in lists', 'warning');
     });
 
     document.getElementById('outdentBtn').addEventListener('click', () => {
@@ -3400,7 +3398,7 @@
       }
       
       // If not in list, show notification
-      showNotification('âš ï¸ Outdent works only in lists', 'warning');
+      showNotification('⚠️ Outdent works only in lists', 'warning');
     });
 
     document.getElementById('ulBtn').addEventListener('click', () => {
@@ -3452,11 +3450,11 @@
       const selection = window.getSelection();
       
       if (!selection.rangeCount || !selection.toString()) {
-        alert('ÐœÐ¾Ð»Ñ, Ð¸Ð·Ð±ÐµÑ€Ð¸ Ñ‚ÐµÐºÑÑ‚ Ð¿ÑŠÑ€Ð²Ð¾');
+        alert('Моля, избери текст първо');
         return;
       }
       
-      const url = prompt('Ð’ÑŠÐ²ÐµÐ´Ð¸ URL:');
+      const url = prompt('Въведи URL:');
       
       if (!url || url.trim() === '') {
         return;
@@ -3861,7 +3859,7 @@
       
       // If no selection or selection is in editor
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
-        alert('ÐœÐ¾Ð»Ñ, Ð¸Ð·Ð±ÐµÑ€Ð¸ Ñ‚ÐµÐºÑÑ‚ Ð¿ÑŠÑ€Ð²Ð¾');
+        alert('Моля, избери текст първо');
         return;
       }
 
@@ -4050,7 +4048,7 @@
         };
         
         // Update page title
-        document.title = fileName + ' â€” Text Editor';
+        document.title = fileName + ' — Text Editor';
       };
       reader.readAsText(file);
       
@@ -4211,7 +4209,7 @@
     document.getElementById('htmlEditorBtn').addEventListener('click', () => {
       // Check if editor has content
       if (!editor.innerHTML.trim()) {
-        alert('âš ï¸ No content to edit.\n\nPlease open a file first.');
+        alert('⚠️ No content to edit.\n\nPlease open a file first.');
         return;
       }
 
@@ -4252,7 +4250,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       document.getElementById('htmlEditorModal').style.display = 'none';
       
       // Show confirmation
-      showNotification('âœ… HTML updated successfully!', 'success');
+      showNotification('✅ HTML updated successfully!', 'success');
     });
 
     // HTML Editor Close
@@ -4355,7 +4353,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       };
       
       // Update page title
-      document.title = cleanName + ' â€” Text Editor';
+      document.title = cleanName + ' — Text Editor';
     }
 
     // Close file browser modal
@@ -5495,7 +5493,7 @@ renderMathInElement(document.body, {
 
       const key = e.key;
 
-      if (key === 'b' || key === 'B' || key === 'Ð‘' || key === 'Ð±') {
+      if (key === 'b' || key === 'B' || key === 'Б' || key === 'б') {
         e.preventDefault();
         wrapTextareaSelection(noteTextInput, '**');
         return;
@@ -5524,7 +5522,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if (key === 'g' || key === 'G' || key === 'Ð“' || key === 'Ð³') {
+      if (key === 'g' || key === 'G' || key === 'Г' || key === 'г') {
         e.preventDefault();
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
           if (!line.trim()) return line;
@@ -5533,7 +5531,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if ((key === 'o' || key === 'O' || key === 'Ðž' || key === 'Ð¾') && e.shiftKey) {
+      if ((key === 'o' || key === 'O' || key === 'О' || key === 'о') && e.shiftKey) {
         e.preventDefault();
         let index = 1;
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
@@ -5545,7 +5543,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if (key === 'q' || key === 'Q' || key === 'Ð¹' || key === 'Ð™') {
+      if (key === 'q' || key === 'Q' || key === 'й' || key === 'Й') {
         e.preventDefault();
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
           if (!line.trim()) return line;
@@ -5554,7 +5552,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if (key === 's' || key === 'S' || key === 'Ð¡' || key === 'Ñ') {
+      if (key === 's' || key === 'S' || key === 'С' || key === 'с') {
         e.preventDefault();
         document.getElementById('insertNoteBtn').click();
       }
@@ -6456,7 +6454,7 @@ renderMathInElement(document.body, {
       
       // Show notification
       const notification = document.createElement('div');
-      notification.textContent = 'âœ“ Font sizes reset to default';
+      notification.textContent = '✓ Font sizes reset to default';
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
       document.body.appendChild(notification);
       
@@ -6479,23 +6477,23 @@ renderMathInElement(document.body, {
     const geminiBtn = document.getElementById('geminiBtn');
     if (geminiBtn) {
       geminiBtn.addEventListener('click', () => {
-        const geminiPrompt = `ÐŸÑ€ÐµÐ¾Ð±Ñ€Ð°Ð·ÑƒÐ²Ð°Ð¹ Ñ†ÐµÐ»Ð¸Ñ ÑÐ»ÐµÐ´Ð²Ð°Ñ‰ Ñ‚ÐµÐºÑÑ‚ Ð² Ð¡Ð£Ð ÐžÐ’ MD ÐšÐžÐ” Ñ Ñ†ÐµÐ» Ð¼Ð°ÐºÑÐ¸Ð¼Ð°Ð»Ð½Ð° Ñ‡ÐµÑ‚Ð¸Ð¼Ð¾ÑÑ‚ Ð¸ ÑÑÐ½Ð° ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð°.
+        const geminiPrompt = `Преобразувай целия следващ текст в СУРОВ MD КОД с цел максимална четимост и ясна структура.
 
-Ð˜Ð·Ð¸ÑÐºÐ²Ð°Ð½Ð¸Ñ Ð·Ð° Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð¸Ñ€Ð°Ð½Ðµ:
-1. Ð“ÐµÐ½ÐµÑ€Ð¸Ñ€Ð°Ð¹ ÑÐ°Ð¼Ð¾ Ð¸ ÐµÐ´Ð¸Ð½ÑÑ‚Ð²ÐµÐ½Ð¾ ÑÐ°Ð¼Ð¸Ñ .md ÐºÐ¾Ð´, ÐžÐ“Ð ÐÐ”Ð•Ð Ð’ Ð‘Ð›ÐžÐš Ð—Ð ÐšÐžÐ” (markdown...), Ð·Ð° Ð´Ð° Ð¼Ð¾Ð¶Ðµ Ð´Ð° Ð±ÑŠÐ´Ðµ ÐºÐ¾Ð¿Ð¸Ñ€Ð°Ð½.
-2. Ð˜Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ **H1 (#)** ÑÐ°Ð¼Ð¾ Ð²ÐµÐ´Ð½ÑŠÐ¶ Ð·Ð° Ð³Ð»Ð°Ð²Ð½Ð¾Ñ‚Ð¾ Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ðµ Ð½Ð° Ñ‚ÐµÐ¼Ð°Ñ‚Ð°.
-3. Ð˜Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ **H2 (##)**, **H3 (###)**, Ð¸ **H4 (#####)** Ð·Ð° Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð¿Ð¾Ð´Ñ‚ÐµÐ¼Ð¸ Ð¸ ÑÐµÐºÑ†Ð¸Ð¸. ÐÐµ Ð¸Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ H5 Ð¸Ð»Ð¸ Ð¿Ð¾-Ð½Ð¸ÑÐºÐ¸.
-4. Ð˜ÑÐºÐ°Ð¼ Ð´Ð° ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð¸Ñ€Ð°Ñˆ Ñ‚ÐµÐºÑÑ‚Ð° Ñ‚Ð°ÐºÐ°, Ñ‡Ðµ ÐµÐ´Ð½Ð¾Ð²Ñ€ÐµÐ¼ÐµÐ½Ð½Ð¾ Ð´Ð° Ðµ Ð¼Ð°ÐºÑÐ¸Ð¼Ð°Ð»Ð½Ð¾ Ñ‡ÐµÑ‚Ð¸Ð¼ Ð¸ ÑÑÐµÐ½. Ð˜ÑÐºÐ°Ð¼ Ð´Ð° Ð½Ðµ Ðµ ÑÐ°Ð¼Ð¾ bullet points, Ð½Ð¾ Ð½Ðµ Ð¸ ÑÐ°Ð¼Ð¾ ÑÐ²Ð¾Ð±Ð¾Ð´ÐµÐ½ Ñ‚ÐµÐºÑÑ‚ - Ð¸ÑÐºÐ°Ð¼ Ð»Ð¾Ð³Ð¸Ñ‡Ð½Ð° ÐºÐ¾Ð¼Ð±Ð¸Ð½Ð°Ñ†Ð¸Ñ Ð¾Ñ‚ Ð¿Ð°Ñ€Ð°Ð³Ñ€Ð°Ñ„Ð¸, ÑÐ¿Ð¸ÑÑŠÑ†Ð¸, Ð¸ Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ñ, Ñ‚Ð°ÐºÐ° Ñ‡Ðµ Ð´Ð° Ðµ Ð»ÐµÑÐ½Ð¾ Ð·Ð° Ñ‡ÐµÑ‚ÐµÐ½Ðµ Ð¸ Ð²ÑŠÐ·Ð¿Ñ€Ð¸ÐµÐ¼Ð°Ð½Ðµ.
-5. Ð˜Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ ÑƒÐ´ÐµÐ±ÐµÐ»ÑÐ²Ð°Ð½Ðµ (bold) Ð·Ð° ÐºÐ»ÑŽÑ‡Ð¾Ð²Ð¸ Ñ‚ÐµÑ€Ð¼Ð¸Ð½Ð¸, ÑÐ¸Ð½Ð´Ñ€Ð¾Ð¼Ð¸ Ð¸ Ð°Ð½Ð°Ñ‚Ð¾Ð¼Ð¸Ñ‡Ð½Ð¸ ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð¸.
-6. ÐÐµ Ð´Ð¾Ð±Ð°Ð²ÑÐ¹ LaTeX, ÐµÐ¼Ð¾Ð´Ð¶Ð¸Ñ‚Ð°, cite_start Ð¸Ð»Ð¸ ÑÐ½Ð¸Ð¼ÐºÐ¸.
-7. ÐÐºÐ¾ Ð¸Ð¼Ð° Ð¿Ñ€ÐµÐ¿Ñ€Ð°Ñ‚ÐºÐ¸ ÐºÑŠÐ¼ Ñ„Ð¸Ð³ÑƒÑ€Ð¸ (Ð½Ð°Ð¿Ñ€. "Ñ„Ð¸Ð³. 8.1"), Ð³Ð¸ Ð¿Ñ€ÐµÐ¼Ð°Ñ…Ð½Ð¸.
-8. ÐÐºÐ¾ Ð¸Ð·Ð¿Ñ€Ð°Ñ‰Ð°Ð¼ Ñ‚ÐµÐºÑÑ‚Ð° Ð½Ð° Ñ‡Ð°ÑÑ‚Ð¸, Ð¿Ñ€Ð¾Ð´ÑŠÐ»Ð¶Ð°Ð²Ð°Ð¹ ÑÐ¼Ð¸ÑÐ»Ð¾Ð²Ð¾ Ð¾Ñ‚ Ð¿Ð¾ÑÐ»ÐµÐ´Ð½Ð°Ñ‚Ð° Ð·Ð°Ð²ÑŠÑ€ÑˆÐµÐ½Ð° ÑÐµÐºÑ†Ð¸Ñ.`;
+Изисквания за форматиране:
+1. Генерирай само и единствено самия .md код, ОГРАДЕН В БЛОК ЗА КОД (markdown...), за да може да бъде копиран.
+2. Използвай **H1 (#)** само веднъж за главното заглавие на темата.
+3. Използвай **H2 (##)**, **H3 (###)**, и **H4 (#####)** за всички подтеми и секции. Не използвай H5 или по-ниски.
+4. Искам да структурираш текста така, че едновременно да е максимално четим и ясен. Искам да не е само bullet points, но не и само свободен текст - искам логична комбинация от параграфи, списъци, и заглавия, така че да е лесно за четене и възприемане.
+5. Използвай удебеляване (bold) за ключови термини, синдроми и анатомични структури.
+6. Не добавяй LaTeX, емоджита, cite_start или снимки.
+7. Ако има препратки към фигури (напр. "фиг. 8.1"), ги премахни.
+8. Ако изпращам текста на части, продължавай смислово от последната завършена секция.`;
 
         // Copy to clipboard
         navigator.clipboard.writeText(geminiPrompt).then(() => {
           // Show notification
           const notification = document.createElement('div');
-          notification.textContent = 'âœ“ Prompt copied to clipboard! Opening Gemini...';
+          notification.textContent = '✓ Prompt copied to clipboard! Opening Gemini...';
           notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
           document.body.appendChild(notification);
           
@@ -6511,7 +6509,7 @@ renderMathInElement(document.body, {
           console.error('Failed to copy:', err);
           // Show error notification
           const notification = document.createElement('div');
-          notification.textContent = 'âœ— Failed to copy prompt';
+          notification.textContent = '✗ Failed to copy prompt';
           notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #ef4444; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
           document.body.appendChild(notification);
           
@@ -6685,7 +6683,7 @@ renderMathInElement(document.body, {
               
               // Show notification
               const notification = document.createElement('div');
-              notification.textContent = 'âœ“ Ð¡Ð¿Ð¸ÑÑŠÑ†Ð¸ Ð¾Ð±ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸';
+              notification.textContent = '✓ Списъци обединени';
               notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
               document.body.appendChild(notification);
               
@@ -6695,7 +6693,7 @@ renderMathInElement(document.body, {
                 setTimeout(() => notification.remove(), 300);
               }, 2000);
             } else {
-              alert('ÐÑÐ¼Ð° ÑÑŠÑÐµÐ´ÐµÐ½ ÑÐ¿Ð¸ÑÑŠÐº Ð·Ð° Ð¾Ð±ÐµÐ´Ð¸Ð½ÑÐ²Ð°Ð½Ðµ');
+              alert('Няма съседен списък за обединяване');
             }
           }
           return;
@@ -6703,7 +6701,7 @@ renderMathInElement(document.body, {
         currentNode = currentNode.parentNode;
       }
       
-      alert('ÐœÐ¾Ð»Ñ, Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² ÑÐ¿Ð¸ÑÑŠÐº');
+      alert('Моля, позиционирай курсора в списък');
     }
 
     // Keyboard shortcuts
@@ -7313,7 +7311,7 @@ renderMathInElement(document.body, {
           e.preventDefault();
           document.execCommand('italic', false, null);
           saveToHistory();
-        } else if (e.key === 's' || e.key === 'S' || e.key === 'Ð¡' || e.key === 'Ñ') {
+        } else if (e.key === 's' || e.key === 'S' || e.key === 'С' || e.key === 'с') {
           e.preventDefault();
           // Open save modal (same as download button)
           document.getElementById('saveFileModal').style.display = 'block';
@@ -7341,16 +7339,16 @@ renderMathInElement(document.body, {
           e.preventDefault();
           insertFormat('p');
           saveToHistory();
-        } else if (e.key === 'g' || e.key === 'G' || e.key === 'Ð“' || e.key === 'Ð³') {
+        } else if (e.key === 'g' || e.key === 'G' || e.key === 'Г' || e.key === 'г') {
           e.preventDefault();
           insertList('ul');
-        } else if ((e.key === 'o' || e.key === 'O'|| e.key === 'Ðž' || e.key === 'Ð¾') && e.shiftKey) {
+        } else if ((e.key === 'o' || e.key === 'O'|| e.key === 'О' || e.key === 'о') && e.shiftKey) {
           e.preventDefault();
           insertList('ol');
-        } else if (e.key === 't' || e.key === 'T' || e.key === 'Ñ‚' || e.key === 'Ð¢') {
+        } else if (e.key === 't' || e.key === 'T' || e.key === 'т' || e.key === 'Т') {
           e.preventDefault();
           insertTable();
-        } else if (e.key === 'D' || e.key === 'd'|| e.key === 'Ð”' || e.key === 'Ð´') {
+        } else if (e.key === 'D' || e.key === 'd'|| e.key === 'Д' || e.key === 'д') {
           if (e.shiftKey) {
             e.preventDefault();
             // Remove text color (reset to dark gray)
@@ -7366,10 +7364,10 @@ renderMathInElement(document.body, {
             applyFormatting('color', lastColor);
             saveToHistory();
           }
-        } else if (e.key === 'q' || e.key === 'Q' || e.key === 'Ñ' || e.key === 'Ð¯') {
+        } else if (e.key === 'q' || e.key === 'Q' || e.key === 'я' || e.key === 'Я') {
           e.preventDefault();
           toggleBlockquote();
-        } else if ((e.key === 'z' || e.key === 'Z'|| e.key === 'Ð—' || e.key === 'Ð·') && !e.shiftKey) {
+        } else if ((e.key === 'z' || e.key === 'Z'|| e.key === 'З' || e.key === 'з') && !e.shiftKey) {
           e.preventDefault();
           if (historyIndex > 0) {
             historyIndex--;
@@ -7381,13 +7379,13 @@ renderMathInElement(document.body, {
             historyIndex++;
             editor.innerHTML = history[historyIndex];
           }
-        } else if ((e.key === 'c' || e.key === 'C' || e.key === 'Ð¡' || e.key === 'Ñ') && e.altKey) {
+        } else if ((e.key === 'c' || e.key === 'C' || e.key === 'С' || e.key === 'с') && e.altKey) {
           e.preventDefault();
           // Apply last used text color
           const lastColor = localStorage.getItem('textEditorTextColor') || '#1f2937';
           applyFormatting('color', lastColor);
           saveToHistory();
-        } else if (e.key === 'h' || e.key === 'H' || e.key === 'Ð¥' || e.key === 'Ñ…') {
+        } else if (e.key === 'h' || e.key === 'H' || e.key === 'Х' || e.key === 'х') {
           if (e.shiftKey) {
             e.preventDefault();
             // Remove highlight
@@ -8039,7 +8037,7 @@ renderMathInElement(document.body, {
               
               // Show notification
               const notification = document.createElement('div');
-              notification.textContent = `ðŸ”— Opening: ${href}`;
+              notification.textContent = `🔗 Opening: ${href}`;
               notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
               document.body.appendChild(notification);
               
@@ -8925,7 +8923,7 @@ renderMathInElement(document.body, {
             
             // Update page title
             const cleanName = fileName.replace(/\.(md|txt|html)$/i, '').replace(/^\d+(\.\d+)?-/, '').replace(/^msg-/i, '');
-            document.title = cleanName + ' â€” Text Editor';
+            document.title = cleanName + ' — Text Editor';
             
             // Clear sessionStorage
             sessionStorage.removeItem('editFileContent');
@@ -8935,7 +8933,7 @@ renderMathInElement(document.body, {
             window.history.replaceState({}, document.title, window.location.pathname);
             return;
           } catch (err) {
-            alert('Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° ÑÑŠÐ´ÑŠÑ€Ð¶Ð°Ð½Ð¸ÐµÑ‚Ð¾: ' + err.message);
+            alert('Грешка при зареждане на съдържанието: ' + err.message);
             console.error('Load error:', err);
             sessionStorage.removeItem('editFileContent');
             sessionStorage.removeItem('editFilePath');
@@ -8979,13 +8977,13 @@ renderMathInElement(document.body, {
           // Update page title
           if (filePath) {
             const fileName = filePath.split('/').pop();
-            document.title = fileName.replace(/\.(md|txt)$/i, '').replace(/^\d+-/, '').replace(/^msg-/i, '') + ' â€” Text Editor';
+            document.title = fileName.replace(/\.(md|txt)$/i, '').replace(/^\d+-/, '').replace(/^msg-/i, '') + ' — Text Editor';
           }
           
           // Clear URL parameters to prevent auto-reload on refresh
           window.history.replaceState({}, document.title, window.location.pathname);
         } catch (err) {
-          alert('Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° ÑÑŠÐ´ÑŠÑ€Ð¶Ð°Ð½Ð¸ÐµÑ‚Ð¾: ' + err.message);
+          alert('Грешка при зареждане на съдържанието: ' + err.message);
           console.error('Load error:', err);
         }
       } else if (filePath) {
@@ -9102,14 +9100,14 @@ renderMathInElement(document.body, {
             historyIndex = 0;
             
             // Update page title
-            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' â€” Text Editor';
+            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' — Text Editor';
           })
           .catch(err => {
             const isFile = window.location.protocol === 'file:';
             const hint = isFile
-              ? '\n\nÐ¡ÑŠÐ²ÐµÑ‚: ÐžÑ‚Ð²Ð¾Ñ€Ð¸ ÑÐ°Ð¹Ñ‚Ð° Ð¿Ñ€ÐµÐ· Ð»Ð¾ÐºÐ°Ð»ÐµÐ½ HTTP ÑÑŠÑ€Ð²ÑŠÑ€ (Ð½Ð°Ð¿Ñ€. VS Code Live Server), Ñ‚ÑŠÐ¹ ÐºÐ°Ñ‚Ð¾ Ð±Ñ€Ð°ÑƒÐ·ÑŠÑ€Ð¸Ñ‚Ðµ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð°Ñ‚ fetch Ð¾Ñ‚ file://'
+              ? '\n\nСъвет: Отвори сайта през локален HTTP сървър (напр. VS Code Live Server), тъй като браузърите блокират fetch от file://'
               : '';
-            alert('Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° Ñ„Ð°Ð¹Ð»Ð°: ' + err.message + hint);
+            alert('Грешка при зареждане на файла: ' + err.message + hint);
             console.error('Load error:', err);
           });
       } else {
@@ -9321,7 +9319,7 @@ renderMathInElement(document.body, {
       const headingType = document.getElementById('anchorHeadingTypeInput').value;
 
       if (!anchorId || !anchorText) {
-        alert('âš ï¸ Please fill in both Anchor ID and Anchor Text');
+        alert('⚠️ Please fill in both Anchor ID and Anchor Text');
         return;
       }
 
@@ -9359,7 +9357,7 @@ renderMathInElement(document.body, {
 
       // Show success message
       const notification = document.createElement('div');
-      notification.textContent = 'âœ… Anchor created: #' + anchorId;
+      notification.textContent = '✅ Anchor created: #' + anchorId;
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
       document.body.appendChild(notification);
 
@@ -9376,7 +9374,7 @@ renderMathInElement(document.body, {
       let linkText = document.getElementById('linkTextInput').value.trim();
 
       if (!selectedAnchor) {
-        alert('âš ï¸ Please select an anchor first');
+        alert('⚠️ Please select an anchor first');
         return;
       }
 
@@ -9422,7 +9420,7 @@ renderMathInElement(document.body, {
 
       // Show success message
       const notification = document.createElement('div');
-      notification.textContent = 'âœ… Link created to #' + selectedAnchor;
+      notification.textContent = '✅ Link created to #' + selectedAnchor;
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #3b82f6; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
       document.body.appendChild(notification);
 
@@ -9577,8 +9575,8 @@ renderMathInElement(document.body, {
       combineFilesModal.classList.add('open');
       uploadedFiles = [];
       selectedCourseFiles = [];
-      filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">ÐšÐ°Ñ‡Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð·Ð° Ð´Ð° Ð³Ð¸ Ð²Ð¸Ð´Ð¸Ñˆ Ñ‚ÑƒÐº</div>';
-      courseFilesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Ð˜Ð·Ð±ÐµÑ€Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð¾Ñ‚ ÐºÑƒÑ€ÑÐ¾Ð²Ðµ</div>';
+      filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>';
+      courseFilesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Избери файлове от курсове</div>';
       combineFilesInput.value = '';
       combineFileSearch.value = '';
       
@@ -9633,7 +9631,7 @@ renderMathInElement(document.body, {
 
     function renderFilesList() {
       if (uploadedFiles.length === 0) {
-        filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">ÐšÐ°Ñ‡Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð·Ð° Ð´Ð° Ð³Ð¸ Ð²Ð¸Ð´Ð¸Ñˆ Ñ‚ÑƒÐº</div>';
+        filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>';
         return;
       }
 
@@ -9656,7 +9654,7 @@ renderMathInElement(document.body, {
         `;
 
         const dragHandle = document.createElement('span');
-        dragHandle.textContent = 'â‹®â‹®';
+        dragHandle.textContent = '⋮⋮';
         dragHandle.style.cssText = 'color: #9ca3af; cursor: grab;';
 
         const fileName = document.createElement('span');
@@ -9664,7 +9662,7 @@ renderMathInElement(document.body, {
         fileName.style.cssText = 'flex: 1; font-size: 0.9em;';
 
         const removeBtn = document.createElement('button');
-        removeBtn.textContent = 'âœ•';
+        removeBtn.textContent = '✕';
         removeBtn.style.cssText = `
           background: #ef4444;
           color: white;
@@ -9741,7 +9739,7 @@ renderMathInElement(document.body, {
       }
 
       if (filteredFiles.length === 0) {
-        courseFilesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">ÐÐµÐ¼Ð° Ñ€ÐµÐ·ÑƒÐ»Ñ‚Ð°Ñ‚Ð¸</div>';
+        courseFilesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Нема резултати</div>';
         return;
       }
 
@@ -9798,7 +9796,7 @@ renderMathInElement(document.body, {
     saveCombineFilesBtn.addEventListener('click', async () => {
       if (currentCombineMode === 'local') {
         if (uploadedFiles.length === 0) {
-          alert('ÐœÐ¾Ð»Ñ ÐºÐ°Ñ‡Ð¸ Ð¿Ð¾Ð½Ðµ ÐµÐ´Ð¸Ð½ Ñ„Ð°Ð¹Ð»');
+          alert('Моля качи поне един файл');
           return;
         }
 
@@ -9830,7 +9828,7 @@ renderMathInElement(document.body, {
       } else {
         // Handle course files combining
         if (selectedCourseFiles.length === 0) {
-          alert('ÐœÐ¾Ð»Ñ Ð¸Ð·Ð±ÐµÑ€Ð¸ Ð¿Ð¾Ð½Ðµ ÐµÐ´Ð¸Ð½ Ñ„Ð°Ð¹Ð»');
+          alert('Моля избери поне един файл');
           return;
         }
 
@@ -9872,7 +9870,7 @@ renderMathInElement(document.body, {
       
       // Show notification
       const notification = document.createElement('div');
-      notification.textContent = 'âœ“ Ð¤Ð°Ð¹Ð»Ð¾Ð²Ðµ ÐºÐ¾Ð¼Ð±Ð¸Ð½Ð¸Ñ€Ð°Ð½Ð¸ ÑƒÑÐ¿ÐµÑˆÐ½Ð¾!';
+      notification.textContent = '✓ Файлове комбинирани успешно!';
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
       document.body.appendChild(notification);
       
@@ -9890,10 +9888,9 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202604011rqg"></script>
+    <script src="js/chat.js?v=202604011r6o"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
 
 </html>
-

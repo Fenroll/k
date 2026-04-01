@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <script src="js/auth-guard.js?v=202603101mce"></script>
@@ -9,8 +9,6 @@
   
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=202603101mce" type="image/svg+xml">
-  <link rel="icon" href="favicon.ico?v=20260401ios" sizes="any">
-  <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios">
   
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
   
@@ -792,14 +790,14 @@
       <!-- Tools Menu -->
       <div class="tools-menu" style="padding: 30px 20px; background: #f5f5f5;">
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; max-width: 1200px; margin: 0 auto;">
-          <button class="test-menu-btn active" data-test="upload" data-emoji="ðŸ“¤" style="padding: 18px 24px; border: none; background: #588157; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(88, 129, 87, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
-            ðŸ“¤ ÐšÐ°Ñ‡Ð²Ð°Ð½Ðµ Ð½Ð° Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ
+          <button class="test-menu-btn active" data-test="upload" data-emoji="📤" style="padding: 18px 24px; border: none; background: #588157; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: white; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(88, 129, 87, 0.2); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            📤 Качване на файлове
           </button>
-          <button class="test-menu-btn" data-test="uploads" data-emoji="ðŸ“š" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
-            ðŸ“š ÐšÐ°Ñ‡ÐµÐ½Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ
+          <button class="test-menu-btn" data-test="uploads" data-emoji="📚" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            📚 Качени файлове
           </button>
-          <button class="test-menu-btn" data-test="finance" data-emoji="ðŸ’¶" id="financeMenuBtn" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
-            ðŸ’¶ Ð¤Ð¸Ð½Ð°Ð½ÑÐ¸
+          <button class="test-menu-btn" data-test="finance" data-emoji="💶" id="financeMenuBtn" style="padding: 18px 24px; border: none; background: white; border-radius: 10px; cursor: pointer; font-size: 15px; font-weight: 600; color: #666; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; align-items: center; justify-content: center; gap: 8px;">
+            💶 Финанси
           </button>
         </div>
       </div>
@@ -808,7 +806,7 @@
         <!-- File Upload Container -->
         <div id="uploadTool" class="test-container" style="display: block;">
           <div class="upload-container" style="max-width: 800px; margin: 40px auto; padding: 30px;">
-            <h2 style="text-align: center; margin-bottom: 30px; color: #262626;">ÐšÐ°Ñ‡Ð²Ð°Ð½Ðµ Ð½Ð° Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ</h2>
+            <h2 style="text-align: center; margin-bottom: 30px; color: #262626;">Качване на файлове</h2>
             
             <!-- Drop Zone -->
             <div id="dropZone" class="drop-zone">
@@ -818,28 +816,28 @@
                   <polyline points="17 8 12 3 7 8"></polyline>
                   <line x1="12" y1="3" x2="12" y2="15"></line>
                 </svg>
-                <h3>ÐŸÑƒÑÐ½ÐµÑ‚Ðµ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð¸Ð»Ð¸ Ð¿Ð°Ð¿ÐºÐ¸ Ñ‚ÑƒÐº</h3>
-                <p>Ð¸Ð»Ð¸</p>
+                <h3>Пуснете файлове или папки тук</h3>
+                <p>или</p>
                 <div style="display: flex; gap: 12px; justify-content: center;">
                   <label for="singleFileInput" class="btn btn-primary" style="cursor: pointer;">
-                    ðŸ“„ Ð˜Ð·Ð±ÐµÑ€Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ
+                    📄 Избери файлове
                   </label>
                   <label for="fileInput" class="btn btn-secondary" style="cursor: pointer;">
-                    ðŸ“ Ð˜Ð·Ð±ÐµÑ€Ð¸ Ð¿Ð°Ð¿ÐºÐ°
+                    📁 Избери папка
                   </label>
                 </div>
                 <input type="file" id="fileInput" multiple webkitdirectory directory style="display: none;">
                 <input type="file" id="singleFileInput" multiple style="display: none;">
               </div>
               <div class="drop-zone-active">
-                <h3>ÐŸÑƒÑÐ½ÐµÑ‚Ðµ Ñ„Ð°Ð¹Ð»Ð¾Ð²ÐµÑ‚Ðµ Ñ‚ÑƒÐº</h3>
+                <h3>Пуснете файловете тук</h3>
               </div>
             </div>
             
             <!-- Upload Progress -->
             <div id="uploadProgress" style="display: none; margin-top: 24px;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span id="uploadStatusText">ÐšÐ°Ñ‡Ð²Ð°Ð½Ðµ...</span>
+                <span id="uploadStatusText">Качване...</span>
                 <span id="uploadPercentage">0%</span>
               </div>
               <div class="progress-bar">
@@ -849,19 +847,19 @@
             
             <!-- File List -->
             <div id="fileList" style="margin-top: 24px; display: none;">
-              <h3 style="margin-bottom: 16px;">Ð˜Ð·Ð±Ñ€Ð°Ð½Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ</h3>
+              <h3 style="margin-bottom: 16px;">Избрани файлове</h3>
               <div id="fileListContainer" style="max-height: 400px; overflow-y: auto;">
                 <!-- Files will be listed here -->
               </div>
               <div style="margin-top: 16px; display: flex; gap: 12px;">
-                <button id="uploadBtn" class="btn btn-success">ÐšÐ°Ñ‡Ð¸ Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ</button>
-                <button id="clearFilesBtn" class="btn btn-secondary">Ð˜Ð·Ñ‡Ð¸ÑÑ‚Ð¸</button>
+                <button id="uploadBtn" class="btn btn-success">Качи всички файлове</button>
+                <button id="clearFilesBtn" class="btn btn-secondary">Изчисти</button>
               </div>
             </div>
             
             <!-- Upload Results -->
             <div id="uploadResults" style="display: none; margin-top: 24px;">
-              <h3>Ð ÐµÐ·ÑƒÐ»Ñ‚Ð°Ñ‚Ð¸</h3>
+              <h3>Резултати</h3>
               <div id="uploadResultsList"></div>
             </div>
           </div>
@@ -870,17 +868,17 @@
         <div id="financeTool" class="test-container" style="display: none;">
           <div style="max-width: 1000px; margin: 40px auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
-              <h2 style="margin: 0; color: #1f2937;">Ð¤Ð¸Ð½Ð°Ð½ÑÐ¸</h2>
+              <h2 style="margin: 0; color: #1f2937;">Финанси</h2>
               <div style="display: flex; align-items: center; gap: 8px;">
-                <button id="financePrevMonthBtn" type="button" class="btn btn-secondary" style="padding: 8px 12px;">â—€</button>
+                <button id="financePrevMonthBtn" type="button" class="btn btn-secondary" style="padding: 8px 12px;">◀</button>
                 <div id="financeMonthLabel" style="min-width: 180px; text-align: center; font-weight: 700; color: #374151;"></div>
-                <button id="financeNextMonthBtn" type="button" class="btn btn-secondary" style="padding: 8px 12px;">â–¶</button>
+                <button id="financeNextMonthBtn" type="button" class="btn btn-secondary" style="padding: 8px 12px;">▶</button>
               </div>
             </div>
 
             <div id="financeMyDonationCard" style="display: none; margin-bottom: 16px; padding: 14px; border-radius: 10px; border: 1px solid #d1d5db; background: #f9fafb;">
-              <div style="font-size: 13px; color: #6b7280; margin-bottom: 6px; font-weight: 700;">ÐœÐ¾ÑÑ‚ Ð¿Ñ€Ð¸Ñ…Ð¾Ð´:</div>
-              <div id="financeMyDonationText" style="font-size: 15px; font-weight: 700; color: #1f2937;">â€”</div>
+              <div style="font-size: 13px; color: #6b7280; margin-bottom: 6px; font-weight: 700;">Моят приход:</div>
+              <div id="financeMyDonationText" style="font-size: 15px; font-weight: 700; color: #1f2937;">—</div>
             </div>
 
             <div id="financeAdminPanel" style="display: none;">
@@ -888,29 +886,29 @@
 
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin-bottom: 16px;">
                 <div style="border: 1px solid #d1fae5; border-left: 5px solid #10b981; border-radius: 10px; padding: 14px; background: #ecfdf5;">
-                  <h3 style="margin: 0 0 10px 0; color: #065f46;">Ð”Ð¾Ñ…Ð¾Ð´Ð¸</h3>
-                  <textarea id="financeIncomeInput" style="width: 100%; min-height: 180px; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px; box-sizing: border-box; resize: vertical; font-size: 14px;" placeholder="ÐŸÑ€Ð¸Ð¼ÐµÑ€:\n- Donations: 45 EUR\n- Ð¡Ð¿Ð¾Ð½ÑÐ¾Ñ€ÑÑ‚Ð²Ð¾: 20 EUR"></textarea>
+                  <h3 style="margin: 0 0 10px 0; color: #065f46;">Доходи</h3>
+                  <textarea id="financeIncomeInput" style="width: 100%; min-height: 180px; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px; box-sizing: border-box; resize: vertical; font-size: 14px;" placeholder="Пример:\n- Donations: 45 EUR\n- Спонсорство: 20 EUR"></textarea>
                   <div id="financeIncomePreview" style="display:none; min-height: 180px; border: 1px solid #a7f3d0; border-radius: 8px; padding: 10px; box-sizing: border-box; background:#fff; font-size: 14px; color:#374151; white-space: normal;"></div>
                 </div>
 
                 <div style="border: 1px solid #fecaca; border-left: 5px solid #ef4444; border-radius: 10px; padding: 14px; background: #fef2f2;">
-                  <h3 style="margin: 0 0 10px 0; color: #991b1b;">Ð Ð°Ð·Ñ…Ð¾Ð´Ð¸</h3>
-                  <textarea id="financeExpenseInput" style="width: 100%; min-height: 180px; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; box-sizing: border-box; resize: vertical; font-size: 14px;" placeholder="ÐŸÑ€Ð¸Ð¼ÐµÑ€:\n- Ð¥Ð¾ÑÑ‚Ð¸Ð½Ð³: 12 EUR\n- Ð”Ð¾Ð¼ÐµÐ¹Ð½: 9 EUR"></textarea>
+                  <h3 style="margin: 0 0 10px 0; color: #991b1b;">Разходи</h3>
+                  <textarea id="financeExpenseInput" style="width: 100%; min-height: 180px; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; box-sizing: border-box; resize: vertical; font-size: 14px;" placeholder="Пример:\n- Хостинг: 12 EUR\n- Домейн: 9 EUR"></textarea>
                   <div id="financeExpensePreview" style="display:none; min-height: 180px; border: 1px solid #fca5a5; border-radius: 8px; padding: 10px; box-sizing: border-box; background:#fff; font-size: 14px; color:#374151; white-space: normal;"></div>
                 </div>
               </div>
 
               <div id="financeDonationsSection" style="border: 1px solid #e5e7eb; border-radius: 10px; padding: 14px; background: #f9fafb; margin-bottom: 12px;">
                 <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px;">
-                  <h3 style="margin: 0; color: #1f2937;">Donations Ð¿Ð¾ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»Ð¸</h3>
+                  <h3 style="margin: 0; color: #1f2937;">Donations по потребители</h3>
                 </div>
 
                 <div id="financeDonationsRows"></div>
               </div>
 
               <div id="financeAdminActions" style="display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap;">
-                <button id="financeReloadBtn" type="button" class="btn btn-secondary">ÐŸÑ€ÐµÐ·Ð°Ñ€ÐµÐ´Ð¸</button>
-                <button id="financeSaveBtn" type="button" class="btn btn-success">Ð—Ð°Ð¿Ð°Ð·Ð¸ Ð·Ð° Ð¼ÐµÑÐµÑ†Ð°</button>
+                <button id="financeReloadBtn" type="button" class="btn btn-secondary">Презареди</button>
+                <button id="financeSaveBtn" type="button" class="btn btn-success">Запази за месеца</button>
               </div>
 
               <div id="financeLastUpdate" style="margin-top: 10px; font-size: 12px; color: #6b7280;"></div>
@@ -921,8 +919,8 @@
         <div id="uploadsTool" class="test-container" style="display: none;">
           <div style="max-width: 1300px; margin: 24px auto; padding: 18px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
             <div id="toolsUploadsHeaderRow" style="display:flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 12px;">
-              <h2 style="margin: 0; color: #1f2937;">ÐšÐ°Ñ‡ÐµÐ½Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ</h2>
-              <button id="toolsUploadsRefreshBtn" class="btn btn-secondary" type="button">â†» Refresh</button>
+              <h2 style="margin: 0; color: #1f2937;">Качени файлове</h2>
+              <button id="toolsUploadsRefreshBtn" class="btn btn-secondary" type="button">↻ Refresh</button>
             </div>
 
             <div id="toolsUploadsStatus" style="display:none; border-radius: 8px; padding: 10px 12px; margin-bottom: 12px; font-size: 14px;"></div>
@@ -978,7 +976,7 @@
 
         <div id="tool3Tool" class="test-container" style="display: none;">
           <div style="max-width: 800px; margin: 40px auto; padding: 30px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); color: #6b7280; text-align: center;">
-            Ð˜Ð½ÑÑ‚Ñ€ÑƒÐ¼ÐµÐ½Ñ‚ 3 Ð¿Ñ€ÐµÐ´ÑÑ‚Ð¾Ð¸.
+            Инструмент 3 предстои.
           </div>
         </div>
       </div>
@@ -1312,10 +1310,10 @@
       fileListContainer.innerHTML = selectedFiles.map((file, index) => `
         <div class="file-item" data-index="${index}">
           <div class="file-item-info">
-            <span class="file-item-name" title="${file.fullPath}">ðŸ“„ ${file.fullPath}</span>
+            <span class="file-item-name" title="${file.fullPath}">📄 ${file.fullPath}</span>
             <span class="file-item-size">${formatFileSize(file.size)}</span>
           </div>
-          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="removeFile(${index})">ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð¸</button>
+          <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="removeFile(${index})">Премахни</button>
         </div>
       `).join('');
     }
@@ -1363,7 +1361,7 @@
       
       for (const file of selectedFiles) {
         try {
-          uploadStatusText.textContent = `ÐšÐ°Ñ‡Ð²Ð°Ð½Ðµ Ð½Ð° ${file.fullPath}...`;
+          uploadStatusText.textContent = `Качване на ${file.fullPath}...`;
           
           const formData = new FormData();
           formData.append('file', file);
@@ -1416,14 +1414,14 @@
             </div>
           </div>
           <span class="file-item-status ${result.status}">
-            ${result.status === 'success' ? 'âœ“ ÐšÐ°Ñ‡ÐµÐ½' : 'âœ— Ð“Ñ€ÐµÑˆÐºÐ°'}
+            ${result.status === 'success' ? '✓ Качен' : '✗ Грешка'}
           </span>
         </div>
       `).join('');
       
       uploadBtn.disabled = false;
       clearFilesBtn.disabled = false;
-      uploadStatusText.textContent = 'ÐšÐ°Ñ‡Ð²Ð°Ð½Ðµ Ð·Ð°Ð²ÑŠÑ€ÑˆÐµÐ½Ð¾!';
+      uploadStatusText.textContent = 'Качване завършено!';
       
       // Clear selected files after successful upload
       selectedFiles = [];
@@ -2195,7 +2193,7 @@
 
     const SPECIAL_DONATION_RULES = [
       { aliases: ['vikopiko'], label: 'Driver Pass' },
-      { aliases: ['Ð¿Ð°Ð¸ÑÐ¸Ð¹', 'paisiy'], label: 'Owner' }
+      { aliases: ['паисий', 'paisiy'], label: 'Owner' }
     ];
 
     const FINANCE_BLUE = '#588157';
@@ -2241,8 +2239,8 @@
       html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
       html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
       html = html.replace(/&lt;u&gt;([\s\S]*?)&lt;\/u&gt;/g, '<u>$1</u>');
-      html = html.replace(/(\d+(?:[\.,]\d+)?)\s*(â‚¬|EUR)/gi, `<span style="color:${FINANCE_BLUE}; font-weight:700;">$1 $2</span>`);
-      html = html.replace(/(^|\n)-\s+/g, '$1â€¢ ');
+      html = html.replace(/(\d+(?:[\.,]\d+)?)\s*(€|EUR)/gi, `<span style="color:${FINANCE_BLUE}; font-weight:700;">$1 $2</span>`);
+      html = html.replace(/(^|\n)-\s+/g, '$1• ');
       html = html.replace(/\n/g, '<br>');
 
       return html;
@@ -2421,7 +2419,7 @@
       wrapper.innerHTML = `
         <input type="text" class="finance-donation-user" value="${(row.user || '').replace(/"/g, '&quot;')}" readonly>
         <input type="number" class="finance-donation-amount" min="0" step="0.01" placeholder="EUR" value="${Number.isFinite(row.amount) ? row.amount : ''}">
-        <input type="text" class="finance-donation-note" placeholder="Ð‘ÐµÐ»ÐµÐ¶ÐºÐ°" value="${String(row.note || '').replace(/"/g, '&quot;')}">
+        <input type="text" class="finance-donation-note" placeholder="Бележка" value="${String(row.note || '').replace(/"/g, '&quot;')}">
       `;
 
       wrapper.querySelectorAll('input').forEach(el => {
@@ -2570,7 +2568,7 @@
       });
 
       if (!myDonation) {
-        textEl.innerHTML = '<span style="color:#991b1b;">0â‚¬</span>';
+        textEl.innerHTML = '<span style="color:#991b1b;">0€</span>';
         textEl.style.color = '';
         return;
       }
@@ -2581,11 +2579,11 @@
         const noteText = typeof myDonation.note === 'string' ? myDonation.note.trim() : '';
         const safeNote = escapeHtml(noteText);
         textEl.innerHTML = noteText
-          ? `<span style="color:#065f46; font-weight:700;">${amountText}â‚¬</span> <span style="color:#111827; font-weight:400;">(${safeNote})</span>`
-          : `<span style="color:#065f46; font-weight:700;">${amountText}â‚¬</span>`;
+          ? `<span style="color:#065f46; font-weight:700;">${amountText}€</span> <span style="color:#111827; font-weight:400;">(${safeNote})</span>`
+          : `<span style="color:#065f46; font-weight:700;">${amountText}€</span>`;
         textEl.style.color = '';
       } else {
-        textEl.innerHTML = '<span style="color:#991b1b;">0â‚¬</span>';
+        textEl.innerHTML = '<span style="color:#991b1b;">0€</span>';
         textEl.style.color = '';
       }
     }
@@ -2617,7 +2615,7 @@
       if (!lastUpdateEl) return;
 
       if (!meta || !meta.updatedAt) {
-        lastUpdateEl.textContent = 'ÐŸÐ¾ÑÐ»ÐµÐ´ÐµÐ½ ÑŠÐ¿Ð´ÐµÐ¹Ñ‚: Ð½ÑÐ¼Ð°';
+        lastUpdateEl.textContent = 'Последен ъпдейт: няма';
         return;
       }
 
@@ -2625,9 +2623,9 @@
       const by = meta.updatedBy || 'Unknown';
       const byRule = getSpecialRuleByName(by);
       if (byRule && byRule.label === 'Owner') {
-        lastUpdateEl.textContent = `ÐŸÐ¾ÑÐ»ÐµÐ´ÐµÐ½ ÑŠÐ¿Ð´ÐµÐ¹Ñ‚: ${when.toLocaleString('bg-BG')}`;
+        lastUpdateEl.textContent = `Последен ъпдейт: ${when.toLocaleString('bg-BG')}`;
       } else {
-        lastUpdateEl.textContent = `ÐŸÐ¾ÑÐ»ÐµÐ´ÐµÐ½ ÑŠÐ¿Ð´ÐµÐ¹Ñ‚: ${by} Â· ${when.toLocaleString('bg-BG')}`;
+        lastUpdateEl.textContent = `Последен ъпдейт: ${by} · ${when.toLocaleString('bg-BG')}`;
       }
     }
 
@@ -2734,7 +2732,7 @@
         setLastUpdate(value);
       } catch (error) {
         console.error('Finance load error:', error);
-        setFinanceStatus(`Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ: ${error.message}`, true);
+        setFinanceStatus(`Грешка при зареждане: ${error.message}`, true);
       }
     }
 
@@ -2755,11 +2753,11 @@
         };
 
         await financeRefForMonth(state.monthDate).set(payload);
-        setFinanceStatus('Ð¤Ð¸Ð½Ð°Ð½ÑÐ¸Ñ‚Ðµ ÑÐ° Ð·Ð°Ð¿Ð°Ð·ÐµÐ½Ð¸ ÑƒÑÐ¿ÐµÑˆÐ½Ð¾.');
+        setFinanceStatus('Финансите са запазени успешно.');
         await loadFinanceMonth();
       } catch (error) {
         console.error('Finance save error:', error);
-        setFinanceStatus(`Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ð¿Ð¸Ñ: ${error.message}`, true);
+        setFinanceStatus(`Грешка при запис: ${error.message}`, true);
       } finally {
         if (saveBtn) saveBtn.disabled = false;
       }
@@ -2877,4 +2875,3 @@
 <script src="js/mobile-nav.js?v=202602171mhr"></script>
 </body>
 </html>
-

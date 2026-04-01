@@ -1,7 +1,7 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=202604011rqg"></script>
+    <script src="js/auth-guard.js?v=202604011r6o"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=202602171mhr"></script>
@@ -10,8 +10,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
      <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
-  <link rel="icon" href="favicon.ico?v=20260401ios" sizes="any">
-  <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios">
     <link rel="stylesheet" href="css/mobile-nav.css?v=2026031715gu">
     <title>Admin Panel</title>
     <style>
@@ -454,12 +452,12 @@
             }
 
             #ve-prev-week-btn::before {
-                content: 'â—€';
+                content: '◀';
                 font-size: 18px;
             }
 
             #ve-next-week-btn::before {
-                content: 'â–¶';
+                content: '▶';
                 font-size: 18px;
             }
 
@@ -787,7 +785,7 @@
         <div class="ve-modal-content">
             <div class="ve-modal-header">
                 <h3 id="ve-modal-title">Edit Event</h3>
-                <span style="cursor: pointer; font-size: 24px;" onclick="closeVeModal()">Ã—</span>
+                <span style="cursor: pointer; font-size: 24px;" onclick="closeVeModal()">×</span>
             </div>
             <form id="ve-event-form">
                 <div class="form-group">
@@ -801,11 +799,11 @@
                 <div class="form-group">
                     <label>Type</label>
                     <select id="ve-type" style="width: 100%; padding: 8px; background: #333; color: #e0e0e0; border: 1px solid #444; border-radius: 8px;">
-                        <option value="Ð›ÐµÐºÑ†Ð¸Ñ">Lecture</option>
-                        <option value="Ð£Ð¿Ñ€Ð°Ð¶Ð½ÐµÐ½Ð¸Ðµ">Exercise</option>
-                        <option value="Ð’Ð°Ð¶Ð½Ð° Ð»ÐµÐºÑ†Ð¸Ñ">Important Lecture</option>
-                        <option value="ÐšÐ¾Ð»Ð¾ÐºÐ²Ð¸ÑƒÐ¼">Colloquium</option>
-                        <option value="Ð¢ÐµÑÑ‚">Test</option>
+                        <option value="Лекция">Lecture</option>
+                        <option value="Упражнение">Exercise</option>
+                        <option value="Важна лекция">Important Lecture</option>
+                        <option value="Колоквиум">Colloquium</option>
+                        <option value="Тест">Test</option>
                     </select>
                 </div>
                 <div style="display: flex; gap: 10px;">
@@ -849,7 +847,7 @@
         <div class="ve-modal-content" style="width: 600px; max-height: 90vh; display: flex; flex-direction: column;">
             <div class="ve-modal-header">
                 <h3>Exam Manager</h3>
-                <span style="cursor: pointer; font-size: 24px;" onclick="closeExamModal()">Ã—</span>
+                <span style="cursor: pointer; font-size: 24px;" onclick="closeExamModal()">×</span>
             </div>
             
             <!-- List View -->
@@ -921,7 +919,7 @@
         <div class="ve-modal-content" style="width: 500px; max-height: 90vh; overflow-y: auto;">
             <div class="ve-modal-header">
                 <h3>Manage Semesters</h3>
-                <span style="cursor: pointer; font-size: 24px;" onclick="closeSemesterModal()">Ã—</span>
+                <span style="cursor: pointer; font-size: 24px;" onclick="closeSemesterModal()">×</span>
             </div>
             
             <div id="semester-list-view">
@@ -990,7 +988,7 @@
         <div class="ve-modal-content" style="width: 400px;">
             <div class="ve-modal-header">
                 <h3>Edit Week Date</h3>
-                <span style="cursor: pointer; font-size: 24px;" onclick="closeWeekDateModal()">Ã—</span>
+                <span style="cursor: pointer; font-size: 24px;" onclick="closeWeekDateModal()">×</span>
             </div>
             <form id="week-date-form">
                 <div class="form-group">
@@ -1017,7 +1015,7 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=202604011rqg"></script>
+    <script src="courses.generated.js?v=202604011r6o"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=202602171mhr"></script>
     <script src="js/admin-visual-editor.js?v=202602171mhr"></script>

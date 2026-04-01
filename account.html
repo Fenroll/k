@@ -1,15 +1,13 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bg">
 <head>
-    <script src="js/auth-guard.js?v=202604011rqg"></script>
+    <script src="js/auth-guard.js?v=202604011r6o"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
     <title>Account</title>
     <!-- Favicon -->
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
-  <link rel="icon" href="favicon.ico?v=20260401ios" sizes="any">
-  <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Fira+Sans:wght@400;500;700&family=Rubik:wght@400;500;700&display=swap">
@@ -36,8 +34,8 @@
         .form-container, .account-info {
             display: none;
         }
-        /* ÐŸÐ¾ÐºÐ°Ð·Ð²Ð°Ð¼Ðµ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð° Ð·Ð° Ð²Ñ…Ð¾Ð´ Ð¿Ð¾ Ð¿Ð¾Ð´Ñ€Ð°Ð·Ð±Ð¸Ñ€Ð°Ð½Ðµ, Ð·Ð° Ð´Ð° Ð½Ðµ Ðµ Ð¿Ñ€Ð°Ð·ÐµÐ½ ÐµÐºÑ€Ð°Ð½ÑŠÑ‚.
-           JavaScript ÑÐ»ÐµÐ´ Ñ‚Ð¾Ð²Ð° Ñ‰Ðµ ÑƒÐ¿Ñ€Ð°Ð²Ð»ÑÐ²Ð° ÐºÐ¾Ñ Ñ„Ð¾Ñ€Ð¼Ð° Ð´Ð° ÑÐµ Ð²Ð¸Ð¶Ð´Ð°. */
+        /* Показваме формата за вход по подразбиране, за да не е празен екранът.
+           JavaScript след това ще управлява коя форма да се вижда. */
         #login-form {
             display: block;
         }
@@ -332,7 +330,7 @@
                 </div>
                 <div class="profile-data-item">
                     <span class="data-label">Password:</span>
-                    <span class="data-value password-value" id="user-password">â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢</span>
+                    <span class="data-value password-value" id="user-password">••••••••</span>
                     <button id="show-change-password-btn" class="change-btn">change</button>
                 </div>
                 <div class="profile-data-item">
@@ -385,7 +383,7 @@
                 <div class="form-group">
                     <label for="new-avatar-url">Image URL</label>
                     <input type="url" id="new-avatar-url" placeholder="https://example.com/image.jpg" style="width: 100%; border-radius: 8px;">
-                    <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Link to an external image (will be automatically resized to 150Ã—150px).</p>
+                    <p style="font-size: 0.8rem; color: #666; margin-top: 5px;">Link to an external image (will be automatically resized to 150×150px).</p>
                 </div>
 
                 <button type="submit" class="btn">Save</button>
@@ -473,12 +471,12 @@
                     </select>
                     <div id="font-preview-wrap" class="font-preview-wrap" aria-live="polite">
                         <div class="font-preview-block">
-                            <h3>ÐšÐ»Ð¸Ð½Ð¸Ñ‡Ð½Ð¾ Ð½Ð°Ð±Ð»ÑŽÐ´ÐµÐ½Ð¸Ðµ Ð¸ Ð°Ð½Ð°Ð»Ð¸Ð·</h3>
-                            <p>Ð¢Ð¾Ð·Ð¸ Ð¿Ñ€Ð¸Ð¼ÐµÑ€ÐµÐ½ Ð¿Ð°Ñ€Ð°Ð³Ñ€Ð°Ñ„ Ð¿Ð¾ÐºÐ°Ð·Ð²Ð° Ñ‡ÐµÑ‚Ð¸Ð¼Ð¾ÑÑ‚Ñ‚Ð° Ð¿Ñ€Ð¸ Ð¼ÐµÐ´Ð¸Ñ†Ð¸Ð½ÑÐºÐ¸ Ñ‚ÐµÐºÑÑ‚ Ñ Ð´ÑŠÐ»Ð³Ð¸ Ð¸Ð·Ñ€ÐµÑ‡ÐµÐ½Ð¸Ñ Ð¸ ÑÐ¿ÐµÑ†Ð¸Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð°Ð½Ð° Ñ‚ÐµÑ€Ð¼Ð¸Ð½Ð¾Ð»Ð¾Ð³Ð¸Ñ.</p>
+                            <h3>Клинично наблюдение и анализ</h3>
+                            <p>Този примерен параграф показва четимостта при медицински текст с дълги изречения и специализирана терминология.</p>
                             <ul>
-                                <li>ÐÐ½Ð°Ð¼Ð½ÐµÐ·Ð° Ð¸ Ð¾ÑÐ½Ð¾Ð²Ð½Ð¸ ÑÐ¸Ð¼Ð¿Ñ‚Ð¾Ð¼Ð¸</li>
-                                <li>Ð”Ð¸Ñ„ÐµÑ€ÐµÐ½Ñ†Ð¸Ð°Ð»Ð½Ð° Ð´Ð¸Ð°Ð³Ð½Ð¾Ð·Ð°</li>
-                                <li>ÐŸÐ»Ð°Ð½ Ð·Ð° Ð»ÐµÑ‡ÐµÐ½Ð¸Ðµ Ð¸ Ð¿Ñ€Ð¾ÑÐ»ÐµÐ´ÑÐ²Ð°Ð½Ðµ</li>
+                                <li>Анамнеза и основни симптоми</li>
+                                <li>Диференциална диагноза</li>
+                                <li>План за лечение и проследяване</li>
                             </ul>
                         </div>
                         <div class="font-preview-block">
@@ -525,7 +523,7 @@
                     <input type="password" id="password-for-delete" required>
                 </div>
                 <button type="submit" class="btn btn-danger">Confirm deletion</button>
-                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">ÐžÑ‚ÐºÐ°Ð·</button>
+                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Отказ</button>
             </form>
         </div>
 
@@ -535,16 +533,16 @@
         </div>
     </div>
 
-    <!-- Firebase SDKs - Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ñ‚ ÑÐµ Ð¿Ñ€ÐµÐ´Ð¸ Ð½Ð°ÑˆÐ¸Ñ ÑÐºÑ€Ð¸Ð¿Ñ‚ -->
+    <!-- Firebase SDKs - зареждат се преди нашия скрипт -->
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
 
-    <!-- ÐÐ°ÑˆÐ¸ÑÑ‚ ÑÐºÑ€Ð¸Ð¿Ñ‚ Ð·Ð° Ð°ÐºÐ°ÑƒÐ½Ñ‚Ð¸ -->
-    <script src="./js/account-system.js?v=202604011rqg"></script>
+    <!-- Нашият скрипт за акаунти -->
+    <script src="./js/account-system.js?v=202604011r6o"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/version-check.js?v=202602171mhr"></script>
     <script>
-        // Ð¢ÑŠÐ¹ ÐºÐ°Ñ‚Ð¾ ÑÐºÑ€Ð¸Ð¿Ñ‚Ð¾Ð²ÐµÑ‚Ðµ ÑÐ° Ð² ÐºÑ€Ð°Ñ Ð½Ð° <body>, DOM Ðµ Ð³Ð¾Ñ‚Ð¾Ð² Ð¸ Ð¿Ñ€ÐµÐ´Ñ…Ð¾Ð´Ð½Ð¸Ñ‚Ðµ ÑÐºÑ€Ð¸Ð¿Ñ‚Ð¾Ð²Ðµ ÑÐ° Ð·Ð°Ñ€ÐµÐ´ÐµÐ½Ð¸.
+        // Тъй като скриптовете са в края на <body>, DOM е готов и предходните скриптове са заредени.
         (async function() {
             try {
                 window.accountSystem = new AccountSystem();
@@ -553,7 +551,7 @@
                 console.error("Fatal error during app initialization:", error);
                 const container = document.querySelector('.account-container');
                 if (container) {
-                    container.innerHTML = `<p style="color: #ef4444; text-align: center; font-weight: bold;">Ð’ÑŠÐ·Ð½Ð¸ÐºÐ½Ð° ÐºÑ€Ð¸Ñ‚Ð¸Ñ‡Ð½Ð° Ð³Ñ€ÐµÑˆÐºÐ°: ${error.message}. ÐŸÑ€Ð¾Ð²ÐµÑ€ÐµÑ‚Ðµ ÐºÐ¾Ð½Ð·Ð¾Ð»Ð°Ñ‚Ð° (F12).</p>`;
+                    container.innerHTML = `<p style="color: #ef4444; text-align: center; font-weight: bold;">Възникна критична грешка: ${error.message}. Проверете конзолата (F12).</p>`;
                 }
             }
         })();
