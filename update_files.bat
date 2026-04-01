@@ -2,6 +2,33 @@
 setlocal
 
 echo Updating files submodule...
+for /f "delims=" %%i in ('git config -f .gitmodules --get submodule.files.url 2^>nul') do set SUBMODULE_URL=%%i
+if "%SUBMODULE_URL%"=="" (
+	echo Could not read submodule URL from .gitmodules.
+	pause
+	exit /b 1
+)
+
+git submodule sync -- files
+if %ERRORLEVEL% neq 0 (
+	echo Could not sync submodule configuration.
+	pause
+	exit /b %ERRORLEVEL%
+)
+
+for /f "delims=" %%i in ('git -C files remote get-url origin 2^>nul') do set CURRENT_URL=%%i
+if /I not "%CURRENT_URL%"=="%SUBMODULE_URL%" (
+	echo Fixing files origin URL:
+	echo   %CURRENT_URL%
+	echo   -> %SUBMODULE_URL%
+	git -C files remote set-url origin "%SUBMODULE_URL%"
+	if %ERRORLEVEL% neq 0 (
+		echo Could not set files origin URL.
+		pause
+		exit /b %ERRORLEVEL%
+	)
+)
+
 cd files
 if %ERRORLEVEL% neq 0 (
 	echo Could not enter files submodule.
@@ -34,7 +61,7 @@ if %ERRORLEVEL% neq 0 (
 	exit /b %ERRORLEVEL%
 )
 
-git push
+git push origin HEAD:main
 if %ERRORLEVEL% neq 0 (
 	echo git push failed in files submodule.
 	cd ..
