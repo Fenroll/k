@@ -43,6 +43,43 @@ function sanitizeDownloadFileName(name, fallback = 'download') {
     .replace(/"/g, "'");
 }
 
+function inferContentType(fileName, fallback = 'application/octet-stream') {
+  const name = String(fileName || '').toLowerCase();
+  const extension = (name.split('.').pop() || '').trim();
+  const byExt = {
+    pdf: 'application/pdf',
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    webp: 'image/webp',
+    gif: 'image/gif',
+    svg: 'image/svg+xml',
+    mp3: 'audio/mpeg',
+    wav: 'audio/wav',
+    m4a: 'audio/mp4',
+    mp4: 'video/mp4',
+    webm: 'video/webm',
+    txt: 'text/plain; charset=utf-8',
+    md: 'text/markdown; charset=utf-8',
+    html: 'text/html; charset=utf-8',
+    htm: 'text/html; charset=utf-8',
+    json: 'application/json; charset=utf-8'
+  };
+
+  return byExt[extension] || fallback;
+}
+
+function resolveBucketFromType(env, bucketType = 'default') {
+  if (bucketType === 'chat') {
+    return env.CHATBUCKET;
+  }
+  return env.R2BUCKET || env.R2_BUCKET || env['r2-upload'];
+}
+
+function normalizeObjectKey(key) {
+  return String(key || '').replace(/^\/+/, '').trim();
+}
+
 async function resolveUniqueObjectKey(bucket, desiredKey) {
   const current = await bucket.head(desiredKey);
   if (!current) {
@@ -304,6 +341,201 @@ export default {
       });
     }
 
+    // Handle JSON actions (metadata repair) before multipart upload flow.
+    const contentTypeHeader = String(request.headers.get('content-type') || '').toLowerCase();
+    if (contentTypeHeader.includes('application/json')) {
+      try {
+        const body = await request.json();
+        const action = String(body.action || '').trim();
+
+        if (action !== 'repairMetadata') {
+          return new Response(JSON.stringify({ error: 'Unsupported POST action' }), {
+            status: 400,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Optional protection: if env token exists, require it.
+        const requiredToken = String(env.METADATA_REPAIR_TOKEN || '').trim();
+        if (requiredToken) {
+          const providedToken = String(
+            request.headers.get('x-admin-token') || body.token || ''
+          ).trim();
+          if (!providedToken || providedToken !== requiredToken) {
+            return new Response(JSON.stringify({ error: 'Unauthorized metadata repair request' }), {
+              status: 401,
+              headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+            });
+          }
+        }
+
+        const bucketType = body.bucketType === 'chat' ? 'chat' : 'default';
+        const bucket = resolveBucketFromType(env, bucketType);
+        if (!bucket) {
+          return new Response(JSON.stringify({ error: 'Bucket not bound' }), {
+            status: 500,
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        const requestedContentType = String(body.contentType || '').trim();
+        const dryRun = Boolean(body.dryRun);
+
+        const rewriteObjectMetadata = async (rawKey) => {
+          const key = normalizeObjectKey(rawKey);
+          if (!key) {
+            return { key, status: 'skipped', reason: 'empty-key' };
+          }
+
+          const head = await bucket.head(key);
+          if (!head) {
+            return { key, status: 'missing' };
+          }
+
+          const currentType = String(
+            (head.httpMetadata && head.httpMetadata.contentType) || ''
+          ).trim();
+          const nextType = requestedContentType || inferContentType(key, currentType || 'application/octet-stream');
+
+          if (!nextType || currentType === nextType) {
+            return {
+              key,
+              status: 'unchanged',
+              contentType: currentType || null
+            };
+          }
+
+          if (dryRun) {
+            return {
+              key,
+              status: 'would-update',
+              from: currentType || null,
+              to: nextType
+            };
+          }
+
+          const object = await bucket.get(key);
+          if (!object) {
+            return { key, status: 'missing-after-head' };
+          }
+
+          const existingMeta = object.httpMetadata || {};
+          await bucket.put(key, object.body, {
+            httpMetadata: {
+              contentType: nextType,
+              contentDisposition: existingMeta.contentDisposition,
+              contentEncoding: existingMeta.contentEncoding,
+              contentLanguage: existingMeta.contentLanguage,
+              cacheControl: existingMeta.cacheControl
+            },
+            customMetadata: object.customMetadata || undefined
+          });
+
+          return {
+            key,
+            status: 'updated',
+            from: currentType || null,
+            to: nextType
+          };
+        };
+
+        // Single key mode.
+        if (body.key) {
+          const result = await rewriteObjectMetadata(body.key);
+          return new Response(JSON.stringify({
+            success: true,
+            action: 'repairMetadata',
+            bucketType,
+            dryRun,
+            result
+          }), {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+          });
+        }
+
+        // Batch mode by prefix and extension (default: pdf).
+        const prefix = String(body.prefix || '').trim();
+        const extension = String(body.extension || 'pdf').trim().replace(/^\./, '').toLowerCase();
+        const maxObjectsRaw = Number(body.maxObjects);
+        const maxObjects = Number.isFinite(maxObjectsRaw) && maxObjectsRaw > 0
+          ? Math.min(Math.floor(maxObjectsRaw), 1000)
+          : 200;
+
+        let cursor = undefined;
+        let scanned = 0;
+        let processed = 0;
+        let truncated = false;
+        const results = [];
+
+        while (processed < maxObjects) {
+          const listed = await bucket.list({ prefix, cursor, limit: Math.min(1000, maxObjects) });
+          const objects = listed.objects || [];
+
+          for (const item of objects) {
+            scanned += 1;
+            const key = String(item.key || '');
+            if (!key.toLowerCase().endsWith(`.${extension}`)) {
+              continue;
+            }
+
+            const result = await rewriteObjectMetadata(key);
+            results.push(result);
+            processed += 1;
+
+            if (processed >= maxObjects) {
+              truncated = true;
+              break;
+            }
+          }
+
+          if (!listed.truncated || !listed.cursor) {
+            break;
+          }
+
+          cursor = listed.cursor;
+          if (processed >= maxObjects) {
+            truncated = true;
+            break;
+          }
+        }
+
+        const updatedCount = results.filter(r => r.status === 'updated').length;
+        const wouldUpdateCount = results.filter(r => r.status === 'would-update').length;
+        const unchangedCount = results.filter(r => r.status === 'unchanged').length;
+        const missingCount = results.filter(r => r.status === 'missing' || r.status === 'missing-after-head').length;
+
+        return new Response(JSON.stringify({
+          success: true,
+          action: 'repairMetadata',
+          bucketType,
+          dryRun,
+          prefix,
+          extension,
+          maxObjects,
+          scanned,
+          processed,
+          truncated,
+          summary: {
+            updated: updatedCount,
+            wouldUpdate: wouldUpdateCount,
+            unchanged: unchangedCount,
+            missing: missingCount
+          },
+          results
+        }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      } catch (error) {
+        return new Response(JSON.stringify({
+          error: 'Metadata repair failed',
+          message: error.message
+        }), {
+          status: 500,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        });
+      }
+    }
+
     try {
       // Parse multipart form data first to get bucket selection
       const formData = await request.formData();
@@ -397,10 +629,14 @@ export default {
 
       // Upload to R2 - use arrayBuffer instead of stream for better compatibility
       const fileData = await file.arrayBuffer();
+      const preferredType = String(file.type || '').trim();
+      const contentType = preferredType && preferredType !== 'application/octet-stream'
+        ? preferredType
+        : inferContentType(fileName, preferredType || 'application/octet-stream');
       
       await bucket.put(key, fileData, {
         httpMetadata: {
-          contentType: file.type || 'application/octet-stream',
+          contentType,
         },
       });
 

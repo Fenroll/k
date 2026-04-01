@@ -1,0 +1,11 @@
+name = "filesfavicon"
+main = "filesfavicon.worker.js"
+compatibility_date = "2026-03-11"
+
+[[r2_buckets]]
+binding = "FILES_BUCKET"
+bucket_name = "files"
+
+[[routes]]
+pattern = "files.coursebook.lol/*"
+zone_name = "coursebook.lol"
