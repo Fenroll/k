@@ -1693,7 +1693,7 @@
 
             function getCoursesFromGlobal() {
                 if (!Array.isArray(window.courses)) return [];
-                return window.courses
+                const courses = window.courses
                     .filter(course => {
                         if (!course || !course.id || !course.title || course.isArchived) return false;
                         const normalizedTitle = String(course.title).trim().toLowerCase();
@@ -1701,6 +1701,16 @@
                     })
                     .map(course => ({ id: String(course.id), title: String(course.title) }))
                     .sort((a, b) => a.title.localeCompare(b.title, 'bg'));
+
+                const hasGeneralCourse = courses.some(
+                    (course) => String(course.title || '').trim().toLowerCase() === 'общи'
+                );
+
+                if (!hasGeneralCourse) {
+                    courses.unshift({ id: 'general', title: 'Общи' });
+                }
+
+                return courses;
             }
 
             function renderCoursesList() {
@@ -1753,6 +1763,30 @@
             function normalizeHtml(html) {
                 const text = String(html || '').trim();
                 return text ? html : '';
+            }
+
+            function unwrapNode(node) {
+                const parent = node && node.parentNode;
+                if (!parent) return;
+                while (node.firstChild) {
+                    parent.insertBefore(node.firstChild, node);
+                }
+                parent.removeChild(node);
+            }
+
+            function sanitizeEditorFormatting(root) {
+                if (!(root instanceof Element)) return;
+
+                root.querySelectorAll('font').forEach((fontNode) => {
+                    unwrapNode(fontNode);
+                });
+
+                root.querySelectorAll('span[style]').forEach((spanNode) => {
+                    spanNode.removeAttribute('style');
+                    if (spanNode.attributes.length === 0) {
+                        unwrapNode(spanNode);
+                    }
+                });
             }
 
             function setImageUploadStatus(message, isError = false) {
@@ -1882,12 +1916,14 @@
                     img.classList.remove('notes-lazy-image');
                     img.classList.remove('notes-image-loaded');
                 });
+                sanitizeEditorFormatting(clone);
                 return normalizeHtml(clone.innerHTML);
             }
 
             function setEditorHtml(html) {
                 const value = normalizeHtml(html);
                 els.courseNotesEditor.innerHTML = value;
+                sanitizeEditorFormatting(els.courseNotesEditor);
                 setupLazyLoadingForEditorImages();
             }
 
@@ -2412,7 +2448,14 @@
                 }
 
                 if (state.courses.length > 0) {
-                    await selectCourse(state.courses[0].id, state.courses[0].title);
+                    const preferredCourse =
+                        state.courses.find((course) => /\bобщи\b/i.test(course.title)) ||
+                        state.courses.find((course) => /общи/i.test(course.title)) ||
+                        state.courses.find((course) => /\bобща\b/i.test(course.title)) ||
+                        state.courses.find((course) => /обща/i.test(course.title)) ||
+                        state.courses[0];
+
+                    await selectCourse(preferredCourse.id, preferredCourse.title);
                 } else {
                     els.selectedCourseTitle.textContent = 'Няма налични предмети';
                     els.courseNotesEditor.contentEditable = 'false';
@@ -2442,6 +2485,7 @@
 
             els.courseNotesEditor.addEventListener('input', () => {
                 normalizeSeparatorLines();
+                sanitizeEditorFormatting(els.courseNotesEditor);
                 setupLazyLoadingForEditorImages();
                 markEditedBlockAuthor();
                 bumpLocalEditVersion();
