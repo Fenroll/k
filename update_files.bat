@@ -16,6 +16,13 @@ if %ERRORLEVEL% neq 0 (
 	exit /b %ERRORLEVEL%
 )
 
+git submodule update --init --recursive files
+if %ERRORLEVEL% neq 0 (
+	echo Could not initialize files submodule.
+	pause
+	exit /b %ERRORLEVEL%
+)
+
 for /f "delims=" %%i in ('git -C files remote get-url origin 2^>nul') do set CURRENT_URL=%%i
 if /I not "%CURRENT_URL%"=="%SUBMODULE_URL%" (
 	echo Fixing files origin URL:
@@ -32,6 +39,29 @@ if /I not "%CURRENT_URL%"=="%SUBMODULE_URL%" (
 cd files
 if %ERRORLEVEL% neq 0 (
 	echo Could not enter files submodule.
+	pause
+	exit /b %ERRORLEVEL%
+)
+
+if not exist .git (
+	echo This folder is not an initialized git submodule.
+	cd ..
+	pause
+	exit /b 1
+)
+
+git checkout main
+if %ERRORLEVEL% neq 0 (
+	echo Could not switch files submodule to main branch.
+	cd ..
+	pause
+	exit /b %ERRORLEVEL%
+)
+
+git pull --rebase origin main
+if %ERRORLEVEL% neq 0 (
+	echo Could not rebase files submodule onto origin/main.
+	cd ..
 	pause
 	exit /b %ERRORLEVEL%
 )
