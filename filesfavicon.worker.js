@@ -1,6 +1,8 @@
 ﻿export default {
 	async fetch(request, env) {
 		const url = new URL(request.url);
+		const accept = String(request.headers.get('accept') || '').toLowerCase();
+		const secFetchDest = String(request.headers.get('sec-fetch-dest') || '').toLowerCase();
 
 		if (request.method === 'OPTIONS') {
 			return new Response(null, {
@@ -34,8 +36,53 @@
 		}
 
 		const isPdf = key.toLowerCase().endsWith('.pdf');
+		const forceRaw = url.searchParams.get('raw') === '1';
 		const forceDownload = url.searchParams.get('download') === '1';
 		const rangeHeader = request.headers.get('range');
+		const isBrowserDocumentRequest =
+			request.method === 'GET' &&
+			!rangeHeader &&
+			!forceRaw &&
+			!forceDownload &&
+			isPdf &&
+			((accept.includes('text/html') && !accept.includes('application/json')) ||
+				secFetchDest === 'document' ||
+				secFetchDest === 'iframe');
+
+		if (isBrowserDocumentRequest) {
+			const faviconUrl = String(env.SITE_FAVICON_URL || 'https://coursebook.lol/favicon.ico');
+			const siteTitle = String(env.SITE_TITLE || 'Coursebook');
+			const baseName = key.split('/').pop() || 'PDF';
+			const safeTitle = baseName.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			const rawUrl = new URL(url.toString());
+			rawUrl.searchParams.set('raw', '1');
+
+			const html = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>${safeTitle} - ${siteTitle}</title>
+  <link rel="icon" href="${faviconUrl}">
+	<style>
+		html,body{height:100%;margin:0;overflow:hidden;background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+		iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+	</style>
+</head>
+<body>
+  <iframe src="${rawUrl.toString()}" allow="fullscreen"></iframe>
+</body>
+</html>`;
+
+			return new Response(html, {
+				status: 200,
+				headers: {
+					'content-type': 'text/html; charset=utf-8',
+					'cache-control': 'public, max-age=300',
+					'x-worker-version': '2026-04-01.2'
+				}
+			});
+		}
 
 		const getOptions = {};
 		if (rangeHeader) {
@@ -96,8 +143,6 @@
 				`attachment; filename="${safeAscii}"; filename*=UTF-8''${encodeURIComponent(baseName)}`
 			);
 		}
-
-		headers.set('x-worker-version', '2026-04-01.1');
 
 		if (request.method === 'HEAD') {
 			return new Response(null, { status: object.range ? 206 : 200, headers });
