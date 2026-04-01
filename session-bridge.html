@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Session Bridge</title>
+</head>
+<body>
+  <script>
+    (function () {
+      const allowedOrigins = new Set([
+        'https://files.coursebook.lol',
+        'https://chat.coursebook.lol',
+        'https://coursebook.lol'
+      ]);
+
+      window.addEventListener('message', function (event) {
+        if (!allowedOrigins.has(event.origin)) return;
+        const data = event.data || {};
+        if (data.type !== 'COURSEBOOK_GET_SESSION') return;
+
+        const loggedInUser = localStorage.getItem('loggedInUser');
+        event.source.postMessage(
+          {
+            type: 'COURSEBOOK_SESSION',
+            loggedInUser: loggedInUser || null
+          },
+          event.origin
+        );
+      });
+    })();
+  </script>
+</body>
+</html>

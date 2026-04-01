@@ -1634,9 +1634,35 @@ class ChatUIManager {
     // data.users is online users, data.allUsers has all registered users
     let onlineUsers = Object.values(data.users || {});
     const allUsers = data.allUsers || {};
-    const count = data.count || 0; // Online count
+    const remoteCount = data.count || 0; // Online count from backend
 
     const myId = (typeof window.currentUser !== 'undefined' && window.currentUser.userId) ? String(window.currentUser.userId) : null;
+
+    // Local-only UX override: always show the current viewer as online in their own UI.
+    if (myId) {
+      const alreadyPresent = onlineUsers.some((user) => String(user.userId) === myId);
+      if (!alreadyPresent) {
+        const meProfile = (this.userProfiles && this.userProfiles[myId]) || allUsers[myId] || {};
+        const fallbackName =
+          (typeof window.currentUser !== 'undefined' && (window.currentUser.userName || window.currentUser.displayName))
+            ? (window.currentUser.userName || window.currentUser.displayName)
+            : 'You';
+
+        onlineUsers.push({
+          userId: myId,
+          userName: meProfile.displayName || meProfile.username || fallbackName,
+          color: meProfile.color || (typeof window.currentUser !== 'undefined' ? window.currentUser.color : '#588157') || '#588157',
+          avatar: meProfile.avatar || (typeof window.currentUser !== 'undefined' ? window.currentUser.avatar : null) || null,
+          isAdmin: !!meProfile.isAdmin,
+          hasMobile: false,
+          isGuest: !!meProfile.isGuest,
+          lastActivity: Date.now(),
+          isLocallyForcedOnline: true
+        });
+      }
+    }
+
+    const count = Math.max(remoteCount, onlineUsers.length);
 
     // Get offline users who should be shown (filter by showInMembersList flag)
     const offlineUsers = [];
@@ -1745,8 +1771,11 @@ class ChatUIManager {
     const userColor = user.color || '#588157';
     const hasAvatar = user.avatar && user.avatar.length > 5;
     
-    // Check if user is actually online (in activeUsers list)
-    const isOnline = !!this.activeUsers[userId];
+    // Local-only UX override: current viewer is always shown as online to themselves.
+    const myId = (typeof window.currentUser !== 'undefined' && window.currentUser.userId)
+      ? String(window.currentUser.userId)
+      : null;
+    const isOnline = !!this.activeUsers[userId] || (myId && String(userId) === myId);
     
     // Determine status text (Admin > Guest > Member)
     let statusText = 'Member';
