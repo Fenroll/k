@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026040116m2"></script>
+  <script src="js/auth-guard.js?v=202604011ixh"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1662,7 +1662,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=2026040116m2"></script>
+  <script src="courses.generated.js?v=202604011ixh"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2952,6 +2952,94 @@
       root.querySelectorAll('img[data-width]').forEach(applyIntrinsicWidthToImage);
     }
 
+    function removeBrokenEditorImage(img) {
+      if (!(img instanceof HTMLImageElement)) return;
+      if (!editor || !editor.contains(img)) return;
+
+      const selection = window.getSelection();
+      const range = document.createRange();
+
+      const next = img.nextSibling;
+      const prev = img.previousSibling;
+
+      if (next && next.nodeType === Node.ELEMENT_NODE && next.tagName === 'BR') {
+        next.remove();
+      }
+
+      if (prev && prev.nodeType === Node.ELEMENT_NODE && prev.tagName === 'BR') {
+        const prevPrev = prev.previousSibling;
+        if (!prevPrev || (prevPrev.nodeType === Node.ELEMENT_NODE && prevPrev.tagName === 'BR')) {
+          prev.remove();
+        }
+      }
+
+      if (img.parentNode) {
+        const parent = img.parentNode;
+        const offset = Array.prototype.indexOf.call(parent.childNodes, img);
+        img.remove();
+
+        const safeOffset = Math.min(offset, parent.childNodes.length);
+        if (parent === editor) {
+          range.setStart(editor, safeOffset);
+        } else {
+          range.selectNodeContents(parent);
+          range.collapse(false);
+        }
+      } else {
+        range.setStart(editor, editor.childNodes.length);
+      }
+
+      range.collapse(true);
+      if (selection) {
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+
+      saveToHistory();
+      showNotification('Broken image removed', 'warning');
+    }
+
+    function isLikelyBrokenEditorImage(img) {
+      if (!(img instanceof HTMLImageElement)) return false;
+      if (!editor || !editor.contains(img)) return false;
+
+      const src = String(img.getAttribute('src') || '').trim();
+      if (!src) return true;
+
+      // If browser already completed load with zero intrinsic width, treat as broken.
+      if (img.complete && Number(img.naturalWidth) === 0) {
+        return true;
+      }
+
+      return false;
+    }
+
+    function wireEditorImageErrorCleanup(img) {
+      if (!(img instanceof HTMLImageElement)) return;
+      if (!editor || !editor.contains(img)) return;
+      if (img.dataset.brokenCleanupBound === '1') return;
+
+      img.dataset.brokenCleanupBound = '1';
+
+      img.addEventListener('error', () => {
+        removeBrokenEditorImage(img);
+      });
+
+      // Handle already-broken images present in loaded content.
+      if (isLikelyBrokenEditorImage(img)) {
+        window.requestAnimationFrame(() => {
+          if (isLikelyBrokenEditorImage(img)) {
+            removeBrokenEditorImage(img);
+          }
+        });
+      }
+    }
+
+    function wireEditorImageErrorCleanupInRoot(root = editor) {
+      if (!root || !root.querySelectorAll) return;
+      root.querySelectorAll('img').forEach(wireEditorImageErrorCleanup);
+    }
+
     let editorImageWidthObserver = null;
     function ensureEditorImageWidthObserver() {
       if (editorImageWidthObserver || !editor) return;
@@ -2965,8 +3053,13 @@
               applyIntrinsicWidthToImage(node);
             }
 
+            if (node.matches && node.matches('img')) {
+              wireEditorImageErrorCleanup(node);
+            }
+
             if (node.querySelectorAll) {
               node.querySelectorAll('img[data-width]').forEach(applyIntrinsicWidthToImage);
+              node.querySelectorAll('img').forEach(wireEditorImageErrorCleanup);
             }
           });
         });
@@ -2974,6 +3067,7 @@
 
       editorImageWidthObserver.observe(editor, { childList: true, subtree: true });
       applyIntrinsicWidthsInEditor(editor);
+      wireEditorImageErrorCleanupInRoot(editor);
     }
 
     function insertImageAtRange(imgSrc, imageAlt, imageSize, preferredRange = null) {
@@ -2995,6 +3089,7 @@
       img.setAttribute('data-original-src', imgSrc);
       img.setAttribute('data-width', widthPercent);
       img.setAttribute('data-align', 'left');
+      wireEditorImageErrorCleanup(img);
       applyAlignmentToImageElement(img, 'left');
 
       range.deleteContents();
@@ -9793,7 +9888,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026040116m2"></script>
+    <script src="js/chat.js?v=202604011ixh"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
