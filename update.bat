@@ -10,7 +10,14 @@ if %ERRORLEVEL% neq 0 (
 )
 
 echo Adding changes...
-git add -A
+if exist NUL (
+    del /f /q "\\?\%CD%\NUL" >nul 2>nul
+)
+if exist files\NUL (
+    del /f /q "\\?\%CD%\files\NUL" >nul 2>nul
+)
+
+git add -A -- . ":(exclude)files"
 if %ERRORLEVEL% neq 0 (
     echo Error during git add. Aborting.
     pause
