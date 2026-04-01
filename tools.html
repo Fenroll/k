@@ -870,7 +870,7 @@
         <div id="financeTool" class="test-container" style="display: none;">
           <div style="max-width: 1000px; margin: 40px auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08);">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
-              <h2 style="margin: 0; color: #1f2937;">Финанси</h2>
+              <h2 id="financeInfoTrigger" style="margin: 0; color: #1f2937; cursor: pointer;" title="Покажи снимка">Финанси</h2>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <button id="financePrevMonthBtn" type="button" class="btn btn-secondary" style="padding: 8px 12px;">◀</button>
                 <div id="financeMonthLabel" style="min-width: 180px; text-align: center; font-weight: 700; color: #374151;"></div>
@@ -2222,6 +2222,50 @@
       return `${y}-${m}`;
     }
 
+    const FINANCE_INFO_IMAGE_URL = 'https://scontent.fvar1-1.fna.fbcdn.net/v/t1.15752-9/657753822_26362734963367001_8238548511824153356_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=9f807c&_nc_ohc=2qSUKxyCN_IQ7kNvwEIsOvg&_nc_oc=Ado899XNtd1ry9tRXN6v33rsMbidhDkCyr9T5NU5dQBwHlAsMO2buCwGNjpCZKoIngY&_nc_zt=23&_nc_ht=scontent.fvar1-1.fna&_nc_ss=7a3a8&oh=03_Q7cD5AFNX77VHngGs1XqVcMQIzl8b2NmbzQOoplZWdmPHgbiaA&oe=69F4FFEA';
+
+    function openFinanceInfoModal() {
+      let modal = document.getElementById('financeInfoModal');
+      if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'financeInfoModal';
+        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:5000;display:none;align-items:center;justify-content:center;padding:20px;';
+
+        const panel = document.createElement('div');
+        panel.style.cssText = 'position:relative;max-width:min(96vw,1100px);max-height:92vh;';
+
+        const closeBtn = document.createElement('button');
+        closeBtn.type = 'button';
+        closeBtn.textContent = '×';
+        closeBtn.setAttribute('aria-label', 'Close');
+        closeBtn.style.cssText = 'position:absolute;top:-14px;right:-14px;width:36px;height:36px;border:none;border-radius:999px;background:#111;color:#fff;font-size:24px;line-height:1;cursor:pointer;';
+
+        const img = document.createElement('img');
+        img.src = FINANCE_INFO_IMAGE_URL;
+        img.alt = 'Finance info';
+        img.loading = 'lazy';
+        img.referrerPolicy = 'no-referrer';
+        img.style.cssText = 'display:block;max-width:100%;max-height:92vh;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,0.45);';
+
+        closeBtn.addEventListener('click', () => {
+          modal.style.display = 'none';
+        });
+
+        modal.addEventListener('click', (event) => {
+          if (event.target === modal) {
+            modal.style.display = 'none';
+          }
+        });
+
+        panel.appendChild(closeBtn);
+        panel.appendChild(img);
+        modal.appendChild(panel);
+        document.body.appendChild(modal);
+      }
+
+      modal.style.display = 'flex';
+    }
+
     function normalizeText(value) {
       return String(value || '').trim().toLowerCase();
     }
@@ -2772,6 +2816,7 @@
     }
 
     async function initFinanceTool() {
+      const financeInfoTrigger = document.getElementById('financeInfoTrigger');
       const financeMenuBtn = document.getElementById('financeMenuBtn');
       const adminPanel = document.getElementById('financeAdminPanel');
       const donationsSection = document.getElementById('financeDonationsSection');
@@ -2787,6 +2832,11 @@
       const saveBtn = document.getElementById('financeSaveBtn');
 
       if (!financeMenuBtn || !adminPanel) return;
+
+      if (financeInfoTrigger && financeInfoTrigger.dataset.modalBound !== '1') {
+        financeInfoTrigger.addEventListener('click', openFinanceInfoModal);
+        financeInfoTrigger.dataset.modalBound = '1';
+      }
 
       if (!window.currentUserPromise) {
         financeMenuBtn.style.display = 'none';
