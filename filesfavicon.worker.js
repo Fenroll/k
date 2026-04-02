@@ -38,6 +38,8 @@
 		const isPdf = key.toLowerCase().endsWith('.pdf');
 		const forceRaw = url.searchParams.get('raw') === '1';
 		const forceDownload = url.searchParams.get('download') === '1';
+		const userAgent = String(request.headers.get('user-agent') || '').toLowerCase();
+		const isMobilePdfViewerUserAgent = /(iphone|ipad|ipod|android|mobile)/i.test(userAgent);
 		const rangeHeader = request.headers.get('range');
 		const isBrowserDocumentRequest =
 			request.method === 'GET' &&
@@ -50,6 +52,15 @@
 				secFetchDest === 'iframe');
 
 		if (isBrowserDocumentRequest) {
+			const rawUrl = new URL(url.toString());
+			rawUrl.searchParams.set('raw', '1');
+
+			// Mobile PDF viewers (especially iOS Safari and some Android Chrome builds)
+			// can break inside iframe wrappers. Send them directly to the PDF stream.
+			if (isMobilePdfViewerUserAgent) {
+				return Response.redirect(rawUrl.toString(), 302);
+			}
+
 			const faviconUrl = String(env.SITE_FAVICON_URL || 'https://coursebook.lol/favicon.ico');
 			const siteTitle = String(env.SITE_TITLE || 'Coursebook');
 			const siteBaseUrl = String(env.SITE_BASE_URL || 'https://coursebook.lol/');
@@ -68,9 +79,6 @@
 			const firebaseStorageBucket = String(env.FIREBASE_STORAGE_BUCKET || `${firebaseProjectId}.appspot.com`);
 			const baseName = key.split('/').pop() || 'PDF';
 			const safeTitle = baseName.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-			const rawUrl = new URL(url.toString());
-			rawUrl.searchParams.set('raw', '1');
-
 			const html = `<!doctype html>
 <html lang="en">
 <head>
