@@ -765,6 +765,7 @@ class ChatUIManager {
     this.activeUsers = {}; // Списък с активни потребители за логика с реакции
     this.activeTyping = {}; // State for typing indicators
     this.showMembers = localStorage.getItem(`showMembers_${this.documentId}`) === 'true'; // Default to false if not set
+    this.lastActiveMembersSignature = '';
 
     this.init();
   }
@@ -1716,6 +1717,33 @@ class ChatUIManager {
       if (!a.isMe && b.isMe) return 1;
       return a.userName.localeCompare(b.userName);
     });
+
+    const buildUserSignature = (user) => {
+      return [
+        String(user.userId || ''),
+        String(user.userName || ''),
+        String(user.avatar || ''),
+        String(user.color || ''),
+        user.isOffline ? '1' : '0',
+        user.hasMobile ? '1' : '0',
+        user.isMe ? '1' : '0'
+      ].join('~');
+    };
+
+    const nextActiveMembersSignature = [
+      `count:${count}`,
+      `online:${onlineUsers.map(buildUserSignature).join('|')}`,
+      `offline:${offlineUsers.map(buildUserSignature).join('|')}`
+    ].join('||');
+
+    if (this.lastActiveMembersSignature === nextActiveMembersSignature) {
+      if (this.updateHeaderOnlineCount) {
+        this.updateHeaderOnlineCount(count);
+      }
+      return;
+    }
+
+    this.lastActiveMembersSignature = nextActiveMembersSignature;
 
     const renderUserItem = (user) => {
       const mobileIcon = user.hasMobile

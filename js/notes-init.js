@@ -431,6 +431,29 @@ class NotesUIManager {
             flex-direction: column;
           gap: 0;
         }
+
+        .notes-date-separator {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          margin: 16px 0 8px 0;
+          padding: 0 16px;
+          height: 1px;
+          background: #e2e8f0;
+          position: relative;
+          flex-shrink: 0;
+        }
+
+        .notes-date-separator span {
+          background: #fff;
+          padding: 2px 10px;
+          font-size: 11px;
+          font-weight: 600;
+          color: var(--chat-text-light);
+          transform: translateY(-50%);
+          position: absolute;
+          top: 50%;
+        }
         
         .notes-input-area {
             padding: 12px;
@@ -480,11 +503,6 @@ class NotesUIManager {
           display: flex;
           gap: 8px;
           align-items: flex-start;
-          animation: slideIn 0.3s ease;
-        }
-        @keyframes slideIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
         }
         .note-message.note-message-continuation {
           margin-top: -3px;
@@ -673,13 +691,6 @@ class NotesUIManager {
       }
     };
 
-    this.scrollToBottomReliable = () => {
-      this.scrollToBottom();
-      requestAnimationFrame(() => this.scrollToBottom());
-      setTimeout(() => this.scrollToBottom(), 120);
-      setTimeout(() => this.scrollToBottom(), 300);
-    };
-
     const forceInputFocusable = () => {
       if (!this.inputEl) return;
       this.inputEl.disabled = false;
@@ -784,7 +795,8 @@ class NotesUIManager {
     if (this.isMobileViewport()) {
       this.setChatToggleHidden(true);
     }
-    this.scrollToBottomReliable();
+    this.scrollToBottom();
+    requestAnimationFrame(() => this.scrollToBottom());
 
     const pagePath = String(window.location.pathname || '').toLowerCase();
     const shouldAutoFocus = !(this.isMobileViewport() && pagePath.includes('md-viewer'));
@@ -840,62 +852,65 @@ class NotesUIManager {
       ].join('|');
   }
 
+  getDateSeparatorLabel(timestamp) {
+      const date = new Date(Number(timestamp) || Date.now());
+      return date.toLocaleDateString('bg-BG', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric'
+      });
+  }
+
   renderMessages(messages) {
       const list = this.container.querySelector('#notes-messages-list');
       if(!list) return;
-      
-      // console.log('NotesUIManager: Rendering messages.'); // Can be removed, frequent
+
       const wasAtBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 50;
+      const previousScrollTop = list.scrollTop;
 
-      const existingById = new Map();
-      list.querySelectorAll('.note-message[data-id]').forEach((el) => {
-          existingById.set(el.dataset.id, el);
-      });
+      const orderedMessages = Array.isArray(messages)
+        ? [...messages].sort((a, b) => (Number(a.timestamp) || 0) - (Number(b.timestamp) || 0))
+        : [];
 
-      const nextIds = new Set();
-
+      const fragment = document.createDocumentFragment();
       let prevMsg = null;
-      messages.forEach((msg, index) => {
+      let prevDateLabel = '';
+
+      orderedMessages.forEach((msg) => {
+          const currentDateLabel = this.getDateSeparatorLabel(msg.timestamp);
+          if (currentDateLabel !== prevDateLabel) {
+              const dateSep = document.createElement('div');
+              dateSep.className = 'notes-date-separator';
+              dateSep.dataset.date = currentDateLabel;
+
+              const label = document.createElement('span');
+              label.textContent = currentDateLabel;
+              dateSep.appendChild(label);
+              fragment.appendChild(dateSep);
+
+              prevDateLabel = currentDateLabel;
+          }
+
           const isContinuation = !!(
             prevMsg &&
             prevMsg.userId === msg.userId &&
-            (msg.timestamp - prevMsg.timestamp < 3 * 60 * 1000)
+            this.getDateSeparatorLabel(prevMsg.timestamp) === currentDateLabel &&
+            (Number(msg.timestamp) - Number(prevMsg.timestamp) < 3 * 60 * 1000)
           );
 
-          const id = String(msg.id || '');
-          if (id) nextIds.add(id);
-
-          const signature = this.buildMessageRenderSignature(msg, isContinuation);
-          const existing = existingById.get(id);
-          const expectedNodeAtIndex = list.children[index] || null;
-
-          let targetEl = existing;
-          if (!existing) {
-            targetEl = this.createMessageElement(msg, messages, isContinuation);
-            list.insertBefore(targetEl, expectedNodeAtIndex);
-          } else if (existing.dataset.renderSig !== signature) {
-            const replacement = this.createMessageElement(msg, messages, isContinuation);
-            existing.replaceWith(replacement);
-            targetEl = replacement;
-          }
-
-          targetEl.dataset.renderSig = signature;
-
-          const nodeAfterUpdates = list.children[index] || null;
-          if (targetEl !== nodeAfterUpdates) {
-            list.insertBefore(targetEl, nodeAfterUpdates);
-          }
-
+          const messageEl = this.createMessageElement(msg, orderedMessages, isContinuation);
+          fragment.appendChild(messageEl);
           prevMsg = msg;
       });
 
-      existingById.forEach((el, id) => {
-          if (!nextIds.has(id)) {
-            el.remove();
-          }
-      });
-      
-      if(wasAtBottom) this.scrollToBottom();
+      list.innerHTML = '';
+      list.appendChild(fragment);
+
+      if (wasAtBottom) {
+          this.scrollToBottom();
+      } else {
+          list.scrollTop = previousScrollTop;
+      }
   }
   
   createMessageElement(msg, allMessages, isContinuation = false) {
