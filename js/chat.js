@@ -766,6 +766,10 @@ class ChatUIManager {
     this.activeTyping = {}; // State for typing indicators
     this.showMembers = localStorage.getItem(`showMembers_${this.documentId}`) === 'true'; // Default to false if not set
     this.lastActiveMembersSignature = '';
+    this.lastReadStorageKey = `lastReadMessage_${this.documentId}`;
+    this.crossTabReadSyncKey = `chatReadSync_${this.documentId}`;
+    this._crossTabStorageHandler = null;
+    this._crossTabChannel = null;
 
     this.init();
   }
@@ -1132,6 +1136,7 @@ class ChatUIManager {
   async init() {
     try {
       this.fixInputLayout();
+      this.setupCrossTabNotificationSync();
       // await this.chatFirebase.markUserActive(); // Removed - using site-wide presence.js
 
       // Зареди първоначални съобщения - от localStorage или Firebase
@@ -1209,11 +1214,7 @@ class ChatUIManager {
         // Only update if the new ID is "greater" (newer) than what we have
         if (lastReadId && (!this.lastReadMessageId || lastReadId > this.lastReadMessageId)) {
           console.log(`🔄 Synchronized newer lastReadId: ${lastReadId}`);
-          this.lastReadMessageId = lastReadId;
-          localStorage.setItem(`lastReadMessage_${this.documentId}`, lastReadId);
-          
-          this.recalculateUnreadCount(this.chatFirebase.messages);
-          this.updateActiveCount();
+          this.applyReadSync(lastReadId, { persistLocal: true });
         }
       });
 
@@ -3018,6 +3019,12 @@ class ChatUIManager {
         <img src="svg/chat/icon-image.svg">
         Image
       </div>
+      <div class="plus-menu-item" data-type="audio">
+        <svg class="audio-menu-icon" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#588157" d="M12 3v10.55a4 4 0 1 0 2 3.45V8h6V3h-8z"></path>
+        </svg>
+        Audio (MP3)
+      </div>
       <div class="plus-menu-item" data-type="gif">
         <img src="svg/chat/icon-gif.svg">
         GIFs
@@ -3036,6 +3043,8 @@ class ChatUIManager {
         menu.remove();
         if (type === 'image') {
           this.openImageUpload();
+        } else if (type === 'audio') {
+          this.openAudioUpload();
         } else {
           this.toggleMediaPicker(type);
         }
@@ -3165,6 +3174,19 @@ class ChatUIManager {
     input.click();
   }
 
+  openAudioUpload() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'audio/mpeg,.mp3';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        this.uploadAudio(file);
+      }
+    };
+    input.click();
+  }
+
   async uploadImage(file) {
     // Validate file size (10MB limit)
     const MAX_SIZE = 10 * 1024 * 1024;
@@ -3214,6 +3236,59 @@ class ChatUIManager {
     } catch (error) {
       console.error('Image upload error:', error);
       alert('Failed to upload image: ' + error.message);
+    } finally {
+      input.placeholder = originalPlaceholder;
+      input.disabled = false;
+    }
+  }
+
+  async uploadAudio(file) {
+    const MAX_SIZE = 25 * 1024 * 1024;
+    if (file.size > MAX_SIZE) {
+      alert('Audio file too large. Maximum size is 25MB.');
+      return;
+    }
+
+    const lowerName = String(file.name || '').toLowerCase();
+    const isMp3ByName = lowerName.endsWith('.mp3');
+    const isMp3ByMime = file.type === 'audio/mpeg' || file.type === 'audio/mp3';
+    if (!isMp3ByName && !isMp3ByMime) {
+      alert('Please select an MP3 file.');
+      return;
+    }
+
+    const input = this.container.querySelector('.chat-input');
+    const originalPlaceholder = input.placeholder;
+    input.placeholder = 'Uploading audio...';
+    input.disabled = true;
+
+    try {
+      const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+
+      const safeName = lowerName.endsWith('.mp3') ? file.name : `${file.name}.mp3`;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('userName', currentUser.userName || 'anonymous');
+      formData.append('path', `chat-audio/${Date.now()}-${safeName}`);
+      formData.append('bucketType', 'chat');
+
+      const response = await fetch(R2_WORKER_URL, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Upload failed');
+      }
+
+      const result = await response.json();
+      if (result.url) {
+        this.chatFirebase.sendMessage(result.url);
+      }
+    } catch (error) {
+      console.error('Audio upload error:', error);
+      alert('Failed to upload audio: ' + error.message);
     } finally {
       input.placeholder = originalPlaceholder;
       input.disabled = false;
@@ -3296,12 +3371,116 @@ class ChatUIManager {
 
       // Update local state
       this.lastReadMessageId = newLastReadId;
-      localStorage.setItem(`lastReadMessage_${this.documentId}`, newLastReadId);
+      localStorage.setItem(this.lastReadStorageKey, newLastReadId);
       this.unreadCount = 0;
+      this.unreadHasMention = false;
       this.updateActiveCount();
+
+      this.broadcastReadSync(newLastReadId);
       
       // Synchronize with Firebase
       this.chatFirebase.setLastRead(currentUser.userName, newLastReadId);
+    }
+  }
+
+  setupCrossTabNotificationSync() {
+    if (this._crossTabStorageHandler) return;
+
+    this._crossTabStorageHandler = (event) => {
+      if (!event || !event.key) return;
+
+      if (event.key === this.lastReadStorageKey && event.newValue) {
+        this.applyReadSync(event.newValue, { persistLocal: false });
+        return;
+      }
+
+      if (event.key === this.crossTabReadSyncKey && event.newValue) {
+        try {
+          const payload = JSON.parse(event.newValue);
+          if (payload && payload.lastReadId) {
+            this.applyReadSync(payload.lastReadId, { persistLocal: false });
+          }
+        } catch (e) {
+          console.warn('Invalid chat read sync payload:', e);
+        }
+        return;
+      }
+
+      if (event.key === `notificationsDisabled_${this.documentId}`) {
+        this.notificationsDisabled = event.newValue === 'true';
+        this.updateNotificationButtonColor();
+        this.updateActiveCount();
+      }
+    };
+
+    window.addEventListener('storage', this._crossTabStorageHandler);
+
+    if (typeof BroadcastChannel !== 'undefined') {
+      try {
+        this._crossTabChannel = new BroadcastChannel(`chat-sync-${this.documentId}`);
+        this._crossTabChannel.onmessage = (event) => {
+          const data = event && event.data;
+          if (data && data.type === 'read-sync' && data.lastReadId) {
+            this.applyReadSync(data.lastReadId, { persistLocal: false });
+          }
+        };
+      } catch (e) {
+        console.warn('BroadcastChannel unavailable for chat sync:', e);
+      }
+    }
+  }
+
+  applyReadSync(lastReadId, options = {}) {
+    if (!lastReadId) return;
+
+    const persistLocal = options.persistLocal === true;
+    this.lastReadMessageId = lastReadId;
+
+    if (persistLocal) {
+      try {
+        localStorage.setItem(this.lastReadStorageKey, lastReadId);
+      } catch (e) {
+        console.warn('Failed to persist last read id:', e);
+      }
+    }
+
+    const currentMessages = Array.isArray(this.chatFirebase.messages) ? this.chatFirebase.messages : [];
+    if (currentMessages.length > 0) {
+      this.recalculateUnreadCount(currentMessages);
+    } else {
+      this.unreadCount = 0;
+      this.unreadHasMention = false;
+    }
+
+    if (this.unreadCount === 0) {
+      const icon = document.querySelector('.chat-icon');
+      if (icon) icon.classList.remove('has-mention');
+    }
+
+    this.updateActiveCount();
+  }
+
+  broadcastReadSync(lastReadId) {
+    if (!lastReadId) return;
+
+    const payload = {
+      type: 'read-sync',
+      lastReadId,
+      ts: Date.now()
+    };
+
+    try {
+      localStorage.setItem(this.crossTabReadSyncKey, JSON.stringify(payload));
+    } catch (e) {
+      console.warn('Failed to write cross-tab read sync storage event:', e);
+    }
+
+    if (this._crossTabChannel) {
+      try {
+        this._crossTabChannel.postMessage(payload);
+      } catch (e) {
+        console.warn('Failed to post read sync via BroadcastChannel:', e);
+      }
     }
   }
 
@@ -3931,15 +4110,25 @@ class ChatUIManager {
         }
     });
 
-    // 5. Linkify and Image Preview
+    // 5. Linkify with media previews (image + mp3)
     const urlRegex = /(https?:\/\/[^\s<>\[\]{}|\\^`"]*)/g;
     return processed.replace(urlRegex, (url) => {
       const isImage = /\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i.test(url);
+      const isMp3 = /\.mp3([?#].*)?$/i.test(url);
       
       if (isImage) {
           return `
             <div class="chat-image-preview" style="margin-top: 5px;">
               <img data-src="${url}" alt="Image" class="chat-message-image lazy-image" data-image-url="${url}" style="max-width: 100%; max-height: 200px; border-radius: 8px; border: 1px solid var(--chat-border); display: block; cursor: pointer; background: #f3f4f6;">
+            </div>
+          `;
+      }
+
+      if (isMp3) {
+          const mediaUrl = url.replace(/&amp;/g, '&');
+          return `
+            <div class="chat-audio-native" style="margin-top: 6px;">
+              <audio controls preload="metadata" src="${mediaUrl}" style="width:min(240px,70vw);max-width:100%;height:32px;max-height:32px;"></audio>
             </div>
           `;
       }
@@ -3996,6 +4185,14 @@ class ChatUIManager {
   }
 
   destroy() {
+    if (this._crossTabStorageHandler) {
+      window.removeEventListener('storage', this._crossTabStorageHandler);
+      this._crossTabStorageHandler = null;
+    }
+    if (this._crossTabChannel) {
+      this._crossTabChannel.close();
+      this._crossTabChannel = null;
+    }
     this.chatFirebase.stop();
   }
 }
@@ -4159,6 +4356,20 @@ class ChatUIManager {
   width: 24px;
   height: 24px;
   filter: invert(48%) sepia(13%) saturate(1063%) hue-rotate(68deg) brightness(92%) contrast(85%);
+}
+.plus-menu-item .audio-menu-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-block;
+  flex-shrink: 0;
+}
+.chat-audio-native {
+  line-height: 0;
+}
+.chat-audio-native audio {
+  display: block;
+  width: min(240px, 70vw);
+  max-width: 100%;
 }
 .chat-gif-btn {
   display: none; /* Replaced by plus button */
