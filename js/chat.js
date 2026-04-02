@@ -1745,44 +1745,197 @@ class ChatUIManager {
 
     this.lastActiveMembersSignature = nextActiveMembersSignature;
 
-    const renderUserItem = (user) => {
-      const mobileIcon = user.hasMobile
-        ? `<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" style="margin-left: 4px; vertical-align: middle;" title="Mobile device"> <path d="M11.5,0h-7C3.675,0,3,0.675,3,1.5v13C3,15.325,3.675,16,4.5,16h7c0.825,0,1.5-0.675,1.5-1.5v-13C13,0.675,12.325,0,11.5,0z M8,15c-0.553,0-1-0.447-1-1s0.447-1,1-1s1,0.447,1,1S8.553,15,8,15z M12,12H4V2h8V12z" /> </svg>`
-        : '';
-      
-      const opacity = user.isOffline ? '0.6' : '1';
-        
-      return `
-        <div class="active-user-item" data-user-id="${user.userId}" style="display: flex; align-items: center; gap: 8px; margin: 6px 0; cursor: pointer; padding: 4px 2px; border-radius: 4px; transition: background 0.2s; opacity: ${opacity};">
-          ${user.avatar ? 
-            `<img src="${user.avatar}" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">` :
-            `<div style="width: 24px; height: 24px; border-radius: 50%; background-color: ${user.color}; display: flex; align-items: center; justify-content: center; font-size: 11px; color: white; font-weight: bold; flex-shrink: 0;">${user.userName.charAt(0).toUpperCase()}</div>`
-          }
-          <span style="font-size: 12px; flex: 1; min-width: 0; display: flex; align-items: center; color: var(--chat-text-light); ${user.isMe ? 'font-weight: bold; color: var(--chat-text);' : ''}">
-            <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; max-width: 100%;">${user.userName}</span>
-            ${mobileIcon}
-          </span>
-        </div>
-      `;
-    };
+    const structure = this.ensureActiveUsersListStructure(usersListEl);
+    structure.onlineHeader.textContent = `Online (${count}):`;
 
-    usersListEl.innerHTML = `
-      <strong style="color: var(--chat-text);">Online (${count}):</strong><br>
-      ${onlineUsers.map(renderUserItem).join('')}
-      ${offlineUsers.length > 0 ? `<div style="height: 4px;"></div><strong style="margin-top: 0; display: block; color: var(--chat-text);">Offline:</strong>${offlineUsers.map(renderUserItem).join('')}` : ''}
-    `;
+    this.syncActiveUsersSection(structure.onlineList, onlineUsers);
 
-    // Add click listeners
-    usersListEl.querySelectorAll('.active-user-item').forEach(item => {
-        item.addEventListener('click', () => {
-            this.showUserProfile(item.dataset.userId);
-        });
-    });
+    if (offlineUsers.length > 0) {
+      structure.offlineSection.style.display = 'block';
+      this.syncActiveUsersSection(structure.offlineList, offlineUsers);
+    } else {
+      structure.offlineSection.style.display = 'none';
+      this.syncActiveUsersSection(structure.offlineList, []);
+    }
 
     // Also update header count to be consistent
     if (this.updateHeaderOnlineCount) {
         this.updateHeaderOnlineCount(count);
     }
+  }
+
+  ensureActiveUsersListStructure(usersListEl) {
+    if (usersListEl._activeMembersStructure) return usersListEl._activeMembersStructure;
+
+    usersListEl.innerHTML = '';
+
+    const onlineHeader = document.createElement('strong');
+    onlineHeader.style.color = 'var(--chat-text)';
+    usersListEl.appendChild(onlineHeader);
+
+    const onlineList = document.createElement('div');
+    onlineList.className = 'active-users-online-list';
+    usersListEl.appendChild(onlineList);
+
+    const offlineSection = document.createElement('div');
+    offlineSection.className = 'active-users-offline-section';
+    offlineSection.style.display = 'none';
+
+    const spacer = document.createElement('div');
+    spacer.style.height = '4px';
+    offlineSection.appendChild(spacer);
+
+    const offlineHeader = document.createElement('strong');
+    offlineHeader.textContent = 'Offline:';
+    offlineHeader.style.marginTop = '0';
+    offlineHeader.style.display = 'block';
+    offlineHeader.style.color = 'var(--chat-text)';
+    offlineSection.appendChild(offlineHeader);
+
+    const offlineList = document.createElement('div');
+    offlineList.className = 'active-users-offline-list';
+    offlineSection.appendChild(offlineList);
+
+    usersListEl.appendChild(offlineSection);
+
+    usersListEl._activeMembersStructure = {
+      onlineHeader,
+      onlineList,
+      offlineSection,
+      offlineList
+    };
+
+    return usersListEl._activeMembersStructure;
+  }
+
+  buildActiveMemberItemSignature(user) {
+    return [
+      String(user.userId || ''),
+      String(user.userName || ''),
+      String(user.avatar || ''),
+      String(user.color || ''),
+      user.isOffline ? '1' : '0',
+      user.hasMobile ? '1' : '0',
+      user.isMe ? '1' : '0'
+    ].join('~');
+  }
+
+  createActiveUserItemElement(user) {
+    const item = document.createElement('div');
+    item.className = 'active-user-item';
+    item.style.cssText = 'display:flex;align-items:center;gap:8px;margin:6px 0;cursor:pointer;padding:4px 2px;border-radius:4px;transition:background 0.2s;';
+
+    const avatarSlot = document.createElement('div');
+    avatarSlot.className = 'active-user-avatar-slot';
+    avatarSlot.style.cssText = 'width:24px;height:24px;flex-shrink:0;';
+    item.appendChild(avatarSlot);
+
+    const row = document.createElement('span');
+    row.className = 'active-user-name-row';
+    row.style.cssText = 'font-size:12px;flex:1;min-width:0;display:flex;align-items:center;color:var(--chat-text-light);';
+
+    const nameSpan = document.createElement('span');
+    nameSpan.className = 'active-user-name';
+    nameSpan.style.cssText = 'overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;max-width:100%;';
+    row.appendChild(nameSpan);
+
+    const mobileIcon = document.createElement('span');
+    mobileIcon.className = 'active-user-mobile-icon';
+    mobileIcon.style.cssText = 'margin-left:4px;display:none;line-height:0;';
+    row.appendChild(mobileIcon);
+
+    item.appendChild(row);
+
+    item.addEventListener('click', () => {
+      this.showUserProfile(item.dataset.userId);
+    });
+
+    this.patchActiveUserItemElement(item, user);
+    return item;
+  }
+
+  patchActiveUserItemElement(item, user) {
+    const signature = this.buildActiveMemberItemSignature(user);
+    if (item.dataset.sig === signature) return;
+
+    item.dataset.sig = signature;
+    item.dataset.userId = String(user.userId || '');
+    item.style.opacity = user.isOffline ? '0.6' : '1';
+
+    const avatarSlot = item.querySelector('.active-user-avatar-slot');
+    const row = item.querySelector('.active-user-name-row');
+    const nameSpan = item.querySelector('.active-user-name');
+    const mobileIcon = item.querySelector('.active-user-mobile-icon');
+
+    if (avatarSlot) {
+      avatarSlot.innerHTML = '';
+      if (user.avatar) {
+        const img = document.createElement('img');
+        img.src = user.avatar;
+        img.style.cssText = 'width:24px;height:24px;border-radius:50%;object-fit:cover;flex-shrink:0;';
+        avatarSlot.appendChild(img);
+      } else {
+        const fallback = document.createElement('div');
+        fallback.style.cssText = 'width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:white;font-weight:bold;flex-shrink:0;';
+        fallback.style.backgroundColor = user.color || '#999';
+        const name = String(user.userName || '?');
+        fallback.textContent = name.charAt(0).toUpperCase();
+        avatarSlot.appendChild(fallback);
+      }
+    }
+
+    if (row) {
+      row.style.fontWeight = user.isMe ? 'bold' : 'normal';
+      row.style.color = user.isMe ? 'var(--chat-text)' : 'var(--chat-text-light)';
+    }
+
+    if (nameSpan) {
+      nameSpan.textContent = String(user.userName || 'Unknown');
+    }
+
+    if (mobileIcon) {
+      if (user.hasMobile) {
+        mobileIcon.style.display = 'inline-flex';
+        mobileIcon.innerHTML = '<svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" title="Mobile device"><path d="M11.5,0h-7C3.675,0,3,0.675,3,1.5v13C3,15.325,3.675,16,4.5,16h7c0.825,0,1.5-0.675,1.5-1.5v-13C13,0.675,12.325,0,11.5,0z M8,15c-0.553,0-1-0.447-1-1s0.447-1,1-1s1,0.447,1,1S8.553,15,8,15z M12,12H4V2h8V12z"></path></svg>';
+      } else {
+        mobileIcon.style.display = 'none';
+        mobileIcon.innerHTML = '';
+      }
+    }
+  }
+
+  syncActiveUsersSection(sectionEl, users) {
+    const existing = new Map();
+    Array.from(sectionEl.querySelectorAll('.active-user-item[data-user-id]')).forEach((el) => {
+      existing.set(String(el.dataset.userId), el);
+    });
+
+    const seen = new Set();
+
+    users.forEach((user, index) => {
+      const id = String(user.userId || '');
+      if (!id) return;
+
+      let el = existing.get(id);
+      if (!el) {
+        el = this.createActiveUserItemElement(user);
+      } else {
+        this.patchActiveUserItemElement(el, user);
+      }
+
+      const currentAtIndex = sectionEl.children[index] || null;
+      if (el !== currentAtIndex) {
+        sectionEl.insertBefore(el, currentAtIndex);
+      }
+
+      seen.add(id);
+    });
+
+    existing.forEach((el, id) => {
+      if (!seen.has(id)) {
+        el.remove();
+      }
+    });
   }
 
   showUserProfile(userId) {
