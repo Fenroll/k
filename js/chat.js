@@ -2074,6 +2074,9 @@ class ChatUIManager {
 
     if (!text.trim()) return;
 
+    const trimmedText = text.trim();
+    const lowerTrimmedText = trimmedText.toLowerCase();
+
     // Редактиране на съобщение
     if (this.editingMessage) {
         await this.editMessage(this.editingMessage.key, text);
@@ -2083,6 +2086,26 @@ class ChatUIManager {
     // Провери дали има reply
     const replyTo = input.dataset.replyTo;
     const replyAuthor = input.dataset.replyAuthor;
+
+    if (lowerTrimmedText === '/fahh') {
+      const FAHH_AUDIO_URL = 'https://quicksounds.com/uploads/tracks/1516062671_1563213891_1648330556.mp3';
+      const success = await this.chatFirebase.sendMessage(FAHH_AUDIO_URL, replyTo, replyAuthor);
+      if (success) {
+        this.unreadCount = 0;
+        this.unreadHasMention = false;
+        this.updateActiveCount();
+
+        input.value = '';
+        input.dataset.replyTo = '';
+        input.dataset.replyAuthor = '';
+        input.style.height = 'auto';
+        input.focus();
+
+        const replyIndicator = this.container.querySelector('.reply-indicator');
+        if (replyIndicator) replyIndicator.remove();
+      }
+      return;
+    }
 
     const success = await this.chatFirebase.sendMessage(text, replyTo, replyAuthor);
     if (success) {
