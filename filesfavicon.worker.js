@@ -40,6 +40,10 @@
 		const forceDownload = url.searchParams.get('download') === '1';
 		const userAgent = String(request.headers.get('user-agent') || '').toLowerCase();
 		const isAndroid = /android/i.test(userAgent);
+		const isIosDevice = /(iphone|ipad|ipod)/i.test(userAgent);
+		const isSafariToken = /safari\//i.test(userAgent);
+		const isIosAltBrowser = /(crios|fxios|edgios|opios|duckduckgo)/i.test(userAgent);
+		const isIosSafari = isIosDevice && isSafariToken && !isIosAltBrowser;
 		const hasChromeToken = /chrome\/[0-9]+/i.test(userAgent);
 		const isExcludedChromiumBrand = /(edg|opr|samsungbrowser|duckduckgo)\//i.test(userAgent);
 		const isAndroidChrome = isAndroid && hasChromeToken && !isExcludedChromiumBrand;
@@ -57,6 +61,12 @@
 		if (isBrowserDocumentRequest) {
 			const rawUrl = new URL(url.toString());
 			rawUrl.searchParams.set('raw', '1');
+
+			// iOS Safari has unreliable PDF rendering inside iframe wrappers.
+			// Send it to the raw stream with an initial fit-width hint.
+			if (isIosSafari) {
+				return Response.redirect(`${rawUrl.toString()}#page=1&zoom=page-width`, 302);
+			}
 
 			// Use PDF.js only for Android Chrome.
 			if (isAndroidChrome) {
@@ -89,7 +99,7 @@
 		#pdf-viewer canvas { width: 100%; height: auto; display: block; margin: 0 auto 8px; background: #fff; }
 		@media (max-width: 768px) {
 			#chat-widget, .chat-widget {
-				bottom: calc(max(0px, env(safe-area-inset-bottom)) + 2px) !important;
+				bottom: calc(max(0px, env(safe-area-inset-bottom)) + 4px) !important;
 			}
 		}
 	</style>
