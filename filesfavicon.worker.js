@@ -39,7 +39,10 @@
 		const forceRaw = url.searchParams.get('raw') === '1';
 		const forceDownload = url.searchParams.get('download') === '1';
 		const userAgent = String(request.headers.get('user-agent') || '').toLowerCase();
-		const isMobilePdfViewerUserAgent = /(iphone|ipad|ipod|android|mobile)/i.test(userAgent);
+		const isAndroid = /android/i.test(userAgent);
+		const hasChromeToken = /chrome\/[0-9]+/i.test(userAgent);
+		const isExcludedChromiumBrand = /(edg|opr|samsungbrowser|duckduckgo)\//i.test(userAgent);
+		const isAndroidChrome = isAndroid && hasChromeToken && !isExcludedChromiumBrand;
 		const rangeHeader = request.headers.get('range');
 		const isBrowserDocumentRequest =
 			request.method === 'GET' &&
@@ -55,10 +58,188 @@
 			const rawUrl = new URL(url.toString());
 			rawUrl.searchParams.set('raw', '1');
 
-			// Mobile PDF viewers (especially iOS Safari and some Android Chrome builds)
-			// can break inside iframe wrappers. Send them directly to the PDF stream.
-			if (isMobilePdfViewerUserAgent) {
-				return Response.redirect(rawUrl.toString(), 302);
+			// Use PDF.js only for Android Chrome.
+			if (isAndroidChrome) {
+				const siteBaseUrl = String(env.SITE_BASE_URL || 'https://coursebook.lol/');
+				const chatScriptUrl = String(env.CHAT_SCRIPT_URL || 'https://coursebook.lol/js/chat.js');
+				const presenceScriptUrl = String(env.PRESENCE_SCRIPT_URL || 'https://coursebook.lol/js/presence.js');
+				const userIdentityScriptUrl = String(env.USER_IDENTITY_SCRIPT_URL || 'https://coursebook.lol/js/user-identity.js');
+				const sessionBridgeUrl = String(env.SESSION_BRIDGE_URL || 'https://coursebook.lol/session-bridge.html');
+				const firebaseAppCompatUrl = String(env.FIREBASE_APP_COMPAT_URL || 'https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js');
+				const firebaseDbCompatUrl = String(env.FIREBASE_DB_COMPAT_URL || 'https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js');
+				const firebaseDatabaseUrl = String(env.FIREBASE_DATABASE_URL || 'https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app');
+				const firebaseProjectId = String(env.FIREBASE_PROJECT_ID || 'med-student-chat');
+				const firebaseApiKey = String(env.FIREBASE_API_KEY || 'API_KEY');
+				const firebaseAppId = String(env.FIREBASE_APP_ID || 'APP_ID');
+				const firebaseSenderId = String(env.FIREBASE_MESSAGING_SENDER_ID || 'SENDER_ID');
+				const firebaseAuthDomain = String(env.FIREBASE_AUTH_DOMAIN || `${firebaseProjectId}.firebaseapp.com`);
+				const firebaseStorageBucket = String(env.FIREBASE_STORAGE_BUCKET || `${firebaseProjectId}.appspot.com`);
+				const baseName = key.split('/').pop() || 'PDF';
+				const safeTitle = baseName.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+				const pdfJsHtml = `<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>${safeTitle}</title>
+	<base href="${siteBaseUrl}">
+	<style>
+		html, body { margin: 0; width: 100%; height: 100%; background: #0f172a; }
+		#pdf-viewer { width: 100%; height: 100%; overflow: auto; }
+		#pdf-viewer canvas { width: 100%; height: auto; display: block; margin: 0 auto 8px; background: #fff; }
+		@media (max-width: 768px) {
+			#chat-widget, .chat-widget {
+				bottom: calc(max(0px, env(safe-area-inset-bottom)) + 2px) !important;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div id="pdf-viewer"></div>
+
+	<script src="${firebaseAppCompatUrl}"></script>
+	<script src="${firebaseDbCompatUrl}"></script>
+	<script>
+		(function () {
+			if (typeof firebase === 'undefined' || !firebase.initializeApp) return;
+			const firebaseConfig = {
+				apiKey: ${JSON.stringify(firebaseApiKey)},
+				authDomain: ${JSON.stringify(firebaseAuthDomain)},
+				databaseURL: ${JSON.stringify(firebaseDatabaseUrl)},
+				projectId: ${JSON.stringify(firebaseProjectId)},
+				storageBucket: ${JSON.stringify(firebaseStorageBucket)},
+				messagingSenderId: ${JSON.stringify(firebaseSenderId)},
+				appId: ${JSON.stringify(firebaseAppId)}
+			};
+			if (!firebase.apps || !firebase.apps.length) {
+				firebase.initializeApp(firebaseConfig);
+			}
+		})();
+	</script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+	<script>
+		const pdfUrl = ${JSON.stringify(rawUrl.toString())};
+		pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+		async function renderPDF() {
+			const loadingTask = pdfjsLib.getDocument(pdfUrl);
+			const pdf = await loadingTask.promise;
+			const container = document.getElementById('pdf-viewer');
+			container.innerHTML = '';
+
+			for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+				const page = await pdf.getPage(pageNum);
+				const viewport = page.getViewport({ scale: 1.5 });
+				const canvas = document.createElement('canvas');
+				const context = canvas.getContext('2d');
+				canvas.height = viewport.height;
+				canvas.width = viewport.width;
+				canvas.style.width = '100%';
+				canvas.style.display = 'block';
+				container.appendChild(canvas);
+				await page.render({ canvasContext: context, viewport }).promise;
+			}
+		}
+
+		renderPDF().catch((err) => console.error('Error rendering PDF:', err));
+	</script>
+
+	<script>
+		(async function () {
+			const bridgeUrl = ${JSON.stringify(sessionBridgeUrl)};
+			const userIdentityUrl = ${JSON.stringify(userIdentityScriptUrl)};
+			const presenceUrl = ${JSON.stringify(presenceScriptUrl)};
+			const chatUrl = ${JSON.stringify(chatScriptUrl)};
+
+			function loadScript(src, defer) {
+				return new Promise((resolve, reject) => {
+					const script = document.createElement('script');
+					script.src = src;
+					if (defer) script.defer = true;
+					script.onload = () => resolve();
+					script.onerror = () => reject(new Error('Failed to load: ' + src));
+					document.body.appendChild(script);
+				});
+			}
+
+			async function syncSessionFromMainDomain() {
+				let bridgeOrigin;
+				try {
+					bridgeOrigin = new URL(bridgeUrl).origin;
+				} catch {
+					return;
+				}
+
+				await new Promise((resolve) => {
+					let finished = false;
+					let timer = null;
+					const bridgeFrame = document.createElement('iframe');
+
+					function done() {
+						if (finished) return;
+						finished = true;
+						window.removeEventListener('message', onMessage);
+						if (timer) clearTimeout(timer);
+						if (bridgeFrame && bridgeFrame.parentNode) {
+							bridgeFrame.parentNode.removeChild(bridgeFrame);
+						}
+						resolve();
+					}
+
+					function onMessage(event) {
+						if (event.origin !== bridgeOrigin) return;
+						const data = event.data || {};
+						if (data.type !== 'COURSEBOOK_SESSION') return;
+
+						if (typeof data.loggedInUser === 'string' && data.loggedInUser.trim()) {
+							localStorage.setItem('loggedInUser', data.loggedInUser);
+						}
+						done();
+					}
+
+					window.addEventListener('message', onMessage);
+					timer = setTimeout(done, 2000);
+
+					bridgeFrame.style.display = 'none';
+					bridgeFrame.src = bridgeUrl;
+					bridgeFrame.onload = function () {
+						try {
+							bridgeFrame.contentWindow.postMessage({ type: 'COURSEBOOK_GET_SESSION' }, bridgeOrigin);
+						} catch {
+							done();
+						}
+					};
+
+					document.body.appendChild(bridgeFrame);
+				});
+			}
+
+			try {
+				await syncSessionFromMainDomain();
+			} catch {
+				// Continue even if cross-domain session sync fails.
+			}
+
+			try {
+				await loadScript(userIdentityUrl, false);
+				await loadScript(presenceUrl, false);
+				await loadScript(chatUrl, true);
+			} catch (err) {
+				console.error('PDF chat bootstrap error:', err);
+			}
+		})();
+	</script>
+</body>
+</html>`;
+
+				return new Response(pdfJsHtml, {
+					status: 200,
+					headers: {
+						'content-type': 'text/html; charset=utf-8',
+						'cache-control': 'public, max-age=300'
+					}
+				});
 			}
 
 			const faviconUrl = String(env.SITE_FAVICON_URL || 'https://coursebook.lol/favicon.ico');
@@ -90,6 +271,11 @@
 	<style>
 		html,body{height:100%;margin:0;overflow:hidden;background:#0f172a;color:#e2e8f0;font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
 		iframe{display:block;width:100%;height:100%;border:0;background:#fff}
+		@media (max-width: 768px) {
+			#chat-widget, .chat-widget {
+				bottom: calc(max(0px, env(safe-area-inset-bottom)) + 2px) !important;
+			}
+		}
 	</style>
 </head>
 <body>
@@ -251,10 +437,33 @@
 		headers.set('accept-ranges', 'bytes');
 		headers.set('cache-control', headers.get('cache-control') || 'public, max-age=3600');
 
-		// Safari can fail on some inline PDFs when Content-Disposition has a broken fallback filename.
-		// For normal PDF viewing, omit Content-Disposition entirely.
+		if (Number.isFinite(object.size) && object.size >= 0) {
+			headers.set('content-length', String(object.size));
+		}
+
+		// Force deterministic inline PDF headers to avoid mobile browsers downloading instead of opening.
 		if (isPdf && !forceDownload) {
-			headers.delete('content-disposition');
+			const baseName = key.split('/').pop() || 'document.pdf';
+			const safeAscii = baseName
+				.replace(/[\r\n]/g, ' ')
+				.replace(/[\\/]/g, '_')
+				.replace(/"/g, "'")
+				.replace(/[^\x20-\x7E]/g, '_');
+
+			headers.set('content-type', 'application/pdf');
+			headers.set(
+				'content-disposition',
+				`inline; filename="${safeAscii}"; filename*=UTF-8''${encodeURIComponent(baseName)}`
+			);
+			headers.set('x-content-type-options', 'nosniff');
+			headers.delete('content-encoding');
+		}
+
+		if (object.range && Number.isFinite(object.range.offset) && Number.isFinite(object.range.length) && Number.isFinite(object.size)) {
+			const start = object.range.offset;
+			const end = object.range.offset + object.range.length - 1;
+			headers.set('content-range', `bytes ${start}-${end}/${object.size}`);
+			headers.set('content-length', String(object.range.length));
 		}
 
 		if (forceDownload) {
