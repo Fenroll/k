@@ -1700,6 +1700,43 @@
         return 'svg/uploads/note-icon.svg';
       }
 
+      function shouldHideOpenAction(row) {
+        const ext = getRowExtension(row);
+        return ['ppt', 'pptx', 'doc', 'docx', 'odt', 'rtf'].includes(ext);
+      }
+
+      function buildWorkerDownloadUrlForRow(row) {
+        if (!row || !row.key) return '';
+        const fileName = String(row.name || getFileNameFromPath(row.path || row.url) || 'download');
+        const endpoint = new URL(R2_WORKER_URL);
+        endpoint.searchParams.set('action', 'download');
+        endpoint.searchParams.set('bucketType', row.bucketType || 'default');
+        endpoint.searchParams.set('key', row.key);
+        endpoint.searchParams.set('filename', fileName);
+        return endpoint.toString();
+      }
+
+      function getPublicDomainForRow(row) {
+        return row && row.bucketType === 'chat' ? 'https://chat.coursebook.lol' : 'https://files.coursebook.lol';
+      }
+
+      function getResolvedUrlForRow(row) {
+        if (!row) return '';
+        const rawUrl = String(row.url || '').trim();
+        if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
+
+        const keyLike = String(row.key || row.path || rawUrl || '').replace(/^\/+/, '');
+        if (!keyLike) return rawUrl;
+        return buildPublicUrl(getPublicDomainForRow(row), keyLike);
+      }
+
+      function getCopyUrlForRow(row) {
+        const resolvedUrl = getResolvedUrlForRow(row);
+        if (!resolvedUrl) return '';
+        if (!shouldHideOpenAction(row)) return resolvedUrl;
+        return resolvedUrl;
+      }
+
       function buildPublicUrl(domain, key) {
         const safePath = String(key || '').split('/').map((segment) => encodeURIComponent(segment)).join('/');
         return String(domain || '').replace(/\/+$/, '') + '/' + safePath;
@@ -1944,6 +1981,7 @@
           const safeUrl = escapeHtml(r.url);
           const safeDate = escapeHtml(toDateString(r.uploadedAt));
           const safeIcon = escapeHtml(getFileTypeIconPath(r));
+          const canOpenInBrowser = !shouldHideOpenAction(r);
           const avatarUrl = getUploaderAvatarUrl(r.uploader);
           const safeAvatarUrl = escapeHtml(avatarUrl);
           const uploaderInitial = escapeHtml((String(r.uploader || '?').trim().charAt(0) || '?').toUpperCase());
@@ -1967,7 +2005,9 @@
             '<td style="padding:10px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;color:#1f2937;">' + safeDate + '</td>' +
             '<td style="padding:10px;border-bottom:1px solid #f3f4f6;vertical-align:top;font-size:14px;color:#1f2937;">' +
               '<div style="display:flex;gap:6px;flex-wrap:wrap;">' +
-                '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" style="font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;color:#1f2937;text-decoration:none;background:#fff;">Open</a>' +
+                (canOpenInBrowser
+                  ? '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" style="font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;color:#1f2937;text-decoration:none;background:#fff;">Open</a>'
+                  : '') +
                 '<button class="tools-uploads-download" data-idx="' + idx + '" style="font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;color:#1f2937;background:#fff;cursor:pointer;">Download</button>' +
                 '<button class="tools-uploads-copy" data-idx="' + idx + '" style="font-size:12px;border:1px solid #d1d5db;border-radius:6px;padding:5px 8px;color:#1f2937;background:#fff;cursor:pointer;">Copy URL</button>' +
                 (canDeleteRow(r) ? '<button class="tools-uploads-delete" data-idx="' + idx + '" style="font-size:12px;border:1px solid #fca5a5;border-radius:6px;padding:5px 8px;color:#fff;background:#b91c1c;cursor:pointer;">Delete</button>' : '') +
@@ -1984,16 +2024,6 @@
             if (!row || !row.url) return;
 
             const fileName = String(row.name || getFileNameFromPath(row.path || row.url) || 'download');
-
-            const buildWorkerDownloadUrl = () => {
-              if (!row.key) return '';
-              const endpoint = new URL(R2_WORKER_URL);
-              endpoint.searchParams.set('action', 'download');
-              endpoint.searchParams.set('bucketType', row.bucketType || 'default');
-              endpoint.searchParams.set('key', row.key);
-              endpoint.searchParams.set('filename', fileName);
-              return endpoint.toString();
-            };
 
             const triggerDirectDownload = () => {
               const a = document.createElement('a');
@@ -2018,7 +2048,7 @@
             };
 
             try {
-              const workerUrl = buildWorkerDownloadUrl();
+              const workerUrl = buildWorkerDownloadUrlForRow(row);
               const targetUrl = workerUrl || row.url;
               const response = await fetch(targetUrl, { method: 'GET', mode: 'cors' });
               if (!response.ok) throw new Error('HTTP ' + response.status);
@@ -2035,7 +2065,7 @@
               setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
             } catch (_) {
               // Some sources block CORS blob downloads; fallback to URL download attempts.
-              const workerUrl = buildWorkerDownloadUrl();
+              const workerUrl = buildWorkerDownloadUrlForRow(row);
               if (workerUrl) {
                 triggerUrlDownload(workerUrl);
               } else {
@@ -2049,9 +2079,12 @@
           btn.addEventListener('click', function(e) {
             e.preventDefault();
             const i = Number(btn.getAttribute('data-idx'));
-            const url = Number.isFinite(i) && rows[i] ? rows[i].url : '';
+            const row = Number.isFinite(i) ? rows[i] : null;
+            const url = getCopyUrlForRow(row);
             if (!url) return;
-            navigator.clipboard.writeText(url).then(() => showStatus('URL copied to clipboard.', false)).catch(() => showStatus('Could not copy URL.', true));
+            navigator.clipboard.writeText(url).then(() => {
+              showStatus(shouldHideOpenAction(row) ? 'Download URL copied to clipboard.' : 'URL copied to clipboard.', false);
+            }).catch(() => showStatus('Could not copy URL.', true));
           });
         });
 
