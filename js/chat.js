@@ -4128,7 +4128,6 @@ class ChatUIManager {
             // Self-mention: Back to using user's color for text + light background
             return `<span class="mention-me" style="color: ${userColor}; background-color: ${userColor}26; border: 1px solid ${userColor}40;">@${username}</span>`;
         } else {
-            // Others: Use user's color for text, light background
             return `<span class="mention" style="color: ${userColor}; background-color: ${userColor}26; border: 1px solid ${userColor}40;">@${username}</span>`;
         }
     });
@@ -4388,11 +4387,15 @@ class ChatUIManager {
 }
 .chat-audio-native {
   line-height: 0;
+  max-height: 32px;
+  overflow: hidden;
 }
 .chat-audio-native audio {
   display: block;
   width: min(240px, 70vw);
   max-width: 100%;
+  height: 30px;
+  max-height: 30px;
 }
 .chat-gif-btn {
   display: none; /* Replaced by plus button */

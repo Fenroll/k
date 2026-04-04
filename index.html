@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260404175l"></script>
+  <script src="js/auth-guard.js?v=2026040417fl"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1098,7 +1098,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=20260404175l"></script>
+  <script src="courses.generated.js?v=2026040417fl"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
@@ -1994,7 +1994,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=20260404175l"></script>
+<script src="js/chat.js?v=2026040417fl"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -2424,7 +2424,9 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       }
 
       try {
-        const hostname = new URL(file.url).hostname.toLowerCase();
+        const parsedUrl = new URL(file.url);
+        const hostname = parsedUrl.hostname.toLowerCase();
+        const pathname = String(parsedUrl.pathname || '').toLowerCase();
         if (!hostname) {
           return { primary: '', fallbacks: [] };
         }
@@ -2440,6 +2442,35 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
               `https://api.faviconkit.com/${hostname}/64`,
               `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
               `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
+            ]
+          };
+        }
+
+        // Force Google Docs-family links to use the correct app icon.
+        if (hostname === 'docs.google.com' || hostname.endsWith('.docs.google.com')) {
+          let docsPrimary = 'https://www.gstatic.com/images/branding/product/1x/docs_2020q4_48dp.png';
+          let docsFallback = 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_document_x16.png';
+
+          if (pathname.startsWith('/spreadsheets/')) {
+            docsPrimary = 'https://www.gstatic.com/images/branding/product/1x/sheets_2020q4_48dp.png';
+            docsFallback = 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_spreadsheet_x16.png';
+          } else if (pathname.startsWith('/presentation/')) {
+            docsPrimary = 'https://www.gstatic.com/images/branding/product/1x/slides_2020q4_48dp.png';
+            docsFallback = 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_presentation_x16.png';
+          } else if (pathname.startsWith('/forms/')) {
+            docsPrimary = 'https://www.gstatic.com/images/branding/product/1x/forms_2020q4_48dp.png';
+            docsFallback = 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_form_x16.png';
+          }
+
+          return {
+            primary: docsPrimary,
+            fallbacks: [
+              docsFallback,
+              'https://www.google.com/s2/favicons?domain=docs.google.com&sz=64',
+              'https://docs.google.com/favicon.ico',
+              `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
+              `https://icon.horse/icon/${hostname}`,
+              `https://api.faviconkit.com/${hostname}/64`
             ]
           };
         }
