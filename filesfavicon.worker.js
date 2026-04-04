@@ -35,6 +35,38 @@
 			return new Response('Not Found', { status: 404 });
 		}
 
+		const keyCandidates = [];
+		function addKeyCandidate(value) {
+			const normalized = String(value || '').replace(/^\/+/, '').trim();
+			if (!normalized) return;
+			if (!keyCandidates.includes(normalized)) keyCandidates.push(normalized);
+		}
+
+		addKeyCandidate(key);
+		addKeyCandidate(rawPath);
+
+		const queryKey = url.searchParams.get('key') || url.searchParams.get('path') || '';
+		if (queryKey) {
+			addKeyCandidate(queryKey);
+			try {
+				addKeyCandidate(decodeURIComponent(queryKey));
+			} catch {
+				// Ignore malformed query encoding.
+			}
+		}
+
+		try {
+			const decodedRawPath = decodeURIComponent(rawPath);
+			addKeyCandidate(decodedRawPath);
+			const reEncodedPath = decodedRawPath
+				.split('/')
+				.map((segment) => encodeURIComponent(segment))
+				.join('/');
+			addKeyCandidate(reEncodedPath);
+		} catch {
+			// Ignore malformed path encoding.
+		}
+
 		const isPdf = key.toLowerCase().endsWith('.pdf');
 		const forceRaw = url.searchParams.get('raw') === '1';
 		const forceDownload = url.searchParams.get('download') === '1';
@@ -433,9 +465,17 @@
 			}
 		}
 
-		const object = Object.keys(getOptions).length > 0
-			? await bucket.get(key, getOptions)
-			: await bucket.get(key);
+		let object = null;
+		let resolvedKey = key;
+		for (const candidate of keyCandidates) {
+			object = Object.keys(getOptions).length > 0
+				? await bucket.get(candidate, getOptions)
+				: await bucket.get(candidate);
+			if (object) {
+				resolvedKey = candidate;
+				break;
+			}
+		}
 
 		if (!object) {
 			return new Response('Not Found', { status: 404 });
@@ -453,7 +493,9 @@
 
 		// Force deterministic inline PDF headers to avoid mobile browsers downloading instead of opening.
 		if (isPdf && !forceDownload) {
-			const baseName = key.split('/').pop() || 'document.pdf';
+			const baseNameRaw = resolvedKey.split('/').pop() || 'document.pdf';
+			let baseName = baseNameRaw;
+			try { baseName = decodeURIComponent(baseNameRaw); } catch {}
 			const safeAscii = baseName
 				.replace(/[\r\n]/g, ' ')
 				.replace(/[\\/]/g, '_')
@@ -477,7 +519,9 @@
 		}
 
 		if (forceDownload) {
-			const baseName = key.split('/').pop() || 'download';
+			const baseNameRaw = resolvedKey.split('/').pop() || 'download';
+			let baseName = baseNameRaw;
+			try { baseName = decodeURIComponent(baseNameRaw); } catch {}
 			const safeAscii = baseName
 				.replace(/[\r\n]/g, ' ')
 				.replace(/[\\/]/g, '_')

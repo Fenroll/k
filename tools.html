@@ -1705,40 +1705,99 @@
         return ['ppt', 'pptx', 'doc', 'docx', 'odt', 'rtf'].includes(ext);
       }
 
+      function buildPublicDownloadUrlForRow(row) {
+        const resolvedUrl = getResolvedUrlForRow(row);
+        if (!resolvedUrl) return '';
+        const endpoint = new URL(resolvedUrl);
+        endpoint.searchParams.set('download', '1');
+        return endpoint.toString();
+      }
+
       function buildWorkerDownloadUrlForRow(row) {
-        if (!row || !row.key) return '';
+        if (!row) return '';
+        const derivedKey = String(
+          row.key
+          || row.path
+          || deriveKeyFromUrl(row.url)
+          || ''
+        ).replace(/^\/+/, '');
+        if (!derivedKey) return '';
         const fileName = String(row.name || getFileNameFromPath(row.path || row.url) || 'download');
         const endpoint = new URL(R2_WORKER_URL);
         endpoint.searchParams.set('action', 'download');
         endpoint.searchParams.set('bucketType', row.bucketType || 'default');
-        endpoint.searchParams.set('key', row.key);
+        endpoint.searchParams.set('key', derivedKey);
         endpoint.searchParams.set('filename', fileName);
         return endpoint.toString();
+      }
+
+      function getPreferredDownloadUrlForRow(row) {
+        return buildWorkerDownloadUrlForRow(row)
+          || buildPublicDownloadUrlForRow(row)
+          || getResolvedUrlForRow(row)
+          || (row && row.url ? String(row.url) : '');
       }
 
       function getPublicDomainForRow(row) {
         return row && row.bucketType === 'chat' ? 'https://chat.coursebook.lol' : 'https://files.coursebook.lol';
       }
 
+      function isPublicFilesHost(hostname) {
+        const host = String(hostname || '').toLowerCase();
+        return host === 'files.coursebook.lol' || host === 'chat.coursebook.lol';
+      }
+
       function getResolvedUrlForRow(row) {
         if (!row) return '';
         const rawUrl = String(row.url || '').trim();
-        if (/^https?:\/\//i.test(rawUrl)) return rawUrl;
+        const rawIsHttp = /^https?:\/\//i.test(rawUrl);
 
-        const keyLike = String(row.key || row.path || rawUrl || '').replace(/^\/+/, '');
-        if (!keyLike) return rawUrl;
-        return buildPublicUrl(getPublicDomainForRow(row), keyLike);
+        if (rawIsHttp) {
+          try {
+            const parsed = new URL(rawUrl);
+            if (isPublicFilesHost(parsed.hostname)) {
+              return rawUrl;
+            }
+          } catch (_) {
+            // Fallback to key/path resolution below.
+          }
+
+          const keyFromRawUrl = String(deriveKeyFromUrl(rawUrl) || '').replace(/^\/+/, '');
+          if (keyFromRawUrl) {
+            return buildPublicUrl(getPublicDomainForRow(row), keyFromRawUrl);
+          }
+        }
+
+        const keyLike = String(row.key || row.path || (!rawIsHttp ? rawUrl : '') || '').replace(/^\/+/, '');
+
+        if (keyLike) {
+          return buildPublicUrl(getPublicDomainForRow(row), keyLike);
+        }
+
+        if (rawIsHttp) return rawUrl;
+        return '';
       }
 
       function getCopyUrlForRow(row) {
         const resolvedUrl = getResolvedUrlForRow(row);
         if (!resolvedUrl) return '';
         if (!shouldHideOpenAction(row)) return resolvedUrl;
-        return resolvedUrl;
+        return buildWorkerDownloadUrlForRow(row)
+          || buildPublicDownloadUrlForRow(row)
+          || resolvedUrl;
       }
 
       function buildPublicUrl(domain, key) {
-        const safePath = String(key || '').split('/').map((segment) => encodeURIComponent(segment)).join('/');
+        const safePath = String(key || '')
+          .split('/')
+          .map((segment) => {
+            try {
+              return encodeURIComponent(decodeURIComponent(segment));
+            } catch (_) {
+              return encodeURIComponent(segment);
+            }
+          })
+          .join('/');
         return String(domain || '').replace(/\/+$/, '') + '/' + safePath;
       }
 
@@ -1753,6 +1812,8 @@
       function deriveKeyFromUrl(url) {
         try {
           const parsed = new URL(String(url || ''));
+          const fromQuery = String(parsed.searchParams.get('key') || parsed.searchParams.get('path') || '').replace(/^\/+/, '');
+          if (fromQuery) return decodeURIComponent(fromQuery);
           return decodeURIComponent(parsed.pathname.replace(/^\//, ''));
         } catch (_) { return ''; }
       }
@@ -1978,7 +2039,8 @@
         tableBody.innerHTML = rows.map((r, idx) => {
           const safeName = escapeHtml(r.name);
           const safeUploader = escapeHtml(r.uploader || 'unknown');
-          const safeUrl = escapeHtml(r.url);
+          const resolvedOpenUrl = String(getResolvedUrlForRow(r) || r.url || '');
+          const safeUrl = escapeHtml(resolvedOpenUrl);
           const safeDate = escapeHtml(toDateString(r.uploadedAt));
           const safeIcon = escapeHtml(getFileTypeIconPath(r));
           const canOpenInBrowser = !shouldHideOpenAction(r);
@@ -2048,8 +2110,8 @@
             };
 
             try {
-              const workerUrl = buildWorkerDownloadUrlForRow(row);
-              const targetUrl = workerUrl || row.url;
+              const preferredDownloadUrl = getPreferredDownloadUrlForRow(row);
+              const targetUrl = preferredDownloadUrl;
               const response = await fetch(targetUrl, { method: 'GET', mode: 'cors' });
               if (!response.ok) throw new Error('HTTP ' + response.status);
 
@@ -2065,9 +2127,9 @@
               setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
             } catch (_) {
               // Some sources block CORS blob downloads; fallback to URL download attempts.
-              const workerUrl = buildWorkerDownloadUrlForRow(row);
-              if (workerUrl) {
-                triggerUrlDownload(workerUrl);
+              const preferredDownloadUrl = getPreferredDownloadUrlForRow(row);
+              if (preferredDownloadUrl) {
+                triggerUrlDownload(preferredDownloadUrl);
               } else {
                 triggerDirectDownload();
               }
