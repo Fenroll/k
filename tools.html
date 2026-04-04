@@ -1715,10 +1715,13 @@
 
       function buildWorkerDownloadUrlForRow(row) {
         if (!row) return '';
+        const rawPath = String(row.path || '').trim();
+        const pathAsKey = /^https?:\/\//i.test(rawPath) ? deriveKeyFromUrl(rawPath) : rawPath;
         const derivedKey = String(
           row.key
-          || row.path
+          || pathAsKey
           || deriveKeyFromUrl(row.url)
+          || deriveKeyFromUrl(getResolvedUrlForRow(row))
           || ''
         ).replace(/^\/+/, '');
         if (!derivedKey) return '';
@@ -1779,12 +1782,13 @@
       }
 
       function getCopyUrlForRow(row) {
+        const workerUrl = buildWorkerDownloadUrlForRow(row);
         const resolvedUrl = getResolvedUrlForRow(row);
-        if (!resolvedUrl) return '';
-        if (!shouldHideOpenAction(row)) return resolvedUrl;
-        return buildWorkerDownloadUrlForRow(row)
+        if (!shouldHideOpenAction(row)) return resolvedUrl || workerUrl || '';
+        return workerUrl
           || buildPublicDownloadUrlForRow(row)
-          || resolvedUrl;
+          || resolvedUrl
+          || '';
       }
 
       function buildPublicUrl(domain, key) {
