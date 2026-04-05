@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026040517fj"></script>
+  <script src="js/auth-guard.js?v=2026040518gs"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1664,7 +1664,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=2026040517fj"></script>
+  <script src="courses.generated.js?v=2026040518gs"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -7034,6 +7034,23 @@ renderMathInElement(document.body, {
       
       // CRITICAL: Handle Enter in list items to prevent <p> tag wrapping
       if (e.key === 'Enter') {
+        if (e.shiftKey) {
+          e.preventDefault();
+          let inserted = false;
+          try {
+            inserted = document.execCommand('insertLineBreak', false, null);
+          } catch (_) {
+          }
+          if (!inserted) {
+            try {
+              document.execCommand('insertHTML', false, '<br>');
+            } catch (_) {
+            }
+          }
+          saveToHistory();
+          return;
+        }
+
         const selection = window.getSelection();
         if (selection.rangeCount) {
           const range = selection.getRangeAt(0);
@@ -9898,7 +9915,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026040517fj"></script>
+    <script src="js/chat.js?v=2026040518gs"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
