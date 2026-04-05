@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026040518gs"></script>
+  <script src="js/auth-guard.js?v=202604051dsw"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1664,7 +1664,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=2026040518gs"></script>
+  <script src="courses.generated.js?v=202604051dsw"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -3147,6 +3147,19 @@
       });
     }
 
+    function normalizeEditorHrElement(hr) {
+      if (!(hr instanceof HTMLHRElement)) return;
+      hr.setAttribute('contenteditable', 'false');
+      hr.setAttribute('data-editor-void', 'true');
+      hr.tabIndex = -1;
+    }
+
+    function normalizeAllEditorHrElements() {
+      editor.querySelectorAll('hr').forEach((hr) => normalizeEditorHrElement(hr));
+    }
+
+    normalizeAllEditorHrElements();
+
     function insertDivider({ dashed = false } = {}) {
       const selection = window.getSelection();
       if (!selection.rangeCount) return;
@@ -3175,6 +3188,7 @@
       };
 
       const divider = document.createElement('hr');
+      normalizeEditorHrElement(divider);
       if (dashed) {
         const separatorColor = getCurrentHeadingColor();
         divider.style.cssText = `border: none; border-top: 2px dashed ${separatorColor};`;
@@ -3237,6 +3251,7 @@
 
       const makeDashedDivider = () => {
         const divider = document.createElement('hr');
+        normalizeEditorHrElement(divider);
         const separatorColor = getCurrentHeadingColor();
         divider.style.cssText = `border: none; border-top: 2px dashed ${separatorColor};`;
         divider.dataset.separatorStyle = 'dashed';
@@ -6779,6 +6794,30 @@ renderMathInElement(document.body, {
         const selection = window.getSelection();
         if (selection.rangeCount) {
           const range = selection.getRangeAt(0);
+
+          // If caret is at the editor root, allow deleting adjacent HR nodes directly.
+          if (range.collapsed && range.startContainer === editor) {
+            if (e.key === 'Backspace' && range.startOffset > 0) {
+              const leftNode = editor.childNodes[range.startOffset - 1];
+              if (leftNode && leftNode.nodeType === Node.ELEMENT_NODE && leftNode.tagName === 'HR') {
+                e.preventDefault();
+                leftNode.remove();
+                saveToHistory();
+                return;
+              }
+            }
+
+            if (e.key === 'Delete' && range.startOffset < editor.childNodes.length) {
+              const rightNode = editor.childNodes[range.startOffset];
+              if (rightNode && rightNode.nodeType === Node.ELEMENT_NODE && rightNode.tagName === 'HR') {
+                e.preventDefault();
+                rightNode.remove();
+                saveToHistory();
+                return;
+              }
+            }
+          }
+
           let node = range.startContainer;
 
           const findClosestBlock = (startNode) => {
@@ -7600,6 +7639,7 @@ renderMathInElement(document.body, {
       repairInvalidHeadingStructureInEditor();
       cleanupHeadingInlineArtifacts();
       cleanupInlineFontArtifacts();
+      normalizeAllEditorHrElements();
 
       // Debounced history save (don't save on every keystroke)
       clearTimeout(editor.historyTimeout);
@@ -7654,6 +7694,7 @@ renderMathInElement(document.body, {
             if (text === '---' && node.tagName === 'P') {
               // Replace this paragraph with <hr>
               const hr = document.createElement('hr');
+              normalizeEditorHrElement(hr);
               node.parentNode.replaceChild(hr, node);
               
               // Create new paragraph after hr and focus there
@@ -7671,6 +7712,7 @@ renderMathInElement(document.body, {
             } else if (text === '~~~' && node.tagName === 'P') {
               // Replace this paragraph with dashed <hr>
               const hr = document.createElement('hr');
+              normalizeEditorHrElement(hr);
               hr.style.cssText = `border: none; border-top: 2px dashed ${getCurrentHeadingColor()};`;
               hr.dataset.separatorStyle = 'dashed';
               node.parentNode.replaceChild(hr, node);
@@ -9915,7 +9957,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026040518gs"></script>
+    <script src="js/chat.js?v=202604051dsw"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
