@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202604051p5k"></script>
+  <script src="js/auth-guard.js?v=202604051tf0"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1664,7 +1664,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202604051p5k"></script>
+  <script src="courses.generated.js?v=202604051tf0"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2103,9 +2103,28 @@
     // Saved selection for color pickers
     let savedTextColorSelection = null;
     let savedHighlightSelection = null;
+    let lastEditorSelectionRange = null;
+
+    const updateLastEditorSelectionRange = () => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) return;
+
+      const anchorInEditor = editor.contains(selection.anchorNode);
+      const focusInEditor = editor.contains(selection.focusNode);
+      if (!anchorInEditor || !focusInEditor) return;
+
+      lastEditorSelectionRange = selection.getRangeAt(0).cloneRange();
+    };
+
+    editor.addEventListener('mouseup', updateLastEditorSelectionRange);
+    editor.addEventListener('keyup', updateLastEditorSelectionRange);
 
     // Initialize text color picker
     initializeColorPicker('textThemeColors', 'textStandardColors', (color) => {
+      if (!savedTextColorSelection && lastEditorSelectionRange) {
+        savedTextColorSelection = lastEditorSelectionRange.cloneRange();
+      }
+
       // Restore selection if saved
       if (savedTextColorSelection) {
         const selection = window.getSelection();
@@ -3129,6 +3148,25 @@
       return localStorage.getItem('textEditorHeadingColor') || '#588157';
     }
 
+    function applyGlobalHeadingColor(color) {
+      const headingColor = color || '#588157';
+      let style = document.getElementById('heading-color-style');
+      if (!style) {
+        style = document.createElement('style');
+        style.id = 'heading-color-style';
+        document.head.appendChild(style);
+      }
+
+      style.textContent = `
+        #editor h1,
+        #editor h2,
+        #editor h3,
+        #editor h4 {
+          color: ${headingColor} !important;
+        }
+      `;
+    }
+
     function applyDashedSeparatorColor(color) {
       if (!color) return;
 
@@ -3670,6 +3708,17 @@
       }
     });
 
+    const captureTextColorSelectionFromEditor = () => {
+      updateLastEditorSelectionRange();
+      if (lastEditorSelectionRange) {
+        savedTextColorSelection = lastEditorSelectionRange.cloneRange();
+      }
+    };
+
+    document.getElementById('textColorToggleBtn').addEventListener('mousedown', () => {
+      captureTextColorSelectionFromEditor();
+    });
+
     // Text Color Control - Toggle button
     document.getElementById('textColorToggleBtn').addEventListener('click', (e) => {
       e.preventDefault();
@@ -3678,8 +3727,7 @@
       const isHidden = textColorOptions.style.display === 'none' || !textColorOptions.style.display;
       
       if (isHidden) {
-        // Save current selection
-        savedTextColorSelection = saveSelection();
+        captureTextColorSelectionFromEditor();
       }
       
       // Close highlight picker if open
@@ -3694,6 +3742,7 @@
       const textColorToggleBtn = document.getElementById('textColorToggleBtn');
       if (textColorOptions && !textColorOptions.contains(e.target) && !textColorToggleBtn.contains(e.target)) {
         textColorOptions.style.display = 'none';
+        savedTextColorSelection = null;
       }
     });
 
@@ -3702,11 +3751,11 @@
     const textColorHexInput = document.getElementById('textColorHexInput');
 
     textColorControl.addEventListener('mousedown', () => {
-        savedTextColorSelection = saveSelection();
+      captureTextColorSelectionFromEditor();
     });
     textColorHexInput.addEventListener('mousedown', (e) => {
         e.stopPropagation();
-        savedTextColorSelection = saveSelection();
+      captureTextColorSelectionFromEditor();
     });
 
     textColorControl.addEventListener('input', (e) => {
@@ -3729,33 +3778,204 @@
       }
     });
 
+    function removeTextColorFormatting() {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0 || !editor.contains(selection.anchorNode)) {
+        alert('Please select text first');
+        return false;
+      }
+
+      const range = selection.getRangeAt(0);
+      const findClosestHeading = (node) => {
+        let current = node;
+        if (current && current.nodeType === Node.TEXT_NODE) {
+          current = current.parentNode;
+        }
+
+        while (current && current !== editor) {
+          if (current.nodeType === Node.ELEMENT_NODE && /^H[1-6]$/.test(current.tagName)) {
+            return current;
+          }
+          current = current.parentNode;
+        }
+        return null;
+      };
+
+      const stripDescendantHeadingColors = (headingEl) => {
+        headingEl.querySelectorAll('span[style], font[color]').forEach((node) => {
+          if (node.tagName === 'FONT') {
+            node.removeAttribute('color');
+            return;
+          }
+
+          const styleValue = node.getAttribute('style') || '';
+          const declarations = styleValue
+            .split(';')
+            .map((part) => part.trim())
+            .filter(Boolean)
+            .filter((part) => {
+              const separatorIndex = part.indexOf(':');
+              if (separatorIndex === -1) return false;
+              const prop = part.slice(0, separatorIndex).trim().toLowerCase();
+              return prop !== 'color';
+            });
+
+          if (declarations.length === 0) {
+            node.removeAttribute('style');
+          } else {
+            node.setAttribute('style', declarations.join('; '));
+          }
+        });
+      };
+
+      const stripInlineColorFromElement = (node) => {
+        if (!node || node.nodeType !== Node.ELEMENT_NODE) return;
+
+        if (node.tagName === 'FONT' && node.hasAttribute('color')) {
+          node.removeAttribute('color');
+        }
+
+        if (node.hasAttribute('style')) {
+          const styleValue = node.getAttribute('style') || '';
+          const declarations = styleValue
+            .split(';')
+            .map((part) => part.trim())
+            .filter(Boolean)
+            .filter((part) => {
+              const separatorIndex = part.indexOf(':');
+              if (separatorIndex === -1) return false;
+              const prop = part.slice(0, separatorIndex).trim().toLowerCase();
+              return prop !== 'color';
+            });
+
+          if (declarations.length === 0) {
+            node.removeAttribute('style');
+          } else {
+            node.setAttribute('style', declarations.join('; '));
+          }
+        }
+      };
+
+      const headingsToReset = [];
+      const addHeading = (headingEl) => {
+        if (!headingEl || !editor.contains(headingEl)) return;
+        if (!headingsToReset.includes(headingEl)) {
+          headingsToReset.push(headingEl);
+        }
+      };
+
+      if (range.collapsed) {
+        addHeading(findClosestHeading(range.startContainer));
+      } else {
+        editor.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((headingEl) => {
+          try {
+            if (range.intersectsNode(headingEl)) {
+              addHeading(headingEl);
+            }
+          } catch (_) {
+            // Ignore nodes that cannot be intersected by this range.
+          }
+        });
+
+        if (headingsToReset.length === 0) {
+          addHeading(findClosestHeading(selection.anchorNode));
+          addHeading(findClosestHeading(selection.focusNode));
+        }
+      }
+
+      if (headingsToReset.length > 0) {
+        headingsToReset.forEach((headingEl) => {
+          stripDescendantHeadingColors(headingEl);
+          headingEl.style.removeProperty('color');
+          if (!headingEl.getAttribute('style') || headingEl.getAttribute('style').trim() === '') {
+            headingEl.removeAttribute('style');
+          }
+        });
+
+        editor.querySelectorAll('span[style], font[color]').forEach((node) => {
+          try {
+            if (range.intersectsNode(node)) {
+              stripInlineColorFromElement(node);
+            }
+          } catch (_) {
+            // Ignore nodes that cannot be intersected by this range.
+          }
+        });
+
+        saveToHistory();
+        return true;
+      }
+
+      // Non-heading selection/caret: strip inline color styles only, never paint fallback colors.
+      let removedAny = false;
+
+      editor.querySelectorAll('span[style], font[color]').forEach((node) => {
+        try {
+          if (range.intersectsNode(node)) {
+            const beforeStyle = node.getAttribute('style');
+            const beforeColor = node.getAttribute('color');
+            stripInlineColorFromElement(node);
+            if (beforeStyle !== node.getAttribute('style') || beforeColor !== node.getAttribute('color')) {
+              removedAny = true;
+            }
+          }
+        } catch (_) {
+          // Ignore nodes that cannot be intersected by this range.
+        }
+      });
+
+      if (range.collapsed) {
+        let current = range.startContainer;
+        if (current && current.nodeType === Node.TEXT_NODE) {
+          current = current.parentNode;
+        }
+
+        while (current && current !== editor) {
+          const beforeStyle = current.getAttribute ? current.getAttribute('style') : null;
+          const beforeColor = current.getAttribute ? current.getAttribute('color') : null;
+          stripInlineColorFromElement(current);
+          const afterStyle = current.getAttribute ? current.getAttribute('style') : null;
+          const afterColor = current.getAttribute ? current.getAttribute('color') : null;
+          if (beforeStyle !== afterStyle || beforeColor !== afterColor) {
+            removedAny = true;
+          }
+          current = current.parentNode;
+        }
+      }
+
+      if (!removedAny && !selection.toString()) {
+        alert('Please select text first');
+        return false;
+      }
+
+      saveToHistory();
+      return true;
+    }
+
     // Remove Text Color Button
     document.getElementById('removeTextColorBtn').addEventListener('click', (e) => {
       e.preventDefault();
       if (savedTextColorSelection) {
         restoreSelection(savedTextColorSelection);
       }
-      
-      const selection = window.getSelection();
-      if (!selection.toString() || !editor.contains(selection.anchorNode)) {
-        alert('Please select text first');
-        return;
-      }
 
-      document.execCommand('foreColor', false, 'rgb(31, 41, 55)');
+      removeTextColorFormatting();
       document.getElementById('textColorOptions').style.display = 'none';
       savedTextColorSelection = null;
-      saveToHistory();
     });
 
+    const headingColorToggleButton = document.getElementById('headingColorToggleBtn');
+
     // Heading Color Toggle Button
-    document.getElementById('headingColorToggleBtn').addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const headingColorOptions = document.getElementById('headingColorOptions');
-      const isHidden = headingColorOptions.style.display === 'none' || headingColorOptions.style.display === '';
-      headingColorOptions.style.display = isHidden ? 'flex' : 'none';
-    });
+    if (headingColorToggleButton) {
+      headingColorToggleButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const headingColorOptions = document.getElementById('headingColorOptions');
+        const isHidden = headingColorOptions.style.display === 'none' || headingColorOptions.style.display === '';
+        headingColorOptions.style.display = isHidden ? 'flex' : 'none';
+      });
+    }
 
     // Close heading color dropdown when clicking outside
     document.addEventListener('click', (e) => {
@@ -3771,19 +3991,8 @@
       btn.addEventListener('click', (e) => {
         e.preventDefault();
         const color = btn.dataset.color;
-        
-        const style = document.createElement('style');
-        style.id = 'heading-color-style';
-        const existingStyle = document.getElementById('heading-color-style');
-        if (existingStyle) existingStyle.remove();
-        
-        style.textContent = `
-          #editor h1, #editor h2, #editor h3, #editor h4 { color: ${color} !important; }
-        `;
-        document.head.appendChild(style);
-        
-        const headers = document.querySelectorAll('#editor h1, #editor h2, #editor h3, #editor h4');
-        headers.forEach(h => h.style.color = color);
+
+        applyGlobalHeadingColor(color);
         applyDashedSeparatorColor(color);
         
         document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
@@ -3873,6 +4082,93 @@
     // Apply formatting to selected text
     function applyFormatting(property, value) {
       const selection = window.getSelection();
+      const findClosestHeading = (node) => {
+        let current = node;
+        if (current && current.nodeType === Node.TEXT_NODE) {
+          current = current.parentNode;
+        }
+
+        while (current && current !== editor) {
+          if (current.nodeType === Node.ELEMENT_NODE && /^H[1-6]$/.test(current.tagName)) {
+            return current;
+          }
+          current = current.parentNode;
+        }
+        return null;
+      };
+
+      const stripDescendantHeadingColors = (headingEl) => {
+        headingEl.querySelectorAll('span[style], font[color]').forEach((node) => {
+          if (node.tagName === 'FONT') {
+            node.removeAttribute('color');
+            return;
+          }
+
+          const styleValue = node.getAttribute('style') || '';
+          const declarations = styleValue
+            .split(';')
+            .map((part) => part.trim())
+            .filter(Boolean)
+            .filter((part) => {
+              const separatorIndex = part.indexOf(':');
+              if (separatorIndex === -1) return false;
+              const prop = part.slice(0, separatorIndex).trim().toLowerCase();
+              return prop !== 'color';
+            });
+
+          if (declarations.length === 0) {
+            node.removeAttribute('style');
+          } else {
+            node.setAttribute('style', declarations.join('; '));
+          }
+        });
+      };
+
+      if (property === 'color' && selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const anchorInEditor = editor.contains(selection.anchorNode);
+        const focusInEditor = editor.contains(selection.focusNode);
+
+        if (anchorInEditor && focusInEditor) {
+          const headingsToColor = [];
+          const addHeading = (headingEl) => {
+            if (!headingEl || !editor.contains(headingEl)) return;
+            if (!headingsToColor.includes(headingEl)) {
+              headingsToColor.push(headingEl);
+            }
+          };
+
+          if (range.collapsed) {
+            addHeading(findClosestHeading(range.startContainer));
+          } else {
+            editor.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((headingEl) => {
+              try {
+                if (range.intersectsNode(headingEl)) {
+                  addHeading(headingEl);
+                }
+              } catch (_) {
+                // Ignore nodes that cannot be intersected by this range.
+              }
+            });
+
+            // Fallback for edge selections where intersectsNode is inconsistent.
+            if (headingsToColor.length === 0) {
+              addHeading(findClosestHeading(selection.anchorNode));
+              addHeading(findClosestHeading(selection.focusNode));
+            }
+          }
+
+          if (headingsToColor.length > 0) {
+            headingsToColor.forEach((headingEl) => {
+              stripDescendantHeadingColors(headingEl);
+              headingEl.style.setProperty('color', value, 'important');
+            });
+            localStorage.setItem('textEditorTextColor', value);
+            saveToHistory();
+            return;
+          }
+        }
+      }
       
       // If no selection or selection is in editor
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
@@ -3916,6 +4212,8 @@
     window.addEventListener('load', () => {
       const savedTextColor = localStorage.getItem('textEditorTextColor');
       const savedHeadingColor = localStorage.getItem('textEditorHeadingColor');
+      const activeHeadingColor = savedHeadingColor || '#588157';
+      applyGlobalHeadingColor(activeHeadingColor);
 
       if (savedTextColor) {
         document.getElementById('textColorControl').value = savedTextColor;
@@ -3934,26 +4232,8 @@
       }
 
       if (savedHeadingColor) {
-        // Apply saved heading color
         const btn = document.querySelector(`.heading-color-btn[data-color="${savedHeadingColor}"]`);
         if (btn) {
-          const style = document.createElement('style');
-          style.id = 'heading-color-style';
-          style.textContent = `
-            #editor h1, 
-            #editor h2, 
-            #editor h3, 
-            #editor h4 { 
-              color: ${savedHeadingColor} !important; 
-            }
-          `;
-          document.head.appendChild(style);
-          
-          // Also apply directly to existing headers
-          const headers = document.querySelectorAll('#editor h1, #editor h2, #editor h3, #editor h4');
-          headers.forEach(h => {
-            h.style.color = savedHeadingColor;
-          });
           applyDashedSeparatorColor(savedHeadingColor);
           
           // Clear all active classes first
@@ -3966,24 +4246,6 @@
         const defaultBtn = document.querySelector('.heading-color-btn[data-color="#588157"]');
         if (defaultBtn) {
           defaultBtn.classList.add('active');
-          // Apply default heading color
-          const style = document.createElement('style');
-          style.id = 'heading-color-style';
-          style.textContent = `
-            #editor h1, 
-            #editor h2, 
-            #editor h3, 
-            #editor h4 { 
-              color: #588157 !important; 
-            }
-          `;
-          document.head.appendChild(style);
-          
-          // Also apply directly to existing headers
-          const headers = document.querySelectorAll('#editor h1, #editor h2, #editor h3, #editor h4');
-          headers.forEach(h => {
-            h.style.color = '#588157';
-          });
           applyDashedSeparatorColor('#588157');
         }
       }
@@ -7417,12 +7679,7 @@ renderMathInElement(document.body, {
         } else if (e.key === 'D' || e.key === 'd'|| e.key === 'Д' || e.key === 'д') {
           if (e.shiftKey) {
             e.preventDefault();
-            // Remove text color (reset to dark gray)
-            const selection = window.getSelection();
-            if (selection.toString() && editor.contains(selection.anchorNode)) {
-              document.execCommand('foreColor', false, 'rgb(31, 41, 55)');
-              saveToHistory();
-            }
+            removeTextColorFormatting();
           } else {
             e.preventDefault();
             // Apply last used text color
@@ -9957,7 +10214,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202604051p5k"></script>
+    <script src="js/chat.js?v=202604051tf0"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
