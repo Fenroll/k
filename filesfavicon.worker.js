@@ -73,12 +73,17 @@
 		const userAgent = String(request.headers.get('user-agent') || '').toLowerCase();
 		const isAndroid = /android/i.test(userAgent);
 		const isIosDevice = /(iphone|ipad|ipod)/i.test(userAgent);
+		const isIpadDesktopUa = /macintosh/i.test(userAgent) && /mobile\//i.test(userAgent);
 		const isSafariToken = /safari\//i.test(userAgent);
 		const isIosAltBrowser = /(crios|fxios|edgios|opios|duckduckgo)/i.test(userAgent);
-		const isIosSafari = isIosDevice && isSafariToken && !isIosAltBrowser;
+		const isAppleMobile = isIosDevice || isIpadDesktopUa;
+		const isAppleWebkitBrowser = isSafariToken || isIosAltBrowser;
+		const shouldBypassIframePdfForApple = isAppleMobile && isAppleWebkitBrowser;
 		const hasChromeToken = /chrome\/[0-9]+/i.test(userAgent);
 		const isExcludedChromiumBrand = /(edg|opr|samsungbrowser|duckduckgo)\//i.test(userAgent);
 		const isAndroidChrome = isAndroid && hasChromeToken && !isExcludedChromiumBrand;
+		const isSafariBrowser = isSafariToken && !hasChromeToken && !isIosAltBrowser && !/firefox\//i.test(userAgent);
+		const shouldUsePdfJs = isAndroidChrome || isSafariBrowser;
 		const rangeHeader = request.headers.get('range');
 		const isBrowserDocumentRequest =
 			request.method === 'GET' &&
@@ -94,14 +99,62 @@
 			const rawUrl = new URL(url.toString());
 			rawUrl.searchParams.set('raw', '1');
 
-			// iOS Safari has unreliable PDF rendering inside iframe wrappers.
-			// Send it to the raw stream with an initial fit-width hint.
-			if (isIosSafari) {
-				return Response.redirect(`${rawUrl.toString()}#page=1&zoom=page-width`, 302);
+			// iOS/iPadOS browsers can be unreliable for PDF rendering inside iframe wrappers.
+			// Send it to the raw stream and, when embedded, try to break out of the frame.
+			if (shouldBypassIframePdfForApple && !isSafariBrowser) {
+				const targetUrl = rawUrl.toString();
+				if (secFetchDest === 'iframe') {
+					const fallbackHref = targetUrl.replace(/&/g, '&amp;').replace(/"/g, '&quot;');
+					const openerHtml = `<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Opening PDF</title>
+	<style>
+		html, body { margin: 0; width: 100%; height: 100%; background: #ffffff; color: #0f172a; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; }
+		.wrap { min-height: 100%; display: flex; align-items: center; justify-content: center; padding: 16px; text-align: center; }
+		a { color: #0f172a; }
+	</style>
+</head>
+<body>
+	<div class="wrap">
+		<div>
+			<div>Opening PDF...</div>
+			<div style="margin-top:10px"><a href="${fallbackHref}" target="_top" rel="noopener">Open manually</a></div>
+		</div>
+	</div>
+	<script>
+		(function () {
+			const target = ${JSON.stringify(targetUrl)};
+			try {
+				if (window.top && window.top !== window.self) {
+					window.top.location.replace(target);
+					return;
+				}
+			} catch {
+				// Fall back to same-frame navigation.
+			}
+			window.location.replace(target);
+		})();
+	</script>
+</body>
+</html>`;
+
+					return new Response(openerHtml, {
+						status: 200,
+						headers: {
+							'content-type': 'text/html; charset=utf-8',
+							'cache-control': 'no-store'
+						}
+					});
+				}
+
+				return Response.redirect(targetUrl, 302);
 			}
 
-			// Use PDF.js only for Android Chrome.
-			if (isAndroidChrome) {
+			// Use PDF.js for Android Chrome and Safari.
+			if (shouldUsePdfJs) {
 				const siteBaseUrl = String(env.SITE_BASE_URL || 'https://coursebook.lol/');
 				const chatScriptUrl = String(env.CHAT_SCRIPT_URL || 'https://coursebook.lol/js/chat.js');
 				const presenceScriptUrl = String(env.PRESENCE_SCRIPT_URL || 'https://coursebook.lol/js/presence.js');
@@ -236,6 +289,14 @@
 
 						if (typeof data.loggedInUser === 'string' && data.loggedInUser.trim()) {
 							localStorage.setItem('loggedInUser', data.loggedInUser);
+						}
+
+						if (data.chatState && typeof data.chatState === 'object') {
+							for (const [storageKey, storageValue] of Object.entries(data.chatState)) {
+								if (typeof storageValue === 'string' && storageKey) {
+									localStorage.setItem(storageKey, storageValue);
+								}
+							}
 						}
 						done();
 					}
@@ -390,6 +451,14 @@
 
 						if (typeof data.loggedInUser === 'string' && data.loggedInUser.trim()) {
 							localStorage.setItem('loggedInUser', data.loggedInUser);
+						}
+
+						if (data.chatState && typeof data.chatState === 'object') {
+							for (const [storageKey, storageValue] of Object.entries(data.chatState)) {
+								if (typeof storageValue === 'string' && storageKey) {
+									localStorage.setItem(storageKey, storageValue);
+								}
+							}
 						}
 						done();
 					}

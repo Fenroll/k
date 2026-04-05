@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202604041tcj"></script>
+  <script src="js/auth-guard.js?v=2026040517fj"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -496,14 +496,16 @@
       border-radius: 6px;
     }
     #noteTooltipViewer .note-table-scroll {
-      overflow-x: auto;
+      overflow-x: hidden;
       margin: 0.3em 0;
+      max-width: 100%;
     }
     #noteTooltipViewer table {
       border-collapse: collapse;
-      width: max-content;
+      width: 100%;
       max-width: 100%;
-      min-width: 220px;
+      min-width: 0;
+      table-layout: fixed;
       background: #ffffff;
     }
     #noteTooltipViewer th,
@@ -513,7 +515,9 @@
       text-align: left;
       vertical-align: top;
       line-height: 1.3;
-      white-space: nowrap;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     #noteTooltipViewer thead th {
       background: rgba(88, 129, 87, 0.12);
@@ -2206,7 +2210,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202604041tcj"></script>
+  <script src="courses.generated.js?v=2026040517fj"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2313,7 +2317,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202604041tcj"></script>
+    <script src="js/chat.js?v=2026040517fj"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=20260324a"></script>
 

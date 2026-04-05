@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202604041tcj"></script>
+  <script src="js/auth-guard.js?v=2026040517fj"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1664,7 +1664,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202604041tcj"></script>
+  <script src="courses.generated.js?v=2026040517fj"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -4708,14 +4708,16 @@ localStorage.setItem('textEditorContent', htmlContent);
       margin-bottom: 0 !important;
     }
     .note-tooltip .note-table-scroll {
-      overflow-x: auto;
+      overflow-x: hidden;
       margin: 0.3em 0;
+      max-width: 100%;
     }
     .note-tooltip table {
       border-collapse: collapse;
-      width: max-content;
+      width: 100%;
       max-width: 100%;
-      min-width: 220px;
+      min-width: 0;
+      table-layout: fixed;
       background: #ffffff;
     }
     .note-tooltip th,
@@ -4725,7 +4727,9 @@ localStorage.setItem('textEditorContent', htmlContent);
       text-align: left;
       vertical-align: top;
       line-height: 1.3;
-      white-space: nowrap;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
     }
     .note-tooltip thead th {
       background: rgba(88, 129, 87, 0.12);
@@ -5630,14 +5634,16 @@ renderMathInElement(document.body, {
             border-radius: 6px;
           }
           #noteTooltip .note-table-scroll {
-            overflow-x: auto;
+            overflow-x: hidden;
             margin: 0.3em 0;
+            max-width: 100%;
           }
           #noteTooltip table {
             border-collapse: collapse;
-            width: max-content;
+            width: 100%;
             max-width: 100%;
-            min-width: 220px;
+            min-width: 0;
+            table-layout: fixed;
             background: #ffffff;
           }
           #noteTooltip th,
@@ -5647,7 +5653,9 @@ renderMathInElement(document.body, {
             text-align: left;
             vertical-align: top;
             line-height: 1.3;
-            white-space: nowrap;
+            white-space: normal;
+            overflow-wrap: anywhere;
+            word-break: break-word;
           }
           #noteTooltip thead th {
             background: rgba(88, 129, 87, 0.12);
@@ -9890,7 +9898,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202604041tcj"></script>
+    <script src="js/chat.js?v=2026040517fj"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>

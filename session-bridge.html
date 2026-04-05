@@ -22,10 +22,24 @@
         if (data.type !== 'COURSEBOOK_GET_SESSION') return;
 
         const loggedInUser = localStorage.getItem('loggedInUser');
+        const chatStateKeys = [
+          'lastReadMessage_global-chat',
+          'notificationsDisabled_global-chat',
+          'showMembers_global-chat'
+        ];
+        const chatState = {};
+        for (const key of chatStateKeys) {
+          const value = localStorage.getItem(key);
+          if (typeof value === 'string') {
+            chatState[key] = value;
+          }
+        }
+
         event.source.postMessage(
           {
             type: 'COURSEBOOK_SESSION',
-            loggedInUser: loggedInUser || null
+            loggedInUser: loggedInUser || null,
+            chatState
           },
           event.origin
         );
