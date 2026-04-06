@@ -155,7 +155,7 @@
             border-radius: 12px;
             padding: 16px 20px;
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
             align-items: center;
             gap: 12px;
             flex-wrap: wrap;
@@ -183,10 +183,33 @@
             color: #374151;
         }
 
+        .panel-header .status-chip {
+            margin-top: 8px;
+            width: fit-content;
+        }
+
+        .editor-panel .panel-header #notesStatus {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            margin-top: 0;
+        }
+
         .status-chip.error {
             border-color: #fecaca;
             background: #fef2f2;
             color: #991b1b;
+        }
+
+        .status-chip.dirty {
+            border-color: #fecdd3;
+            background: #fff1f2;
+            color: #be123c;
+        }
+
+        .notes-header #notesStatus {
+            margin-left: auto;
         }
 
         .notes-layout {
@@ -225,6 +248,11 @@
         .panel-header {
             padding: 14px;
             border-bottom: 1px solid #e5e7eb;
+        }
+
+        .editor-panel .panel-header {
+            position: relative;
+            padding-right: 170px;
         }
 
         .search-input {
@@ -372,12 +400,15 @@
             display: inline-flex;
             align-items: center;
             gap: 6px;
-            flex-wrap: wrap;
+            flex-wrap: nowrap;
+            min-height: 22px;
+            white-space: nowrap;
         }
 
         .collab-avatar {
             width: 20px;
             height: 20px;
+            flex: 0 0 20px;
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
@@ -401,6 +432,11 @@
             margin-top: 4px;
             font-size: 12px;
             color: #4b5563;
+            min-height: 22px;
+            display: flex;
+            align-items: center;
+            line-height: 1;
+            overflow: hidden;
         }
 
         .notes-editor:focus {
@@ -758,6 +794,12 @@
             color: #fca5a5;
         }
 
+        body.dark-mode .status-chip.dirty {
+            border-color: #7f1d1d;
+            background: #3a151f;
+            color: #fda4af;
+        }
+
         body.dark-mode .save-btn {
             background: #588157;
             color: #fff;
@@ -816,6 +858,14 @@
                 display: flex;
                 flex-direction: column;
                 align-items: stretch;
+                padding-right: 14px;
+            }
+
+            .editor-panel .panel-header #notesStatus {
+                position: static;
+                transform: none;
+                align-self: flex-end;
+                margin-top: 8px;
             }
 
             .mobile-course-select {
@@ -914,11 +964,10 @@
     </div>
 
     <div class="main-content">
-        <div class="notes-header">
+        <div id="notesHeader" class="notes-header">
             <div>
                 <h1 class="notes-title">Course Notes</h1>
             </div>
-            <div id="notesStatus" class="status-chip">Няма незапазени промени</div>
         </div>
 
         <div class="notes-layout">
@@ -931,10 +980,11 @@
             </section>
 
             <section class="editor-panel">
-                <div class="panel-header">
+                <div id="editorPanelHeader" class="panel-header">
                     <h2 id="selectedCourseTitle" class="panel-title">Избери предмет</h2>
-                    <div id="selectedCourseMeta" class="editor-meta">Последен ъпдейт: няма</div>
-                    <div id="collabStatus" class="collab-meta">Няма активни редактори</div>
+                    <div id="selectedCourseMeta" class="editor-meta">Последна редакция: —</div>
+                    <div id="collabStatus" class="collab-meta">Офлайн</div>
+                    <div id="notesStatus" class="status-chip">Запазено</div>
                     <select id="courseSelectMobile" class="mobile-course-select"></select>
                 </div>
                 <div class="md-toolbar">
@@ -1099,6 +1149,8 @@
                 coursesList: document.getElementById('coursesList'),
                 courseSearch: document.getElementById('courseSearch'),
                 courseSelectMobile: document.getElementById('courseSelectMobile'),
+                notesHeader: document.getElementById('notesHeader'),
+                editorPanelHeader: document.getElementById('editorPanelHeader'),
                 selectedCourseTitle: document.getElementById('selectedCourseTitle'),
                 selectedCourseMeta: document.getElementById('selectedCourseMeta'),
                 collabStatus: document.getElementById('collabStatus'),
@@ -1121,9 +1173,38 @@
 
             function setDraftState(isDirty) {
                 state.isDirty = isDirty;
-                els.notesStatus.textContent = isDirty ? 'Има незапазени промени' : 'Няма незапазени промени';
+                els.notesStatus.textContent = isDirty ? 'Незапазено' : 'Запазено';
                 els.notesStatus.classList.remove('error');
+                els.notesStatus.classList.toggle('dirty', isDirty);
             }
+
+            function setCollabSimpleStatus(text = 'Офлайн', color = '#6b7280') {
+                if (!els.collabStatus) return;
+                els.collabStatus.textContent = text;
+                els.collabStatus.style.color = color;
+            }
+
+            function placeNotesStatusForViewport() {
+                if (!els.notesStatus || !els.notesHeader || !els.editorPanelHeader) return;
+
+                const isMobileViewport = window.matchMedia('(max-width: 1000px)').matches;
+                if (isMobileViewport) {
+                    if (els.notesStatus.parentElement !== els.notesHeader) {
+                        els.notesHeader.appendChild(els.notesStatus);
+                    }
+                    return;
+                }
+
+                if (els.notesStatus.parentElement !== els.editorPanelHeader) {
+                    if (els.courseSelectMobile && els.courseSelectMobile.parentElement === els.editorPanelHeader) {
+                        els.editorPanelHeader.insertBefore(els.notesStatus, els.courseSelectMobile);
+                    } else {
+                        els.editorPanelHeader.appendChild(els.notesStatus);
+                    }
+                }
+            }
+
+            window.addEventListener('resize', placeNotesStatusForViewport);
 
             function clearAutosaveTimer() {
                 if (state.autosaveTimer) {
@@ -1346,9 +1427,7 @@
                 state.liveblocksRenderHash = '';
                 state.liveblocksLastSelections = {};
                 clearSelectionOverlay();
-                if (els.collabStatus) {
-                    els.collabStatus.textContent = 'Няма активни редактори';
-                }
+                setCollabSimpleStatus('Офлайн');
             }
 
             function buildLiveblocksPresencePayload(overrides = {}) {
@@ -1388,7 +1467,11 @@
                 const others = normalizeLiveblocksOthers(othersInput);
                 if (!Array.isArray(others)) {
                     clearSelectionOverlay();
-                    if (els.collabStatus) els.collabStatus.textContent = 'Няма активни редактори';
+                    if (state.liveblocksConnected) {
+                        setCollabSimpleStatus('Офлайн');
+                    } else {
+                        setCollabSimpleStatus('Офлайн');
+                    }
                     return;
                 }
 
@@ -1450,7 +1533,11 @@
 
                         els.collabStatus.innerHTML = `<span class="collab-avatars-wrap"><span>Активни:</span>${avatars}</span>`;
                     } else {
-                        els.collabStatus.textContent = 'Няма активни редактори';
+                        if (state.liveblocksConnected) {
+                            setCollabSimpleStatus('Офлайн');
+                        } else {
+                            setCollabSimpleStatus('Офлайн');
+                        }
                     }
                 }
 
@@ -1489,10 +1576,7 @@
                 stopLiveblocksPresence();
 
                 try {
-                    if (els.collabStatus) {
-                        els.collabStatus.textContent = `Liveblocks: connecting (${roomId})...`;
-                        els.collabStatus.style.color = '#374151';
-                    }
+                    setCollabSimpleStatus('Офлайн');
 
                     await ensureLiveblocksModule();
                     if (!state.liveblocksClient) {
@@ -1571,10 +1655,7 @@
                     state.liveblocksRoom = entered.room;
                     state.liveblocksRoomId = roomId;
                     state.liveblocksLeave = entered.leave;
-                    if (els.collabStatus) {
-                        els.collabStatus.textContent = `Liveblocks: joined ${roomId}`;
-                        els.collabStatus.style.color = '#588157';
-                    }
+                    setCollabSimpleStatus('Офлайн');
 
                     if (typeof state.liveblocksRoom.subscribe === 'function') {
                         state.liveblocksRoom.subscribe('status', (status) => {
@@ -1631,11 +1712,7 @@
                     });
                 } catch (error) {
                     console.error('Liveblocks init failed:', error);
-                    if (els.collabStatus) {
-                        const message = (error && error.message) ? error.message : 'init failed';
-                        els.collabStatus.textContent = `Liveblocks error: ${message}`;
-                        els.collabStatus.style.color = '#b91c1c';
-                    }
+                    setCollabSimpleStatus('Офлайн');
                     stopLiveblocksPresence();
                 }
             }
@@ -1754,10 +1831,17 @@
             }
 
             function financeDate(value) {
-                if (!value) return 'няма';
+                if (!value) return '—';
                 const date = new Date(value);
-                if (Number.isNaN(date.getTime())) return 'няма';
-                return date.toLocaleString('bg-BG');
+                if (Number.isNaN(date.getTime())) return '—';
+
+                const day = String(date.getDate());
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const year = String(date.getFullYear());
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${day}.${month}.${year}, ${hours}:${minutes}`;
             }
 
             function normalizeHtml(html) {
@@ -1993,13 +2077,12 @@
             }
 
             function setupLazyLoadingForEditorImages() {
-                setupLazyObserver();
-
                 const images = Array.from(els.courseNotesEditor.querySelectorAll('img'));
                 images.forEach((img) => {
                     img.loading = 'lazy';
                     img.decoding = 'async';
                     img.referrerPolicy = 'no-referrer';
+                    img.setAttribute('draggable', 'false');
 
                     if (img.dataset.notesErrorBound !== '1') {
                         img.addEventListener('error', () => {
@@ -2008,26 +2091,15 @@
                         img.dataset.notesErrorBound = '1';
                     }
 
-                    const currentSrc = img.getAttribute('src');
-                    const currentDataSrc = img.getAttribute('data-src');
-                    const alreadyLazyLoaded = img.getAttribute('data-lazy-loaded') === '1' || img.classList.contains('notes-image-loaded');
-
-                    if (alreadyLazyLoaded) {
-                        img.classList.remove('notes-lazy-image');
-                        img.classList.add('notes-image-loaded');
-                        return;
+                    const dataSrc = img.getAttribute('data-src');
+                    if (dataSrc) {
+                        img.setAttribute('src', dataSrc);
+                        img.removeAttribute('data-src');
                     }
 
-                    if (!currentDataSrc && currentSrc && currentSrc !== NOTES_IMAGE_LAZY_PLACEHOLDER) {
-                        img.setAttribute('data-src', currentSrc);
-                        img.setAttribute('src', NOTES_IMAGE_LAZY_PLACEHOLDER);
-                        img.classList.add('notes-lazy-image');
-                        img.classList.remove('notes-image-loaded');
-                    }
-
-                    if (state.imageObserver && img.getAttribute('data-src')) {
-                        state.imageObserver.observe(img);
-                    }
+                    img.setAttribute('data-lazy-loaded', '1');
+                    img.classList.remove('notes-lazy-image');
+                    img.classList.add('notes-image-loaded');
                 });
             }
 
@@ -2088,11 +2160,12 @@
                 const image = document.createElement('img');
                 image.src = imageSrc;
                 image.alt = 'Image';
-                image.setAttribute('data-src', imageSrc);
                 image.loading = 'lazy';
                 image.decoding = 'async';
                 image.referrerPolicy = 'no-referrer';
-                image.classList.add('notes-lazy-image');
+                image.classList.add('notes-image-loaded');
+                image.setAttribute('data-lazy-loaded', '1');
+                image.setAttribute('draggable', 'false');
 
                 range.deleteContents();
                 range.insertNode(image);
@@ -2129,7 +2202,7 @@
             function renderCurrentMeta(value) {
                 const updatedBy = value?.updatedBy || 'Unknown';
                 const updatedAt = financeDate(value?.updatedAt);
-                els.selectedCourseMeta.textContent = `Последен ъпдейт: ${updatedAt}${updatedAt === 'няма' ? '' : ` · ${updatedBy}`}`;
+                els.selectedCourseMeta.textContent = `Последна редакция: ${updatedAt}${updatedAt === '—' ? '' : ` · ${updatedBy}`}`;
             }
 
             function normalizeAuthorTitles() {
@@ -2403,6 +2476,8 @@
             }
 
             async function init() {
+                placeNotesStatusForViewport();
+
                 const adminButton = document.getElementById('admin-button');
                 if (adminButton) {
                     const isAdminByRole = (candidate) => {
@@ -2443,8 +2518,7 @@
                 renderCoursesList();
 
                 if (!state.liveblocksEnabled) {
-                    els.collabStatus.textContent = 'Liveblocks auth endpoint липсва: realtime е изключен';
-                    els.collabStatus.style.color = '#b45309';
+                    setCollabSimpleStatus('Офлайн');
                 }
 
                 if (state.courses.length > 0) {
@@ -2524,7 +2598,7 @@
                     }
                 } finally {
                     if (els.notesStatus && !state.isDirty) {
-                        els.notesStatus.textContent = previousStatus || 'Няма незапазени промени';
+                        els.notesStatus.textContent = previousStatus || 'Запазено';
                     }
                 }
             });

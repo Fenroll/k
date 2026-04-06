@@ -2749,7 +2749,7 @@
       if (!lastUpdateEl) return;
 
       if (!meta || !meta.updatedAt) {
-        lastUpdateEl.textContent = 'Последен ъпдейт: няма';
+        lastUpdateEl.textContent = 'Последна редакция: няма';
         return;
       }
 
@@ -2757,9 +2757,9 @@
       const by = meta.updatedBy || 'Unknown';
       const byRule = getSpecialRuleByName(by);
       if (byRule && byRule.label === 'Owner') {
-        lastUpdateEl.textContent = `Последен ъпдейт: ${when.toLocaleString('bg-BG')}`;
+        lastUpdateEl.textContent = `Последна редакция: ${when.toLocaleString('bg-BG')}`;
       } else {
-        lastUpdateEl.textContent = `Последен ъпдейт: ${by} · ${when.toLocaleString('bg-BG')}`;
+        lastUpdateEl.textContent = `Последна редакция: ${by} · ${when.toLocaleString('bg-BG')}`;
       }
     }
 
