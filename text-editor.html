@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260408107t"></script>
+  <script src="js/auth-guard.js?v=2026041216d"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1664,7 +1664,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260408107t"></script>
+  <script src="courses.generated.js?v=2026041216d"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -7772,9 +7772,13 @@ renderMathInElement(document.body, {
 
         if (blockedChildren.length === 0) return;
 
+        const movedNodes = document.createDocumentFragment();
+
         blockedChildren.forEach(child => {
-          headingEl.parentNode.insertBefore(child, headingEl.nextSibling);
+          movedNodes.appendChild(child);
         });
+
+        headingEl.parentNode.insertBefore(movedNodes, headingEl.nextSibling);
 
         if (!hasMeaningfulHeadingContent(headingEl)) {
           headingEl.remove();
@@ -8187,6 +8191,22 @@ renderMathInElement(document.body, {
       if (selection.rangeCount === 0) return;
       
       const range = selection.getRangeAt(0);
+
+      const findAncestor = (node, predicate) => {
+        while (node && node !== editor) {
+          if (node.nodeType === Node.ELEMENT_NODE && predicate(node)) return node;
+          node = node.parentNode;
+        }
+        return null;
+      };
+
+      const isAtStartOfElement = (targetEl) => {
+        if (!targetEl) return false;
+        const probe = range.cloneRange();
+        probe.selectNodeContents(targetEl);
+        probe.setEnd(range.startContainer, range.startOffset);
+        return probe.toString().length === 0;
+      };
       
       // Convert markdown to HTML
       const html = markdownToHtml(text);
@@ -8194,6 +8214,44 @@ renderMathInElement(document.body, {
       // Create temporary container with the HTML
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = html;
+
+      const structuralPasteTags = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'TABLE', 'BLOCKQUOTE', 'PRE', 'HR']);
+      const pastedHasStructuralBlocks = Array.from(tempDiv.childNodes).some((node) => {
+        return node.nodeType === Node.ELEMENT_NODE && structuralPasteTags.has(node.tagName);
+      });
+
+      // Pasting multi-line/structured markdown inside a heading can produce invalid nested blocks
+      // and cause content loss-like behavior; insert around the heading instead.
+      const currentHeading = findAncestor(range.startContainer, (el) => /^H[1-6]$/.test(el.tagName));
+      if (currentHeading && pastedHasStructuralBlocks && currentHeading.parentNode) {
+        range.deleteContents();
+
+        const parent = currentHeading.parentNode;
+        const insertBeforeNode = isAtStartOfElement(currentHeading)
+          ? currentHeading
+          : currentHeading.nextSibling;
+
+        const fragment = document.createDocumentFragment();
+        while (tempDiv.firstChild) {
+          fragment.appendChild(tempDiv.firstChild);
+        }
+
+        const caretMarker = document.createComment('paste-caret');
+        fragment.appendChild(caretMarker);
+        parent.insertBefore(fragment, insertBeforeNode);
+
+        const newRange = document.createRange();
+        newRange.setStartAfter(caretMarker);
+        newRange.collapse(true);
+        caretMarker.remove();
+
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+
+        repairInvalidHeadingStructureInEditor();
+        editor.dispatchEvent(new Event('input', { bubbles: true }));
+        return;
+      }
       
       // Remove all style attributes to prevent font size changes
       const allElements = tempDiv.querySelectorAll('*');
@@ -10214,7 +10272,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260408107t"></script>
+    <script src="js/chat.js?v=2026041216d"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
