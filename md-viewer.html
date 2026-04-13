@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=2026041311uk"></script>
+  <script src="js/auth-guard.js?v=202604131205"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -479,15 +479,19 @@
       margin-bottom: 0 !important;
     }
     #noteTooltipViewer h1, #noteTooltipViewer h2, #noteTooltipViewer h3, #noteTooltipViewer h4 {
-      margin: 0.25em 0 0.2em 0;
-      color: #2f5d50;
-      line-height: 1.25;
-      font-weight: 700;
+      margin: 0.25em 0 0.2em 0 !important;
+      color: #2f5d50 !important;
+      line-height: 1.25 !important;
+      font-weight: 700 !important;
+      font-family: inherit !important;
+      letter-spacing: normal !important;
+      text-transform: none !important;
+      border: 0 !important;
     }
-    #noteTooltipViewer h1 { font-size: 1.1em; }
-    #noteTooltipViewer h2 { font-size: 1.03em; }
-    #noteTooltipViewer h3 { font-size: 0.97em; }
-    #noteTooltipViewer h4 { font-size: 0.93em; }
+    #noteTooltipViewer h1 { font-size: 1.1em !important; }
+    #noteTooltipViewer h2 { font-size: 1.03em !important; }
+    #noteTooltipViewer h3 { font-size: 0.97em !important; }
+    #noteTooltipViewer h4 { font-size: 0.93em !important; }
     #noteTooltipViewer img {
       max-width: 100%;
       height: auto;
@@ -2210,7 +2214,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=2026041311uk"></script>
+  <script src="courses.generated.js?v=202604131205"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2317,7 +2321,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026041311uk"></script>
+    <script src="js/chat.js?v=202604131205"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=20260324a"></script>
 
