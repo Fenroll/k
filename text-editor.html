@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202604121sv8"></script>
+  <script src="js/auth-guard.js?v=2026041311uk"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1387,7 +1387,7 @@
 
   <!-- Add Note Modal -->
   <div id="noteModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
+    <div class="modal-content" style="width: min(92vw, 760px); max-width: 760px;">
       <div class="modal-header">
         <h2>Add Note</h2>
         <span class="close" id="closeNoteModalBtn">&times;</span>
@@ -1399,7 +1399,7 @@
         </div>
         <div style="margin-bottom: 16px;">
           <label for="noteTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Note Content</label>
-          <textarea id="noteTextInput" placeholder="Paste your note content here..." style="width: 100%; height: 150px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: var(--app-ui-font); resize: vertical;"></textarea>
+          <textarea id="noteTextInput" placeholder="Paste your note content here..." style="width: 100%; height: 280px; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; font-family: var(--app-ui-font); resize: vertical;"></textarea>
         </div>
         <div style="margin-bottom: 4px; padding: 10px; border: 1px solid #e5e7eb; border-radius: 8px; background: #f9fafb;">
           <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 8px;">
@@ -1664,7 +1664,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202604121sv8"></script>
+  <script src="courses.generated.js?v=2026041311uk"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2346,6 +2346,14 @@
         history.shift();
         historyIndex--;
       }
+    }
+
+    function scheduleEditorAutoSave() {
+      if (isLoadingFile) return;
+      clearTimeout(editor.saveTimeout);
+      editor.saveTimeout = setTimeout(() => {
+        localStorage.setItem('textEditorContent', editor.innerHTML);
+      }, 2000);
     }
 
     // Toolbar functions
@@ -5155,7 +5163,9 @@ localStorage.setItem('textEditorContent', htmlContent);
                  html.push('</' + closed.type + '>');
                }
             }
-            if (/^#{1,4}\\s+/.test(content)) {
+            if (/^(?:---|\\*\\*\\*|___)$/.test(content)) {
+              html.push('<hr>');
+            } else if (/^#{1,4}\\s+/.test(content)) {
               const headingMatch = content.match(/^(#{1,4})\\s+(.+)$/);
               if (headingMatch) {
                 const level = headingMatch[1].length;
@@ -5484,6 +5494,7 @@ renderMathInElement(document.body, {
       }
 
       saveToHistory();
+      scheduleEditorAutoSave();
       showNotification('Note removed successfully!', 'success');
       resetNoteModalState();
 
@@ -5531,6 +5542,7 @@ renderMathInElement(document.body, {
         resetNoteModalState();
         
         saveToHistory();
+        scheduleEditorAutoSave();
         
         // Restore cursor position after the edited note span
         requestAnimationFrame(() => {
@@ -5604,6 +5616,7 @@ renderMathInElement(document.body, {
         resetNoteModalState();
         
         saveToHistory();
+        scheduleEditorAutoSave();
         
         // Restore cursor position after the note span - use requestAnimationFrame for better timing
         requestAnimationFrame(() => {
@@ -5744,7 +5757,20 @@ renderMathInElement(document.body, {
     noteTextInput.addEventListener('paste', async (e) => {
       const clipboardItems = Array.from((e.clipboardData && e.clipboardData.items) || []);
       const imageItem = clipboardItems.find(item => item.kind === 'file' && item.type.startsWith('image/'));
-      if (!imageItem) return;
+      if (!imageItem) {
+        const pastedText = (e.clipboardData && e.clipboardData.getData('text/plain')) || '';
+        if (!pastedText) return;
+
+        e.preventDefault();
+        const textWithoutEmptyLines = pastedText
+          .split(/\r?\n/)
+          .filter((line) => line.trim() !== '')
+          .join('\n');
+
+        if (!textWithoutEmptyLines) return;
+        insertTextAtTextareaCursor(noteTextInput, textWithoutEmptyLines);
+        return;
+      }
 
       e.preventDefault();
 
@@ -5850,6 +5876,7 @@ renderMathInElement(document.body, {
 
     function createNoteTooltip() {
       noteTooltip = document.createElement('div');
+      const supportsPreciseHover = Boolean(window.matchMedia && window.matchMedia('(hover: hover) and (pointer: fine)').matches);
       noteTooltip.id = 'noteTooltip';
       noteTooltip.style.cssText = `
         position: fixed;
@@ -5874,6 +5901,7 @@ renderMathInElement(document.body, {
         border: 1px solid #588157; /* ~Fern */
         contain: content;
       `;
+      noteTooltip.style.pointerEvents = supportsPreciseHover ? 'none' : 'auto';
       noteTooltip.id = 'noteTooltip';
       
       // Add styles for compact lists in tooltips
@@ -6122,8 +6150,10 @@ renderMathInElement(document.body, {
                html.push('</' + closed.type + '>');
              }
           }
-          
-          if (/^#{1,4}\s+/.test(content)) {
+
+          if (/^(?:---|\*\*\*|___)$/.test(content)) {
+            html.push('<hr>');
+          } else if (/^#{1,4}\s+/.test(content)) {
             const headingMatch = content.match(/^(#{1,4})\s+(.+)$/);
             if (headingMatch) {
               const level = headingMatch[1].length;
@@ -6265,11 +6295,8 @@ renderMathInElement(document.body, {
           if (left < minLeft) left = minLeft;
 
           let top = rect.bottom + 6;
-          const maxTop = window.innerHeight - tooltipRect.height - 10;
-          if (top > maxTop) {
-            top = rect.top - tooltipRect.height - 6;
-          }
-          if (top < 10) top = 10;
+          const maxTop = window.innerHeight - tooltipRect.height - 20;
+          top = Math.max(10, Math.min(top, maxTop));
 
           noteTooltip.style.left = `${left}px`;
           noteTooltip.style.top = `${top}px`;
@@ -6281,14 +6308,19 @@ renderMathInElement(document.body, {
     editor.addEventListener('mouseout', (e) => {
       const fromNote = getNoteSpanFromEventTarget(e.target);
       const toNote = getNoteSpanFromEventTarget(e.relatedTarget);
-      const enteringTooltip = noteTooltip && e.relatedTarget && noteTooltip.contains(e.relatedTarget);
-      if (enteringTooltip) {
-        return;
-      }
       if (noteTooltip && fromNote && fromNote !== toNote) {
         hideNoteTooltip();
       }
     });
+
+    document.addEventListener('pointerdown', (e) => {
+      if (!noteTooltip || noteTooltip.style.display !== 'block') return;
+      const clickedNote = getNoteSpanFromEventTarget(e.target);
+      const clickedTooltip = noteTooltip.contains(e.target);
+      if (!clickedNote && !clickedTooltip) {
+        hideNoteTooltip();
+      }
+    }, true);
 
     document.addEventListener('touchstart', (e) => {
       if (!noteTooltip || noteTooltip.style.display !== 'block') return;
@@ -9507,12 +9539,7 @@ renderMathInElement(document.body, {
 
     // Auto-save to localStorage (only when user is actually editing, not loading files)
     editor.addEventListener('input', () => {
-      if (isLoadingFile) return; // Don't save during file load
-      
-      clearTimeout(editor.saveTimeout);
-      editor.saveTimeout = setTimeout(() => {
-        localStorage.setItem('textEditorContent', editor.innerHTML);
-      }, 2000);
+      scheduleEditorAutoSave();
     });
 
     // Table context menu
@@ -10272,7 +10299,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202604121sv8"></script>
+    <script src="js/chat.js?v=2026041311uk"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
