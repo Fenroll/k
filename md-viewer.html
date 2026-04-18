@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=2026041812cr"></script>
+  <script src="js/auth-guard.js?v=2026041814p8"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -2214,7 +2214,7 @@
   </script>
   
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=2026041812cr"></script>
+  <script src="courses.generated.js?v=2026041814p8"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2321,7 +2321,7 @@
   
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026041812cr"></script>
+    <script src="js/chat.js?v=2026041814p8"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=20260324a"></script>
 
@@ -2640,6 +2640,13 @@
           html.push('</' + closed.type + '>');
         }
 
+        const protectedHtmlSegments = [];
+        const protectHtmlSegment = (segmentHtml) => {
+          const token = `ZZZPH${protectedHtmlSegments.length}ZZZ`;
+          protectedHtmlSegments.push(segmentHtml);
+          return token;
+        };
+
         let rendered = html.join('')
           .replace(/!\[(.*?)\]\((.*?)(?:\s+(?:"(.*?)"|&quot;(.*?)&quot;))?\)/g, (match, alt, src, titleQuoted, titleEscaped) => {
             const safeAlt = escapeHtml(alt);
@@ -2649,24 +2656,31 @@
               .trim();
             const trimmedSrc = stripTrailingUrlPunctuation(srcWithoutTitle);
             const isAllowedSrc = /^(https?:\/\/|data:image\/|\.\.?\/|\/)/i.test(trimmedSrc);
-            const safeSrc = isAllowedSrc ? trimmedSrc.replace(/"/g, '&quot;') : '#';
+            const safeSrc = isAllowedSrc ? trimmedSrc : '#';
+            const encodedSrc = safeSrc.replace(/"/g, '&quot;');
             let widthValue = '100';
             const widthMatch = String(title || '').match(/width=(\d+)%/i);
             if (widthMatch && widthMatch[1]) {
               widthValue = String(Math.min(100, Math.max(10, Number(widthMatch[1]) || 100)));
             }
-            return `<img data-note-src="${safeSrc}" data-note-width="${widthValue}" alt="${safeAlt}" loading="lazy" decoding="async">`;
+            return protectHtmlSegment(`<img data-note-src="${encodedSrc}" data-note-width="${widthValue}" alt="${safeAlt}" loading="lazy" decoding="async">`);
           })
           .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
           .replace(/__(.+?)__/g, '<strong>$1</strong>')
           .replace(/\*(.+?)\*/g, '<em>$1</em>')
           .replace(/_(.+?)_/g, '<em>$1</em>')
           .replace(/`(.+?)`/g, '<code>$1</code>')
-          .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank" rel="noopener">$1</a>')
+          .replace(/\[(.+?)\]\((.+?)\)/g, (match, text, href) => {
+            const rawHref = String(href || '').trim();
+            const isAllowedHref = /^(https?:\/\/|mailto:|tel:|\.?\.?\/|\/)/i.test(rawHref);
+            const safeHref = (isAllowedHref ? rawHref : '#').replace(/"/g, '&quot;');
+            return protectHtmlSegment(`<a href="${safeHref}" target="_blank" rel="noopener">${text}</a>`);
+          })
           .replace(/<br><ul>/g, '<ul>')
           .replace(/<br><ol>/g, '<ol>')
           .replace(/<\/ul><br>/g, '</ul>')
-          .replace(/<\/ol><br>/g, '</ol>');
+          .replace(/<\/ol><br>/g, '</ol>')
+          .replace(/ZZZPH(\d+)ZZZ/g, (match, idx) => protectedHtmlSegments[Number(idx)] || '');
 
         tooltip.innerHTML = rendered;
         loadTooltipImagesNow();
