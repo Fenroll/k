@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202604191c1t"></script>
+  <script src="js/auth-guard.js?v=202604191cz6"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1664,7 +1664,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202604191c1t"></script>
+  <script src="courses.generated.js?v=202604191cz6"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2950,6 +2950,7 @@
 
     async function optimizeImageFileForUpload(file, maxBytes = TEXT_EDITOR_MAX_IMAGE_UPLOAD_BYTES) {
       const originalSize = file && Number.isFinite(file.size) ? file.size : 0;
+      const isOversized = originalSize > maxBytes;
 
       if (!file || !(file instanceof File)) {
         throw new Error('No image file was provided');
@@ -2959,23 +2960,15 @@
         throw new Error('Selected file is not an image');
       }
 
-      if (originalSize <= maxBytes) {
-        return {
-          file,
-          wasOptimized: false,
-          originalSize,
-          finalSize: originalSize,
-          note: ''
-        };
-      }
-
       if (shouldSkipCanvasOptimization(file.type)) {
         return {
           file,
           wasOptimized: false,
           originalSize,
           finalSize: originalSize,
-          note: 'This image format cannot be safely auto-compressed. Please use PNG, JPG, or WEBP under 1MB.'
+          note: isOversized
+            ? 'This image format cannot be safely auto-compressed. Please use PNG, JPG, or WEBP under 1MB.'
+            : ''
         };
       }
 
@@ -2993,8 +2986,12 @@
         throw new Error('Image optimization is not available in this browser');
       }
 
-      const scaleSteps = [1, 0.9, 0.82, 0.74, 0.66, 0.58, 0.5, 0.42, 0.35, 0.28];
-      const qualitySteps = [0.92, 0.86, 0.8, 0.74, 0.68, 0.62, 0.56, 0.5, 0.44, 0.38];
+      const scaleSteps = isOversized
+        ? [1, 0.9, 0.82, 0.74, 0.66, 0.58, 0.5, 0.42, 0.35, 0.28]
+        : [1];
+      const qualitySteps = isOversized
+        ? [0.92, 0.86, 0.8, 0.74, 0.68, 0.62, 0.56, 0.5, 0.44, 0.38]
+        : [0.98, 0.96, 0.94, 0.92];
       const mimeCandidates = getOptimizationMimeCandidates(file.type);
 
       let bestBlob = null;
@@ -3031,6 +3028,17 @@
                 lastModified: Date.now()
               });
 
+              // Keep tiny gains from gentle mode only when there is a meaningful size reduction.
+              if (!isOversized && optimizedFile.size >= (originalSize * 0.97)) {
+                return {
+                  file,
+                  wasOptimized: false,
+                  originalSize,
+                  finalSize: originalSize,
+                  note: ''
+                };
+              }
+
               return {
                 file: optimizedFile,
                 wasOptimized: true,
@@ -3052,6 +3060,16 @@
         type: fallbackMimeType,
         lastModified: Date.now()
       });
+
+      if (!isOversized && fallbackFile.size >= (originalSize * 0.97)) {
+        return {
+          file,
+          wasOptimized: false,
+          originalSize,
+          finalSize: originalSize,
+          note: ''
+        };
+      }
 
       return {
         file: fallbackFile,
@@ -10509,7 +10527,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202604191c1t"></script>
+    <script src="js/chat.js?v=202604191cz6"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
