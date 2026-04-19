@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260419168y"></script>
+  <script src="js/auth-guard.js?v=202604191c1t"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -1664,7 +1664,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260419168y"></script>
+  <script src="courses.generated.js?v=202604191c1t"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2872,6 +2872,197 @@
     // Store cursor position for image insertion
     let savedImageRange = null;
     const TEXT_EDITOR_R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+    const TEXT_EDITOR_MAX_IMAGE_UPLOAD_BYTES = 1 * 1024 * 1024;
+
+    function formatUploadBytes(bytes) {
+      const value = Number(bytes);
+      if (!Number.isFinite(value) || value < 0) return '0 B';
+      if (value < 1024) return `${Math.round(value)} B`;
+      if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+      return `${(value / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    function extensionForImageMimeType(mimeType) {
+      switch (String(mimeType || '').toLowerCase()) {
+        case 'image/jpeg': return 'jpg';
+        case 'image/png': return 'png';
+        case 'image/webp': return 'webp';
+        default: return 'png';
+      }
+    }
+
+    function buildOptimizedImageFileName(fileName, mimeType) {
+      const fallback = 'image';
+      const raw = String(fileName || fallback).trim() || fallback;
+      const base = raw.replace(/\.[^.]+$/, '') || fallback;
+      return `${base}.${extensionForImageMimeType(mimeType)}`;
+    }
+
+    function shouldSkipCanvasOptimization(fileType) {
+      const type = String(fileType || '').toLowerCase();
+      return type === 'image/gif' || type === 'image/svg+xml';
+    }
+
+    function getOptimizationMimeCandidates(fileType) {
+      const type = String(fileType || '').toLowerCase();
+      if (type === 'image/jpeg' || type === 'image/jpg') {
+        return ['image/jpeg'];
+      }
+      if (type === 'image/webp') {
+        return ['image/webp'];
+      }
+      if (type === 'image/png') {
+        return ['image/png'];
+      }
+      return ['image/png'];
+    }
+
+    function loadImageElementFromFile(file) {
+      return new Promise((resolve, reject) => {
+        const objectUrl = URL.createObjectURL(file);
+        const img = new Image();
+
+        img.onload = () => {
+          URL.revokeObjectURL(objectUrl);
+          resolve(img);
+        };
+
+        img.onerror = () => {
+          URL.revokeObjectURL(objectUrl);
+          reject(new Error('Could not decode image'));
+        };
+
+        img.src = objectUrl;
+      });
+    }
+
+    function canvasToBlobAsync(canvas, mimeType, quality) {
+      return new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+          if (!blob) {
+            reject(new Error('Failed to encode image'));
+            return;
+          }
+          resolve(blob);
+        }, mimeType, quality);
+      });
+    }
+
+    async function optimizeImageFileForUpload(file, maxBytes = TEXT_EDITOR_MAX_IMAGE_UPLOAD_BYTES) {
+      const originalSize = file && Number.isFinite(file.size) ? file.size : 0;
+
+      if (!file || !(file instanceof File)) {
+        throw new Error('No image file was provided');
+      }
+
+      if (!file.type || !file.type.startsWith('image/')) {
+        throw new Error('Selected file is not an image');
+      }
+
+      if (originalSize <= maxBytes) {
+        return {
+          file,
+          wasOptimized: false,
+          originalSize,
+          finalSize: originalSize,
+          note: ''
+        };
+      }
+
+      if (shouldSkipCanvasOptimization(file.type)) {
+        return {
+          file,
+          wasOptimized: false,
+          originalSize,
+          finalSize: originalSize,
+          note: 'This image format cannot be safely auto-compressed. Please use PNG, JPG, or WEBP under 1MB.'
+        };
+      }
+
+      const sourceImage = await loadImageElementFromFile(file);
+      const sourceWidth = Math.max(1, Math.round(sourceImage.naturalWidth || sourceImage.width || 0));
+      const sourceHeight = Math.max(1, Math.round(sourceImage.naturalHeight || sourceImage.height || 0));
+
+      if (!sourceWidth || !sourceHeight) {
+        throw new Error('Could not read image dimensions for optimization');
+      }
+
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d', { alpha: true });
+      if (!context) {
+        throw new Error('Image optimization is not available in this browser');
+      }
+
+      const scaleSteps = [1, 0.9, 0.82, 0.74, 0.66, 0.58, 0.5, 0.42, 0.35, 0.28];
+      const qualitySteps = [0.92, 0.86, 0.8, 0.74, 0.68, 0.62, 0.56, 0.5, 0.44, 0.38];
+      const mimeCandidates = getOptimizationMimeCandidates(file.type);
+
+      let bestBlob = null;
+      let bestMimeType = '';
+
+      for (const scale of scaleSteps) {
+        const width = Math.max(1, Math.round(sourceWidth * scale));
+        const height = Math.max(1, Math.round(sourceHeight * scale));
+        canvas.width = width;
+        canvas.height = height;
+        context.clearRect(0, 0, width, height);
+        context.drawImage(sourceImage, 0, 0, width, height);
+
+        for (const mimeType of mimeCandidates) {
+          const candidateQualities = mimeType === 'image/png' ? [undefined] : qualitySteps;
+
+          for (const quality of candidateQualities) {
+            let blob;
+            try {
+              blob = await canvasToBlobAsync(canvas, mimeType, quality);
+            } catch (error) {
+              continue;
+            }
+
+            if (!bestBlob || blob.size < bestBlob.size) {
+              bestBlob = blob;
+              bestMimeType = mimeType;
+            }
+
+            if (blob.size <= maxBytes) {
+              const optimizedMimeType = blob.type || mimeType;
+              const optimizedFile = new File([blob], buildOptimizedImageFileName(file.name, optimizedMimeType), {
+                type: optimizedMimeType,
+                lastModified: Date.now()
+              });
+
+              return {
+                file: optimizedFile,
+                wasOptimized: true,
+                originalSize,
+                finalSize: optimizedFile.size,
+                note: ''
+              };
+            }
+          }
+        }
+      }
+
+      if (!bestBlob) {
+        throw new Error('Unable to optimize image');
+      }
+
+      const fallbackMimeType = bestBlob.type || bestMimeType || 'image/jpeg';
+      const fallbackFile = new File([bestBlob], buildOptimizedImageFileName(file.name, fallbackMimeType), {
+        type: fallbackMimeType,
+        lastModified: Date.now()
+      });
+
+      return {
+        file: fallbackFile,
+        wasOptimized: true,
+        originalSize,
+        finalSize: fallbackFile.size,
+        note: fallbackFile.size > maxBytes
+          ? `Could not reduce image below ${formatUploadBytes(maxBytes)}.`
+          : ''
+      };
+    }
 
     function getUploadUserName() {
       let userName = 'anonymous';
@@ -2915,11 +3106,30 @@
         throw new Error('Selected file is not an image');
       }
 
+      setImageUploadStatus(`${statusPrefix}... preparing image`);
+
+      const optimizationResult = await optimizeImageFileForUpload(file, TEXT_EDITOR_MAX_IMAGE_UPLOAD_BYTES);
+      const fileToUpload = optimizationResult.file;
+
+      if (optimizationResult.note) {
+        throw new Error(optimizationResult.note);
+      }
+
+      if (fileToUpload.size > TEXT_EDITOR_MAX_IMAGE_UPLOAD_BYTES) {
+        throw new Error(`Image is ${formatUploadBytes(fileToUpload.size)} after optimization and exceeds the ${formatUploadBytes(TEXT_EDITOR_MAX_IMAGE_UPLOAD_BYTES)} limit.`);
+      }
+
       setImageUploadStatus(`${statusPrefix}...`);
 
+      if (optimizationResult.wasOptimized) {
+        setImageUploadStatus(
+          `${statusPrefix}... optimized ${formatUploadBytes(optimizationResult.originalSize)} to ${formatUploadBytes(optimizationResult.finalSize)}.`
+        );
+      }
+
       const formData = new FormData();
-      formData.append('file', file);
-      formData.append('path', buildCloudflareImagePath(file.name));
+      formData.append('file', fileToUpload);
+      formData.append('path', buildCloudflareImagePath(fileToUpload.name));
       formData.append('userName', getUploadUserName());
 
       const response = await fetch(TEXT_EDITOR_R2_WORKER_URL, {
@@ -2937,7 +3147,7 @@
         throw new Error('Upload succeeded but no URL was returned');
       }
 
-      setImageUploadStatus('Upload complete. URL is ready to insert.');
+      setImageUploadStatus(`Upload complete (${formatUploadBytes(fileToUpload.size)}). URL is ready to insert.`);
       return data.url;
     }
 
@@ -10299,7 +10509,7 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260419168y"></script>
+    <script src="js/chat.js?v=202604191c1t"></script>
   
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
