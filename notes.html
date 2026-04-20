@@ -450,17 +450,43 @@
         }
 
         .notes-editor h1 {
-            font-size: 1.05rem;
+            font-size: 1.58rem;
             font-weight: 700;
-            margin: 0.12em 0 0.18em;
+            line-height: 1.16;
+            margin: 0.01em 0 0.001em;
             color: #588157;
         }
 
         .notes-editor h2 {
-            font-size: 0.95rem;
+            font-size: 1.28rem;
             font-weight: 700;
-            margin: 0.1em 0 0.14em;
+            line-height: 1.18;
+            margin: 0.008em 0 0.001em;
             color: #588157;
+        }
+
+        .notes-editor h3 {
+            font-size: 1.20rem;
+            font-weight: 700;
+            line-height: 1.2;
+            margin: 0.006em 0 0.001em;
+            color: #588157;
+        }
+
+        .notes-editor h4 {
+            font-size: 1.08rem;
+            font-weight: 700;
+            line-height: 1.22;
+            margin: 0.004em 0 0.001em;
+            color: #588157;
+        }
+
+        .notes-editor :is(h1, h2, h3, h4) + p {
+            margin-top: 0;
+        }
+
+        .notes-editor :is(h1, h2, h3, h4) + :is(h1, h2, h3, h4) {
+            margin-top: 0;
         }
 
         .notes-editor a {
@@ -471,7 +497,7 @@
         }
 
         .notes-editor p {
-            margin: 0.08em 0 0.14em;
+            margin: 0.001em 0 0.028em;
         }
 
         .notes-editor ul,
@@ -815,6 +841,8 @@
 
         body.dark-mode .notes-editor h1,
         body.dark-mode .notes-editor h2,
+        body.dark-mode .notes-editor h3,
+        body.dark-mode .notes-editor h4,
         body.dark-mode .notes-editor a {
             color: #588157;
         }
@@ -988,8 +1016,10 @@
                     <select id="courseSelectMobile" class="mobile-course-select"></select>
                 </div>
                 <div class="md-toolbar">
-                    <button type="button" class="md-btn" data-cmd="h1" title="H1"><img src="svg/md-editor/icon-h1.svg?v=2026031715gu" alt="H1"></button>
-                    <button type="button" class="md-btn" data-cmd="h2" title="H2"><img src="svg/md-editor/icon-h2.svg?v=2026031715gu" alt="H2"></button>
+                    <button type="button" class="md-btn" data-cmd="h1" title="H1 (Ctrl/Cmd+1)"><img src="svg/md-editor/icon-h1.svg?v=2026031715gu" alt="H1"></button>
+                    <button type="button" class="md-btn" data-cmd="h2" title="H2 (Ctrl/Cmd+2)"><img src="svg/md-editor/icon-h2.svg?v=2026031715gu" alt="H2"></button>
+                    <button type="button" class="md-btn" data-cmd="h3" title="H3 (Ctrl/Cmd+3)"><img src="svg/md-editor/icon-h3.svg?v=2026031715gu" alt="H3"></button>
+                    <button type="button" class="md-btn" data-cmd="h4" title="H4 (Ctrl/Cmd+4)"><img src="svg/md-editor/icon-h4.svg?v=2026031715gu" alt="H4"></button>
                     <button type="button" class="md-btn" data-cmd="bold" title="Bold"><img src="svg/md-editor/icon-bold.svg?v=2026031715gu" alt="Bold"></button>
                     <button type="button" class="md-btn" data-cmd="italic" title="Italic"><img src="svg/md-editor/icon-italic.svg?v=2026031715gu" alt="Italic"></button>
                     <button type="button" class="md-btn" data-cmd="underline" title="Underline"><img src="svg/md-editor/icon-underline.svg?v=2026031715gu" alt="Underline"></button>
@@ -2376,7 +2406,7 @@
                 if (node.nodeType === Node.TEXT_NODE) node = node.parentElement;
                 if (!(node instanceof Element) || !els.courseNotesEditor.contains(node)) return;
 
-                const currentHeading = node.closest('h1,h2');
+                const currentHeading = node.closest('h1,h2,h3,h4');
                 if (currentHeading && currentHeading.tagName.toLowerCase() === tagName.toLowerCase()) {
                     document.execCommand('formatBlock', false, 'p');
                 } else {
@@ -2410,6 +2440,10 @@
                     toggleHeading('h1');
                 } else if (action === 'h2') {
                     toggleHeading('h2');
+                } else if (action === 'h3') {
+                    toggleHeading('h3');
+                } else if (action === 'h4') {
+                    toggleHeading('h4');
                 } else if (action === 'bold') {
                     document.execCommand('bold', false);
                 } else if (action === 'italic') {
@@ -2822,6 +2856,12 @@
                 } else if (key === '2') {
                     event.preventDefault();
                     applyCommand('h2');
+                } else if (key === '3') {
+                    event.preventDefault();
+                    applyCommand('h3');
+                } else if (key === '4') {
+                    event.preventDefault();
+                    applyCommand('h4');
                 }
             });
 
