@@ -403,6 +403,43 @@
         const saveScheduleJsonBtn = document.getElementById('save-schedule-json');
         const scheduleJsonRef = db.ref('/settings/scheduleData');
 
+        async function loadScheduleJsonFromFirebase(options = {}) {
+            const { showSuccessNotification = true } = options;
+
+            try {
+                const snapshot = await scheduleJsonRef.once('value');
+                const data = snapshot.val();
+
+                if (data) {
+                    scheduleJsonEditor.value = JSON.stringify(data, null, 2);
+                    if (showSuccessNotification) {
+                        showNotification('Schedule data loaded from Firebase.');
+                    }
+                } else {
+                    if (showSuccessNotification) {
+                        showNotification('No schedule data found in Firebase.', true);
+                    }
+                }
+
+                hideError('schedule-json-error');
+
+                window.__adminScheduleJsonLoaded = true;
+                window.__adminScheduleJsonHasData = Boolean(data);
+                window.dispatchEvent(new CustomEvent('admin:schedule-json-loaded', {
+                    detail: { hasData: Boolean(data) }
+                }));
+            } catch (error) {
+                console.error('Error loading schedule data:', error);
+                showError('schedule-json-error', 'Failed to load schedule data: ' + error.message);
+
+                window.__adminScheduleJsonLoaded = true;
+                window.__adminScheduleJsonHasData = false;
+                window.dispatchEvent(new CustomEvent('admin:schedule-json-loaded', {
+                    detail: { hasData: false, error: true }
+                }));
+            }
+        }
+
         // Upload limit settings
         const uploadLimitSettingsRef = db.ref('/settings/uploadLimits');
         const BYTES_IN_MB = 1024 * 1024;
@@ -457,30 +494,25 @@
         }
 
         // Load from Firebase
-        loadScheduleJsonBtn.addEventListener('click', async () => {
-            try {
-                const snapshot = await scheduleJsonRef.once('value');
-                const data = snapshot.val();
-                if (data) {
-                    scheduleJsonEditor.value = JSON.stringify(data, null, 2);
-                    showNotification('Schedule data loaded from Firebase.');
-                } else {
-                    showNotification('No schedule data found in Firebase.', true);
-                }
-                hideError('schedule-json-error');
-            } catch (error) {
-                console.error("Error loading schedule data:", error);
-                showError('schedule-json-error', 'Failed to load schedule data: ' + error.message);
-            }
-        });
+        if (loadScheduleJsonBtn) {
+            loadScheduleJsonBtn.addEventListener('click', async () => {
+                await loadScheduleJsonFromFirebase({ showSuccessNotification: true });
+            });
+        }
+
+        // Auto-load schedule JSON when the admin page initializes.
+        loadScheduleJsonFromFirebase({ showSuccessNotification: false });
 
         // Save to Firebase
         saveScheduleJsonBtn.addEventListener('click', async () => {
             const content = scheduleJsonEditor.value;
+            const shouldShowSaveNotification = !window.__adminSilentScheduleSaveNotification;
             try {
                 const parsedData = JSON.parse(content);
                 await scheduleJsonRef.set(parsedData);
-                showNotification('Schedule data saved to Firebase successfully!');
+                if (shouldShowSaveNotification) {
+                    showNotification('Schedule data saved to Firebase successfully!');
+                }
                 hideError('schedule-json-error');
             } catch (error) {
                 console.error("Error saving schedule data:", error);
@@ -489,6 +521,8 @@
                 } else {
                     showError('schedule-json-error', 'Failed to save schedule data: ' + error.message);
                 }
+            } finally {
+                window.__adminSilentScheduleSaveNotification = false;
             }
         });
 

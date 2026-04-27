@@ -1,10 +1,16 @@
 (function() {
     // Wait for marked to load
     window.addEventListener('DOMContentLoaded', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const shouldAutoOpenVisualEditor = ['1', 'true', 'yes'].includes(String(urlParams.get('openVisualEditor') || '').toLowerCase());
+        const returnToUrl = urlParams.get('returnTo') || '';
+
         // Elements
         const openBtn = document.getElementById('open-visual-editor');
         const visualContainer = document.getElementById('visual-editor-container');
         const closeBtn = document.getElementById('close-visual-editor');
+        const visualSaveBtn = document.getElementById('save-visual-editor');
+        const saveScheduleJsonBtn = document.getElementById('save-schedule-json');
         const scheduleJsonEditor = document.getElementById('schedule-json-editor');
         const manageSemestersBtn = document.getElementById('manage-semesters-btn');
         const modeSelector = document.getElementById('ve-mode-selector');
@@ -23,28 +29,98 @@
         let scheduleByWeek = [];
         let viewMode = 'schedule'; // 'schedule', 'template-winter', 'template-summer'
 
-        // Open Visual Editor
-        openBtn.addEventListener('click', () => {
+        function openVisualEditorPanel(options = {}) {
+            const { silentNoData = false } = options;
+
             try {
                 const jsonContent = scheduleJsonEditor.value;
                 if (!jsonContent) {
-                    alert('Please load or import schedule data first.');
-                    return;
+                    if (!silentNoData) {
+                        alert('Please load or import schedule data first.');
+                    }
+                    return false;
                 }
+
                 currentScheduleData = JSON.parse(jsonContent);
                 initScheduleView(false); // False = don't preserve, reset to today
                 visualContainer.style.display = 'block';
                 document.body.style.overflow = 'hidden';
+                return true;
             } catch (e) {
-                alert('Invalid JSON in editor. Please fix errors before opening visual editor.\n' + e.message);
+                if (!silentNoData) {
+                    alert('Invalid JSON in editor. Please fix errors before opening visual editor.\n' + e.message);
+                }
+                return false;
             }
+        }
+
+        // Open Visual Editor
+        openBtn.addEventListener('click', () => {
+            openVisualEditorPanel();
         });
 
         // Close Visual Editor
         closeBtn.addEventListener('click', () => {
+            if (returnToUrl) {
+                window.location.href = returnToUrl;
+                return;
+            }
+
             visualContainer.style.display = 'none';
             document.body.style.overflow = '';
         });
+
+        if (shouldAutoOpenVisualEditor) {
+            const tryOpenIfJsonReady = () => {
+                const hasJson = Boolean(scheduleJsonEditor && String(scheduleJsonEditor.value || '').trim());
+                if (!hasJson) return false;
+                openVisualEditorPanel({ silentNoData: true });
+                return true;
+            };
+
+            const handleScheduleLoaded = (evt) => {
+                const hasData = Boolean(evt && evt.detail && evt.detail.hasData);
+                if (hasData) {
+                    openVisualEditorPanel({ silentNoData: true });
+                } else {
+                    openVisualEditorPanel();
+                }
+            };
+
+            if (!tryOpenIfJsonReady()) {
+                window.addEventListener('admin:schedule-json-loaded', handleScheduleLoaded, { once: true });
+
+                if (window.__adminScheduleJsonLoaded) {
+                    window.dispatchEvent(new CustomEvent('admin:schedule-json-loaded', {
+                        detail: { hasData: Boolean(window.__adminScheduleJsonHasData) }
+                    }));
+                }
+            }
+        }
+
+        // Save Visual Editor data to Firebase using the existing JSON save flow.
+        if (visualSaveBtn) {
+            visualSaveBtn.addEventListener('click', () => {
+                if (!currentScheduleData) {
+                    alert('No schedule data loaded to save.');
+                    return;
+                }
+
+                if (!scheduleJsonEditor) {
+                    alert('Schedule JSON editor is missing. Cannot save.');
+                    return;
+                }
+
+                scheduleJsonEditor.value = JSON.stringify(currentScheduleData, null, 2);
+
+                if (saveScheduleJsonBtn) {
+                    window.__adminSilentScheduleSaveNotification = true;
+                    saveScheduleJsonBtn.click();
+                } else {
+                    alert('Main Save JSON button not found.');
+                }
+            });
+        }
 
         // Mode Selector
         if (modeSelector) {

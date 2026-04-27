@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=20260427193f"></script>
+  <script src="js/auth-guard.js?v=202604271ajb"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -248,6 +248,15 @@
     font-weight: 600;
     cursor: pointer;
     transition: background 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .schedule-notes-edit-icon {
+    width: 13px;
+    height: 13px;
+    flex: 0 0 auto;
   }
 
   .schedule-notes-edit-btn:hover {
@@ -334,9 +343,10 @@
     gap: 20px;
     margin-bottom: 12px; /* Reduced from 24px */
     background: #fff;
-    padding: 16px 24px;
+    padding: 16px 150px 16px 24px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    position: relative;
   }
   
   .week-btn {
@@ -364,6 +374,19 @@
     background: #d1d5db;
     cursor: not-allowed;
     transform: none;
+  }
+
+  .week-edit-btn {
+    background: #588157;
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .week-edit-btn:hover {
+    background: #344e41;
+    transform: translateY(calc(-50% - 1px));
   }
   
   .week-info {
@@ -544,6 +567,108 @@
     margin-top: 2px;
   }
 
+  /* Compact handling for short events on desktop so subject is always visible */
+  .short-event {
+    padding: 2px 4px;
+    line-height: 1.05;
+  }
+
+  .short-event .event-title {
+    font-size: 12px;
+    margin-bottom: 1px;
+  }
+
+  .short-event .event-time {
+    font-size: 10px;
+  }
+
+  .short-event .event-location {
+    display: none;
+  }
+
+  .tiny-event {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 0 3px;
+    line-height: 1;
+  }
+
+  .tiny-event .event-title {
+    font-size: 11px;
+    margin-bottom: 0;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .tiny-event .event-time {
+    font-size: 9px;
+    margin-left: 3px;
+    flex: 0 0 auto;
+  }
+
+  .tiny-event .event-location {
+    display: none;
+  }
+
+  /* Shared one-line layout for compact events: subject + time side by side */
+  .event-card.inline-time-event {
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  .event-card.inline-time-event .event-title {
+    margin-bottom: 0;
+    min-width: 0;
+    flex: 0 1 auto;
+    order: 0;
+    font-size: var(--inline-title-size, 11px);
+  }
+
+  .event-card.inline-time-event .event-time {
+    margin-left: 4px;
+    margin-right: 0;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    order: 1;
+    font-size: var(--inline-time-size, 9px);
+  }
+
+  .event-card.inline-time-event .event-location {
+    display: none;
+  }
+
+  /* Under 30 minutes: force subject + time on one line */
+  .ultra-short-event {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    padding: 0 3px;
+    line-height: 1;
+  }
+
+  .ultra-short-event .event-title {
+    font-size: 11px;
+    margin-bottom: 0;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .ultra-short-event .event-time {
+    font-size: 9px;
+    margin-left: 3px;
+    white-space: nowrap;
+    flex: 0 0 auto;
+  }
+
+  .ultra-short-event .event-location {
+    display: none;
+  }
+
   /* Types */
   .type-exercise {
     background: linear-gradient(135deg, #dbeafe 0%, #91c3fd 100%);
@@ -603,10 +728,65 @@
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
+      gap: 4px;
         padding: 0 2px;
     }
-    .tiny-event .event-title { font-size: 10px; width: auto; margin-bottom: 0; }
-    .tiny-event .event-time { font-size: 8px; margin-left: 4px; }
+    .tiny-event .event-title {
+      font-size: 10px;
+      width: auto;
+      min-width: 0;
+      flex: 1 1 auto;
+      margin-bottom: 0;
+    }
+    .tiny-event .event-time {
+      font-size: 8px;
+      margin-left: 4px;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+
+    .ultra-short-event {
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-between;
+      gap: 3px;
+      padding: 0 2px;
+    }
+    .ultra-short-event .event-title {
+      font-size: 10px;
+      margin-bottom: 0;
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+    .ultra-short-event .event-time {
+      font-size: 8px;
+      margin-left: 3px;
+      white-space: nowrap;
+      flex: 0 0 auto;
+    }
+    .ultra-short-event .event-location { display: none; }
+
+    .event-card.inline-time-event {
+      gap: 3px;
+      padding: 0 2px;
+      justify-content: flex-start;
+    }
+    .event-card.inline-time-event .event-title {
+      margin-bottom: 0;
+      min-width: 0;
+      flex: 0 1 auto;
+      order: 0;
+      font-size: var(--inline-title-size-mobile, 10px);
+    }
+    .event-card.inline-time-event .event-time {
+      margin-left: 3px;
+      margin-right: 0;
+      white-space: nowrap;
+      flex: 0 0 auto;
+      order: 1;
+      font-size: var(--inline-time-size-mobile, 8px);
+    }
+    .event-card.inline-time-event .event-location { display: none; }
     
     :root {
        --time-col-width: 35px;
@@ -1099,6 +1279,17 @@
       justify-content: center;
       align-items: center;
       margin-bottom: 8px; /* Reduced margin to grid */
+    }
+
+    .week-edit-btn {
+      position: static;
+      transform: none;
+      right: auto;
+      top: auto;
+    }
+
+    .week-edit-btn:hover {
+      transform: translateY(-1px);
     }
     
     .week-btn {
@@ -1717,6 +1908,14 @@
               <path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </button>
+
+          <button class="week-btn week-edit-btn" id="calendarAdminEditBtn" type="button" style="display: none;" onclick="openCalendarAdminEditor()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M4 20H8L18 10L14 6L4 16V20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M12 8L16 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span class="btn-text-label">Edit</span>
+          </button>
         </div>
 
         <!-- Christmas vacation screen -->
@@ -1756,7 +1955,13 @@
               <div class="schedule-notes-title">Schedule Notes</div>
               <div id="scheduleNotesLastEdit" class="schedule-notes-last-edit">Last edit: —</div>
             </div>
-            <button id="editScheduleNotesBtn" class="schedule-notes-edit-btn" type="button">Edit</button>
+            <button id="editScheduleNotesBtn" class="schedule-notes-edit-btn" type="button">
+              <svg class="schedule-notes-edit-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <path d="M4 20H8L18 10L14 6L4 16V20Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 8L16 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span>Edit</span>
+            </button>
           </div>
           <div class="info-panel-content" id="infoContent">
             Loading schedule notes...
@@ -2791,6 +2996,28 @@
               el.classList.add('short-event');
           }
 
+            if (duration < 30) {
+              el.classList.add('ultra-short-event');
+            }
+
+              if (duration < 30) {
+                el.classList.add('inline-time-event');
+
+                const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+                const lerp = (from, to, ratio) => from + ((to - from) * ratio);
+                const compactRatio = clamp((duration - 15) / 14, 0, 1);
+
+                const desktopTitleSize = lerp(11, 12.6, compactRatio);
+                const desktopTimeSize = lerp(9, 10.4, compactRatio);
+                const mobileTitleSize = lerp(10, 11.2, compactRatio);
+                const mobileTimeSize = lerp(8, 9.1, compactRatio);
+
+                el.style.setProperty('--inline-title-size', `${desktopTitleSize.toFixed(2)}px`);
+                el.style.setProperty('--inline-time-size', `${desktopTimeSize.toFixed(2)}px`);
+                el.style.setProperty('--inline-title-size-mobile', `${mobileTitleSize.toFixed(2)}px`);
+                el.style.setProperty('--inline-time-size-mobile', `${mobileTimeSize.toFixed(2)}px`);
+              }
+
           el.style.gridColumn = dayIndex + 2; 
           el.style.gridRowStart = rowStart;
           el.style.gridRowEnd = `span ${rowSpan}`;
@@ -2802,7 +3029,10 @@
           }
 
           const infoIndicator = (ev.additionalInfo || ev.additionalInfoHtml) ? '*' : '';
-          const titleDesktop = ev.fullName || ev.subject;
+          const isCompactEvent = duration < 30;
+          const titleDesktop = isCompactEvent
+            ? (ev.subject || ev.fullName)
+            : (ev.fullName || ev.subject);
           const titleMobile = ev.subject;
           
           // --- Smart Logic for Building/Room (Handles Old and New Schema) ---
@@ -3235,9 +3465,15 @@
       window.location.href = 'login.html';
     }
 
+    function openCalendarAdminEditor() {
+      const returnTo = encodeURIComponent(window.location.href);
+      window.location.href = `admin.html?openVisualEditor=1&returnTo=${returnTo}`;
+    }
+
     // Admin button visibility logic (cache-first to prevent reload flicker)
     function updateAdminButtonVisibility() {
       const adminButton = document.getElementById('admin-button');
+      const calendarAdminEditBtn = document.getElementById('calendarAdminEditBtn');
       if (!adminButton) return;
 
       const isAdminByRole = (candidate) => {
@@ -3250,6 +3486,7 @@
           const cachedUser = JSON.parse(cachedRaw);
           if (isAdminByRole(cachedUser)) {
             adminButton.style.display = 'list-item';
+            if (calendarAdminEditBtn) calendarAdminEditBtn.style.display = 'inline-flex';
           }
         }
       } catch (_) {
@@ -3258,7 +3495,11 @@
 
       if (window.currentUserPromise) {
         window.currentUserPromise.then(user => {
-          adminButton.style.display = isAdminByRole(user) ? 'list-item' : 'none';
+          const isAdmin = isAdminByRole(user);
+          adminButton.style.display = isAdmin ? 'list-item' : 'none';
+          if (calendarAdminEditBtn) {
+            calendarAdminEditBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+          }
         }).catch(error => {
           console.error("Error checking admin status for button visibility:", error);
         });
@@ -3799,7 +4040,7 @@
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260427193f"></script>
+    <script src="js/chat.js?v=202604271ajb"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>

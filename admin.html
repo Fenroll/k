@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=20260427193f"></script>
+    <script src="js/auth-guard.js?v=202604271ajb"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=202602171mhr"></script>
@@ -570,7 +570,6 @@
                 <textarea id="schedule-json-editor" style="width: 100%; min-height: 300px; padding: 0.75rem; border: 1px solid #444; border-radius: 8px; background-color: #333; color: #e0e0e0; box-sizing: border-box; font-family: monospace; font-size: 13px;" spellcheck="false"></textarea>
             </div>
             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                <button id="load-schedule-json" class="btn btn-secondary" style="flex: 1;">Load from Firebase</button>
                 <button id="open-visual-editor" class="btn" style="flex: 1; background-color: #444; color: white;">Visual Editor</button>
             </div>
             <button id="save-schedule-json" class="btn" style="margin-top: 10px;">Save JSON</button>
@@ -734,6 +733,7 @@
         <div class="ve-header">
             <h2>Visual Schedule Editor</h2>
             <div class="ve-header-actions">
+                <button id="save-visual-editor" class="btn" style="width: auto; background-color: #588157; color: #121212;">Save to Firebase</button>
                 <button id="manage-semesters-btn" class="btn" style="width: auto; background-color: #588157;">Manage Semesters</button>
                 <button id="close-visual-editor" class="btn btn-secondary" style="width: auto;">Close & Back</button>
             </div>
@@ -1017,7 +1017,7 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=20260427193f"></script>
+    <script src="courses.generated.js?v=202604271ajb"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=202602171mhr"></script>
     <script src="js/admin-visual-editor.js?v=202602171mhr"></script>
