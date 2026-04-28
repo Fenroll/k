@@ -98,6 +98,284 @@
             text-align: center;
             display: none;
         }
+        .quick-upload-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            padding: 16px;
+        }
+        .quick-upload-overlay.open {
+            display: flex;
+        }
+        .quick-upload-panel {
+            width: min(560px, 100%);
+            max-height: min(82vh, 760px);
+            overflow: auto;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 18px;
+        }
+        .quick-upload-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .quick-upload-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: #111827;
+        }
+        .quick-upload-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 10px;
+            background: #f3f4f6;
+            color: #374151;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+        }
+        .quick-upload-close:hover {
+            background: #e5e7eb;
+        }
+        .quick-upload-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 14px;
+            align-items: center;
+        }
+        .quick-upload-btn {
+            appearance: none;
+            border: none;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, opacity 0.2s;
+        }
+        .quick-upload-btn:hover {
+            transform: translateY(-1px);
+        }
+        .quick-upload-btn.primary {
+            background: #588157;
+            color: #fff;
+            box-shadow: 0 8px 20px rgba(88, 129, 87, 0.2);
+        }
+        .quick-upload-btn.secondary {
+            background: #eef2f7;
+            color: #1f2937;
+        }
+        .quick-upload-btn:disabled {
+            opacity: 0.7;
+            cursor: wait;
+            transform: none;
+        }
+        .quick-upload-dropzone {
+            border: 1.5px dashed #9ca3af;
+            border-radius: 16px;
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+            padding: 18px;
+            text-align: center;
+            color: #475569;
+            margin-bottom: 14px;
+        }
+        .quick-upload-dropzone.drag-over {
+            border-color: #588157;
+            background: rgba(88, 129, 87, 0.06);
+        }
+        .quick-upload-dropzone strong {
+            display: block;
+            color: #111827;
+            margin-bottom: 6px;
+            font-size: 1rem;
+        }
+        .quick-upload-status {
+            display: none;
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+        .quick-upload-status.info {
+            display: block;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+        }
+        .quick-upload-status.success {
+            display: block;
+            background: #ecfdf5;
+            border: 1px solid #bbf7d0;
+            color: #166534;
+        }
+        .quick-upload-status.error {
+            display: block;
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+        }
+        .quick-upload-section-title {
+            margin: 0 0 10px 0;
+            font-size: 0.95rem;
+            color: #111827;
+        }
+        .quick-upload-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .quick-upload-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 12px;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            background: #fff;
+        }
+        .quick-upload-item-main {
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            flex: 1;
+        }
+        .quick-upload-item-name {
+            font-weight: 700;
+            color: #111827;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .quick-upload-item-meta {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        .quick-upload-item-link {
+            font-size: 12px;
+            font-weight: 700;
+            color: #588157;
+            text-decoration: none;
+            white-space: nowrap;
+        }
+        .quick-upload-item-link:hover {
+            text-decoration: underline;
+        }
+        .priority-links-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.55);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10001;
+            padding: 16px;
+        }
+        .priority-links-overlay.open {
+            display: flex;
+        }
+        .priority-links-panel {
+            width: min(520px, 100%);
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            padding: 18px;
+        }
+        .priority-links-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .priority-links-header h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: #111827;
+        }
+        .priority-links-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 10px;
+            background: #f3f4f6;
+            color: #374151;
+            cursor: pointer;
+            font-size: 18px;
+            line-height: 1;
+        }
+        .priority-links-close:hover {
+            background: #e5e7eb;
+        }
+        .priority-links-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .priority-link-btn {
+            appearance: none;
+            border: 1px solid #d1d5db;
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 14px 16px;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s, background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+        .priority-link-btn:hover {
+            transform: translateY(-1px);
+            border-color: #588157;
+            box-shadow: 0 8px 20px rgba(88, 129, 87, 0.12);
+        }
+        .priority-link-btn strong {
+            display: block;
+            font-size: 0.98rem;
+            color: #111827;
+        }
+        .priority-link-btn span {
+            display: block;
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 4px;
+            word-break: break-word;
+        }
+        .priority-link-badge {
+            flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            border-radius: 999px;
+            background: #588157;
+            color: #ffffff;
+            font-weight: 700;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+        }
+        .priority-links-empty {
+            padding: 12px;
+            border: 1px dashed #d1d5db;
+            border-radius: 12px;
+            color: #6b7280;
+            font-size: 14px;
+            text-align: center;
+        }
         #loading-spinner {
             text-align: center;
             display: none;
@@ -134,11 +412,42 @@
         </div>
     </div>
 
+    <div id="quick-upload-overlay" class="quick-upload-overlay" aria-hidden="true">
+        <div class="quick-upload-panel" role="dialog" aria-modal="true" aria-labelledby="quick-upload-title">
+            <div class="quick-upload-header">
+                <h3 id="quick-upload-title">Quick Upload</h3>
+                <button type="button" class="quick-upload-close" id="quick-upload-close" aria-label="Close quick upload">✕</button>
+            </div>
+            <div class="quick-upload-actions">
+                <button type="button" class="quick-upload-btn primary" id="quick-upload-pick-btn">Select files</button>
+            </div>
+            <div id="quick-upload-dropzone" class="quick-upload-dropzone">
+                <strong>Drop files here</strong>
+                <div>They will upload as Quick user and appear below immediately.</div>
+            </div>
+            <div id="quick-upload-status" class="quick-upload-status"></div>
+            <input id="quick-upload-input" type="file" multiple style="display:none;">
+            <h4 class="quick-upload-section-title">Uploaded just now</h4>
+            <div id="quick-upload-list" class="quick-upload-list"></div>
+        </div>
+    </div>
+
+    <div id="priority-links-overlay" class="priority-links-overlay" aria-hidden="true">
+        <div class="priority-links-panel" role="dialog" aria-modal="true" aria-labelledby="priority-links-title">
+            <div class="priority-links-header">
+                <h3 id="priority-links-title">Priority links</h3>
+                <button type="button" class="priority-links-close" id="priority-links-close" aria-label="Close priority links">✕</button>
+            </div>
+            <div id="priority-links-list" class="priority-links-list"></div>
+        </div>
+    </div>
+
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
 
     <!-- HTML Priority Script -->
+    <script src="courses.generated.js?v=20260428jck"></script>
     <script src="./html-priority.js?v=202602171mhr"></script>
     
     <!-- Account System Script -->
@@ -170,16 +479,517 @@
                 // Wait for htmlPriority to be loaded
                 await window.htmlPriorityPromise;
 
-                document.addEventListener('keydown', (e) => {
-                    if (e.ctrlKey && (e.key === '1' || e.key === '2' || e.key === '3')) {
-                        e.preventDefault();
-                        const priorityNumber = parseInt(e.key);
-                        const filePath = window.htmlPriority[priorityNumber];
-                        if (filePath) {
-                            window.location.href = `md-viewer.html?path=${encodeURIComponent(filePath)}&guest=true`;
-                        } else {
-                            console.warn(`No HTML priority file configured for Ctrl+${priorityNumber}`);
+                const QUICK_UPLOAD_KEY = 'coursebook-quick-upload-recent';
+                const QUICK_UPLOAD_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+                const QUICK_UPLOAD_USER = 'Quick Upload';
+                const QUICK_UPLOAD_TTL_MS = 30 * 60 * 1000;
+                const quickUploadOverlay = document.getElementById('quick-upload-overlay');
+                const quickUploadClose = document.getElementById('quick-upload-close');
+                const quickUploadPickBtn = document.getElementById('quick-upload-pick-btn');
+                const quickUploadInput = document.getElementById('quick-upload-input');
+                const quickUploadDropzone = document.getElementById('quick-upload-dropzone');
+                const quickUploadStatus = document.getElementById('quick-upload-status');
+                const quickUploadList = document.getElementById('quick-upload-list');
+                const quickUploadState = { recent: [] };
+                const priorityLinksOverlay = document.getElementById('priority-links-overlay');
+                const priorityLinksClose = document.getElementById('priority-links-close');
+                const priorityLinksList = document.getElementById('priority-links-list');
+
+                function isQuickUploadFresh(item) {
+                    const uploadedAt = Number(item && item.uploadedAt);
+                    if (!Number.isFinite(uploadedAt) || uploadedAt <= 0) return false;
+                    return (Date.now() - uploadedAt) <= QUICK_UPLOAD_TTL_MS;
+                }
+
+                function pruneRecentQuickUploads() {
+                    quickUploadState.recent = quickUploadState.recent.filter(isQuickUploadFresh);
+                }
+
+                function loadRecentQuickUploads() {
+                    try {
+                        const raw = localStorage.getItem(QUICK_UPLOAD_KEY);
+                        const parsed = raw ? JSON.parse(raw) : [];
+                        quickUploadState.recent = Array.isArray(parsed) ? parsed.slice(0, 8) : [];
+                        pruneRecentQuickUploads();
+                    } catch (_) {
+                        quickUploadState.recent = [];
+                    }
+                }
+
+                function saveRecentQuickUploads() {
+                    try {
+                        pruneRecentQuickUploads();
+                        localStorage.setItem(QUICK_UPLOAD_KEY, JSON.stringify(quickUploadState.recent.slice(0, 8)));
+                    } catch (_) {
+                        // Ignore storage failures.
+                    }
+                }
+
+                function escapeHtml(value) {
+                    return String(value || '')
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;')
+                        .replace(/"/g, '&quot;')
+                        .replace(/'/g, '&#39;');
+                }
+
+                function formatBytes(bytes) {
+                    const value = Number(bytes);
+                    if (!Number.isFinite(value) || value < 0) return '0 B';
+                    if (value < 1024) return `${Math.round(value)} B`;
+                    if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+                    return `${(value / (1024 * 1024)).toFixed(2)} MB`;
+                }
+
+                function setQuickUploadStatus(message, tone = 'info') {
+                    if (!quickUploadStatus) return;
+                    quickUploadStatus.className = `quick-upload-status ${tone}`;
+                    quickUploadStatus.textContent = message || '';
+                    quickUploadStatus.style.display = message ? 'block' : 'none';
+                }
+
+                function renderRecentQuickUploads() {
+                    if (!quickUploadList) return;
+                    pruneRecentQuickUploads();
+                    if (!quickUploadState.recent.length) {
+                        quickUploadList.innerHTML = '<div style="padding:12px;border:1px dashed #d1d5db;border-radius:12px;color:#6b7280;font-size:14px;">No quick uploads in the last 30 minutes.</div>';
+                        return;
+                    }
+
+                    quickUploadList.innerHTML = quickUploadState.recent.map((item) => {
+                        const name = escapeHtml(item.name || 'file');
+                        const size = escapeHtml(formatBytes(item.size || 0));
+                        const time = escapeHtml(new Date(item.uploadedAt || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+                        const url = escapeHtml(item.url || '#');
+                        return `
+                            <div class="quick-upload-item">
+                                <div class="quick-upload-item-main">
+                                    <div class="quick-upload-item-name">${name}</div>
+                                    <div class="quick-upload-item-meta">${size} · ${time} · Quick</div>
+                                </div>
+                                <a class="quick-upload-item-link" href="${url}" target="_blank" rel="noopener noreferrer">Open</a>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                function addRecentQuickUpload(entry) {
+                    quickUploadState.recent.unshift({
+                        name: entry.name || 'file',
+                        size: Number(entry.size) || 0,
+                        url: entry.url || '',
+                        uploadedAt: entry.uploadedAt || Date.now()
+                    });
+                    pruneRecentQuickUploads();
+                    saveRecentQuickUploads();
+                    renderRecentQuickUploads();
+                }
+
+                async function uploadQuickFiles(files) {
+                    const list = Array.from(files || []).filter(Boolean);
+                    if (!list.length) return;
+
+                    setQuickUploadStatus(`Uploading ${list.length} file(s) as Quick...`, 'info');
+                    quickUploadPickBtn.disabled = true;
+                    quickUploadInput.disabled = true;
+
+                    try {
+                        for (const file of list) {
+                            const formData = new FormData();
+                            formData.append('file', file);
+                            formData.append('path', `quick/${Date.now()}-${file.name}`);
+                            formData.append('userName', QUICK_UPLOAD_USER);
+
+                            const response = await fetch(QUICK_UPLOAD_URL, {
+                                method: 'POST',
+                                body: formData
+                            });
+
+                            if (!response.ok) {
+                                const errorText = await response.text();
+                                throw new Error(errorText || 'Upload failed');
+                            }
+
+                            const data = await response.json();
+                            if (!data || !data.url) {
+                                throw new Error('Upload succeeded but no URL was returned');
+                            }
+
+                            addRecentQuickUpload({
+                                name: file.name,
+                                size: file.size,
+                                url: data.url,
+                                uploadedAt: Date.now()
+                            });
                         }
+
+                        setQuickUploadStatus('Quick upload complete.', 'success');
+                    } catch (error) {
+                        console.error('Quick upload failed:', error);
+                        setQuickUploadStatus(`Quick upload failed: ${error.message}`, 'error');
+                    } finally {
+                        quickUploadPickBtn.disabled = false;
+                        quickUploadInput.disabled = false;
+                        quickUploadInput.value = '';
+                    }
+                }
+
+                function openQuickUploadMenu() {
+                    loadRecentQuickUploads();
+                    renderRecentQuickUploads();
+                    setQuickUploadStatus('', 'info');
+                    if (quickUploadOverlay) {
+                        quickUploadOverlay.classList.add('open');
+                        quickUploadOverlay.setAttribute('aria-hidden', 'false');
+                    }
+                }
+
+                function closeQuickUploadMenu() {
+                    if (quickUploadOverlay) {
+                        quickUploadOverlay.classList.remove('open');
+                        quickUploadOverlay.setAttribute('aria-hidden', 'true');
+                    }
+                    setQuickUploadStatus('', 'info');
+                }
+
+                function getPriorityEntries() {
+                    const entries = [];
+                    for (const key of [1, 2, 3]) {
+                        const rawEntry = window.htmlPriority && window.htmlPriority[key] ? window.htmlPriority[key] : '';
+                        const filePath = typeof rawEntry === 'object'
+                            ? String(rawEntry.path || '').trim()
+                            : String(rawEntry || '').trim();
+                        const storedLabel = typeof rawEntry === 'object' ? String(rawEntry.label || '').trim() : '';
+                        if (filePath) {
+                            entries.push({
+                                index: key,
+                                filePath,
+                                storedLabel,
+                                kind: getPriorityEntryKind(filePath)
+                            });
+                        }
+                    }
+                    return entries;
+                }
+
+                function getPriorityEntryKind(value) {
+                    const text = String(value || '').trim().toLowerCase();
+                    if (!text) return 'Link';
+                    if (/^https?:\/\//i.test(text) || /^file:\/\//i.test(text)) return 'Link';
+                    if (/\.url(?:[?#].*)?$/i.test(text)) return 'URL shortcut';
+                    if (/\.pdf(?:[?#].*)?$/i.test(text)) return 'PDF';
+                    if (/\.html?(?:[?#].*)?$/i.test(text)) return 'HTML';
+                    return 'File';
+                }
+
+                function getPriorityFallbackLabel(filePath) {
+                    const text = String(filePath || '').trim();
+                    if (!text) return '';
+                    if (/\.url(?:[?#].*)?$/i.test(text)) {
+                        return text.split('/').pop() || text;
+                    }
+                    if (/\.pdf(?:[?#].*)?$/i.test(text)) {
+                        return text.split('/').pop() || text;
+                    }
+                    if (/^https?:\/\//i.test(text) || /^file:\/\//i.test(text)) {
+                        try {
+                            return new URL(text).hostname || text;
+                        } catch (_) {
+                            return text;
+                        }
+                    }
+                    return text.split('/').pop() || text;
+                }
+
+                function cleanPriorityDisplayName(name) {
+                    const text = String(name || '').trim();
+                    if (!text) return '';
+                    return text.replace(/\.(?:url|html?)$/i, '') || text;
+                }
+
+                function normalizePriorityLookupPath(path) {
+                    let value = String(path || '').trim();
+                    if (!value) return '';
+                    try {
+                        value = decodeURIComponent(value);
+                    } catch (_) {}
+                    value = value.replace(/^file:\/\//i, '').replace(/\\/g, '/');
+                    return value;
+                }
+
+                function findCourseEntryByPath(path) {
+                    const targetPath = normalizePriorityLookupPath(path);
+                    if (!targetPath || !Array.isArray(window.courses)) return null;
+
+                    for (const course of window.courses) {
+                        for (const section of (course && course.sections) || []) {
+                            for (const bucketName of ['files', 'msgNotes']) {
+                                const items = section && Array.isArray(section[bucketName]) ? section[bucketName] : [];
+                                const found = items.find((item) => normalizePriorityLookupPath(item && item.path) === targetPath);
+                                if (found) return found;
+                            }
+                        }
+                    }
+
+                    return null;
+                }
+
+                function getPriorityLabelFromCourseData(path) {
+                    const entry = findCourseEntryByPath(path);
+                    if (!entry) return getPriorityFallbackLabel(path);
+                    return cleanPriorityDisplayName(entry.name || entry.label || getPriorityFallbackLabel(path));
+                }
+
+                function parseLinkTxtTarget(text, lineNumber) {
+                    const lines = String(text || '')
+                        .split(/\r?\n/)
+                        .map((line) => line.trim())
+                        .filter(Boolean);
+                    const index = Math.max(1, Number(lineNumber) || 1) - 1;
+                    const line = lines[index] || '';
+                    const separatorIndex = line.indexOf('|');
+                    if (separatorIndex !== -1) {
+                        return line.slice(separatorIndex + 1).trim();
+                    }
+                    return line.trim();
+                }
+
+                function parseInternetShortcutTarget(text) {
+                    const match = String(text || '').match(/^\s*URL\s*=\s*(.+)$/im);
+                    return match ? match[1].trim() : '';
+                }
+
+                function parseLinkTxtEntry(text, lineNumber) {
+                    const lines = String(text || '')
+                        .split(/\r?\n/)
+                        .map((line) => line.trim())
+                        .filter(Boolean);
+                    const index = Math.max(1, Number(lineNumber) || 1) - 1;
+                    const line = lines[index] || '';
+                    const separatorIndex = line.indexOf('|');
+                    if (separatorIndex === -1) {
+                        return { label: '', url: line.trim() };
+                    }
+                    return {
+                        label: line.slice(0, separatorIndex).trim(),
+                        url: line.slice(separatorIndex + 1).trim()
+                    };
+                }
+
+                async function resolvePriorityEntry(targetValue, preferredLabel = '') {
+                    const raw = String(targetValue || '').trim();
+                    if (!raw) return { label: '', target: '' };
+
+                    // If courses metadata contains a ready URL for this path, use it
+                    const courseEntry = findCourseEntryByPath(raw);
+                    if (courseEntry && courseEntry.url) {
+                        return {
+                            label: preferredLabel || getPriorityLabelFromCourseData(raw),
+                            target: courseEntry.url
+                        };
+                    }
+
+                    const isWebUrl = /^https?:\/\//i.test(raw) || /^file:\/\//i.test(raw);
+                    const isHtmlFile = /\.html?(?:[?#].*)?$/i.test(raw);
+                    const isUrlShortcut = /\.url(?:[?#].*)?$/i.test(raw);
+                    const linkTxtMatch = raw.match(/^(.*\/link\.txt)(?:#(\d+))?$/i);
+
+                    // If this is a link.txt reference, prefer parsing it directly (label + url)
+                    if (linkTxtMatch) {
+                        const txtPath = linkTxtMatch[1];
+                        const lineNumber = Number(linkTxtMatch[2] || 1);
+                        try {
+                            // Avoid fetch under file:// due to browser restrictions.
+                            if (window.location && window.location.protocol === 'file:') {
+                                throw new Error('file protocol');
+                            }
+                            const response = await fetch(txtPath, { cache: 'no-store' });
+                            if (response.ok) {
+                                const text = await response.text();
+                                const parsed = parseLinkTxtEntry(text, lineNumber);
+                                if (parsed && parsed.url) {
+                                    const label = parsed.label || getPriorityFallbackLabel(raw);
+                                    return { label: preferredLabel || label, target: parsed.url };
+                                }
+                            }
+                        } catch (_) {
+                            /* fallthrough */
+                        }
+                        // fallback to raw representation
+                    }
+
+                    if (isHtmlFile && /(^|\/)files\//i.test(raw)) {
+                        return {
+                            label: getPriorityFallbackLabel(raw),
+                            target: `md-viewer.html?path=${encodeURIComponent(raw)}&guest=true`
+                        };
+                    }
+
+                    if (isWebUrl) {
+                        return {
+                            label: getPriorityFallbackLabel(raw),
+                            target: raw
+                        };
+                    }
+
+                    if (linkTxtMatch) {
+                        const txtPath = linkTxtMatch[1];
+                        const lineNumber = Number(linkTxtMatch[2] || 1);
+                        try {
+                            const response = await fetch(txtPath, { cache: 'no-store' });
+                            if (response.ok) {
+                                const text = await response.text();
+                                const resolved = parseLinkTxtEntry(text, lineNumber);
+                                if (resolved.url) {
+                                    return {
+                                        label: resolved.label || getPriorityFallbackLabel(raw),
+                                        target: resolved.url
+                                    };
+                                }
+                            }
+                        } catch (_) {
+                            // Fall through to the raw value below.
+                        }
+                        return { label: preferredLabel || getPriorityFallbackLabel(raw), target: raw };
+                    }
+
+                    if (isUrlShortcut) {
+                        try {
+                            const response = await fetch(raw, { cache: 'no-store' });
+                            if (response.ok) {
+                                const text = await response.text();
+                                const resolved = parseInternetShortcutTarget(text);
+                                if (resolved) {
+                                    return {
+                                        label: preferredLabel || getPriorityFallbackLabel(raw),
+                                        target: resolved
+                                    };
+                                }
+                            }
+                        } catch (_) {
+                            // Fall through to the raw value below.
+                        }
+                        return { label: preferredLabel || getPriorityFallbackLabel(raw), target: raw };
+                    }
+
+                    return { label: preferredLabel || getPriorityFallbackLabel(raw), target: raw };
+                }
+
+                async function renderPriorityLinks() {
+                    if (!priorityLinksList) return;
+                    const entries = getPriorityEntries();
+                    if (!entries.length) {
+                        priorityLinksList.innerHTML = '<div class="priority-links-empty">No priority links are configured.</div>';
+                        return;
+                    }
+
+                    priorityLinksList.innerHTML = '<div class="priority-links-empty">Loading priority links...</div>';
+
+                    const resolvedEntries = await Promise.all(entries.map(async (entry) => {
+                        const resolved = await resolvePriorityEntry(entry.filePath, entry.storedLabel);
+                        return {
+                            ...entry,
+                            label: resolved.label || entry.storedLabel || getPriorityFallbackLabel(entry.filePath),
+                            target: resolved.target || entry.filePath
+                        };
+                    }));
+
+                    priorityLinksList.innerHTML = resolvedEntries.map((entry) => {
+                        const safePath = escapeHtml(entry.filePath);
+const cleanedLabel = entry.label
+    .replace(/^\d+-msg-/, '') // remove "number-msg-"
+    .replace(/\.html$/i, ''); // remove ".html"
+
+const safeLabel = escapeHtml(cleanedLabel);                        const safeKind = escapeHtml(entry.kind);
+                        // Format Course/Subfolder/Name when possible
+                        const parts = normalizePriorityLookupPath(entry.filePath).split('/');
+                        let courseLabel = safeLabel;
+                        if (parts.length >= 3 && parts[0] === 'files') {
+                            const course = escapeHtml(parts[1] || '');
+                            const folder = escapeHtml(parts[2] || '');
+                            courseLabel = `${course} / ${folder} / ${safeLabel}`;
+                        }
+                        return `
+                            <button type="button" class="priority-link-btn" data-path="${safePath}" data-target="${escapeHtml(entry.target)}" data-index="${entry.index}">
+                                <div style="min-width:0;flex:1;">
+                                    <strong>${courseLabel}</strong>
+                                </div>
+                                <div class="priority-link-badge" title="${safeKind}">${entry.index}</div>
+                            </button>
+                        `;
+                    }).join('');
+
+                    priorityLinksList.querySelectorAll('.priority-link-btn').forEach((btn) => {
+                        btn.addEventListener('click', async () => {
+                            const filePath = btn.dataset.path || '';
+                            const target = btn.dataset.target || '';
+                            if (target) window.location.href = target;
+                            else if (filePath) {
+                                const resolved = await resolvePriorityEntry(filePath);
+                                if (resolved.target) window.location.href = resolved.target;
+                            }
+                        });
+                    });
+                }
+
+                async function openPriorityLinksMenu() {
+                    await renderPriorityLinks();
+                    if (priorityLinksOverlay) {
+                        priorityLinksOverlay.classList.add('open');
+                        priorityLinksOverlay.setAttribute('aria-hidden', 'false');
+                    }
+                }
+
+                function closePriorityLinksMenu() {
+                    if (priorityLinksOverlay) {
+                        priorityLinksOverlay.classList.remove('open');
+                        priorityLinksOverlay.setAttribute('aria-hidden', 'true');
+                    }
+                }
+
+                quickUploadPickBtn?.addEventListener('click', () => quickUploadInput?.click());
+                quickUploadClose?.addEventListener('click', closeQuickUploadMenu);
+                quickUploadOverlay?.addEventListener('click', (e) => {
+                    if (e.target === quickUploadOverlay) closeQuickUploadMenu();
+                });
+                priorityLinksClose?.addEventListener('click', closePriorityLinksMenu);
+                priorityLinksOverlay?.addEventListener('click', (e) => {
+                    if (e.target === priorityLinksOverlay) closePriorityLinksMenu();
+                });
+                quickUploadInput?.addEventListener('change', (e) => {
+                    uploadQuickFiles(e.target.files || []);
+                });
+                quickUploadDropzone?.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    quickUploadDropzone.classList.add('drag-over');
+                });
+                quickUploadDropzone?.addEventListener('dragleave', () => {
+                    quickUploadDropzone.classList.remove('drag-over');
+                });
+                quickUploadDropzone?.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    quickUploadDropzone.classList.remove('drag-over');
+                    uploadQuickFiles(e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files : []);
+                });
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.ctrlKey && e.key === '9') {
+                        e.preventDefault();
+                        openQuickUploadMenu();
+                    }
+                    if (e.ctrlKey && e.key === '1') {
+                        e.preventDefault();
+                        openPriorityLinksMenu();
+                    }
+                    if (priorityLinksOverlay && priorityLinksOverlay.classList.contains('open') && !e.ctrlKey && !e.altKey && !e.metaKey && (e.key === '1' || e.key === '2' || e.key === '3')) {
+                        e.preventDefault();
+                        const btn = priorityLinksList?.querySelector(`.priority-link-btn[data-index="${e.key}"]`);
+                        if (btn) btn.click();
+                    }
+                    if (e.key === 'Escape') {
+                        closeQuickUploadMenu();
+                        closePriorityLinksMenu();
                     }
                 });
 

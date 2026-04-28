@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=20260428jck"></script>
+    <script src="js/auth-guard.js?v=2026042810k3"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=202602171mhr"></script>
@@ -544,19 +544,22 @@
             <div id="html-priority-error" class="error-message"></div>
             <form id="html-priority-form-element">
                 <div class="form-group">
-                    <label for="html-priority-1">Priority 1 Path</label>
-                    <input type="text" id="html-priority-1" readonly required>
+                    <label for="html-priority-1">Priority 1 File or Link</label>
+                    <input type="text" id="html-priority-1" placeholder="Paste any file path or link">
                     <button type="button" class="btn browse-btn" data-target-input="html-priority-1">Browse</button>
+                    <button type="button" class="btn btn-secondary clear-priority-btn" data-target-input="html-priority-1" style="width: auto; margin-left: 8px;">Remove</button>
                 </div>
                 <div class="form-group">
-                    <label for="html-priority-2">Priority 2 Path</label>
-                    <input type="text" id="html-priority-2" readonly required>
+                    <label for="html-priority-2">Priority 2 File or Link</label>
+                    <input type="text" id="html-priority-2" placeholder="Paste any file path or link">
                     <button type="button" class="btn browse-btn" data-target-input="html-priority-2">Browse</button>
+                    <button type="button" class="btn btn-secondary clear-priority-btn" data-target-input="html-priority-2" style="width: auto; margin-left: 8px;">Remove</button>
                 </div>
                 <div class="form-group">
-                    <label for="html-priority-3">Priority 3 Path</label>
-                    <input type="text" id="html-priority-3" readonly required>
+                    <label for="html-priority-3">Priority 3 File or Link</label>
+                    <input type="text" id="html-priority-3" placeholder="Paste any file path or link">
                     <button type="button" class="btn browse-btn" data-target-input="html-priority-3">Browse</button>
+                    <button type="button" class="btn btn-secondary clear-priority-btn" data-target-input="html-priority-3" style="width: auto; margin-left: 8px;">Remove</button>
                 </div>
                 <button type="submit" class="btn">Save HTML Priorities</button>
             </form>
@@ -701,7 +704,7 @@
         }
         #fileListContainer .course-header {
             font-weight: bold;
-            color: #bb86fc; /* Purple for course names */
+            color: #588157; /* Purple for course names */
             padding: 0.5rem 0.5rem;
             background-color: #1e1e1e;
             border-bottom: 1px solid #333;
@@ -1017,7 +1020,7 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=20260428jck"></script>
+    <script src="courses.generated.js?v=2026042810k3"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=202602171mhr"></script>
     <script src="js/admin-visual-editor.js?v=202602171mhr"></script>

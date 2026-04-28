@@ -234,6 +234,10 @@ class NotesUIManager {
     this.userProfiles = {};
     this.avatarCache = new Map();
     this.editingMessage = null;
+    this.notesImageUploadButton = null;
+    this.notesImageUploadInput = null;
+    this.notesImageUploadStatus = null;
+    this.notesImageUploadStatusTimer = null;
 
     // console.log('NotesUIManager: Constructor called for documentId:', documentId);
     this.init();
@@ -364,11 +368,12 @@ class NotesUIManager {
             --chat-text: #2c1810;
             --chat-text-light: #6d4c41;
             --chat-secondary: #efebe9;
+          --chat-primary: #588157;
             
             position: fixed;
             bottom: 20px;
             left: 20px;
-            width: 350px;
+            width: min(430px, calc(100vw - 40px));
             height: min(800px, calc(100dvh - 100px));
             max-height: calc(100dvh - 24px);
             background: #fff;
@@ -474,6 +479,7 @@ class NotesUIManager {
             border-radius: 8px;
             outline: none;
           font-size: 16px;
+            min-height: 36px;
             resize: none;
             overflow: hidden;
             transition: all 0.2s;
@@ -481,6 +487,39 @@ class NotesUIManager {
         .notes-input:focus {
             border-color: #7c3aed;
             box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        .notes-image-upload-btn {
+          width: 36px;
+          height: 36px;
+          border: none;
+          background: var(--chat-primary);
+          color: white;
+          border-radius: 8px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          transition: all 0.2s;
+          flex-shrink: 0;
+          padding: 0;
+          line-height: 1;
+        }
+        .notes-image-upload-btn:hover {
+          transform: scale(1.05);
+        }
+        .notes-image-upload-btn:active {
+          transform: scale(0.95);
+        }
+        .notes-image-upload-btn:disabled {
+          opacity: 0.75;
+          cursor: wait;
+          transform: none;
+        }
+        .notes-image-upload-btn img {
+          width: 18px;
+          height: 18px;
+          display: block;
+          filter: brightness(0) invert(1);
         }
         .notes-send-btn {
             background: #7c3aed; color: white; border: none; padding: 0;
@@ -558,6 +597,16 @@ class NotesUIManager {
         .note-time { font-size: 11px; color: var(--chat-text-light); }
         .note-text { font-size: 13px; line-height: 1.4; color: var(--chat-text); padding: 4px 10px; border-radius: 8px; word-break: break-word; overflow-wrap: anywhere; box-sizing: border-box; max-width: 100%; width: fit-content; }
         .note-text a { word-break: break-all; overflow-wrap: anywhere; }
+        .note-text img {
+          display: block;
+          max-width: 100%;
+          max-height: 280px;
+          object-fit: contain;
+          background: #f8fafc;
+          border: 1px solid rgba(0, 0, 0, 0.08);
+          border-radius: 8px;
+          cursor: zoom-in;
+        }
         .note-reactions { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
         .reaction-badge { font-size: 14px !important; padding: 4px 8px !important; border-radius: 12px !important; }
         
@@ -657,6 +706,11 @@ class NotesUIManager {
     inputArea.innerHTML = `
         <div id="notes-reply-preview"></div>
         <div class="notes-input-row" style="display: flex; gap: 12px; align-items: flex-end;">
+             <div style="display: flex; flex-direction: column; gap: 0; align-items: center; min-width: 36px; flex-shrink: 0;">
+               <button type="button" class="notes-image-upload-btn" title="Upload image">
+                 <img src="svg/md-editor/icon-image.svg?v=2026031715gu" alt="Image">
+               </button>
+             </div>
              <textarea class="notes-input" placeholder="Напиши бележка..." rows="1"></textarea>
              <button class="notes-send-btn" title="Изпрати">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
@@ -664,12 +718,18 @@ class NotesUIManager {
                 </svg>
              </button>
         </div>
+        <input type="file" class="notes-image-upload-input" accept="image/*" style="display: none;">
     `;
     
     const sendBtn = this.container.querySelector('.notes-send-btn');
     const input = this.container.querySelector('.notes-input');
     const closeBtn = this.container.querySelector('.notes-close-btn');
+    const imageUploadBtn = this.container.querySelector('.notes-image-upload-btn');
+    const imageUploadInput = this.container.querySelector('.notes-image-upload-input');
     this.inputEl = input;
+    this.notesImageUploadButton = imageUploadBtn;
+    this.notesImageUploadInput = imageUploadInput;
+    this.notesImageUploadStatus = null;
 
     this.setPageScrollLocked = (locked) => {
       document.documentElement.classList.toggle('notes-widget-open', Boolean(locked));
@@ -710,6 +770,36 @@ class NotesUIManager {
 
     input.addEventListener('pointerdown', () => {
       forceInputFocusable();
+    });
+
+    input.addEventListener('paste', async (e) => {
+      const clipboardItems = Array.from((e.clipboardData && e.clipboardData.items) || []);
+      const imageItem = clipboardItems.find(item => item.kind === 'file' && item.type.startsWith('image/'));
+      if (!imageItem) return;
+
+      e.preventDefault();
+
+      const file = imageItem.getAsFile();
+      if (!file) return;
+
+      const originalDisabled = imageUploadBtn ? imageUploadBtn.disabled : false;
+      const originalHtml = imageUploadBtn ? imageUploadBtn.innerHTML : '';
+
+      try {
+        if (imageUploadBtn) {
+          imageUploadBtn.disabled = true;
+          imageUploadBtn.innerHTML = '<span>...</span>';
+        }
+        const uploadedUrl = await this.uploadImageFileToCloudflare(file, 'Uploading note image');
+        this.insertTextAtTextareaCursor(input, this.formatInsertedNoteImageText(input.value, uploadedUrl));
+      } catch (error) {
+        alert('Image upload failed: ' + error.message);
+      } finally {
+        if (imageUploadBtn) {
+          imageUploadBtn.disabled = originalDisabled;
+          imageUploadBtn.innerHTML = originalHtml;
+        }
+      }
     });
     
     const sendMessage = () => {
@@ -786,6 +876,364 @@ class NotesUIManager {
       this.closeNotes();
     });
 
+    if (imageUploadBtn && imageUploadInput) {
+      imageUploadBtn.addEventListener('click', () => {
+        imageUploadInput.value = '';
+        imageUploadInput.click();
+      });
+
+      imageUploadInput.addEventListener('change', async (e) => {
+        const file = e.target.files && e.target.files[0] ? e.target.files[0] : null;
+        if (!file) return;
+
+        const originalHtml = imageUploadBtn.innerHTML;
+        try {
+          imageUploadBtn.disabled = true;
+          imageUploadBtn.innerHTML = '<span>Uploading...</span>';
+          const uploadedUrl = await this.uploadImageFileToCloudflare(file, 'Uploading note image');
+          this.insertTextAtTextareaCursor(input, this.formatInsertedNoteImageText(input.value, uploadedUrl));
+          this.setNotesImageUploadStatus('Image uploaded and inserted.');
+        } catch (error) {
+          this.setNotesImageUploadStatus(`Image upload failed: ${error.message}`, true);
+          alert('Image upload failed: ' + error.message);
+        } finally {
+          imageUploadBtn.disabled = false;
+          imageUploadBtn.innerHTML = originalHtml;
+          imageUploadInput.value = '';
+        }
+      });
+    }
+
+  }
+
+  setNotesImageUploadStatus(message, isError = false) {
+    const status = this.notesImageUploadStatus;
+    if (!status) return;
+
+    if (this.notesImageUploadStatusTimer) {
+      clearTimeout(this.notesImageUploadStatusTimer);
+      this.notesImageUploadStatusTimer = null;
+    }
+
+    status.textContent = message || '';
+    status.style.color = isError ? '#ef4444' : '#6b7280';
+
+    if (message && !isError) {
+      this.notesImageUploadStatusTimer = setTimeout(() => {
+        if (this.notesImageUploadStatus === status) {
+          status.textContent = '';
+        }
+        this.notesImageUploadStatusTimer = null;
+      }, 4000);
+    }
+  }
+
+  formatUploadBytes(bytes) {
+    const value = Number(bytes);
+    if (!Number.isFinite(value) || value < 0) return '0 B';
+    if (value < 1024) return `${Math.round(value)} B`;
+    if (value < 1024 * 1024) return `${(value / 1024).toFixed(1)} KB`;
+    return `${(value / (1024 * 1024)).toFixed(2)} MB`;
+  }
+
+  extensionForImageMimeType(mimeType) {
+    switch (String(mimeType || '').toLowerCase()) {
+      case 'image/jpeg': return 'jpg';
+      case 'image/png': return 'png';
+      case 'image/webp': return 'webp';
+      default: return 'png';
+    }
+  }
+
+  buildOptimizedImageFileName(fileName, mimeType) {
+    const fallback = 'image';
+    const raw = String(fileName || fallback).trim() || fallback;
+    const base = raw.replace(/\.[^.]+$/, '') || fallback;
+    return `${base}.${this.extensionForImageMimeType(mimeType)}`;
+  }
+
+  shouldSkipCanvasOptimization(fileType) {
+    const type = String(fileType || '').toLowerCase();
+    return type === 'image/gif' || type === 'image/svg+xml';
+  }
+
+  getOptimizationMimeCandidates(fileType) {
+    const type = String(fileType || '').toLowerCase();
+    if (type === 'image/jpeg' || type === 'image/jpg') {
+      return ['image/jpeg'];
+    }
+    if (type === 'image/webp') {
+      return ['image/webp'];
+    }
+    if (type === 'image/png') {
+      return ['image/png'];
+    }
+    return ['image/png'];
+  }
+
+  loadImageElementFromFile(file) {
+    return new Promise((resolve, reject) => {
+      const objectUrl = URL.createObjectURL(file);
+      const img = new Image();
+
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(img);
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error('Could not decode image'));
+      };
+
+      img.src = objectUrl;
+    });
+  }
+
+  canvasToBlobAsync(canvas, mimeType, quality) {
+    return new Promise((resolve, reject) => {
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          reject(new Error('Failed to encode image'));
+          return;
+        }
+        resolve(blob);
+      }, mimeType, quality);
+    });
+  }
+
+  async optimizeImageFileForUpload(file, maxBytes = 1 * 1024 * 1024) {
+    const originalSize = file && Number.isFinite(file.size) ? file.size : 0;
+    const isOversized = originalSize > maxBytes;
+
+    if (!file || !(file instanceof File)) {
+      throw new Error('No image file was provided');
+    }
+
+    if (!file.type || !file.type.startsWith('image/')) {
+      throw new Error('Selected file is not an image');
+    }
+
+    if (this.shouldSkipCanvasOptimization(file.type)) {
+      return {
+        file,
+        wasOptimized: false,
+        originalSize,
+        finalSize: originalSize,
+        note: isOversized
+          ? 'This image format cannot be safely auto-compressed. Please use PNG, JPG, or WEBP under 1MB.'
+          : ''
+      };
+    }
+
+    const sourceImage = await this.loadImageElementFromFile(file);
+    const sourceWidth = Math.max(1, Math.round(sourceImage.naturalWidth || sourceImage.width || 0));
+    const sourceHeight = Math.max(1, Math.round(sourceImage.naturalHeight || sourceImage.height || 0));
+
+    if (!sourceWidth || !sourceHeight) {
+      throw new Error('Could not read image dimensions for optimization');
+    }
+
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d', { alpha: true });
+    if (!context) {
+      throw new Error('Image optimization is not available in this browser');
+    }
+
+    const scaleSteps = isOversized
+      ? [1, 0.9, 0.82, 0.74, 0.66, 0.58, 0.5, 0.42, 0.35, 0.28]
+      : [1];
+    const qualitySteps = isOversized
+      ? [0.92, 0.86, 0.8, 0.74, 0.68, 0.62, 0.56, 0.5, 0.44, 0.38]
+      : [0.98, 0.96, 0.94, 0.92];
+    const mimeCandidates = this.getOptimizationMimeCandidates(file.type);
+
+    let bestBlob = null;
+    let bestMimeType = '';
+
+    for (const scale of scaleSteps) {
+      const width = Math.max(1, Math.round(sourceWidth * scale));
+      const height = Math.max(1, Math.round(sourceHeight * scale));
+      canvas.width = width;
+      canvas.height = height;
+      context.clearRect(0, 0, width, height);
+      context.drawImage(sourceImage, 0, 0, width, height);
+
+      for (const mimeType of mimeCandidates) {
+        const candidateQualities = mimeType === 'image/png' ? [undefined] : qualitySteps;
+
+        for (const quality of candidateQualities) {
+          let blob;
+          try {
+            blob = await this.canvasToBlobAsync(canvas, mimeType, quality);
+          } catch (error) {
+            continue;
+          }
+
+          if (!bestBlob || blob.size < bestBlob.size) {
+            bestBlob = blob;
+            bestMimeType = mimeType;
+          }
+
+          if (blob.size <= maxBytes) {
+            const optimizedMimeType = blob.type || mimeType;
+            const optimizedFile = new File([blob], this.buildOptimizedImageFileName(file.name, optimizedMimeType), {
+              type: optimizedMimeType,
+              lastModified: Date.now()
+            });
+
+            if (!isOversized && optimizedFile.size >= (originalSize * 0.97)) {
+              return {
+                file,
+                wasOptimized: false,
+                originalSize,
+                finalSize: originalSize,
+                note: ''
+              };
+            }
+
+            return {
+              file: optimizedFile,
+              wasOptimized: true,
+              originalSize,
+              finalSize: optimizedFile.size,
+              note: ''
+            };
+          }
+        }
+      }
+    }
+
+    if (!bestBlob) {
+      throw new Error('Unable to optimize image');
+    }
+
+    const fallbackMimeType = bestBlob.type || bestMimeType || 'image/jpeg';
+    const fallbackFile = new File([bestBlob], this.buildOptimizedImageFileName(file.name, fallbackMimeType), {
+      type: fallbackMimeType,
+      lastModified: Date.now()
+    });
+
+    if (!isOversized && fallbackFile.size >= (originalSize * 0.97)) {
+      return {
+        file,
+        wasOptimized: false,
+        originalSize,
+        finalSize: originalSize,
+        note: ''
+      };
+    }
+
+    return {
+      file: fallbackFile,
+      wasOptimized: true,
+      originalSize,
+      finalSize: fallbackFile.size,
+      note: fallbackFile.size > maxBytes
+        ? `Could not reduce image below ${this.formatUploadBytes(maxBytes)}.`
+        : ''
+    };
+  }
+
+  getUploadUserName() {
+    let userName = 'anonymous';
+    try {
+      if (typeof currentUser !== 'undefined' && currentUser) {
+        userName = currentUser.userName || currentUser.displayName || currentUser.username || userName;
+      } else {
+        const loggedInUser = localStorage.getItem('loggedInUser');
+        if (loggedInUser) {
+          const user = JSON.parse(loggedInUser);
+          userName = user.userName || user.displayName || user.username || userName;
+        }
+      }
+    } catch (e) {
+      console.warn('Could not get user name:', e);
+    }
+    return userName;
+  }
+
+  sanitizeUploadFileName(fileName) {
+    const normalized = (fileName || 'image.png').replace(/\s+/g, '-').toLowerCase();
+    return normalized.replace(/[^a-z0-9._-]/g, '') || 'image.png';
+  }
+
+  buildCloudflareImagePath(fileName) {
+    const now = new Date();
+    const year = String(now.getFullYear());
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const timestamp = now.getTime();
+    const safeName = this.sanitizeUploadFileName(fileName);
+    return `notes-images/${year}/${month}/${timestamp}-${safeName}`;
+  }
+
+  insertTextAtTextareaCursor(textarea, text) {
+    const start = textarea.selectionStart || 0;
+    const end = textarea.selectionEnd || 0;
+    const prefix = textarea.value.slice(0, start);
+    const suffix = textarea.value.slice(end);
+    textarea.value = prefix + text + suffix;
+    const nextPos = start + text.length;
+    textarea.setSelectionRange(nextPos, nextPos);
+    textarea.focus();
+  }
+
+  formatInsertedNoteImageText(currentValue, imageUrl) {
+    const trimmedUrl = String(imageUrl || '').trim();
+    if (!trimmedUrl) return '';
+    const needsLeadingNewline = currentValue.length > 0 && !currentValue.endsWith('\n');
+    return `${needsLeadingNewline ? '\n' : ''}${trimmedUrl}\n`;
+  }
+
+  async uploadImageFileToCloudflare(file, statusPrefix = 'Uploading image') {
+    if (!file) throw new Error('No file selected');
+    if (!file.type || !file.type.startsWith('image/')) {
+      throw new Error('Selected file is not an image');
+    }
+
+    this.setNotesImageUploadStatus(`${statusPrefix}... preparing image`);
+
+    const optimizationResult = await this.optimizeImageFileForUpload(file, 1 * 1024 * 1024);
+    const fileToUpload = optimizationResult.file;
+
+    if (optimizationResult.note) {
+      throw new Error(optimizationResult.note);
+    }
+
+    if (fileToUpload.size > 1 * 1024 * 1024) {
+      throw new Error(`Image is ${this.formatUploadBytes(fileToUpload.size)} after optimization and exceeds the ${this.formatUploadBytes(1 * 1024 * 1024)} limit.`);
+    }
+
+    this.setNotesImageUploadStatus(`${statusPrefix}...`);
+
+    if (optimizationResult.wasOptimized) {
+      this.setNotesImageUploadStatus(
+        `${statusPrefix}... optimized ${this.formatUploadBytes(optimizationResult.originalSize)} to ${this.formatUploadBytes(optimizationResult.finalSize)}.`
+      );
+    }
+
+    const formData = new FormData();
+    formData.append('file', fileToUpload);
+    formData.append('path', this.buildCloudflareImagePath(fileToUpload.name));
+    formData.append('userName', this.getUploadUserName());
+
+    const response = await fetch('https://r2-upload.sergey-2210-pavlov.workers.dev', {
+      method: 'POST',
+      body: formData
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(errorText || 'Upload failed');
+    }
+
+    const data = await response.json();
+    if (!data || !data.url) {
+      throw new Error('Upload succeeded but no URL was returned');
+    }
+
+    this.setNotesImageUploadStatus(`Upload complete (${this.formatUploadBytes(fileToUpload.size)}). URL is ready to insert.`);
+    return data.url;
   }
 
   openNotes() {
@@ -1006,7 +1454,122 @@ class NotesUIManager {
       
       const reactionsEl = el.querySelector(`#reactions-${msg.id}`);
       if (reactionsEl) this.attachReactionListeners(reactionsEl);
+
+      el.querySelectorAll('.note-message-image').forEach((img) => {
+        img.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.openImageModal(img.dataset.imageUrl || img.src);
+        });
+      });
+
       return el;
+  }
+
+  openImageModal(imageUrl) {
+    if (!imageUrl) return;
+
+    if (window.chatManager && typeof window.chatManager.openImageModal === 'function') {
+      window.chatManager.openImageModal(imageUrl);
+      return;
+    }
+
+    const existingModal = document.getElementById('image-modal');
+    if (existingModal) existingModal.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'image-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10000;
+        cursor: pointer;
+    `;
+
+    const container = document.createElement('div');
+    container.style.cssText = `
+        position: relative;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        border: 2px solid #e5e7eb;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        max-width: 90%;
+        max-height: 90%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    `;
+
+    const img = document.createElement('img');
+    img.src = imageUrl;
+    img.style.cssText = `
+        max-width: 100%;
+        max-height: calc(90vh - 80px);
+        object-fit: contain;
+        border-radius: 8px;
+        display: block;
+    `;
+
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '✕';
+    closeBtn.style.cssText = `
+        position: absolute;
+        top: -12px;
+        right: -12px;
+        background: white;
+        border: 2px solid #e5e7eb;
+        color: #374151;
+        font-size: 24px;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    `;
+    closeBtn.onmouseover = () => {
+        closeBtn.style.background = '#f3f4f6';
+        closeBtn.style.borderColor = '#d1d5db';
+    };
+    closeBtn.onmouseout = () => {
+        closeBtn.style.background = 'white';
+        closeBtn.style.borderColor = '#e5e7eb';
+    };
+
+    container.appendChild(img);
+    container.appendChild(closeBtn);
+    modal.appendChild(container);
+    document.body.appendChild(modal);
+
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+
+    closeBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        modal.remove();
+    });
+
+    container.addEventListener('click', (e) => e.stopPropagation());
+
+    const escHandler = (e) => {
+      if (e.key === 'Escape') {
+        modal.remove();
+        document.removeEventListener('keydown', escHandler);
+      }
+    };
+    document.addEventListener('keydown', escHandler);
   }
   
   startReply(msg) {
@@ -1367,10 +1930,44 @@ class NotesUIManager {
   }
   
   linkify(text) {
-      // Basic linkify with line break preservation
-      const escaped = this.escapeHtml(text);
-      const withBreaks = escaped.replace(/\n/g, '<br>');
-      return withBreaks.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank" style="color:#0ea5e9">$1</a>');
+      const source = String(text || '');
+      const urlPattern = /https?:\/\/[^\s]+/g;
+      const imagePattern = /\.(?:png|jpe?g|gif|webp)(?:\?.*)?$/i;
+
+      let lastIndex = 0;
+      let html = '';
+      let match;
+
+      while ((match = urlPattern.exec(source)) !== null) {
+        const before = source.slice(lastIndex, match.index);
+        if (before) {
+          html += this.escapeHtml(before).replace(/\n/g, '<br>');
+        }
+
+        const rawUrl = match[0];
+        const trimmedUrl = rawUrl.replace(/[),.?!;:]+$/g, '');
+        const trailing = rawUrl.slice(trimmedUrl.length);
+        const safeUrl = this.escapeHtml(trimmedUrl);
+
+        if (imagePattern.test(trimmedUrl)) {
+          html += `<img src="${safeUrl}" alt="Image" class="note-message-image" data-image-url="${safeUrl}" style="max-width:100%;max-height:280px;border-radius:8px;border:1px solid rgba(0,0,0,0.08);display:block;object-fit:contain;background:#f8fafc;cursor:zoom-in;">`;
+        } else {
+          html += `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="color:#0ea5e9">${safeUrl}</a>`;
+        }
+
+        if (trailing) {
+          html += this.escapeHtml(trailing).replace(/\n/g, '<br>');
+        }
+
+        lastIndex = match.index + rawUrl.length;
+      }
+
+      const rest = source.slice(lastIndex);
+      if (rest) {
+        html += this.escapeHtml(rest).replace(/\n/g, '<br>');
+      }
+
+      return html;
   }
 }
 

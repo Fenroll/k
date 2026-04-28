@@ -91,15 +91,23 @@ function normalizePriorityPath(path) {
     .then(snapshot => {
       const data = snapshot.val();
       if (data) {
-        // Normalize loaded values so lookups in index.html are reliable.
+        const normalizeEntry = (entry) => {
+          if (!entry) return { path: '', label: '' };
+          if (typeof entry === 'object') {
+            const pathValue = normalizePriorityPath(entry.path || '');
+            return { path: pathValue, label: String(entry.label || '').trim() };
+          }
+          return { path: normalizePriorityPath(entry), label: '' };
+        };
+
         window.htmlPriority = {
-          1: normalizePriorityPath(data[1] || data['1'] || ''),
-          2: normalizePriorityPath(data[2] || data['2'] || ''),
-          3: normalizePriorityPath(data[3] || data['3'] || '')
+          1: normalizeEntry(data[1] || data['1'] || ''),
+          2: normalizeEntry(data[2] || data['2'] || ''),
+          3: normalizeEntry(data[3] || data['3'] || '')
         };
       } else {
         // Keep empty when not configured; admin.html is the source of truth.
-        window.htmlPriority = { 1: '', 2: '', 3: '' };
+        window.htmlPriority = { 1: { path: '', label: '' }, 2: { path: '', label: '' }, 3: { path: '', label: '' } };
       }
       return window.htmlPriority;
     })

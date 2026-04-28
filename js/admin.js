@@ -51,6 +51,7 @@
         const htmlPriorityInput3 = document.getElementById('html-priority-3');
         const htmlPriorityError = document.getElementById('html-priority-error');
         const browseButtons = document.querySelectorAll('.browse-btn');
+        const clearPriorityButtons = document.querySelectorAll('.clear-priority-btn');
 
         // File Browser Modal elements
         const fileBrowserModal = document.getElementById('fileBrowserModal');
@@ -114,18 +115,14 @@
         function getCleanFileName(fileName) {
             // Remove common prefixes like "1-msg-", "2.1-msg-", etc.
             let cleanName = fileName.replace(/^[\d\.]+-msg-/, '');
-            // Remove .html extension
-            cleanName = cleanName.replace(/\.html$/, '');
+            // Remove common extensions
+            cleanName = cleanName.replace(/\.(?:html?|url|pdf)$/i, '');
             return cleanName;
         }
 
-        // Helper function to check if a file is an HTML msg file
-        function isHtmlMsgFile(file) {
-            if (!file || !file.name || !file.path) return false;
-            const fileName = file.name;
-            const isMsg = fileName.includes('-msg-') || fileName.startsWith('msg-');
-            const isHtml = file.path.endsWith('.html');
-            return isMsg && isHtml;
+        // Helper function to check if a file can be used as a priority target.
+        function isPriorityTargetFile(file) {
+            return Boolean(file && file.name && file.path);
         }
 
         // Helper function to convert full path to display format for input fields
@@ -179,7 +176,7 @@
                     // Process regular files that are "msg" types
                     if (section.files) {
                         section.files.forEach(file => {
-                            if (isHtmlMsgFile(file) && (file.name.toLowerCase().includes(lowerCaseFilter) || file.path.toLowerCase().includes(lowerCaseFilter))) {
+                            if (isPriorityTargetFile(file) && (file.name.toLowerCase().includes(lowerCaseFilter) || file.path.toLowerCase().includes(lowerCaseFilter))) {
                                 sectionFiles.push({ name: file.name, path: file.path });
                             }
                         });
@@ -188,8 +185,8 @@
                     // Process msgNotes files (if they exist and are distinct)
                     if (section.msgNotes) {
                         section.msgNotes.forEach(file => {
-                            // Ensure no duplicates and apply the same "msg" filter
-                            if (isHtmlMsgFile(file) && !sectionFiles.some(sf => sf.path === file.path) && (file.name.toLowerCase().includes(lowerCaseFilter) || file.path.toLowerCase().includes(lowerCaseFilter))) {
+                            // Ensure no duplicates and allow any file type.
+                            if (isPriorityTargetFile(file) && !sectionFiles.some(sf => sf.path === file.path) && (file.name.toLowerCase().includes(lowerCaseFilter) || file.path.toLowerCase().includes(lowerCaseFilter))) {
                                 sectionFiles.push({ name: file.name, path: file.path });
                             }
                         });
@@ -532,34 +529,69 @@
         htmlPriorityRef.on('value', (snapshot) => {
             const prioritySettings = snapshot.val();
             if (prioritySettings) {
-                // When loading, set the display path to value, and full path to data-full-path
-                htmlPriorityInput1.value = getDisplayPath(prioritySettings['1'] || '');
-                htmlPriorityInput1.dataset.fullPath = prioritySettings['1'] || '';
-                htmlPriorityInput2.value = getDisplayPath(prioritySettings['2'] || '');
-                htmlPriorityInput2.dataset.fullPath = prioritySettings['2'] || '';
-                htmlPriorityInput3.value = getDisplayPath(prioritySettings['3'] || '');
-                htmlPriorityInput3.dataset.fullPath = prioritySettings['3'] || '';
+                const entry1 = prioritySettings['1'] || '';
+                const entry2 = prioritySettings['2'] || '';
+                const entry3 = prioritySettings['3'] || '';
+
+                const path1 = typeof entry1 === 'object' ? entry1.path || '' : entry1;
+                const path2 = typeof entry2 === 'object' ? entry2.path || '' : entry2;
+                const path3 = typeof entry3 === 'object' ? entry3.path || '' : entry3;
+
+                htmlPriorityInput1.value = path1 || '';
+                htmlPriorityInput1.dataset.fullPath = path1 || '';
+                htmlPriorityInput1.dataset.label = typeof entry1 === 'object' ? String(entry1.label || '').trim() : '';
+
+                htmlPriorityInput2.value = path2 || '';
+                htmlPriorityInput2.dataset.fullPath = path2 || '';
+                htmlPriorityInput2.dataset.label = typeof entry2 === 'object' ? String(entry2.label || '').trim() : '';
+
+                htmlPriorityInput3.value = path3 || '';
+                htmlPriorityInput3.dataset.fullPath = path3 || '';
+                htmlPriorityInput3.dataset.label = typeof entry3 === 'object' ? String(entry3.label || '').trim() : '';
             } else {
                 htmlPriorityInput1.value = '';
                 htmlPriorityInput1.dataset.fullPath = '';
+                htmlPriorityInput1.dataset.label = '';
                 htmlPriorityInput2.value = '';
                 htmlPriorityInput2.dataset.fullPath = '';
+                htmlPriorityInput2.dataset.label = '';
                 htmlPriorityInput3.value = '';
                 htmlPriorityInput3.dataset.fullPath = '';
+                htmlPriorityInput3.dataset.label = '';
             }
-            // If value is empty, display 'Select file...'
-            if (!htmlPriorityInput1.value) htmlPriorityInput1.value = 'Select file...';
-            if (!htmlPriorityInput2.value) htmlPriorityInput2.value = 'Select file...';
-            if (!htmlPriorityInput3.value) htmlPriorityInput3.value = 'Select file...';
+        });
+
+        [htmlPriorityInput1, htmlPriorityInput2, htmlPriorityInput3].forEach((input) => {
+            if (!input) return;
+            input.addEventListener('input', () => {
+                input.dataset.fullPath = input.value.trim();
+                input.dataset.label = '';
+            });
         });
 
         htmlPriorityForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const newPrioritySettings = {
-                1: htmlPriorityInput1.dataset.fullPath, // Save full path from data attribute
-                2: htmlPriorityInput2.dataset.fullPath,
-                3: htmlPriorityInput3.dataset.fullPath
+                1: {
+                    path: (htmlPriorityInput1.dataset.fullPath || htmlPriorityInput1.value || '').trim(),
+                    label: (htmlPriorityInput1.dataset.label || '').trim()
+                },
+                2: {
+                    path: (htmlPriorityInput2.dataset.fullPath || htmlPriorityInput2.value || '').trim(),
+                    label: (htmlPriorityInput2.dataset.label || '').trim()
+                },
+                3: {
+                    path: (htmlPriorityInput3.dataset.fullPath || htmlPriorityInput3.value || '').trim(),
+                    label: (htmlPriorityInput3.dataset.label || '').trim()
+                }
             };
+            // Trim empty entries
+            Object.keys(newPrioritySettings).forEach((key) => {
+                const entry = newPrioritySettings[key];
+                if (!entry.path) {
+                    newPrioritySettings[key] = { path: '', label: '' };
+                }
+            });
             try {
                 await htmlPriorityRef.set(newPrioritySettings);
                 showNotification('HTML Priority settings saved successfully!');
@@ -576,6 +608,15 @@
                 currentInputForFileSelection = document.getElementById(e.target.dataset.targetInput);
                 buildFileList();
                 fileBrowserModal.style.display = 'flex';
+            });
+        });
+
+        clearPriorityButtons.forEach(button => {
+            button.addEventListener('click', (e) => {
+                const input = document.getElementById(e.target.dataset.targetInput);
+                if (!input) return;
+                input.value = '';
+                input.dataset.fullPath = '';
             });
         });
 
@@ -597,8 +638,11 @@
                 target = target.parentNode;
             }
             if (target && target.classList.contains('file-item') && currentInputForFileSelection) {
-                currentInputForFileSelection.value = getDisplayPath(target.dataset.path); // Display friendly path
-                currentInputForFileSelection.dataset.fullPath = target.dataset.path; // Store full path
+                const selectedValue = (target.dataset.path || '').trim();
+                const selectedLabel = getCleanFileName(target.textContent || '').trim();
+                currentInputForFileSelection.value = selectedValue;
+                currentInputForFileSelection.dataset.fullPath = selectedValue;
+                currentInputForFileSelection.dataset.label = selectedLabel;
                 fileBrowserModal.style.display = 'none';
                 currentInputForFileSelection = null; // Clear selection
             }
