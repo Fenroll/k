@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-    <script src="js/auth-guard.js?v=202604281m3a"></script>
+    <script src="js/auth-guard.js?v=202604281o6d"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
@@ -288,7 +288,7 @@
             </div>
             <div class="account-footer-actions">
                 <button id="show-delete-account-btn" class="btn btn-danger">Delete Account</button>
-                <button onclick="window.location.href=(JSON.parse(localStorage.getItem('loggedInUser') || '{}').preferredCoursesView === 'beta' ? 'indexbeta.html' : 'index.html')" class="btn" style="background-color: #262626;">Go back</button>
+                <button onclick="window.location.href=(JSON.parse(localStorage.getItem('loggedInUser') || '{}').preferredCoursesView === 'legacy' && window.matchMedia && window.matchMedia('(min-width: 901px)').matches ? 'indexlegacy.html' : 'index.html')" class="btn" style="background-color: #262626;">Go back</button>
             </div>
         </div>
 
@@ -468,7 +468,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
 
     <!-- Нашият скрипт за акаунти -->
-    <script src="./js/account-system.js?v=202604281m3a"></script>
+    <script src="./js/account-system.js?v=202604281o6d"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/version-check.js?v=202602171mhr"></script>
     <script>

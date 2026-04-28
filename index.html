@@ -14,7 +14,7 @@
       } catch (_) {}
     })();
   </script>
-  <script src="js/auth-guard.js?v=202604281m3a"></script>
+  <script src="js/auth-guard.js?v=202604281o6d"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -350,10 +350,6 @@
     display: none !important;
   }
   
-  /* Скрий "Others" само на мобилни устройства */
-  .others-label {
-    display: none !important;
-  }
   .main-header {
     justify-content: flex-start !important;
     text-align: left !important;
@@ -379,10 +375,26 @@
     box-sizing: border-box;
   }
   .archive-separator {
-    width: calc(100% - 7px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    height: auto;
+    background: transparent;
+    color: #6b7280;
+    font-size: 12px;
+    line-height: 1;
+    font-weight: 700;
+    margin: 10px 0 6px 0;
+    text-align: center;
+    white-space: nowrap;
+  }
+  .archive-separator::before,
+  .archive-separator::after {
+    content: '';
     height: 1px;
-    background-color: #ddd;
-    margin: 20px 0 12px 0;
+    flex: 1 1 auto;
+    background: #e5e7eb;
   }
 
 }
@@ -1111,7 +1123,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=202604281m3a"></script>
+  <script src="courses.generated.js?v=202604281o6d"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 
 <!-- Subtle UI tweaks -->
@@ -1594,14 +1606,9 @@ function renderCourseList() {
       const separator = document.createElement('div');
       separator.className = 'archive-separator';
       separator.style.gridColumn = '1 / -1';
+      separator.textContent = 'Archived Courses';
       list.appendChild(separator);
-      
-      const archiveLabel = document.createElement('div');
-      archiveLabel.className = 'others-label';
-      archiveLabel.style.cssText = 'font-size: 1.5em; color: #222; font-weight: 400; margin-bottom: 0.5rem; margin-left: 2px; font-family: "Open Sans", Arial, sans-serif !important; grid-column: 1 / -1;';
-      archiveLabel.textContent = 'Archived Courses';
-      list.appendChild(archiveLabel);
-      
+
       // Render archived courses
       const archivedColors = getUniqueShuffledColors(archivedCourses.length, true);
       archivedCourses.forEach((course, index) => {
@@ -2115,7 +2122,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=202604281m3a"></script>
+<script src="js/chat.js?v=202604281o6d"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -3928,17 +3935,27 @@ body.index-beta .course-custom-text {
 
 body.index-beta .archive-separator {
   grid-column: 1 / -1;
-  margin: 8px 0 2px 0 !important;
-  height: 1px !important;
-  background: #e5e7eb !important;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: auto !important;
+  margin: 10px 0 6px 0 !important;
+  background: transparent !important;
+  color: #6b7280 !important;
+  font-size: 12px !important;
+  line-height: 1;
+  font-weight: 700 !important;
+  text-align: center;
+  white-space: nowrap;
 }
 
-body.index-beta .others-label {
-  grid-column: 1 / -1;
-  margin: 8px 0 2px 0 !important;
-  color: #6b7280 !important;
-  font-size: 13px !important;
-  font-weight: 700 !important;
+body.index-beta .archive-separator::before,
+body.index-beta .archive-separator::after {
+  content: '';
+  height: 1px;
+  flex: 1 1 auto;
+  background: #e5e7eb;
 }
 
 body.index-beta .right-overlay {
@@ -3983,7 +4000,6 @@ body.index-beta.dark-mode .course-title {
 body.index-beta.dark-mode .beta-editor-meta,
 body.index-beta.dark-mode .course-id,
 body.index-beta.dark-mode .course-custom-text,
-body.index-beta.dark-mode .others-label,
 body.index-beta.dark-mode .beta-empty-state {
   color: #aaaaaa !important;
 }
@@ -4365,14 +4381,6 @@ body.dark-mode .overlay-header {
 
 body.dark-mode .main-header {
   background: #121212 !important;
-}
-
-body.dark-mode .others-label {
-  color: #ffffff !important;
-}
-
-body.dark-mode .archive-separator {
-  background-color: #303030 !important;
 }
 
 body.dark-mode .overlay-main-content section {
