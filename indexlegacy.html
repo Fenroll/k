@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
   <script>
@@ -14,7 +14,7 @@
       } catch (_) {}
     })();
   </script>
-  <script src="js/auth-guard.js?v=202604281o6d"></script>
+  <script src="js/auth-guard.js?v=202604281tjv"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1111,7 +1111,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=202604281o6d"></script>
+  <script src="courses.generated.js?v=202604281tjv"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
@@ -2007,7 +2007,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=202604281o6d"></script>
+<script src="js/chat.js?v=202604281tjv"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -3241,7 +3241,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       <ul style="margin: 0 0 12px 0; padding-left: 24px;">
         <li style="margin-bottom: 8px;"><strong>Authentication:</strong> We store your unique User ID and Session Token to keep you logged in.</li>
         <li style="margin-bottom: 8px;"><strong>Device ID:</strong> A random identifier is generated for this browser to manage active sessions security.</li>
-        <li style="margin-bottom: 0;"><strong>Preferences:</strong> Settings such as font size or theme choices are saved for your convenience.</li>
+        <li style="margin-bottom: 0;"><strong>Preferences:</strong> Settings such as font size are saved for your convenience.</li>
       </ul>
       <p style="margin: 0;"><strong>Note:</strong> This data is strictly necessary for the application to function. We do not use cookies for advertising, tracking, or analytics. No data is shared with third parties.</p>
     </div>
@@ -3271,212 +3271,32 @@ document.addEventListener('click', function(event) {
   if (event.target === modal) {
     closePrivacyModal();
   }
-});
-</script>
-
-<style>
-body.dark-mode {
-  background: #121212 !important;
-  color: #f1f1f1 !important;
-}
-
-body.dark-mode .main-content,
-body.dark-mode .course-org-list,
-body.dark-mode .filter-bar,
-body.dark-mode .overlay-content,
-body.dark-mode .overlay-main-content,
-body.dark-mode .text-modal-content,
-body.dark-mode #privacyModal .text-modal-content {
-  background: #121212 !important;
-  color: #f1f1f1 !important;
-}
-
-body.dark-mode .main-header,
-body.dark-mode .overlay-header,
-body.dark-mode .msg-note-content,
-body.dark-mode .annotation-modal-content,
-body.dark-mode .filter-search-input,
-body.dark-mode .filter-select,
-body.dark-mode .text-modal-content,
-body.dark-mode .right-overlay {
-  background: #181818 !important;
-  color: #f1f1f1 !important;
-  border-color: #303030 !important;
-}
-
-body.dark-mode .element-card {
-  background: #181818 !important;
-  color: #f1f1f1 !important;
-  border-top: 1px solid #303030 !important;
-  border-right: 1px solid #303030 !important;
-  border-bottom: 1px solid #303030 !important;
-  /* Keep border-left accent color from existing course color logic */
-}
-
-body.dark-mode .course-title,
-body.dark-mode .course-custom-text,
-body.dark-mode .course-id,
-body.dark-mode .status-open,
-body.dark-mode .status-moreinfo,
-body.dark-mode .overlay-header .page-title,
-body.dark-mode .filter-label,
-body.dark-mode .text-modal-title,
-body.dark-mode .text-modal-body,
-body.dark-mode .msg-note-content,
-body.dark-mode .event-info-overlay,
-body.dark-mode .event-info-overlay li,
-body.dark-mode .event-info-overlay p,
-body.dark-mode #privacyModal,
-body.dark-mode #privacyModal p,
-body.dark-mode #privacyModal li {
-  color: #f1f1f1 !important;
 }
 
 
 
-body.dark-mode .status-moreinfo,
-body.dark-mode .status-instructors,
-body.dark-mode .markdown-content a,
-body.dark-mode .event-info-overlay a,
-body.dark-mode .overlay-main-content a {
-  color: #a3b18a !important;
-}
-
-body.dark-mode .filter-search-input,
-body.dark-mode .filter-select {
-  border-color: #3f3f3f !important;
-  background: #121212 !important;
-}
-
-body.dark-mode .filter-label {
-  background: #121212 !important;
-  color: #aaaaaa !important;
-}
-
-body.dark-mode .filter-search-icon,
-body.dark-mode .filter-select-arrow {
-  color: #aaaaaa !important;
-  fill: #aaaaaa !important;
-}
-
-body.dark-mode .sidebar-nav a {
-  background: #121212 !important;
-  color: #f1f1f1 !important;
-}
-
-body.dark-mode .sidebar-nav a:hover {
-  background: #121212 !important;
-}
-
-body.dark-mode .sidebar-nav .active a,
-body.dark-mode .sidebar-nav li.active a {
-  background: #1a1a1a !important;
-}
-
-body.dark-mode .logo-header,
-body.dark-mode .base-courses-header-container,
-body.dark-mode .base-footer,
-body.dark-mode #side-menu {
-  background: #121212 !important;
-}
-
-body.dark-mode .sidebar-nav .active a::before,
-body.dark-mode .sidebar-nav li.active a::before {
-  background: #588157 !important;
-}
-
-body.dark-mode .sidebar-nav .svg-icon {
-  filter: brightness(0) invert(1) !important;
-}
-
-body.dark-mode .main-header,
-body.dark-mode .overlay-header {
-  border-bottom: 1px solid #303030 !important;
-}
-
-body.dark-mode .main-header {
-  background: #121212 !important;
-}
-
-body.dark-mode .others-label {
-  color: #ffffff !important;
-}
-
-body.dark-mode .archive-separator {
-  background-color: #303030 !important;
-}
-
-body.dark-mode .overlay-main-content section {
-  background: #1a1a1a !important;
-  border: 1px solid #303030 !important;
-  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.35) !important;
-}
 
 
 
-body.dark-mode .msg-note,
-body.dark-mode .msg-note:hover,
-body.dark-mode .msg-note-html,
-body.dark-mode .msg-note-html:hover {
-  border-left-color: #588157 !important;
-  box-shadow: none !important;
-}
 
 
-body.dark-mode .msg-note-content {
-  border-top-color: rgba(146, 64, 14, 0.2) !important;
-}
 
-body.dark-mode .folder-toggle-arrow {
-  background: linear-gradient(180deg, #2f3832 0%, #273029 100%) !important;
-  color: #d9e2d0 !important;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45) !important;
-}
 
-body.dark-mode .element-card::after,
-body.dark-mode .main-header,
-body.dark-mode .overlay-header,
-body.dark-mode .sidebar-nav a,
-body.dark-mode .base-footer,
-body.dark-mode .logo-header {
-  border-color: #343a42 !important;
-}
 
-body.dark-mode .text-modal {
-  background-color: rgba(12, 14, 16, 0.78) !important;
-}
 
-body.dark-mode .element-card::after {
-  background-color: #303030 !important;
-}
+
+
+
+
+
+
+
+
+
+
+
+
 
 </style>
-
-<script>
-(function() {
-  const THEME_KEY = 'index-copy-theme';
-  const root = document.documentElement;
-
-  function setDarkMode(enabled) {
-    document.body.classList.toggle('dark-mode', enabled);
-    root.classList.toggle('dark-mode', enabled);
-    if (enabled) {
-      root.setAttribute('data-theme', 'dark');
-    } else {
-      root.removeAttribute('data-theme');
-    }
-
-    window.dispatchEvent(new Event('themechange'));
-  }
-
-  function getInitialPreference() {
-    const stored = localStorage.getItem(THEME_KEY);
-    if (stored === 'dark') return true;
-    return false;
-  }
-
-  setDarkMode(getInitialPreference());
-})();
-</script>
-    </body>
+</body>
     </html>
