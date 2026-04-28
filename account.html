@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-    <script src="js/auth-guard.js?v=2026042810mr"></script>
+    <script src="js/auth-guard.js?v=202604281awt"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
@@ -229,81 +229,7 @@
             background-color: #dc2626;
         }
 
-        body.dark-mode {
-            background-color: #121212;
-            color: #f1f1f1;
-        }
-        body.dark-mode .account-container {
-            background: #181818;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.45);
-            border: 1px solid #303030;
-        }
-        body.dark-mode h2 {
-            color: #588157;
-        }
-        body.dark-mode .data-section-title {
-            color: #588157;
-            border-bottom-color: #303030;
-        }
-        body.dark-mode .data-label {
-            color: #f1f1f1;
-        }
-        body.dark-mode .data-value {
-            color: #bfbfbf;
-        }
-        body.dark-mode input[type="text"],
-        body.dark-mode input[type="email"],
-        body.dark-mode input[type="password"],
-        body.dark-mode input[type="url"],
-        body.dark-mode input[type="file"],
-        body.dark-mode select,
-        body.dark-mode textarea {
-            background: #121212;
-            color: #f1f1f1;
-            border-color: #3f3f3f;
-        }
-        body.dark-mode .btn {
-            background: #588157;
-            color: #f1f1f1;
-        }
-        body.dark-mode .btn:hover {
-            background: #466c43;
-        }
-        body.dark-mode .btn-danger {
-            background-color: #ef4444;
-            color: #ffffff;
-        }
-        body.dark-mode .btn-danger:hover {
-            background-color: #dc2626;
-        }
-        body.dark-mode .change-btn {
-            background: rgba(88, 129, 87, 0.2);
-            border-color: #588157;
-            color: #d5e5d3;
-        }
-        body.dark-mode .change-btn:hover {
-            background: rgba(88, 129, 87, 0.32);
-            border-color: #6f9f6d;
-        }
-        body.dark-mode .error-message {
-            background: #2d1414;
-            color: #fca5a5;
-            border: 1px solid #7f1d1d;
-        }
-        body.dark-mode .font-preview-wrap {
-            background: #121212;
-            border-color: #303030;
-        }
-        body.dark-mode .font-preview-block {
-            background: #1b1b1b;
-            border-color: #303030;
-        }
-        body.dark-mode .font-preview-block h3,
-        body.dark-mode .font-preview-block p,
-        body.dark-mode .font-preview-block ul,
-        body.dark-mode .font-preview-block li {
-            color: #e5e7eb;
-        }
+        
     </style>
   <script src="js/version-manager.js?v=2026031715gu"></script>
 </head>
@@ -355,14 +281,14 @@
                     <button id="show-change-font-btn" class="change-btn">change</button>
                 </div>
                 <div class="profile-data-item">
-                    <span class="data-label">Theme (Experimental):</span>
-                    <span class="data-value" id="user-theme">Light</span>
-                    <button id="show-change-theme-btn" class="change-btn">change</button>
+                    <span class="data-label">Courses (Experimental):</span>
+                    <span class="data-value" id="user-courses-view">Legacy</span>
+                    <button id="show-change-courses-view-btn" class="change-btn">change</button>
                 </div>
             </div>
             <div class="account-footer-actions">
                 <button id="show-delete-account-btn" class="btn btn-danger">Delete Account</button>
-                <button onclick="window.location.href='index.html'" class="btn" style="background-color: #262626;">Go back</button>
+                <button onclick="window.location.href=(JSON.parse(localStorage.getItem('loggedInUser') || '{}').preferredCoursesView === 'beta' ? 'indexbeta.html' : 'index.html')" class="btn" style="background-color: #262626;">Go back</button>
             </div>
         </div>
 
@@ -497,22 +423,24 @@
             </form>
         </div>
 
-        <!-- Change Theme Form -->
-        <div id="change-theme-form" class="form-container">
-            <h2>Change Theme</h2>
-            <div id="change-theme-error" class="error-message"></div>
-            <form id="change-theme-form-element">
+
+        <!-- Change Courses View Form -->
+        <div id="change-courses-view-form" class="form-container">
+            <h2>Change Courses View</h2>
+            <div id="change-courses-view-error" class="error-message"></div>
+            <form id="change-courses-view-form-element">
                 <div class="form-group">
-                    <label for="new-theme">Pick a Theme</label>
-                    <select id="new-theme" required>
-                        <option value="light">Light</option>
-                        <option value="dark">Dark</option>
+                    <label for="new-courses-view">Courses (Experimental)</label>
+                    <select id="new-courses-view" required>
+                        <option value="legacy">Legacy</option>
+                        <option value="beta">Beta</option>
                     </select>
                 </div>
                 <button type="submit" class="btn">Save</button>
                 <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Cancel</button>
             </form>
         </div>
+
 
         <!-- Delete Account Form -->
         <div id="delete-account-form" class="form-container">
@@ -540,7 +468,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
 
     <!-- Нашият скрипт за акаунти -->
-    <script src="./js/account-system.js?v=2026042810mr"></script>
+    <script src="./js/account-system.js?v=202604281awt"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/version-check.js?v=202602171mhr"></script>
     <script>

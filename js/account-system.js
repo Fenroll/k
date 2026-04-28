@@ -2,10 +2,10 @@
 class AccountSystem {
     constructor() {
         this.db = null;
-        this.user = null; // Custom user object: { uid (permanent), username (for login), displayName, color, preferredFont, preferredTheme }
+        this.user = null; // Custom user object: { uid (permanent), username (for login), displayName, color, preferredFont, preferredCoursesView }
         this.defaultPreferredFont = 'open-sans';
-        this.defaultPreferredTheme = 'light';
-        this.themeStorageKey = 'index-copy-theme';
+        this.defaultPreferredCoursesView = 'legacy';
+        this.coursesViewStorageKey = 'coursebook-courses-view';
         this.fontLabels = {
             'open-sans': 'Open Sans',
             'noto-sans': 'Noto Sans',
@@ -13,9 +13,9 @@ class AccountSystem {
             'fira-sans': 'Fira Sans',
             'rubik': 'Rubik'
         };
-        this.themeLabels = {
-            'light': 'Light',
-            'dark': 'Dark'
+        this.coursesViewLabels = {
+            'legacy': 'Legacy',
+            'beta': 'Beta'
         };
         this.fontStacks = {
             'open-sans': "'Open Sans', Arial, sans-serif",
@@ -41,7 +41,7 @@ class AccountSystem {
         this.changeDisplaynameForm = null;
         this.changeColorForm = null;
         this.changeFontForm = null;
-        this.changeThemeForm = null;
+        this.changeCoursesViewForm = null;
         this.deleteAccountForm = null;
     }
 
@@ -64,17 +64,18 @@ class AccountSystem {
         return this.fontLabels[normalized] ? normalized : this.defaultPreferredFont;
     }
 
-    normalizePreferredTheme(preferredThemeValue) {
-        const key = (preferredThemeValue || this.defaultPreferredTheme).toString().trim().toLowerCase();
-        return this.themeLabels[key] ? key : this.defaultPreferredTheme;
+    normalizePreferredCoursesView(preferredCoursesViewValue) {
+        const key = (preferredCoursesViewValue || this.defaultPreferredCoursesView).toString().trim().toLowerCase();
+        return this.coursesViewLabels[key] ? key : this.defaultPreferredCoursesView;
     }
 
-    applyThemePreference(preferredTheme) {
-        const theme = this.normalizePreferredTheme(preferredTheme);
-        localStorage.setItem(this.themeStorageKey, theme);
-        if (document && document.body) {
-            document.body.classList.toggle('dark-mode', theme === 'dark');
-        }
+    applyCoursesViewPreference(preferredCoursesView) {
+        const coursesView = this.normalizePreferredCoursesView(preferredCoursesView);
+        localStorage.setItem(this.coursesViewStorageKey, coursesView);
+    }
+
+    getCoursesHomeUrl(preferredCoursesView = this.user?.preferredCoursesView) {
+        return this.normalizePreferredCoursesView(preferredCoursesView) === 'beta' ? 'indexbeta.html' : 'index.html';
     }
 
     applyFontPreview(fontKey) {
@@ -104,11 +105,11 @@ class AccountSystem {
             this.changeDisplaynameForm = document.getElementById('change-displayname-form');
             this.changeColorForm = document.getElementById('change-color-form');
             this.changeFontForm = document.getElementById('change-font-form');
-            this.changeThemeForm = document.getElementById('change-theme-form');
+            this.changeCoursesViewForm = document.getElementById('change-courses-view-form');
             this.changeAvatarForm = document.getElementById('change-avatar-form');
             this.deleteAccountForm = document.getElementById('delete-account-form');
 
-            if (!this.accountInfo || !this.loadingSpinner || !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm || !this.changeFontForm || !this.changeThemeForm || !this.deleteAccountForm) {
+            if (!this.accountInfo || !this.loadingSpinner || !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm || !this.changeFontForm || !this.changeCoursesViewForm || !this.deleteAccountForm) {
                 console.error("Account page UI elements not found. Aborting.");
                 return;
             }
@@ -118,7 +119,6 @@ class AccountSystem {
 
         this.loadingSpinner.style.display = 'block';
         try {
-            this.applyThemePreference(localStorage.getItem(this.themeStorageKey) || this.defaultPreferredTheme);
             await this.initFirebase();
             await this.checkSession();
             this.attachEventListeners();
@@ -146,20 +146,20 @@ class AccountSystem {
                     const userData = snapshot.val();
                     const plainPassword = this.decodeStoredPassword(userData.password);
                     const preferredFont = this.normalizePreferredFont(userData.preferredFont);
-                    const preferredTheme = this.normalizePreferredTheme(userData.preferredTheme);
+                    const preferredCoursesView = this.normalizePreferredCoursesView(userData.preferredCoursesView);
                     
                     // Reconstruct the user object for the session with the decoded password.
-                    this.user = { ...userData, password: plainPassword, preferredFont, preferredTheme };
+                    this.user = { ...userData, password: plainPassword, preferredFont, preferredCoursesView };
 
                     // Update localStorage with the fresh, correct data.
                     localStorage.setItem('loggedInUser', JSON.stringify(this.user));
-                    this.applyThemePreference(preferredTheme);
+                    this.applyCoursesViewPreference(preferredCoursesView);
 
                     if (!userData.preferredFont || preferredFont !== userData.preferredFont) {
                         await userRef.update({ preferredFont });
                     }
-                    if (!userData.preferredTheme || preferredTheme !== userData.preferredTheme) {
-                        await userRef.update({ preferredTheme });
+                    if (!userData.preferredCoursesView || preferredCoursesView !== userData.preferredCoursesView) {
+                        await userRef.update({ preferredCoursesView });
                     }
                     console.log('Session refreshed from DB for user:', this.user.username);
                 } else { // Keep, error message
@@ -256,12 +256,12 @@ class AccountSystem {
                 }
                 this.showForm('change-font');
             });
-            document.getElementById('show-change-theme-btn').addEventListener('click', () => {
-                const themeSelect = document.getElementById('new-theme');
-                if (themeSelect) {
-                    themeSelect.value = this.normalizePreferredTheme(this.user.preferredTheme);
+            document.getElementById('show-change-courses-view-btn').addEventListener('click', () => {
+                const coursesViewSelect = document.getElementById('new-courses-view');
+                if (coursesViewSelect) {
+                    coursesViewSelect.value = this.normalizePreferredCoursesView(this.user.preferredCoursesView);
                 }
-                this.showForm('change-theme');
+                this.showForm('change-courses-view');
             });
 
             const fontSelect = document.getElementById('new-font');
@@ -310,10 +310,10 @@ class AccountSystem {
                 this.changeFont(newFont);
             });
 
-            document.getElementById('change-theme-form-element').addEventListener('submit', (e) => {
+            document.getElementById('change-courses-view-form-element').addEventListener('submit', (e) => {
                 e.preventDefault();
-                const newTheme = document.getElementById('new-theme').value;
-                this.changeTheme(newTheme);
+                const newCoursesView = document.getElementById('new-courses-view').value;
+                this.changeCoursesView(newCoursesView);
             });
             
             document.getElementById('change-avatar-form-element').addEventListener('submit', (e) => {
@@ -378,7 +378,7 @@ class AccountSystem {
                     password: btoa(password), // Simple encoding, NOT for security
                     color: this.generateRandomColor(),
                     preferredFont: this.defaultPreferredFont,
-                    preferredTheme: this.defaultPreferredTheme,
+                    preferredCoursesView: this.defaultPreferredCoursesView,
                     createdAt: Date.now()
                 };
 
@@ -452,10 +452,10 @@ class AccountSystem {
                     // The permanent UID is the key of the record in the database
                     // After migration, userData contains the full new object.
                     const preferredFont = this.normalizePreferredFont(userData.preferredFont);
-                    const preferredTheme = this.normalizePreferredTheme(userData.preferredTheme);
-                    this.user = { ...userData, password: storedPassword, color: userColor, preferredFont, preferredTheme };
+                    const preferredCoursesView = this.normalizePreferredCoursesView(userData.preferredCoursesView);
+                    this.user = { ...userData, password: storedPassword, color: userColor, preferredFont, preferredCoursesView };
                     localStorage.setItem('loggedInUser', JSON.stringify(this.user));
-                    this.applyThemePreference(preferredTheme);
+                    this.applyCoursesViewPreference(preferredCoursesView);
 
                     // Device tracking
                     let deviceId = localStorage.getItem('deviceId');
@@ -466,7 +466,7 @@ class AccountSystem {
                     const deviceRef = this.db.ref(`site_users/${userKey}/devices/${deviceId}`);
                     deviceRef.set({ lastLogin: Date.now() });
 
-                    window.location.href = 'index.html'; // Redirect to home page
+                    window.location.href = this.getCoursesHomeUrl(preferredCoursesView); // Redirect to preferred courses page
 
                     // If user had no color, save the new one to DB
                     if (!userData.color) {
@@ -475,8 +475,8 @@ class AccountSystem {
                     if (!userData.preferredFont || preferredFont !== userData.preferredFont) {
                         await this.db.ref(`site_users/${userKey}`).update({ preferredFont });
                     }
-                    if (!userData.preferredTheme || preferredTheme !== userData.preferredTheme) {
-                        await this.db.ref(`site_users/${userKey}`).update({ preferredTheme });
+                    if (!userData.preferredCoursesView || preferredCoursesView !== userData.preferredCoursesView) {
+                        await this.db.ref(`site_users/${userKey}`).update({ preferredCoursesView });
                     }
                 } else {
                     this.showError('login-error', 'Грешно потребителско име или парола.');
@@ -680,29 +680,29 @@ class AccountSystem {
         }
     }
 
-    async changeTheme(newTheme) {
-        const normalizedTheme = this.normalizePreferredTheme(newTheme);
-        if (!this.themeLabels[normalizedTheme]) {
-            this.showError('change-theme-error', 'Невалиден избор на тема.');
+    async changeCoursesView(newCoursesView) {
+        const normalizedCoursesView = this.normalizePreferredCoursesView(newCoursesView);
+        if (!this.coursesViewLabels[normalizedCoursesView]) {
+            this.showError('change-courses-view-error', 'Невалиден избор за Courses.');
             return;
         }
 
         this.loadingSpinner.style.display = 'block';
         this.showForm(null);
-        this.hideError('change-theme-error');
+        this.hideError('change-courses-view-error');
 
         try {
             const userRef = this.db.ref(`site_users/${this.user.uid}`);
-            await userRef.update({ preferredTheme: normalizedTheme });
+            await userRef.update({ preferredCoursesView: normalizedCoursesView });
 
-            this.user.preferredTheme = normalizedTheme;
+            this.user.preferredCoursesView = normalizedCoursesView;
             localStorage.setItem('loggedInUser', JSON.stringify(this.user));
-            this.applyThemePreference(normalizedTheme);
+            this.applyCoursesViewPreference(normalizedCoursesView);
 
             this.updateUI();
         } catch (error) {
-            console.error('Theme change error:', error);
-            this.showError('change-theme-error', 'Възникна грешка.');
+            console.error('Courses view change error:', error);
+            this.showError('change-courses-view-error', 'Възникна грешка.');
             this.updateUI();
         } finally {
             this.loadingSpinner.style.display = 'none';
@@ -921,10 +921,10 @@ class AccountSystem {
                     fontValue.textContent = this.fontLabels[fontKey] || this.fontLabels[this.defaultPreferredFont];
                 }
 
-                const themeValue = document.getElementById('user-theme');
-                if (themeValue) {
-                    const themeKey = this.normalizePreferredTheme(this.user.preferredTheme);
-                    themeValue.textContent = this.themeLabels[themeKey] || this.themeLabels[this.defaultPreferredTheme];
+                const coursesViewValue = document.getElementById('user-courses-view');
+                if (coursesViewValue) {
+                    const coursesViewKey = this.normalizePreferredCoursesView(this.user.preferredCoursesView);
+                    coursesViewValue.textContent = this.coursesViewLabels[coursesViewKey] || this.coursesViewLabels[this.defaultPreferredCoursesView];
                 }
 
                 const avatarPreview = document.getElementById('user-avatar-preview');
@@ -957,7 +957,7 @@ class AccountSystem {
             if (this.changeDisplaynameForm) this.changeDisplaynameForm.style.display = 'none';
             if (this.changeColorForm) this.changeColorForm.style.display = 'none';
             if (this.changeFontForm) this.changeFontForm.style.display = 'none';
-            if (this.changeThemeForm) this.changeThemeForm.style.display = 'none';
+            if (this.changeCoursesViewForm) this.changeCoursesViewForm.style.display = 'none';
             if (this.changeAvatarForm) this.changeAvatarForm.style.display = 'none';
             if (this.deleteAccountForm) this.deleteAccountForm.style.display = 'none';
             
@@ -967,7 +967,7 @@ class AccountSystem {
             else if (formId === 'change-displayname' && this.changeDisplaynameForm) this.changeDisplaynameForm.style.display = 'block';
             else if (formId === 'change-color' && this.changeColorForm) this.changeColorForm.style.display = 'block';
             else if (formId === 'change-font' && this.changeFontForm) this.changeFontForm.style.display = 'block';
-            else if (formId === 'change-theme' && this.changeThemeForm) this.changeThemeForm.style.display = 'block';
+            else if (formId === 'change-courses-view' && this.changeCoursesViewForm) this.changeCoursesViewForm.style.display = 'block';
             else if (formId === 'change-avatar' && this.changeAvatarForm) this.changeAvatarForm.style.display = 'block';
             else if (formId === 'delete-account' && this.deleteAccountForm) this.deleteAccountForm.style.display = 'block';
         }

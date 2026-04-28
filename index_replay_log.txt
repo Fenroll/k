@@ -1,0 +1,58 @@
+Block 1 indexbeta.html: exact, exact, exact, exact, exact
+Block 2 indexbeta.html: exact
+Block 3 indexbeta.html: exact
+Block 4 indexbeta.html: exact, exact
+Block 5 indexbeta.html: exact, exact, exact, exact, exact, exact, exact, exact
+Block 6 indexbeta.html: exact, exact
+Block 7 indexbeta.html: exact
+Block 8 indexbeta.html: exact
+Block 9 indexbeta.html: exact
+Block 10 indexbeta.html: exact
+Block 11 indexbeta.html: exact, exact
+Block 12 indexbeta.html: exact
+Block 13 indexbeta.html: exact, exact, exact, exact, exact, exact, exact, exact, exact, exact, exact, exact, exact, exact, exact, exact, exact
+Block 14 indexbeta.html: exact
+Block 15 indexbeta.html: exact
+Block 16 indexbeta.html: exact, exact, exact, exact, exact, exact, exact, exact
+Block 17 indexbeta.html: exact
+Block 18 indexbeta.html: exact, exact, exact, exact
+Block 19 indexbeta.html: exact, exact, exact
+Block 20 indexbeta.html: exact
+Block 21 indexbeta.html: exact, exact
+Block 22 indexbeta.html: exact, exact, exact, exact
+Block 23 indexbeta.html: exact, exact, exact, exact
+Block 24 indexbeta.html: exact, exact
+Block 25 indexbeta.html: exact, exact, exact, exact, exact
+Block 26 indexbeta.html: exact, exact, exact, exact, exact, exact
+Block 27 indexbeta.html: exact, fuzzy0.98
+Block 28 indexbeta.html: exact, exact
+Block 29 indexbeta.html: exact, exact
+Block 30 indexbeta.html: exact, exact
+Block 31 indexbeta.html: fuzzy0.99
+Block 32 indexbeta.html: exact, exact, exact, exact
+Block 33 indexbeta.html: exact, exact, exact
+Block 34 indexbeta.html: exact
+Block 35 indexbeta.html: exact
+Block 36 indexbeta.html: exact
+Block 37 indexbeta.html: exact, exact
+Block 38 indexbeta.html: exact
+Block 39 indexbeta.html: exact, exact
+Block 40 indexbeta.html: exact
+Block 41 indexbeta.html: exact
+Block 42 indexbeta.html: exact
+Block 43 indexbeta.html: exact
+Block 44 indexbeta.html: exact, exact, exact, exact
+Block 45 indexbeta.html: exact
+Block 46 indexbeta.html: exact, exact
+Block 47 indexbeta.html: exact
+Block 48 indexbeta.html: exact, exact, exact
+Block 49 indexbeta.html: exact, exact, exact, exact
+Block 50 indexbeta.html: exact
+Block 51 indexbeta.html: exact
+Block 52 indexbeta.html: exact
+Block 53 indexbeta.html: exact, exact
+Block 54 indexbeta.html: exact
+Block 60 index.html: exact
+Block 61 indexbeta.html: exact
+Block 70 index.html: failbest0.84
+Block 71 indexbeta.html: failbest0.84
