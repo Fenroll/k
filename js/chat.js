@@ -20,6 +20,7 @@ class ChatFirebaseREST {
   constructor(documentId) {
     this.documentId = documentId || 'default';
     this.messages = [];
+    this.messageIds = new Set();
     this.listeners = [];
     this.isPolling = false;
     this.unsubscribers = [];
@@ -172,6 +173,7 @@ class ChatFirebaseREST {
       // Sort
       messages.sort((a, b) => a.timestamp - b.timestamp);
       this.messages = messages;
+      this.messageIds = new Set(messages.map(message => message.id));
       this.oldestLoadedTimestamp = messages.length > 0 ? messages[0].timestamp : null;
       this.hasMoreMessages = messages.length === 200; // If we got 200, there might be more
       
@@ -220,6 +222,7 @@ class ChatFirebaseREST {
       
       // Prepend to existing messages
       this.messages = [...newMessages, ...this.messages];
+      newMessages.forEach(message => this.messageIds.add(message.id));
       
       // Update oldest timestamp
       if (newMessages.length > 0) {
@@ -348,7 +351,7 @@ class ChatFirebaseREST {
     });
   }
 
-  startPolling(callback, interval = 2000) {
+  startRealtimeMessages(callback) {
     if (this.isPolling) return;
     this.isPolling = true;
 
@@ -372,11 +375,9 @@ class ChatFirebaseREST {
                 timestamp: val.timestamp || Date.now()
             });
             
-            // Only add if not already in messages array
-            const exists = this.messages.find(m => m.id === newMessage.id);
-            if (!exists) {
+            if (!this.messageIds.has(newMessage.id)) {
                 this.messages.push(newMessage);
-                this.messages.sort((a, b) => a.timestamp - b.timestamp);
+                this.messageIds.add(newMessage.id);
                 
                 // Notify listeners of new message
                 this.listeners.forEach(listener => listener(newMessage));
@@ -390,6 +391,7 @@ class ChatFirebaseREST {
         // Listen for deletions (all messages, not just new ones)
         const qAll = messagesRef.orderByChild('timestamp');
             const onChildRemoved = (snapshot) => {
+            this.messageIds.delete(snapshot.key);
             this.messages = this.messages.filter(m => m.id !== snapshot.key);
             callback(this.messages);
             };
@@ -406,6 +408,7 @@ class ChatFirebaseREST {
                     id: snapshot.key,
                     timestamp: val.timestamp || Date.now()
                 });
+                this.messageIds.add(snapshot.key);
                 callback(this.messages);
             }
             };
@@ -537,12 +540,23 @@ class ChatFirebaseREST {
   startReactionsPolling(callback) {
     this._ensureInit().then(() => {
         const reactionsRef = firebase.database().ref(`reactions/${this.documentId}`);
+        const reactions = {};
 
-        const onReactions = (snapshot) => {
-            const reactions = snapshot.val() || {};
-            callback(reactions);
+        const notify = (messageId) => callback(reactions, messageId ? [messageId] : null);
+
+        const onReactionAddedOrChanged = (snapshot) => {
+            reactions[snapshot.key] = snapshot.val() || {};
+            notify(snapshot.key);
         };
-        this._trackRealtimeListener(reactionsRef, 'value', onReactions);
+
+        const onReactionRemoved = (snapshot) => {
+            delete reactions[snapshot.key];
+            notify(snapshot.key);
+        };
+
+        this._trackRealtimeListener(reactionsRef, 'child_added', onReactionAddedOrChanged);
+        this._trackRealtimeListener(reactionsRef, 'child_changed', onReactionAddedOrChanged);
+        this._trackRealtimeListener(reactionsRef, 'child_removed', onReactionRemoved);
     });
   }
 
@@ -762,6 +776,7 @@ class ChatUIManager {
     this.lastRenderedLastMessageId = null;
     this.userNameMappings = {}; // Карта за стари към нови имена
     this.reactionsCache = {}; // Кеш за реакции
+    this.reactionHtmlCache = new Map();
     this.activeUsers = {}; // Списък с активни потребители за логика с реакции
     this.activeTyping = {}; // State for typing indicators
     this.showMembers = localStorage.getItem(`showMembers_${this.documentId}`) === 'true'; // Default to false if not set
@@ -1148,6 +1163,7 @@ class ChatUIManager {
         console.log(`💾 Loaded ${messages.length} messages from cache`);
         // Restore pagination state from cached messages
         this.chatFirebase.messages = messages;
+        this.chatFirebase.messageIds = new Set(messages.map(message => message.id));
         if (messages.length > 0) {
           this.chatFirebase.oldestLoadedTimestamp = messages[0].timestamp;
           // Assume there might be more if we have messages
@@ -1168,8 +1184,8 @@ class ChatUIManager {
       this.saveToCache(messages);
       this.renderMessages(messages);
 
-      // Polling за нови съобщения
-      this.chatFirebase.startPolling((messages) => {
+      // Realtime listener for new, changed, and deleted messages
+      this.chatFirebase.startRealtimeMessages((messages) => {
         this.saveToCache(messages);
         // Throttle renders to prevent flickering
         if (this.renderTimeout) return;
@@ -1177,12 +1193,16 @@ class ChatUIManager {
           this.renderTimeout = null;
           this.renderMessages(messages);
         }, 100);
-      }, 2500);
+      });
 
-      // Real-time слушател за ВСИЧКИ реакции
-      this.chatFirebase.startReactionsPolling((reactions) => {
+      // Realtime listener for changed reactions
+      this.chatFirebase.startReactionsPolling((reactions, changedMessageIds) => {
         this.reactionsCache = reactions;
-        this.renderAllReactions();
+        if (changedMessageIds) {
+          this.renderReactionsForMessages(changedMessageIds);
+        } else {
+          this.renderAllReactions();
+        }
       });
 
       // New site-wide presence polling
@@ -2110,7 +2130,7 @@ class ChatUIManager {
     const success = await this.chatFirebase.sendMessage(text, replyTo, replyAuthor);
     if (success) {
       // Find the last message in history (which should be the one just sent)
-      // Note: startPolling will bring it in, but we can optimistically update
+      // Note: the realtime listener will bring it in, but we can optimistically update
       // so the unread count stays 0 for our own messages.
       const messages = this.chatFirebase.messages;
       if (messages.length > 0) {
@@ -2133,7 +2153,7 @@ class ChatUIManager {
       const replyIndicator = this.container.querySelector('.reply-indicator');
       if (replyIndicator) replyIndicator.remove();
       
-      // Realtime listener ще се погрижи за обновяването (startPolling)
+      // Realtime listener ще се погрижи за обновяването
       // Премахнахме ръчното презареждане, за да избегнем race conditions
     }
   }
@@ -2587,16 +2607,14 @@ class ChatUIManager {
       messagesMapObj[m.id] = m;
     });
 
-    const isDarkChat = document.body.classList.contains('dark-mode') && !document.body.classList.contains('chat-force-light');
-
     // Ако има reply, намери оригиналното съобщение
     let replyHTML = '';
     if (msg.replyTo && messagesMapObj[msg.replyTo]) {
       const originalMsg = messagesMapObj[msg.replyTo];
-      const replyBg = isDarkChat ? '#2b3138' : '#f1f5f9';
-      const replyBorder = isDarkChat ? '#4b5563' : '#cbd5e1';
-      const replyText = isDarkChat ? '#e2e8f0' : '#1f2937';
-      const replyAuthor = isDarkChat ? '#f8fafc' : '#111827';
+      const replyBg = '#f1f5f9';
+      const replyBorder = '#cbd5e1';
+      const replyText = '#1f2937';
+      const replyAuthor = '#111827';
       replyHTML = `
          <div style="background: ${replyBg}; border-left: 3px solid ${replyBorder}; color: ${replyText}; padding: 4px 8px; margin-bottom: 4px; font-size: 11px; border-radius: 4px; opacity: 0.92;">
            <b style="color: ${replyAuthor};">${this.escapeHtml(msg.replyAuthor || 'Someone')}:</b> ${this.linkifyText(originalMsg.text.substring(0, 50))}...
@@ -2611,7 +2629,7 @@ class ChatUIManager {
     const resolvedName = this._resolveMessageAuthorName(msg);
 
     const isCurrentUser = (window.currentUser.userId && msg.userId === window.currentUser.userId) || (window.currentUser.legacyChatId && msg.userId === window.currentUser.legacyChatId);
-    const messageBgColor = isCurrentUser ? (isDarkChat ? '#588157' : '#E8F5E9') : 'var(--chat-secondary)';
+    const messageBgColor = isCurrentUser ? '#E8F5E9' : 'var(--chat-secondary)';
     const messageTextColor = isCurrentUser ? '#000000' : '#000000';
 
     // Avatar Logic
@@ -3643,12 +3661,11 @@ class ChatUIManager {
     if (oldPicker) oldPicker.remove();
 
     const emojis = ['👍', '👎', '😂', '❤️', '😭', '😮', '🐐'];
-    const isDarkChat = document.body.classList.contains('dark-mode') && !document.body.classList.contains('chat-force-light');
-    const pickerBg = isDarkChat ? '#1a1f25' : '#ffffff';
-    const pickerText = isDarkChat ? '#e5e7eb' : '#1f2937';
-    const pickerHover = isDarkChat ? '#2f353c' : 'var(--chat-secondary)';
-    const customBtnBg = isDarkChat ? '#2b3138' : '#f3f4f6';
-    const customBtnText = isDarkChat ? '#d1d5db' : '#6b7280';
+    const pickerBg = '#ffffff';
+    const pickerText = '#1f2937';
+    const pickerHover = 'var(--chat-secondary)';
+    const customBtnBg = '#f3f4f6';
+    const customBtnText = '#6b7280';
     
     const picker = document.createElement('div');
     picker.className = 'reaction-picker';
@@ -3833,31 +3850,44 @@ class ChatUIManager {
 
   renderAllReactions() {
     if (!this.reactionsCache) return;
-    
+
     const messageElements = this.container.querySelectorAll('.chat-message[data-message-id]');
-    messageElements.forEach(msgEl => {
-        const messageId = msgEl.dataset.messageId;
-        const reactionsContainer = msgEl.querySelector('.message-reactions');
-        if (reactionsContainer) {
-            const newHTML = this.getReactionsHTML(messageId);
-            // Only update if changed to prevent flicker
-            if (reactionsContainer.innerHTML !== newHTML) {
-                // If we are about to replace the HTML, hide any active tooltip 
-                // because the element being hovered might disappear
-                this.hideReactionTooltip();
-                
-                reactionsContainer.innerHTML = newHTML;
-                this.attachReactionBadgeListeners(msgEl);
-            }
-        }
+    const activeMessageIds = new Set(Array.from(messageElements).map(el => el.dataset.messageId).filter(Boolean));
+    this.renderReactionsForMessages(activeMessageIds);
+
+    Array.from(this.reactionHtmlCache.keys()).forEach(messageId => {
+      if (!activeMessageIds.has(messageId)) this.reactionHtmlCache.delete(messageId);
+    });
+  }
+
+  renderReactionsForMessages(messageIds) {
+    if (!this.reactionsCache || !messageIds) return;
+
+    messageIds.forEach(messageId => {
+      if (!messageId) return;
+      const escapedMessageId = window.CSS && CSS.escape ? CSS.escape(messageId) : String(messageId).replace(/["\\]/g, '\\$&');
+      const msgEl = this.container.querySelector(`.chat-message[data-message-id="${escapedMessageId}"]`);
+      if (!msgEl) {
+        this.reactionHtmlCache.delete(messageId);
+        return;
+      }
+
+      const reactionsContainer = msgEl.querySelector('.message-reactions');
+      if (!reactionsContainer) return;
+
+      const newHTML = this.getReactionsHTML(messageId);
+      if (this.reactionHtmlCache.get(messageId) === newHTML) return;
+
+      this.reactionHtmlCache.set(messageId, newHTML);
+      this.hideReactionTooltip();
+      reactionsContainer.innerHTML = newHTML;
+      this.attachReactionBadgeListeners(msgEl);
     });
   }
 
   getReactionsHTML(messageId) {
     const reactionsForMessage = this.reactionsCache ? this.reactionsCache[messageId] : null;
     if (!reactionsForMessage) return '';
-
-    const isDarkChat = document.body.classList.contains('dark-mode') && !document.body.classList.contains('chat-force-light');
 
     const reactionCounts = {};
     const myReactions = {};
@@ -3884,7 +3914,7 @@ class ChatUIManager {
 
     return Object.keys(reactionCounts).map(emoji => `
         <button class="reaction-badge" data-emoji="${emoji}" data-message-id="${messageId}" 
-          style="background: ${myReactions[emoji] ? (isDarkChat ? '#2f5f47' : '#93c5fd') : (isDarkChat ? '#2f353b' : '#f0f0f0')}; color: ${isDarkChat ? '#e5e7eb' : '#111827'}; border: ${isDarkChat ? '1px solid #46505a' : 'none'}; border-radius: 12px; padding: 4px 8px; margin-right: 4px; cursor: pointer; font-size: 12px; font-weight: ${myReactions[emoji] ? 'bold' : 'normal'};">
+          style="background: ${myReactions[emoji] ? '#93c5fd' : '#f0f0f0'}; color: #111827; border: none; border-radius: 12px; padding: 4px 8px; margin-right: 4px; cursor: pointer; font-size: 12px; font-weight: ${myReactions[emoji] ? 'bold' : 'normal'};">
           ${emoji} <span>${reactionCounts[emoji]}</span>
         </button>
       `).join('');
@@ -4247,13 +4277,6 @@ class ChatUIManager {
   // Wait for the user identity to be resolved before doing anything else
   await window.currentUserPromise;
 
-  // Keep chat light-only on explicit editor/viewer pages.
-  const pagePath = String(window.location.pathname || '').toLowerCase();
-  const chatForceLight = pagePath.includes('text-editor') || pagePath.includes('md-viewer');
-  if (chatForceLight) {
-    document.body.classList.add('chat-force-light');
-  }
-  
   let attempts = 0;
   const maxAttempts = 20;
   let chatInitialized = false;
@@ -4454,97 +4477,6 @@ class ChatUIManager {
   --chat-border: #a3b18a;
   --chat-text: #000000;
   --chat-text-light: #000000;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget {
-  --chat-primary: #588157;
-  --chat-secondary: #202420;
-  --chat-border: #343a42;
-  --chat-text: #f1f1f1;
-  --chat-text-light: #cbd5e1;
-  --chat-self-message-bg: rgba(88, 129, 87, 0.32);
-  --chat-other-message-bg: #2b3136;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .chat-panel,
-body.dark-mode:not(.chat-force-light) #chat-widget .chat-input-area,
-body.dark-mode:not(.chat-force-light) #chat-widget .chat-user-info,
-body.dark-mode:not(.chat-force-light) #chat-widget .chat-active-users,
-body.dark-mode:not(.chat-force-light) #chat-widget .chat-plus-menu,
-body.dark-mode:not(.chat-force-light) #chat-widget .gif-picker-container,
-body.dark-mode:not(.chat-force-light) #chat-widget .mention-suggestions,
-body.dark-mode:not(.chat-force-light) #chat-widget .chat-date-separator span {
-  background: #181818 !important;
-  color: var(--chat-text) !important;
-  border-color: var(--chat-border) !important;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .message-text {
-  background: var(--chat-other-message-bg) !important;
-  color: var(--chat-text) !important;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .chat-message.is-self-message .message-text {
-  background: var(--chat-self-message-bg) !important;
-  color: #eaf6ef !important;
-  border: 1px solid rgba(130, 190, 145, 0.45);
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .reaction-badge {
-  background: #2f353b !important;
-  color: #e5e7eb !important;
-  border: 1px solid #46505a;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .message-actions button:hover {
-  background: #2b3136 !important;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .message-actions img {
-  filter: brightness(0) invert(1);
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .chat-input {
-  background: #121212;
-  color: var(--chat-text);
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .chat-input::placeholder {
-  color: #94a3b8;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .suggestion-item:hover,
-body.dark-mode:not(.chat-force-light) #chat-widget .suggestion-item.active,
-body.dark-mode:not(.chat-force-light) #chat-widget .active-user:hover,
-body.dark-mode:not(.chat-force-light) #chat-widget .plus-menu-item:hover {
-  background: #252b31 !important;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .message-options-menu,
-body.dark-mode:not(.chat-force-light) #chat-widget .reaction-picker,
-body.dark-mode:not(.chat-force-light) #chat-widget .gif-picker-header {
-  background: #181818 !important;
-  color: var(--chat-text) !important;
-  border-color: var(--chat-border) !important;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget #active-users-list {
-  color: #d4dde8 !important;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget #active-users-list strong,
-body.dark-mode:not(.chat-force-light) #chat-widget #active-users-list .active-user-item span {
-  color: #edf2f7 !important;
-}
-body.dark-mode:not(.chat-force-light) #chat-widget .gif-search-input {
-  background: #121212;
-  color: var(--chat-text);
-  border-color: var(--chat-border);
-}
-body.dark-mode:not(.chat-force-light) .user-profile-modal {
-  background: #181818;
-  color: var(--chat-text);
-}
-body.dark-mode:not(.chat-force-light) .profile-modal-name,
-body.dark-mode:not(.chat-force-light) .profile-modal-close,
-body.dark-mode:not(.chat-force-light) .profile-modal-info,
-body.dark-mode:not(.chat-force-light) .info-item,
-body.dark-mode:not(.chat-force-light) .info-label,
-body.dark-mode:not(.chat-force-light) .profile-modal-status {
-  color: var(--chat-text) !important;
-}
-body.dark-mode:not(.chat-force-light) .profile-modal-info {
-  background: #202420;
-}
-body.dark-mode:not(.chat-force-light) .profile-modal-close:hover {
-  color: #ffffff;
 }
 .chat-widget {
   position: fixed;

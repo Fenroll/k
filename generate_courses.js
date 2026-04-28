@@ -555,13 +555,11 @@ function updateHtmlFiles(version) {
   // HTML files that need cache-busting updates
   const htmlFiles = [
     path.join(__dirname, 'index.html'),
-    path.join(__dirname, 'indexbeta.html'),
+    path.join(__dirname, 'indexlegacy.html'),
     path.join(__dirname, 'md-viewer.html'),
-    path.join(__dirname, 'md-editor.html'),
     path.join(__dirname, 'text-editor.html'),
     path.join(__dirname, 'admin.html'),
     path.join(__dirname, 'account.html'),
-    path.join(__dirname, 'tests.html'),
     path.join(__dirname, 'calendar.html'),
     path.join(__dirname, 'anamnesis.html')
   ];

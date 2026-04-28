@@ -18,6 +18,7 @@
     const PERIODIC_CLEANUP_INTERVAL = 5 * 60 * 1000; // Clean up every 5 minutes
     const LOCALSTORAGE_CLEANUP_DAYS = 7; // Clean localStorage entries older than 7 days
     const TAB_ELECTION_INTERVAL = 15000; // Re-elect leader every 15 seconds
+    const IS_MOBILE_DEVICE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
     
     // Tab coordination - only one tab performs cleanup to avoid race conditions
     let isLeaderTab = true; // Start as leader, will be demoted if another tab exists
@@ -94,7 +95,12 @@
     } else {
         // Load existing device info or create if missing
         const storedInfo = localStorage.getItem('deviceInfo_' + deviceId);
-        deviceInfo = storedInfo ? JSON.parse(storedInfo) : getDeviceFingerprint();
+        try {
+            deviceInfo = storedInfo ? JSON.parse(storedInfo) : getDeviceFingerprint();
+        } catch (e) {
+            console.warn('Presence: Invalid stored device info, recreating it');
+            deviceInfo = getDeviceFingerprint();
+        }
         
         // Update timestamp
         deviceInfo.timestamp = Date.now();
@@ -167,6 +173,7 @@
             // Use synchronous update for beforeunload
             window.userStatusDatabaseRef.update({
                 isActive: false,
+                offlineAt: firebase.database.ServerValue.TIMESTAMP,
                 lastActivity: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -336,12 +343,9 @@
     function updatePresenceStatus() {
         if (typeof firebase === 'undefined' || !window.userStatusDatabaseRef || !isConnected) return;
         
-        // More accurate mobile detection - only use user agent, not window width
-        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-        
         if (isUserActive) {
             const deviceData = {
-                isMobile: isMobile,
+                isMobile: IS_MOBILE_DEVICE,
                 isGuest: isGuest,
                 userName: currentUserName,
                 isActive: true,
@@ -365,6 +369,7 @@
             // Mark as inactive (but still connected)
             window.userStatusDatabaseRef.update({
                 isActive: false,
+                lastInactive: firebase.database.ServerValue.TIMESTAMP,
                 lastActivity: firebase.database.ServerValue.TIMESTAMP
             }).catch(err => {
                 console.warn('Presence: Failed to update inactive status:', err.message);
@@ -405,11 +410,8 @@
                 console.log('Presence: Connected to Firebase');
             }
             
-            // Determine device type - only use user agent, not window width
-            const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-
             const deviceData = {
-                isMobile: isMobile,
+                isMobile: IS_MOBILE_DEVICE,
                 isGuest: isGuest,
                 userName: currentUserName,
                 isActive: isUserActive && isPageVisible,

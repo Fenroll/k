@@ -4,7 +4,7 @@ class AccountSystem {
         this.db = null;
         this.user = null; // Custom user object: { uid (permanent), username (for login), displayName, color, preferredFont, preferredCoursesView }
         this.defaultPreferredFont = 'open-sans';
-        this.defaultPreferredCoursesView = 'legacy';
+        this.defaultPreferredCoursesView = 'beta';
         this.coursesViewStorageKey = 'coursebook-courses-view';
         this.fontLabels = {
             'open-sans': 'Open Sans',
@@ -15,7 +15,7 @@ class AccountSystem {
         };
         this.coursesViewLabels = {
             'legacy': 'Legacy',
-            'beta': 'Beta'
+            'beta': 'Default'
         };
         this.fontStacks = {
             'open-sans': "'Open Sans', Arial, sans-serif",
@@ -74,8 +74,14 @@ class AccountSystem {
         localStorage.setItem(this.coursesViewStorageKey, coursesView);
     }
 
+    isMobileCoursesDevice() {
+        if (typeof window === 'undefined') return false;
+        return (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) || window.innerWidth <= 900;
+    }
+
     getCoursesHomeUrl(preferredCoursesView = this.user?.preferredCoursesView) {
-        return this.normalizePreferredCoursesView(preferredCoursesView) === 'beta' ? 'indexbeta.html' : 'index.html';
+        if (this.isMobileCoursesDevice()) return 'index.html';
+        return this.normalizePreferredCoursesView(preferredCoursesView) === 'legacy' ? 'indexlegacy.html' : 'index.html';
     }
 
     applyFontPreview(fontKey) {
