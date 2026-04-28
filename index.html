@@ -14,7 +14,7 @@
       } catch (_) {}
     })();
   </script>
-  <script src="js/auth-guard.js?v=202604281krl"></script>
+  <script src="js/auth-guard.js?v=202604281lsu"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -1111,7 +1111,7 @@
   font-family: 'Open Sans', Arial, sans-serif !important;
 }
   </style>
-  <script src="courses.generated.js?v=202604281krl"></script>
+  <script src="courses.generated.js?v=202604281lsu"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 
 <!-- Subtle UI tweaks -->
@@ -1671,19 +1671,71 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateResultsCount() {
       const visible = courseList.querySelectorAll('.element-card:not([style*="display: none"])').length;
     }
+    function normalizeCourseSearchText(text) {
+      return (text || '').toLocaleLowerCase('bg-BG').normalize('NFKC');
+    }
+    function isCourseWordStartMatch(text, index) {
+      if (index <= 0) return index === 0;
+      return !/[\p{L}\p{N}]/u.test(text[index - 1]);
+    }
+    function getCourseSearchScore(card, query) {
+      const name = normalizeCourseSearchText(card.querySelector('.course-title')?.textContent || '');
+      const id = normalizeCourseSearchText(card.querySelector('.course-id')?.textContent || '');
+      const nameIndex = name.indexOf(query);
+      const idIndex = id.indexOf(query);
+
+      if (nameIndex === 0) return 0;
+      if (nameIndex > 0 && isCourseWordStartMatch(name, nameIndex)) return 1;
+      if (query.length >= 4 && nameIndex > -1) return 2;
+      if (idIndex === 0) return 3;
+      if (query.length >= 4 && idIndex > -1) return 4;
+      return Infinity;
+    }
     function filterCourses() {
       if (!searchInput) return;
-      const val = searchInput.value.trim().toLowerCase();
-      const cards = courseList.querySelectorAll('.element-card');
-      cards.forEach(card => {
-        const name = card.querySelector('.course-title')?.textContent.toLowerCase() || '';
-        const id = card.querySelector('.course-id')?.textContent.toLowerCase() || '';
-        if (name.includes(val) || id.includes(val)) {
-          card.style.display = '';
-        } else {
-          card.style.display = 'none';
+      const val = normalizeCourseSearchText(searchInput.value.trim());
+      const list = document.getElementById('dynamic-course-list') || courseList;
+      const children = Array.from(list.children);
+      const cards = Array.from(list.querySelectorAll('.element-card'));
+      children.forEach((child, index) => {
+        if (!child.dataset.searchOrder) {
+          child.dataset.searchOrder = String(index);
         }
       });
+
+      if (!val) {
+        children
+          .sort((a, b) => Number(a.dataset.searchOrder) - Number(b.dataset.searchOrder))
+          .forEach(child => {
+            child.style.display = '';
+            list.appendChild(child);
+          });
+        updateResultsCount();
+        return;
+      }
+
+      children.forEach(child => {
+        if (!child.classList.contains('element-card')) {
+          child.style.display = 'none';
+        }
+      });
+
+      const rankedCards = cards.map(card => ({
+        card,
+        score: getCourseSearchScore(card, val),
+        order: Number(card.dataset.searchOrder)
+      }));
+
+      rankedCards
+        .sort((a, b) => (a.score - b.score) || (a.order - b.order))
+        .forEach(({ card, score }) => {
+          if (score < Infinity) {
+            card.style.display = '';
+          } else {
+            card.style.display = 'none';
+          }
+          list.appendChild(card);
+        });
       updateResultsCount();
     }
     function handleLogout() {
@@ -2063,7 +2115,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=202604281krl"></script>
+<script src="js/chat.js?v=202604281lsu"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
