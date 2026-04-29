@@ -1484,24 +1484,26 @@ class ChatUIManager {
       // Mobile keyboard: lift panel above keyboard using visualViewport
       if (window.visualViewport) {
         const panel = this.container.querySelector('.chat-panel');
+        let _kbRaf = null;
         const onViewport = () => {
-          if (!panel) return;
-          const vv = window.visualViewport;
-          const keyboardH = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-          panel.style.setProperty('--mobile-keyboard-offset', keyboardH + 'px');
-          if (keyboardH > 100) this.scrollToBottom();
+          cancelAnimationFrame(_kbRaf);
+          _kbRaf = requestAnimationFrame(() => {
+            if (!panel) return;
+            const keyboardH = Math.max(0, window.innerHeight - window.visualViewport.height);
+            panel.style.setProperty('--mobile-keyboard-offset', keyboardH + 'px');
+            if (keyboardH > 100) this.scrollToBottom();
+          });
         };
         const clearViewport = () => {
+          cancelAnimationFrame(_kbRaf);
           if (panel) panel.style.setProperty('--mobile-keyboard-offset', '0px');
         };
         input.addEventListener('focus', () => {
           window.visualViewport.addEventListener('resize', onViewport);
-          window.visualViewport.addEventListener('scroll', onViewport);
         });
         input.addEventListener('blur', () => {
           window.visualViewport.removeEventListener('resize', onViewport);
-          window.visualViewport.removeEventListener('scroll', onViewport);
-          setTimeout(clearViewport, 100);
+          setTimeout(clearViewport, 80);
         });
       }
     }
@@ -3018,6 +3020,7 @@ class ChatUIManager {
   showMessageOptions(messageId, messageKey, anchorEl, triggerEvent = null, messageEl = null, mode = 'full') {
     const existingMenu = document.getElementById('message-options-menu');
     if (existingMenu) existingMenu.remove();
+    document.querySelectorAll('.message-options-backdrop').forEach(el => el.remove());
 
     const sourceMessageEl = messageEl || document.querySelector(`.chat-message[data-message-id="${messageId}"]`);
     const messageUserId = sourceMessageEl ? String(sourceMessageEl.dataset.userId || '') : '';
@@ -5234,6 +5237,9 @@ class ChatUIManager {
   .chat-icon {
     width: 48px;
     height: 48px;
+  }
+  .chat-panel {
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 .chat-messages::-webkit-scrollbar {
