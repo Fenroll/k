@@ -3,10 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        @media (max-width: 900px) {
+            #side-menu {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                pointer-events: none !important;
+            }
+        }
+    </style>
     <title>Anamnesis</title>
     
     <!-- Scripts -->
-    <script src="js/auth-guard.js?v=202604291u5j"></script>
+    <script src="js/auth-guard.js?v=20260430bx"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=20260127"></script>
@@ -645,8 +655,8 @@
         }
     </style>
   <link rel="stylesheet" href="css/mobile-nav.css?v=20260129">
-  <script src="js/desktop-nav.js?v=20260429nav1"></script>
-  <link rel="stylesheet" href="css/desktop-nav.css?v=20260429nav1">
+  <script src="js/desktop-nav.js?v=20260430nav4"></script>
+  <link rel="stylesheet" href="css/desktop-nav.css?v=20260430nav5">
 </head>
 <body>
 
@@ -993,7 +1003,7 @@
     
     <!-- CHAT SYSTEM -->
     <script src="js/presence.js?v=20260131"></script>
-    <script src="js/chat.js?v=202604291u5j"></script>
+    <script src="js/chat.js?v=20260430bx"></script>
 
     <script>
         function handleLogout() {
