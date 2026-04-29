@@ -43,6 +43,17 @@
         const uploadMaxTotalMbInput = document.getElementById('upload-max-total-mb');
         const uploadLimitCurrentText = document.getElementById('upload-limit-current');
         const saveUploadLimitBtn = document.getElementById('save-upload-limit');
+
+        // Domain migration elements
+        const domainMigrationOldInput = document.getElementById('domain-migration-old');
+        const domainMigrationNewInput = document.getElementById('domain-migration-new');
+        const domainMigrationRootsInput = document.getElementById('domain-migration-roots');
+        const domainMigrationPreviewBtn = document.getElementById('domain-migration-preview');
+        const domainMigrationApplyBtn = document.getElementById('domain-migration-apply');
+        const domainMigrationLocalBtn = document.getElementById('domain-migration-local');
+        const domainMigrationDownloadCoursesBtn = document.getElementById('domain-migration-download-courses');
+        const domainMigrationStatus = document.getElementById('domain-migration-status');
+        const domainMigrationLog = document.getElementById('domain-migration-log');
         
         // HTML Priority Settings elements
         const htmlPriorityForm = document.getElementById('html-priority-form-element');
@@ -123,6 +134,368 @@
         // Helper function to check if a file can be used as a priority target.
         function isPriorityTargetFile(file) {
             return Boolean(file && file.name && file.path);
+        }
+
+        function normalizeMigrationPrefix(value) {
+            return String(value || '').trim().replace(/\/+$/, '');
+        }
+
+        function isHttpUrlPrefix(value) {
+            if (!/^https?:\/\//i.test(value)) return false;
+            try {
+                const parsed = new URL(value);
+                return Boolean(parsed.protocol && parsed.hostname);
+            } catch (_) {
+                return false;
+            }
+        }
+
+        function getDomainMigrationRoots() {
+            const fallback = [
+                'messages',
+                'notes',
+                'course_notes',
+                'site_users',
+                'uploads',
+                'uploadLogs',
+                'filesUploads',
+                'settings',
+                'scheduleNotes',
+                'anamneses',
+                'name_mappings',
+                'protected_names',
+                'reactions',
+                'notes_reactions',
+                'finance'
+            ];
+            const raw = domainMigrationRootsInput ? domainMigrationRootsInput.value : '';
+            const roots = String(raw || '')
+                .split(',')
+                .map(root => root.trim().replace(/^\/+|\/+$/g, ''))
+                .filter(Boolean);
+            return roots.length ? roots : fallback;
+        }
+
+        function setDomainMigrationBusy(isBusy) {
+            [domainMigrationPreviewBtn, domainMigrationApplyBtn, domainMigrationLocalBtn, domainMigrationDownloadCoursesBtn]
+                .filter(Boolean)
+                .forEach(button => {
+                    button.disabled = isBusy;
+                });
+        }
+
+        function setDomainMigrationStatus(text) {
+            if (domainMigrationStatus) {
+                domainMigrationStatus.textContent = text;
+            }
+        }
+
+        function appendDomainMigrationLog(text) {
+            if (!domainMigrationLog) return;
+            domainMigrationLog.value += `[${new Date().toLocaleTimeString('bg-BG')}] ${text}\n`;
+            domainMigrationLog.scrollTop = domainMigrationLog.scrollHeight;
+        }
+
+        function escapeRegExp(value) {
+            return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        }
+
+        function replaceAllString(value, oldPrefix, newPrefix) {
+            return String(value).replace(new RegExp(escapeRegExp(oldPrefix), 'g'), newPrefix);
+        }
+
+        function countStringOccurrences(value, needle) {
+            if (!needle) return 0;
+            let count = 0;
+            let index = String(value).indexOf(needle);
+            while (index !== -1) {
+                count += 1;
+                index = String(value).indexOf(needle, index + needle.length);
+            }
+            return count;
+        }
+
+        function collectDomainStringUpdates(value, currentPath, oldPrefix, newPrefix, updates, samples, stats) {
+            if (typeof value === 'string') {
+                const occurrences = countStringOccurrences(value, oldPrefix);
+                if (occurrences > 0) {
+                    const nextValue = replaceAllString(value, oldPrefix, newPrefix);
+                    updates[currentPath.join('/')] = {
+                        before: value,
+                        after: nextValue
+                    };
+                    stats.fields += 1;
+                    stats.occurrences += occurrences;
+                    if (samples.length < 20) {
+                        samples.push({
+                            path: currentPath.join('/'),
+                            occurrences,
+                            before: value.slice(0, 180),
+                            after: nextValue.slice(0, 180)
+                        });
+                    }
+                }
+                return;
+            }
+
+            if (!value || typeof value !== 'object') return;
+
+            Object.entries(value).forEach(([key, childValue]) => {
+                collectDomainStringUpdates(childValue, currentPath.concat(key), oldPrefix, newPrefix, updates, samples, stats);
+            });
+        }
+
+        function downloadDomainMigrationBackup(updates, oldPrefix, newPrefix) {
+            const entries = Object.entries(updates);
+            if (!entries.length) return;
+
+            const backup = {
+                createdAt: new Date().toISOString(),
+                oldPrefix,
+                newPrefix,
+                fields: entries.map(([path, after]) => ({
+                    path,
+                    before: after.before,
+                    after: after.after
+                }))
+            };
+
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `domain-migration-plan-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+        }
+
+        async function applyTransactionalStringUpdates(updates, oldPrefix, newPrefix) {
+            const entries = Object.keys(updates);
+            let changed = 0;
+            let skipped = 0;
+
+            for (let index = 0; index < entries.length; index += 1) {
+                const path = entries[index];
+                const result = await db.ref(path).transaction(currentValue => {
+                    if (typeof currentValue !== 'string') return currentValue;
+                    if (!currentValue.includes(oldPrefix)) return currentValue;
+                    return replaceAllString(currentValue, oldPrefix, newPrefix);
+                });
+
+                const finalValue = result && result.snapshot ? result.snapshot.val() : null;
+                if (typeof finalValue === 'string' && finalValue.includes(newPrefix)) {
+                    changed += 1;
+                } else {
+                    skipped += 1;
+                }
+
+                if ((index + 1) % 50 === 0 || index === entries.length - 1) {
+                    appendDomainMigrationLog(`Applied ${index + 1}/${entries.length} field transaction(s).`);
+                }
+            }
+
+            return { changed, skipped };
+        }
+
+        async function runDomainMigration({ applyChanges }) {
+            const oldPrefix = normalizeMigrationPrefix(domainMigrationOldInput && domainMigrationOldInput.value);
+            const newPrefix = normalizeMigrationPrefix(domainMigrationNewInput && domainMigrationNewInput.value);
+
+            hideError('domain-migration-error');
+            if (!oldPrefix || !newPrefix) {
+                showError('domain-migration-error', 'Enter both old and new domain or URL prefixes.');
+                return;
+            }
+            if (oldPrefix === newPrefix) {
+                showError('domain-migration-error', 'Old and new prefixes are the same.');
+                return;
+            }
+            if (!isHttpUrlPrefix(oldPrefix) || !isHttpUrlPrefix(newPrefix)) {
+                showError('domain-migration-error', 'Both prefixes should be complete URLs that start with http:// or https://.');
+                return;
+            }
+
+            const roots = getDomainMigrationRoots();
+            const updates = {};
+            const samples = [];
+            const totalStats = { fields: 0, occurrences: 0 };
+
+            setDomainMigrationBusy(true);
+            setDomainMigrationStatus(`${applyChanges ? 'Applying' : 'Previewing'} migration...`);
+            if (domainMigrationLog) domainMigrationLog.value = '';
+            appendDomainMigrationLog(`Old: ${oldPrefix}`);
+            appendDomainMigrationLog(`New: ${newPrefix}`);
+            appendDomainMigrationLog(`Roots: ${roots.join(', ')}`);
+
+            try {
+                for (const root of roots) {
+                    appendDomainMigrationLog(`Scanning ${root}...`);
+                    const snapshot = await db.ref(root).once('value');
+                    const value = snapshot.val();
+                    const beforeFields = totalStats.fields;
+                    const beforeOccurrences = totalStats.occurrences;
+                    collectDomainStringUpdates(value, [root], oldPrefix, newPrefix, updates, samples, totalStats);
+                    appendDomainMigrationLog(
+                        `${root}: ${totalStats.fields - beforeFields} field(s), ${totalStats.occurrences - beforeOccurrences} occurrence(s).`
+                    );
+                }
+
+                const updateCount = Object.keys(updates).length;
+                setDomainMigrationStatus(
+                    `${applyChanges ? 'Apply' : 'Preview'} result: ${updateCount} Firebase field(s), ${totalStats.occurrences} URL occurrence(s).`
+                );
+
+                if (samples.length) {
+                    appendDomainMigrationLog('Samples:');
+                    samples.forEach(sample => {
+                        appendDomainMigrationLog(`- ${sample.path} (${sample.occurrences})`);
+                        appendDomainMigrationLog(`  before: ${sample.before}`);
+                        appendDomainMigrationLog(`  after:  ${sample.after}`);
+                    });
+                } else {
+                    appendDomainMigrationLog('No matching Firebase values found.');
+                }
+
+                if (applyChanges && updateCount > 0) {
+                    downloadDomainMigrationBackup(updates, oldPrefix, newPrefix);
+                    appendDomainMigrationLog('Downloaded a migration plan backup before writing.');
+
+                    const confirmed = window.confirm(
+                        `Apply ${updateCount} Firebase field update(s), replacing ${totalStats.occurrences} occurrence(s)?\n\nA migration plan JSON has been downloaded. Each field will be updated with a transaction to avoid overwriting concurrent edits.\n\nThis does not edit local browser drafts or the deployed static courses.generated.js file.`
+                    );
+                    if (!confirmed) {
+                        setDomainMigrationStatus('Apply cancelled. No changes written.');
+                        appendDomainMigrationLog('Cancelled by admin before writing.');
+                        return;
+                    }
+                    const result = await applyTransactionalStringUpdates(updates, oldPrefix, newPrefix);
+                    setDomainMigrationStatus(`Done: updated ${result.changed} Firebase field(s). Skipped ${result.skipped}.`);
+                    showNotification('Domain migration applied successfully.', false);
+                }
+            } catch (error) {
+                console.error('Domain migration failed:', error);
+                showError('domain-migration-error', `Migration failed: ${error.message || error}`);
+                setDomainMigrationStatus('Migration failed.');
+                appendDomainMigrationLog(`ERROR: ${error.message || error}`);
+            } finally {
+                setDomainMigrationBusy(false);
+            }
+        }
+
+        async function downloadPatchedCoursesGenerated() {
+            const oldPrefix = normalizeMigrationPrefix(domainMigrationOldInput && domainMigrationOldInput.value);
+            const newPrefix = normalizeMigrationPrefix(domainMigrationNewInput && domainMigrationNewInput.value);
+
+            hideError('domain-migration-error');
+            if (!oldPrefix || !newPrefix) {
+                showError('domain-migration-error', 'Enter both old and new prefixes before downloading.');
+                return;
+            }
+            if (oldPrefix === newPrefix) {
+                showError('domain-migration-error', 'Old and new prefixes are the same.');
+                return;
+            }
+            if (!isHttpUrlPrefix(oldPrefix) || !isHttpUrlPrefix(newPrefix)) {
+                showError('domain-migration-error', 'Both prefixes should be complete URLs that start with http:// or https://.');
+                return;
+            }
+
+            setDomainMigrationBusy(true);
+            setDomainMigrationStatus('Preparing patched courses.generated.js...');
+            try {
+                const response = await fetch(`courses.generated.js?v=${Date.now()}`, { cache: 'no-store' });
+                if (!response.ok) {
+                    throw new Error(`Could not fetch courses.generated.js (HTTP ${response.status})`);
+                }
+                const source = await response.text();
+                const occurrences = countStringOccurrences(source, oldPrefix);
+                const patched = replaceAllString(source, oldPrefix, newPrefix);
+                const blob = new Blob([patched], { type: 'application/javascript;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'courses.generated.js';
+                document.body.appendChild(link);
+                link.click();
+                link.remove();
+                URL.revokeObjectURL(url);
+                setDomainMigrationStatus(`Downloaded patched courses.generated.js with ${occurrences} replacement(s). Replace the deployed file with this one.`);
+                appendDomainMigrationLog(`courses.generated.js replacements: ${occurrences}`);
+            } catch (error) {
+                console.error('Failed to patch courses.generated.js:', error);
+                showError('domain-migration-error', `Download failed: ${error.message || error}`);
+                setDomainMigrationStatus('Download failed.');
+            } finally {
+                setDomainMigrationBusy(false);
+            }
+        }
+
+        function migrateCurrentBrowserStorage() {
+            const oldPrefix = normalizeMigrationPrefix(domainMigrationOldInput && domainMigrationOldInput.value);
+            const newPrefix = normalizeMigrationPrefix(domainMigrationNewInput && domainMigrationNewInput.value);
+
+            hideError('domain-migration-error');
+            if (!oldPrefix || !newPrefix) {
+                showError('domain-migration-error', 'Enter both old and new prefixes before migrating this browser cache.');
+                return;
+            }
+            if (oldPrefix === newPrefix) {
+                showError('domain-migration-error', 'Old and new prefixes are the same.');
+                return;
+            }
+            if (!isHttpUrlPrefix(oldPrefix) || !isHttpUrlPrefix(newPrefix)) {
+                showError('domain-migration-error', 'Both prefixes should be complete URLs that start with http:// or https://.');
+                return;
+            }
+
+            const matches = [];
+            for (let index = 0; index < localStorage.length; index += 1) {
+                const key = localStorage.key(index);
+                if (!key) continue;
+                const value = localStorage.getItem(key);
+                if (typeof value === 'string' && value.includes(oldPrefix)) {
+                    matches.push({ key, before: value, after: replaceAllString(value, oldPrefix, newPrefix) });
+                }
+            }
+
+            if (!matches.length) {
+                setDomainMigrationStatus('This browser cache has no matching values.');
+                appendDomainMigrationLog('Local browser cache: no matches.');
+                return;
+            }
+
+            const backup = {
+                createdAt: new Date().toISOString(),
+                oldPrefix,
+                newPrefix,
+                storage: 'localStorage',
+                items: matches
+            };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `localstorage-domain-migration-${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+
+            const confirmed = window.confirm(
+                `Update ${matches.length} localStorage item(s) in this browser?\n\nA backup JSON has been downloaded first. This only affects this browser/profile, not other users or devices.`
+            );
+            if (!confirmed) {
+                setDomainMigrationStatus('This browser cache migration was cancelled.');
+                appendDomainMigrationLog('Local browser cache migration cancelled.');
+                return;
+            }
+
+            matches.forEach(item => localStorage.setItem(item.key, item.after));
+            setDomainMigrationStatus(`Updated ${matches.length} localStorage item(s) in this browser.`);
+            appendDomainMigrationLog(`Local browser cache updated: ${matches.map(item => item.key).join(', ')}`);
+            showNotification('This browser cache was migrated successfully.', false);
         }
 
         // Helper function to convert full path to display format for input fields
@@ -229,6 +602,19 @@
 
 
         // --- Event Listeners ---
+
+        if (domainMigrationPreviewBtn) {
+            domainMigrationPreviewBtn.addEventListener('click', () => runDomainMigration({ applyChanges: false }));
+        }
+        if (domainMigrationApplyBtn) {
+            domainMigrationApplyBtn.addEventListener('click', () => runDomainMigration({ applyChanges: true }));
+        }
+        if (domainMigrationLocalBtn) {
+            domainMigrationLocalBtn.addEventListener('click', migrateCurrentBrowserStorage);
+        }
+        if (domainMigrationDownloadCoursesBtn) {
+            domainMigrationDownloadCoursesBtn.addEventListener('click', downloadPatchedCoursesGenerated);
+        }
 
         // Register function
         async function register(username, displayName, password) {

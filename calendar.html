@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202604291eds"></script>
+  <script src="js/auth-guard.js?v=202604291jcx"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -41,126 +41,6 @@
   <style>
   body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; overflow-y: scroll; }
   .layout { display: flex; min-height: 100vh; }
-  
-  /* Sidebar styling */
-  #side-menu {
-    background: #262626;
-    width: 200px;
-    min-width: 200px;
-    max-width: 200px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    height: 100vh;
-    z-index: 100;
-  }
-  
- .logo-header {
-      background: #262626;
-      width: 200px !important;
-      height: 107px !important;
-      min-width: 200px !important;
-      min-height: 107px !important;
-      max-width: 200px !important;
-      max-height: 107px !important;
-      text-align: center;
-      border-bottom: none;
-      margin: 0 !important;
-      padding: 0 !important;
-      overflow: hidden;
-      flex: 0 0 107px !important;
-      box-sizing: content-box;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid #1d1b1b;
-    }
-  
-  .logo-img {
-    width: 240px !important;
-    height: 50px !important;
-    object-fit: contain;
-    padding-top: 4px !important;
-  }
-  
-  .sidebar-nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-  }
-  
-  .sidebar-nav a {
-    display: flex;
-    align-items: center;
-    color: #fff !important;
-    text-decoration: none;
-    padding: 16px 28px 16px 12px;  /* Намален padding-left на 20px */
-    font-size: 14px;
-    transition: background 0.2s;
-    gap: 12px;
-    background: transparent;
-    font-weight: 400;
-    position: relative;
-    border-radius: 0;
-    flex-direction: row;
-  }
-  
-  .sidebar-nav .active a {
-    background: #000000;
-  }
-  
-  .sidebar-nav .active a::before {
-    content: '';
-    display: block;
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 4px;
-    height: 100%;
-    background: #588157; /* Fern */
-  }
-  
-  .sidebar-nav a:hover {
-    background: #181818;  /* Тъмно сиво при hover */
-  }
-  
-  .sidebar-nav .svg-icon {
-    width: 26px;
-    height: 26px;
-    flex-shrink: 0;
-    margin-right: -2px;
-    margin-left: -2px;
-    margin-top: -2px;
-    margin-bottom: -2px;
-  }
-  
-  /* Make messages icon white */
-  .sidebar-nav a[href*="messages"] .svg-icon {
-    filter: brightness(0) invert(1);
-  }
-  
-  .sidebar-footer-links {
-    position: absolute;
-    left: 12px;
-    bottom: 11px;
-    display: flex;
-    flex-direction: column;
-    gap: 2.5px;
-    font-size: 12px;
-    color: #cdcdcd;
-  }
-  
-  .sidebar-footer-item {
-    font-size: 12px;
-    color: #cdcdcd;
-    cursor: default;
-  }
-  
-  .sidebar-footer-item:hover {
-    color: #fff;
-    text-decoration: underline;
-  }
-  
   /* Main content */
   .main-content {
     flex: 1;
@@ -1535,12 +1415,6 @@
       display: none !important;
     }
   }
-  
-  .bb-inner-wrap {
-    position: relative;
-    height: 100%;
-  }
-
   .schedule-notes-modal-content {
     max-width: 760px;
     width: calc(100% - 32px);
@@ -1866,6 +1740,8 @@
   }
   </style>
   <link rel="stylesheet" href="css/mobile-nav.css?v=20260318navdark2">
+  <script src="js/desktop-nav.js?v=20260429nav1"></script>
+  <link rel="stylesheet" href="css/desktop-nav.css?v=20260429nav1">
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
@@ -4119,7 +3995,7 @@
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202604291eds"></script>
+    <script src="js/chat.js?v=202604291jcx"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>

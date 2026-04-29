@@ -1,20 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-    (function() {
-      try {
-        const user = JSON.parse(localStorage.getItem('loggedInUser') || '{}');
-        const storedView = localStorage.getItem('coursebook-courses-view');
-        const isMobileCoursesDevice = (window.matchMedia && window.matchMedia('(max-width: 900px)').matches) || window.innerWidth <= 900;
-        const preferredView = String(user.preferredCoursesView || storedView || 'beta').toLowerCase();
-        if (!isMobileCoursesDevice && preferredView === 'legacy') {
-          window.location.replace('indexlegacy.html' + window.location.search + window.location.hash);
-        }
-      } catch (_) {}
-    })();
-  </script>
-  <script src="js/auth-guard.js?v=202604291eds"></script>
+  <script src="js/auth-guard.js?v=202604291jcx"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
@@ -25,6 +12,8 @@
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
   <link rel="stylesheet" href="css/mobile-nav.css?v=20260318navdark2">
+  <script src="js/desktop-nav.js?v=20260429nav1"></script>
+  <link rel="stylesheet" href="css/desktop-nav.css?v=20260429nav1">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
@@ -96,24 +85,6 @@
         height: 100vh !important;
         min-height: 100vh !important;
         overflow-x: hidden;
-      }
-      #side-menu {
-        height: 100vh !important;
-        min-height: 100vh !important;
-        max-height: 100vh !important;
-        overflow-y: auto !important;
-        box-shadow: 2px 0 16px rgba(0,0,0,0.18);
-        transform: translateX(-100%);
-        transition: transform 0.3s cubic-bezier(.4,0,.2,1);
-        position: fixed !important;
-        left: 0;
-        top: 0;
-        bottom: 0;
-        z-index: 3200;
-        width: 70vw !important;
-        max-width: 260px !important;
-        min-width: 200px !important;
-        display: block;
       }
       .mobile-overlay {
         display: none;
@@ -248,12 +219,6 @@
     }
     /* --- MOBILE IMPROVEMENTS --- */
 @media (max-width: 768px) {
-  #side-menu {
-    height: 100vh !important;
-    min-height: 100vh !important;
-    max-height: 100vh !important;
-    overflow-y: auto !important;
-  }
   .right-overlay {
     height: 100vh !important;
     min-height: 100vh !important;
@@ -1010,120 +975,8 @@
   .base-footer a { color: #cdcdcd; margin: 0 0.7em; text-decoration: none; }
   .base-footer a:hover { text-decoration: underline; color: #fff; }
     .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
-    .sidebar {
-  width: 200px;
-      background: #262626;
-      color: #fff;
-      display: flex;
-      flex-direction: column;
-      min-height: 100vh;
-      box-shadow: 2px 0 8px rgba(0,0,0,0.04);
-    }
-    .logo-header {
-      background: #262626;
-      width: 200px !important;
-      height: 107px !important;
-      min-width: 200px !important;
-      min-height: 107px !important;
-      max-width: 200px !important;
-      max-height: 107px !important;
-      text-align: center;
-      border-bottom: none;
-      margin: 0 !important;
-      padding: 0 !important;
-      overflow: hidden;
-      flex: 0 0 107px !important;
-      box-sizing: content-box;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border-bottom: 1px solid #1d1b1b;
-    }
-    .logo-header > a {
-      display: block;
-      margin: 0 !important;
-      padding: 0 !important;
-      box-sizing: content-box;
-    }
-    .logo-img {
-      width: 240px !important;
-      height: 50px !important;
-      object-fit: contain;
-      padding-top: 4px !important;
-    }
-    .sidebar-nav ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 0;
-    }
-    .sidebar-nav li {
-      margin: 0;
-      position: relative;
-    }
-    .sidebar-nav a {
-      display: flex;
-      align-items: center;
-      color: #fff !important;
-      text-decoration: none;
-      padding: 16px 28px 16px 28px;
-  font-size: 14px;
-      transition: background 0.2s;
-      position: relative;
-      border-radius: 0;
-      gap: 12px;
-      flex-direction: row;
-      background: #222b36;
-      font-weight: 400;
-    }
-    .sidebar-nav .active a, .sidebar-nav li.active a {
-      background: #000000;
-      color: #fff !important;
-      position: relative;
-    }
-    .sidebar-nav .active a::before, .sidebar-nav li.active a::before {
-      content: '';
-      display: block;
-      position: absolute;
-      left: 0;
-      top: 0;
-      width: 4px;
-      height: 100%;
-      background: #588157;
-      border-radius: 0;
-    }
-    .sidebar-nav a:hover {
-      background: #181818;
-    }
-    .sidebar-nav .base-navigation-button-content {
-      border-radius: 0;
-      background: inherit;
-      color: inherit;
-      padding-left: 12px;
-    }
-    .sidebar-nav .svg-icon {
-  width: 26px;
-  height: 26px;
-  margin-right: -2px;
-  margin-left: -2px;
-  margin-top: -2px;
-  margin-bottom: -2px;
-  flex-shrink: 0;
-  fill: #222 !important;
-  stroke: #222 !important;
-    }
-
-    /* Make messages icon white */
-    .sidebar-nav a[href*="messages"] .svg-icon {
-      filter: brightness(0) invert(1);
-    }
-    .sidebar, .sidebar * {
-  font-family: 'Open Sans', Arial, sans-serif !important;
-}
   </style>
-  <script src="courses.generated.js?v=202604291eds"></script>
+  <script src="courses.generated.js?v=202604291jcx"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 
 <!-- Subtle UI tweaks -->
@@ -1169,7 +1022,7 @@
     </div>
 
   <div class="layout">
-  <div id="side-menu" class="mode-light hide-in-background themed-background-primary-fill-only left-off-canvas-menu color-selection-live-mode" style="background: #262626; width: 200px; min-width: 200px; max-width: 200px; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100;">
+  <div id="side-menu" class="mode-light hide-in-background themed-background-primary-fill-only left-off-canvas-menu color-selection-live-mode">
       <div class="bb-inner-wrap">
         <div class="logo-header">
           <a href="index.html?v=202603151sxu">
@@ -1790,8 +1643,6 @@ document.addEventListener('DOMContentLoaded', function() {
   <style>
   body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
     .layout { display: flex; min-height: 100vh; }
-  .logo-header { background: #262626; height: 107px; min-height: 107px; max-height: 107px; text-align: center; border-bottom: 1px solid #1d1b1b; padding: 0; display: flex; align-items: center; justify-content: center; }
-    .logo-img { width: 240px !important; height: 50px !important; object-fit: contain; padding-top: 4px !important; }
     .sidebar-profile {
       margin-left: 8px;
       font-weight: 500;
@@ -1940,45 +1791,9 @@ document.addEventListener('DOMContentLoaded', function() {
     width: 100%;
     box-sizing: border-box;
   }
-  .bb-inner-wrap {
-    position: relative;
-    height: 100%;
-  }
-  .sidebar-footer-links {
-    position: absolute;
-    left: 12px;
-    bottom: 11px;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 2.5px;
-    font-size: 12px;
-  }
-  .sidebar-footer-item {
-      font-size: 12px;
-      color: #cdcdcd;
-      text-decoration: none;
-      cursor: default;
-      padding: 0;
-      margin: 0;
-      background: none;
-      border: none;
-      outline: none;
-      display: block;
-    }
-  .sidebar-footer-item:hover {
-    color: #fff;
-    text-decoration: underline;
-  }
-  .sidebar-footer-links a:hover {
-    text-decoration: underline;
-    color: #fff;
-    opacity: 1;
-  }
     .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
     @media (max-width: 900px) {
       .layout { flex-direction: column; }
-      .sidebar { width: 100%; flex-direction: row; overflow-x: auto; }
       .main-content { padding: 0; }
       .main-header, .filter-bar, .course-org-list { padding-left: 16px; padding-right: 16px; }
       
@@ -2080,9 +1895,6 @@ document.addEventListener('DOMContentLoaded', function() {
   transform: rotate(90deg);
 }
 </style>
-
-
-
 <script>
 // Expose globally because section headers use inline onclick handlers.
 window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
@@ -2122,7 +1934,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=202604291eds"></script>
+<script src="js/chat.js?v=202604291jcx"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -3476,10 +3288,6 @@ body.index-beta .layout {
   display: flex;
   width: 100%;
   min-height: 100vh;
-}
-
-body.index-beta #side-menu {
-  z-index: 3200 !important;
 }
 
 body.index-beta .main-content {

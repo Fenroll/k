@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="bg">
 <head>
-    <script src="js/auth-guard.js?v=202604291eds"></script>
+    <script src="js/auth-guard.js?v=202604291jcx"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
@@ -280,15 +280,10 @@
                     <span class="data-value" id="user-font">Open Sans</span>
                     <button id="show-change-font-btn" class="change-btn">change</button>
                 </div>
-                <div class="profile-data-item">
-                    <span class="data-label">Courses Theme:</span>
-                    <span class="data-value" id="user-courses-view">Legacy</span>
-                    <button id="show-change-courses-view-btn" class="change-btn">change</button>
-                </div>
             </div>
             <div class="account-footer-actions">
                 <button id="show-delete-account-btn" class="btn btn-danger">Delete Account</button>
-                <button onclick="window.location.href=(JSON.parse(localStorage.getItem('loggedInUser') || '{}').preferredCoursesView === 'legacy' && window.matchMedia && window.matchMedia('(min-width: 901px)').matches ? 'indexlegacy.html' : 'index.html')" class="btn" style="background-color: #262626;">Go back</button>
+                <button onclick="window.location.href='index.html'" class="btn" style="background-color: #262626;">Go back</button>
             </div>
         </div>
 
@@ -423,25 +418,6 @@
             </form>
         </div>
 
-
-        <!-- Change Courses View Form -->
-        <div id="change-courses-view-form" class="form-container">
-            <h2>Change Courses View</h2>
-            <div id="change-courses-view-error" class="error-message"></div>
-            <form id="change-courses-view-form-element">
-                <div class="form-group">
-                    <label for="new-courses-view">Courses Theme</label>
-                    <select id="new-courses-view" required>
-                        <option value="legacy">Legacy</option>
-                        <option value="beta">Default</option>
-                    </select>
-                </div>
-                <button type="submit" class="btn">Save</button>
-                <button type="button" class="cancel-action-btn btn" style="background-color: #e5e7eb; color: #374151; margin-top: 0.5rem;">Cancel</button>
-            </form>
-        </div>
-
-
         <!-- Delete Account Form -->
         <div id="delete-account-form" class="form-container">
             <h2>Delete Account</h2>
@@ -468,7 +444,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
 
     <!-- Нашият скрипт за акаунти -->
-    <script src="./js/account-system.js?v=202604291eds"></script>
+    <script src="./js/account-system.js?v=202604291jcx"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/version-check.js?v=202602171mhr"></script>
     <script>
