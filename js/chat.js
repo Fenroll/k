@@ -1347,12 +1347,16 @@ class ChatUIManager {
             img.removeAttribute('data-src');
             img.classList.remove('lazy-image');
             this.imageObserver.unobserve(img);
+            // Re-scroll after image loads if user is at the bottom
+            img.addEventListener('load', () => {
+              if (this.autoScroll) this.scrollToBottom();
+            }, { once: true });
           }
         }
       });
     }, {
       root: this.container.querySelector('.chat-messages'),
-      rootMargin: '50px' // Start loading 50px before image enters viewport
+      rootMargin: '50px'
     });
 
     // If messages were rendered before observer init (e.g. fast cache/poll callback on refresh),
@@ -1485,13 +1489,20 @@ class ChatUIManager {
       if (window.visualViewport) {
         const panel = this.container.querySelector('.chat-panel');
         let _kbRaf = null;
+        // Store the tallest vv.height we've seen — that's the no-keyboard baseline
+        let _fullH = window.visualViewport.height;
         const onViewport = () => {
           cancelAnimationFrame(_kbRaf);
           _kbRaf = requestAnimationFrame(() => {
             if (!panel) return;
-            const keyboardH = Math.max(0, window.innerHeight - window.visualViewport.height);
-            panel.style.setProperty('--mobile-keyboard-offset', keyboardH + 'px');
-            if (keyboardH > 100) this.scrollToBottom();
+            const vvH = window.visualViewport.height;
+            // Ratchet up: if viewport grew, update our baseline (keyboard closed)
+            if (vvH > _fullH) _fullH = vvH;
+            const keyboardH = Math.max(0, _fullH - vvH);
+            // Safety cap: never push more than 70% of screen (avoids extreme values)
+            const safeOffset = Math.min(keyboardH, _fullH * 0.7);
+            panel.style.setProperty('--mobile-keyboard-offset', safeOffset + 'px');
+            if (safeOffset > 100) this.scrollToBottom();
           });
         };
         const clearViewport = () => {
@@ -1499,11 +1510,17 @@ class ChatUIManager {
           if (panel) panel.style.setProperty('--mobile-keyboard-offset', '0px');
         };
         input.addEventListener('focus', () => {
+          // Update baseline now in case vv grew while we weren't watching
+          if (window.visualViewport.height > _fullH) _fullH = window.visualViewport.height;
           window.visualViewport.addEventListener('resize', onViewport);
         });
         input.addEventListener('blur', () => {
           window.visualViewport.removeEventListener('resize', onViewport);
           setTimeout(clearViewport, 80);
+        });
+        // Keep baseline up to date while panel is idle
+        window.visualViewport.addEventListener('resize', () => {
+          if (window.visualViewport.height > _fullH) _fullH = window.visualViewport.height;
         });
       }
     }
@@ -3134,7 +3151,8 @@ class ChatUIManager {
     if (!input) return;
 
     input.value = msg.text;
-    input.focus();
+    input.style.height = 'auto';
+    input.style.height = input.scrollHeight + 'px';
     this.editingMessage = { id: messageId, key: messageKey };
 
     const inputArea = this.container.querySelector('.chat-input-area');
@@ -3164,6 +3182,7 @@ class ChatUIManager {
     }
 
     input.placeholder = "Editing message...";
+    input.focus();
   }
 
   async editMessage(messageKey, newText) {
@@ -5508,7 +5527,7 @@ class ChatUIManager {
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 2px 0 0;
+  padding: 0;
   border-radius: 0;
   background: transparent;
   border: 0;
@@ -5527,6 +5546,7 @@ class ChatUIManager {
   justify-content: center;
   cursor: pointer;
   flex-shrink: 0;
+  align-self: center;
   font-size: 12px;
   line-height: 1;
 }
