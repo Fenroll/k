@@ -1476,11 +1476,34 @@ class ChatUIManager {
       input.addEventListener('input', () => {
          input.style.height = 'auto';
          input.style.height = (input.scrollHeight) + 'px';
-         // Cap max height if needed via CSS max-height
 
          this.handleMentionInput(input);
          this.handleTyping();
       });
+
+      // Mobile keyboard: lift panel above keyboard using visualViewport
+      if (window.visualViewport) {
+        const panel = this.container.querySelector('.chat-panel');
+        const onViewport = () => {
+          if (!panel) return;
+          const vv = window.visualViewport;
+          const keyboardH = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+          panel.style.setProperty('--mobile-keyboard-offset', keyboardH + 'px');
+          if (keyboardH > 100) this.scrollToBottom();
+        };
+        const clearViewport = () => {
+          if (panel) panel.style.setProperty('--mobile-keyboard-offset', '0px');
+        };
+        input.addEventListener('focus', () => {
+          window.visualViewport.addEventListener('resize', onViewport);
+          window.visualViewport.addEventListener('scroll', onViewport);
+        });
+        input.addEventListener('blur', () => {
+          window.visualViewport.removeEventListener('resize', onViewport);
+          window.visualViewport.removeEventListener('scroll', onViewport);
+          setTimeout(clearViewport, 100);
+        });
+      }
     }
 
     const messagesContainer = this.container.querySelector('.chat-messages');
@@ -4242,6 +4265,7 @@ class ChatUIManager {
         volumeInput.style.setProperty('--volume-percent', `${percent}%`);
       };
 
+      let _rafId = null;
       const syncProgress = () => {
         const duration = audio.duration || 0;
         const percent = duration ? Math.min(100, (audio.currentTime / duration) * 100) : 0;
@@ -4249,18 +4273,24 @@ class ChatUIManager {
         if (progress) progress.setAttribute('aria-valuenow', String(Math.round(percent)));
         if (currentEl) currentEl.textContent = this.formatAudioTime(audio.currentTime);
       };
+      const rafLoop = () => {
+        syncProgress();
+        if (!audio.paused && !audio.ended) _rafId = requestAnimationFrame(rafLoop);
+      };
 
       audio.addEventListener('loadedmetadata', () => {
         if (durationEl) durationEl.textContent = this.formatAudioTime(audio.duration);
         syncProgress();
       });
 
-      audio.addEventListener('timeupdate', syncProgress);
       audio.addEventListener('pause', () => {
+        cancelAnimationFrame(_rafId);
         player.classList.remove('is-playing');
         if (playIcon) playIcon.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>';
       });
       audio.addEventListener('play', () => {
+        cancelAnimationFrame(_rafId);
+        _rafId = requestAnimationFrame(rafLoop);
         document.querySelectorAll('.chat-audio-player.is-playing').forEach(other => {
           if (other !== player && other._chatAudio) other._chatAudio.pause();
         });
@@ -4268,6 +4298,7 @@ class ChatUIManager {
         if (playIcon) playIcon.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg>';
       });
       audio.addEventListener('ended', () => {
+        cancelAnimationFrame(_rafId);
         audio.currentTime = 0;
         syncProgress();
       });
@@ -5528,7 +5559,6 @@ class ChatUIManager {
   height: 100%;
   border-radius: inherit;
   background: var(--chat-primary);
-  transition: width 0.08s linear;
 }
 
 #chat-widget .chat-audio-time {
