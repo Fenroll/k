@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="js/auth-guard.js?v=20260430bx"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Chat UI Test Lab</title>
+
+  <link rel="icon" href="favicon.svg?v=202603151sxu" type="image/svg+xml">
+  <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
+  <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
+
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "API_KEY",
+      authDomain: "med-student-chat.firebaseapp.com",
+      databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "med-student-chat",
+      storageBucket: "med-student-chat.appspot.com",
+      messagingSenderId: "SENDER_ID",
+      appId: "APP_ID"
+    };
+
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+  </script>
+
+  <style>
+    :root {
+      --lab-green: #588157;
+      --lab-ink: #111827;
+      --lab-muted: #5f6b7a;
+      --lab-border: #d7ded6;
+      --lab-bg: #eef2ec;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: 'Open Sans', Arial, sans-serif;
+      color: var(--lab-ink);
+      background:
+        radial-gradient(circle at 18% 12%, rgba(166, 221, 26, 0.16), transparent 30%),
+        radial-gradient(circle at 84% 16%, rgba(8, 127, 153, 0.16), transparent 28%),
+        linear-gradient(135deg, #f8faf7 0%, var(--lab-bg) 100%);
+      overflow-x: hidden;
+    }
+
+    .test-shell {
+      width: min(1080px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 44px 0 120px;
+    }
+
+    .test-hero {
+      background: rgba(255, 255, 255, 0.82);
+      border: 1px solid var(--lab-border);
+      border-radius: 28px;
+      padding: clamp(24px, 5vw, 48px);
+      box-shadow: 0 22px 70px rgba(31, 41, 55, 0.12);
+      backdrop-filter: blur(12px);
+    }
+
+    .test-kicker {
+      color: var(--lab-green);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      max-width: 760px;
+      font-size: clamp(34px, 7vw, 72px);
+      line-height: 0.95;
+      letter-spacing: -0.06em;
+    }
+
+    .test-copy {
+      max-width: 660px;
+      margin: 18px 0 0;
+      color: var(--lab-muted);
+      font-size: 17px;
+      line-height: 1.65;
+    }
+
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 18px;
+    }
+
+    .test-card {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid var(--lab-border);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .test-card strong {
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    .test-card span {
+      color: var(--lab-muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .test-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
+
+    .test-btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 12px 18px;
+      background: var(--lab-green);
+      color: #fff;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      box-shadow: 0 10px 24px rgba(88, 129, 87, 0.28);
+    }
+
+    .test-btn.secondary {
+      background: #fff;
+      color: var(--lab-ink);
+      border: 1px solid var(--lab-border);
+      box-shadow: none;
+    }
+
+    .test-note {
+      margin-top: 18px;
+      color: var(--lab-muted);
+      font-size: 13px;
+    }
+
+    @media (max-width: 780px) {
+      .test-shell {
+        padding-top: 24px;
+      }
+
+      .test-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="test-shell">
+    <section class="test-hero">
+      <div class="test-kicker">Isolated sandbox</div>
+      <h1>Chat UI Test Lab</h1>
+      <p class="test-copy">
+        This page loads <strong>js/chat-test.js</strong>, a separate copy of the production chat script.
+        It previews the normal chat messages in a read-only test UI, without changing the live chat widget.
+      </p>
+
+      <div class="test-grid">
+        <div class="test-card">
+          <strong>Separate script</strong>
+          <span>Edit <code>js/chat-test.js</code> for experiments. Production still uses <code>js/chat.js</code>.</span>
+        </div>
+        <div class="test-card">
+          <strong>Live messages</strong>
+          <span>The test copy reads from <code>messages/global-chat</code> so the UI can be compared with real content.</span>
+        </div>
+        <div class="test-card">
+          <strong>Same dependencies</strong>
+          <span>Firebase, identity, and the widget lifecycle are loaded like the real app.</span>
+        </div>
+      </div>
+
+      <div class="test-actions">
+        <button class="test-btn" type="button" onclick="document.getElementById('chat-toggle')?.click()">Open test chat</button>
+        <a class="test-btn secondary" href="index.html">Back to Coursebook</a>
+      </div>
+
+      <p class="test-note">
+        Sending and attachments are disabled here, so the preview cannot post into the normal chat.
+      </p>
+    </section>
+  </main>
+
+  <script src="js/user-identity.js?v=202602171mhr"></script>
+  <script src="js/chat-test.js?v=20260430test21"></script>
+</body>
+</html>

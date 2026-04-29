@@ -6,7 +6,7 @@
   <script>
     // Firebase configuration (extracted from js/chat.js)
     const firebaseConfig = {
-      apiKey: "API_KEY", // Замени с твоя API Key
+      apiKey: "API_KEY", // Ð—Ð°Ð¼ÐµÐ½Ð¸ Ñ Ñ‚Ð²Ð¾Ñ API Key
       authDomain: "med-student-chat.firebaseapp.com",
       databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "med-student-chat",
@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=20260430bx"></script>
+  <script src="js/auth-guard.js?v=202604302m8"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -35,19 +35,19 @@
   </style>
   <meta name="robots" content="noindex, nofollow">
   <title>Calendar</title>
-  
+
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=202603151sxu" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-  
+
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  
+
   <!-- Markdown parser -->
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
-  
+
   <style>
   body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; overflow-y: scroll; }
   .layout { display: flex; min-height: 100vh; }
@@ -58,7 +58,7 @@
     background: #f5f5f5;
     min-height: 100vh;
   }
-  
+
   .main-header {
     background: #fff;
     color: #000;
@@ -74,19 +74,19 @@
     top: 0;
     z-index: 1200;
   }
-  
+
   .page-title {
     font-size: 30px !important;
     margin-left: 30px !important;
     font-family: 'Open Sans', serif;
     font-weight: 400;
   }
-  
+
   /* Schedule container */
   .schedule-container {
     margin: 2rem 33px;
   }
-  
+
   /* Current Information Panel */
   .info-panel {
     background: linear-gradient(180deg, #fbfdf9 0%, #ffffff 100%);
@@ -162,13 +162,13 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+
   .info-panel-content {
     color: #374151;
     line-height: 1.72;
     font-size: 15px;
   }
-  
+
   .info-panel-content h1 {
     font-size: 25px;
     color: #111827;
@@ -176,7 +176,7 @@
     font-weight: 600;
     line-height: 1.3;
   }
-  
+
   .info-panel-content h2 {
     font-size: 20px;
     color: #1f2937;
@@ -184,7 +184,7 @@
     font-weight: 600;
     line-height: 1.35;
   }
-  
+
   .info-panel-content h3 {
     font-size: 16px;
     color: #588157;
@@ -192,31 +192,31 @@
     font-weight: 600;
     line-height: 1.4;
   }
-  
+
   .info-panel-content p {
     margin: 10px 0;
   }
-  
+
   .info-panel-content ul {
     margin: 12px 0;
     padding-left: 24px;
   }
-  
+
   .info-panel-content li {
     margin: 6px 0;
   }
-  
+
   .info-panel-content strong {
     color: #111827;
     font-weight: 600;
   }
-  
+
   .info-panel-content hr {
     border: none;
     border-top: 1px solid #e5e7eb;
     margin: 24px 0;
   }
-  
+
   .info-panel-content code {
     background: #f3f4f6;
     padding: 2px 6px;
@@ -224,7 +224,7 @@
     font-family: 'Courier New', monospace;
     font-size: 14px;
   }
-  
+
   /* Week selector */
   .week-selector {
     display: flex;
@@ -238,7 +238,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.08);
     position: relative;
   }
-  
+
   .week-btn {
     background: #588157;
     color: #fff;
@@ -253,13 +253,13 @@
     align-items: center;
     gap: 6px;
   }
-  
+
   .week-btn:hover {
     background: #344e41;
     transform: translateY(-1px);
     box-shadow: 0 2px 8px rgba(124,58,237,0.3);
   }
-  
+
   .week-btn:disabled {
     background: #d1d5db;
     cursor: not-allowed;
@@ -278,7 +278,7 @@
     background: #344e41;
     transform: translateY(calc(-50% - 1px));
   }
-  
+
   .week-info {
     font-size: 16px;
     font-weight: 600;
@@ -286,14 +286,14 @@
     text-align: center;
     padding: 0 10px; /* Minimal padding */
   }
-  
+
   .week-number {
     color: #588157;
     font-size: 14px;
     display: block;
     margin-top: 4px;
   }
-  
+
   /* Vertical Schedule Grid Styles */
   :root {
     --col-dust-grey: #dad7cd;
@@ -301,7 +301,7 @@
     --col-fern: #588157;
     --col-hunter: #3a5a40;
     --col-pine: #344e41;
-    
+
     --time-col-width: 40px; /* Compact time column */
     --slot-height: 16px; /* 15 min slot height */
   }
@@ -314,7 +314,7 @@
     margin: 0 auto;
     border: 1px solid #d3cdcd;
     /* Force clipping of sticky elements */
-    mask-image: radial-gradient(white, black); 
+    mask-image: radial-gradient(white, black);
     -webkit-mask-image: -webkit-radial-gradient(white, black);
     overflow: hidden;
   }
@@ -328,7 +328,7 @@
     background: #fff;
     border-radius: 8px; /* Apply to grid directly */
     overflow: hidden;
-    
+
     /* Vertical Lines using gradient */
     /* Time col is fixed, days are 1fr. This is hard to gradient perfectly with mix. */
     /* Fallback: use a repeating-linear-gradient that assumes approx width or just use JS for lines? */
@@ -413,7 +413,7 @@
       background: #fff;
     }
   }
-  
+
   /* Vertical Line Helper Class */
   .vertical-line {
       grid-row: 4 / -1; /* Start after header */
@@ -451,13 +451,13 @@
     line-height: 1.2;
     isolation: isolate;
   }
-  
+
   .header-cell.time-header {
     background-color: var(--col-pine);
     z-index: 101;
-    left: 0; 
+    left: 0;
   }
-  
+
   /* Explicit Column Assignment for Headers to prevent shifts */
   .calendar-grid > .header-cell:nth-child(1) { grid-column: 1; } /* Time */
   .calendar-grid > .header-cell:nth-child(2) { grid-column: 2; } /* Mon */
@@ -484,7 +484,7 @@
     border-top: 1px solid #f4f4f4;
     pointer-events: none;
   }
-  
+
   .grid-line.hour-marker {
     border-top: 1px solid #e0e0e0;
   }
@@ -504,7 +504,7 @@
     transition: transform 0.1s;
     z-index: 5;
   }
-  
+
   .event-card:hover {
     transform: scale(1.02);
     z-index: 15;
@@ -517,7 +517,7 @@
     text-overflow: ellipsis;
     font-size: 15px; /* Increased from 13px */
   }
-  
+
   .title-desktop { display: inline; }
   .title-mobile { display: none; }
 
@@ -526,7 +526,7 @@
     opacity: 0.9;
     white-space: nowrap;
   }
-  
+
   .event-location {
     font-size: 13px; /* Increased from 11px */
     font-style: italic;
@@ -644,31 +644,31 @@
     border-left: 3px solid #2563eb;
     color: #1e40af;
   }
-  
+
   .type-lecture {
     background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
     border-left: 3px solid #9ca3af;
     color: #4b5563;
   }
-  
+
   .type-important-lecture {
     background: linear-gradient(135deg, #e5e7eb 0%, #dad7cd 110%);
     border-left: 3px solid #646c7e;
     color: #374151;
   }
-  
+
   .type-exam {
     background: linear-gradient(135deg, #e2aa98 0%, #d87060 100%);
     border-left: 3px solid #b34d41;
     color: #7a2f26;
   }
-  
+
   .type-test {
     background: linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%);
     border-left: 3px solid #732c2c;
     color: #047857;
   }
-  
+
   .type-makeup {
     background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
     border-left: 3px solid #f97316;
@@ -681,8 +681,8 @@
     .title-mobile { display: inline; }
     .event-title { font-size: 14px; } /* Increased from 12px */
     .event-time { font-size: 12px; } /* Increased from 10px */
-    .event-location { display: none; } 
-    
+    .event-location { display: none; }
+
     /* Dynamic scaling for short events on mobile */
     .short-event {
         justify-content: center;
@@ -691,7 +691,7 @@
     }
     .short-event .event-title { font-size: 11px; margin-bottom: 0; }
     .short-event .event-time { font-size: 9px; }
-    
+
     /* Tiny events (1 slot / 15 mins) - Single line layout */
     .tiny-event {
         flex-direction: row;
@@ -756,23 +756,23 @@
       font-size: var(--inline-time-size-mobile, 8px);
     }
     .event-card.inline-time-event .event-location { display: none; }
-    
+
     :root {
        --time-col-width: 35px;
        --slot-height: 11px; /* Significantly reduced height from 16px */
     }
-    
+
            .calendar-wrapper {
               margin-bottom: 80px; /* Force white space at the bottom */
               border-left: none;
               border-right: none;
-           }    
+           }
     .event-card {
        padding: 1px 3px; /* Tighter padding for shorter rows */
     }
   }
 
-  
+
 
 
   /* Modal overlay */
@@ -788,7 +788,7 @@
     background: rgba(0,0,0,0.6);
     z-index: 5000;
   }
-  
+
   .modal-overlay.open {
     opacity: 1;
     visibility: visible;
@@ -802,7 +802,7 @@
   .modal-overlay:not(.open) .modal-close {
     display: none !important;
   }
-  
+
   .modal-content {
     background: #fff;
     border-radius: 16px;
@@ -815,7 +815,7 @@
     animation: slideIn 0.3s ease;
     position: relative;
   }
-  
+
   @keyframes slideIn {
     from {
       transform: translateY(-50px);
@@ -826,7 +826,7 @@
       opacity: 1;
     }
   }
-  
+
   .modal-close {
     position: absolute;
     top: 16px;
@@ -844,12 +844,12 @@
     border-radius: 4px;
     transition: all 0.2s;
   }
-  
+
   .modal-close:hover {
     background: #f3f4f6;
     color: #000;
   }
-  
+
   /* Exam card styles */
   .exam-card {
     background: #fff;
@@ -860,39 +860,39 @@
     cursor: pointer;
     transition: all 0.2s ease;
   }
-  
+
   .exam-card:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     transform: translateY(-2px);
   }
-  
+
   .exam-card-header {
     margin-bottom: 10px;
     padding-bottom: 8px;
     border-bottom: 1px solid #e5e7eb;
   }
-  
+
   .exam-card-title {
     color: #588157;
     font-size: 16px;
     font-weight: 700;
     margin: 0;
   }
-  
+
   .exam-card-subtitle {
     color: #6b7280;
     font-size: 13px;
     margin: 0;
   }
-  
+
   .exam-section {
     margin-bottom: 10px;
   }
-  
+
   .exam-section:last-child {
     margin-bottom: 0;
   }
-  
+
   .exam-section-title {
     color: #374151;
     font-size: 15px;
@@ -902,13 +902,13 @@
     align-items: center;
     gap: 6px;
   }
-  
+
   .exam-section-icon {
     width: 20px;
     height: 20px;
     fill: currentColor;
   }
-  
+
   .exam-info-row {
     display: flex;
     justify-content: space-between;
@@ -918,18 +918,18 @@
     margin-bottom: 3px;
     gap: 12px;
   }
-  
+
   .exam-info-row:last-child {
     margin-bottom: 0;
   }
-  
+
   .exam-info-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 8px;
     margin-bottom: 0;
   }
-  
+
   .exam-info-item {
     display: flex;
     flex-direction: column;
@@ -937,7 +937,7 @@
     background: #f9fafb;
     border-radius: 4px;
   }
-  
+
   .exam-info-label {
     color: #6b7280;
     font-size: 14px;
@@ -946,32 +946,32 @@
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }
-  
+
   .exam-info-value {
     color: #111827;
     font-size: 13.5px;
     font-weight: 500;
     text-align: left;
   }
-  
-  /* Show line break after "и" only on mobile */
+
+  /* Show line break after "Ð¸" only on mobile */
   .mobile-break {
     display: none;
   }
-  
+
   @media (max-width: 768px) {
     .mobile-break {
       display: block;
     }
   }
-  
+
   .modal-title {
     margin: 0 0 8px 0;
     color: #588157;
     font-size: 1.8em;
     font-weight: 700;
   }
-  
+
   .modal-type {
     display: inline-block;
     background: #dad7cd;
@@ -982,60 +982,60 @@
     font-weight: 600;
     margin-bottom: 20px;
   }
-  
+
   .modal-info {
     margin: 16px 0;
   }
-  
+
   .modal-info-row {
     display: flex;
     align-items: flex-start;
     margin-bottom: 12px;
     gap: 12px;
   }
-  
+
   .modal-info-icon {
     flex-shrink: 0;
     width: 20px;
     height: 20px;
     fill: #588157;
   }
-  
+
   .modal-info-label {
     font-weight: 600;
     color: #374151;
     min-width: 100px;
   }
-  
+
   .modal-info-value {
     color: #6b7280;
     flex: 1;
   }
-  
+
   #modalAdditionalInfo {
     text-decoration: underline;
     max-height: 70vh;
     overflow-y: auto;
   }
-  
+
   #modalAdditionalInfo p {
     margin: 0;
   }
-  
+
   #modalAdditionalInfo::-webkit-scrollbar {
     width: 8px;
   }
-  
+
   #modalAdditionalInfo::-webkit-scrollbar-track {
     background: #f1f5f9;
     border-radius: 10px;
   }
-  
+
   #modalAdditionalInfo::-webkit-scrollbar-thumb {
     background: #cbd5e1;
     border-radius: 10px;
   }
-  
+
   #modalAdditionalInfo::-webkit-scrollbar-thumb:hover {
     background: #94a3b8;
   }
@@ -1154,7 +1154,7 @@
     color: #856404;
     border: 1px solid #ffeeba;
   }
-  
+
   /* Mobile responsive */
   @media (max-width: 768px) {
     #side-menu {
@@ -1168,11 +1168,11 @@
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
     }
-    
+
     #side-menu.mobile-open {
       transform: translateX(0);
     }
-    
+
     /* Prevent body scroll when menu is open */
     body.menu-open {
       overflow: hidden;
@@ -1184,7 +1184,7 @@
     body.menu-open .modal-close {
       display: none !important;
     }
-    
+
     /* Mobile menu overlay */
     .mobile-menu-overlay {
       display: none;
@@ -1198,18 +1198,18 @@
       opacity: 0;
       transition: opacity 0.3s;
     }
-    
+
     .mobile-menu-overlay.active {
       display: block;
       opacity: 1;
     }
-    
+
     .main-content {
       padding: 0;
       width: 100%;
       overflow-x: hidden;
     }
-    
+
     .main-header {
       display: flex;
       height: 60px;
@@ -1218,29 +1218,29 @@
       padding: 0 !important;
       width: 100% !important;
     }
-    
+
     .page-title {
       font-size: 22px !important;
       margin: 0 !important;
       text-align: center;
       width: 100%;
     }
-    
+
     #weekDateRange {
       font-size: 14px;
     }
-    
+
     .event-time {
       font-size: 9px !important;
     }
-    
+
     .schedule-container {
       margin: 0.5rem 12px;
       overflow-x: auto;
       max-width: 100%;
       -webkit-overflow-scrolling: touch;
     }
-    
+
     .week-selector {
       flex-wrap: nowrap;
       gap: 10px;
@@ -1260,7 +1260,7 @@
     .week-edit-btn:hover {
       transform: translateY(-1px);
     }
-    
+
     .week-btn {
       font-size: 13px;
       width: 44px; /* Fixed width for symmetry */
@@ -1272,68 +1272,68 @@
       min-width: auto;
       flex-shrink: 0;
     }
-    
+
     .btn-text-label {
       display: none;
     }
-    
+
     .week-info {
       text-align: center;
       min-width: 0;
       flex: 1; /* Take all space between symmetric buttons */
       order: 0;
       margin-bottom: 0;
-      font-size: 15px; 
+      font-size: 15px;
     }
-    
+
     .week-number {
       font-size: 13px; /* Restored close to original */
       white-space: nowrap;
     }
-    
+
     .schedule-table {
       min-width: 100%;
       width: 100%;
       font-size: 13px;
     }
-    
+
     .schedule-table th {
       padding: 12px 4px;
       font-size: 13px;
     }
-    
+
     .schedule-table td {
       padding: 6px 4px;
       min-width: 0;
     }
-    
+
     .schedule-item {
       padding: 8px;
       font-size: 12px;
       margin: 4px 0;
     }
-    
+
     .schedule-item-subject {
       font-size: 13px;
       margin-bottom: 4px;
     }
-    
+
     .schedule-item-type {
       font-size: 11px;
       padding: 2px 6px;
     }
-    
+
     .schedule-item-time,
     .schedule-item-room {
       font-size: 11px;
       margin: 2px 0;
       white-space: nowrap;
     }
-    
+
     .schedule-time {
       white-space: nowrap !important;
     }
-    
+
     .currentInfoPanel {
       margin: 1rem 12px;
       padding: 12px;
@@ -1342,7 +1342,7 @@
     .info-panel-content h1 {
       font-size: 20px;
     }
-    
+
     .info-panel-content h2 {
       font-size: 18px;
     }
@@ -1353,12 +1353,12 @@
      .info-panel-content h4 {
       font-size: 14.5px;
     }
-    
+
     .modal-content {
       padding: 24px;
       max-width: 90%;
     }
-    
+
     .mobile-menu-toggle {
       display: flex !important;
       flex-direction: column;
@@ -1377,13 +1377,13 @@
       padding: 0;
       transition: opacity 0.3s, visibility 0.3s;
     }
-    
+
     .mobile-menu-toggle.hidden {
       opacity: 0;
       visibility: hidden;
       pointer-events: none;
     }
-    
+
     .mobile-menu-toggle span {
       display: block;
       width: 26px;
@@ -1399,27 +1399,27 @@
     .schedule-item {
       padding: 4px 0px !important;
     }
-    
+
     .schedule-item-subject {
       letter-spacing: -0.3px !important;
     }
-    
+
     .schedule-item-time,
     .schedule-item-room {
       letter-spacing: -0.3px !important;
     }
-    
+
     .schedule-time {
       font-size: 11.3px !important;
       letter-spacing: -0.25px !important;
       display: block !important;
     }
-    
+
     .schedule-table td {
       padding: 2px 2px !important;
     }
   }
-  
+
   @media (min-width: 769px) {
     .mobile-menu-toggle {
       display: none !important;
@@ -1859,16 +1859,16 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span class="btn-text-label">Предишна</span>
+            <span class="btn-text-label">ÐŸÑ€ÐµÐ´Ð¸ÑˆÐ½Ð°</span>
           </button>
-          
+
           <div class="week-info">
-            <div id="weekDateRange">Седмица 1<span style="color: #588157;"></span></div>
-            <span class="week-number" id="weekNumber">4 ноември - 8 ноември 2025</span>
+            <div id="weekDateRange">Ð¡ÐµÐ´Ð¼Ð¸Ñ†Ð° 1<span style="color: #588157;"></span></div>
+            <span class="week-number" id="weekNumber">4 Ð½Ð¾ÐµÐ¼Ð²Ñ€Ð¸ - 8 Ð½Ð¾ÐµÐ¼Ð²Ñ€Ð¸ 2025</span>
           </div>
-          
+
           <button class="week-btn" id="nextWeekBtn" onclick="changeWeek(1)">
-            <span class="btn-text-label">Следваща</span>
+            <span class="btn-text-label">Ð¡Ð»ÐµÐ´Ð²Ð°Ñ‰Ð°</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -1886,10 +1886,10 @@
         <!-- Christmas vacation screen -->
         <div id="christmasScreen" style="display: none;">
           <div style="text-align: center; padding: 60px 20px;">
-            <div style="font-size: 80px; margin-bottom: 20px;">🎅🎄</div>
-            <h2 style="color: #dc2626; font-size: 32px; margin-bottom: 10px;">Коледна ваканция!</h2>
-            <div style="font-size: 60px;">🎁❄️⛄</div>
-            <p style="color: #9ca3af; margin-top: 30px; font-size: 14px;">Честита Коледа и Щастлива Нова Година! 🎉</p>
+            <div style="font-size: 80px; margin-bottom: 20px;">ðŸŽ…ðŸŽ„</div>
+            <h2 style="color: #dc2626; font-size: 32px; margin-bottom: 10px;">ÐšÐ¾Ð»ÐµÐ´Ð½Ð° Ð²Ð°ÐºÐ°Ð½Ñ†Ð¸Ñ!</h2>
+            <div style="font-size: 60px;">ðŸŽâ„ï¸â›„</div>
+            <p style="color: #9ca3af; margin-top: 30px; font-size: 14px;">Ð§ÐµÑÑ‚Ð¸Ñ‚Ð° ÐšÐ¾Ð»ÐµÐ´Ð° Ð¸ Ð©Ð°ÑÑ‚Ð»Ð¸Ð²Ð° ÐÐ¾Ð²Ð° Ð“Ð¾Ð´Ð¸Ð½Ð°! ðŸŽ‰</p>
           </div>
         </div>
 
@@ -1905,20 +1905,20 @@
         <div id="scheduleGrid" class="calendar-grid">
           <!-- Header Row -->
           <div class="header-cell time-header"></div>
-          <div class="header-cell">ПОН</div>
-          <div class="header-cell">ВТ</div>
-          <div class="header-cell">СР</div>
-          <div class="header-cell">ЧЕТ</div>
-          <div class="header-cell">ПЕТ</div>
+          <div class="header-cell">ÐŸÐžÐ</div>
+          <div class="header-cell">Ð’Ð¢</div>
+          <div class="header-cell">Ð¡Ð </div>
+          <div class="header-cell">Ð§Ð•Ð¢</div>
+          <div class="header-cell">ÐŸÐ•Ð¢</div>
           <!-- Grid Content will be injected by JS -->
         </div>
-        
+
         <!-- Current Information Panel -->
         <div id="currentInfoPanel" class="info-panel">
           <div class="schedule-notes-header">
             <div class="schedule-notes-heading">
               <div class="schedule-notes-title">Schedule Notes</div>
-              <div id="scheduleNotesLastEdit" class="schedule-notes-last-edit">Last edit: —</div>
+              <div id="scheduleNotesLastEdit" class="schedule-notes-last-edit">Last edit: â€”</div>
             </div>
             <button id="editScheduleNotesBtn" class="schedule-notes-edit-btn" type="button">
               <svg class="schedule-notes-edit-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1944,7 +1944,7 @@
   <!-- Modal for schedule details -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
-      <button class="modal-close" onclick="closeModal()">×</button>
+      <button class="modal-close" onclick="closeModal()">Ã—</button>
       <h2 class="modal-title" id="modalSubject"></h2>
       <span class="modal-type" id="modalType"></span>
       <div class="modal-info">
@@ -1953,7 +1953,7 @@
             <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
           </svg>
           <div>
-            <div class="modal-info-label">Час:</div>
+            <div class="modal-info-label">Ð§Ð°Ñ:</div>
             <div class="modal-info-value" id="modalTime"></div>
           </div>
         </div>
@@ -1962,7 +1962,7 @@
             <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z"/>
           </svg>
           <div>
-            <div class="modal-info-label">Сграда:</div>
+            <div class="modal-info-label">Ð¡Ð³Ñ€Ð°Ð´Ð°:</div>
             <div class="modal-info-value" id="modalBuilding"></div>
           </div>
         </div>
@@ -1971,7 +1971,7 @@
             <path d="M5,3V21H11V17.5H13V21H19V3H5M7,5H9V7H7V5M11,5H13V7H11V5M15,5H17V7H15V5M7,9H9V11H7V9M11,9H13V11H11V9M15,9H17V11H15V9M7,13H9V15H7V13M11,13H13V15H11V13M15,13H17V15H15V13M7,17H9V19H7V17M15,17H17V19H15V17Z"/>
           </svg>
           <div>
-            <div class="modal-info-label">Стая:</div>
+            <div class="modal-info-label">Ð¡Ñ‚Ð°Ñ:</div>
             <div class="modal-info-value" id="modalRoomInfo">
               <span id="modalRoom"></span><span id="modalFloorText"></span>
             </div>
@@ -1982,17 +1982,17 @@
             <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
           </svg>
           <div>
-            <div class="modal-info-label">Преподавател:</div>
+            <div class="modal-info-label">ÐŸÑ€ÐµÐ¿Ð¾Ð´Ð°Ð²Ð°Ñ‚ÐµÐ»:</div>
             <div class="modal-info-value" id="modalTeacher"></div>
           </div>
         </div>
-        
+
         <div id="modalAdditionalInfoRow" class="modal-info-row" style="display: none;">
           <svg class="modal-info-icon" viewBox="0 0 24 24">
             <path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"/>
           </svg>
           <div>
-            <div class="modal-info-label">Допълнителна информация:</div>
+            <div class="modal-info-label">Ð”Ð¾Ð¿ÑŠÐ»Ð½Ð¸Ñ‚ÐµÐ»Ð½Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ:</div>
             <div class="modal-info-value" id="modalAdditionalInfo"></div>
           </div>
         </div>
@@ -2003,32 +2003,32 @@
   <!-- Exam Info Modal -->
   <div class="modal-overlay" id="examInfoModal">
     <div class="modal-content">
-      <button class="modal-close" onclick="closeExamModal()">×</button>
-      <h2 class="modal-title">Допълнителна информация</h2>
-      
+      <button class="modal-close" onclick="closeExamModal()">Ã—</button>
+      <h2 class="modal-title">Ð”Ð¾Ð¿ÑŠÐ»Ð½Ð¸Ñ‚ÐµÐ»Ð½Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ</h2>
+
       <!-- Calculator Section (hidden by default) -->
       <div id="calculatorSection" style="display: none; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
-        <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 1.1em; text-align: center;">Калкулатор на изпита</h3>
-        
+        <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 1.1em; text-align: center;">ÐšÐ°Ð»ÐºÑƒÐ»Ð°Ñ‚Ð¾Ñ€ Ð½Ð° Ð¸Ð·Ð¿Ð¸Ñ‚Ð°</h3>
+
         <div class="calc-input-group">
-          <label for="calcAnnualGrade">Годишна оценка:</label>
-          <input type="number" id="calcAnnualGrade" step="0.01" min="2" max="6" placeholder="Напр. 5.00">
+          <label for="calcAnnualGrade">Ð“Ð¾Ð´Ð¸ÑˆÐ½Ð° Ð¾Ñ†ÐµÐ½ÐºÐ°:</label>
+          <input type="number" id="calcAnnualGrade" step="0.01" min="2" max="6" placeholder="ÐÐ°Ð¿Ñ€. 5.00">
         </div>
 
         <div class="calc-input-group">
-          <label for="calcTargetGrade">Желана крайна оценка:</label>
+          <label for="calcTargetGrade">Ð–ÐµÐ»Ð°Ð½Ð° ÐºÑ€Ð°Ð¹Ð½Ð° Ð¾Ñ†ÐµÐ½ÐºÐ°:</label>
           <select id="calcTargetGrade">
-            <option value="3.50">3.50 (Добър)</option>
-            <option value="4.50">4.50 (Много добър)</option>
-            <option value="5.50">5.50 (Отличен)</option>
+            <option value="3.50">3.50 (Ð”Ð¾Ð±ÑŠÑ€)</option>
+            <option value="4.50">4.50 (ÐœÐ½Ð¾Ð³Ð¾ Ð´Ð¾Ð±ÑŠÑ€)</option>
+            <option value="5.50">5.50 (ÐžÑ‚Ð»Ð¸Ñ‡ÐµÐ½)</option>
           </select>
         </div>
 
-        <button onclick="calculateExamPoints()" style="width: 100%; padding: 10px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95em; font-weight: bold;">Изчисли</button>
+        <button onclick="calculateExamPoints()" style="width: 100%; padding: 10px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95em; font-weight: bold;">Ð˜Ð·Ñ‡Ð¸ÑÐ»Ð¸</button>
 
         <div id="calcResult" style="margin-top: 15px; padding: 12px; border-radius: 6px; display: none; text-align: center; line-height: 1.5; font-size: 13px;"></div>
       </div>
-      
+
       <div class="modal-info" id="examInfoContent">
         <div class="modal-info-row">
           <div id="examAdditionalInfo" style="width: 100%; line-height: 1.6; color: #374151; word-wrap: break-word; font-size: 14px; overflow: auto; max-height: 70vh;"></div>
@@ -2039,7 +2039,7 @@
 
   <div class="modal-overlay" id="scheduleNotesEditModal" style="display: none;">
     <div class="modal-content schedule-notes-modal-content">
-      <button class="modal-close" type="button" onclick="closeScheduleNotesModal()">×</button>
+      <button class="modal-close" type="button" onclick="closeScheduleNotesModal()">Ã—</button>
       <h2 class="modal-title">Edit Schedule Notes</h2>
       <div id="scheduleNotesModalError" class="schedule-notes-modal-error"></div>
       <textarea id="scheduleNotesEditor" style="width: 100%; min-height: 320px; resize: vertical; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px;"></textarea>
@@ -2054,7 +2054,7 @@
     // Schedule data loaded from Firebase
     let scheduleByWeek = [];
     let currentWeekIndex = 0;
-    
+
     // Global variable to store loaded data for helpers
     window.scheduleData = null;
 
@@ -2169,15 +2169,15 @@
           console.error('Error fetching schedule from Firebase:', error);
           const weekDateRangeEl = document.getElementById('weekDateRange');
           const weekNumberEl = document.getElementById('weekNumber');
-          if (weekDateRangeEl) weekDateRangeEl.textContent = 'Разписание';
-          if (weekNumberEl) weekNumberEl.textContent = 'Грешка при зареждане. Моля, опитайте по-късно.';
+          if (weekDateRangeEl) weekDateRangeEl.textContent = 'Ð Ð°Ð·Ð¿Ð¸ÑÐ°Ð½Ð¸Ðµ';
+          if (weekNumberEl) weekNumberEl.textContent = 'Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ. ÐœÐ¾Ð»Ñ, Ð¾Ð¿Ð¸Ñ‚Ð°Ð¹Ñ‚Ðµ Ð¿Ð¾-ÐºÑŠÑÐ½Ð¾.';
         }
       }
 
       // After timetable is rendered, refresh notes from Firebase (non-blocking)
       refreshScheduleNotesFromFirebase();
     });
-    
+
     const scheduleNotesDbRef = firebase.database().ref('scheduleNotes/content');
     let scheduleNotesState = {
       content: '',
@@ -2227,9 +2227,9 @@
     }
 
     function formatLastEdited(lastEditedAt) {
-      if (!lastEditedAt) return 'Last edit: —';
+      if (!lastEditedAt) return 'Last edit: â€”';
       const date = new Date(lastEditedAt);
-      if (Number.isNaN(date.getTime())) return 'Last edit: —';
+      if (Number.isNaN(date.getTime())) return 'Last edit: â€”';
       const formatted = date.toLocaleString('bg-BG', {
         day: '2-digit',
         month: '2-digit',
@@ -2253,7 +2253,7 @@
           .map(line => `<h2>${marked.parseInline(line)}</h2>`)
           .join('');
       } else {
-        infoContent.innerHTML = '<p>Няма въведени бележки. Натисни <strong>Edit</strong>, за да добавиш.</p>';
+        infoContent.innerHTML = '<p>ÐÑÐ¼Ð° Ð²ÑŠÐ²ÐµÐ´ÐµÐ½Ð¸ Ð±ÐµÐ»ÐµÐ¶ÐºÐ¸. ÐÐ°Ñ‚Ð¸ÑÐ½Ð¸ <strong>Edit</strong>, Ð·Ð° Ð´Ð° Ð´Ð¾Ð±Ð°Ð²Ð¸Ñˆ.</p>';
       }
     }
 
@@ -2263,9 +2263,9 @@
 
       const timeText = formatLastEdited(lastEditedAt).replace('Last edit: ', '');
       if (lastEditedBy && lastEditedAt) {
-        lastEditEl.textContent = `Last edit: ${lastEditedBy} · ${timeText}`;
+        lastEditEl.textContent = `Last edit: ${lastEditedBy} Â· ${timeText}`;
       } else {
-        lastEditEl.textContent = 'Last edit: —';
+        lastEditEl.textContent = 'Last edit: â€”';
       }
     }
 
@@ -2397,21 +2397,21 @@
         console.error('Error refreshing schedule notes from Firebase:', error);
       }
     }
-    
+
     // Find the current week index based on today's date
     function findCurrentWeekIndex() {
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Reset time to midnight
-      
+
       const semConfig = getSemesterConfigForDate(today);
-      
+
       // Special Check: If today is in an Exam Period, force find the exam week
       if (semConfig && semConfig.examPeriod) {
           const examStart = new Date(semConfig.examPeriod.start);
           const examEnd = new Date(semConfig.examPeriod.end);
           examStart.setHours(0,0,0,0);
           examEnd.setHours(0,0,0,0);
-          
+
           if (today >= examStart && today <= examEnd) {
               // Find the week that starts on (or closest before?) the exam start
               // The weeks array usually has an entry for the Exam Start date.
@@ -2420,20 +2420,20 @@
                   wStart.setHours(0,0,0,0);
                   return wStart.getTime() === examStart.getTime();
               });
-              
+
               if (examStartIndex !== -1) {
                   return examStartIndex;
               }
           }
       }
-      
+
       // Check if today is in Christmas break
       if (semConfig && semConfig.christmasBreak) {
         const christmasStart = new Date(semConfig.christmasBreak.start);
         const christmasEnd = new Date(semConfig.christmasBreak.end);
         christmasStart.setHours(0, 0, 0, 0);
         christmasEnd.setHours(0, 0, 0, 0);
-        
+
         if (today >= christmasStart && today <= christmasEnd) {
              // Return index of the week that contains or precedes the break
              // Or better, if we have a "Christmas" week entry (we do: Dec 24)
@@ -2445,11 +2445,11 @@
              if (xmasIndex !== -1) return xmasIndex;
         }
       }
-      
+
       // Check if today is Saturday (6) or Sunday (0)
       const dayOfWeek = today.getDay();
       let targetDate = new Date(today);
-      
+
       if (dayOfWeek === 0) {
         // Sunday - show next week (add 1 day to Monday)
         targetDate.setDate(targetDate.getDate() + 1);
@@ -2457,19 +2457,19 @@
         // Saturday - show next week (add 2 days to Monday)
         targetDate.setDate(targetDate.getDate() + 2);
       }
-      
+
       for (let i = 0; i < scheduleByWeek.length; i++) {
         const weekStart = new Date(scheduleByWeek[i].startDate);
         weekStart.setHours(0, 0, 0, 0);
-        
+
         const weekEnd = new Date(weekStart);
         weekEnd.setDate(weekEnd.getDate() + 4); // End of week (Friday)
-        
+
         if (targetDate >= weekStart && targetDate <= weekEnd) {
           return i;
         }
       }
-      
+
       // If today is before first week, return 0
       if (scheduleByWeek.length > 0) {
         const firstWeek = new Date(scheduleByWeek[0].startDate);
@@ -2477,19 +2477,19 @@
           return 0;
         }
       }
-      
+
       // If today is after all weeks, return last week
       return Math.max(0, scheduleByWeek.length - 1);
     }
-    
+
     // Generate schedule for all weeks from template
     function generateWeeksFromTemplate(config) {
       const weeks = [];
       const overrides = config.overrides || {};
       const addedExamPeriods = new Set(); // Track which exam periods we've already added
-      
+
       const processedTemplates = {};
-      
+
       // Check if templates object exists AND has keys. If empty, try legacy fallback.
       if (config.templates && Object.keys(config.templates).length > 0) {
         // New structure
@@ -2510,7 +2510,7 @@
       config.weeks.forEach((week, index) => {
         const weekNumber = index + 1;
         const weekStartDateStr = week.startDate;
-        
+
         // Determine semester using string comparison
         let semesterKey = 'winter';
         if (config.semesters) {
@@ -2527,13 +2527,13 @@
                  semesterKey = 'summer';
              }
         }
-        
+
         // Check if this week overlaps with an exam period
         let matchingExamPeriod = null;
         const weekDate = new Date(weekStartDateStr);
         const weekEndDate = new Date(weekDate);
         weekEndDate.setDate(weekEndDate.getDate() + 6); // Week spans Monday to Sunday
-        
+
         if (config.semesters) {
             for (const semKey in config.semesters) {
                 const sem = config.semesters[semKey];
@@ -2544,7 +2544,7 @@
                     examEnd.setHours(0, 0, 0, 0);
                     weekDate.setHours(0, 0, 0, 0);
                     weekEndDate.setHours(0, 0, 0, 0);
-                    
+
                     // Check if week overlaps with exam period at all
                     if (weekDate <= examEnd && weekEndDate >= examStart) {
                         matchingExamPeriod = { key: semKey, ...sem.examPeriod };
@@ -2553,7 +2553,7 @@
                 }
             }
         }
-        
+
         // Skip weeks that overlap with exam periods - but add the exam period once
         if (matchingExamPeriod) {
             const examKey = `${matchingExamPeriod.start}_${matchingExamPeriod.end}`;
@@ -2570,32 +2570,32 @@
             }
             return; // Skip this week
         }
-        
+
         const currentTemplate = processedTemplates[semesterKey] || [];
         let schedule = JSON.parse(JSON.stringify(currentTemplate)); // Deep copy
-        
+
         // Apply overrides for this week if they exist
         if (overrides[weekNumber]) {
           overrides[weekNumber].forEach(override => {
             if (override.removeDay) {
               schedule = schedule.filter(item => item.day !== override.removeDay);
             } else if (override.remove) {
-              schedule = schedule.filter(item => 
-                !(item.day === override.day && 
-                  item.subject === override.subject && 
+              schedule = schedule.filter(item =>
+                !(item.day === override.day &&
+                  item.subject === override.subject &&
                   item.startTime === override.startTime)
               );
             } else if (override.changes) {
               if (override.changes.removed === true) {
-                schedule = schedule.filter(item => 
-                  !(item.day === override.day && 
-                    item.subject === override.subject && 
+                schedule = schedule.filter(item =>
+                  !(item.day === override.day &&
+                    item.subject === override.subject &&
                     item.startTime === override.startTime)
                 );
               } else {
-                const itemIndex = schedule.findIndex(item => 
-                  item.day === override.day && 
-                  item.subject === override.subject && 
+                const itemIndex = schedule.findIndex(item =>
+                  item.day === override.day &&
+                  item.subject === override.subject &&
                   item.startTime === override.startTime
                 );
                 if (itemIndex !== -1) {
@@ -2607,7 +2607,7 @@
             }
           });
         }
-        
+
         weeks.push({
           weekNumber: weekNumber,
           startDate: week.startDate,
@@ -2616,10 +2616,10 @@
           type: 'normal'
         });
       });
-      
+
       return weeks;
     }
-    
+
     // Helper to get semester config for a specific date
     function getSemesterConfigForDate(dateStr) {
       // Normalize date string to YYYY-MM-DD for string comparison if passed as Date object or timestamp
@@ -2632,14 +2632,14 @@
       }
 
       const data = window.scheduleData;
-      
+
       if (!data) return null;
-      
+
       if (data.semesters) {
         // Sort keys by start date to find the correct range
         const keys = Object.keys(data.semesters).sort((a, b) => data.semesters[a].startDate.localeCompare(data.semesters[b].startDate));
         let selectedSem = data.semesters.winter; // Default to first/winter
-        
+
         for (const key of keys) {
             if (dateString >= data.semesters[key].startDate) {
                 selectedSem = data.semesters[key];
@@ -2647,7 +2647,7 @@
         }
         return selectedSem;
       }
-      
+
       return data.semester; // Legacy fallback
     }
 
@@ -2655,43 +2655,43 @@
     function getWeekNumberFromSemesterStart(dateStr) {
       const semConfig = getSemesterConfigForDate(dateStr);
       if (!semConfig) return 1;
-      
+
       const weekDate = new Date(dateStr);
       const semesterStart = new Date(semConfig.startDate);
-      
+
       // Calculate difference in days
       const diffTime = weekDate - semesterStart;
       const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-      
+
       // Calculate week number (starting from 1)
       const weekNum = Math.floor(diffDays / 7) + 1;
       return weekNum > 0 ? weekNum : 1;
     }
-    
+
     // Check if date is in Christmas break
     function isChristmasBreak(dateStr) {
       const semConfig = getSemesterConfigForDate(dateStr);
       if (!semConfig || !semConfig.christmasBreak) return false;
-      
+
       const date = new Date(dateStr);
       const breakStart = new Date(semConfig.christmasBreak.start);
       const breakEnd = new Date(semConfig.christmasBreak.end);
-      
+
       return date >= breakStart && date <= breakEnd;
     }
-    
+
     // Check if date is in exam period
     function isExamPeriod(dateStr) {
       const semConfig = getSemesterConfigForDate(dateStr);
       if (!semConfig || !semConfig.examPeriod) return false;
-      
+
       const date = new Date(dateStr);
       const examStart = new Date(semConfig.examPeriod.start);
       const examEnd = new Date(semConfig.examPeriod.end);
-      
+
       return date >= examStart && date <= examEnd;
     }
-    
+
     // Get week type (normal, christmas, exam)
     function getWeekType(dateStr) {
       if (isChristmasBreak(dateStr)) return 'christmas';
@@ -2809,7 +2809,7 @@
       let startHour = Math.floor(earliestMin / 60);
 
       // Round up end to next :30 increment
-      // If ends before XX:30, snap to XX:30. 
+      // If ends before XX:30, snap to XX:30.
       // If ends at or after XX:30, snap to (XX+1):30.
       let baseHour = Math.floor(latestMin / 60);
       let mins = latestMin % 60;
@@ -2819,51 +2819,51 @@
       } else {
           endHour = baseHour + 1.5;
       }
-      
+
       return { startHour, endHour };
     }
 
-    // Get current day of week (ПОН, ВТ, etc.) or Monday if weekend
+    // Get current day of week (ÐŸÐžÐ, Ð’Ð¢, etc.) or Monday if weekend
     // Returns null if we're viewing a different week than current
     function getCurrentDay() {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      
+
       // Check if today is in the currently displayed week
       const currentWeek = scheduleByWeek[currentWeekIndex];
       if (!currentWeek) return null;
-      
+
       const weekStart = new Date(currentWeek.startDate);
       weekStart.setHours(0, 0, 0, 0);
       const weekEnd = new Date(weekStart);
       weekEnd.setDate(weekEnd.getDate() + 6); // End of week (Sunday)
-      
+
       // If today is not in this week, don't highlight anything
       if (today < weekStart || today > weekEnd) {
         return null;
       }
-      
+
       const dayIndex = today.getDay(); // 0=Sunday, 1=Monday, etc.
-      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
-      
+      const days = ['ÐŸÐžÐ', 'Ð’Ð¢', 'Ð¡Ð ', 'Ð§Ð•Ð¢', 'ÐŸÐ•Ð¢'];
+
       // If Saturday (6) or Sunday (0), return Monday (for current week only)
       if (dayIndex === 0 || dayIndex === 6) {
-        return 'ПОН';
+        return 'ÐŸÐžÐ';
       }
-      
+
       // Otherwise return the current day (Monday=1 -> index 0)
       return days[dayIndex - 1];
     }
 
     function renderSchedule() {
       const grid = document.getElementById('scheduleGrid');
-      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
+      const days = ['ÐŸÐžÐ', 'Ð’Ð¢', 'Ð¡Ð ', 'Ð§Ð•Ð¢', 'ÐŸÐ•Ð¢'];
       const currentDay = getCurrentDay();
 
       // Update Dates in Headers
       const headerCells = grid.querySelectorAll('.header-cell:not(.time-header)');
       const currentWeek = scheduleByWeek[currentWeekIndex];
-      
+
       if (!currentWeek) return; // Should not happen if data loaded
 
       // Update Header Dates
@@ -2877,7 +2877,7 @@
               const dateStr = `${d}.${m < 10 ? '0' + m : m}`;
               // Using divs for flex column layout
               cell.innerHTML = `<div>${days[i]}</div><div style="font-weight:400; font-size: 0.9em; opacity: 0.9; margin-top: 2px;">${dateStr}</div>`;
-              
+
               // Highlight current day
               if (days[i] === currentDay) {
                   cell.style.backgroundColor = 'var(--col-pine)'; // Darker highlight
@@ -2909,7 +2909,7 @@
 
         // Clear previous events only (keep static background grid for smoother updates)
         grid.querySelectorAll('.event-card').forEach(el => el.remove());
-      
+
       const stepMinutes = 15;
       const totalMinutes = (endHour - startHour) * 60;
       const totalRows = totalMinutes / stepMinutes;
@@ -2917,7 +2917,7 @@
       // 2. Render Events
       scheduleData.forEach(ev => {
           if (!ev.startTime || !ev.endTime) return;
-          if (ev.startTime === '00:00') return; 
+          if (ev.startTime === '00:00') return;
 
           const dayIndex = days.indexOf(ev.day);
           if (dayIndex === -1) return;
@@ -2927,33 +2927,33 @@
           const duration = endMins - startMins;
 
           const startOffset = startMins - (startHour * 60);
-          
+
           // Row Calculation
           const slotIndex = Math.floor(startOffset / stepMinutes);
           const remainderMinutes = startOffset % stepMinutes;
-          
+
           // Revert to +4 offset
           const rowStart = Math.max(4, slotIndex + 4);
           const rowSpan = Math.ceil(duration / stepMinutes);
-          
+
           const pixelOffsetRatio = remainderMinutes / stepMinutes;
 
           const el = document.createElement('div');
-          
+
           const typeMap = {
-            'Упражнение': 'type-exercise',
-            'Лекция': 'type-lecture',
-            'Важна лекция': 'type-important-lecture',
+            'Ð£Ð¿Ñ€Ð°Ð¶Ð½ÐµÐ½Ð¸Ðµ': 'type-exercise',
+            'Ð›ÐµÐºÑ†Ð¸Ñ': 'type-lecture',
+            'Ð’Ð°Ð¶Ð½Ð° Ð»ÐµÐºÑ†Ð¸Ñ': 'type-important-lecture',
             'ImportantLecture': 'type-important-lecture',
-            'Колоквиум': 'type-exam',
-            'Поправка на Колоквиум': 'type-makeup',
-            'Тест': 'type-test'
+            'ÐšÐ¾Ð»Ð¾ÐºÐ²Ð¸ÑƒÐ¼': 'type-exam',
+            'ÐŸÐ¾Ð¿Ñ€Ð°Ð²ÐºÐ° Ð½Ð° ÐšÐ¾Ð»Ð¾ÐºÐ²Ð¸ÑƒÐ¼': 'type-makeup',
+            'Ð¢ÐµÑÑ‚': 'type-test'
           };
           const typeClass = typeMap[ev.type] || 'type-lecture';
-          
+
           el.className = `event-card ${typeClass}`;
           if (ev.highlight) el.classList.add('highlight');
-          
+
           // Apply dynamic scaling classes based on duration (rowSpan)
           if (rowSpan === 1) {
               el.classList.add('tiny-event');
@@ -2983,10 +2983,10 @@
                 el.style.setProperty('--inline-time-size-mobile', `${mobileTimeSize.toFixed(2)}px`);
               }
 
-          el.style.gridColumn = dayIndex + 2; 
+          el.style.gridColumn = dayIndex + 2;
           el.style.gridRowStart = rowStart;
           el.style.gridRowEnd = `span ${rowSpan}`;
-          
+
           // Precision positioning using relative top
           if (pixelOffsetRatio > 0) {
              el.style.position = 'relative';
@@ -2999,7 +2999,7 @@
             ? (ev.subject || ev.fullName)
             : (ev.fullName || ev.subject);
           const titleMobile = ev.subject;
-          
+
           // --- Smart Logic for Building/Room (Handles Old and New Schema) ---
           let b = ev.building;
           let r = ev.room;
@@ -3008,7 +3008,7 @@
               b = ev.room;
               r = ev.floor;
           }
-          
+
           // Construct location HTML: Building \n Room for desktop
           const locationHtml = `
               ${b ? `<div>${b}</div>` : ''}
@@ -3023,7 +3023,7 @@
               <div class="event-time">${ev.startTime}-${ev.endTime}</div>
               <div class="event-location">${locationHtml}</div>
           `;
-          
+
           el.onclick = () => openModal(ev);
           grid.appendChild(el);
       });
@@ -3033,7 +3033,7 @@
       const grid = document.getElementById('scheduleGrid');
       if (!grid) return;
 
-      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
+      const days = ['ÐŸÐžÐ', 'Ð’Ð¢', 'Ð¡Ð ', 'Ð§Ð•Ð¢', 'ÐŸÐ•Ð¢'];
       const stepMinutes = 15;
       const totalMinutes = (endHour - startHour) * 60;
       const totalRows = totalMinutes / stepMinutes;
@@ -3091,7 +3091,7 @@
       if (!grid) return;
 
       const headerCells = grid.querySelectorAll('.header-cell:not(.time-header)');
-      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
+      const days = ['ÐŸÐžÐ', 'Ð’Ð¢', 'Ð¡Ð ', 'Ð§Ð•Ð¢', 'ÐŸÐ•Ð¢'];
       headerCells.forEach((cell, i) => {
         cell.innerHTML = `<div>${days[i]}</div><div style="font-weight:400; font-size: 0.9em; opacity: 0.55; margin-top: 2px;">--.--</div>`;
         cell.style.backgroundColor = '';
@@ -3101,7 +3101,7 @@
       renderGridBackground(7, 20, null);
       gridBackgroundSignature = '7-20-none';
     }
-    
+
     // Change week
     function changeWeek(direction) {
       const newIndex = currentWeekIndex + direction;
@@ -3111,61 +3111,61 @@
         updateWeekInfo();
       }
     }
-    
+
     // Update week information display
     function updateWeekInfo() {
       const currentWeek = scheduleByWeek[currentWeekIndex];
       if (!currentWeek) return;
-      
+
       const semesterConfig = getSemesterConfigForDate(currentWeek.startDate);
 
       // Parse start date
       const startDate = new Date(currentWeek.startDate);
       let endDate = new Date(startDate);
-      
+
       // Check if this is week 15 (last week before Christmas) - only show Mon-Tue
       const weekNumber = currentWeekIndex + 1;
       if (weekNumber === 15) {
-        endDate.setDate(endDate.getDate() + 1); // Only Tuesday (понеделник + 1 ден = вторник)
+        endDate.setDate(endDate.getDate() + 1); // Only Tuesday (Ð¿Ð¾Ð½ÐµÐ´ÐµÐ»Ð½Ð¸Ðº + 1 Ð´ÐµÐ½ = Ð²Ñ‚Ð¾Ñ€Ð½Ð¸Ðº)
       } else {
-        endDate.setDate(endDate.getDate() + 6); // Sunday (понеделник + 6 дни = неделя)
+        endDate.setDate(endDate.getDate() + 6); // Sunday (Ð¿Ð¾Ð½ÐµÐ´ÐµÐ»Ð½Ð¸Ðº + 6 Ð´Ð½Ð¸ = Ð½ÐµÐ´ÐµÐ»Ñ)
       }
-      
+
       // Get week type - use the type from the week object itself (already calculated during generation)
       const weekType = currentWeek.type || getWeekType(currentWeek.startDate);
-      
+
       // Format dates
-      const months = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 
-                      'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
-      
+      const months = ['ÑÐ½ÑƒÐ°Ñ€Ð¸', 'Ñ„ÐµÐ²Ñ€ÑƒÐ°Ñ€Ð¸', 'Ð¼Ð°Ñ€Ñ‚', 'Ð°Ð¿Ñ€Ð¸Ð»', 'Ð¼Ð°Ð¹', 'ÑŽÐ½Ð¸',
+                      'ÑŽÐ»Ð¸', 'Ð°Ð²Ð³ÑƒÑÑ‚', 'ÑÐµÐ¿Ñ‚ÐµÐ¼Ð²Ñ€Ð¸', 'Ð¾ÐºÑ‚Ð¾Ð¼Ð²Ñ€Ð¸', 'Ð½Ð¾ÐµÐ¼Ð²Ñ€Ð¸', 'Ð´ÐµÐºÐµÐ¼Ð²Ñ€Ð¸'];
+
       const startDay = startDate.getDate();
       const startMonth = months[startDate.getMonth()];
       const endDay = endDate.getDate();
       const endMonth = months[endDate.getMonth()];
       const year = startDate.getFullYear();
-      
+
       // Calculate actual week number from semester start
       const actualWeekNumber = getWeekNumberFromSemesterStart(currentWeek.startDate);
-      
+
       // Update display based on week type
       const weekDateRangeEl = document.getElementById('weekDateRange');
       const weekNumberEl = document.getElementById('weekNumber');
-      
+
       // Get special screens
       const christmasScreen = document.getElementById('christmasScreen');
       const examScreen = document.getElementById('examScreen');
       const scheduleGrid = document.getElementById('scheduleGrid');
-      
+
       if (weekType === 'christmas') {
         // Christmas break - show special screen
-        weekDateRangeEl.textContent = '🎄 Коледна ваканция';
+        weekDateRangeEl.textContent = 'ðŸŽ„ ÐšÐ¾Ð»ÐµÐ´Ð½Ð° Ð²Ð°ÐºÐ°Ð½Ñ†Ð¸Ñ';
         weekDateRangeEl.style.color = '#dc2626';
-        
+
         // Hide table, show Christmas screen
         scheduleGrid.style.display = 'none';
         examScreen.style.display = 'none';
         christmasScreen.style.display = 'block';
-        
+
         // Show full Christmas break range
         if (semesterConfig && semesterConfig.christmasBreak) {
             const christmasStart = new Date(semesterConfig.christmasBreak.start);
@@ -3176,28 +3176,28 @@
             const christmasEndDay = christmasEnd.getDate();
             const christmasEndMonth = months[christmasEnd.getMonth()];
             const christmasEndYear = christmasEnd.getFullYear();
-            
+
             if (christmasStartMonth === christmasEndMonth && christmasStartYear === christmasEndYear) {
             weekNumberEl.textContent = `${christmasStartDay} - ${christmasEndDay} ${christmasStartMonth} ${christmasStartYear}`;
             } else {
             weekNumberEl.textContent = `${christmasStartDay} ${christmasStartMonth} ${christmasStartYear} - ${christmasEndDay} ${christmasEndMonth} ${christmasEndYear}`;
             }
         }
-        
+
         return; // Skip normal rendering
       } else if (weekType === 'exam') {
         // Exam period - show special screen
-        weekDateRangeEl.textContent = 'Изпитна сесия';
+        weekDateRangeEl.textContent = 'Ð˜Ð·Ð¿Ð¸Ñ‚Ð½Ð° ÑÐµÑÐ¸Ñ';
         weekDateRangeEl.style.color = '#588157';
-        
+
         // Hide table, show exam screen
         scheduleGrid.style.display = 'none';
         christmasScreen.style.display = 'none';
         examScreen.style.display = 'block';
-        
+
         // Render exams
         renderExams(semesterConfig ? semesterConfig.examPeriod : null);
-        
+
         // Show full month range
         if (semesterConfig && semesterConfig.examPeriod) {
             const examStart = new Date(semesterConfig.examPeriod.start);
@@ -3206,61 +3206,61 @@
             const examStartMonth = months[examStart.getMonth()];
             const examEndDay = examEnd.getDate();
             const examEndMonth = months[examEnd.getMonth()];
-            
+
             if (examStartMonth === examEndMonth) {
             weekNumberEl.textContent = `${examStartDay} - ${examEndDay} ${examStartMonth} ${year}`;
             } else {
             weekNumberEl.textContent = `${examStartDay} ${examStartMonth} - ${examEndDay} ${examEndMonth} ${year}`;
             }
         }
-        
+
         return; // Skip normal rendering
       } else {
         // Normal week - show table, hide special screens
         scheduleGrid.style.display = 'grid';
         christmasScreen.style.display = 'none';
         examScreen.style.display = 'none';
-        
+
         // Normal week - show week number from semester start
-        weekDateRangeEl.textContent = `Седмица ${actualWeekNumber}`;
+        weekDateRangeEl.textContent = `Ð¡ÐµÐ´Ð¼Ð¸Ñ†Ð° ${actualWeekNumber}`;
         weekDateRangeEl.style.color = '#588157';
       }
-      
+
       // Show date range
       if (startMonth === endMonth) {
-        weekNumberEl.textContent = 
+        weekNumberEl.textContent =
           `${startDay} - ${endDay} ${startMonth} ${year}`;
       } else {
-        weekNumberEl.textContent = 
+        weekNumberEl.textContent =
           `${startDay} ${startMonth} - ${endDay} ${endMonth} ${year}`;
       }
-      
+
       // Update dates in table header
       updateTableHeaderDates(startDate);
-      
+
       // Update button states
       document.getElementById('prevWeekBtn').disabled = currentWeekIndex === 0;
       document.getElementById('nextWeekBtn').disabled = currentWeekIndex === scheduleByWeek.length - 1;
     }
-    
+
     // Update dates in table header
     function updateTableHeaderDates(startDate) {
       const headerCells = document.querySelectorAll('#scheduleGrid .header-cell:not(.time-header)');
-      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
+      const days = ['ÐŸÐžÐ', 'Ð’Ð¢', 'Ð¡Ð ', 'Ð§Ð•Ð¢', 'ÐŸÐ•Ð¢'];
       const currentDay = getCurrentDay();
 
       if (!headerCells.length) return;
-      
+
       for (let i = 0; i < Math.min(5, headerCells.length); i++) {
         const date = new Date(startDate);
         date.setDate(date.getDate() + i);
-        
+
         const day = date.getDate();
         const month = date.getMonth() + 1; // Month is 0-indexed
         const dateStr = `${day}.${month < 10 ? '0' + month : month}`;
-        
+
         headerCells[i].innerHTML = `<div>${days[i]}</div><div style="font-weight:400; font-size: 0.9em; opacity: 0.9; margin-top: 2px;">${dateStr}</div>`;
-        
+
         // Add current-day class if this is today
         if (days[i] === currentDay) {
           headerCells[i].style.backgroundColor = 'var(--col-pine)';
@@ -3278,13 +3278,13 @@
       const examAdditionalInfo = document.getElementById('examAdditionalInfo');
       const infoHtml = resolveAdditionalInfoHtml(exam);
       exam.additionalInfoHtml = infoHtml;
-      
+
       if (infoHtml) {
         examAdditionalInfo.innerHTML = infoHtml;
       } else {
-        examAdditionalInfo.innerHTML = 'Няма добавена информация.';
+        examAdditionalInfo.innerHTML = 'ÐÑÐ¼Ð° Ð´Ð¾Ð±Ð°Ð²ÐµÐ½Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ.';
       }
-      
+
       // Show/hide calculator based on flag
       const calculatorSection = document.getElementById('calculatorSection');
       if (exam.hasCalculatorPharmacology1) {
@@ -3292,7 +3292,7 @@
       } else {
         calculatorSection.style.display = 'none';
       }
-      
+
       document.getElementById('examInfoModal').classList.add('open');
       document.body.style.overflow = 'hidden';
     }
@@ -3323,14 +3323,14 @@
       const resultDiv = document.getElementById('calcResult');
 
       if (isNaN(annual) || annual < 2 || annual > 6) {
-        resultDiv.textContent = 'Моля, въведете валидна годишна оценка между 2 и 6.';
+        resultDiv.textContent = 'ÐœÐ¾Ð»Ñ, Ð²ÑŠÐ²ÐµÐ´ÐµÑ‚Ðµ Ð²Ð°Ð»Ð¸Ð´Ð½Ð° Ð³Ð¾Ð´Ð¸ÑˆÐ½Ð° Ð¾Ñ†ÐµÐ½ÐºÐ° Ð¼ÐµÐ¶Ð´Ñƒ 2 Ð¸ 6.';
         resultDiv.className = 'warning';
         resultDiv.style.display = 'block';
         return;
       }
 
       const neededExamGrade = (target - (0.3 * annual)) / 0.7;
-      
+
       let foundPoints = "";
       for (let entry of scoreScale) {
         if (entry.val >= neededExamGrade) {
@@ -3342,14 +3342,14 @@
       resultDiv.style.display = "block";
       if (foundPoints === "" && neededExamGrade > 6) {
         resultDiv.className = "warning";
-        resultDiv.innerHTML = `За съжаление, целта от <strong>${target.toFixed(2)}</strong> е математически недостижима с годишна оценка ${annual.toFixed(2)}.`;
+        resultDiv.innerHTML = `Ð—Ð° ÑÑŠÐ¶Ð°Ð»ÐµÐ½Ð¸Ðµ, Ñ†ÐµÐ»Ñ‚Ð° Ð¾Ñ‚ <strong>${target.toFixed(2)}</strong> Ðµ Ð¼Ð°Ñ‚ÐµÐ¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸ Ð½ÐµÐ´Ð¾ÑÑ‚Ð¸Ð¶Ð¸Ð¼Ð° Ñ Ð³Ð¾Ð´Ð¸ÑˆÐ½Ð° Ð¾Ñ†ÐµÐ½ÐºÐ° ${annual.toFixed(2)}.`;
       } else if (neededExamGrade <= 3.00) {
         resultDiv.className = "success";
-        resultDiv.innerHTML = `Тъй като годишната Ви оценка е висока, Ви трябват само минималните <strong>60 точки</strong>, за да преминете изпита.`;
+        resultDiv.innerHTML = `Ð¢ÑŠÐ¹ ÐºÐ°Ñ‚Ð¾ Ð³Ð¾Ð´Ð¸ÑˆÐ½Ð°Ñ‚Ð° Ð’Ð¸ Ð¾Ñ†ÐµÐ½ÐºÐ° Ðµ Ð²Ð¸ÑÐ¾ÐºÐ°, Ð’Ð¸ Ñ‚Ñ€ÑÐ±Ð²Ð°Ñ‚ ÑÐ°Ð¼Ð¾ Ð¼Ð¸Ð½Ð¸Ð¼Ð°Ð»Ð½Ð¸Ñ‚Ðµ <strong>60 Ñ‚Ð¾Ñ‡ÐºÐ¸</strong>, Ð·Ð° Ð´Ð° Ð¿Ñ€ÐµÐ¼Ð¸Ð½ÐµÑ‚Ðµ Ð¸Ð·Ð¿Ð¸Ñ‚Ð°.`;
       } else {
         const actualScaleGrade = scoreScale.find(e => e.pts === foundPoints).val;
         resultDiv.className = "success";
-        resultDiv.innerHTML = `За крайна оценка <strong>${target.toFixed(2)}</strong>,<br>на изпита Ви трябват минимум:<br><span style="font-size: 1.3em;"><strong>${foundPoints} точки</strong></span><br>(Това съответства на <strong>${actualScaleGrade.toFixed(2)}</strong> от теста на изпита)`;
+        resultDiv.innerHTML = `Ð—Ð° ÐºÑ€Ð°Ð¹Ð½Ð° Ð¾Ñ†ÐµÐ½ÐºÐ° <strong>${target.toFixed(2)}</strong>,<br>Ð½Ð° Ð¸Ð·Ð¿Ð¸Ñ‚Ð° Ð’Ð¸ Ñ‚Ñ€ÑÐ±Ð²Ð°Ñ‚ Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼:<br><span style="font-size: 1.3em;"><strong>${foundPoints} Ñ‚Ð¾Ñ‡ÐºÐ¸</strong></span><br>(Ð¢Ð¾Ð²Ð° ÑÑŠÐ¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²Ð° Ð½Ð° <strong>${actualScaleGrade.toFixed(2)}</strong> Ð¾Ñ‚ Ñ‚ÐµÑÑ‚Ð° Ð½Ð° Ð¸Ð·Ð¿Ð¸Ñ‚Ð°)`;
       }
     }
 
@@ -3375,15 +3375,15 @@
       const displayName = event.fullName || event.subject;
       document.getElementById('modalSubject').textContent = displayName;
       document.getElementById('modalType').textContent = event.type || '-';
-      
+
       const displayTime = event.time || formatTime(event.startTime, event.endTime);
       document.getElementById('modalTime').textContent = displayTime;
-      
+
       // --- Smart Logic for Building/Room (Handles Old and New Schema) ---
       let building = event.building;
       let room = event.room;
       let floor = event.floor;
-      
+
       // If building is missing but floor exists, it's the old schema:
       // old room -> building, old floor -> room
       if (!building && floor) {
@@ -3391,32 +3391,32 @@
           room = event.floor;
           floor = null; // Floor is now integrated into room in old entries
       }
-      
-      document.getElementById('modalBuilding').textContent = building || 'Не е посочена';
-      document.getElementById('modalRoom').textContent = room || 'Не е посочена';
-      
+
+      document.getElementById('modalBuilding').textContent = building || 'ÐÐµ Ðµ Ð¿Ð¾ÑÐ¾Ñ‡ÐµÐ½Ð°';
+      document.getElementById('modalRoom').textContent = room || 'ÐÐµ Ðµ Ð¿Ð¾ÑÐ¾Ñ‡ÐµÐ½Ð°';
+
       // Only show floor if it's explicitly provided (new/separate field cases)
       if (floor && floor !== '-' && floor !== '') {
-        document.getElementById('modalFloorText').textContent = ` (Етаж ${floor})`;
+        document.getElementById('modalFloorText').textContent = ` (Ð•Ñ‚Ð°Ð¶ ${floor})`;
       } else {
         document.getElementById('modalFloorText').textContent = '';
       }
-      
-      document.getElementById('modalTeacher').textContent = event.teacher || 'Не е посочен';
-      
+
+      document.getElementById('modalTeacher').textContent = event.teacher || 'ÐÐµ Ðµ Ð¿Ð¾ÑÐ¾Ñ‡ÐµÐ½';
+
       const additionalInfoElement = document.getElementById('modalAdditionalInfo');
       const additionalInfoRow = document.getElementById('modalAdditionalInfoRow');
 
       const infoHtml = resolveAdditionalInfoHtml(event);
       event.additionalInfoHtml = infoHtml;
-      
+
       if (infoHtml) {
         additionalInfoElement.innerHTML = infoHtml;
         additionalInfoRow.style.display = 'flex';
       } else {
         additionalInfoRow.style.display = 'none';
       }
-      
+
       document.getElementById('modalOverlay').classList.add('open');
       document.body.style.overflow = 'hidden';
     }    // Close modal
@@ -3424,7 +3424,7 @@
       document.getElementById('modalOverlay').classList.remove('open');
       document.body.style.overflow = '';
     }
-    
+
     function handleLogout() {
       localStorage.removeItem('loggedInUser');
       window.location.href = 'login.html';
@@ -3476,19 +3476,19 @@
     function renderExams(examPeriod) {
       const examsList = document.getElementById('examsList');
       if (!scheduleData.exams || scheduleData.exams.length === 0) {
-        examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">Няма информация за изпити.</p>';
+        examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">ÐÑÐ¼Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ Ð·Ð° Ð¸Ð·Ð¿Ð¸Ñ‚Ð¸.</p>';
         return;
       }
-      
+
       let examsToShow = scheduleData.exams;
-      
+
       // Filter if period is provided
       if (examPeriod && examPeriod.start && examPeriod.end) {
           const start = new Date(examPeriod.start);
           const end = new Date(examPeriod.end);
           start.setHours(0,0,0,0);
           end.setHours(0,0,0,0);
-          
+
           examsToShow = examsToShow.filter(exam => {
               if (!exam.examDate) return false;
               const d = new Date(exam.examDate);
@@ -3496,15 +3496,15 @@
               return d >= start && d <= end;
           });
       }
-      
+
       if (examsToShow.length === 0) {
-          examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">Няма изпити за този период.</p>';
+          examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">ÐÑÐ¼Ð° Ð¸Ð·Ð¿Ð¸Ñ‚Ð¸ Ð·Ð° Ñ‚Ð¾Ð·Ð¸ Ð¿ÐµÑ€Ð¸Ð¾Ð´.</p>';
           return;
       }
-      
-      const months = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 
-                      'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
-      
+
+      const months = ['ÑÐ½ÑƒÐ°Ñ€Ð¸', 'Ñ„ÐµÐ²Ñ€ÑƒÐ°Ñ€Ð¸', 'Ð¼Ð°Ñ€Ñ‚', 'Ð°Ð¿Ñ€Ð¸Ð»', 'Ð¼Ð°Ð¹', 'ÑŽÐ½Ð¸',
+                      'ÑŽÐ»Ð¸', 'Ð°Ð²Ð³ÑƒÑÑ‚', 'ÑÐµÐ¿Ñ‚ÐµÐ¼Ð²Ñ€Ð¸', 'Ð¾ÐºÑ‚Ð¾Ð¼Ð²Ñ€Ð¸', 'Ð½Ð¾ÐµÐ¼Ð²Ñ€Ð¸', 'Ð´ÐµÐºÐµÐ¼Ð²Ñ€Ð¸'];
+
       examsList.innerHTML = examsToShow.map(exam => {
         // Format exam date
         const examDate = new Date(exam.examDate);
@@ -3512,12 +3512,12 @@
         const examMonth = months[examDate.getMonth()];
         const examYear = examDate.getFullYear();
         const examDateFormatted = `${examDay} ${examMonth} ${examYear}`;
-        
-        // Format retake date - handle multiple dates separated by " и " (and)
+
+        // Format retake date - handle multiple dates separated by " Ð¸ " (and)
         let retakeDateFormatted = '';
-        if (exam.retakeDate && exam.retakeDate.includes(' и ')) {
+        if (exam.retakeDate && exam.retakeDate.includes(' Ð¸ ')) {
           // Multiple dates
-          const retakeDates = exam.retakeDate.split(' и ').map(d => d.trim());
+          const retakeDates = exam.retakeDate.split(' Ð¸ ').map(d => d.trim());
           const formattedDates = retakeDates.map(dateStr => {
             const d = new Date(dateStr);
             if (isNaN(d.getTime())) return dateStr; // Return original if invalid
@@ -3526,8 +3526,8 @@
             const year = d.getFullYear();
             return `${day} ${month} ${year}`;
           });
-          // Add <br> after "и" for mobile devices
-          retakeDateFormatted = formattedDates.join(' и <span class="mobile-break"></span>');
+          // Add <br> after "Ð¸" for mobile devices
+          retakeDateFormatted = formattedDates.join(' Ð¸ <span class="mobile-break"></span>');
         } else if (exam.retakeDate) {
           // Single date
           const retakeDate = new Date(exam.retakeDate);
@@ -3540,46 +3540,46 @@
             retakeDateFormatted = exam.retakeDate;
           }
         }
-        
+
         return `
           <div class="exam-card" onclick="showExamModal(${JSON.stringify(exam).replace(/"/g, '&quot;')})">
             <div class="exam-card-header">
               <h3 class="exam-card-title">${exam.fullName || exam.subject}</h3>
             </div>
-            
+
             <div class="exam-section">
               <div class="exam-section-title">
                 <svg class="exam-section-icon" viewBox="0 0 24 24">
                   <path d="M9,10H7V12H9V10M13,10H11V12H13V10M17,10H15V12H17V10M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z"/>
                 </svg>
-                Редовен изпит
+                Ð ÐµÐ´Ð¾Ð²ÐµÐ½ Ð¸Ð·Ð¿Ð¸Ñ‚
               </div>
               <div class="exam-info-grid">
                 <div class="exam-info-item">
-                  <span class="exam-info-label">Дата:</span>
+                  <span class="exam-info-label">Ð”Ð°Ñ‚Ð°:</span>
                   <span class="exam-info-value">${examDateFormatted}</span>
                 </div>
                 <div class="exam-info-item">
-                  <span class="exam-info-label">Час:</span>
+                  <span class="exam-info-label">Ð§Ð°Ñ:</span>
                   <span class="exam-info-value">${exam.examTime || ''}</span>
                 </div>
               </div>
             </div>
-            
+
             <div class="exam-section">
               <div class="exam-section-title">
                 <svg class="exam-section-icon" viewBox="0 0 24 24">
                   <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
                 </svg>
-                Поправка
+                ÐŸÐ¾Ð¿Ñ€Ð°Ð²ÐºÐ°
               </div>
               <div class="exam-info-grid">
                 <div class="exam-info-item">
-                  <span class="exam-info-label">Дата:</span>
+                  <span class="exam-info-label">Ð”Ð°Ñ‚Ð°:</span>
                   <span class="exam-info-value">${retakeDateFormatted}</span>
                 </div>
                 <div class="exam-info-item">
-                  <span class="exam-info-label">Час:</span>
+                  <span class="exam-info-label">Ð§Ð°Ñ:</span>
                   <span class="exam-info-value">${exam.retakeTime || ''}</span>
                 </div>
               </div>
@@ -3608,7 +3608,7 @@
       const mobileToggle = document.getElementById('mobileMenuToggle');
       const sidebar = document.getElementById('side-menu');
       const overlay = document.getElementById('mobileMenuOverlay');
-      
+
       function closeMobileMenu() {
         sidebar.classList.remove('mobile-open');
         overlay.classList.remove('active');
@@ -3616,7 +3616,7 @@
         document.body.classList.remove('menu-open');
         document.body.style.overflow = '';
       }
-      
+
       if (mobileToggle && sidebar && overlay) {
         mobileToggle.addEventListener('click', function() {
           sidebar.classList.toggle('mobile-open');
@@ -3631,10 +3631,10 @@
             document.body.style.overflow = '';
           }
         });
-        
+
         // Close menu when clicking on overlay
         overlay.addEventListener('click', closeMobileMenu);
-        
+
         // Close menu on link click
         sidebar.querySelectorAll('a').forEach(link => {
           link.addEventListener('click', closeMobileMenu);
@@ -4005,7 +4005,7 @@
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260430bx"></script>
+    <script src="js/chat.js?v=202604302m8"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>

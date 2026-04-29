@@ -17,15 +17,16 @@
 // ============================================
 
 class ChatFirebaseREST {
-  constructor(documentId) {
+  constructor(documentId, options = {}) {
     this.documentId = documentId || 'default';
+    this.readOnly = !!options.readOnly;
     this.messages = [];
     this.messageIds = new Set();
     this.listeners = [];
     this.isPolling = false;
     this.unsubscribers = [];
     this.heartbeatInterval = null;
-    
+
     // Firebase is now initialized globally by calendar.html, so no need for config here.
 
     // console.log('Using Firebase SDK Wrapper'); // Can be removed
@@ -47,7 +48,7 @@ class ChatFirebaseREST {
       // Assume app is already initialized globally. Just get the default app.
       const app = firebaseInstance.app();
       this.db = firebaseInstance.database();
-      // console.log('✓ Firebase SDK Initialized'); // Can be removed
+      // console.log('âœ“ Firebase SDK Initialized'); // Can be removed
     } catch (e) {
       console.error("Firebase Init Error: Ensure Firebase is initialized globally in the HTML.", e);
     }
@@ -109,11 +110,12 @@ class ChatFirebaseREST {
   }
 
   async sendMessage(text, replyTo = null, replyAuthor = null) {
+    if (this.readOnly) return false;
     if (!text.trim()) return false;
     await this._ensureInit();
 
     const messagesRef = firebase.database().ref(`messages/${this.documentId}`);
-    
+
     const message = {
       userId: currentUser.userId,
       userName: this._resolveOutgoingUserName(currentUser),
@@ -140,6 +142,7 @@ class ChatFirebaseREST {
   }
 
   async updateMessage(messageKey, data) {
+    if (this.readOnly) return false;
     await this._ensureInit();
     const messageRef = firebase.database().ref(`messages/${this.documentId}/${messageKey}`);
     try {
@@ -154,15 +157,15 @@ class ChatFirebaseREST {
   async loadMessages() {
     // Load initial batch of messages (last 200)
     await this._ensureInit();
-    
+
     try {
       const messagesRef = firebase.database().ref(`messages/${this.documentId}`);
       // Load last 200 messages initially
       const q = messagesRef.orderByChild('timestamp').limitToLast(200);
-      
+
       const snapshot = await q.once('value');
       if (!snapshot.exists()) return [];
-      
+
       const data = snapshot.val();
       const messages = Object.keys(data).map(key => this._normalizeMessageAuthor({
         ...data[key],
@@ -176,9 +179,9 @@ class ChatFirebaseREST {
       this.messageIds = new Set(messages.map(message => message.id));
       this.oldestLoadedTimestamp = messages.length > 0 ? messages[0].timestamp : null;
       this.hasMoreMessages = messages.length === 200; // If we got 200, there might be more
-      
-      console.log(`✅ Initial load: ${messages.length} messages, hasMore: ${this.hasMoreMessages}`);
-      
+
+      console.log(`âœ… Initial load: ${messages.length} messages, hasMore: ${this.hasMoreMessages}`);
+
       return messages;
     } catch (error) {
       console.error('SDK Load error:', error);
@@ -189,27 +192,27 @@ class ChatFirebaseREST {
   async loadMoreMessages(batchSize = 30) {
     // Load older messages for infinite scroll
     if (!this.hasMoreMessages || this.isLoadingMore) return [];
-    
+
     await this._ensureInit();
     this.isLoadingMore = true;
-    
-    console.log(`📥 Loading more messages (batch: ${batchSize}, current total: ${this.messages.length})`);
-    
+
+    console.log(`ðŸ“¥ Loading more messages (batch: ${batchSize}, current total: ${this.messages.length})`);
+
     try {
       const messagesRef = firebase.database().ref(`messages/${this.documentId}`);
       // Load messages older than the oldest one we have
       const q = messagesRef.orderByChild('timestamp')
         .endBefore(this.oldestLoadedTimestamp)
         .limitToLast(batchSize);
-      
+
       const snapshot = await q.once('value');
       if (!snapshot.exists()) {
         this.hasMoreMessages = false;
         this.isLoadingMore = false;
-        console.log('📭 No more messages to load');
+        console.log('ðŸ“­ No more messages to load');
         return [];
       }
-      
+
       const data = snapshot.val();
       const newMessages = Object.keys(data).map(key => this._normalizeMessageAuthor({
         ...data[key],
@@ -219,22 +222,22 @@ class ChatFirebaseREST {
 
       // Sort
       newMessages.sort((a, b) => a.timestamp - b.timestamp);
-      
+
       // Prepend to existing messages
       this.messages = [...newMessages, ...this.messages];
       newMessages.forEach(message => this.messageIds.add(message.id));
-      
+
       // Update oldest timestamp
       if (newMessages.length > 0) {
         this.oldestLoadedTimestamp = newMessages[0].timestamp;
       }
-      
+
       // If we got fewer than requested, we've reached the beginning
       this.hasMoreMessages = newMessages.length === batchSize;
       this.isLoadingMore = false;
-      
-      console.log(`✅ Loaded ${newMessages.length} older messages. Total now: ${this.messages.length}, hasMore: ${this.hasMoreMessages}`);
-      
+
+      console.log(`âœ… Loaded ${newMessages.length} older messages. Total now: ${this.messages.length}, hasMore: ${this.hasMoreMessages}`);
+
       return newMessages;
     } catch (error) {
       console.error('SDK Load More error:', error);
@@ -307,6 +310,7 @@ class ChatFirebaseREST {
   }
 
   async setTyping(isTyping) {
+    if (this.readOnly) return;
     await this._ensureInit();
     // Use a disconnect handler to remove typing status if user closes tab
     const typingRef = firebase.database().ref(`typing/${this.documentId}/${currentUser.userId}`);
@@ -335,7 +339,7 @@ class ChatFirebaseREST {
             // Filter out stale typing indicators (older than 10 seconds)
             const activeTyping = {};
             const now = Date.now();
-            
+
             Object.keys(typingData).forEach(userId => {
                 const data = typingData[userId];
                 // Check if data is object and has timestamp, or just handle simple case
@@ -344,7 +348,7 @@ class ChatFirebaseREST {
                     activeTyping[userId] = data.userName;
                 }
             });
-            
+
             callback(activeTyping);
           };
           this._trackRealtimeListener(typingRef, 'value', onTyping);
@@ -357,12 +361,12 @@ class ChatFirebaseREST {
 
     this._ensureInit().then(() => {
         const messagesRef = firebase.database().ref(`messages/${this.documentId}`);
-        
+
         // Get the latest timestamp from already loaded messages
-        const latestTimestamp = this.messages.length > 0 
-            ? this.messages[this.messages.length - 1].timestamp 
+        const latestTimestamp = this.messages.length > 0
+            ? this.messages[this.messages.length - 1].timestamp
             : Date.now();
-        
+
         // Only listen for messages AFTER the ones we already have
         const q = messagesRef.orderByChild('timestamp').startAfter(latestTimestamp);
 
@@ -374,20 +378,20 @@ class ChatFirebaseREST {
                 id: snapshot.key,
                 timestamp: val.timestamp || Date.now()
             });
-            
+
             if (!this.messageIds.has(newMessage.id)) {
                 this.messages.push(newMessage);
                 this.messageIds.add(newMessage.id);
-                
+
                 // Notify listeners of new message
                 this.listeners.forEach(listener => listener(newMessage));
                 this.lastNotifiedId = newMessage.id;
-                
+
                 callback(this.messages);
             }
             };
             this._trackRealtimeListener(q, 'child_added', onChildAdded);
-        
+
         // Listen for deletions (all messages, not just new ones)
         const qAll = messagesRef.orderByChild('timestamp');
             const onChildRemoved = (snapshot) => {
@@ -396,7 +400,7 @@ class ChatFirebaseREST {
             callback(this.messages);
             };
             this._trackRealtimeListener(qAll, 'child_removed', onChildRemoved);
-        
+
         // Listen for changes (edits)
             const onChildChanged = (snapshot) => {
             const val = snapshot.val();
@@ -434,6 +438,7 @@ class ChatFirebaseREST {
   // getActiveUsers removed
 
   async deleteMessage(messageKey) {
+    if (this.readOnly) return false;
     await this._ensureInit();
     try {
         const messageRef = firebase.database().ref(`messages/${this.documentId}/${messageKey}`);
@@ -446,6 +451,7 @@ class ChatFirebaseREST {
   }
 
   async setLastRead(userName, messageId) {
+    if (this.readOnly) return false;
     if (!userName || !messageId) return false;
     // Note: Firebase keys can't contain ., $, #, [, ], /, or ASCII control chars 0-31 or 127.
     // Sanitize userName to be a safe key.
@@ -499,14 +505,15 @@ class ChatFirebaseREST {
   }
 
   async setReaction(messageId, emoji, value) {
+    if (this.readOnly) return false;
     await this._ensureInit();
     try {
       // Use set with false to "remove" (logically) or null/remove to physically remove?
       // The original code used PUT with true/false, establishing a schema where key=userId, value=true/false
       // path: reactions/docId/msgId/emoji/userId = true/false
       const reactionRef = firebase.database().ref(`reactions/${this.documentId}/${messageId}/${emoji}/${currentUser.userId}`);
-      
-      // If value is false, maybe we should remove the node to keep DB clean, 
+
+      // If value is false, maybe we should remove the node to keep DB clean,
       // but original code sent 'false'. Let's stick to user logic or improve it.
       // Actually, removing it is better for counting.
       if (value) {
@@ -573,9 +580,9 @@ class ChatFirebaseREST {
         };
         this._trackRealtimeListener(offsetRef, 'value', onOffset);
 
-        let allSiteUsers = {};     
-        let allOnlineAuthData = {}; 
-        let allOnlineGuestData = {}; 
+        let allSiteUsers = {};
+        let allOnlineAuthData = {};
+        let allOnlineGuestData = {};
 
         const processAndCallback = () => {
                 const groupedUsers = {};
@@ -589,22 +596,22 @@ class ChatFirebaseREST {
                         if (device.isActive === true) {
                             return true;
                         }
-                        
+
                         // 2. Recently active (within 30 seconds) - for transitions
                         if (device.lastActivity && (now - device.lastActivity) < 30000) {
                             return true;
                         }
-                        
+
                         // 3. Grace period for backgrounded tabs (still connected)
                         if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD_ACTIVE) {
                             return true;
                         }
-                        
+
                         // 4. Shorter grace period for disconnected devices (closed tabs)
                         if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD_CLOSED) {
                             return true;
                         }
-                        
+
                         return false;
                     });
                 };
@@ -613,7 +620,7 @@ class ChatFirebaseREST {
                 // Process Authenticated Users
                 for (const uid in allOnlineAuthData) {
                     const devices = allOnlineAuthData[uid];
-                    
+
                     // Get most recent activity/offline timestamp from all devices
                     let lastActivity = 0;
                     Object.values(devices).forEach(device => {
@@ -630,12 +637,12 @@ class ChatFirebaseREST {
                             lastActivity = device.lastInactive;
                         }
                     });
-                    
+
                     if (isUserOnline(devices)) {
                         const deviceIds = Object.keys(devices);
                         const deviceCount = deviceIds.length;
                         const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
-                        
+
                         const userProfile = allSiteUsers[uid];
                         if (userProfile) {
                             groupedUsers[uid] = {
@@ -678,8 +685,8 @@ class ChatFirebaseREST {
                         const deviceIds = Object.keys(devices);
                         const deviceCount = deviceIds.length;
                         const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
-                        
-                        const sampleDeviceData = devices[deviceIds[0]]; 
+
+                        const sampleDeviceData = devices[deviceIds[0]];
                         const guestUserName = sampleDeviceData.userName || this._guestNameFromId(guestId) || `guest-${guestId.substring(6, 10)}`;
 
                         groupedUsers[guestId] = {
@@ -748,7 +755,7 @@ class ChatFirebaseREST {
         this.heartbeatInterval = null;
     }
 
-    // console.log('🛑 ChatFirebaseREST спрян.'); // Can be removed
+    // console.log('ðŸ›‘ ChatFirebaseREST ÑÐ¿Ñ€ÑÐ½.'); // Can be removed
   }
 }
 
@@ -757,27 +764,31 @@ class ChatFirebaseREST {
 // ============================================
 
 class ChatUIManager {
-  constructor(containerId, documentId) {
-    // console.log('💬 ChatUIManager инициализирам...'); // Can be removed
+  constructor(containerId, documentId, options = {}) {
+    // console.log('ðŸ’¬ ChatUIManager Ð¸Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð°Ð¼...'); // Can be removed
     this.container = document.getElementById(containerId);
     if (!this.container) {
-      console.error('Container не е намерен:', containerId);
+      console.error('Container Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½:', containerId);
       return;
     }
-    
+
     this.documentId = documentId || 'default';
-    this.chatFirebase = new ChatFirebaseREST(this.documentId);
+    this.readOnly = !!options.readOnly;
+    this.chatFirebase = new ChatFirebaseREST(this.documentId, { readOnly: this.readOnly });
+    if (this.readOnly) {
+      this.container.classList.add('chat-readonly');
+    }
     this.isOpen = false;
     this.autoScroll = true;
     this.lastReadMessageId = localStorage.getItem(`lastReadMessage_${documentId}`) || null;
     this.notificationsDisabled = localStorage.getItem(`notificationsDisabled_${documentId}`) === 'true';
     this.unreadCount = 0;
-    this.lastMessages = [];  // Съхранявам предишни съобщения
+    this.lastMessages = [];  // Ð¡ÑŠÑ…Ñ€Ð°Ð½ÑÐ²Ð°Ð¼ Ð¿Ñ€ÐµÐ´Ð¸ÑˆÐ½Ð¸ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ñ
     this.lastRenderedLastMessageId = null;
-    this.userNameMappings = {}; // Карта за стари към нови имена
-    this.reactionsCache = {}; // Кеш за реакции
+    this.userNameMappings = {}; // ÐšÐ°Ñ€Ñ‚Ð° Ð·Ð° ÑÑ‚Ð°Ñ€Ð¸ ÐºÑŠÐ¼ Ð½Ð¾Ð²Ð¸ Ð¸Ð¼ÐµÐ½Ð°
+    this.reactionsCache = {}; // ÐšÐµÑˆ Ð·Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ð¸
     this.reactionHtmlCache = new Map();
-    this.activeUsers = {}; // Списък с активни потребители за логика с реакции
+    this.activeUsers = {}; // Ð¡Ð¿Ð¸ÑÑŠÐº Ñ Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¸ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»Ð¸ Ð·Ð° Ð»Ð¾Ð³Ð¸ÐºÐ° Ñ Ñ€ÐµÐ°ÐºÑ†Ð¸Ð¸
     this.activeTyping = {}; // State for typing indicators
     this.showMembers = localStorage.getItem(`showMembers_${this.documentId}`) === 'true'; // Default to false if not set
     this.lastActiveMembersSignature = '';
@@ -791,7 +802,7 @@ class ChatUIManager {
 
   _getMyUserIds() {
     if (!this.activeUsers || !currentUser.userName) return [currentUser.userId];
-    
+
     const myName = currentUser.userName;
     const myIds = new Set([currentUser.userId]); // Always include current ID
 
@@ -858,7 +869,7 @@ class ChatUIManager {
     // Check all possible sources for user info (avatar, color)
     let avatar = null;
     let color = null;
-    
+
     // 1. Check userProfiles (site_users) by ID
     if (this.userProfiles && userId) {
       const profile = this.userProfiles[userId] || this.userProfiles[String(userId)];
@@ -868,12 +879,12 @@ class ChatUIManager {
         if (avatar && color) return { avatar, color };
       }
     }
-    
+
     // 2. Check userProfiles by name (case-insensitive)
     if (this.userProfiles && userName) {
       const searchName = userName.toLowerCase();
-      const profile = Object.values(this.userProfiles).find(p => 
-        (p.username && p.username.toLowerCase() === searchName) || 
+      const profile = Object.values(this.userProfiles).find(p =>
+        (p.username && p.username.toLowerCase() === searchName) ||
         (p.displayName && p.displayName.toLowerCase() === searchName) ||
         (p.userName && p.userName.toLowerCase() === searchName)
       );
@@ -883,7 +894,7 @@ class ChatUIManager {
         if (avatar && color) return { avatar, color };
       }
     }
-    
+
     // 3. Check activeUsers (online presence)
     if (this.activeUsers && userId) {
       const user = this.activeUsers[userId] || this.activeUsers[String(userId)];
@@ -896,7 +907,7 @@ class ChatUIManager {
     // 4. Check activeUsers by name
     if (this.activeUsers && userName) {
       const searchName = userName.toLowerCase();
-      const user = Object.values(this.activeUsers).find(u => 
+      const user = Object.values(this.activeUsers).find(u =>
         (u.userName && u.userName.toLowerCase() === searchName) ||
         (u.displayName && u.displayName.toLowerCase() === searchName)
       );
@@ -905,7 +916,7 @@ class ChatUIManager {
         color = color || user.color;
       }
     }
-    
+
     return { avatar, color };
   }
 
@@ -1047,7 +1058,7 @@ class ChatUIManager {
             }
             @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
             @keyframes modalSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-            
+
             .profile-modal-close {
                 position: absolute;
                 top: 12px;
@@ -1061,7 +1072,7 @@ class ChatUIManager {
                 line-height: 1;
             }
             .profile-modal-close:hover { color: #4b5563; }
-            
+
             .profile-modal-avatar {
                 width: 100px;
                 height: 100px;
@@ -1091,7 +1102,7 @@ class ChatUIManager {
                 margin-bottom: 16px;
             }
             .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; }
-            
+
             .profile-modal-info {
                 width: 100%;
                 background: #f9fafb;
@@ -1106,7 +1117,7 @@ class ChatUIManager {
             }
             .info-item { display: flex; justify-content: space-between; }
             .info-label { font-weight: 600; }
-            
+
             .profile-modal-actions {
                 display: flex;
                 gap: 8px;
@@ -1130,19 +1141,19 @@ class ChatUIManager {
 
     // 2. Restructure DOM: Move controls into a row if they aren't already
     const inputField = inputArea.querySelector('.chat-input');
-    
+
     // Only proceed if inputField is direct child of inputArea (meaning not wrapped yet)
     if (inputField && inputField.parentElement === inputArea) {
         const row = document.createElement('div');
         row.className = 'chat-controls-row';
-        
+
         // Find elements to move
         const sendBtn = inputArea.querySelector('.chat-send-btn');
-        
+
         // Move them to row
         row.appendChild(inputField); // Input
         if (sendBtn) row.appendChild(sendBtn);
-        
+
         // Append row to inputArea
         inputArea.appendChild(row);
     }
@@ -1154,13 +1165,13 @@ class ChatUIManager {
       this.setupCrossTabNotificationSync();
       // await this.chatFirebase.markUserActive(); // Removed - using site-wide presence.js
 
-      // Зареди първоначални съобщения - от localStorage или Firebase
+      // Ð—Ð°Ñ€ÐµÐ´Ð¸ Ð¿ÑŠÑ€Ð²Ð¾Ð½Ð°Ñ‡Ð°Ð»Ð½Ð¸ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ñ - Ð¾Ñ‚ localStorage Ð¸Ð»Ð¸ Firebase
       let messages = this.loadFromCache();
       if (!messages || messages.length === 0) {
-        console.log('📂 No cache, loading from Firebase...');
+        console.log('ðŸ“‚ No cache, loading from Firebase...');
         messages = await this.chatFirebase.loadMessages();
       } else {
-        console.log(`💾 Loaded ${messages.length} messages from cache`);
+        console.log(`ðŸ’¾ Loaded ${messages.length} messages from cache`);
         // Restore pagination state from cached messages
         this.chatFirebase.messages = messages;
         this.chatFirebase.messageIds = new Set(messages.map(message => message.id));
@@ -1170,8 +1181,8 @@ class ChatUIManager {
           this.chatFirebase.hasMoreMessages = true;
         }
       }
-      
-      // Зареди мапинги на имена
+
+      // Ð—Ð°Ñ€ÐµÐ´Ð¸ Ð¼Ð°Ð¿Ð¸Ð½Ð³Ð¸ Ð½Ð° Ð¸Ð¼ÐµÐ½Ð°
       this.protectedNames = await this.chatFirebase.getProtectedNames();
 
       this.chatFirebase.startNameMappingsPolling((mappings) => {
@@ -1180,7 +1191,7 @@ class ChatUIManager {
             this.refreshRenderedMessageMetadata();
           }
       });
-      
+
       this.saveToCache(messages);
       this.renderMessages(messages);
 
@@ -1211,11 +1222,11 @@ class ChatUIManager {
         // Cache user data
         this.activeUsers = data.users || {};
         this.userProfiles = data.allUsers || {};
-        
+
         // Update member list and header
         this.updateNotificationButton(data);
         this.updateHeaderOnlineCount(data.count);
-        
+
         // Re-render messages ONCE when profiles first load to update avatars
         if (!profilesLoaded && Object.keys(this.userProfiles).length > 0 && this.lastMessages.length > 0) {
           profilesLoaded = true;
@@ -1229,16 +1240,16 @@ class ChatUIManager {
           this.renderTypingIndicators(activeTyping);
       });
 
-      // Синхронизация на прочетени съобщения
+      // Ð¡Ð¸Ð½Ñ…Ñ€Ð¾Ð½Ð¸Ð·Ð°Ñ†Ð¸Ñ Ð½Ð° Ð¿Ñ€Ð¾Ñ‡ÐµÑ‚ÐµÐ½Ð¸ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ñ
       this.chatFirebase.startLastReadPolling(currentUser.userName, (lastReadId) => {
         // Only update if the new ID is "greater" (newer) than what we have
         if (lastReadId && (!this.lastReadMessageId || lastReadId > this.lastReadMessageId)) {
-          console.log(`🔄 Synchronized newer lastReadId: ${lastReadId}`);
+          console.log(`ðŸ”„ Synchronized newer lastReadId: ${lastReadId}`);
           this.applyReadSync(lastReadId, { persistLocal: true });
         }
       });
 
-      // Listener за уведомления
+      // Listener Ð·Ð° ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ñ
       this.chatFirebase.addMessageListener((newMessage) => {
         // Check if the message is from the current user
         const isMyMessage = (window.currentUser.userId && newMessage.userId === window.currentUser.userId) ||
@@ -1250,33 +1261,33 @@ class ChatUIManager {
             const textLower = (newMessage.text || "").toLowerCase();
             const hasIndividualMention = currentName && textLower.includes(`@${currentName}`);
             const hasEveryoneMention = textLower.includes('@everyone');
-            
+
             if (hasIndividualMention || hasEveryoneMention) {
                 this.showMentionNotification();
             }
-            
+
             // Trigger standard notification only if chat is closed
             if (!this.isOpen) {
-                // this.showNotification(); 
+                // this.showNotification();
             }
         }
       });
 
       this.attachEventListeners();
-      
-      // Приложи начално състояние на списъка с членове
+
+      // ÐŸÑ€Ð¸Ð»Ð¾Ð¶Ð¸ Ð½Ð°Ñ‡Ð°Ð»Ð½Ð¾ ÑÑŠÑÑ‚Ð¾ÑÐ½Ð¸Ðµ Ð½Ð° ÑÐ¿Ð¸ÑÑŠÐºÐ° Ñ Ñ‡Ð»ÐµÐ½Ð¾Ð²Ðµ
       const chatPanel = this.container.querySelector('.chat-panel');
       if (chatPanel && this.showMembers) {
         chatPanel.classList.add('show-members');
       }
-      
-      // Инициализирай бутон за уведомления един път
+
+      // Ð˜Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð°Ð¹ Ð±ÑƒÑ‚Ð¾Ð½ Ð·Ð° ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ñ ÐµÐ´Ð¸Ð½ Ð¿ÑŠÑ‚
       this.initNotificationButton();
-      
+
       // Setup lazy loading for images using Intersection Observer
       this.setupLazyLoading();
-      
-      // console.log('✓✓✓ ChatUIManager готов'); // Can be removed
+
+      // console.log('âœ“âœ“âœ“ ChatUIManager Ð³Ð¾Ñ‚Ð¾Ð²'); // Can be removed
     } catch (error) {
       console.error('Init error:', error);
     }
@@ -1341,11 +1352,23 @@ class ChatUIManager {
     const input = this.container.querySelector('.chat-input'); // This is now a textarea
 
     if (sendBtn && input) {
+      if (this.readOnly) {
+        input.value = '';
+        input.readOnly = true;
+        input.placeholder = 'Previewing normal chat messages...';
+        sendBtn.disabled = true;
+      }
+
       sendBtn.addEventListener('click', () => this.handleSendMessage());
 
       const plusBtn = this.container.querySelector('.chat-plus-btn');
       if (plusBtn) {
+        if (this.readOnly) {
+          plusBtn.disabled = true;
+          plusBtn.title = 'Disabled in live-message preview';
+        }
         plusBtn.addEventListener('click', (e) => {
+          if (this.readOnly) return;
           e.stopPropagation();
           this.togglePlusMenu();
         });
@@ -1402,30 +1425,31 @@ class ChatUIManager {
 
         if (e.key === 'Enter' && !e.shiftKey) {
           e.preventDefault();
+          if (this.readOnly) return;
           this.handleSendMessage();
         }
       });
-      
+
       // Auto-resize textarea
       input.addEventListener('input', () => {
          input.style.height = 'auto';
          input.style.height = (input.scrollHeight) + 'px';
          // Cap max height if needed via CSS max-height
-         
+
          this.handleMentionInput(input);
          this.handleTyping();
       });
     }
 
     const messagesContainer = this.container.querySelector('.chat-messages');
-    
+
     // Members toggle logic
     const membersToggle = this.container.querySelector('#chat-members-toggle');
     const chatPanel = this.container.querySelector('.chat-panel');
     if (membersToggle && chatPanel) {
       membersToggle.addEventListener('click', (e) => {
         e.stopPropagation();
-        
+
         this.showMembers = !chatPanel.classList.contains('show-members');
         chatPanel.classList.toggle('show-members');
         localStorage.setItem(`showMembers_${this.documentId}`, this.showMembers);
@@ -1438,7 +1462,7 @@ class ChatUIManager {
         const isAtBottom =
           messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 50;
         this.autoScroll = isAtBottom;
-        
+
         // Throttle infinite scroll check
         if (scrollTimeout) return;
         scrollTimeout = setTimeout(() => {
@@ -1454,7 +1478,7 @@ class ChatUIManager {
 
   handleTyping() {
     if (this.typingTimeout) clearTimeout(this.typingTimeout);
-    
+
     if (!this.isTyping) {
         this.isTyping = true;
         this.chatFirebase.setTyping(true);
@@ -1520,9 +1544,9 @@ class ChatUIManager {
     const text = input.value;
     const cursor = input.selectionStart;
     const lastAt = text.lastIndexOf('@', cursor - 1);
-    
+
     if (lastAt === -1) return null;
-    
+
     // Check if there's a space before @ (optional, but usually mentions start after space or at start)
     if (lastAt > 0 && !/\s/.test(text[lastAt - 1])) {
         // Only allow if it's start of line or after space
@@ -1531,7 +1555,7 @@ class ChatUIManager {
 
     const term = text.substring(lastAt + 1, cursor);
     if (/\s/.test(term)) return null; // No spaces allowed in mention term during search
-    
+
     return term;
   }
 
@@ -1541,7 +1565,7 @@ class ChatUIManager {
       const initial = user.name.charAt(0).toUpperCase();
       const userColor = user.color || '#588157';
       const hasRealAvatar = user.avatar && user.avatar.length > 5;
-      
+
       return `
         <div class="suggestion-item ${index === 0 ? 'active' : ''}" data-uid="${user.uid}" data-name="${user.name}">
           <div class="suggestion-avatar" style="background-color: ${userColor}; position: relative;">
@@ -1566,18 +1590,18 @@ class ChatUIManager {
     const text = input.value;
     const cursor = input.selectionStart;
     const lastAt = text.lastIndexOf('@', cursor - 1);
-    
+
     const before = text.substring(0, lastAt);
     const after = text.substring(cursor);
-    
+
     input.value = before + '@' + username + ' ' + after;
     input.focus();
-    
+
     const newCursor = lastAt + username.length + 2; // +1 for @, +1 for space
     input.setSelectionRange(newCursor, newCursor);
-    
+
     this.container.querySelector('#mention-suggestions').style.display = 'none';
-    
+
     // Trigger auto-resize
     input.dispatchEvent(new Event('input'));
   }
@@ -1626,7 +1650,7 @@ class ChatUIManager {
       toggleBtn.addEventListener('click', () => {
         this.notificationsDisabled = !this.notificationsDisabled;
         localStorage.setItem(`notificationsDisabled_${this.documentId}`, this.notificationsDisabled);
-        
+
         // Update button visual state
         this.updateNotificationButtonColor();
         // Update unread count visibility
@@ -1692,7 +1716,7 @@ class ChatUIManager {
       const user = allUsers[uid];
       // Skip if already online or if not flagged to show in members list
       if (data.users[uid] || !user.showInMembersList) continue;
-      
+
       offlineUsers.push({
         userId: uid,
         userName: user.displayName || user.username,
@@ -1964,21 +1988,21 @@ class ChatUIManager {
     if (!user) return;
 
     // Get actual username from userProfiles if available (activeUsers only has displayName in userName field)
-    const actualUsername = (this.userProfiles && this.userProfiles[userId]) ? 
-        (this.userProfiles[userId].username || this.userProfiles[userId].userName) : 
+    const actualUsername = (this.userProfiles && this.userProfiles[userId]) ?
+        (this.userProfiles[userId].username || this.userProfiles[userId].userName) :
         (user.username || user.userName);
 
     const resolvedName = this.resolveName(user.userName || user.displayName);
     const initial = resolvedName.charAt(0).toUpperCase();
     const userColor = user.color || '#588157';
     const hasAvatar = user.avatar && user.avatar.length > 5;
-    
+
     // Local-only UX override: current viewer is always shown as online to themselves.
     const myId = (typeof window.currentUser !== 'undefined' && window.currentUser.userId)
       ? String(window.currentUser.userId)
       : null;
     const isOnline = !!this.activeUsers[userId] || (myId && String(userId) === myId);
-    
+
     // Determine status text (Admin > Guest > Member)
     let statusText = 'Member';
     if (user.isAdmin) {
@@ -1986,18 +2010,18 @@ class ChatUIManager {
     } else if (user.isGuest) {
         statusText = 'Guest';
     }
-    
+
     const deviceText = user.hasMobile ? 'Mobile' : 'Desktop';
-    
+
     // Format last seen time for offline users
     let lastSeenText = '';
     if (!isOnline) {
         // Try lastActivity from presence data first, then lastSeen from profile
         const lastSeenTimestamp = user.lastActivity || user.lastSeen;
-        
+
         // Ensure timestamp is a valid number
         const validTimestamp = lastSeenTimestamp && !isNaN(Number(lastSeenTimestamp)) ? Number(lastSeenTimestamp) : null;
-        
+
         if (validTimestamp) {
             const lastSeenDate = new Date(validTimestamp);
             const now = new Date();
@@ -2005,7 +2029,7 @@ class ChatUIManager {
             const diffMins = Math.floor(diffMs / 60000);
             const diffHours = Math.floor(diffMs / 3600000);
             const diffDays = Math.floor(diffMs / 86400000);
-            
+
             if (diffMins < 1) {
                 lastSeenText = 'Just now';
             } else if (diffMins < 60) {
@@ -2022,26 +2046,26 @@ class ChatUIManager {
             lastSeenText = 'Long time ago';
         }
     }
-    
+
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'user-profile-modal-overlay';
 
     modalOverlay.innerHTML = `
         <div class="user-profile-modal">
-            <button class="profile-modal-close">✕</button>
-            
-            ${hasAvatar ? 
+            <button class="profile-modal-close">&times;</button>
+
+            ${hasAvatar ?
                 `<img src="${user.avatar}" class="profile-modal-avatar">` :
                 `<div class="profile-modal-avatar" style="background-color: ${userColor}">${initial}</div>`
             }
-            
+
             <div class="profile-modal-name">${this.escapeHtml(resolvedName)}</div>
             <div class="profile-modal-status" style="color: ${isOnline ? '#22c55e' : '#9ca3af'}">
                 <span class="status-dot" style="background-color: ${isOnline ? '#22c55e' : '#9ca3af'}"></span>
                 ${isOnline ? 'Online' : 'Offline'}
             </div>
             ${!isOnline && lastSeenText ? `<div style="font-size: 12px; color: #6b7280; margin-top: -4px;">Last seen: ${lastSeenText}</div>` : ''}
-            
+
             <div class="profile-modal-info">
                 <div class="info-item">
                     <span class="info-label">Role</span>
@@ -2058,7 +2082,7 @@ class ChatUIManager {
                     <span>${user.email}</span>
                 </div>` : ''}
             </div>
-            
+
             <div class="profile-modal-actions">
                 <button class="profile-action-btn btn-mention">@ Mention</button>
             </div>
@@ -2089,6 +2113,7 @@ class ChatUIManager {
   }
 
   async handleSendMessage() {
+    if (this.readOnly) return;
     const input = this.container.querySelector('.chat-input');
     const text = input.value;
 
@@ -2097,13 +2122,13 @@ class ChatUIManager {
     const trimmedText = text.trim();
     const lowerTrimmedText = trimmedText.toLowerCase();
 
-    // Редактиране на съобщение
+    // Ð ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð°Ð½Ðµ Ð½Ð° ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ðµ
     if (this.editingMessage) {
         await this.editMessage(this.editingMessage.key, text);
         return;
     }
 
-    // Провери дали има reply
+    // ÐŸÑ€Ð¾Ð²ÐµÑ€Ð¸ Ð´Ð°Ð»Ð¸ Ð¸Ð¼Ð° reply
     const replyTo = input.dataset.replyTo;
     const replyAuthor = input.dataset.replyAuthor;
 
@@ -2144,17 +2169,17 @@ class ChatUIManager {
       input.value = '';
       input.dataset.replyTo = '';
       input.dataset.replyAuthor = '';
-      
+
       // Reset textarea height after sending
       input.style.height = 'auto';
       input.focus();
-      
-      // Премахни reply indicator
+
+      // ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð¸ reply indicator
       const replyIndicator = this.container.querySelector('.reply-indicator');
       if (replyIndicator) replyIndicator.remove();
-      
-      // Realtime listener ще се погрижи за обновяването
-      // Премахнахме ръчното презареждане, за да избегнем race conditions
+
+      // Realtime listener Ñ‰Ðµ ÑÐµ Ð¿Ð¾Ð³Ñ€Ð¸Ð¶Ð¸ Ð·Ð° Ð¾Ð±Ð½Ð¾Ð²ÑÐ²Ð°Ð½ÐµÑ‚Ð¾
+      // ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð°Ñ…Ð¼Ðµ Ñ€ÑŠÑ‡Ð½Ð¾Ñ‚Ð¾ Ð¿Ñ€ÐµÐ·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ, Ð·Ð° Ð´Ð° Ð¸Ð·Ð±ÐµÐ³Ð½ÐµÐ¼ race conditions
     }
   }
 
@@ -2171,7 +2196,7 @@ class ChatUIManager {
     }
 
     let readIndex = messages.findIndex(m => m.id === this.lastReadMessageId);
-    
+
     // If marker is gone (deleted), try to recover using previous history
     if (readIndex === -1 && this.lastMessages.length > 0) {
         const oldIndex = this.lastMessages.findIndex(m => m.id === this.lastReadMessageId);
@@ -2188,7 +2213,7 @@ class ChatUIManager {
                 }
             }
         }
-        
+
         // If still not found (e.g. all preceding messages deleted too, or never found), reset to 0
         // Because if the marker is gone, we assume the user was up to date.
         if (readIndex === -1) {
@@ -2196,7 +2221,7 @@ class ChatUIManager {
              return;
         }
     }
-    
+
     // Calculate unread
     let unreadMessages = [];
     if (readIndex !== -1) {
@@ -2429,7 +2454,7 @@ class ChatUIManager {
     messages.forEach((msg, index) => {
         const msgDate = new Date(msg.timestamp);
         const dateStr = msgDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
-        
+
         // Add date separator if day changed
         if (dateStr !== lastDateStr) {
             let dateSep = messagesContainer.querySelector(`.chat-date-separator[data-date="${dateStr}"]`);
@@ -2459,12 +2484,12 @@ class ChatUIManager {
         } else {
             // Move existing element to fragment
             fragment.appendChild(existingEl);
-            
+
             // Update if needed
             const profile = this.userProfiles && (this.userProfiles[msg.userId] || Object.values(this.userProfiles).find(p => (p.username||"").toLowerCase() === (msg.userName||"").toLowerCase()));
             const hasRealAvatar = profile && profile.avatar && typeof profile.avatar === 'string' && profile.avatar.length > 5;
             const isShowingPlaceholder = !existingEl.querySelector('img.message-avatar') || existingEl.querySelector('img.message-avatar').style.display === 'none';
-            
+
             if (hasRealAvatar && isShowingPlaceholder && !isContinuation) {
                 const newMessageEl = this.createMessageElement(msg, messages, isContinuation);
                 existingEl.replaceWith(newMessageEl);
@@ -2512,7 +2537,7 @@ class ChatUIManager {
     // Clear and re-append all messages in correct order
     messagesContainer.innerHTML = '';
     messagesContainer.appendChild(fragment);
-    
+
     // Attach listeners to new messages
     messagesContainer.querySelectorAll('.chat-message').forEach(el => {
         if (!el.hasAttribute('data-listeners-attached')) {
@@ -2523,7 +2548,7 @@ class ChatUIManager {
 
     this.recalculateUnreadCount(messages);
     this.updateActiveCount();
-    
+
     // Check if the last message is new
     const lastMsgId = messages.length > 0 ? messages[messages.length - 1].id : null;
     const oldLastMsgId = this.lastRenderedLastMessageId;
@@ -2607,7 +2632,7 @@ class ChatUIManager {
       messagesMapObj[m.id] = m;
     });
 
-    // Ако има reply, намери оригиналното съобщение
+    // ÐÐºÐ¾ Ð¸Ð¼Ð° reply, Ð½Ð°Ð¼ÐµÑ€Ð¸ Ð¾Ñ€Ð¸Ð³Ð¸Ð½Ð°Ð»Ð½Ð¾Ñ‚Ð¾ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ðµ
     let replyHTML = '';
     if (msg.replyTo && messagesMapObj[msg.replyTo]) {
       const originalMsg = messagesMapObj[msg.replyTo];
@@ -2616,7 +2641,7 @@ class ChatUIManager {
       const replyText = '#1f2937';
       const replyAuthor = '#111827';
       replyHTML = `
-         <div style="background: ${replyBg}; border-left: 3px solid ${replyBorder}; color: ${replyText}; padding: 4px 8px; margin-bottom: 4px; font-size: 11px; border-radius: 4px; opacity: 0.92;">
+         <div class="chat-reply-preview" style="background: ${replyBg}; border-left: 3px solid ${replyBorder}; color: ${replyText}; padding: 4px 8px; margin-bottom: 2px; font-size: 11px; border-radius: 4px; opacity: 0.92;">
            <b style="color: ${replyAuthor};">${this.escapeHtml(msg.replyAuthor || 'Someone')}:</b> ${this.linkifyText(originalMsg.text.substring(0, 50))}...
          </div>
       `;
@@ -2624,8 +2649,8 @@ class ChatUIManager {
 
     // Robust avatar/color lookup - check all sources
     const userInfo = this.getUserInfo(msg.userId, msg.userName);
-    const currentAvatar = userInfo.avatar || msg.userAvatar; 
-    const currentColor = userInfo.color || msg.userColor || '#ccc'; 
+    const currentAvatar = userInfo.avatar || msg.userAvatar;
+    const currentColor = userInfo.color || msg.userColor || '#ccc';
     const resolvedName = this._resolveMessageAuthorName(msg);
 
     const isCurrentUser = (window.currentUser.userId && msg.userId === window.currentUser.userId) || (window.currentUser.legacyChatId && msg.userId === window.currentUser.legacyChatId);
@@ -2636,11 +2661,11 @@ class ChatUIManager {
     let avatarHtml = '';
     const avatarStyle = isContinuation ? 'visibility: hidden;' : 'visibility: visible;';
     const initial = (resolvedName || "?")[0].toUpperCase();
-    
+
     if (currentAvatar && typeof currentAvatar === 'string' && currentAvatar.length > 5) {
         avatarHtml = `
             <div class="message-avatar-container" style="width: 32px; height: 32px; flex-shrink: 0; position: relative;">
-                <img src="${currentAvatar}" class="message-avatar" style="${avatarStyle} object-fit: cover;" 
+                <img src="${currentAvatar}" class="message-avatar" style="${avatarStyle} object-fit: cover;"
                      onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 <div class="message-avatar" style="background-color: ${currentColor}; ${avatarStyle} display: none; align-items: center; justify-content: center; border-radius: 50%; color: white; font-weight: bold;">${initial}</div>
             </div>`;
@@ -2656,30 +2681,32 @@ class ChatUIManager {
     const headerStyle = isContinuation ? 'display: none;' : 'display: flex;';
     headerHtml = `
       <div class="message-header" style="justify-content: flex-start; ${headerStyle}">
-        <span class="message-author">${this.escapeHtml(resolvedName)}</span> 
+        <span class="message-author">${this.escapeHtml(resolvedName)}</span>
         <span class="message-time">${this.formatTime(msg.timestamp)}</span>
       </div>
     `;
 
+    const currentIndex = (messagesMap || []).findIndex(m => m && m.id === msg.id);
+    const nextMsg = currentIndex >= 0 ? messagesMap[currentIndex + 1] : null;
+    const isFollowedByContinuation = !!(nextMsg && nextMsg.userId === msg.userId && (nextMsg.timestamp - msg.timestamp < 3 * 60 * 1000));
+
     // Reactions are now rendered from cache, so the initial div is populated
     const reactionsHTML = this.getReactionsHTML(msg.id);
-    
-    // Calculate margin: default very tight (2px), continuation (0px), loose if reactions (2px)
-    let marginBottom = isContinuation ? '0px' : '2px';
-    if (reactionsHTML) {
-        marginBottom = '2px';
-    }
+
+    const marginBottom = (isContinuation || isFollowedByContinuation) ? '0px' : '2px';
 
     const actionClass = isCurrentUser ? '' : 'two-btns';
 
     const selfMessageClass = isCurrentUser ? ' is-self-message' : '';
+    const continuationMessageClass = isContinuation ? ' is-continuation-message' : '';
+    const followedByContinuationClass = isFollowedByContinuation ? ' is-followed-by-continuation' : '';
 
     const htmlString = `
-      <div class="chat-message${selfMessageClass}" data-user-id="${msg.userId}" data-message-id="${msg.id}" data-message-key="${msg.key}" style="position: relative; display: flex; gap: 8px; margin-bottom: ${marginBottom}; flex-direction: row;">
+      <div class="chat-message${selfMessageClass}${continuationMessageClass}${followedByContinuationClass}" data-user-id="${msg.userId}" data-message-id="${msg.id}" data-message-key="${msg.key}" style="position: relative; display: flex; gap: 8px; margin-bottom: ${marginBottom}; flex-direction: row;">
         ${avatarHtml}
         <div class="message-content" style="flex: 1; align-items: flex-start; display: flex; flex-direction: column; min-width: 0;">
           ${headerHtml}
-          
+
           <div class="message-bubble-container" style="position: relative; width: fit-content; display: flex; flex-direction: column;">
              ${replyHTML}
              <div class="message-main-row" style="position: relative; width: fit-content; display: flex; flex-direction: column;">
@@ -2688,14 +2715,14 @@ class ChatUIManager {
                  ${msg.edited ? `<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>` : ''}
                </div>
                <div class="message-actions ${actionClass}">
-                 <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Отговори">
+                 <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="ÐžÑ‚Ð³Ð¾Ð²Ð¾Ñ€Ð¸">
                    <img src="svg/chat/icon-reply.svg" alt="Reply" style="width: 16px; height: 16px">
                  </button>
-                 <button class="message-reaction-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Добави реакция">
+                 <button class="message-reaction-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Ð”Ð¾Ð±Ð°Ð²Ð¸ Ñ€ÐµÐ°ÐºÑ†Ð¸Ñ">
                    <img src="svg/chat/icon-reaction.svg" alt="Reaction" style="width: 16px; height: 16px">
                  </button>
                  ${isCurrentUser ? `
-                 <button class="message-options-btn" data-message-id="${msg.id}" data-message-key="${msg.key}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Още опции">
+                 <button class="message-options-btn" data-message-id="${msg.id}" data-message-key="${msg.key}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="ÐžÑ‰Ðµ Ð¾Ð¿Ñ†Ð¸Ð¸">
                    <img src="svg/chat/icon-three-dots-vertical.svg" alt="More" style="width: 16px; height: 16px">
                  </button>` : ''}
                </div>
@@ -2716,8 +2743,9 @@ class ChatUIManager {
 
   attachMessageListeners(msgEl) {
     // Hover effect now handled by CSS (.chat-message:hover .message-actions)
+    this.initializeCustomAudioPlayers(msgEl);
 
-    // Добави listener за реакции
+    // Ð”Ð¾Ð±Ð°Ð²Ð¸ listener Ð·Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ð¸
     const reactionBtn = msgEl.querySelector('.message-reaction-btn');
     if (reactionBtn) {
       reactionBtn.addEventListener('click', (e) => {
@@ -2726,7 +2754,7 @@ class ChatUIManager {
       });
     }
 
-    // Добави listener за reply
+    // Ð”Ð¾Ð±Ð°Ð²Ð¸ listener Ð·Ð° reply
     const replyBtn = msgEl.querySelector('.message-reply-btn');
     if (replyBtn) {
       replyBtn.addEventListener('click', (e) => {
@@ -2735,7 +2763,7 @@ class ChatUIManager {
       });
     }
 
-    // Добави listener за options
+    // Ð”Ð¾Ð±Ð°Ð²Ð¸ listener Ð·Ð° options
     const optionsBtn = msgEl.querySelector('.message-options-btn');
     if (optionsBtn) {
       optionsBtn.addEventListener('click', (e) => {
@@ -2830,7 +2858,7 @@ class ChatUIManager {
     `;
 
     const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '✕';
+    closeBtn.innerHTML = '&times;';
     closeBtn.style.cssText = `
         position: absolute;
         top: -12px;
@@ -2867,7 +2895,7 @@ class ChatUIManager {
     modal.addEventListener('click', (e) => {
         if (e.target === modal) modal.remove();
     });
-    
+
     closeBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         modal.remove();
@@ -2897,7 +2925,7 @@ class ChatUIManager {
     const menu = document.createElement('div');
     menu.id = 'message-options-menu';
     menu.className = 'message-options-menu';
-    
+
     const isOwnerOnly = mode === 'owner-only';
     menu.innerHTML = `
       ${isOwnerOnly ? '' : '<div class="message-option-item reply"><img src="svg/chat/icon-reply.svg" alt="Reply">Reply</div>'}
@@ -2995,11 +3023,11 @@ class ChatUIManager {
     input.value = msg.text;
     input.focus();
     this.editingMessage = { id: messageId, key: messageKey };
-    
+
     const inputArea = this.container.querySelector('.chat-input-area');
     if (inputArea) {
       inputArea.style.borderTop = '2px solid #588157';
-      
+
       // Add editing indicator
       let editIndicator = inputArea.querySelector('.edit-indicator');
       if (!editIndicator) {
@@ -3007,21 +3035,21 @@ class ChatUIManager {
         editIndicator.className = 'edit-indicator';
         inputArea.prepend(editIndicator);
       }
-      
+
       editIndicator.style.cssText = `
         background: var(--chat-secondary); border-left: 3px solid var(--chat-primary);
         padding: 8px 12px; margin-bottom: 8px; border-radius: 8px;
         font-size: 12px; display: flex; justify-content: space-between; align-items: center;
       `;
-      
+
       editIndicator.innerHTML = `
         <span><strong style="color: var(--chat-primary);">Editing message</strong></span>
-        <button class="cancel-edit-btn" style="border:none;background:none;cursor:pointer;font-size:16px;color:var(--chat-primary);padding: 0 4px; line-height: 1;">✕</button>
+        <button class="cancel-edit-btn" style="border:none;background:none;cursor:pointer;font-size:16px;color:var(--chat-primary);padding: 0 4px; line-height: 1;">&times;</button>
       `;
-      
+
       editIndicator.querySelector('.cancel-edit-btn').onclick = () => this.cancelEditing();
     }
-    
+
     input.placeholder = "Editing message...";
   }
 
@@ -3148,16 +3176,16 @@ class ChatUIManager {
   }
 
   async searchMedia(query, resultsContainer, type) {
-    const apiKey = 'LIVDSRZULELA'; 
+    const apiKey = 'LIVDSRZULELA';
     const limit = 20;
-    
+
     let url;
     if (type === 'sticker') {
         // Use search endpoint with sticker filter for both empty and non-empty queries
         const q = query ? query : 'trending';
         url = `https://g.tenor.com/v1/search?q=${encodeURIComponent(q)}&key=${apiKey}&limit=${limit}&searchfilter=sticker`;
     } else {
-        url = query 
+        url = query
           ? `https://g.tenor.com/v1/search?q=${encodeURIComponent(query)}&key=${apiKey}&limit=${limit}`
           : `https://g.tenor.com/v1/trending?key=${apiKey}&limit=${limit}`;
     }
@@ -3165,16 +3193,16 @@ class ChatUIManager {
     try {
       const response = await fetch(url);
       const data = await response.json();
-      
+
       resultsContainer.innerHTML = '';
-      
+
       if (data.results && data.results.length > 0) {
         data.results.forEach(result => {
           const media = result.media[0].tinygif;
           const img = document.createElement('img');
           img.className = 'gif-item';
           img.src = media.url;
-          
+
           if (type === 'sticker') {
               img.style.objectFit = 'contain';
               // Checkerboard pattern for transparency
@@ -3183,7 +3211,7 @@ class ChatUIManager {
               img.style.objectFit = 'cover';
               img.style.background = '#eee';
           }
-          
+
           img.onclick = () => this.selectMedia(media.url);
           resultsContainer.appendChild(img);
         });
@@ -3251,7 +3279,7 @@ class ChatUIManager {
     try {
       // Get R2 worker URL from config or use default
       const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev'; // TODO: Update this with your actual worker URL
-      
+
       const formData = new FormData();
       formData.append('file', file);
       formData.append('userName', currentUser.userName || 'anonymous');
@@ -3269,7 +3297,7 @@ class ChatUIManager {
       }
 
       const result = await response.json();
-      
+
       // Send the image URL as a message
       if (result.url) {
         this.chatFirebase.sendMessage(result.url);
@@ -3351,8 +3379,8 @@ class ChatUIManager {
   updateActiveCount(data) {
     const badgeEl = document.querySelector('.chat-badge-count');
     const icon = document.querySelector('.chat-icon');
-    
-    // Покази брой непрочетени съобщения САМО ако уведомленията са включени И чатът е затворен
+
+    // ÐŸÐ¾ÐºÐ°Ð·Ð¸ Ð±Ñ€Ð¾Ð¹ Ð½ÐµÐ¿Ñ€Ð¾Ñ‡ÐµÑ‚ÐµÐ½Ð¸ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ñ Ð¡ÐÐœÐž Ð°ÐºÐ¾ ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸ÑÑ‚Ð° ÑÐ° Ð²ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸ Ð˜ Ñ‡Ð°Ñ‚ÑŠÑ‚ Ðµ Ð·Ð°Ñ‚Ð²Ð¾Ñ€ÐµÐ½
     if (badgeEl) {
       if (this.notificationsDisabled || this.isOpen) {
         badgeEl.style.display = 'none';
@@ -3360,7 +3388,7 @@ class ChatUIManager {
       } else {
         badgeEl.textContent = this.unreadCount;
         badgeEl.style.display = this.unreadCount > 0 ? 'flex' : 'none';
-        
+
         // Remove mention highlight if no unread messages have a mention
         if (icon && !this.unreadHasMention) {
             icon.classList.remove('has-mention');
@@ -3391,7 +3419,7 @@ class ChatUIManager {
       // Special mention doesn't auto-remove as quickly as pulse
       // It stays until chat is opened or markAsRead is called
     }
-    
+
     // Optional: Play sound if permitted
     try {
         const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
@@ -3418,7 +3446,7 @@ class ChatUIManager {
       this.updateActiveCount();
 
       this.broadcastReadSync(newLastReadId);
-      
+
       // Synchronize with Firebase
       this.chatFirebase.setLastRead(currentUser.userName, newLastReadId);
     }
@@ -3536,10 +3564,10 @@ class ChatUIManager {
     if (this.isLoadingMore || !this.chatFirebase.hasMoreMessages) {
       return;
     }
-    
+
     this.isLoadingMore = true;
     const messagesContainer = this.container.querySelector('.chat-messages');
-    
+
     // Show loading indicator at top
     let loadingIndicator = messagesContainer.querySelector('.loading-more-indicator');
     if (!loadingIndicator) {
@@ -3554,22 +3582,22 @@ class ChatUIManager {
       loadingIndicator.textContent = 'Loading older messages...';
       messagesContainer.prepend(loadingIndicator);
     }
-    
+
     // Get current first message to restore position
     const firstMessage = messagesContainer.querySelector('.chat-message');
     const firstMessageId = firstMessage ? firstMessage.dataset.messageId : null;
-    
+
     // Load more messages
     const oldCount = this.chatFirebase.messages.length;
     const newMessages = await this.chatFirebase.loadMoreMessages(30);
-    
+
     // Remove loading indicator
     if (loadingIndicator) loadingIndicator.remove();
-    
+
     if (newMessages.length > 0) {
       // Only insert new messages at the top
       this.prependMessages(newMessages);
-      
+
       // Restore scroll to the previous first message
       if (firstMessageId) {
         const firstMsg = messagesContainer.querySelector(`[data-message-id="${firstMessageId}"]`);
@@ -3580,7 +3608,7 @@ class ChatUIManager {
         }
       }
     }
-    
+
     this.isLoadingMore = false;
   }
 
@@ -3591,23 +3619,23 @@ class ChatUIManager {
     const fragment = document.createDocumentFragment();
     let prevMsg = null;
     let lastDateStr = null;
-    
+
     // Get the date of the first existing message to avoid duplicate separator
     const firstExistingMessage = messagesContainer.querySelector('.chat-message');
-    const firstExistingDate = firstExistingMessage ? 
-      new Date(parseInt(firstExistingMessage.dataset.timestamp || 0)).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) : 
+    const firstExistingDate = firstExistingMessage ?
+      new Date(parseInt(firstExistingMessage.dataset.timestamp || 0)).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' }) :
       null;
-    
+
     messages.forEach((msg, index) => {
       const msgDate = new Date(msg.timestamp);
       const dateStr = msgDate.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' });
-      
+
       // Add date separator only when date changes
       if (dateStr !== lastDateStr) {
         // Check if this is the last message we're adding and it has the same date as the first existing message
         const isLastNewMessage = (index === messages.length - 1);
         const sameAsExisting = (dateStr === firstExistingDate);
-        
+
         // Only add separator if it's not a duplicate with existing messages
         if (!(isLastNewMessage && sameAsExisting)) {
           // Remove existing date separator for this date if present
@@ -3615,7 +3643,7 @@ class ChatUIManager {
           if (existingDateSep) {
             existingDateSep.remove();
           }
-          
+
           const dateSep = document.createElement('div');
           dateSep.className = 'chat-date-separator';
           dateSep.dataset.date = dateStr;
@@ -3624,24 +3652,24 @@ class ChatUIManager {
         }
         lastDateStr = dateStr;
       }
-      
+
       // Check continuation
       let isContinuation = false;
       if (prevMsg && prevMsg.userId === msg.userId && (msg.timestamp - prevMsg.timestamp < 3 * 60 * 1000)) {
         isContinuation = true;
       }
-      
+
       // Create and add message element
       const messageEl = this.createMessageElement(msg, this.chatFirebase.messages, isContinuation);
       messageEl.dataset.timestamp = msg.timestamp; // Store timestamp for date checks
       fragment.appendChild(messageEl);
-      
+
       prevMsg = msg;
     });
-    
+
     // Prepend all new messages at once
     messagesContainer.prepend(fragment);
-    
+
     // Attach listeners to new messages
     messages.forEach(msg => {
       const el = messagesContainer.querySelector(`[data-message-id="${msg.id}"]`);
@@ -3650,23 +3678,23 @@ class ChatUIManager {
         el.setAttribute('data-listeners-attached', 'true');
       }
     });
-    
+
     // Setup lazy loading for new images
     this.observeLazyImages();
   }
 
   showReactionPicker(messageId) {
-    // Премахни стар picker ако съществува
+    // ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð¸ ÑÑ‚Ð°Ñ€ picker Ð°ÐºÐ¾ ÑÑŠÑ‰ÐµÑÑ‚Ð²ÑƒÐ²Ð°
     const oldPicker = document.querySelector('.reaction-picker');
     if (oldPicker) oldPicker.remove();
 
-    const emojis = ['👍', '👎', '😂', '❤️', '😭', '😮', '🐐'];
+    const emojis = ['\u{1F44D}', '\u{1F44E}', '\u{1F602}', '\u{2764}\u{FE0F}', '\u{1F62D}', '\u{1F62E}', '\u{1F410}'];
     const pickerBg = '#ffffff';
     const pickerText = '#1f2937';
     const pickerHover = 'var(--chat-secondary)';
     const customBtnBg = '#f3f4f6';
     const customBtnText = '#6b7280';
-    
+
     const picker = document.createElement('div');
     picker.className = 'reaction-picker';
     picker.style.cssText = `
@@ -3709,12 +3737,12 @@ class ChatUIManager {
       return btn;
     };
 
-    // Добави стандартни емоджита
+    // Ð”Ð¾Ð±Ð°Ð²Ð¸ ÑÑ‚Ð°Ð½Ð´Ð°Ñ€Ñ‚Ð½Ð¸ ÐµÐ¼Ð¾Ð´Ð¶Ð¸Ñ‚Ð°
     emojis.forEach(emoji => {
       picker.appendChild(addEmojiButton(emoji, messageId));
     });
 
-    // Добави бутон за персонализирана реакция
+    // Ð”Ð¾Ð±Ð°Ð²Ð¸ Ð±ÑƒÑ‚Ð¾Ð½ Ð·Ð° Ð¿ÐµÑ€ÑÐ¾Ð½Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð°Ð½Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ñ
     const customBtn = document.createElement('button');
     customBtn.innerHTML = `
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -3722,7 +3750,7 @@ class ChatUIManager {
         <line x1="5" y1="12" x2="19" y2="12"></line>
       </svg>
     `;
-    customBtn.title = "Добави друга реакция";
+    customBtn.title = "Ð”Ð¾Ð±Ð°Ð²Ð¸ Ð´Ñ€ÑƒÐ³Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ñ";
     customBtn.style.cssText = `
       background: ${customBtnBg};
       border: none;
@@ -3739,7 +3767,7 @@ class ChatUIManager {
     `;
     customBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const customEmoji = prompt("Въведи емоджи или кратък текст за реакция:");
+      const customEmoji = prompt("Ð’ÑŠÐ²ÐµÐ´Ð¸ ÐµÐ¼Ð¾Ð´Ð¶Ð¸ Ð¸Ð»Ð¸ ÐºÑ€Ð°Ñ‚ÑŠÐº Ñ‚ÐµÐºÑÑ‚ Ð·Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ñ:");
       if (customEmoji && customEmoji.trim()) {
         this.addReaction(messageId, customEmoji.trim().substring(0, 5));
       }
@@ -3748,25 +3776,25 @@ class ChatUIManager {
     });
     picker.appendChild(customBtn);
 
-    // Позиционирай picker до съобщението
+    // ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ picker Ð´Ð¾ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸ÐµÑ‚Ð¾
     const msgEl = document.querySelector(`[data-message-id="${messageId}"]`);
     if (msgEl) {
       const rect = msgEl.getBoundingClientRect();
       document.body.appendChild(picker);
-      
+
       const pickerRect = picker.getBoundingClientRect();
-      // Позиционирай в горния десен ъгъл на съобщението
+      // ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ Ð² Ð³Ð¾Ñ€Ð½Ð¸Ñ Ð´ÐµÑÐµÐ½ ÑŠÐ³ÑŠÐ» Ð½Ð° ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸ÐµÑ‚Ð¾
       let left = rect.right - pickerRect.width;
       let top = rect.top - pickerRect.height - 5;
-      
-      // Осигури да не излиза извън екрана наляво
+
+      // ÐžÑÐ¸Ð³ÑƒÑ€Ð¸ Ð´Ð° Ð½Ðµ Ð¸Ð·Ð»Ð¸Ð·Ð° Ð¸Ð·Ð²ÑŠÐ½ ÐµÐºÑ€Ð°Ð½Ð° Ð½Ð°Ð»ÑÐ²Ð¾
       if (left < 10) left = 10;
-      
+
       picker.style.left = left + 'px';
       picker.style.top = top + 'px';
     }
 
-    // Функция за затваряне на picker
+    // Ð¤ÑƒÐ½ÐºÑ†Ð¸Ñ Ð·Ð° Ð·Ð°Ñ‚Ð²Ð°Ñ€ÑÐ½Ðµ Ð½Ð° picker
     const closePicker = (e) => {
       if (!picker.contains(e.target) && !e.target.closest('.message-reaction-btn')) {
         picker.remove();
@@ -3785,7 +3813,7 @@ class ChatUIManager {
   }
 
   showReactionTooltip(badgeElement) {
-    this.hideReactionTooltip(); // Скрий предишни, ако има
+    this.hideReactionTooltip(); // Ð¡ÐºÑ€Ð¸Ð¹ Ð¿Ñ€ÐµÐ´Ð¸ÑˆÐ½Ð¸, Ð°ÐºÐ¾ Ð¸Ð¼Ð°
 
     const messageId = badgeElement.dataset.messageId;
     const emoji = badgeElement.dataset.emoji;
@@ -3801,26 +3829,26 @@ class ChatUIManager {
       return;
     }
 
-    // Създай карта на userId -> userName от всички налични източници
+    // Ð¡ÑŠÐ·Ð´Ð°Ð¹ ÐºÐ°Ñ€Ñ‚Ð° Ð½Ð° userId -> userName Ð¾Ñ‚ Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð½Ð°Ð»Ð¸Ñ‡Ð½Ð¸ Ð¸Ð·Ñ‚Ð¾Ñ‡Ð½Ð¸Ñ†Ð¸
     const userMap = {};
-    // 1. От активните потребители (най-актуални имена)
+    // 1. ÐžÑ‚ Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¸Ñ‚Ðµ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»Ð¸ (Ð½Ð°Ð¹-Ð°ÐºÑ‚ÑƒÐ°Ð»Ð½Ð¸ Ð¸Ð¼ÐµÐ½Ð°)
     for (const userId in this.activeUsers) {
         userMap[userId] = this.activeUsers[userId].userName;
     }
-    // 2. От историята на съобщенията (за офлайн потребители)
+    // 2. ÐžÑ‚ Ð¸ÑÑ‚Ð¾Ñ€Ð¸ÑÑ‚Ð° Ð½Ð° ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸ÑÑ‚Ð° (Ð·Ð° Ð¾Ñ„Ð»Ð°Ð¹Ð½ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»Ð¸)
     this.chatFirebase.messages.forEach(msg => {
         if (!userMap[msg.userId]) {
             userMap[msg.userId] = msg.userName;
         }
     });
 
-    // Преобразувай ID-тата в имена
+    // ÐŸÑ€ÐµÐ¾Ð±Ñ€Ð°Ð·ÑƒÐ²Ð°Ð¹ ID-Ñ‚Ð°Ñ‚Ð° Ð² Ð¸Ð¼ÐµÐ½Ð°
     const reactorNames = reactorIds.map(id => {
-        const rawName = userMap[id] || 'Неизвестен';
+        const rawName = userMap[id] || 'ÐÐµÐ¸Ð·Ð²ÐµÑÑ‚ÐµÐ½';
         const resolvedName = this.resolveName(rawName);
         const isMe = this._getMyUserIds().includes(id);
-        // Маркирай текущия потребител
-        return isMe ? `<strong>${this.escapeHtml(resolvedName)} (Аз)</strong>` : this.escapeHtml(resolvedName);
+        // ÐœÐ°Ñ€ÐºÐ¸Ñ€Ð°Ð¹ Ñ‚ÐµÐºÑƒÑ‰Ð¸Ñ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»
+        return isMe ? `<strong>${this.escapeHtml(resolvedName)} (ÐÐ·)</strong>` : this.escapeHtml(resolvedName);
     }).join('<br>');
 
     const tooltip = document.createElement('div');
@@ -3833,7 +3861,7 @@ class ChatUIManager {
     const badgeRect = badgeElement.getBoundingClientRect();
     const tooltipRect = tooltip.getBoundingClientRect();
 
-    // Позиционирай над бутона, центрирано
+    // ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ Ð½Ð°Ð´ Ð±ÑƒÑ‚Ð¾Ð½Ð°, Ñ†ÐµÐ½Ñ‚Ñ€Ð¸Ñ€Ð°Ð½Ð¾
     let top = badgeRect.top - tooltipRect.height - 5;
     let left = badgeRect.left + (badgeRect.width / 2) - (tooltipRect.width / 2);
 
@@ -3891,29 +3919,29 @@ class ChatUIManager {
 
     const reactionCounts = {};
     const myReactions = {};
-    
-    const myUserIds = this._getMyUserIds(); // Вземи всички мои userId-та
+
+    const myUserIds = this._getMyUserIds(); // Ð’Ð·ÐµÐ¼Ð¸ Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð¼Ð¾Ð¸ userId-Ñ‚Ð°
 
     Object.keys(reactionsForMessage).forEach(emoji => {
         const usersObj = reactionsForMessage[emoji] || {};
         const userIdsWhoReacted = Object.keys(usersObj).filter(userId => usersObj[userId] === true);
         const count = userIdsWhoReacted.length;
-        
+
         if (count > 0) {
             reactionCounts[emoji] = count;
-            // Провери дали някое от моите userId-та е реагирало
+            // ÐŸÑ€Ð¾Ð²ÐµÑ€Ð¸ Ð´Ð°Ð»Ð¸ Ð½ÑÐºÐ¾Ðµ Ð¾Ñ‚ Ð¼Ð¾Ð¸Ñ‚Ðµ userId-Ñ‚Ð° Ðµ Ñ€ÐµÐ°Ð³Ð¸Ñ€Ð°Ð»Ð¾
             if (userIdsWhoReacted.some(id => myUserIds.includes(id))) {
                 myReactions[emoji] = true;
             }
         }
     });
-      
+
     if (Object.keys(reactionCounts).length === 0) {
         return '';
     }
 
     return Object.keys(reactionCounts).map(emoji => `
-        <button class="reaction-badge" data-emoji="${emoji}" data-message-id="${messageId}" 
+        <button class="reaction-badge ${myReactions[emoji] ? 'is-my-reaction' : 'is-other-reaction'}" data-emoji="${emoji}" data-message-id="${messageId}"
           style="background: ${myReactions[emoji] ? '#93c5fd' : '#f0f0f0'}; color: #111827; border: none; border-radius: 12px; padding: 4px 8px; margin-right: 4px; cursor: pointer; font-size: 12px; font-weight: ${myReactions[emoji] ? 'bold' : 'normal'};">
           ${emoji} <span>${reactionCounts[emoji]}</span>
         </button>
@@ -3929,7 +3957,7 @@ class ChatUIManager {
         e.stopPropagation();
         const emoji = btn.dataset.emoji;
         const msgId = btn.dataset.messageId;
-        
+
         const reactionsForMessage = this.reactionsCache ? this.reactionsCache[msgId] : null;
         if (!reactionsForMessage) {
             this.addReaction(msgId, emoji);
@@ -3938,19 +3966,19 @@ class ChatUIManager {
 
         const myUserIds = this._getMyUserIds();
         const reactorsForEmoji = reactionsForMessage[emoji] || {};
-        
+
         const myReactingIds = myUserIds.filter(id => reactorsForEmoji[id] === true);
 
         if (myReactingIds.length > 0) {
-          // Премахни всички мои реакции за това емоджи
+          // ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð¸ Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð¼Ð¾Ð¸ Ñ€ÐµÐ°ÐºÑ†Ð¸Ð¸ Ð·Ð° Ñ‚Ð¾Ð²Ð° ÐµÐ¼Ð¾Ð´Ð¶Ð¸
           this.chatFirebase.bulkRemoveReactions(msgId, emoji, myReactingIds);
         } else {
-          // Добави нова реакция
+          // Ð”Ð¾Ð±Ð°Ð²Ð¸ Ð½Ð¾Ð²Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ñ
           this.addReaction(msgId, emoji);
         }
       });
 
-      // Добави hover слушатели за tooltip
+      // Ð”Ð¾Ð±Ð°Ð²Ð¸ hover ÑÐ»ÑƒÑˆÐ°Ñ‚ÐµÐ»Ð¸ Ð·Ð° tooltip
       btn.addEventListener('mouseenter', e => {
         this.showReactionTooltip(e.currentTarget);
       });
@@ -3969,7 +3997,7 @@ class ChatUIManager {
     // Find message text and author
     const textEl = messageEl.querySelector('.message-text');
     const authorEl = messageEl.querySelector('.message-author');
-    
+
     if (!textEl || !authorEl) return;
 
     const author = authorEl.textContent;
@@ -3981,12 +4009,12 @@ class ChatUIManager {
       input.dataset.replyTo = messageId;
       input.dataset.replyAuthor = author;
       input.dataset.replyText = text;
-      
+
       const inputArea = this.container.querySelector('.chat-input-area');
       this.fixInputLayout();
-      
+
       let replyIndicator = inputArea.querySelector('.reply-indicator');
-      
+
       if (!replyIndicator) {
         replyIndicator = document.createElement('div');
         replyIndicator.className = 'reply-indicator';
@@ -4008,7 +4036,7 @@ class ChatUIManager {
           <div style="font-weight: bold; color: var(--chat-primary); margin-bottom: 2px;">Replying to ${this.escapeHtml(author)}</div>
           <div style="opacity: 0.7; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${this.escapeHtml(textPreview)}</div>
         </div>
-        <button onclick="const input = this.closest('.chat-input-area').querySelector('.chat-input'); if(input) { input.dataset.replyTo=''; input.dataset.replyAuthor=''; input.dataset.replyText=''; } this.closest('.reply-indicator').remove();" style="border:none;background:none;cursor:pointer;font-size:16px;color:#64748b;padding: 0 4px; line-height: 1;">✕</button>
+        <button onclick="const input = this.closest('.chat-input-area').querySelector('.chat-input'); if(input) { input.dataset.replyTo=''; input.dataset.replyAuthor=''; input.dataset.replyText=''; } this.closest('.reply-indicator').remove();" style="border:none;background:none;cursor:pointer;font-size:16px;color:#64748b;padding: 0 4px; line-height: 1;">&times;</button>
       `;
       input.focus();
     }
@@ -4046,11 +4074,11 @@ class ChatUIManager {
         // Re-bind lazy observers on open to handle browsers that miss intersections
         // when messages were rendered while the panel was hidden.
         this.observeLazyImages();
-        
-        // Маркирай съобщенията като прочетени
+
+        // ÐœÐ°Ñ€ÐºÐ¸Ñ€Ð°Ð¹ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸ÑÑ‚Ð° ÐºÐ°Ñ‚Ð¾ Ð¿Ñ€Ð¾Ñ‡ÐµÑ‚ÐµÐ½Ð¸
         this.markAsRead();
 
-        // Превърти до долу веднага и след малко закъснение (заради анимацията)
+        // ÐŸÑ€ÐµÐ²ÑŠÑ€Ñ‚Ð¸ Ð´Ð¾ Ð´Ð¾Ð»Ñƒ Ð²ÐµÐ´Ð½Ð°Ð³Ð° Ð¸ ÑÐ»ÐµÐ´ Ð¼Ð°Ð»ÐºÐ¾ Ð·Ð°ÐºÑŠÑÐ½ÐµÐ½Ð¸Ðµ (Ð·Ð°Ñ€Ð°Ð´Ð¸ Ð°Ð½Ð¸Ð¼Ð°Ñ†Ð¸ÑÑ‚Ð°)
         this.scrollToBottom();
         requestAnimationFrame(() => this.scrollToBottom());
         setTimeout(() => this.scrollToBottom(), 100);
@@ -4076,14 +4104,14 @@ class ChatUIManager {
     if (!timestamp) return '';
     const date = new Date(timestamp);
     const now = new Date();
-    
+
     const isToday = date.getDate() === now.getDate() &&
                     date.getMonth() === now.getMonth() &&
                     date.getFullYear() === now.getFullYear();
 
     const hours = String(date.getHours()).padStart(2, '0');
     const minutes = String(date.getMinutes()).padStart(2, '0');
-    
+
     if (isToday) {
       return `${hours}:${minutes}`;
     } else {
@@ -4099,48 +4127,147 @@ class ChatUIManager {
     return div.innerHTML;
   }
 
+  formatAudioTime(seconds) {
+    if (!Number.isFinite(seconds) || seconds < 0) return '0:00';
+    const minutes = Math.floor(seconds / 60);
+    const remaining = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${remaining}`;
+  }
+
+  initializeCustomAudioPlayers(root) {
+    const players = root.querySelectorAll('.chat-audio-player:not([data-audio-ready="true"])');
+    players.forEach(player => {
+      const src = player.dataset.audioSrc;
+      if (!src) return;
+
+      player.dataset.audioReady = 'true';
+      const audio = new Audio(src);
+      audio.preload = 'metadata';
+
+      const playBtn = player.querySelector('.chat-audio-play');
+      const playIcon = player.querySelector('.chat-audio-play-icon');
+      const progress = player.querySelector('.chat-audio-progress');
+      const fill = player.querySelector('.chat-audio-progress-fill');
+      const currentEl = player.querySelector('.chat-audio-current');
+      const durationEl = player.querySelector('.chat-audio-duration');
+      const volumeInput = player.querySelector('.chat-audio-volume');
+      const updateVolumeTrack = () => {
+        if (!volumeInput) return;
+        const value = Number(volumeInput.value || 0);
+        const percent = Math.round(value * 100);
+        volumeInput.style.setProperty('--volume-percent', `${percent}%`);
+      };
+
+      const syncProgress = () => {
+        const duration = audio.duration || 0;
+        const percent = duration ? Math.min(100, (audio.currentTime / duration) * 100) : 0;
+        if (fill) fill.style.width = `${percent}%`;
+        if (progress) progress.setAttribute('aria-valuenow', String(Math.round(percent)));
+        if (currentEl) currentEl.textContent = this.formatAudioTime(audio.currentTime);
+      };
+
+      audio.addEventListener('loadedmetadata', () => {
+        if (durationEl) durationEl.textContent = this.formatAudioTime(audio.duration);
+        syncProgress();
+      });
+
+      audio.addEventListener('timeupdate', syncProgress);
+      audio.addEventListener('pause', () => {
+        player.classList.remove('is-playing');
+        if (playIcon) playIcon.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg>';
+      });
+      audio.addEventListener('play', () => {
+        document.querySelectorAll('.chat-audio-player.is-playing').forEach(other => {
+          if (other !== player && other._chatAudio) other._chatAudio.pause();
+        });
+        player.classList.add('is-playing');
+        if (playIcon) playIcon.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"></path></svg>';
+      });
+      audio.addEventListener('ended', () => {
+        audio.currentTime = 0;
+        syncProgress();
+      });
+
+      if (playBtn) {
+        playBtn.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (audio.paused) {
+            audio.play().catch(err => console.warn('Audio play failed:', err));
+          } else {
+            audio.pause();
+          }
+        });
+      }
+
+      if (progress) {
+        progress.addEventListener('click', e => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!audio.duration) return;
+          const rect = progress.getBoundingClientRect();
+          const ratio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+          audio.currentTime = ratio * audio.duration;
+          syncProgress();
+        });
+      }
+
+      if (volumeInput) {
+        audio.volume = Number(volumeInput.value || 1);
+        updateVolumeTrack();
+        volumeInput.addEventListener('input', e => {
+          audio.volume = Number(e.target.value);
+          updateVolumeTrack();
+        });
+        volumeInput.addEventListener('click', e => e.stopPropagation());
+      }
+
+      player._chatAudio = audio;
+    });
+  }
+
   linkifyText(text) {
     // 1. Escape HTML
     let processed = this.escapeHtml(text);
-    
+
     // 2. Markdown Support (Bold and Italic)
     // Bold: **text** -> <strong>text</strong>
     processed = processed.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
-    
+
     // Italic: *text* -> <em>text</em>
     // Use a regex that requires non-whitespace content to avoid matching simple asterisks
     processed = processed.replace(/\*(?!\s)(.*?)(?<!\s)\*/g, '<em>$1</em>');
 
     // 3. Newlines
     processed = processed.replace(/\n/g, '<br>');
-    
+
     // 4. Mentions (@username)
     const currentName = window.currentUser ? (window.currentUser.userName || window.currentUser.displayName || "").toLowerCase() : "";
-    
-    processed = processed.replace(/@([a-zA-Z0-9А-Яа-я._-]+)/g, (match, username) => {
+
+    processed = processed.replace(/@([a-zA-Z0-9Ð-Ð¯Ð°-Ñ._-]+)/g, (match, username) => {
         const lowerName = username.toLowerCase();
-        
+
         // Special case: @everyone
         if (lowerName === 'everyone') {
             return `<span class="mention-everyone" style="color: #ef4444; background-color: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); font-weight: 700; padding: 0 4px; border-radius: 4px;">@everyone</span>`;
         }
 
         const isMe = lowerName === currentName && currentName !== "";
-        
+
         // Find user color
         let userColor = '#3a5a40'; // Default Fern Green
-        
+
         // Search in profiles
         if (this.userProfiles) {
-            const profile = Object.values(this.userProfiles).find(p => 
+            const profile = Object.values(this.userProfiles).find(p =>
                 (p.username || p.displayName || p.userName || "").toLowerCase() === lowerName
             );
             if (profile && profile.color) userColor = profile.color;
         }
-        
+
         // If not found, check active users
         if (userColor === '#3a5a40' && this.chatFirebase && this.chatFirebase.activeUsers) {
-            const activeUser = Object.values(this.chatFirebase.activeUsers).find(u => 
+            const activeUser = Object.values(this.chatFirebase.activeUsers).find(u =>
                 (u.displayName || u.userName || u.username || "").toLowerCase() === lowerName
             );
             if (activeUser && activeUser.color) userColor = activeUser.color;
@@ -4148,7 +4275,7 @@ class ChatUIManager {
 
         // If STILL not found, check message history (fallback for offline users not in allUsers)
         if (userColor === '#3a5a40' && this.chatFirebase && this.chatFirebase.messages) {
-            const lastMsg = [...this.chatFirebase.messages].reverse().find(m => 
+            const lastMsg = [...this.chatFirebase.messages].reverse().find(m =>
                 (m.userName || "").toLowerCase() === lowerName
             );
             if (lastMsg && lastMsg.userColor) userColor = lastMsg.userColor;
@@ -4167,7 +4294,7 @@ class ChatUIManager {
     return processed.replace(urlRegex, (url) => {
       const isImage = /\.(jpeg|jpg|gif|png|webp)(\?.*)?$/i.test(url);
       const isMp3 = /\.mp3([?#].*)?$/i.test(url);
-      
+
       if (isImage) {
           return `
             <div class="chat-image-preview" style="margin-top: 5px;">
@@ -4179,12 +4306,27 @@ class ChatUIManager {
       if (isMp3) {
           const mediaUrl = url.replace(/&amp;/g, '&');
           return `
-            <div class="chat-audio-native" style="margin-top: 6px;">
-              <audio controls preload="metadata" src="${mediaUrl}" style="width:min(240px,70vw);max-width:100%;height:32px;max-height:32px;"></audio>
+            <div class="chat-audio-player" data-audio-src="${mediaUrl}" style="margin-top: 6px;">
+              <button class="chat-audio-play" type="button" aria-label="Play audio">
+                <span class="chat-audio-play-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"></path></svg></span>
+              </button>
+              <div class="chat-audio-body">
+                <div class="chat-audio-progress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+                  <div class="chat-audio-progress-fill"></div>
+                </div>
+                <div class="chat-audio-time">
+                  <span class="chat-audio-current">0:00</span>
+                  <span class="chat-audio-duration">0:00</span>
+                </div>
+                <div class="chat-audio-volume-row">
+                  <span class="chat-audio-volume-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4zm12.5 3c0-1.5-.8-2.8-2-3.5v7c1.2-.7 2-2 2-3.5z"></path></svg></span>
+                  <input class="chat-audio-volume" type="range" min="0" max="1" step="0.05" value="1" aria-label="Volume">
+                </div>
+              </div>
             </div>
           `;
       }
-      
+
       return `<a href="${url}" target="_blank" style="color: #4ade80; text-decoration: underline; cursor: pointer;">${url}</a>`;
     });
   }
@@ -4192,16 +4334,16 @@ class ChatUIManager {
   async deleteMessage(messageKey) {
         // Find the message to check if it has an image
         const msg = this.chatFirebase.messages.find(m => m.key === messageKey);
-        
+
         if (await this.chatFirebase.deleteMessage(messageKey)) {
             // Hide tooltip if it was showing for this message
             this.hideReactionTooltip();
-            
+
             // Check if message contains an R2 image URL and delete it
             if (msg && msg.text) {
                 const chatImageRegex = /https:\/\/chat\.coursebook\.lol\/([^\s]+)/g;
                 const matches = [...msg.text.matchAll(chatImageRegex)];
-                
+
                 for (const match of matches) {
                     const imageKey = decodeURIComponent(match[1]);
                     try {
@@ -4209,7 +4351,7 @@ class ChatUIManager {
                         await fetch(R2_WORKER_URL, {
                             method: 'DELETE',
                             headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ 
+                            body: JSON.stringify({
                                 key: imageKey,
                                 bucketType: 'chat'
                             })
@@ -4220,8 +4362,8 @@ class ChatUIManager {
                     }
                 }
             }
-            
-            // Премахни локално веднага с анимация
+
+            // ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð¸ Ð»Ð¾ÐºÐ°Ð»Ð½Ð¾ Ð²ÐµÐ´Ð½Ð°Ð³Ð° Ñ Ð°Ð½Ð¸Ð¼Ð°Ñ†Ð¸Ñ
             const messagesContainer = this.container.querySelector('.chat-messages');
             const messageEl = messagesContainer.querySelector(`[data-message-key="${messageKey}"]`);
             if (messageEl) {
@@ -4264,10 +4406,10 @@ class ChatUIManager {
         // Check if the update is for the currently logged-in user
         if (window.currentUser && newUserData.uid === window.currentUser.userId) {
           // console.log('User data updated from another tab. Refreshing local state.'); // Can be removed
-          
+
           // Update the global currentUser object
           Object.assign(window.currentUser, newUserData);
-          
+
           // Presence is managed by site-wide presence.js; no direct chat-side force update call.
         }
       } catch (e) { console.error('Error processing storage event:', e); }
@@ -4299,7 +4441,7 @@ class ChatUIManager {
       </div>
       <div style="display: flex; gap: 8px;">
         <button class="chat-header-btn" id="toggle-notifications" title="Notifications">
-          <img src="svg/chat/${this.notificationsDisabled ? 'icon-notifications-disabled.svg' : 'icon-notifications-enabled.svg'}" 
+          <img src="svg/chat/${this.notificationsDisabled ? 'icon-notifications-disabled.svg' : 'icon-notifications-enabled.svg'}"
                style="width: ${this.notificationsDisabled ? '18px' : '20px'}; height: ${this.notificationsDisabled ? '18px' : '20px'}; filter: brightness(0) invert(1);">
         </button>
         <button class="chat-header-btn" id="chat-members-toggle" title="Active Members">
@@ -4310,7 +4452,7 @@ class ChatUIManager {
             <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
           </svg>
         </button>
-        <button class="chat-close-btn" id="chat-close" title="Close Chat">✕</button>
+        <button class="chat-close-btn" id="chat-close" title="Close Chat">&times;</button>
       </div>
     </div>
 
@@ -5003,6 +5145,395 @@ class ChatUIManager {
   text-decoration: underline !important;
   cursor: pointer !important;
 }
+
+/* Test-only: original chat with only background and bubble colors adjusted. */
+#chat-widget .chat-container,
+#chat-widget .chat-messages-wrapper,
+#chat-widget .chat-messages {
+  background: #edf3e8;
+}
+
+#chat-widget .message-text {
+  background: #fbfcf7 !important;
+  border: 1px solid #dfe8dc;
+  box-shadow: 0 1px 3px rgba(58, 90, 64, 0.08);
+  border-radius: 10px;
+}
+
+#chat-widget .chat-header {
+  padding: 15px 16px;
+  background: #588157;
+  border-bottom: 1px solid rgba(52, 78, 65, 0.3);
+  box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.12);
+}
+
+#chat-widget .chat-header-title > div:first-child {
+  letter-spacing: -0.01em;
+}
+
+#chat-widget .chat-header-btn,
+#chat-widget .chat-close-btn {
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+#chat-widget .chat-header-btn:hover,
+#chat-widget .chat-close-btn:hover {
+  background: rgba(255, 255, 255, 0.24);
+}
+
+#chat-widget .chat-input-area {
+  padding: 12px;
+  background: #f4f8f1;
+  border-top-color: #cddbc8;
+  box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.75) inset;
+}
+
+#chat-widget .is-self-message .message-text {
+  background: #d9ecd4 !important;
+  border-color: #b7d1af;
+  box-shadow: 0 2px 7px rgba(58, 90, 64, 0.14);
+}
+
+#chat-widget .chat-message.is-continuation-message {
+  margin-top: -1px;
+  margin-bottom: 0 !important;
+}
+
+#chat-widget .chat-message.is-followed-by-continuation {
+  margin-bottom: 0 !important;
+}
+
+#chat-widget .chat-message.is-continuation-message .message-avatar-container {
+  height: 0 !important;
+  min-height: 0 !important;
+}
+
+#chat-widget .chat-message.is-continuation-message .message-content {
+  gap: 0 !important;
+}
+
+#chat-widget .chat-message.is-continuation-message .message-bubble-container {
+  gap: 0 !important;
+}
+
+#chat-widget .chat-message.is-continuation-message .message-text {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+#chat-widget .message-bubble-container {
+  gap: 3px;
+}
+
+#chat-widget .chat-reply-preview {
+  margin-bottom: 2px !important;
+  border-radius: 8px !important;
+  background: #eef5ec !important;
+  border-left-color: #8aad82 !important;
+  box-shadow: inset 0 0 0 1px rgba(88, 129, 87, 0.08);
+}
+
+#chat-widget .message-reactions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 2px 0 2px;
+  min-height: 0;
+}
+
+#chat-widget .message-reactions:empty {
+  display: none;
+  margin: 0;
+}
+
+#chat-widget .chat-message.is-followed-by-continuation .message-reactions {
+  margin: 0;
+}
+
+#chat-widget .chat-message.is-continuation-message .message-reactions {
+  margin: 1px 0 1px;
+}
+
+#chat-widget .chat-date-separator {
+  height: auto;
+  margin: 18px 14px 14px;
+  padding: 0;
+  background: transparent;
+}
+
+#chat-widget .chat-date-separator::before,
+#chat-widget .chat-date-separator::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #cad9c5;
+}
+
+#chat-widget .chat-date-separator span {
+  position: static;
+  transform: none;
+  top: auto;
+  margin: 0 10px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #f7faf4;
+  border: 1px solid #d7e5d2;
+  color: #587058;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  box-shadow: 0 1px 2px rgba(58, 90, 64, 0.06);
+}
+
+#chat-widget .message-avatar {
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 7px rgba(58, 90, 64, 0.18);
+}
+
+#chat-widget .message-avatar-container {
+  border-radius: 50%;
+}
+
+#chat-widget .chat-active-users {
+  background: #edf3e8;
+  padding: 8px 4px 8px 2px;
+  width: 142px;
+}
+
+#chat-widget #active-users-list {
+  padding: 0 3px 6px 2px !important;
+}
+
+#chat-widget #active-users-list > strong,
+#chat-widget .active-users-offline-section > strong {
+  display: block !important;
+  margin: 0 0 7px !important;
+  text-align: left;
+  color: #3f6846 !important;
+  font-size: 11px;
+  letter-spacing: 0.02em;
+}
+
+#chat-widget .active-users-offline-section > strong {
+  margin-top: 8px !important;
+}
+
+#chat-widget .active-user-item {
+  margin: 3px 0 !important;
+  padding: 5px 4px !important;
+  border-radius: 10px !important;
+  gap: 6px !important;
+}
+
+#chat-widget .active-user-item:hover {
+  background: rgba(88, 129, 87, 0.1) !important;
+}
+
+#chat-widget .active-user-avatar-slot,
+#chat-widget .active-user-avatar-slot img,
+#chat-widget .active-user-avatar-slot > div {
+  width: 26px !important;
+  height: 26px !important;
+}
+
+#chat-widget .active-user-avatar-slot img,
+#chat-widget .active-user-avatar-slot > div {
+  border-radius: 50% !important;
+  box-shadow: 0 1px 5px rgba(58, 90, 64, 0.16);
+}
+
+#chat-widget .active-user-name-row {
+  font-size: 11.5px !important;
+  min-width: 0;
+}
+
+#chat-widget .active-user-name {
+  max-width: none !important;
+}
+
+#chat-widget .active-users-offline-section .active-user-item {
+  opacity: 0.72 !important;
+}
+
+#chat-widget .chat-input {
+  border-radius: 10px;
+  background: #fbfcf7;
+  border-color: #b9cdb3;
+  box-shadow: inset 0 1px 2px rgba(58, 90, 64, 0.05);
+}
+
+#chat-widget .chat-input:focus {
+  border-color: #588157;
+  box-shadow: 0 0 0 3px rgba(88, 129, 87, 0.13);
+}
+
+#chat-widget .chat-plus-btn,
+#chat-widget .chat-send-btn,
+#chat-widget .chat-header-btn,
+#chat-widget .chat-close-btn {
+  border-radius: 10px;
+}
+
+#chat-widget .chat-plus-btn,
+#chat-widget .chat-send-btn {
+  box-shadow: 0 2px 6px rgba(58, 90, 64, 0.16);
+}
+
+#chat-widget .chat-audio-player {
+  width: min(252px, 70vw);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 2px 0 0;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+#chat-widget .chat-audio-play {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--chat-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  font-size: 12px;
+  line-height: 1;
+}
+
+#chat-widget .chat-audio-player.is-playing .chat-audio-play {
+  background: #3f6846;
+}
+
+#chat-widget .chat-audio-play-icon svg,
+#chat-widget .chat-audio-volume-icon svg {
+  width: 14px;
+  height: 14px;
+  display: block;
+  fill: currentColor;
+}
+
+#chat-widget .chat-audio-body {
+  flex: 1;
+  min-width: 0;
+}
+
+#chat-widget .chat-audio-progress {
+  height: 7px;
+  border-radius: 999px;
+  background: #dce7d8;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+#chat-widget .chat-audio-progress-fill {
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--chat-primary);
+  transition: width 0.08s linear;
+}
+
+#chat-widget .chat-audio-time {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+  color: #60705f;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+#chat-widget .chat-audio-volume-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+}
+
+#chat-widget .chat-audio-volume-icon {
+  color: #588157;
+  font-size: 11px;
+  line-height: 1;
+  width: 12px;
+  text-align: center;
+}
+
+#chat-widget .chat-audio-volume {
+  width: 100%;
+  accent-color: #588157;
+  cursor: pointer;
+  --volume-percent: 100%;
+  background: transparent;
+}
+
+#chat-widget .chat-audio-volume::-webkit-slider-runnable-track {
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(to right, #588157 0 var(--volume-percent), #dce7d8 var(--volume-percent) 100%);
+}
+
+#chat-widget .chat-audio-volume::-moz-range-track {
+  height: 5px;
+  border-radius: 999px;
+  background: #dce7d8;
+}
+
+#chat-widget .chat-audio-volume::-moz-range-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: #588157;
+}
+
+#chat-widget .chat-audio-volume::-webkit-slider-thumb {
+  margin-top: -4px;
+}
+
+#chat-widget .reaction-badge {
+  margin-right: 0 !important;
+  border-radius: 999px !important;
+  padding: 3px 8px !important;
+}
+
+#chat-widget .reaction-badge.is-other-reaction {
+  background: #eef5ec !important;
+  border: 1px solid #c9dcc3 !important;
+  box-shadow: 0 1px 3px rgba(58, 90, 64, 0.12);
+  font-weight: 600 !important;
+}
+
+#chat-widget .reaction-badge.is-my-reaction {
+  background: #b9d8b1 !important;
+  border: 1px solid #7faa75 !important;
+  box-shadow: 0 1px 5px rgba(58, 90, 64, 0.18);
+  font-weight: 800 !important;
+}
+
+#chat-widget.chat-readonly .chat-input {
+  color: var(--chat-text-light);
+  cursor: default;
+}
+
+#chat-widget.chat-readonly .chat-plus-btn,
+#chat-widget.chat-readonly .chat-send-btn {
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+#chat-widget.chat-readonly .chat-plus-btn:hover,
+#chat-widget.chat-readonly .chat-send-btn:hover {
+  transform: none;
+}
+
 .message-text strong {
   font-weight: 700;
   color: inherit;
@@ -5054,11 +5585,11 @@ class ChatUIManager {
     try {
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = CHAT_WIDGET_HTML;
-      
+
       // Inject CSS
       const style = tempDiv.querySelector('style');
       if (style) document.head.appendChild(style);
-      
+
       // Inject HTML
       const widget = tempDiv.querySelector('#chat-widget');
       if (widget) {
@@ -5074,15 +5605,15 @@ class ChatUIManager {
 
   async function tryInit() {
     if (chatInitialized) return;
-    
+
     // Wait for DOM to be ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => tryInit());
       return;
-    } 
-    
+    }
+
     attempts++;
-    
+
     // 1. Try to load the widget if missing
     if (!document.getElementById('chat-widget')) {
       await loadChatWidget();
@@ -5105,22 +5636,22 @@ class ChatUIManager {
   }
 
   function initChat() {
-    // console.log('Инициализирам Chat UI...'); // Can be removed
-    
+    // console.log('Ð˜Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð°Ð¼ Chat UI...'); // Can be removed
+
     const chatWidget = document.getElementById('chat-widget');
     if (!chatWidget) {
-      console.error('Chat widget не е намерен!');
+      console.error('Chat widget Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½!');
       return;
     }
 
-    // ГЛОБАЛЕН ЧАТ ЗА ВСИЧКИ САЙТОВЕ
+    // Ð“Ð›ÐžÐ‘ÐÐ›Ð•Ð Ð§ÐÐ¢ Ð—Ð Ð’Ð¡Ð˜Ð§ÐšÐ˜ Ð¡ÐÐ™Ð¢ÐžÐ’Ð•
     const documentId = 'global-chat';
 
     let chatManager;
     try {
       chatManager = new ChatUIManager('chat-widget', documentId);
       window.chatManager = chatManager;
-    //  console.log('✓✓✓ Chat система ГОТОВА!');
+    //  console.log('âœ“âœ“âœ“ Chat ÑÐ¸ÑÑ‚ÐµÐ¼Ð° Ð“ÐžÐ¢ÐžÐ’Ð!');
     } catch (error) {
       console.error('Chat init error:', error);
       return;
@@ -5131,7 +5662,7 @@ class ChatUIManager {
       chatIcon.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        // console.log('💬 Click'); // Can be removed
+        // console.log('ðŸ’¬ Click'); // Can be removed
         if (window.chatManager) {
           window.chatManager.toggleChat();
         }
@@ -5154,24 +5685,24 @@ class ChatUIManager {
       currentUserNameEl.textContent = window.currentUser.userName;
     }
 
-    // console.log('Потребител:', window.currentUser.userName); // Can be removed
+    // console.log('ÐŸÐ¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»:', window.currentUser.userName); // Can be removed
   }
 
   tryInit();
 })();
 
 // ============================================
-// GLOBAL RESET FUNCTION - достъпна отвсякъде
+// GLOBAL RESET FUNCTION - Ð´Ð¾ÑÑ‚ÑŠÐ¿Ð½Ð° Ð¾Ñ‚Ð²ÑÑÐºÑŠÐ´Ðµ
 // ============================================
 
 window.resetChat = function() {
   localStorage.removeItem('userId');
   localStorage.removeItem('userName');
   localStorage.removeItem('userColor');
-  console.log('✅ Ресет завършен! Напиши в консолата: location.reload()');
+  console.log('âœ… Ð ÐµÑÐµÑ‚ Ð·Ð°Ð²ÑŠÑ€ÑˆÐµÐ½! ÐÐ°Ð¿Ð¸ÑˆÐ¸ Ð² ÐºÐ¾Ð½ÑÐ¾Ð»Ð°Ñ‚Ð°: location.reload()');
 };
 
-// console.log('💡 Команди: resetChat() - ресет на име');
+// console.log('ðŸ’¡ ÐšÐ¾Ð¼Ð°Ð½Ð´Ð¸: resetChat() - Ñ€ÐµÑÐµÑ‚ Ð½Ð° Ð¸Ð¼Ðµ');
 
 // Cache buster
 const CHAT_VERSION = '20260122_v2';

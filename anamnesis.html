@@ -14,13 +14,13 @@
         }
     </style>
     <title>Anamnesis</title>
-    
+
     <!-- Scripts -->
-    <script src="js/auth-guard.js?v=20260430bx"></script>
+    <script src="js/auth-guard.js?v=202604302m8"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=20260127"></script>
-    
+
     <!-- Fonts & Icons -->
     <link rel="icon" href="favicon.svg?v=7" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
@@ -31,7 +31,7 @@
 
     <style>
         body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
-        
+
         /* Main Content */
         .main-content {
             flex: 1;
@@ -63,7 +63,7 @@
             border-bottom: 1px solid #eee;
             background: #fafafa;
             /* Adjust for mobile menu button */
-            padding-left: 16px; 
+            padding-left: 16px;
         }
         .search-box {
             width: 100%;
@@ -215,7 +215,7 @@
         }
         .form-control:focus { border-color: #588157; outline: none; }
         textarea.form-control { min-height: 80px; resize: vertical; line-height: 1.5; }
-        
+
         .section-header-large {
             font-size: 22px;
             font-weight: 700;
@@ -242,8 +242,8 @@
             justify-content: space-between;
             align-items: center;
         }
-        .author-badge { 
-            background: #588157; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; 
+        .author-badge {
+            background: #588157; color: #fff; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;
         }
         .date-badge { color: #555; font-size: 13px; }
         .anamnesis-view-content { padding: 32px; }
@@ -251,7 +251,7 @@
         .view-label { font-size: 12px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; }
         .view-value { font-size: 15px; color: #333; line-height: 1.6; white-space: pre-wrap; }
         .view-value.empty { color: #ccc; font-style: italic; }
-        
+
         /* Grid for Status View */
         .status-grid {
             display: grid;
@@ -500,11 +500,11 @@
             animation: spin 1s linear infinite;
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
+
         /* =========================================
            MOBILE OPTIMIZATIONS
            ========================================= */
-        
+
         .mobile-menu-toggle {
             display: none;
             flex-direction: column;
@@ -566,7 +566,7 @@
                 transform: translateX(-100%);
                 box-shadow: 2px 0 16px rgba(0,0,0,0.18);
             }
-            
+
             .mobile-menu-toggle {
                 display: flex;
             }
@@ -596,7 +596,7 @@
             .workspace-panel.active {
                 display: flex;
             }
-            
+
             /* Form Improvements */
             .module-container {
                 padding: 16px;
@@ -618,7 +618,7 @@
             .mobile-back-btn {
                 display: block;
             }
-            
+
             /* Form Elements */
             .form-row {
                 flex-direction: column;
@@ -629,7 +629,7 @@
                 width: 100%;
                 flex: none; /* Reset flex */
             }
-            
+
             /* Cards */
             .anamnesis-view-content {
                 padding: 16px;
@@ -639,7 +639,7 @@
                 align-items: flex-start;
                 gap: 8px;
             }
-            
+
             /* Tab scroll fix */
             .tabs {
                 padding-bottom: 0;
@@ -670,7 +670,7 @@
                 <img class="logo-img" src="svg/logo-coursebook.svg" alt="StudyBoard">
             </a>
         </div>
-        
+
         <nav class="sidebar-nav">
             <ul>
                 <li class="base-navigation-button">
@@ -697,7 +697,7 @@
                         <span>Anamnesis</span>
                     </a>
                 </li>
-                
+
                 <li class="base-navigation-button">
                     <a href="calendar.html">
                         <img class="svg-icon" src="svg/icon-calendar.svg">
@@ -730,7 +730,7 @@
                 </li>
             </ul>
         </nav>
-        
+
         <div class="sidebar-footer-links">
             <span class="sidebar-footer-item">Terms</span>
             <span class="sidebar-footer-item">Accessibility</span>
@@ -740,17 +740,17 @@
     <!-- Main Content -->
     <div class="main-content">
         <div class="anamnesis-layout">
-            
+
             <!-- List Panel -->
             <div class="patient-list-panel" id="patientListPanel">
                 <div class="panel-header">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <h2 style="margin:0; color:#333; font-size: 18px;">Пациенти</h2>
+                        <h2 style="margin:0; color:#333; font-size: 18px;">ÐŸÐ°Ñ†Ð¸ÐµÐ½Ñ‚Ð¸</h2>
                         <button id="btn-new-mobile-list" class="new-btn mobile-visible" style="padding: 6px 12px; font-size: 14px;">
                             <span class="material-icons" style="font-size: 18px;">add</span>
                         </button>
                     </div>
-                    <input type="text" id="patient-search" class="search-box" placeholder="Търсене...">
+                    <input type="text" id="patient-search" class="search-box" placeholder="Ð¢ÑŠÑ€ÑÐµÐ½Ðµ...">
                 </div>
                 <ul id="patient-list" class="patient-list"></ul>
             </div>
@@ -762,119 +762,119 @@
                         <button id="btn-back-mobile" class="mobile-back-btn" type="button">
                             <span class="material-icons" style="font-size: 24px;">arrow_back</span>
                         </button>
-                        <h1 id="workspace-title" class="workspace-title">Нова Анамнеза</h1>
+                        <h1 id="workspace-title" class="workspace-title">ÐÐ¾Ð²Ð° ÐÐ½Ð°Ð¼Ð½ÐµÐ·Ð°</h1>
                     </div>
                     <button id="btn-new-anamnesis" class="new-btn">
-                        <span class="material-icons" style="font-size: 18px;">add</span> <span class="btn-text">Нова</span>
+                        <span class="material-icons" style="font-size: 18px;">add</span> <span class="btn-text">ÐÐ¾Ð²Ð°</span>
                     </button>
                 </div>
 
                 <div class="workspace-content">
-                    
+
                     <!-- FORM VIEW -->
                     <div id="view-form">
                         <form id="anamnesis-form">
-                            
+
                             <div class="module-container">
                                 <div class="tabs">
-                                    <button type="button" class="tab-btn active" onclick="switchTab('tab-anamnesis')">Анамнеза</button>
-                                    <button type="button" class="tab-btn" onclick="switchTab('tab-status')">Статус Презенс</button>
-                                    <button type="button" class="tab-btn" onclick="switchTab('tab-notes')">Записки</button>
+                                    <button type="button" class="tab-btn active" onclick="switchTab('tab-anamnesis')">ÐÐ½Ð°Ð¼Ð½ÐµÐ·Ð°</button>
+                                    <button type="button" class="tab-btn" onclick="switchTab('tab-status')">Ð¡Ñ‚Ð°Ñ‚ÑƒÑ ÐŸÑ€ÐµÐ·ÐµÐ½Ñ</button>
+                                    <button type="button" class="tab-btn" onclick="switchTab('tab-notes')">Ð—Ð°Ð¿Ð¸ÑÐºÐ¸</button>
                                 </div>
 
                                 <!-- TAB 1: ANAMNESIS -->
                                 <div id="tab-anamnesis" class="tab-content active">
-                                    
+
                                     <div class="form-section">
-                                        <h3>1. Въведение и Паспортни Данни</h3>
+                                        <h3>1. Ð’ÑŠÐ²ÐµÐ´ÐµÐ½Ð¸Ðµ Ð¸ ÐŸÐ°ÑÐ¿Ð¾Ñ€Ñ‚Ð½Ð¸ Ð”Ð°Ð½Ð½Ð¸</h3>
                                         <div class="form-row">
                                             <div class="form-group">
-                                                <label>Име</label>
-                                                <input type="text" name="name" class="form-control" required placeholder="Три имена">
+                                                <label>Ð˜Ð¼Ðµ</label>
+                                                <input type="text" name="name" class="form-control" required placeholder="Ð¢Ñ€Ð¸ Ð¸Ð¼ÐµÐ½Ð°">
                                             </div>
                                             <div class="form-group" style="flex: 0 0 100px;">
-                                                <label>Години</label>
-                                                <input type="number" name="age" class="form-control" placeholder="Възраст">
+                                                <label>Ð“Ð¾Ð´Ð¸Ð½Ð¸</label>
+                                                <input type="number" name="age" class="form-control" placeholder="Ð’ÑŠÐ·Ñ€Ð°ÑÑ‚">
                                             </div>
                                             <div class="form-group">
-                                                <label>Местоживеене</label>
-                                                <input type="text" name="address" class="form-control" placeholder="Населено място">
+                                                <label>ÐœÐµÑÑ‚Ð¾Ð¶Ð¸Ð²ÐµÐµÐ½Ðµ</label>
+                                                <input type="text" name="address" class="form-control" placeholder="ÐÐ°ÑÐµÐ»ÐµÐ½Ð¾ Ð¼ÑÑÑ‚Ð¾">
                                             </div>
                                             <div class="form-group" style="flex: 0 0 120px;">
-                                                <label>Пол</label>
+                                                <label>ÐŸÐ¾Ð»</label>
                                                 <select name="gender" class="form-control">
-                                                    <option value="M">Мъж</option>
-                                                    <option value="F">Женат</option>
+                                                    <option value="M">ÐœÑŠÐ¶</option>
+                                                    <option value="F">Ð–ÐµÐ½Ð°Ñ‚</option>
                                                 </select>
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Прием в Клиниката ("Постъпва за... с оплаквания...")</label>
-                                            <textarea name="admission_note" class="form-control" placeholder="Постъпва за пореден път в клиниката със следните оплаквания..."></textarea>
+                                            <label>ÐŸÑ€Ð¸ÐµÐ¼ Ð² ÐšÐ»Ð¸Ð½Ð¸ÐºÐ°Ñ‚Ð° ("ÐŸÐ¾ÑÑ‚ÑŠÐ¿Ð²Ð° Ð·Ð°... Ñ Ð¾Ð¿Ð»Ð°ÐºÐ²Ð°Ð½Ð¸Ñ...")</label>
+                                            <textarea name="admission_note" class="form-control" placeholder="ÐŸÐ¾ÑÑ‚ÑŠÐ¿Ð²Ð° Ð·Ð° Ð¿Ð¾Ñ€ÐµÐ´ÐµÐ½ Ð¿ÑŠÑ‚ Ð² ÐºÐ»Ð¸Ð½Ð¸ÐºÐ°Ñ‚Ð° ÑÑŠÑ ÑÐ»ÐµÐ´Ð½Ð¸Ñ‚Ðµ Ð¾Ð¿Ð»Ð°ÐºÐ²Ð°Ð½Ð¸Ñ..."></textarea>
                                         </div>
                                     </div>
 
                                     <div class="form-section">
-                                        <h3>2. Anamnesis morbi (Сегашно състояние)</h3>
+                                        <h3>2. Anamnesis morbi (Ð¡ÐµÐ³Ð°ÑˆÐ½Ð¾ ÑÑŠÑÑ‚Ð¾ÑÐ½Ð¸Ðµ)</h3>
                                         <div class="form-group">
-                                            <label>Основно Оплакване</label>
-                                            <textarea name="complaint" class="form-control" placeholder="Причина за търсене на помощ"></textarea>
+                                            <label>ÐžÑÐ½Ð¾Ð²Ð½Ð¾ ÐžÐ¿Ð»Ð°ÐºÐ²Ð°Ð½Ðµ</label>
+                                            <textarea name="complaint" class="form-control" placeholder="ÐŸÑ€Ð¸Ñ‡Ð¸Ð½Ð° Ð·Ð° Ñ‚ÑŠÑ€ÑÐµÐ½Ðµ Ð½Ð° Ð¿Ð¾Ð¼Ð¾Ñ‰"></textarea>
                                         </div>
                                         <div class="form-row">
                                             <div class="form-group">
-                                                <label>Хронология и Прогрес</label>
-                                                <textarea name="chronology" class="form-control" placeholder="Начало, продължителност, развитие..."></textarea>
+                                                <label>Ð¥Ñ€Ð¾Ð½Ð¾Ð»Ð¾Ð³Ð¸Ñ Ð¸ ÐŸÑ€Ð¾Ð³Ñ€ÐµÑ</label>
+                                                <textarea name="chronology" class="form-control" placeholder="ÐÐ°Ñ‡Ð°Ð»Ð¾, Ð¿Ñ€Ð¾Ð´ÑŠÐ»Ð¶Ð¸Ñ‚ÐµÐ»Ð½Ð¾ÑÑ‚, Ñ€Ð°Ð·Ð²Ð¸Ñ‚Ð¸Ðµ..."></textarea>
                                             </div>
                                             <div class="form-group">
-                                                <label>Лечение и Предишни Епизоди</label>
-                                                <textarea name="history_treatment" class="form-control" placeholder="Предишно лечение, подобни епизоди..."></textarea>
+                                                <label>Ð›ÐµÑ‡ÐµÐ½Ð¸Ðµ Ð¸ ÐŸÑ€ÐµÐ´Ð¸ÑˆÐ½Ð¸ Ð•Ð¿Ð¸Ð·Ð¾Ð´Ð¸</label>
+                                                <textarea name="history_treatment" class="form-control" placeholder="ÐŸÑ€ÐµÐ´Ð¸ÑˆÐ½Ð¾ Ð»ÐµÑ‡ÐµÐ½Ð¸Ðµ, Ð¿Ð¾Ð´Ð¾Ð±Ð½Ð¸ ÐµÐ¿Ð¸Ð·Ð¾Ð´Ð¸..."></textarea>
                                             </div>
                                         </div>
-                                        
-                                        <h4>Детайли по Симптоми</h4>
+
+                                        <h4>Ð”ÐµÑ‚Ð°Ð¹Ð»Ð¸ Ð¿Ð¾ Ð¡Ð¸Ð¼Ð¿Ñ‚Ð¾Ð¼Ð¸</h4>
                                         <div class="form-row">
-                                            <div class="form-group"><label>Болка</label><input type="text" name="sym_pain" class="form-control" placeholder="Локализация, характер..."></div>
-                                            <div class="form-group"><label>Кашлица</label><input type="text" name="sym_cough" class="form-control" placeholder="Суха/Влажна, храчки..."></div>
-                                            <div class="form-group"><label>Задух</label><input type="text" name="sym_dyspnea" class="form-control" placeholder="При усилие/покой..."></div>
+                                            <div class="form-group"><label>Ð‘Ð¾Ð»ÐºÐ°</label><input type="text" name="sym_pain" class="form-control" placeholder="Ð›Ð¾ÐºÐ°Ð»Ð¸Ð·Ð°Ñ†Ð¸Ñ, Ñ…Ð°Ñ€Ð°ÐºÑ‚ÐµÑ€..."></div>
+                                            <div class="form-group"><label>ÐšÐ°ÑˆÐ»Ð¸Ñ†Ð°</label><input type="text" name="sym_cough" class="form-control" placeholder="Ð¡ÑƒÑ…Ð°/Ð’Ð»Ð°Ð¶Ð½Ð°, Ñ…Ñ€Ð°Ñ‡ÐºÐ¸..."></div>
+                                            <div class="form-group"><label>Ð—Ð°Ð´ÑƒÑ…</label><input type="text" name="sym_dyspnea" class="form-control" placeholder="ÐŸÑ€Ð¸ ÑƒÑÐ¸Ð»Ð¸Ðµ/Ð¿Ð¾ÐºÐ¾Ð¹..."></div>
                                         </div>
                                         <div class="form-row">
-                                            <div class="form-group"><label>Кръвно Налягане</label><input type="text" name="sym_bp_hist" class="form-control" placeholder="Стойности, кризи..."></div>
-                                            <div class="form-group"><label>Пулс</label><input type="text" name="sym_pulse" class="form-control" placeholder="уд/мин..."></div>
-                                            <div class="form-group"><label>Температура</label><input type="text" name="sym_temp" class="form-control" placeholder="Градуси, втрисване..."></div>
+                                            <div class="form-group"><label>ÐšÑ€ÑŠÐ²Ð½Ð¾ ÐÐ°Ð»ÑÐ³Ð°Ð½Ðµ</label><input type="text" name="sym_bp_hist" class="form-control" placeholder="Ð¡Ñ‚Ð¾Ð¹Ð½Ð¾ÑÑ‚Ð¸, ÐºÑ€Ð¸Ð·Ð¸..."></div>
+                                            <div class="form-group"><label>ÐŸÑƒÐ»Ñ</label><input type="text" name="sym_pulse" class="form-control" placeholder="ÑƒÐ´/Ð¼Ð¸Ð½..."></div>
+                                            <div class="form-group"><label>Ð¢ÐµÐ¼Ð¿ÐµÑ€Ð°Ñ‚ÑƒÑ€Ð°</label><input type="text" name="sym_temp" class="form-control" placeholder="Ð“Ñ€Ð°Ð´ÑƒÑÐ¸, Ð²Ñ‚Ñ€Ð¸ÑÐ²Ð°Ð½Ðµ..."></div>
                                         </div>
                                     </div>
 
                                     <div class="form-section">
-                                        <h3>3. Anamnesis vitae (Минали заболявания)</h3>
+                                        <h3>3. Anamnesis vitae (ÐœÐ¸Ð½Ð°Ð»Ð¸ Ð·Ð°Ð±Ð¾Ð»ÑÐ²Ð°Ð½Ð¸Ñ)</h3>
                                         <div class="form-group">
-                                            <label>Прекарани Заболявания и Операции</label>
-                                            <textarea name="past_diseases" class="form-control" placeholder="Диабет, хепатит, туберкулоза, пневмонии..."></textarea>
+                                            <label>ÐŸÑ€ÐµÐºÐ°Ñ€Ð°Ð½Ð¸ Ð—Ð°Ð±Ð¾Ð»ÑÐ²Ð°Ð½Ð¸Ñ Ð¸ ÐžÐ¿ÐµÑ€Ð°Ñ†Ð¸Ð¸</label>
+                                            <textarea name="past_diseases" class="form-control" placeholder="Ð”Ð¸Ð°Ð±ÐµÑ‚, Ñ…ÐµÐ¿Ð°Ñ‚Ð¸Ñ‚, Ñ‚ÑƒÐ±ÐµÑ€ÐºÑƒÐ»Ð¾Ð·Ð°, Ð¿Ð½ÐµÐ²Ð¼Ð¾Ð½Ð¸Ð¸..."></textarea>
                                         </div>
                                         <div class="form-group">
-                                            <label>Придружаващи заболявания</label>
-                                            <textarea name="concomitant_diseases" class="form-control" placeholder="Хронични заболявания..."></textarea>
+                                            <label>ÐŸÑ€Ð¸Ð´Ñ€ÑƒÐ¶Ð°Ð²Ð°Ñ‰Ð¸ Ð·Ð°Ð±Ð¾Ð»ÑÐ²Ð°Ð½Ð¸Ñ</label>
+                                            <textarea name="concomitant_diseases" class="form-control" placeholder="Ð¥Ñ€Ð¾Ð½Ð¸Ñ‡Ð½Ð¸ Ð·Ð°Ð±Ð¾Ð»ÑÐ²Ð°Ð½Ð¸Ñ..."></textarea>
                                         </div>
                                         <div class="form-group">
-                                            <label>Медикаменти (Настоящ и минал прием)</label>
-                                            <textarea name="medications" class="form-control" placeholder="Списък лекарства..."></textarea>
+                                            <label>ÐœÐµÐ´Ð¸ÐºÐ°Ð¼ÐµÐ½Ñ‚Ð¸ (ÐÐ°ÑÑ‚Ð¾ÑÑ‰ Ð¸ Ð¼Ð¸Ð½Ð°Ð» Ð¿Ñ€Ð¸ÐµÐ¼)</label>
+                                            <textarea name="medications" class="form-control" placeholder="Ð¡Ð¿Ð¸ÑÑŠÐº Ð»ÐµÐºÐ°Ñ€ÑÑ‚Ð²Ð°..."></textarea>
                                         </div>
                                     </div>
 
                                     <div class="form-section">
-                                        <h3>4. Социална и Фамилна</h3>
+                                        <h3>4. Ð¡Ð¾Ñ†Ð¸Ð°Ð»Ð½Ð° Ð¸ Ð¤Ð°Ð¼Ð¸Ð»Ð½Ð°</h3>
                                         <div class="form-row">
                                             <div class="form-group">
-                                                <label>Навици (Тютюнопушене, Алкохол)</label>
-                                                <input type="text" name="habits" class="form-control" placeholder="Пакетогодини, алкохол...">
+                                                <label>ÐÐ°Ð²Ð¸Ñ†Ð¸ (Ð¢ÑŽÑ‚ÑŽÐ½Ð¾Ð¿ÑƒÑˆÐµÐ½Ðµ, ÐÐ»ÐºÐ¾Ñ…Ð¾Ð»)</label>
+                                                <input type="text" name="habits" class="form-control" placeholder="ÐŸÐ°ÐºÐµÑ‚Ð¾Ð³Ð¾Ð´Ð¸Ð½Ð¸, Ð°Ð»ÐºÐ¾Ñ…Ð¾Ð»...">
                                             </div>
                                             <div class="form-group">
-                                                <label>Алергии</label>
-                                                <input type="text" name="allergies" class="form-control" placeholder="Храни, медикаменти...">
+                                                <label>ÐÐ»ÐµÑ€Ð³Ð¸Ð¸</label>
+                                                <input type="text" name="allergies" class="form-control" placeholder="Ð¥Ñ€Ð°Ð½Ð¸, Ð¼ÐµÐ´Ð¸ÐºÐ°Ð¼ÐµÐ½Ñ‚Ð¸...">
                                             </div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Фамилна История</label>
-                                            <textarea name="family_history" class="form-control" placeholder="Наследствени болести, родители..."></textarea>
+                                            <label>Ð¤Ð°Ð¼Ð¸Ð»Ð½Ð° Ð˜ÑÑ‚Ð¾Ñ€Ð¸Ñ</label>
+                                            <textarea name="family_history" class="form-control" placeholder="ÐÐ°ÑÐ»ÐµÐ´ÑÑ‚Ð²ÐµÐ½Ð¸ Ð±Ð¾Ð»ÐµÑÑ‚Ð¸, Ñ€Ð¾Ð´Ð¸Ñ‚ÐµÐ»Ð¸..."></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -883,81 +883,81 @@
                                 <div id="tab-status" class="tab-content">
 
                                     <div class="form-section">
-                                        <h3>1. Общо състояние</h3>
+                                        <h3>1. ÐžÐ±Ñ‰Ð¾ ÑÑŠÑÑ‚Ð¾ÑÐ½Ð¸Ðµ</h3>
                                         <div class="form-row">
-                                            <div class="form-group"><label>Общ вид</label><input type="text" name="st_general" class="form-control" value="Отговаря на възрастта"></div>
-                                            <div class="form-group"><label>Съзнание</label><input type="text" name="st_consciousness" class="form-control" value="Ясно, ориентиран"></div>
-                                            <div class="form-group"><label>Положение</label><input type="text" name="st_posture" class="form-control" value="Активно"></div>
+                                            <div class="form-group"><label>ÐžÐ±Ñ‰ Ð²Ð¸Ð´</label><input type="text" name="st_general" class="form-control" value="ÐžÑ‚Ð³Ð¾Ð²Ð°Ñ€Ñ Ð½Ð° Ð²ÑŠÐ·Ñ€Ð°ÑÑ‚Ñ‚Ð°"></div>
+                                            <div class="form-group"><label>Ð¡ÑŠÐ·Ð½Ð°Ð½Ð¸Ðµ</label><input type="text" name="st_consciousness" class="form-control" value="Ð¯ÑÐ½Ð¾, Ð¾Ñ€Ð¸ÐµÐ½Ñ‚Ð¸Ñ€Ð°Ð½"></div>
+                                            <div class="form-group"><label>ÐŸÐ¾Ð»Ð¾Ð¶ÐµÐ½Ð¸Ðµ</label><input type="text" name="st_posture" class="form-control" value="ÐÐºÑ‚Ð¸Ð²Ð½Ð¾"></div>
                                         </div>
                                         <div class="form-row">
-                                            <div class="form-group"><label>Кожа и Лигавици</label><input type="text" name="st_skin" class="form-control" value="Розови, запазен тургор"></div>
-                                            <div class="form-group"><label>Лимфни възли</label><input type="text" name="st_lymph" class="form-control" value="Не се палпират увеличени"></div>
-                                            <div class="form-group"><label>Походка</label><input type="text" name="st_gait" class="form-control" value="Запазена"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-section">
-                                        <h3>2. Глава и Шия</h3>
-                                        <div class="form-row">
-                                            <div class="form-group"><label>Глава/Очи</label><input type="text" name="st_head" class="form-control" value="Правилна конфигурация, зеници реагиращи"></div>
-                                            <div class="form-group"><label>Устна кухина/Език</label><input type="text" name="st_mouth" class="form-control" value="Влажен, необложен език, розови тонзили"></div>
-                                            <div class="form-group"><label>Шия/Щитовидна</label><input type="text" name="st_neck" class="form-control" value="Свободно подвижна, не се палпира щитовидна"></div>
+                                            <div class="form-group"><label>ÐšÐ¾Ð¶Ð° Ð¸ Ð›Ð¸Ð³Ð°Ð²Ð¸Ñ†Ð¸</label><input type="text" name="st_skin" class="form-control" value="Ð Ð¾Ð·Ð¾Ð²Ð¸, Ð·Ð°Ð¿Ð°Ð·ÐµÐ½ Ñ‚ÑƒÑ€Ð³Ð¾Ñ€"></div>
+                                            <div class="form-group"><label>Ð›Ð¸Ð¼Ñ„Ð½Ð¸ Ð²ÑŠÐ·Ð»Ð¸</label><input type="text" name="st_lymph" class="form-control" value="ÐÐµ ÑÐµ Ð¿Ð°Ð»Ð¿Ð¸Ñ€Ð°Ñ‚ ÑƒÐ²ÐµÐ»Ð¸Ñ‡ÐµÐ½Ð¸"></div>
+                                            <div class="form-group"><label>ÐŸÐ¾Ñ…Ð¾Ð´ÐºÐ°</label><input type="text" name="st_gait" class="form-control" value="Ð—Ð°Ð¿Ð°Ð·ÐµÐ½Ð°"></div>
                                         </div>
                                     </div>
 
                                     <div class="form-section">
-                                        <h3>3. Дихателна система</h3>
+                                        <h3>2. Ð“Ð»Ð°Ð²Ð° Ð¸ Ð¨Ð¸Ñ</h3>
                                         <div class="form-row">
-                                            <div class="form-group"><label>Оглед/Гръден кош</label><input type="text" name="st_resp_inspect" class="form-control" value="Симетричен, диафрагмално дишане"></div>
-                                            <div class="form-group"><label>Перкусия/Палпация</label><input type="text" name="st_resp_palp" class="form-control" value="Ясен перкуторен тон, запазен фремитус"></div>
+                                            <div class="form-group"><label>Ð“Ð»Ð°Ð²Ð°/ÐžÑ‡Ð¸</label><input type="text" name="st_head" class="form-control" value="ÐŸÑ€Ð°Ð²Ð¸Ð»Ð½Ð° ÐºÐ¾Ð½Ñ„Ð¸Ð³ÑƒÑ€Ð°Ñ†Ð¸Ñ, Ð·ÐµÐ½Ð¸Ñ†Ð¸ Ñ€ÐµÐ°Ð³Ð¸Ñ€Ð°Ñ‰Ð¸"></div>
+                                            <div class="form-group"><label>Ð£ÑÑ‚Ð½Ð° ÐºÑƒÑ…Ð¸Ð½Ð°/Ð•Ð·Ð¸Ðº</label><input type="text" name="st_mouth" class="form-control" value="Ð’Ð»Ð°Ð¶ÐµÐ½, Ð½ÐµÐ¾Ð±Ð»Ð¾Ð¶ÐµÐ½ ÐµÐ·Ð¸Ðº, Ñ€Ð¾Ð·Ð¾Ð²Ð¸ Ñ‚Ð¾Ð½Ð·Ð¸Ð»Ð¸"></div>
+                                            <div class="form-group"><label>Ð¨Ð¸Ñ/Ð©Ð¸Ñ‚Ð¾Ð²Ð¸Ð´Ð½Ð°</label><input type="text" name="st_neck" class="form-control" value="Ð¡Ð²Ð¾Ð±Ð¾Ð´Ð½Ð¾ Ð¿Ð¾Ð´Ð²Ð¸Ð¶Ð½Ð°, Ð½Ðµ ÑÐµ Ð¿Ð°Ð»Ð¿Ð¸Ñ€Ð° Ñ‰Ð¸Ñ‚Ð¾Ð²Ð¸Ð´Ð½Ð°"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h3>3. Ð”Ð¸Ñ…Ð°Ñ‚ÐµÐ»Ð½Ð° ÑÐ¸ÑÑ‚ÐµÐ¼Ð°</h3>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>ÐžÐ³Ð»ÐµÐ´/Ð“Ñ€ÑŠÐ´ÐµÐ½ ÐºÐ¾Ñˆ</label><input type="text" name="st_resp_inspect" class="form-control" value="Ð¡Ð¸Ð¼ÐµÑ‚Ñ€Ð¸Ñ‡ÐµÐ½, Ð´Ð¸Ð°Ñ„Ñ€Ð°Ð³Ð¼Ð°Ð»Ð½Ð¾ Ð´Ð¸ÑˆÐ°Ð½Ðµ"></div>
+                                            <div class="form-group"><label>ÐŸÐµÑ€ÐºÑƒÑÐ¸Ñ/ÐŸÐ°Ð»Ð¿Ð°Ñ†Ð¸Ñ</label><input type="text" name="st_resp_palp" class="form-control" value="Ð¯ÑÐµÐ½ Ð¿ÐµÑ€ÐºÑƒÑ‚Ð¾Ñ€ÐµÐ½ Ñ‚Ð¾Ð½, Ð·Ð°Ð¿Ð°Ð·ÐµÐ½ Ñ„Ñ€ÐµÐ¼Ð¸Ñ‚ÑƒÑ"></div>
                                         </div>
                                         <div class="form-group">
-                                            <label>Аускултация</label>
-                                            <input type="text" name="st_resp_auscult" class="form-control" value="Везикуларно дишане, без хрипове">
+                                            <label>ÐÑƒÑÐºÑƒÐ»Ñ‚Ð°Ñ†Ð¸Ñ</label>
+                                            <input type="text" name="st_resp_auscult" class="form-control" value="Ð’ÐµÐ·Ð¸ÐºÑƒÐ»Ð°Ñ€Ð½Ð¾ Ð´Ð¸ÑˆÐ°Ð½Ðµ, Ð±ÐµÐ· Ñ…Ñ€Ð¸Ð¿Ð¾Ð²Ðµ">
                                         </div>
                                     </div>
 
                                     <div class="form-section">
-                                        <h3>4. Сърдечно-съдова система</h3>
+                                        <h3>4. Ð¡ÑŠÑ€Ð´ÐµÑ‡Ð½Ð¾-ÑÑŠÐ´Ð¾Ð²Ð° ÑÐ¸ÑÑ‚ÐµÐ¼Ð°</h3>
                                         <div class="form-row">
-                                            <div class="form-group"><label>Оглед и Палпация</label><input type="text" name="st_cardio_inspect_palp" class="form-control" value="Без патологични пулсации, ictus cordis в 5-то м.р."></div>
-                                            <div class="form-group"><label>Перкусия (Граници)</label><input type="text" name="st_cardio_percussion" class="form-control" value="Нормални граници на сърдечно притъпление"></div>
+                                            <div class="form-group"><label>ÐžÐ³Ð»ÐµÐ´ Ð¸ ÐŸÐ°Ð»Ð¿Ð°Ñ†Ð¸Ñ</label><input type="text" name="st_cardio_inspect_palp" class="form-control" value="Ð‘ÐµÐ· Ð¿Ð°Ñ‚Ð¾Ð»Ð¾Ð³Ð¸Ñ‡Ð½Ð¸ Ð¿ÑƒÐ»ÑÐ°Ñ†Ð¸Ð¸, ictus cordis Ð² 5-Ñ‚Ð¾ Ð¼.Ñ€."></div>
+                                            <div class="form-group"><label>ÐŸÐµÑ€ÐºÑƒÑÐ¸Ñ (Ð“Ñ€Ð°Ð½Ð¸Ñ†Ð¸)</label><input type="text" name="st_cardio_percussion" class="form-control" value="ÐÐ¾Ñ€Ð¼Ð°Ð»Ð½Ð¸ Ð³Ñ€Ð°Ð½Ð¸Ñ†Ð¸ Ð½Ð° ÑÑŠÑ€Ð´ÐµÑ‡Ð½Ð¾ Ð¿Ñ€Ð¸Ñ‚ÑŠÐ¿Ð»ÐµÐ½Ð¸Ðµ"></div>
                                         </div>
                                         <div class="form-row">
-                                            <div class="form-group"><label>Аускултация</label><input type="text" name="st_cardio_auscultation" class="form-control" value="Ритмична дейност, ясни тонове, без шумове"></div>
-                                            <div class="form-group"><label>Шиен венозен застой</label><input type="text" name="st_cardio_jvd" class="form-control" value="Не се установява"></div>
+                                            <div class="form-group"><label>ÐÑƒÑÐºÑƒÐ»Ñ‚Ð°Ñ†Ð¸Ñ</label><input type="text" name="st_cardio_auscultation" class="form-control" value="Ð Ð¸Ñ‚Ð¼Ð¸Ñ‡Ð½Ð° Ð´ÐµÐ¹Ð½Ð¾ÑÑ‚, ÑÑÐ½Ð¸ Ñ‚Ð¾Ð½Ð¾Ð²Ðµ, Ð±ÐµÐ· ÑˆÑƒÐ¼Ð¾Ð²Ðµ"></div>
+                                            <div class="form-group"><label>Ð¨Ð¸ÐµÐ½ Ð²ÐµÐ½Ð¾Ð·ÐµÐ½ Ð·Ð°ÑÑ‚Ð¾Ð¹</label><input type="text" name="st_cardio_jvd" class="form-control" value="ÐÐµ ÑÐµ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÑÐ²Ð°"></div>
                                         </div>
                                         <div class="form-row">
-                                            <div class="form-group"><label>АН (RR)</label><input type="text" name="st_bp" class="form-control" placeholder="120/80 mmHg"></div>
-                                            <div class="form-group"><label>Пулс</label><input type="text" name="st_pulse" class="form-control" placeholder="72 уд/мин"></div>
-                                        </div>
-                                    </div>
-
-                                    <div class="form-section">
-                                        <h3>5. Корем</h3>
-                                        <div class="form-row">
-                                            <div class="form-group"><label>Оглед</label><input type="text" name="st_abd_inspect" class="form-control" value="На нивото на гръдния кош, симетричен, участва в дишането"></div>
-                                            <div class="form-group"><label>Аускултация</label><input type="text" name="st_abd_auscult" class="form-control" value="Умерена чревна перисталтика"></div>
-                                        </div>
-                                        <div class="form-row">
-                                            <div class="form-group"><label>Перкусия</label><input type="text" name="st_abd_percuss" class="form-control" value="Тимпаничен перкуторен тон"></div>
-                                        </div>
-                                        <h4>Палпация</h4>
-                                        <div class="form-row">
-                                            <div class="form-group"><label>Повърхностна</label><input type="text" name="st_abd_palp_super" class="form-control" value="Мекоеластични коремни стени, без болезненост и дефанс"></div>
-                                            <div class="form-group"><label>Дълбока</label><input type="text" name="st_abd_palp_deep" class="form-control" value="Не се установяват туморни маси или болезненост"></div>
-                                        </div>
-                                        <div class="form-row">
-                                            <div class="form-group"><label>Чернодробна област</label><input type="text" name="st_abd_liver" class="form-control" value="Сагитален размер 10 см, долен ръб еластичен, под ребрена дъга"></div>
-                                            <div class="form-group"><label>Слезка</label><input type="text" name="st_abd_spleen" class="form-control" value="Надлъжен размер 7 см, не се палпира"></div>
+                                            <div class="form-group"><label>ÐÐ (RR)</label><input type="text" name="st_bp" class="form-control" placeholder="120/80 mmHg"></div>
+                                            <div class="form-group"><label>ÐŸÑƒÐ»Ñ</label><input type="text" name="st_pulse" class="form-control" placeholder="72 ÑƒÐ´/Ð¼Ð¸Ð½"></div>
                                         </div>
                                     </div>
 
                                     <div class="form-section">
-                                        <h3>6. Други</h3>
+                                        <h3>5. ÐšÐ¾Ñ€ÐµÐ¼</h3>
                                         <div class="form-row">
-                                            <div class="form-group"><label>Бъбреци (Succ. Renalis)</label><input type="text" name="st_kidney" class="form-control" value="Отрицателен двустранно"></div>
-                                            <div class="form-group"><label>Крайници/Отоци</label><input type="text" name="st_limbs" class="form-control" value="Без отоци, запазени пулсации"></div>
+                                            <div class="form-group"><label>ÐžÐ³Ð»ÐµÐ´</label><input type="text" name="st_abd_inspect" class="form-control" value="ÐÐ° Ð½Ð¸Ð²Ð¾Ñ‚Ð¾ Ð½Ð° Ð³Ñ€ÑŠÐ´Ð½Ð¸Ñ ÐºÐ¾Ñˆ, ÑÐ¸Ð¼ÐµÑ‚Ñ€Ð¸Ñ‡ÐµÐ½, ÑƒÑ‡Ð°ÑÑ‚Ð²Ð° Ð² Ð´Ð¸ÑˆÐ°Ð½ÐµÑ‚Ð¾"></div>
+                                            <div class="form-group"><label>ÐÑƒÑÐºÑƒÐ»Ñ‚Ð°Ñ†Ð¸Ñ</label><input type="text" name="st_abd_auscult" class="form-control" value="Ð£Ð¼ÐµÑ€ÐµÐ½Ð° Ñ‡Ñ€ÐµÐ²Ð½Ð° Ð¿ÐµÑ€Ð¸ÑÑ‚Ð°Ð»Ñ‚Ð¸ÐºÐ°"></div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>ÐŸÐµÑ€ÐºÑƒÑÐ¸Ñ</label><input type="text" name="st_abd_percuss" class="form-control" value="Ð¢Ð¸Ð¼Ð¿Ð°Ð½Ð¸Ñ‡ÐµÐ½ Ð¿ÐµÑ€ÐºÑƒÑ‚Ð¾Ñ€ÐµÐ½ Ñ‚Ð¾Ð½"></div>
+                                        </div>
+                                        <h4>ÐŸÐ°Ð»Ð¿Ð°Ñ†Ð¸Ñ</h4>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>ÐŸÐ¾Ð²ÑŠÑ€Ñ…Ð½Ð¾ÑÑ‚Ð½Ð°</label><input type="text" name="st_abd_palp_super" class="form-control" value="ÐœÐµÐºÐ¾ÐµÐ»Ð°ÑÑ‚Ð¸Ñ‡Ð½Ð¸ ÐºÐ¾Ñ€ÐµÐ¼Ð½Ð¸ ÑÑ‚ÐµÐ½Ð¸, Ð±ÐµÐ· Ð±Ð¾Ð»ÐµÐ·Ð½ÐµÐ½Ð¾ÑÑ‚ Ð¸ Ð´ÐµÑ„Ð°Ð½Ñ"></div>
+                                            <div class="form-group"><label>Ð”ÑŠÐ»Ð±Ð¾ÐºÐ°</label><input type="text" name="st_abd_palp_deep" class="form-control" value="ÐÐµ ÑÐµ ÑƒÑÑ‚Ð°Ð½Ð¾Ð²ÑÐ²Ð°Ñ‚ Ñ‚ÑƒÐ¼Ð¾Ñ€Ð½Ð¸ Ð¼Ð°ÑÐ¸ Ð¸Ð»Ð¸ Ð±Ð¾Ð»ÐµÐ·Ð½ÐµÐ½Ð¾ÑÑ‚"></div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Ð§ÐµÑ€Ð½Ð¾Ð´Ñ€Ð¾Ð±Ð½Ð° Ð¾Ð±Ð»Ð°ÑÑ‚</label><input type="text" name="st_abd_liver" class="form-control" value="Ð¡Ð°Ð³Ð¸Ñ‚Ð°Ð»ÐµÐ½ Ñ€Ð°Ð·Ð¼ÐµÑ€ 10 ÑÐ¼, Ð´Ð¾Ð»ÐµÐ½ Ñ€ÑŠÐ± ÐµÐ»Ð°ÑÑ‚Ð¸Ñ‡ÐµÐ½, Ð¿Ð¾Ð´ Ñ€ÐµÐ±Ñ€ÐµÐ½Ð° Ð´ÑŠÐ³Ð°"></div>
+                                            <div class="form-group"><label>Ð¡Ð»ÐµÐ·ÐºÐ°</label><input type="text" name="st_abd_spleen" class="form-control" value="ÐÐ°Ð´Ð»ÑŠÐ¶ÐµÐ½ Ñ€Ð°Ð·Ð¼ÐµÑ€ 7 ÑÐ¼, Ð½Ðµ ÑÐµ Ð¿Ð°Ð»Ð¿Ð¸Ñ€Ð°"></div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-section">
+                                        <h3>6. Ð”Ñ€ÑƒÐ³Ð¸</h3>
+                                        <div class="form-row">
+                                            <div class="form-group"><label>Ð‘ÑŠÐ±Ñ€ÐµÑ†Ð¸ (Succ. Renalis)</label><input type="text" name="st_kidney" class="form-control" value="ÐžÑ‚Ñ€Ð¸Ñ†Ð°Ñ‚ÐµÐ»ÐµÐ½ Ð´Ð²ÑƒÑÑ‚Ñ€Ð°Ð½Ð½Ð¾"></div>
+                                            <div class="form-group"><label>ÐšÑ€Ð°Ð¹Ð½Ð¸Ñ†Ð¸/ÐžÑ‚Ð¾Ñ†Ð¸</label><input type="text" name="st_limbs" class="form-control" value="Ð‘ÐµÐ· Ð¾Ñ‚Ð¾Ñ†Ð¸, Ð·Ð°Ð¿Ð°Ð·ÐµÐ½Ð¸ Ð¿ÑƒÐ»ÑÐ°Ñ†Ð¸Ð¸"></div>
                                         </div>
                                     </div>
 
@@ -967,15 +967,15 @@
                                 <div id="tab-notes" class="tab-content">
                                     <div class="form-section">
                                         <div class="form-group">
-                                            <label>Допълнителни бележки и коментари</label>
-                                            <textarea name="patient_notes" class="form-control" style="min-height: 300px;" placeholder="Въведете вашите записки тук..."></textarea>
+                                            <label>Ð”Ð¾Ð¿ÑŠÐ»Ð½Ð¸Ñ‚ÐµÐ»Ð½Ð¸ Ð±ÐµÐ»ÐµÐ¶ÐºÐ¸ Ð¸ ÐºÐ¾Ð¼ÐµÐ½Ñ‚Ð°Ñ€Ð¸</label>
+                                            <textarea name="patient_notes" class="form-control" style="min-height: 300px;" placeholder="Ð’ÑŠÐ²ÐµÐ´ÐµÑ‚Ðµ Ð²Ð°ÑˆÐ¸Ñ‚Ðµ Ð·Ð°Ð¿Ð¸ÑÐºÐ¸ Ñ‚ÑƒÐº..."></textarea>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div style="text-align: right; margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px;">
                                     <button type="submit" class="new-btn" style="font-size: 1.2rem; padding: 14px 40px; display: inline-flex; width: 100%; justify-content: center; box-sizing: border-box;">
-                                        <span class="material-icons" style="margin-right:8px;">save</span> Запази Анамнеза
+                                        <span class="material-icons" style="margin-right:8px;">save</span> Ð—Ð°Ð¿Ð°Ð·Ð¸ ÐÐ½Ð°Ð¼Ð½ÐµÐ·Ð°
                                     </button>
                                 </div>
                             </div>
@@ -1000,10 +1000,10 @@
     </div>
 
     <script src="js/anamnesis.js?v=20260129_v1"></script>
-    
+
     <!-- CHAT SYSTEM -->
     <script src="js/presence.js?v=20260131"></script>
-    <script src="js/chat.js?v=20260430bx"></script>
+    <script src="js/chat.js?v=202604302m8"></script>
 
     <script>
         function handleLogout() {
@@ -1014,9 +1014,9 @@
         function switchTab(tabId) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
-            
+
             document.getElementById(tabId).classList.add('active');
-            
+
             // Find and activate the correct button
             const btns = document.querySelectorAll('.tab-btn');
             btns.forEach(btn => {

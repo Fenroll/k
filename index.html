@@ -1,7 +1,7 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260430bx"></script>
+  <script src="js/auth-guard.js?v=202604302m8"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -16,7 +16,7 @@
   </style>
   <meta name="robots" content="noindex, nofollow">
   <title>Courses</title>
-  
+
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=202603151sxu" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
@@ -291,7 +291,7 @@
     color: #666666 !important;
   }
 
-  
+
   .mobile-overlay-close {
     position: fixed;
     top: 18px;
@@ -324,7 +324,7 @@
   .filter-bar > *:not(.filter-search-group) {
     display: none !important;
   }
-  
+
   .main-header {
     justify-content: flex-start !important;
     text-align: left !important;
@@ -335,7 +335,7 @@
     text-align: left !important;
     width: 100%;
   }
-  
+
   /* Елементите (карти) центрирани с еднакво разстояние */
   .course-org-list {
     padding-left: 0 !important;
@@ -986,7 +986,7 @@
   .base-footer a:hover { text-decoration: underline; color: #fff; }
     .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
   </style>
-  <script src="courses.generated.js?v=20260430bx"></script>
+  <script src="courses.generated.js?v=202604302m8"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 
 <!-- Subtle UI tweaks -->
@@ -1143,7 +1143,7 @@
           }
         });
       }
-      
+
       var courseList = document.getElementById('course-org-list');
       if (courseList) {
         courseList.querySelectorAll('.element-card').forEach(function(card) {
@@ -1407,7 +1407,7 @@ function renderCourseList() {
     // Separate active and archived courses
     const activeCourses = [];
     const archivedCourses = [];
-    
+
     courses.forEach(course => {
       // Check if course is in the archived section (after all active ones)
       // We'll determine this by looking at the structure: archived ones come after active ones
@@ -1416,21 +1416,21 @@ function renderCourseList() {
       // Better approach: we'll mark them during generation or check the structure
       // For simplicity, let's check if it has an archived marker
       const isArchived = course.isArchived || false; // We'll update generate_courses.js to set this
-      
+
       if (isArchived) {
         archivedCourses.push(course);
       } else {
         activeCourses.push(course);
       }
     });
-    
+
     // If we don't have explicit markers, try to detect based on position
     // (assumes generate_courses puts archived courses at the end)
     if (archivedCourses.length === 0 && activeCourses.length === 0) {
       // All courses are in the courses array, let's not separate
       activeCourses.push(...courses);
     }
-    
+
     // Render active courses
     const activeColors = getUniqueShuffledColors(activeCourses.length, false);
     activeCourses.forEach((course, index) => {
@@ -1438,10 +1438,10 @@ function renderCourseList() {
       card.className = 'element-card course-item';
       card.setAttribute('role', 'button');
       card.setAttribute('tabindex', '0');
-      
+
       // Generate color based on course ID
       const borderColor = activeColors[index] || generateColorFromId(course.id, false);
-      
+
       card.innerHTML = `
         <div class="element-details">
           <div class="element-details-content">
@@ -1452,7 +1452,7 @@ function renderCourseList() {
         </div>
       `;
       card.style.setProperty('--course-accent', borderColor);
-      
+
       // Add keyboard support
       card.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ' ') {
@@ -1463,7 +1463,7 @@ function renderCourseList() {
 
       list.appendChild(card);
     });
-    
+
     // Add archive separator if there are archived courses
     if (archivedCourses.length > 0) {
       const separator = document.createElement('div');
@@ -1480,10 +1480,10 @@ function renderCourseList() {
         card.style.opacity = '0.75';
         card.setAttribute('role', 'button');
         card.setAttribute('tabindex', '0');
-        
+
         // Generate color based on course ID with isArchived flag for different palette
         const borderColor = archivedColors[index] || generateColorFromId(course.id, true);
-        
+
         card.innerHTML = `
           <div class="element-details">
             <div class="element-details-content">
@@ -1493,10 +1493,10 @@ function renderCourseList() {
               </div>
             </div>
         `;
-        
-        
+
+
         card.style.setProperty('--course-accent', borderColor);
-        
+
         // Add keyboard support
         card.addEventListener('keydown', function(e) {
           if (e.key === 'Enter' || e.key === ' ') {
@@ -1504,11 +1504,11 @@ function renderCourseList() {
             openRightOverlayForCard(card);
           }
         });
-        
+
         list.appendChild(card);
       });
     }
-    
+
     // Re-attach click listeners for overlay
     list.querySelectorAll('.element-card').forEach(function(card) {
       card.style.cursor = 'pointer';
@@ -1806,7 +1806,7 @@ document.addEventListener('DOMContentLoaded', function() {
       .layout { flex-direction: column; }
       .main-content { padding: 0; }
       .main-header, .filter-bar, .course-org-list { padding-left: 16px; padding-right: 16px; }
-      
+
       /* Mobile overlay header styling */
       .overlay-header {
         justify-content: center !important;
@@ -1910,7 +1910,7 @@ document.addEventListener('DOMContentLoaded', function() {
 window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
   const dropdown = document.getElementById(`files-${sectionId}`);
   const arrow = document.getElementById(`arrow-${sectionId}`);
-  
+
   if (dropdown && arrow) {
     const shouldOpen = dropdown.style.display === 'none' || dropdown.style.display === '';
 
@@ -1922,15 +1922,15 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       // Затваряме - скриваме съдържанието и връщаме стрелката.
       dropdown.style.display = 'none';
       arrow.classList.remove('is-expanded');
-      
+
       // Затваряйте всички вложени папки
       const nestedDropdowns = dropdown.querySelectorAll('[id^="files-"]');
       const nestedArrows = dropdown.querySelectorAll('[id^="arrow-"]');
-      
+
       nestedDropdowns.forEach(nested => {
         nested.style.display = 'none';
       });
-      
+
       nestedArrows.forEach(nestedArrow => {
         nestedArrow.classList.remove('is-expanded');
       });
@@ -1944,7 +1944,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=20260430bx"></script>
+<script src="js/chat.js?v=202604302m8"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -1974,24 +1974,24 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       const tables = doc.querySelectorAll('table');
-      
+
       tables.forEach(table => {
         const rows = Array.from(table.querySelectorAll('tbody tr'));
-        
+
         // Process each column
         const maxCols = Math.max(...rows.map(row => row.cells.length));
-        
+
         for (let colIndex = 0; colIndex < maxCols; colIndex++) {
           let spanStart = -1;
           let spanCount = 0;
-          
+
           for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
             const cell = rows[rowIndex].cells[colIndex];
-            
+
             if (!cell) continue;
-            
+
             const cellText = cell.textContent.trim();
-            
+
             if (cellText === '^') {
               // Mark cell for deletion and count span
               cell.setAttribute('data-delete', 'true');
@@ -2009,7 +2009,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
               spanCount = 0;
             }
           }
-          
+
           // Handle trailing spans
           if (spanCount > 0 && spanStart >= 0) {
             const spanCell = rows[spanStart].cells[colIndex];
@@ -2018,11 +2018,11 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
             }
           }
         }
-        
+
         // Remove cells marked for deletion
         table.querySelectorAll('[data-delete="true"]').forEach(cell => cell.remove());
       });
-      
+
       return doc.body.innerHTML;
     }
 
@@ -2031,20 +2031,20 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       const tables = doc.querySelectorAll('table');
-      
+
       tables.forEach(table => {
         const rows = Array.from(table.querySelectorAll('tbody tr'));
-        
+
         // Process each row
         rows.forEach(row => {
           const cells = Array.from(row.cells);
           let spanStart = -1;
           let spanCount = 0;
-          
+
           for (let colIndex = 0; colIndex < cells.length; colIndex++) {
             const cell = cells[colIndex];
             const cellText = cell.innerHTML.trim();
-            
+
             if (cellText === '&lt;') {
               // Mark cell for deletion and count span
               cell.setAttribute('data-delete-colspan', 'true');
@@ -2062,7 +2062,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
               spanCount = 0;
             }
           }
-          
+
           // Handle trailing spans
           if (spanCount > 0 && spanStart >= 0) {
             const spanCell = cells[spanStart];
@@ -2071,11 +2071,11 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
             }
           }
         });
-        
+
         // Remove cells marked for deletion
         table.querySelectorAll('[data-delete-colspan="true"]').forEach(cell => cell.remove());
       });
-      
+
       return doc.body.innerHTML;
     }
 
@@ -2084,13 +2084,13 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       const parser = new DOMParser();
       const doc = parser.parseFromString(html, 'text/html');
       const tables = doc.querySelectorAll('table');
-      
+
       tables.forEach(table => {
         const allCells = table.querySelectorAll('td, th');
-        
+
         allCells.forEach(cell => {
           let content = cell.innerHTML.trim();
-          
+
           // Check for center alignment >>text<<
           if (content.startsWith('&gt;&gt;') && content.endsWith('&lt;&lt;')) {
             cell.style.textAlign = 'center';
@@ -2108,10 +2108,10 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           }
         });
       });
-      
+
       return doc.body.innerHTML;
     }
-    
+
     // Overlay logic for course cards
     document.addEventListener('DOMContentLoaded', function() {
       // Close overlay when clicking outside overlay-content
@@ -2124,7 +2124,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           }
         });
       }
-      
+
       var courseList = document.getElementById('course-org-list');
       if (courseList) {
         courseList.querySelectorAll('.element-card').forEach(function(card) {
@@ -2167,7 +2167,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
     var title = card.querySelector('.course-title')?.textContent || 'Course';
     var courseId = card.querySelector('.course-id')?.textContent || '';
     var isArchivedCard = card.style.opacity === '0.75'; // Archived cards have opacity
-    
+
     // Find the course - need to check if it's archived or active
     var courseObj;
     if (isArchivedCard) {
@@ -2177,9 +2177,9 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       // For active cards, find in active courses only
       courseObj = courses.find(c => c.id === courseId && (!c.isArchived || c.isArchived === false));
     }
-    
+
     let customContent = '';
-    
+
     // Check if this is "Актуални събития Event center" course - show event info instead
     if (title.includes('Актуални събит') || title.includes('Event center')) {
       if (typeof eventInfo !== 'undefined' && eventInfo && eventInfo.trim().length > 0) {
@@ -2196,7 +2196,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         });
         customContent += `</div>`;
       }
-      
+
       if (courseObj && Array.isArray(courseObj.sections) && courseObj.sections.length > 0) {
         customContent += `<div style="display:flex; flex-direction:column; gap:18px;">`;
         const orderedTopLevelSections = sortTopLevelSections(courseObj.sections);
@@ -2210,7 +2210,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         customContent = '<div style="color:#888;">Няма съдържание за този курс.</div>';
       }
     }
-    
+
     // Function to render big text card (folder-style)
     // Natural sort function for proper number ordering
     function naturalSort(a, b) {
@@ -2240,14 +2240,14 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       const regex = /(\d+)|(\D+)/g;
       const aParts = a.match(regex);
       const bParts = b.match(regex);
-      
+
       for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
         const aPart = aParts[i] || '';
         const bPart = bParts[i] || '';
-        
+
         const aNum = parseInt(aPart);
         const bNum = parseInt(bPart);
-        
+
         if (!isNaN(aNum) && !isNaN(bNum)) {
           if (aNum !== bNum) return aNum - bNum;
         } else {
@@ -2275,7 +2275,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         return naturalSort(aName.toLowerCase(), bName.toLowerCase());
       });
     }
-    
+
     // Sort files: folders first, then by file type, then natural sort
     function sortFilesAndFolders(section) {
       if (section.files && section.files.length > 0) {
@@ -2292,30 +2292,30 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           // Get file extensions
           const aExt = a.name.split('.').pop().toLowerCase();
           const bExt = b.name.split('.').pop().toLowerCase();
-          
+
           // First sort by extension (file type)
           if (aExt !== bExt) {
             return aExt.localeCompare(bExt);
           }
-          
+
           // Then natural sort by name
           return naturalSort(a.name.toLowerCase(), b.name.toLowerCase());
         });
 
         section.files = [...linkTxtFiles, ...regularFiles];
       }
-      
+
       // Sort subsections (folders) with natural sort
       if (section.subsections && section.subsections.length > 0) {
         section.subsections.sort((a, b) => {
           return naturalSort(a.name.toLowerCase(), b.name.toLowerCase());
         });
-        
+
         // Recursively sort nested sections
         section.subsections.forEach(sub => sortFilesAndFolders(sub));
       }
     }
-    
+
     // Helper function to remove order prefix (1-, 2-, 1.1-, 2.2-, etc.) and "msg-" from filenames for display
     function removeOrderPrefix(fileName) {
       // Remove number prefix (1-, 2-, 1.1-, 2.22-, etc.)
@@ -2326,14 +2326,14 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       cleaned = cleaned.replace(/\.(txt|md|docx|pdf|doc|xls|xlsx|ppt|pptx|jpg|jpeg|png|gif|bmp|webp|svg|zip|rar|7z|log|one|onetoc2|url)$/i, '');
       return cleaned;
     }
-    
+
     function renderTextCardBig(card) {
       const title = card.title || 'Без заглавие';
       const content = card.content || '';
       const maxLength = 200;
       const preview = content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
       const cardId = 'card-' + Math.random().toString(36).substr(2, 9);
-      
+
       return `
         <div class="text-card-big" onclick="showTextCardModal('${cardId}', '${title.replace(/'/g, "\\'")}', this.getAttribute('data-content'));"
              data-content="${content.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/\n/g, '&#10;')}">
@@ -2347,7 +2347,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         </div>
       `;
     }
-    
+
     //custom icons
     window.customLinkIconRules = [
       { pathExact: 'files/Вътрешни болести 1 ч/Кардиология/Англоезични материали/Pathophysiology of Heart Disease.url', icon: 'svg/icon-book.svg' },
@@ -2552,9 +2552,9 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         .replace(/^-+|-+$/g, '');
       const sectionIdBase = sectionSlug || `section-level-${level}`;
       const sectionId = `${sectionIdBase}-${Math.random().toString(36).slice(2, 10)}`;
-      
+
       let sectionContent = '';
-      
+
       // Level 1 (first sections like "Материали") - card style, БЕЗ collapsible, винаги отворени
       if (level === 1) {
         sectionContent += `<section style="border-radius:10px; padding:16px 18px 10px 18px; box-shadow:0 1px 6px #e3e3e3; margin-bottom:3px;">`;
@@ -2563,7 +2563,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         sectionContent += `<svg width="20" height="20" viewBox="0 0 24 24" fill="#588157" style="flex-shrink:0;"><path d="M10,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V8C22,6.89 21.1,6 20,6H12L10,4Z"/></svg>`;
         sectionContent += `<h3 style="margin:0; color:#588157; font-size:1.1em; font-weight:600; word-break:break-word; overflow-wrap:break-word; min-width:0;">${section.name}</h3>`;
         sectionContent += `</div>`;
-      } 
+      }
       // Nested levels - simple indent style
       else {
         sectionContent += `<div style="margin-left:${indent}px; margin-top:10px; margin-bottom:6px;">`;
@@ -2585,19 +2585,19 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           sectionContent += `</div>`;
         }
       }
-      
+
       // Open collapsible container if needed
       if (isCollapsible) {
         // Level 2+ са затворени по подразбиране
         sectionContent += `<div id="files-${sectionId}" style="display:none; margin-top:8px;">`;
       }
-      
+
       // Render msg notes (sticky notes) FIRST
       if (section.msgNotes && section.msgNotes.length > 0) {
         section.msgNotes.forEach((note, idx) => {
           // Skip files with -summary in name
           if (note.name.toLowerCase().includes('-summary')) return;
-          
+
           const noteId = `msg-note-${sectionId}-${idx}`;
           const isHtml = /\.html$/i.test(note.path || '');
           sectionContent += `
@@ -2624,26 +2624,26 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
                   });
                   // Parse markdown and fix relative image paths
                   let html = marked.parse(note.content);
-                  
+
                   // Process tables to support rowspan with ^ syntax (only if needed)
                   if (html.includes('^')) {
                     html = processTableRowspans(html);
                   }
-                  
+
                   // Process tables to support cell alignment with >>text<<, <<text, text>> (BEFORE colspan!)
                   if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) {
                     html = processTableAlignment(html);
                   }
-                  
+
                   // Process tables to support colspan with < syntax (only if needed)
                   if (html.includes('&lt;')) {
                     html = processTableColspans(html);
                   }
-                  
+
                   // Get base directory from note path (e.g., "files/Course/Section/")
                   const basePath = note.path.substring(0, note.path.lastIndexOf('/') + 1);
                   // Fix relative image paths: any relative path (not starting with http:// or /) -> prepend basePath
-                  let fixedHtml = html.replace(/<img([^>]+)src="(?!https?:\/\/)(?!\/)([^"]+)"/g, 
+                  let fixedHtml = html.replace(/<img([^>]+)src="(?!https?:\/\/)(?!\/)([^"]+)"/g,
                     (match, attrs, src) => `<img${attrs}src="${basePath}${src}"`);
                   // Add target="_blank" to all links
                   fixedHtml = fixedHtml.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
@@ -2654,17 +2654,17 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           `;
         });
       }
-      
+
       // Render subsections (folders) BEFORE files
       if (hasSubsections) {
         section.subsections.forEach(subsection => {
           // Skip subsections with hidden- prefix or assets folders
-          if (subsection.name.toLowerCase().startsWith('hidden-') || 
+          if (subsection.name.toLowerCase().startsWith('hidden-') ||
               subsection.name.toLowerCase() === 'assets') return;
           sectionContent += renderSection(subsection, level + 1);
         });
       }
-      
+
       // Render files in this section AFTER subsections
       if (hasFiles) {
         // Render file list
@@ -2672,10 +2672,10 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         sectionContent += `<ul style="margin:8px 0 4px 0; padding-left:${fileListIndent}px; list-style:none;">`;
         section.files.forEach(file => {
           // Skip files with hidden- prefix or -summary suffix
-          if (file.name.toLowerCase().startsWith('hidden-') || 
+          if (file.name.toLowerCase().startsWith('hidden-') ||
               file.name.toLowerCase().includes('-summary')) return;
           if (!canShowFileByRequires(file)) return;
-          
+
           const fileName = file.name.toLowerCase();
           const rawFilePath = String(file.path || '');
           const encodedFilePath = encodeURI(rawFilePath).replace(/#/g, '%23');
@@ -2723,14 +2723,14 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
             // Open the URL directly
             const displayName = file.name.replace('.url', '');
             sectionContent += `<a href="${file.url}" target="_blank" style="color:#588157; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#588157'; this.style.textDecoration='underline'" onmouseout="this.style.color='#588157'; this.style.textDecoration='none'">${removeOrderPrefix(displayName)}</a></li>`;
-          } 
+          }
           // Office files: direct download/open only (no external preview eye).
           else if (fileName.endsWith('.pdf')) {
             const pdfOpenUrl = `${encodedFilePath}#page=1&zoom=page-width`;
             sectionContent += `<a href="${pdfOpenUrl}" target="_blank" rel="noopener" style="color:#588157; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#588157'; this.style.textDecoration='underline'" onmouseout="this.style.color='#588157'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a></li>`;
           }
           // Office files: direct download/open only (no external preview eye).
-          else if (fileName.endsWith('.docx') || fileName.endsWith('.pptx') || fileName.endsWith('.ppt') || 
+          else if (fileName.endsWith('.docx') || fileName.endsWith('.pptx') || fileName.endsWith('.ppt') ||
         fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.doc')) {
             sectionContent += `<a href="${encodedFilePath}" download style="color:#588157; text-decoration:none; font-weight:400; transition:color 0.2s; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0;" onmouseover="this.style.color='#588157'; this.style.textDecoration='underline'" onmouseout="this.style.color='#588157'; this.style.textDecoration='none'">${removeOrderPrefix(file.name)}</a></li>`;
           }
@@ -2753,17 +2753,17 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         });
         sectionContent += '</ul>';
       }
-      
+
       // Show "no files" message only inside opened collapsible sections
       if (isCollapsible && !section.files?.length && !section.subsections?.length) {
         sectionContent += `<div style="color:#999; font-size:0.95em; font-style:italic; margin-top:4px; padding:8px 0;">Няма файлове</div>`;
       }
-      
+
       // Close collapsible container if needed
       if (isCollapsible) {
         sectionContent += `</div>`;
       }
-      
+
       // Close tag based on level
       if (level === 1) {
         sectionContent += `</section>`; // Level 1 затваря section тага
@@ -2838,7 +2838,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       }
       fitBetaCourseTitle();
     });
-    
+
     // Close overlay when clicking outside on desktop
     document.addEventListener('click', function(e) {
       const overlay = document.getElementById('rightOverlay');
@@ -2852,12 +2852,12 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         }
       }
     });
-    
+
     // Function to toggle msg note content
     function toggleMsgNote(noteId) {
       const noteContent = document.getElementById(noteId);
       const noteElement = noteContent.closest('.msg-note');
-      
+
       if (noteContent.style.display === 'none' || noteContent.style.display === '') {
         noteContent.style.display = 'block';
         noteElement.classList.add('open');
@@ -2886,12 +2886,12 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       try {
         const contentEl = document.getElementById(noteId);
         if (!contentEl) return;
-        
+
         // Find the parent msg-note element to get the note path
         const noteElement = contentEl.closest('.msg-note');
         const notePath = noteElement ? noteElement.getAttribute('data-note-path') : '';
         const basePath = notePath ? notePath.substring(0, notePath.lastIndexOf('/') + 1) : '';
-        
+
         // Check if this is an HTML file - open in md-viewer with content passed via sessionStorage
         if (notePath && /\.html$/i.test(notePath)) {
           // Find the HTML content from courses data
@@ -2910,14 +2910,14 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
               }
             }
           }
-          
+
           if (htmlContent) {
             // Try to store in sessionStorage, but fallback to hash if quota exceeded
             const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             try {
               sessionStorage.setItem(sessionKey, htmlContent);
               sessionStorage.setItem(sessionKey + '_path', notePath);
-              
+
               const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&sessionKey=${sessionKey}`;
               window.open(mdViewerUrl, '_blank');
             } catch (quotaError) {
@@ -2931,7 +2931,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
                 }
               }
               keysToRemove.forEach(k => sessionStorage.removeItem(k));
-              
+
               // Try one more time
               try {
                 sessionStorage.setItem(sessionKey, htmlContent);
@@ -2952,7 +2952,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           }
           return;
         }
-        
+
         // For markdown/text files, open in md-viewer or simple window
         const mdHtmlEl = contentEl.querySelector('.markdown-content');
         let htmlInner = '';
@@ -2962,7 +2962,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           const pre = contentEl.querySelector('pre');
           htmlInner = pre ? ('<pre>' + pre.textContent.replace(/[&<>]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])) + '</pre>') : contentEl.innerHTML;
         }
-        
+
         // Create a simple window with the content
         const w = window.open();
         if (!w) return;
@@ -2987,7 +2987,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         w.document.close();
       } catch (e) { console.error('openMdNoteFull error', e); }
     }
-    
+
     // Function to toggle version info
     function toggleVersionInfo() {
       const versionInfo = document.getElementById('versionInfo');
@@ -3002,7 +3002,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         versionInfo.style.display = 'none';
       }
     }
-    
+
     // Function to copy git commands
     function copyGitCommand(type) {
       let command = '';
@@ -3011,7 +3011,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       } else if (type === 'files') {
         command = 'cd files; git add .; git commit -m "update"; git push; cd ..';
       }
-      
+
       // Copy to clipboard
       navigator.clipboard.writeText(command).then(() => {
         // Show temporary notification
@@ -3026,12 +3026,12 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         alert('Failed to copy command');
       });
     }
-    
+
     // Function to show text card in modal
     function showTextCardModal(cardId, title, content) {
       // Decode HTML entities
       content = content.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#10;/g, '\n');
-      
+
       // Create modal
       const modal = document.createElement('div');
       modal.id = 'textCardModal';
@@ -3040,23 +3040,23 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       modal.onclick = function(e) {
         if (e.target === modal) closeTextCardModal();
       };
-      
+
       const modalContent = document.createElement('div');
       modalContent.className = 'text-modal-content';
-      
+
       modalContent.innerHTML = `
         <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
         <h2 class="text-modal-title">${title}</h2>
         <div class="text-modal-body">${content}</div>
       `;
-      
+
       modal.appendChild(modalContent);
       document.body.appendChild(modal);
-      
+
       // Prevent body scroll
       document.body.style.overflow = 'hidden';
     }
-    
+
     function closeTextCardModal() {
       const modal = document.getElementById('textCardModal');
       if (modal) {
@@ -3064,14 +3064,14 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         document.body.style.overflow = '';
       }
     }
-    
+
     // Close modal on Escape key
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
         closeTextCardModal();
       }
     });
-    
+
     // Keyboard shortcuts for priority HTML files (Ctrl+1, Ctrl+2, Ctrl+3)
     document.addEventListener('keydown', function(e) {
       if (e.ctrlKey && (e.key === '1' || e.key === '2' || e.key === '3')) {
@@ -3079,7 +3079,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         openPriorityHtmlFile(parseInt(e.key));
       }
     });
-    
+
     // Function to open priority HTML file by number (1, 2, or 3)
     async function openPriorityHtmlFile(priority) {
       // Wait for Firebase-backed config if it is still loading.
@@ -3098,7 +3098,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         console.warn(`Priority HTML file ${priority} is empty`);
         return;
       }
-      
+
       // Find the HTML content from courses data
       let htmlContent = '';
       if (typeof courses !== 'undefined') {
@@ -3115,13 +3115,13 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           }
         }
       }
-      
+
       if (htmlContent) {
         // Store in sessionStorage
         const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         sessionStorage.setItem(sessionKey, htmlContent);
         sessionStorage.setItem(sessionKey + '_path', filePath);
-        
+
         const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(filePath)}&sessionKey=${sessionKey}`;
         window.open(mdViewerUrl, '_blank');
       } else {
@@ -3131,14 +3131,14 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         window.open(mdViewerUrl, '_blank');
       }
     }
-    
+
     // Function to render DOCX files
     async function renderDocxFile(filePath, fileName) {
       try {
         // Fetch the docx file
         const response = await fetch(filePath);
         const arrayBuffer = await response.arrayBuffer();
-        
+
         // Create modal
         const modal = document.createElement('div');
         modal.id = 'textCardModal';
@@ -3147,7 +3147,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         modal.onclick = function(e) {
           if (e.target === modal) closeTextCardModal();
         };
-        
+
         const modalContent = document.createElement('div');
         modalContent.className = 'text-modal-content';
         modalContent.innerHTML = `
@@ -3155,21 +3155,21 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           <h2 class="text-modal-title">${fileName}</h2>
           <div class="text-modal-body" id="docx-container" style="padding: 20px; background: white; max-height: 70vh; overflow-y: auto;"></div>
         `;
-        
+
         modal.appendChild(modalContent);
         document.body.appendChild(modal);
         document.body.style.overflow = 'hidden';
-        
+
         // Render the docx file
         const container = document.getElementById('docx-container');
         await docx.renderAsync(arrayBuffer, container);
-        
+
       } catch (error) {
         console.error('Error rendering DOCX file:', error);
         alert('Грешка при зареждане на документа. Моля опитайте отново.');
       }
     }
-    
+
     // Show image in modal overlay
     function showImageModal(imgPath, imgName, allImages = [], currentIndex = -1) {
       closeTextCardModal();
@@ -3722,7 +3722,7 @@ body.index-beta .course-id {
 body.index-beta .course-title {
   color: inherit !important;
   font-size: 15px !important;
-  line-height: 1.35 !important; 
+  line-height: 1.35 !important;
   font-weight: inherit !important;
   text-shadow: none !important;
   white-space: nowrap;

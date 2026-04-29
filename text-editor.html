@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260430bx"></script>
+  <script src="js/auth-guard.js?v=202604302m8"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Тext Editor</title>
+  <title>Ð¢ext Editor</title>
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  
+
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
     .katex .katex-mathml {
@@ -1115,7 +1115,7 @@
       <button id="strikeBtn" title="Strikethrough"><img src="svg/md-editor/icon-strikethrough.svg?v=2026031715gu" alt="Strikethrough" class="toolbar-icon"></button>
       <button id="subscriptBtn" title="Subscript"><img src="svg/md-editor/icon-subscript.svg?v=2026031715gu" alt="Subscript" class="toolbar-icon"></button>
       <button id="superscriptBtn" title="Superscript"><img src="svg/md-editor/icon-superscript.svg?v=2026031715gu" alt="Superscript" class="toolbar-icon"></button>
-      
+
       <!-- Text Color Button -->
       <div style="position: relative; display: inline-block;">
         <button id="textColorToggleBtn" title="Text Color"><img src="svg/md-editor/icon-text-color.svg?v=2026031715gu" alt="Text Color" class="toolbar-icon"></button>
@@ -1278,7 +1278,7 @@
     <div class="modal-content" style="max-width: 600px;">
       <div class="modal-header">
         <h2>Keyboard Shortcuts</h2>
-        <button class="close-btn" id="closeShortcutsBtn">✕</button>
+        <button class="close-btn" id="closeShortcutsBtn">âœ•</button>
       </div>
       <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
         <h3>Formatting</h3>
@@ -1438,7 +1438,7 @@
         </div>
         <div style="margin-bottom: 16px;">
           <label for="fileNameInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">File Name</label>
-          <input type="text" id="fileNameInput" placeholder="e.g., ХОББ, Белодробен карцином" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+          <input type="text" id="fileNameInput" placeholder="e.g., Ð¥ÐžÐ‘Ð‘, Ð‘ÐµÐ»Ð¾Ð´Ñ€Ð¾Ð±ÐµÐ½ ÐºÐ°Ñ€Ñ†Ð¸Ð½Ð¾Ð¼" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
         </div>
         <div style="padding: 10px; background: #f3f4f6; border-radius: 4px; font-size: 0.9em; color: #4b5563;">
           <strong>Preview:</strong> <span id="fileNamePreview" style="color: #588157; font-family: monospace;">document.html</span>
@@ -1486,11 +1486,11 @@
         <p style="margin-bottom: 16px; color: #6b7280;">Select merge direction:</p>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <button id="mergeRightBtn" style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; background: white; transition: all 0.2s;">
-            <div style="font-size: 24px; margin-bottom: 4px;">→</div>
+            <div style="font-size: 24px; margin-bottom: 4px;">â†’</div>
             <div>Merge Right</div>
           </button>
           <button id="mergeDownBtn" style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; background: white; transition: all 0.2s;">
-            <div style="font-size: 24px; margin-bottom: 4px;">↓</div>
+            <div style="font-size: 24px; margin-bottom: 4px;">â†“</div>
             <div>Merge Down</div>
           </button>
         </div>
@@ -1508,27 +1508,27 @@
         <span class="close" id="closeSymbolsModalBtn">&times;</span>
       </div>
       <div class="modal-body" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 400px; overflow-y: auto;">
-        <button class="symbol-btn" data-symbol="↑" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↑</button>
-        <button class="symbol-btn" data-symbol="↓" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↓</button>
-        <button class="symbol-btn" data-symbol="←" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">←</button>
-        <button class="symbol-btn" data-symbol="→" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">→</button>
-        <button class="symbol-btn" data-symbol="↔" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↔</button>
-        <button class="symbol-btn" data-symbol="α" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">α</button>
-        <button class="symbol-btn" data-symbol="β" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">β</button>
-        <button class="symbol-btn" data-symbol="γ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">γ</button>
-        <button class="symbol-btn" data-symbol="δ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">δ</button>
-        <button class="symbol-btn" data-symbol="ε" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">ε</button>
-        <button class="symbol-btn" data-symbol="μ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">μ</button>
-        <button class="symbol-btn" data-symbol="≈" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≈</button>
-        <button class="symbol-btn" data-symbol="≠" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≠</button>
-        <button class="symbol-btn" data-symbol="≤" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≤</button>
-        <button class="symbol-btn" data-symbol="≥" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≥</button>
-        <button class="symbol-btn" data-symbol="±" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">±</button>
-        <button class="symbol-btn" data-symbol="÷" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">÷</button>
-        <button class="symbol-btn" data-symbol="°" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">°</button>
-        <button class="symbol-btn" data-symbol="℃" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">℃</button>
-        <button class="symbol-btn" data-symbol="‰" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">‰</button>
-        <button class="symbol-btn" data-symbol="t½" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">t½</button>
+        <button class="symbol-btn" data-symbol="â†‘" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â†‘</button>
+        <button class="symbol-btn" data-symbol="â†“" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â†“</button>
+        <button class="symbol-btn" data-symbol="â†" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â†</button>
+        <button class="symbol-btn" data-symbol="â†’" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â†’</button>
+        <button class="symbol-btn" data-symbol="â†”" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â†”</button>
+        <button class="symbol-btn" data-symbol="Î±" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Î±</button>
+        <button class="symbol-btn" data-symbol="Î²" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Î²</button>
+        <button class="symbol-btn" data-symbol="Î³" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Î³</button>
+        <button class="symbol-btn" data-symbol="Î´" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Î´</button>
+        <button class="symbol-btn" data-symbol="Îµ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Îµ</button>
+        <button class="symbol-btn" data-symbol="Î¼" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Î¼</button>
+        <button class="symbol-btn" data-symbol="â‰ˆ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â‰ˆ</button>
+        <button class="symbol-btn" data-symbol="â‰ " style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â‰ </button>
+        <button class="symbol-btn" data-symbol="â‰¤" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â‰¤</button>
+        <button class="symbol-btn" data-symbol="â‰¥" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â‰¥</button>
+        <button class="symbol-btn" data-symbol="Â±" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Â±</button>
+        <button class="symbol-btn" data-symbol="Ã·" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Ã·</button>
+        <button class="symbol-btn" data-symbol="Â°" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">Â°</button>
+        <button class="symbol-btn" data-symbol="â„ƒ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â„ƒ</button>
+        <button class="symbol-btn" data-symbol="â€°" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">â€°</button>
+        <button class="symbol-btn" data-symbol="tÂ½" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">tÂ½</button>
       </div>
       <div class="modal-footer" style="padding: 12px; border-top: 1px solid #e5e7eb; display: flex; align-items: center;">
         <label style="display: flex; align-items: center; cursor: pointer; flex: 1;">
@@ -1543,7 +1543,7 @@
   <div class="modal" id="anchorLinkModal">
     <div class="modal-content" style="max-width: 500px;">
       <div class="modal-header">
-        <h2>🔗 Create/Link Anchors</h2>
+        <h2>ðŸ”— Create/Link Anchors</h2>
         <span class="close" id="closeAnchorLinkModalBtn">&times;</span>
       </div>
       <div class="modal-body">
@@ -1561,7 +1561,7 @@
           </div>
           <div style="margin-bottom: 16px;">
             <label for="anchorTextInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Anchor Text</label>
-            <input type="text" id="anchorTextInput" placeholder="e.g., Topic 1 – Introduction" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+            <input type="text" id="anchorTextInput" placeholder="e.g., Topic 1 â€“ Introduction" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
           </div>
           <div style="margin-bottom: 16px;">
             <label for="anchorHeadingTypeInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">Heading Type</label>
@@ -1597,9 +1597,9 @@
   <div id="htmlEditorModal">
     <div class="html-editor-container">
       <div class="html-editor-header">
-        <h2>📄 HTML Source Code Editor</h2>
+        <h2>ðŸ“„ HTML Source Code Editor</h2>
         <div class="html-editor-actions">
-          <button id="htmlEditorSaveBtn" class="html-editor-button html-editor-save">💾 Save & Update</button>
+          <button id="htmlEditorSaveBtn" class="html-editor-button html-editor-save">ðŸ’¾ Save & Update</button>
           <button id="htmlEditorCloseBtn" class="html-editor-button html-editor-close">Close</button>
         </div>
       </div>
@@ -1611,60 +1611,60 @@
   <div id="combineFilesModal" class="modal">
     <div class="modal-content" style="max-width: 800px;">
       <div class="modal-header">
-        <h2>Комбинирай HTML файлове</h2>
+        <h2>ÐšÐ¾Ð¼Ð±Ð¸Ð½Ð¸Ñ€Ð°Ð¹ HTML Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ</h2>
         <span class="close" id="closeCombineFilesBtn">&times;</span>
       </div>
       <div class="modal-body">
         <!-- Tabs for combining mode -->
         <div style="display: flex; gap: 8px; margin-bottom: 16px; border-bottom: 1px solid #e5e7eb;">
-          <button id="combineLocalTab" class="combine-tab-btn active" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid #588157; color: #588157; font-weight: 500;">Локални файлове</button>
-          <button id="combineCourseTab" class="combine-tab-btn" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280; font-weight: 500;">От курсове</button>
+          <button id="combineLocalTab" class="combine-tab-btn active" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid #588157; color: #588157; font-weight: 500;">Ð›Ð¾ÐºÐ°Ð»Ð½Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ</button>
+          <button id="combineCourseTab" class="combine-tab-btn" style="padding: 10px 16px; border: none; background: none; cursor: pointer; border-bottom: 2px solid transparent; color: #6b7280; font-weight: 500;">ÐžÑ‚ ÐºÑƒÑ€ÑÐ¾Ð²Ðµ</button>
         </div>
 
         <!-- Local Files Tab -->
         <div id="combineLocalPanel" class="combine-panel">
           <div style="margin-bottom: 16px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Избери HTML файлове:</label>
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ð˜Ð·Ð±ÐµÑ€Ð¸ HTML Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ:</label>
             <input type="file" id="combineFilesInput" accept=".html" multiple style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
           </div>
-          
+
           <div style="margin-bottom: 16px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Редослед на файлове:</label>
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ð ÐµÐ´Ð¾ÑÐ»ÐµÐ´ Ð½Ð° Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ:</label>
             <div id="filesList" style="border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; min-height: 200px; padding: 12px; max-height: 300px; overflow-y: auto;">
-              <div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>
+              <div style="color: #9ca3af; text-align: center; padding: 20px;">ÐšÐ°Ñ‡Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð·Ð° Ð´Ð° Ð³Ð¸ Ð²Ð¸Ð´Ð¸Ñˆ Ñ‚ÑƒÐº</div>
             </div>
           </div>
 
           <div style="display: flex; gap: 8px; justify-content: space-between; font-size: 0.85em; color: #6b7280;">
-            <div>💡 Можеш да преместваш файловете за да промениш редоследа</div>
+            <div>ðŸ’¡ ÐœÐ¾Ð¶ÐµÑˆ Ð´Ð° Ð¿Ñ€ÐµÐ¼ÐµÑÑ‚Ð²Ð°Ñˆ Ñ„Ð°Ð¹Ð»Ð¾Ð²ÐµÑ‚Ðµ Ð·Ð° Ð´Ð° Ð¿Ñ€Ð¾Ð¼ÐµÐ½Ð¸Ñˆ Ñ€ÐµÐ´Ð¾ÑÐ»ÐµÐ´Ð°</div>
           </div>
         </div>
 
         <!-- Courses Tab -->
         <div id="combineCoursePanel" class="combine-panel" style="display: none;">
           <div style="margin-bottom: 16px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Търси файлове от курсове:</label>
-            <input type="text" id="combineFileSearch" placeholder="Търси по име..." style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ð¢ÑŠÑ€ÑÐ¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð¾Ñ‚ ÐºÑƒÑ€ÑÐ¾Ð²Ðµ:</label>
+            <input type="text" id="combineFileSearch" placeholder="Ð¢ÑŠÑ€ÑÐ¸ Ð¿Ð¾ Ð¸Ð¼Ðµ..." style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px;">
           </div>
-          
+
           <div style="margin-bottom: 16px;">
-            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Избрани файлове:</label>
+            <label style="display: block; margin-bottom: 8px; font-weight: 500;">Ð˜Ð·Ð±Ñ€Ð°Ð½Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ:</label>
             <div id="courseFilesList" style="border: 1px solid #e5e7eb; border-radius: 4px; background: #f9fafb; min-height: 200px; padding: 12px; max-height: 300px; overflow-y: auto;">
-              <div style="color: #9ca3af; text-align: center; padding: 20px;">Избери файлове от курсове</div>
+              <div style="color: #9ca3af; text-align: center; padding: 20px;">Ð˜Ð·Ð±ÐµÑ€Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð¾Ñ‚ ÐºÑƒÑ€ÑÐ¾Ð²Ðµ</div>
             </div>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button id="closeCombineFilesBtn2">Отмени</button>
-        <button class="primary" id="saveCombineFilesBtn">Комбинирай и вмъкни</button>
+        <button id="closeCombineFilesBtn2">ÐžÑ‚Ð¼ÐµÐ½Ð¸</button>
+        <button class="primary" id="saveCombineFilesBtn">ÐšÐ¾Ð¼Ð±Ð¸Ð½Ð¸Ñ€Ð°Ð¹ Ð¸ Ð²Ð¼ÑŠÐºÐ½Ð¸</button>
       </div>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260430bx"></script>
+  <script src="courses.generated.js?v=202604302m8"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -1856,14 +1856,14 @@
     function showNotification(message, type = 'success') {
       const notification = document.createElement('div');
       notification.textContent = message;
-      
+
       const colors = {
         success: '#10b981',
         warning: '#588157',
         error: '#ef4444',
         info: '#3b82f6'
       };
-      
+
       notification.style.cssText = `
         position: fixed;
         top: 70px;
@@ -1879,15 +1879,15 @@
         transform: translateX(20px);
         transition: opacity 0.3s ease, transform 0.3s ease;
       `;
-      
+
       document.body.appendChild(notification);
-      
+
       // Animate in
       setTimeout(() => {
         notification.style.opacity = '1';
         notification.style.transform = 'translateX(0)';
       }, 10);
-      
+
           // Animate out and remove
           setTimeout(() => {
             notification.style.opacity = '0';
@@ -1895,7 +1895,7 @@
             setTimeout(() => notification.remove(), 300);
           }, 3000);
         }
-      
+
         function setupSimpleButton(buttonId, command) {
           const button = document.getElementById(buttonId);
           if (button) {
@@ -1989,7 +1989,7 @@
 
           img.setAttribute('data-align', normalizedAlign);
         }
-    
+
     // ========================================
     // 1. HEADER ENTER KEY LOGIC
     // ========================================
@@ -1997,32 +1997,32 @@
       if (e.key === 'Enter' && !e.shiftKey) {
         const selection = window.getSelection();
         if (selection.rangeCount === 0) return;
-        
+
         const range = selection.getRangeAt(0);
         let node = range.startContainer;
-        
+
         // Find the heading element if we're inside one
         while (node && node !== editor) {
           if (node.nodeType === 1 && /^H[1-4]$/.test(node.tagName)) {
             // Check if cursor is at the start of the heading
             const textNode = node.firstChild;
             const isAtStart = range.startContainer === textNode && range.startOffset === 0;
-            
+
             if (isAtStart || (range.startContainer === node && range.startOffset === 0)) {
               e.preventDefault();
-              
+
               // Create a new paragraph before the heading
               const newParagraph = document.createElement('p');
               newParagraph.innerHTML = '<br>';
               node.parentNode.insertBefore(newParagraph, node);
-              
+
               // Move cursor to the new paragraph
               const newRange = document.createRange();
               newRange.setStart(newParagraph, 0);
               newRange.collapse(true);
               selection.removeAllRanges();
               selection.addRange(newRange);
-              
+
               saveToHistory();
               return;
             }
@@ -2032,7 +2032,7 @@
         }
       }
     }); */
-    
+
     // ========================================
     // 2. PROFESSIONAL COLOR PICKER INITIALIZATION
     // ========================================
@@ -2060,7 +2060,7 @@
       const r = parseInt(hex.substring(0, 2), 16);
       const g = parseInt(hex.substring(2, 4), 16);
       const b = parseInt(hex.substring(4, 6), 16);
-      
+
       // 5 shades: lighter to darker
       for (let i = 0; i < 5; i++) {
         const factor = 0.9 - (i * 0.2);
@@ -2075,7 +2075,7 @@
     function initializeColorPicker(themeGridId, standardRowId, onColorSelect) {
       const themeGrid = document.getElementById(themeGridId);
       const standardRow = document.getElementById(standardRowId);
-      
+
       // Build theme colors grid
       themeBaseColors.forEach(color => {
         const shades = generateShades(color.base);
@@ -2088,7 +2088,7 @@
           themeGrid.appendChild(swatch);
         });
       });
-      
+
       // Build standard colors row
       standardColors.forEach(color => {
         const swatch = document.createElement('div');
@@ -2155,9 +2155,9 @@
     function toggleBlockquote() {
       const selection = window.getSelection();
       if (selection.rangeCount === 0) return;
-      
+
       let node = selection.anchorNode;
-      
+
       // Find if we're inside a blockquote
       while (node && node !== editor) {
         if (node.nodeType === 1 && node.tagName === 'BLOCKQUOTE') {
@@ -2165,7 +2165,7 @@
           const paragraph = document.createElement('p');
           paragraph.innerHTML = node.innerHTML;
           node.parentNode.replaceChild(paragraph, node);
-          
+
           // Update button state
           document.getElementById('quoteBtn').classList.remove('active');
           saveToHistory();
@@ -2174,7 +2174,7 @@
         }
         node = node.parentNode;
       }
-      
+
       // Not in a blockquote - create one
       document.execCommand('formatBlock', false, 'blockquote');
       document.getElementById('quoteBtn').classList.add('active');
@@ -2189,10 +2189,10 @@
     function updateQuoteButtonState() {
       const selection = window.getSelection();
       if (selection.rangeCount === 0) return;
-      
+
       let node = selection.anchorNode;
       let inQuote = false;
-      
+
       while (node && node !== editor) {
         if (node.nodeType === 1 && node.tagName === 'BLOCKQUOTE') {
           inQuote = true;
@@ -2200,7 +2200,7 @@
         }
         node = node.parentNode;
       }
-      
+
       const quoteBtn = document.getElementById('quoteBtn');
       if (inQuote) {
         quoteBtn.classList.add('active');
@@ -2240,49 +2240,49 @@
     document.addEventListener('selectionchange', updateSuperSubButtonState);
     editor.addEventListener('keyup', updateSuperSubButtonState);
     editor.addEventListener('click', updateSuperSubButtonState);
-    
+
     // Set up MutationObserver to prevent nested lists
     const preventNestedLists = () => {
       // Find all nested OL/UL elements and flatten them
       const nestedLists = editor.querySelectorAll('ol ol, ol ul, ul ol, ul ul');
-      
+
       nestedLists.forEach(nestedList => {
         const parentLi = nestedList.parentElement;
         if (parentLi && parentLi.tagName === 'LI') {
           const grandparent = parentLi.parentElement;
-          
+
           // Check if parent LI is already indented (has nested list)
           // If it does, don't add more nesting - just remove the new nested list
-          
+
           // Move all items from nested list to after parent LI
           const items = Array.from(nestedList.children);
           items.forEach((item, idx) => {
             const newItem = item.cloneNode(true);
-            
+
             // Remove any nested lists from items to keep them flat
             const childLists = newItem.querySelectorAll('ol, ul');
             childLists.forEach(list => list.remove());
-            
+
             const nextSibling = parentLi.nextElementSibling;
-            
+
             if (nextSibling) {
               grandparent.insertBefore(newItem, nextSibling);
             } else {
               grandparent.appendChild(newItem);
             }
           });
-          
+
           // Remove the nested list
           nestedList.remove();
         }
       });
     };
-    
+
     // Create observer to watch for nested list creation
     const observer = new MutationObserver((mutations) => {
       // Check if any OL or UL elements were added/modified
       let hasListChanges = false;
-      
+
       for (let mutation of mutations) {
         if (mutation.type === 'childList') {
           // Check if ol or ul was added
@@ -2295,20 +2295,20 @@
         }
         if (hasListChanges) break;
       }
-      
+
       // If lists were modified, flatten any nested ones
       if (hasListChanges) {
         preventNestedLists();
       }
     });
-    
+
     // Start observing the editor for changes
     observer.observe(editor, {
       childList: true,
       subtree: true,
       attributes: false
     });
-    
+
     const shortcutsBtn = document.getElementById('shortcutsBtn');
     const shortcutsModal = document.getElementById('shortcutsModal');
     const closeShortcutsBtn = document.getElementById('closeShortcutsBtn');
@@ -2317,17 +2317,17 @@
     let editorContent = '';
     let rawContent = '';
     let originalHtml = '<p>Start typing here...</p>';
-    
+
     // Global base path for images
     let globalImageBasePath = '';
-    
+
     // Track current file info
     let currentFileInfo = {
       name: '',
       number: '',
       isFromCourses: false
     };
-    
+
     // Flag to prevent auto-save during file loading
     let isLoadingFile = false;
 
@@ -2360,7 +2360,7 @@
     function insertFormat(tag) {
       const selection = window.getSelection();
       if (selection.rangeCount === 0) return;
-      
+
       const range = selection.getRangeAt(0);
 
       const isEditorRoot = (candidate) => candidate === editor;
@@ -2374,16 +2374,16 @@
         editor.replaceChild(paragraph, textNode);
         return paragraph;
       };
-      
-      // Запази позицијата на курсорот
+
+      // Ð—Ð°Ð¿Ð°Ð·Ð¸ Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ñ˜Ð°Ñ‚Ð° Ð½Ð° ÐºÑƒÑ€ÑÐ¾Ñ€Ð¾Ñ‚
       const preCaretRange = range.cloneRange();
       preCaretRange.selectNodeContents(editor);
       preCaretRange.setEnd(range.startContainer, range.startOffset);
       const cursorOffset = preCaretRange.toString().length;
-      
+
       let node = range.commonAncestorContainer;
-      
-      // Ако е text node, оди до parent
+
+      // ÐÐºÐ¾ Ðµ text node, Ð¾Ð´Ð¸ Ð´Ð¾ parent
       if (node.nodeType === 3) {
         node = node.parentNode;
       }
@@ -2406,14 +2406,14 @@
           }
         }
       }
-      
+
       const structuralBlockTags = new Set(['hr', 'p', 'div', 'h1', 'h2', 'h3', 'h4', 'ul', 'ol', 'table', 'blockquote', 'pre']);
       const isSimpleDivBlock = (candidate) => {
         if (!candidate || candidate.tagName.toLowerCase() !== 'div') return false;
         return !Array.from(candidate.children).some(child => structuralBlockTags.has(child.tagName.toLowerCase()));
       };
 
-      // Оди нагоре додека не найдеш форматирачки блок
+      // ÐžÐ´Ð¸ Ð½Ð°Ð³Ð¾Ñ€Ðµ Ð´Ð¾Ð´ÐµÐºÐ° Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÑˆ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð¸Ñ€Ð°Ñ‡ÐºÐ¸ Ð±Ð»Ð¾Ðº
       while (node && node !== editor) {
         const tagName = node.tagName.toLowerCase();
         if (['h1', 'h2', 'h3', 'h4', 'p'].includes(tagName) || isSimpleDivBlock(node)) {
@@ -2421,12 +2421,12 @@
         }
         node = node.parentNode;
       }
-      
-      // Проверка дали имаме валиден блок елемент
+
+      // ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð´Ð°Ð»Ð¸ Ð¸Ð¼Ð°Ð¼Ðµ Ð²Ð°Ð»Ð¸Ð´ÐµÐ½ Ð±Ð»Ð¾Ðº ÐµÐ»ÐµÐ¼ÐµÐ½Ñ‚
       if (!node || node === editor) {
         return;
       }
-      
+
       const tagName = node.tagName.toLowerCase();
       if (!['h1', 'h2', 'h3', 'h4', 'p', 'div'].includes(tagName)) {
         return;
@@ -2437,36 +2437,36 @@
       if (tagName === 'div' && !isSimpleDivBlock(node)) {
         return;
       }
-      
-      // Замена на блок елементот
+
+      // Ð—Ð°Ð¼ÐµÐ½Ð° Ð½Ð° Ð±Ð»Ð¾Ðº ÐµÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¾Ñ‚
       const targetTag = (tagName === tag) ? 'p' : tag;
       const newEl = document.createElement(targetTag);
-      
-      // Копирај детелја
+
+      // ÐšÐ¾Ð¿Ð¸Ñ€Ð°Ñ˜ Ð´ÐµÑ‚ÐµÐ»Ñ˜Ð°
       while (node.firstChild) {
         const child = node.firstChild;
         newEl.appendChild(child);
       }
-      
-      // Зачувај text-align ако постои
+
+      // Ð—Ð°Ñ‡ÑƒÐ²Ð°Ñ˜ text-align Ð°ÐºÐ¾ Ð¿Ð¾ÑÑ‚Ð¾Ð¸
       const oldAlign = node.style.textAlign;
       if (oldAlign) {
         newEl.style.textAlign = oldAlign;
       }
-      
-      // Замени во DOM
+
+      // Ð—Ð°Ð¼ÐµÐ½Ð¸ Ð²Ð¾ DOM
       node.parentNode.replaceChild(newEl, node);
 
       // Keep headings structurally valid in the live editor DOM.
       repairInvalidHeadingStructureInEditor();
-      
-      // Врати фокус на иста позиција
+
+      // Ð’Ñ€Ð°Ñ‚Ð¸ Ñ„Ð¾ÐºÑƒÑ Ð½Ð° Ð¸ÑÑ‚Ð° Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ñ˜Ð°
       const newRange = document.createRange();
       const sel = window.getSelection();
-      
+
       let charCount = 0;
       let found = false;
-      
+
       function findPosition(n) {
         if (found) return;
         if (n.nodeType === 3) {
@@ -2486,13 +2486,13 @@
           }
         }
       }
-      
+
       findPosition(newEl);
-      
+
       if (!found) {
         newRange.setStart(newEl, 0);
       }
-      
+
       sel.removeAllRanges();
       sel.addRange(newRange);
     }
@@ -2623,11 +2623,11 @@
         alert('Please click in the editor first');
         return;
       }
-      
+
       // Open the table modal
       const tableModal = document.getElementById('tableModal');
       tableModal.style.display = 'flex';
-      
+
       // Focus on rows input after a tiny delay to ensure modal is rendered
       setTimeout(() => {
         document.getElementById('tableRowsInput').focus();
@@ -2668,9 +2668,9 @@
     // Helper to set cursor in a table cell
     function setCursorInTable(table) {
       if (!table) return;
-      
+
       const selection = window.getSelection();
-      
+
       // Use the last saved cell if it's still in this table
       if (lastTableCell && table.contains(lastTableCell)) {
         const range = document.createRange();
@@ -2694,17 +2694,17 @@
     // Helper to set cursor in a specific table cell
     function setCursorInCell(cell) {
       if (!cell) return;
-      
+
       const selection = window.getSelection();
       const range = document.createRange();
-      
+
       // Set cursor at the beginning of the cell
       range.selectNodeContents(cell);
       range.collapse(true);
-      
+
       selection.removeAllRanges();
       selection.addRange(range);
-      
+
       // Update last table cell
       lastTableCell = cell;
     }
@@ -2720,10 +2720,10 @@
 
     function addTableColumnBefore() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
-      
+
       table.querySelectorAll('tr').forEach(row => {
         const newCell = document.createElement(row.querySelector('th') ? 'th' : 'td');
         newCell.textContent = ' ';
@@ -2734,10 +2734,10 @@
 
     function addTableColumnAfter() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
-      
+
       table.querySelectorAll('tr').forEach(row => {
         const newCell = document.createElement(row.querySelector('th') ? 'th' : 'td');
         newCell.textContent = ' ';
@@ -2748,10 +2748,10 @@
 
     function deleteTableColumn() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
-      
+
       table.querySelectorAll('tr').forEach(row => {
         if (row.cells[colIndex]) row.deleteCell(colIndex);
       });
@@ -2760,12 +2760,12 @@
 
     function addTableRowBefore() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       const row = cell.closest('tr');
       const newRow = document.createElement('tr');
       const colCount = table.querySelector('tr').cells.length;
-      
+
       for (let i = 0; i < colCount; i++) {
         newRow.appendChild(document.createElement('td'));
       }
@@ -2775,12 +2775,12 @@
 
     function addTableRowAfter() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       const row = cell.closest('tr');
       const newRow = document.createElement('tr');
       const colCount = table.querySelector('tr').cells.length;
-      
+
       for (let i = 0; i < colCount; i++) {
         newRow.appendChild(document.createElement('td'));
       }
@@ -2790,7 +2790,7 @@
 
     function deleteTableRow() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const row = cell.closest('tr');
       row.remove();
       saveToHistory();
@@ -2798,7 +2798,7 @@
 
     function deleteTable() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       table.remove();
       saveToHistory();
@@ -2806,34 +2806,34 @@
 
     function mergeTableCells() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
-      
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+
       const row = cell.closest('tr');
-      if (!row) return alert('Позиционирай курсора в таблица');
-      
+      if (!row) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+
       // Get current cell index and next cell
       const cellIndex = cell.cellIndex;
       const nextCell = row.cells[cellIndex + 1];
-      
-      if (!nextCell) return alert('Нямаш следваща клетка за мърджване');
-      
+
+      if (!nextCell) return alert('ÐÑÐ¼Ð°Ñˆ ÑÐ»ÐµÐ´Ð²Ð°Ñ‰Ð° ÐºÐ»ÐµÑ‚ÐºÐ° Ð·Ð° Ð¼ÑŠÑ€Ð´Ð¶Ð²Ð°Ð½Ðµ');
+
       // Merge content
       cell.textContent = (cell.textContent + ' ' + nextCell.textContent).trim();
-      
+
       // Add colspan if it doesn't exist
       const colspan = parseInt(cell.getAttribute('colspan')) || 1;
       cell.setAttribute('colspan', colspan + 1);
-      
+
       // Remove next cell
       nextCell.remove();
-      
+
       saveToHistory();
     }
 
     function setCellBackgroundColor() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
-      const color = prompt('Цвят (hex):', '#FAF594');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      const color = prompt('Ð¦Ð²ÑÑ‚ (hex):', '#FAF594');
       if (color) {
         cell.style.backgroundColor = color;
         saveToHistory();
@@ -2842,22 +2842,22 @@
 
     function splitTableCell() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
-      
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+
       const colspan = parseInt(cell.getAttribute('colspan')) || 1;
-      
-      if (colspan <= 1) return alert('Клетката няма colspan за разделяне');
-      
+
+      if (colspan <= 1) return alert('ÐšÐ»ÐµÑ‚ÐºÐ°Ñ‚Ð° Ð½ÑÐ¼Ð° colspan Ð·Ð° Ñ€Ð°Ð·Ð´ÐµÐ»ÑÐ½Ðµ');
+
       const row = cell.closest('tr');
       const cellIndex = cell.cellIndex;
-      
+
       // Reduce colspan
       cell.setAttribute('colspan', colspan - 1);
-      
+
       // Create new cell
       const newCell = document.createElement(cell.tagName);
       newCell.textContent = ' ';
-      
+
       // Insert new cell after current
       const nextCell = row.cells[cellIndex + 1];
       if (nextCell) {
@@ -2865,7 +2865,7 @@
       } else {
         row.appendChild(newCell);
       }
-      
+
       saveToHistory();
     }
 
@@ -3370,7 +3370,7 @@
       if (selection.rangeCount > 0) {
         savedImageRange = selection.getRangeAt(0);
       }
-      
+
 
       const imageModal = document.getElementById('imageModal');
       imageModal.style.display = 'flex';
@@ -3602,20 +3602,20 @@
       option.addEventListener('mousedown', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        
+
         const format = option.dataset.format;
-        
+
         // Use mousedown instead of click to intercept before selection loss
         // Close dropdown immediately
         const formatOptions = document.getElementById('formatOptions');
         if (formatOptions) {
           formatOptions.style.display = 'none';
         }
-        
+
         // Apply format - insertFormat will use current selection from editor
         insertFormat(format);
         saveToHistory();
-        
+
         // Ensure editor stays focused
         editor.focus();
       });
@@ -3651,10 +3651,10 @@
     document.getElementById('indentBtn').addEventListener('click', () => {
       const selection = window.getSelection();
       if (!selection.rangeCount) return;
-      
+
       const range = selection.getRangeAt(0);
       let node = range.startContainer;
-      
+
       // Check if we're in a list item
       while (node && node !== editor) {
         if (node.nodeType === 1 && node.tagName === 'LI') {
@@ -3665,18 +3665,18 @@
         }
         node = node.parentNode;
       }
-      
+
       // If not in list, show notification
-      showNotification('⚠️ Indent works only in lists', 'warning');
+      showNotification('âš ï¸ Indent works only in lists', 'warning');
     });
 
     document.getElementById('outdentBtn').addEventListener('click', () => {
       const selection = window.getSelection();
       if (!selection.rangeCount) return;
-      
+
       const range = selection.getRangeAt(0);
       let node = range.startContainer;
-      
+
       // Check if we're in a list item
       while (node && node !== editor) {
         if (node.nodeType === 1 && node.tagName === 'LI') {
@@ -3687,9 +3687,9 @@
         }
         node = node.parentNode;
       }
-      
+
       // If not in list, show notification
-      showNotification('⚠️ Outdent works only in lists', 'warning');
+      showNotification('âš ï¸ Outdent works only in lists', 'warning');
     });
 
     document.getElementById('ulBtn').addEventListener('click', () => {
@@ -3739,18 +3739,18 @@
     // Link Button - Simple prompt
     document.getElementById('linkBtn').addEventListener('click', () => {
       const selection = window.getSelection();
-      
+
       if (!selection.rangeCount || !selection.toString()) {
-        alert('Моля, избери текст първо');
+        alert('ÐœÐ¾Ð»Ñ, Ð¸Ð·Ð±ÐµÑ€Ð¸ Ñ‚ÐµÐºÑÑ‚ Ð¿ÑŠÑ€Ð²Ð¾');
         return;
       }
-      
-      const url = prompt('Въведи URL:');
-      
+
+      const url = prompt('Ð’ÑŠÐ²ÐµÐ´Ð¸ URL:');
+
       if (!url || url.trim() === '') {
         return;
       }
-      
+
       // Get selected text
       const selectedText = selection.toString();
       const range = selection.getRangeAt(0);
@@ -3771,7 +3771,7 @@
         editor.focus();
         return;
       }
-      
+
       // Create link with wavy underline
       const link = document.createElement('a');
       link.href = normalizedUrl;
@@ -3779,17 +3779,17 @@
       link.style.textDecoration = 'underline wavy';
       link.style.textDecorationSkipInk = 'none';
       link.style.textDecorationColor = '#74b673';
-      
+
       // Insert link
       range.deleteContents();
       range.insertNode(link);
-      
+
       // Move cursor after link
       range.setStartAfter(link);
       range.collapse(true);
       selection.removeAllRanges();
       selection.addRange(range);
-      
+
       saveToHistory();
       editor.focus();
     });
@@ -3809,7 +3809,7 @@
         e.preventDefault();
         const symbol = this.getAttribute('data-symbol');
         const shouldCopy = document.getElementById('symbolCopyCheckbox').checked;
-        
+
         if (shouldCopy) {
           // Copy to clipboard
           navigator.clipboard.writeText(symbol).then(() => {
@@ -3825,14 +3825,14 @@
             alert('Please click in the editor first');
             return;
           }
-          
+
           // Insert symbol at cursor
           document.execCommand('insertText', false, symbol);
-          
+
           saveToHistory();
           editor.focus();
         }
-        
+
         // Close modal
         document.getElementById('symbolsModal').style.display = 'none';
       });
@@ -3840,34 +3840,34 @@
 
     document.getElementById('editTableBtn').addEventListener('click', () => {
       editor.focus();
-      
+
       const selection = window.getSelection();
       let table = null;
-      
+
       // Try to find the table where cursor is
       if (selection.anchorNode) {
         const node = selection.anchorNode.nodeType === 3 ? selection.anchorNode.parentElement : selection.anchorNode;
         table = node.closest('table');
       }
-      
+
       if (!table && selection.focusNode) {
         const node = selection.focusNode.nodeType === 3 ? selection.focusNode.parentElement : selection.focusNode;
         table = node.closest('table');
       }
-      
+
       if (!table && selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         const node = range.commonAncestorContainer.nodeType === 3 ? range.commonAncestorContainer.parentElement : range.commonAncestorContainer;
         table = node.closest('table');
       }
-      
+
       if (!table) {
         const tables = editor.querySelectorAll('table');
         if (tables.length > 0) {
           table = tables[0];
         }
       }
-      
+
       if (!table) {
         alert('No table found. Create a table first or click inside a table');
         return;
@@ -3889,10 +3889,10 @@
     // Table menu dropdown
     let lastTableContext = null; // Store last table context
     let lastTableCell = null; // Store last selected cell
-    
+
     // Track when cursor enters/leaves table
     editor.addEventListener('click', () => {
-      
+
       const selection = window.getSelection();
       if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
@@ -3908,7 +3908,7 @@
       lastTableContext = null;
       lastTableCell = null;
     });
-    
+
     document.getElementById('tableBtn').addEventListener('click', () => {
       insertTable();
     });
@@ -3961,14 +3961,14 @@
       e.stopPropagation();
       const textColorOptions = document.getElementById('textColorOptions');
       const isHidden = textColorOptions.style.display === 'none' || !textColorOptions.style.display;
-      
+
       if (isHidden) {
         captureTextColorSelectionFromEditor();
       }
-      
+
       // Close highlight picker if open
       document.getElementById('highlightOptions').style.display = 'none';
-      
+
       textColorOptions.style.display = isHidden ? 'block' : 'none';
     });
 
@@ -4230,10 +4230,10 @@
 
         applyGlobalHeadingColor(color);
         applyDashedSeparatorColor(color);
-        
+
         document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-        
+
         localStorage.setItem('textEditorHeadingColor', color);
         document.getElementById('headingColorOptions').style.display = 'none';
         btn.blur();
@@ -4246,11 +4246,11 @@
       e.stopPropagation();
       const highlightOptions = document.getElementById('highlightOptions');
       const isHidden = highlightOptions.style.display === 'none' || !highlightOptions.style.display;
-      
+
       if (isHidden) {
         savedHighlightSelection = saveSelection();
       }
-      
+
       document.getElementById('textColorOptions').style.display = 'none';
       highlightOptions.style.display = isHidden ? 'block' : 'none';
     });
@@ -4284,7 +4284,7 @@
       }
       applyFormatting('highlight', color);
     });
-    
+
     highlightColorHexInput.addEventListener('change', (e) => {
         let color = e.target.value.trim();
         if (!color.startsWith('#')) {
@@ -4302,7 +4302,7 @@
       if (savedHighlightSelection) {
         restoreSelection(savedHighlightSelection);
       }
-      
+
       const selection = window.getSelection();
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
         alert('Please select text first');
@@ -4405,10 +4405,10 @@
           }
         }
       }
-      
+
       // If no selection or selection is in editor
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
-        alert('Моля, избери текст първо');
+        alert('ÐœÐ¾Ð»Ñ, Ð¸Ð·Ð±ÐµÑ€Ð¸ Ñ‚ÐµÐºÑÑ‚ Ð¿ÑŠÑ€Ð²Ð¾');
         return;
       }
 
@@ -4432,14 +4432,14 @@
       } else if (property === 'fontSize') {
         document.execCommand('fontSize', false, value);
       }
-      
+
       // Save to localStorage
       if (property === 'color') {
         localStorage.setItem('textEditorTextColor', value);
       } else if (property === 'highlight') {
         localStorage.setItem('textEditorHighlight', value);
       }
-      
+
       // Mark as modified
       saveToHistory();
     }
@@ -4471,7 +4471,7 @@
         const btn = document.querySelector(`.heading-color-btn[data-color="${savedHeadingColor}"]`);
         if (btn) {
           applyDashedSeparatorColor(savedHeadingColor);
-          
+
           // Clear all active classes first
           document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
           btn.classList.add('active');
@@ -4510,7 +4510,7 @@
       document.getElementById('fileNumberInput').value = currentFileInfo.number || '';
       document.getElementById('fileNameInput').value = currentFileInfo.name || '';
       updateFileNamePreview();
-      
+
       // Show modal
       document.getElementById('saveFileModal').style.display = 'flex';
       document.getElementById('fileNameInput').focus();
@@ -4524,17 +4524,17 @@
     document.getElementById('fileInput').addEventListener('change', (e) => {
       const file = e.target.files[0];
       if (!file) return;
-      
+
       const reader = new FileReader();
       reader.onload = (event) => {
         const rawContent = event.target.result;
-        
+
         // Set global base path for images (use file's directory)
         if (file.name) {
           // For local files, we can't reliably set base path, but we try
           globalImageBasePath = '';
         }
-        
+
         // Convert input to HTML (supports .md/.txt/.html)
         isLoadingFile = true;
         let html = '';
@@ -4550,23 +4550,23 @@
         renderMathInEditorContent();
         saveToHistory();
         setTimeout(() => { isLoadingFile = false; }, 100); // Reset after load
-        
+
         // Extract file info for saving later
         const fileName = file.name.replace(/\.(md|txt)$/i, '');
         const numberMatch = fileName.match(/^(\d+(\.\d+)?)-/);
         const nameWithoutNumber = fileName.replace(/^\d+(\.\d+)?-/, '').replace(/^msg-/i, '');
-        
+
         currentFileInfo = {
           name: nameWithoutNumber,
           number: numberMatch ? numberMatch[1] : '',
           isFromCourses: false
         };
-        
+
         // Update page title
-        document.title = fileName + ' — Text Editor';
+        document.title = fileName + ' â€” Text Editor';
       };
       reader.readAsText(file);
-      
+
       // Reset file input
       e.target.value = '';
     });
@@ -4578,13 +4578,13 @@
         alert('Courses data not found. Please make sure you are running this from index.html or include courses.generated.js');
         return;
       }
-      
+
       // Group files by course
       const filesByCourse = {};
       courses.forEach(course => {
         const courseName = course.title || course.name || 'Unknown';
         filesByCourse[courseName] = [];
-        
+
         if (!course.sections) return;
         course.sections.forEach(rootSection => {
           forEachSectionRecursive(rootSection, section => {
@@ -4622,22 +4622,22 @@
           });
         });
       });
-      
+
       // Populate file list with course headers
       const fileList = document.getElementById('fileList');
       fileList.innerHTML = '';
-      
+
       Object.keys(filesByCourse).forEach(courseName => {
         const files = filesByCourse[courseName];
         if (files.length === 0) return;
-        
+
         // Add course header
         const courseHeader = document.createElement('div');
         courseHeader.className = 'course-header';
         courseHeader.textContent = courseName;
         courseHeader.setAttribute('data-course', courseName);
         fileList.appendChild(courseHeader);
-        
+
         // Add files for this course
         files.forEach((file, idx) => {
           const fileItem = document.createElement('div');
@@ -4645,27 +4645,27 @@
           fileItem.setAttribute('data-course', courseName);
           fileItem.setAttribute('data-type', file.type);
           fileItem.setAttribute('data-search-text', (file.courseName + ' ' + file.sectionName + ' ' + file.name).toLowerCase());
-          
+
           // Clean up file name: remove msg-, number prefix (including decimals like 2.4), and extension
           const cleanName = file.name
             .replace(/^\d+(\.\d+)?-/, '')   // Remove number prefix (e.g., "1-", "2.4-")
             .replace(/^msg-/i, '')          // Remove "msg-" prefix
             .replace(/\.(md|txt|html)$/i, '');   // Remove .md, .txt, or .html extension
-          
+
           fileItem.innerHTML = `
             <div class="file-item-name">${cleanName}</div>
             <div class="file-item-path">${file.sectionName}</div>
           `;
-          
+
           fileItem.addEventListener('click', async () => {
             await loadFileFromCourses(file);
             document.getElementById('fileBrowserModal').style.display = 'none';
           });
-          
+
           fileList.appendChild(fileItem);
         });
       });
-      
+
       // Show modal
       document.getElementById('fileBrowserModal').style.display = 'flex';
       document.getElementById('fileSearchInput').value = '';
@@ -4724,19 +4724,19 @@
     document.getElementById('htmlEditorBtn').addEventListener('click', () => {
       // Check if editor has content
       if (!editor.innerHTML.trim()) {
-        alert('⚠️ No content to edit.\n\nPlease open a file first.');
+        alert('âš ï¸ No content to edit.\n\nPlease open a file first.');
         return;
       }
 
       // Get current HTML content from editor
       let currentHtml = editor.innerHTML;
-      
+
       // Format HTML for readability
       currentHtml = formatHTML(currentHtml);
-      
+
       // Set textarea content
       document.getElementById('htmlEditorTextarea').value = currentHtml;
-      
+
       // Show modal
       document.getElementById('htmlEditorModal').style.display = 'block';
       document.getElementById('htmlEditorTextarea').focus();
@@ -4745,7 +4745,7 @@
     // HTML Editor Save
     document.getElementById('htmlEditorSaveBtn').addEventListener('click', () => {
       let htmlContent = document.getElementById('htmlEditorTextarea').value;
-      
+
       // Minify HTML for storage (remove extra whitespace/newlines)
       // But keep meaningful structure
       htmlContent = htmlContent
@@ -4753,19 +4753,19 @@
         .replace(/\n/g, '') // Remove newlines
         .replace(/\s+/g, ' ') // Replace multiple spaces with single space
         .trim();
-      
+
       // Update editor with minified HTML
       editor.innerHTML = htmlContent;
-      
+
       // Save to history and storage
       saveToHistory();
 localStorage.setItem('textEditorContent', htmlContent);
-      
+
       // Close modal
       document.getElementById('htmlEditorModal').style.display = 'none';
-      
+
       // Show confirmation
-      showNotification('✅ HTML updated successfully!', 'success');
+      showNotification('âœ… HTML updated successfully!', 'success');
     });
 
     // HTML Editor Close
@@ -4785,10 +4785,10 @@ localStorage.setItem('textEditorContent', htmlContent);
       const searchText = e.target.value.toLowerCase();
       const fileItems = document.querySelectorAll('.file-item');
       const courseHeaders = document.querySelectorAll('.course-header');
-      
+
       // Track which courses have visible files
       const visibleCourses = new Set();
-      
+
       fileItems.forEach(item => {
         const itemText = item.getAttribute('data-search-text');
         if (itemText.includes(searchText)) {
@@ -4798,7 +4798,7 @@ localStorage.setItem('textEditorContent', htmlContent);
           item.classList.add('hidden');
         }
       });
-      
+
       // Show/hide course headers based on whether they have visible files
       courseHeaders.forEach(header => {
         const courseName = header.getAttribute('data-course');
@@ -4831,18 +4831,18 @@ localStorage.setItem('textEditorContent', htmlContent);
         const currentOrigin = window.location.origin;
         globalImageBasePath = currentOrigin + '/' + basePath;
       }
-      
+
       // Convert markdown to HTML or use HTML directly
       isLoadingFile = true;
       let html;
-      
+
       // If it's an HTML file, use content directly (extract body content)
       if (file.type === 'html') {
         const parser = new DOMParser();
         const doc = parser.parseFromString(file.content, 'text/html');
         // Get body content and trim whitespace
         html = normalizeHtmlForEditor(doc.body.innerHTML.trim());
-        
+
         // Parse msg-terms.html file if opened
         if (file.name === 'msg-terms.html') {
           // Just load normally, no special parsing needed
@@ -4851,24 +4851,24 @@ localStorage.setItem('textEditorContent', htmlContent);
         // Otherwise parse as Markdown
         html = markdownToHtml(file.content);
       }
-      
+
       editor.innerHTML = html;
       renderMathInEditorContent();
       saveToHistory();
       setTimeout(() => { isLoadingFile = false; }, 100); // Reset after load
-      
+
       // Extract file info for saving later
       const numberMatch = file.name.match(/^(\d+(\.\d+)?)-/);
       const cleanName = file.name.replace(/^\d+(\.\d+)?-/, '').replace(/^msg-/i, '').replace(/\.(md|txt|html)$/i, '');
-      
+
       currentFileInfo = {
         name: cleanName,
         number: numberMatch ? numberMatch[1] : '',
         isFromCourses: true
       };
-      
+
       // Update page title
-      document.title = cleanName + ' — Text Editor';
+      document.title = cleanName + ' â€” Text Editor';
     }
 
     // Close file browser modal
@@ -4892,13 +4892,13 @@ localStorage.setItem('textEditorContent', htmlContent);
       const number = document.getElementById('fileNumberInput').value.trim();
       const name = document.getElementById('fileNameInput').value.trim();
       const preview = document.getElementById('fileNamePreview');
-      
+
       let fileName = '';
       if (number) {
         fileName += number + '-msg-';
       }
       fileName += (name || 'document') + '.html';
-      
+
       preview.textContent = fileName;
     }
 
@@ -4908,14 +4908,14 @@ localStorage.setItem('textEditorContent', htmlContent);
     document.getElementById('confirmSaveBtn').addEventListener('click', () => {
       const number = document.getElementById('fileNumberInput').value.trim();
       const name = document.getElementById('fileNameInput').value.trim();
-      
+
       if (!name) {
         alert('Please enter a file name');
         return;
       }
-      
+
       const cleanName = name.replace(/\.(html|md|txt)$/i, '');
-      
+
       let editorContentForBody = editor.innerHTML;
 
       // Create a temporary container
@@ -4966,7 +4966,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       editorContentForBody = normalizeHtmlForEditor(editorContentForBody, { stripNonEssentialSpans: true });
 
       const savedHeadingColor = localStorage.getItem('textEditorHeadingColor') || '#588157';
-      
+
       const htmlDoc = `<!DOCTYPE html>
 <html lang="bg">
 <head>
@@ -4975,16 +4975,16 @@ localStorage.setItem('textEditorContent', htmlContent);
   <title>${cleanName}</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <style>
-    body { 
-      font-family: "Open Sans", Arial, sans-serif; 
-      max-width: 1550px; 
-      margin: 0.5rem auto; 
-      padding: 0 1rem; 
-      line-height: 1.6; 
-      color: #1f2937; 
+    body {
+      font-family: "Open Sans", Arial, sans-serif;
+      max-width: 1550px;
+      margin: 0.5rem auto;
+      padding: 0 1rem;
+      line-height: 1.6;
+      color: #1f2937;
     }
-    h1, h2, h3, h4 { 
-      font-weight: 600; 
+    h1, h2, h3, h4 {
+      font-weight: 600;
       margin-top: 0.7em;
       margin-bottom: 0;
       color: ${savedHeadingColor};
@@ -4994,8 +4994,8 @@ localStorage.setItem('textEditorContent', htmlContent);
     h3 { font-size: 1.1em; margin-bottom: 0; }
     h4 { font-size: 1.05em; margin-bottom: 0; }
     h1 + h2, h1 + h3, h1 + h4, h2 + h3, h2 + h4, h3 + h4 { margin-top: 0.1em; }
-    p { 
-      margin: 0.3em 0; 
+    p {
+      margin: 0.3em 0;
       white-space: pre-wrap;
     }
     hr {
@@ -5018,12 +5018,12 @@ localStorage.setItem('textEditorContent', htmlContent);
     p + ul, p + ol { margin-top: 0.2em; }
     h1 + p, h2 + p, h3 + p, h4 + p,
     h1 + ul, h2 + ul, h3 + ul, h4 + ul,
-    h1 + ol, h2 + ol, h3 + ol, h4 + ol { 
-      margin-top: 0; 
+    h1 + ol, h2 + ol, h3 + ol, h4 + ol {
+      margin-top: 0;
     }
-    ul, ol { 
-      margin: 0.2em 0; 
-      padding-left: 1.5em; 
+    ul, ol {
+      margin: 0.2em 0;
+      padding-left: 1.5em;
       list-style-position: outside;
     }
     li { margin: 0.2em 0; }
@@ -5044,12 +5044,12 @@ localStorage.setItem('textEditorContent', htmlContent);
     ul ul ul { list-style-type: square; }
     strong { font-weight: 600; }
     em { font-style: italic; }
-    code { 
-      background: rgba(146, 64, 14, 0.1); 
-      padding: 2px 6px; 
-      border-radius: 3px; 
-      font-family: "Courier New", monospace; 
-      font-size: 0.9em; 
+    code {
+      background: rgba(146, 64, 14, 0.1);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-family: "Courier New", monospace;
+      font-size: 0.9em;
     }
     pre {
       background: rgba(255, 255, 255, 0.5);
@@ -5070,26 +5070,26 @@ localStorage.setItem('textEditorContent', htmlContent);
       font-style: italic;
       color: #166534;
     }
-    table { 
-      border-collapse: collapse; 
-      margin: 0.75em 0; 
-      width: 100%; 
+    table {
+      border-collapse: collapse;
+      margin: 0.75em 0;
+      width: 100%;
       table-layout: auto;
     }
-    th, td { 
+    th, td {
       border: 1px solid rgba(2, 2, 2, 0.2);
-      padding: 6px 10px; 
-      text-align: left; 
+      padding: 6px 10px;
+      text-align: left;
       vertical-align: top;
       height: 24px;
       line-height: 1.2;
     }
-    thead th { 
-      background: rgba(88, 129, 87, 0.13); 
-      font-weight: 600; 
+    thead th {
+      background: rgba(88, 129, 87, 0.13);
+      font-weight: 600;
     }
-    tbody tr:nth-child(odd) { 
-      background: rgba(88, 129, 87, 0.06); 
+    tbody tr:nth-child(odd) {
+      background: rgba(88, 129, 87, 0.06);
     }
     /* Image alignment rules for exported content and md-viewer */
     img[data-align="left"] {
@@ -5257,7 +5257,7 @@ localStorage.setItem('textEditorContent', htmlContent);
 
       function parseNoteMarkdown(text) {
         if (!text) return '';
-        
+
         const splitTableCells = function(line) {
           return String(line || '')
             .trim()
@@ -5284,10 +5284,10 @@ localStorage.setItem('textEditorContent', htmlContent);
         let lines = text.split('\\n');
         let html = [];
         let stack = [];
-        
+
         for (let i = 0; i < lines.length; i++) {
           let line = lines[i];
-          
+
           let indentMatch = line.match(/^(\\s*)/);
           let indent = indentMatch ? indentMatch[1].length : 0;
           let content = line.trim();
@@ -5342,21 +5342,21 @@ localStorage.setItem('textEditorContent', htmlContent);
             i--;
             continue;
           }
-          
+
           let isUl = /^[-*]\\s+(.+)/.test(content);
           let isOl = /^\\d+\\.\\s+(.+)/.test(content);
-          
+
           if (isUl || isOl) {
             let listType = isUl ? 'ul' : 'ol';
             let match = isUl ? content.match(/^[-*]\\s+(.+)/) : content.match(/^\\d+\\.\\s+(.+)/);
             let itemText = match[1];
-            
+
             if (stack.length === 0) {
               stack.push({ type: listType, indent: indent });
               html.push('<' + listType + '>');
             } else {
               let last = stack[stack.length - 1];
-              
+
               if (indent > last.indent) {
                 stack.push({ type: listType, indent: indent });
                 html.push('<' + listType + '>');
@@ -5406,12 +5406,12 @@ localStorage.setItem('textEditorContent', htmlContent);
             }
           }
         }
-        
+
         while (stack.length > 0) {
           let closed = stack.pop();
           html.push('</' + closed.type + '>');
         }
-        
+
         let result = html.join('')
           .replace(/!\\[(.*?)\\]\\((.*?)\\)/g, '<img src="$2" alt="$1">')
           .replace(/\\*\\*(.+?)\\*\\*/g, '<strong>$1</strong>')
@@ -5420,13 +5420,13 @@ localStorage.setItem('textEditorContent', htmlContent);
           .replace(/_(.+?)_/g, '<em>$1</em>')
           .replace(/\`(.+?)\`/g, '<code>$1</code>')
           .replace(/\\[(.+?)\\]\\((.+?)\\)/g, '<a href="$2" target="_blank">$1</a>');
-        
+
         result = result
           .replace(/<br><ul>/g, '<ul>')
           .replace(/<br><ol>/g, '<ol>')
           .replace(/<\/ul><br>/g, '</ul>')
           .replace(/<\/ol><br>/g, '</ol>');
-        
+
         return result;
       }
 
@@ -5493,22 +5493,22 @@ renderMathInElement(document.body, {
 <\/script>
 </body>
 </html>`;
-      
+
       const blob = new Blob([htmlDoc], { type: 'text/html;charset=utf-8' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      
+
       let fileName = '';
       if (number) {
         fileName = number + '-msg-' + name + '.html';
       } else {
         fileName = name + '.html';
       }
-      
+
       link.download = fileName;
       link.click();
       URL.revokeObjectURL(link.href);
-      
+
       document.getElementById('saveFileModal').style.display = 'none';
     });
 
@@ -5528,15 +5528,15 @@ renderMathInElement(document.body, {
 
     // Image modal events
     document.getElementById('imageBtn').addEventListener('click', insertImage);
-    
+
     document.getElementById('closeImageModalBtn').addEventListener('click', () => {
       document.getElementById('imageModal').style.display = 'none';
     });
-    
+
     document.getElementById('cancelImageBtn').addEventListener('click', () => {
       document.getElementById('imageModal').style.display = 'none';
     });
-    
+
     document.getElementById('imageModal').addEventListener('click', (e) => {
       if (e.target.id === 'imageModal') {
         document.getElementById('imageModal').style.display = 'none';
@@ -5571,7 +5571,7 @@ renderMathInElement(document.body, {
         fileNameLabel.textContent = '';
       }
     });
-    
+
     document.getElementById('insertImageBtn').addEventListener('click', async () => {
       let imageName = document.getElementById('imageNameInput').value.trim();
       imageName = imageName.replace(/[.,;:!?]+$/g, '');
@@ -5601,7 +5601,7 @@ renderMathInElement(document.body, {
         alert('Please enter image file name or URL');
         return;
       }
-      
+
       const isUrl = imageName.startsWith('http://') || imageName.startsWith('https://');
 
       let imgSrc;
@@ -5614,14 +5614,14 @@ renderMathInElement(document.body, {
         }
         imgSrc = 'assets/' + imageName;
       }
-      
+
       try {
         insertImageAtRange(imgSrc, imageName, imageSize);
       } catch (error) {
         alert(error.message);
         return;
       }
-      
+
       // Clear inputs and close modal
       document.getElementById('imageNameInput').value = '';
       document.getElementById('imageSizeInput').value = '100';
@@ -5630,7 +5630,7 @@ renderMathInElement(document.body, {
       setImageUploadStatus('');
       document.getElementById('imageModal').style.display = 'none';
       savedImageRange = null; // Clear saved range
-      
+
       saveToHistory();
       editor.focus();
     });
@@ -5674,7 +5674,7 @@ renderMathInElement(document.body, {
       }
       savedNoteSelection = selection.getRangeAt(0).cloneRange();
       currentEditingNoteSpan = null; // Reset for new note creation
-      
+
       const noteModal = document.getElementById('noteModal');
       const noteModalTitle = noteModal.querySelector('.modal-header h2');
       document.getElementById('noteSelectedTextInput').value = selection.toString(); // Set selected text
@@ -5685,15 +5685,15 @@ renderMathInElement(document.body, {
       noteModal.style.display = 'flex';
       document.getElementById('noteTextInput').focus();
     });
-    
+
     document.getElementById('closeNoteModalBtn').addEventListener('click', () => {
       resetNoteModalState();
     });
-    
+
     document.getElementById('cancelNoteBtn').addEventListener('click', () => {
       resetNoteModalState();
     });
-    
+
     document.getElementById('noteModal').addEventListener('click', (e) => {
       if (e.target.id === 'noteModal') {
         resetNoteModalState();
@@ -5762,26 +5762,26 @@ renderMathInElement(document.body, {
         currentEditingNoteSpan.dataset.note = noteText;
         // The text content of the span does not change during edit
         showNotification('Note updated successfully!', 'success');
-        
+
         // Save reference to the note span before clearing
         const editedNoteSpan = currentEditingNoteSpan;
-        
+
         document.getElementById('noteTextInput').value = '';
         resetNoteModalState();
-        
+
         saveToHistory();
         scheduleEditorAutoSave();
-        
+
         // Restore cursor position after the edited note span
         requestAnimationFrame(() => {
           const range = document.createRange();
           range.setStartAfter(editedNoteSpan);
           range.collapse(true);
-          
+
           const sel = window.getSelection();
           sel.removeAllRanges();
           sel.addRange(range);
-          
+
           editor.focus();
         });
       } else {
@@ -5834,28 +5834,28 @@ renderMathInElement(document.body, {
           return;
         }
         noteSpan.appendChild(extracted);
-        
+
         // Insert inline note span at original selection position.
         savedNoteSelection.insertNode(noteSpan);
-        
+
         showNotification('Note added successfully!', 'success');
-        
+
         document.getElementById('noteTextInput').value = '';
         resetNoteModalState();
-        
+
         saveToHistory();
         scheduleEditorAutoSave();
-        
+
         // Restore cursor position after the note span - use requestAnimationFrame for better timing
         requestAnimationFrame(() => {
           const range = document.createRange();
           range.setStartAfter(noteSpan);
           range.collapse(true);
-          
+
           const sel = window.getSelection();
           sel.removeAllRanges();
           sel.addRange(range);
-          
+
           editor.focus();
         });
       }
@@ -6030,7 +6030,7 @@ renderMathInElement(document.body, {
 
       const key = e.key;
 
-      if (key === 'b' || key === 'B' || key === 'Б' || key === 'б') {
+      if (key === 'b' || key === 'B' || key === 'Ð‘' || key === 'Ð±') {
         e.preventDefault();
         wrapTextareaSelection(noteTextInput, '**');
         return;
@@ -6059,7 +6059,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if (key === 'g' || key === 'G' || key === 'Г' || key === 'г') {
+      if (key === 'g' || key === 'G' || key === 'Ð“' || key === 'Ð³') {
         e.preventDefault();
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
           if (!line.trim()) return line;
@@ -6068,7 +6068,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if ((key === 'o' || key === 'O' || key === 'О' || key === 'о') && e.shiftKey) {
+      if ((key === 'o' || key === 'O' || key === 'Ðž' || key === 'Ð¾') && e.shiftKey) {
         e.preventDefault();
         let index = 1;
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
@@ -6080,7 +6080,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if (key === 'q' || key === 'Q' || key === 'й' || key === 'Й') {
+      if (key === 'q' || key === 'Q' || key === 'Ð¹' || key === 'Ð™') {
         e.preventDefault();
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
           if (!line.trim()) return line;
@@ -6089,7 +6089,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if (key === 's' || key === 'S' || key === 'С' || key === 'с') {
+      if (key === 's' || key === 'S' || key === 'Ð¡' || key === 'Ñ') {
         e.preventDefault();
         document.getElementById('insertNoteBtn').click();
       }
@@ -6131,7 +6131,7 @@ renderMathInElement(document.body, {
       `;
       noteTooltip.style.pointerEvents = supportsPreciseHover ? 'none' : 'auto';
       noteTooltip.id = 'noteTooltip';
-      
+
       // Add styles for compact lists in tooltips
       if (!document.getElementById('note-tooltip-list-styles')) {
         const style = document.createElement('style');
@@ -6197,7 +6197,7 @@ renderMathInElement(document.body, {
         `;
         document.head.appendChild(style);
       }
-      
+
       document.body.appendChild(noteTooltip);
 
       noteTooltip.addEventListener('touchstart', (e) => {
@@ -6257,14 +6257,14 @@ renderMathInElement(document.body, {
         if (/^:-{3,}$/.test(cell)) return 'left';
         return '';
       };
-      
+
       let lines = text.split('\n');
       let html = [];
       let stack = []; // Stack of { type: 'ul'|'ol', indent: number }
-      
+
       for (let i = 0; i < lines.length; i++) {
         let line = lines[i];
-        
+
         // Calculate indentation
         let indentMatch = line.match(/^(\s*)/);
         let indent = indentMatch ? indentMatch[1].length : 0;
@@ -6320,22 +6320,22 @@ renderMathInElement(document.body, {
           i--;
           continue;
         }
-        
+
         let isUl = /^[-*]\s+(.+)/.test(content);
         let isOl = /^\d+\.\s+(.+)/.test(content);
-        
+
         if (isUl || isOl) {
           let listType = isUl ? 'ul' : 'ol';
           let match = isUl ? content.match(/^[-*]\s+(.+)/) : content.match(/^\d+\.\s+(.+)/);
           let itemText = match[1];
-          
+
           if (stack.length === 0) {
             // New list
             stack.push({ type: listType, indent: indent });
             html.push('<' + listType + '>');
           } else {
             let last = stack[stack.length - 1];
-            
+
             if (indent > last.indent) {
               // Nested list
               stack.push({ type: listType, indent: indent });
@@ -6399,13 +6399,13 @@ renderMathInElement(document.body, {
           }
         }
       }
-      
+
       // Close remaining
       while (stack.length > 0) {
         let closed = stack.pop();
         html.push('</' + closed.type + '>');
       }
-      
+
       const protectedTokens = [];
       const makeToken = (htmlSnippet) => {
         const token = `@@NOTETOKEN${protectedTokens.length}@@`;
@@ -6437,13 +6437,13 @@ renderMathInElement(document.body, {
         const i = Number(index);
         return Number.isInteger(i) && protectedTokens[i] !== undefined ? protectedTokens[i] : match;
       });
-      
+
       result = result
         .replace(/<br><ul>/g, '<ul>')
         .replace(/<br><ol>/g, '<ol>')
         .replace(/<\/ul><br>/g, '</ul>')
         .replace(/<\/ol><br>/g, '</ol>');
-      
+
       return result;
     }
 
@@ -6505,7 +6505,7 @@ renderMathInElement(document.body, {
       if (noteSpan && editor.contains(noteSpan)) {
         activeHoveredNoteSpan = noteSpan;
         const noteContent = noteSpan.dataset.note;
-        
+
         if (noteContent) {
           if (!noteTooltip) {
             createNoteTooltip();
@@ -6609,55 +6609,55 @@ renderMathInElement(document.body, {
 
     // Table modal events
     const tableModal = document.getElementById('tableModal');
-    
+
     document.getElementById('closeTableModalBtn').addEventListener('click', () => {
       tableModal.style.display = 'none';
     });
-    
+
     document.getElementById('cancelTableBtn').addEventListener('click', () => {
       tableModal.style.display = 'none';
     });
-    
+
     tableModal.addEventListener('click', (e) => {
       if (e.target.id === 'tableModal') {
         tableModal.style.display = 'none';
       }
     });
-    
+
     document.getElementById('confirmTableBtn').addEventListener('click', () => {
       const rows = parseInt(document.getElementById('tableRowsInput').value) || 3;
       const cols = parseInt(document.getElementById('tableColsInput').value) || 3;
-      
+
       const tableHTML = createTableHTML(rows, cols);
-      
+
       // Use saved range from before modal was opened
       const range = savedTableRange || document.getSelection().getRangeAt(0);
       const fragment = document.createRange().createContextualFragment(tableHTML);
       range.insertNode(fragment);
-      
+
       // Add a paragraph after table for spacing
       const p = document.createElement('p');
       p.innerHTML = '<br>';
       range.setStartAfter(fragment.lastChild);
       range.insertNode(p);
-      
+
       // Move cursor inside the new paragraph
       const newRange = document.createRange();
       newRange.setStart(p, 0);
       newRange.collapse(true);
-      
+
       const selection = window.getSelection();
       selection.removeAllRanges();
       selection.addRange(newRange);
-      
+
       // Clear saved range
       savedTableRange = null;
-      
+
       // Close modal and reset
       tableModal.style.display = 'none';
       document.getElementById('tableRowsInput').value = '3';
       document.getElementById('tableColsInput').value = '3';
-      
+
       saveToHistory();
       editor.focus();
     });
@@ -6716,21 +6716,21 @@ renderMathInElement(document.body, {
       }
 
       let node = e.target;
-      
+
       // Check if click is inside a table cell
       while (node && node !== editor) {
         if (node.tagName === 'TD' || node.tagName === 'TH') {
           e.preventDefault();
-          
+
           contextMenuCell = node;
           contextMenuAudioTarget = null;
           audioContextMenu.classList.remove('active');
-          
+
           // Position the context menu
           tableContextMenu.style.left = e.pageX + 'px';
           tableContextMenu.style.top = e.pageY + 'px';
           tableContextMenu.classList.add('active');
-          
+
           return;
         }
         node = node.parentNode;
@@ -6773,7 +6773,7 @@ renderMathInElement(document.body, {
         const row = contextMenuCell.closest('tr');
         const newRow = document.createElement('tr');
         const colCount = row.cells.length;
-        
+
         for (let i = 0; i < colCount; i++) {
           newRow.appendChild(document.createElement('td'));
         }
@@ -6788,7 +6788,7 @@ renderMathInElement(document.body, {
         const row = contextMenuCell.closest('tr');
         const newRow = document.createElement('tr');
         const colCount = row.cells.length;
-        
+
         for (let i = 0; i < colCount; i++) {
           newRow.appendChild(document.createElement('td'));
         }
@@ -6811,7 +6811,7 @@ renderMathInElement(document.body, {
       if (contextMenuCell) {
         const table = contextMenuCell.closest('table');
         const colIndex = contextMenuCell.cellIndex;
-        
+
         table.querySelectorAll('tr').forEach(row => {
           const newCell = document.createElement(row.querySelector('th') ? 'th' : 'td');
           newCell.textContent = ' ';
@@ -6826,7 +6826,7 @@ renderMathInElement(document.body, {
       if (contextMenuCell) {
         const table = contextMenuCell.closest('table');
         const colIndex = contextMenuCell.cellIndex;
-        
+
         table.querySelectorAll('tr').forEach(row => {
           const newCell = document.createElement(row.querySelector('th') ? 'th' : 'td');
           newCell.textContent = ' ';
@@ -6841,7 +6841,7 @@ renderMathInElement(document.body, {
       if (contextMenuCell) {
         const table = contextMenuCell.closest('table');
         const colIndex = contextMenuCell.cellIndex;
-        
+
         table.querySelectorAll('tr').forEach(row => {
           if (row.cells[colIndex]) row.deleteCell(colIndex);
         });
@@ -6861,15 +6861,15 @@ renderMathInElement(document.body, {
 
     // Merge Cells Modal events
     const mergeCellsModal = document.getElementById('mergeCellsModal');
-    
+
     document.getElementById('closeMergeCellsModalBtn').addEventListener('click', () => {
       mergeCellsModal.style.display = 'none';
     });
-    
+
     document.getElementById('cancelMergeBtn').addEventListener('click', () => {
       mergeCellsModal.style.display = 'none';
     });
-    
+
     mergeCellsModal.addEventListener('click', (e) => {
       if (e.target.id === 'mergeCellsModal') {
         mergeCellsModal.style.display = 'none';
@@ -6881,7 +6881,7 @@ renderMathInElement(document.body, {
         const row = contextMenuCell.closest('tr');
         const cellIndex = contextMenuCell.cellIndex;
         const nextCell = row.cells[cellIndex + 1];
-        
+
         if (nextCell) {
           contextMenuCell.textContent = (contextMenuCell.textContent + ' ' + nextCell.textContent).trim();
           const colspan = parseInt(contextMenuCell.getAttribute('colspan')) || 1;
@@ -6900,7 +6900,7 @@ renderMathInElement(document.body, {
         const currentRow = contextMenuCell.closest('tr');
         const nextRow = currentRow.nextElementSibling;
         const cellIndex = contextMenuCell.cellIndex;
-        
+
         if (nextRow && nextRow.cells[cellIndex]) {
           const cellBelow = nextRow.cells[cellIndex];
           contextMenuCell.textContent = (contextMenuCell.textContent + ' ' + cellBelow.textContent).trim();
@@ -6918,7 +6918,7 @@ renderMathInElement(document.body, {
     document.getElementById('splitCell').addEventListener('click', () => {
       if (contextMenuCell) {
         const colspan = parseInt(contextMenuCell.getAttribute('colspan')) || 1;
-        
+
         if (colspan > 1) {
           const row = contextMenuCell.closest('tr');
           contextMenuCell.setAttribute('colspan', colspan - 1);
@@ -6996,15 +6996,15 @@ renderMathInElement(document.body, {
       });
 
       editor.innerHTML = normalizeHtmlForEditor(editor.innerHTML, { preserveKatex: true });
-      
+
       saveToHistory();
-      
+
       // Show notification
       const notification = document.createElement('div');
-      notification.textContent = '✓ Font sizes reset to default';
+      notification.textContent = 'âœ“ Font sizes reset to default';
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
       document.body.appendChild(notification);
-      
+
       setTimeout(() => {
         notification.style.transition = 'opacity 0.3s';
         notification.style.opacity = '0';
@@ -7024,26 +7024,26 @@ renderMathInElement(document.body, {
     const geminiBtn = document.getElementById('geminiBtn');
     if (geminiBtn) {
       geminiBtn.addEventListener('click', () => {
-        const geminiPrompt = `Преобразувай целия следващ текст в СУРОВ MD КОД с цел максимална четимост и ясна структура.
+        const geminiPrompt = `ÐŸÑ€ÐµÐ¾Ð±Ñ€Ð°Ð·ÑƒÐ²Ð°Ð¹ Ñ†ÐµÐ»Ð¸Ñ ÑÐ»ÐµÐ´Ð²Ð°Ñ‰ Ñ‚ÐµÐºÑÑ‚ Ð² Ð¡Ð£Ð ÐžÐ’ MD ÐšÐžÐ” Ñ Ñ†ÐµÐ» Ð¼Ð°ÐºÑÐ¸Ð¼Ð°Ð»Ð½Ð° Ñ‡ÐµÑ‚Ð¸Ð¼Ð¾ÑÑ‚ Ð¸ ÑÑÐ½Ð° ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð°.
 
-Изисквания за форматиране:
-1. Генерирай само и единствено самия .md код, ОГРАДЕН В БЛОК ЗА КОД (markdown...), за да може да бъде копиран.
-2. Използвай **H1 (#)** само веднъж за главното заглавие на темата.
-3. Използвай **H2 (##)**, **H3 (###)**, и **H4 (#####)** за всички подтеми и секции. Не използвай H5 или по-ниски.
-4. Искам да структурираш текста така, че едновременно да е максимално четим и ясен. Искам да не е само bullet points, но не и само свободен текст - искам логична комбинация от параграфи, списъци, и заглавия, така че да е лесно за четене и възприемане.
-5. Използвай удебеляване (bold) за ключови термини, синдроми и анатомични структури.
-6. Не добавяй LaTeX, емоджита, cite_start или снимки.
-7. Ако има препратки към фигури (напр. "фиг. 8.1"), ги премахни.
-8. Ако изпращам текста на части, продължавай смислово от последната завършена секция.`;
+Ð˜Ð·Ð¸ÑÐºÐ²Ð°Ð½Ð¸Ñ Ð·Ð° Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð¸Ñ€Ð°Ð½Ðµ:
+1. Ð“ÐµÐ½ÐµÑ€Ð¸Ñ€Ð°Ð¹ ÑÐ°Ð¼Ð¾ Ð¸ ÐµÐ´Ð¸Ð½ÑÑ‚Ð²ÐµÐ½Ð¾ ÑÐ°Ð¼Ð¸Ñ .md ÐºÐ¾Ð´, ÐžÐ“Ð ÐÐ”Ð•Ð Ð’ Ð‘Ð›ÐžÐš Ð—Ð ÐšÐžÐ” (markdown...), Ð·Ð° Ð´Ð° Ð¼Ð¾Ð¶Ðµ Ð´Ð° Ð±ÑŠÐ´Ðµ ÐºÐ¾Ð¿Ð¸Ñ€Ð°Ð½.
+2. Ð˜Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ **H1 (#)** ÑÐ°Ð¼Ð¾ Ð²ÐµÐ´Ð½ÑŠÐ¶ Ð·Ð° Ð³Ð»Ð°Ð²Ð½Ð¾Ñ‚Ð¾ Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ðµ Ð½Ð° Ñ‚ÐµÐ¼Ð°Ñ‚Ð°.
+3. Ð˜Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ **H2 (##)**, **H3 (###)**, Ð¸ **H4 (#####)** Ð·Ð° Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð¿Ð¾Ð´Ñ‚ÐµÐ¼Ð¸ Ð¸ ÑÐµÐºÑ†Ð¸Ð¸. ÐÐµ Ð¸Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ H5 Ð¸Ð»Ð¸ Ð¿Ð¾-Ð½Ð¸ÑÐºÐ¸.
+4. Ð˜ÑÐºÐ°Ð¼ Ð´Ð° ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð¸Ñ€Ð°Ñˆ Ñ‚ÐµÐºÑÑ‚Ð° Ñ‚Ð°ÐºÐ°, Ñ‡Ðµ ÐµÐ´Ð½Ð¾Ð²Ñ€ÐµÐ¼ÐµÐ½Ð½Ð¾ Ð´Ð° Ðµ Ð¼Ð°ÐºÑÐ¸Ð¼Ð°Ð»Ð½Ð¾ Ñ‡ÐµÑ‚Ð¸Ð¼ Ð¸ ÑÑÐµÐ½. Ð˜ÑÐºÐ°Ð¼ Ð´Ð° Ð½Ðµ Ðµ ÑÐ°Ð¼Ð¾ bullet points, Ð½Ð¾ Ð½Ðµ Ð¸ ÑÐ°Ð¼Ð¾ ÑÐ²Ð¾Ð±Ð¾Ð´ÐµÐ½ Ñ‚ÐµÐºÑÑ‚ - Ð¸ÑÐºÐ°Ð¼ Ð»Ð¾Ð³Ð¸Ñ‡Ð½Ð° ÐºÐ¾Ð¼Ð±Ð¸Ð½Ð°Ñ†Ð¸Ñ Ð¾Ñ‚ Ð¿Ð°Ñ€Ð°Ð³Ñ€Ð°Ñ„Ð¸, ÑÐ¿Ð¸ÑÑŠÑ†Ð¸, Ð¸ Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ñ, Ñ‚Ð°ÐºÐ° Ñ‡Ðµ Ð´Ð° Ðµ Ð»ÐµÑÐ½Ð¾ Ð·Ð° Ñ‡ÐµÑ‚ÐµÐ½Ðµ Ð¸ Ð²ÑŠÐ·Ð¿Ñ€Ð¸ÐµÐ¼Ð°Ð½Ðµ.
+5. Ð˜Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ ÑƒÐ´ÐµÐ±ÐµÐ»ÑÐ²Ð°Ð½Ðµ (bold) Ð·Ð° ÐºÐ»ÑŽÑ‡Ð¾Ð²Ð¸ Ñ‚ÐµÑ€Ð¼Ð¸Ð½Ð¸, ÑÐ¸Ð½Ð´Ñ€Ð¾Ð¼Ð¸ Ð¸ Ð°Ð½Ð°Ñ‚Ð¾Ð¼Ð¸Ñ‡Ð½Ð¸ ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð¸.
+6. ÐÐµ Ð´Ð¾Ð±Ð°Ð²ÑÐ¹ LaTeX, ÐµÐ¼Ð¾Ð´Ð¶Ð¸Ñ‚Ð°, cite_start Ð¸Ð»Ð¸ ÑÐ½Ð¸Ð¼ÐºÐ¸.
+7. ÐÐºÐ¾ Ð¸Ð¼Ð° Ð¿Ñ€ÐµÐ¿Ñ€Ð°Ñ‚ÐºÐ¸ ÐºÑŠÐ¼ Ñ„Ð¸Ð³ÑƒÑ€Ð¸ (Ð½Ð°Ð¿Ñ€. "Ñ„Ð¸Ð³. 8.1"), Ð³Ð¸ Ð¿Ñ€ÐµÐ¼Ð°Ñ…Ð½Ð¸.
+8. ÐÐºÐ¾ Ð¸Ð·Ð¿Ñ€Ð°Ñ‰Ð°Ð¼ Ñ‚ÐµÐºÑÑ‚Ð° Ð½Ð° Ñ‡Ð°ÑÑ‚Ð¸, Ð¿Ñ€Ð¾Ð´ÑŠÐ»Ð¶Ð°Ð²Ð°Ð¹ ÑÐ¼Ð¸ÑÐ»Ð¾Ð²Ð¾ Ð¾Ñ‚ Ð¿Ð¾ÑÐ»ÐµÐ´Ð½Ð°Ñ‚Ð° Ð·Ð°Ð²ÑŠÑ€ÑˆÐµÐ½Ð° ÑÐµÐºÑ†Ð¸Ñ.`;
 
         // Copy to clipboard
         navigator.clipboard.writeText(geminiPrompt).then(() => {
           // Show notification
           const notification = document.createElement('div');
-          notification.textContent = '✓ Prompt copied to clipboard! Opening Gemini...';
+          notification.textContent = 'âœ“ Prompt copied to clipboard! Opening Gemini...';
           notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
           document.body.appendChild(notification);
-          
+
           setTimeout(() => {
             notification.style.transition = 'opacity 0.3s';
             notification.style.opacity = '0';
@@ -7056,10 +7056,10 @@ renderMathInElement(document.body, {
           console.error('Failed to copy:', err);
           // Show error notification
           const notification = document.createElement('div');
-          notification.textContent = '✗ Failed to copy prompt';
+          notification.textContent = 'âœ— Failed to copy prompt';
           notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #ef4444; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
           document.body.appendChild(notification);
-          
+
           setTimeout(() => {
             notification.style.transition = 'opacity 0.3s';
             notification.style.opacity = '0';
@@ -7093,43 +7093,43 @@ renderMathInElement(document.body, {
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;');
-      
+
       // Headers (h1-h4)
       highlighted = highlighted.replace(/^(#{1,4})\s+(.*)$/gm, '<span style="color: #588157; font-weight: 600;">$1</span> <span style="color: #588157; font-weight: 600;">$2</span>');
-      
+
       // Bold **text**
       highlighted = highlighted.replace(/\*\*([^*]+)\*\*/g, '<span style="color: #1f2937; font-weight: 600;">**</span><span style="color: #374151; font-weight: 600;">$1</span><span style="color: #1f2937; font-weight: 600;">**</span>');
-      
+
       // Italic *text*
       highlighted = highlighted.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<span style="color: #6b7280;">*</span><span style="color: #6b7280; font-style: italic;">$1</span><span style="color: #6b7280;">*</span>');
-      
+
       // Underline __text__
       highlighted = highlighted.replace(/__([^_]+)__/g, '<span style="color: #9ca3af;">__</span><span style="color: #9ca3af; text-decoration: underline;">$1</span><span style="color: #9ca3af;">__</span>');
-      
+
       // Inline code `code`
       highlighted = highlighted.replace(/`([^`]+)`/g, '<span style="color: #059669;">`</span><span style="color: #059669; background: rgba(5, 150, 105, 0.1);">$1</span><span style="color: #059669;">`</span>');
-      
+
       // Links [text](url)
       highlighted = highlighted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<span style="color: #2563eb;">[</span><span style="color: #3b82f6;">$1</span><span style="color: #2563eb;">](</span><span style="color: #60a5fa; text-decoration: underline;">$2</span><span style="color: #2563eb;">)</span>');
-      
+
       // Images ![alt](url)
       highlighted = highlighted.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<span style="color: #588157;">![</span><span style="color: #588157;">$1</span><span style="color: #588157;">](</span><span style="color: #588157; text-decoration: underline;">$2</span><span style="color: #588157;">)</span>');
-      
+
       // Unordered list - keep original - or * marker
       highlighted = highlighted.replace(/^(\s*)([-*])\s+(.*)$/gm, '$1<span style="color: #588157; font-weight: 600;">$2</span> <span style="color: #374151;">$3</span>');
-      
+
       // Ordered list
       highlighted = highlighted.replace(/^(\s*)(\d+)\.\s+(.*)$/gm, '$1<span style="color: #588157; font-weight: 600;">$2.</span> <span style="color: #374151;">$3</span>');
-      
+
       // Blockquote
       highlighted = highlighted.replace(/^(&gt;)\s+(.*)$/gm, '<span style="color: #74b673; font-weight: 600;">$1</span> <span style="color: #588157; font-style: italic;">$2</span>');
-      
+
       // Horizontal rule
       highlighted = highlighted.replace(/^---+$/gm, '<span style="color: #6b7280;">---</span>');
-      
+
       // Dashed divider (topic separator)
       highlighted = highlighted.replace(/^~~~+$/gm, '<span style="color: #73a372; border-bottom: 2px dashed #73a372; display: inline-block; padding-bottom: 2px;">~~~</span>');
-      
+
       return highlighted;
     }
 
@@ -7139,22 +7139,22 @@ renderMathInElement(document.body, {
       let changed = true;
       while (changed) {
         changed = false;
-        
+
         // Find all OL and UL elements
         const allLists = Array.from(editor.querySelectorAll('ol, ul'));
-        
+
         for (let list of allLists) {
           // Check if this list is nested inside an LI
           const parentLi = list.parentElement;
           if (parentLi && parentLi.tagName === 'LI') {
             // This is a nested list
             const grandparentList = parentLi.parentElement;
-            
+
             // Only flatten if both parent and child are same type or if parent is OL
             if (grandparentList && (grandparentList.tagName === 'OL' || grandparentList.tagName === 'UL')) {
               // Move all items from nested list to after the parent LI
               const items = Array.from(list.querySelectorAll(':scope > li'));
-              
+
               for (let item of items) {
                 // If this is an OL > LI > OL, move items to parent OL
                 if (grandparentList.tagName === 'OL' && list.tagName === 'OL') {
@@ -7166,7 +7166,7 @@ renderMathInElement(document.body, {
                   }
                 }
               }
-              
+
               // Remove the nested list if we moved items
               if (items.length > 0 && list.tagName === 'OL' && grandparentList.tagName === 'OL') {
                 list.remove();
@@ -7176,7 +7176,7 @@ renderMathInElement(document.body, {
           }
         }
       }
-      
+
       // Second pass: remove any remaining nested OL/UL that are direct children of LI
       const nestedLists = editor.querySelectorAll('ol ol, ol ul, ul ol, ul ul');
       nestedLists.forEach(nestedList => {
@@ -7185,7 +7185,7 @@ renderMathInElement(document.body, {
           // Move all items up
           const items = Array.from(nestedList.children);
           const grandparent = parent.parentElement;
-          
+
           items.forEach((item, index) => {
             const clone = item.cloneNode(true);
             const nextSibling = parent.nextElementSibling;
@@ -7195,7 +7195,7 @@ renderMathInElement(document.body, {
               grandparent.appendChild(clone);
             }
           });
-          
+
           nestedList.remove();
         }
       });
@@ -7205,13 +7205,13 @@ renderMathInElement(document.body, {
     function mergeAdjacentLists() {
       const selection = window.getSelection();
       let currentNode = selection.focusNode;
-      
+
       // Find the list item we're in
       while (currentNode && currentNode !== editor) {
         if (currentNode.nodeType === 1 && currentNode.tagName === 'LI') {
           const listItem = currentNode;
           const list = listItem.parentNode;
-          
+
           if (list && (list.tagName === 'OL' || list.tagName === 'UL')) {
             // Check if there's an identical list immediately after this one
             let nextElement = list.nextElementSibling;
@@ -7219,7 +7219,7 @@ renderMathInElement(document.body, {
               // Skip comment nodes
               nextElement = nextElement.nextElementSibling;
             }
-            
+
             if (nextElement && nextElement.tagName === list.tagName) {
               // Move all items from next list to current list
               while (nextElement.firstChild) {
@@ -7227,28 +7227,28 @@ renderMathInElement(document.body, {
               }
               // Remove the now-empty list
               nextElement.remove();
-              
+
               // Show notification
               const notification = document.createElement('div');
-              notification.textContent = '✓ Списъци обединени';
+              notification.textContent = 'âœ“ Ð¡Ð¿Ð¸ÑÑŠÑ†Ð¸ Ð¾Ð±ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸';
               notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
               document.body.appendChild(notification);
-              
+
               setTimeout(() => {
                 notification.style.transition = 'opacity 0.3s';
                 notification.style.opacity = '0';
                 setTimeout(() => notification.remove(), 300);
               }, 2000);
             } else {
-              alert('Няма съседен списък за обединяване');
+              alert('ÐÑÐ¼Ð° ÑÑŠÑÐµÐ´ÐµÐ½ ÑÐ¿Ð¸ÑÑŠÐº Ð·Ð° Ð¾Ð±ÐµÐ´Ð¸Ð½ÑÐ²Ð°Ð½Ðµ');
             }
           }
           return;
         }
         currentNode = currentNode.parentNode;
       }
-      
-      alert('Моля, позиционирай курсора в списък');
+
+      alert('ÐœÐ¾Ð»Ñ, Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² ÑÐ¿Ð¸ÑÑŠÐº');
     }
 
     // Keyboard shortcuts
@@ -7458,7 +7458,7 @@ renderMathInElement(document.body, {
               first.remove();
             }
           };
-          
+
           // Find the actual element
           while (node && node !== editor && node.nodeType === 3) {
             node = node.parentNode;
@@ -7472,12 +7472,12 @@ renderMathInElement(document.body, {
                  if (prev && prev.tagName === 'TABLE') {
                      // We are after a table
                      e.preventDefault();
-                     
+
                      // If paragraph is empty, remove it
                      if (node.textContent.trim() === '') {
                         node.remove();
                      }
-                     
+
                      // Move cursor to last cell of table
                      const rows = prev.rows;
                      if (rows.length > 0) {
@@ -7580,7 +7580,7 @@ renderMathInElement(document.body, {
               }
             }
           }
-          
+
           // Check if adjacent to <hr>
           if (node && node.nodeType === 1) {
             if (e.key === 'Delete' && node.nextSibling && node.nextSibling.tagName === 'HR') {
@@ -7592,7 +7592,7 @@ renderMathInElement(document.body, {
           }
         }
       }
-      
+
       // CRITICAL: Handle Enter in list items to prevent <p> tag wrapping
       if (e.key === 'Enter') {
         if (e.shiftKey) {
@@ -7705,7 +7705,7 @@ renderMathInElement(document.body, {
           }
 
           node = range.startContainer;
-          
+
           // Check if we're inside a list item
           while (node && node !== editor) {
             if (node.nodeType === 1 && node.tagName === 'LI') {
@@ -7751,24 +7751,24 @@ renderMathInElement(document.body, {
           return;
         }
       }
-      
+
       // Handle Tab/Shift+Tab for list indentation or table navigation
       if (e.key === 'Tab') {
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
-        
+
         const range = selection.getRangeAt(0);
         let node = range.startContainer;
-        
+
         // First check if we're in a table cell
         while (node && node !== editor) {
           if (node.nodeType === 1 && (node.tagName === 'TD' || node.tagName === 'TH')) {
             e.preventDefault();
-            
+
             const currentCell = node;
             const row = currentCell.closest('tr');
             const table = currentCell.closest('table');
-            
+
             if (e.shiftKey) {
               // Navigate to previous cell
               const prevCell = currentCell.previousElementSibling;
@@ -7810,7 +7810,7 @@ renderMathInElement(document.body, {
           }
           node = node.parentNode;
         }
-        
+
         // If not in table, check for list item
         node = range.startContainer;
         while (node && node !== editor) {
@@ -7827,26 +7827,26 @@ renderMathInElement(document.body, {
           node = node.parentNode;
         }
       }
-      
+
       // Handle arrow keys for table navigation
       if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
         const selection = window.getSelection();
         if (!selection.rangeCount) return;
-        
+
         const range = selection.getRangeAt(0);
         let node = range.startContainer;
-        
+
         // Check if we're in a table cell
         while (node && node !== editor) {
           if (node.nodeType === 1 && (node.tagName === 'TD' || node.tagName === 'TH')) {
             // Only handle if cursor is at edge of cell
             const atStart = range.startOffset === 0;
             const atEnd = range.startOffset === (node.textContent || '').length;
-            
+
             const currentCell = node;
             const row = currentCell.closest('tr');
             const cellIndex = currentCell.cellIndex;
-            
+
             if (e.key === 'ArrowLeft' && atStart && e.ctrlKey) {
               e.preventDefault();
               const prevCell = currentCell.previousElementSibling;
@@ -7873,7 +7873,7 @@ renderMathInElement(document.body, {
           node = node.parentNode;
         }
       }
-      
+
       if (e.ctrlKey || e.metaKey) {
         if (e.shiftKey && e.code === 'KeyJ') {
           e.preventDefault();
@@ -7899,7 +7899,7 @@ renderMathInElement(document.body, {
           e.preventDefault();
           document.execCommand('italic', false, null);
           saveToHistory();
-        } else if (e.key === 's' || e.key === 'S' || e.key === 'С' || e.key === 'с') {
+        } else if (e.key === 's' || e.key === 'S' || e.key === 'Ð¡' || e.key === 'Ñ') {
           e.preventDefault();
           // Open save modal (same as download button)
           document.getElementById('saveFileModal').style.display = 'block';
@@ -7927,16 +7927,16 @@ renderMathInElement(document.body, {
           e.preventDefault();
           insertFormat('p');
           saveToHistory();
-        } else if (e.key === 'g' || e.key === 'G' || e.key === 'Г' || e.key === 'г') {
+        } else if (e.key === 'g' || e.key === 'G' || e.key === 'Ð“' || e.key === 'Ð³') {
           e.preventDefault();
           insertList('ul');
-        } else if ((e.key === 'o' || e.key === 'O'|| e.key === 'О' || e.key === 'о') && e.shiftKey) {
+        } else if ((e.key === 'o' || e.key === 'O'|| e.key === 'Ðž' || e.key === 'Ð¾') && e.shiftKey) {
           e.preventDefault();
           insertList('ol');
-        } else if (e.key === 't' || e.key === 'T' || e.key === 'т' || e.key === 'Т') {
+        } else if (e.key === 't' || e.key === 'T' || e.key === 'Ñ‚' || e.key === 'Ð¢') {
           e.preventDefault();
           insertTable();
-        } else if (e.key === 'D' || e.key === 'd'|| e.key === 'Д' || e.key === 'д') {
+        } else if (e.key === 'D' || e.key === 'd'|| e.key === 'Ð”' || e.key === 'Ð´') {
           if (e.shiftKey) {
             e.preventDefault();
             removeTextColorFormatting();
@@ -7947,10 +7947,10 @@ renderMathInElement(document.body, {
             applyFormatting('color', lastColor);
             saveToHistory();
           }
-        } else if (e.key === 'q' || e.key === 'Q' || e.key === 'я' || e.key === 'Я') {
+        } else if (e.key === 'q' || e.key === 'Q' || e.key === 'Ñ' || e.key === 'Ð¯') {
           e.preventDefault();
           toggleBlockquote();
-        } else if ((e.key === 'z' || e.key === 'Z'|| e.key === 'З' || e.key === 'з') && !e.shiftKey) {
+        } else if ((e.key === 'z' || e.key === 'Z'|| e.key === 'Ð—' || e.key === 'Ð·') && !e.shiftKey) {
           e.preventDefault();
           if (historyIndex > 0) {
             historyIndex--;
@@ -7962,13 +7962,13 @@ renderMathInElement(document.body, {
             historyIndex++;
             editor.innerHTML = history[historyIndex];
           }
-        } else if ((e.key === 'c' || e.key === 'C' || e.key === 'С' || e.key === 'с') && e.altKey) {
+        } else if ((e.key === 'c' || e.key === 'C' || e.key === 'Ð¡' || e.key === 'Ñ') && e.altKey) {
           e.preventDefault();
           // Apply last used text color
           const lastColor = localStorage.getItem('textEditorTextColor') || '#1f2937';
           applyFormatting('color', lastColor);
           saveToHistory();
-        } else if (e.key === 'h' || e.key === 'H' || e.key === 'Х' || e.key === 'х') {
+        } else if (e.key === 'h' || e.key === 'H' || e.key === 'Ð¥' || e.key === 'Ñ…') {
           if (e.shiftKey) {
             e.preventDefault();
             // Remove highlight
@@ -7997,7 +7997,7 @@ renderMathInElement(document.body, {
         if (selection.rangeCount) {
           const range = selection.getRangeAt(0);
           let node = range.startContainer;
-          
+
           while (node && node !== editor) {
             if (node.nodeType === 1 && node.tagName === 'LI') {
               // We're in a list item - don't prevent, let browser handle it
@@ -8167,7 +8167,7 @@ renderMathInElement(document.body, {
       editor.historyTimeout = setTimeout(() => {
         saveToHistory();
       }, 500);
-      
+
       // CRITICAL: Convert unwanted <div> elements to <p> tags to prevent font size issues
       // Only convert top-level divs that are not part of special structures (tables, etc)
       const unwantedDivs = editor.querySelectorAll(':scope > div');
@@ -8186,7 +8186,7 @@ renderMathInElement(document.body, {
         });
         div.parentNode.replaceChild(p, div);
       });
-      
+
       // SAFE: Only remove completely empty <p> tags using textContent manipulation
       // Instead of innerHTML which breaks cursor position
       const emptyParagraphs = editor.querySelectorAll('p');
@@ -8201,13 +8201,13 @@ renderMathInElement(document.body, {
           p.remove();
         }
       });
-      
+
       // Auto-convert "---" to horizontal rule and "~~~" to dashed divider
       const selection = window.getSelection();
       if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         let node = range.startContainer;
-        
+
         // Find parent paragraph
         while (node && node !== editor) {
           if (node.nodeType === 1 && (node.tagName === 'P' || node.tagName === 'DIV')) {
@@ -8217,18 +8217,18 @@ renderMathInElement(document.body, {
               const hr = document.createElement('hr');
               normalizeEditorHrElement(hr);
               node.parentNode.replaceChild(hr, node);
-              
+
               // Create new paragraph after hr and focus there
               const newP = document.createElement('p');
               newP.innerHTML = '<br>';
               hr.parentNode.insertBefore(newP, hr.nextSibling);
-              
+
               const newRange = document.createRange();
               newRange.setStart(newP, 0);
               newRange.collapse(true);
               selection.removeAllRanges();
               selection.addRange(newRange);
-              
+
               saveToHistory();
             } else if (text === '~~~' && node.tagName === 'P') {
               // Replace this paragraph with dashed <hr>
@@ -8237,18 +8237,18 @@ renderMathInElement(document.body, {
               hr.style.cssText = `border: none; border-top: 2px dashed ${getCurrentHeadingColor()};`;
               hr.dataset.separatorStyle = 'dashed';
               node.parentNode.replaceChild(hr, node);
-              
+
               // Create new paragraph after hr and focus there
               const newP2 = document.createElement('p');
               newP2.innerHTML = '<br>';
               hr.parentNode.insertBefore(newP2, hr.nextSibling);
-              
+
               const newRange2 = document.createRange();
               newRange2.setStart(newP2, 0);
               newRange2.collapse(true);
               selection.removeAllRanges();
               selection.addRange(newRange2);
-              
+
               saveToHistory();
             }
             break;
@@ -8344,41 +8344,41 @@ renderMathInElement(document.body, {
       }
 
       if (selection.toString().length === 0) return;
-      
+
       e.preventDefault();
-      
+
       try {
         // Get the HTML content from selection
         const range = selection.getRangeAt(0);
         const fragment = range.cloneContents();
         const div = document.createElement('div');
         div.appendChild(fragment);
-        
+
         let html = div.innerHTML;
-        
+
         // Clean up the HTML before converting to markdown
         // Remove BR tags only inside list items (browser artifacts)
         // Don't remove all BR tags globally as they may be important for structure
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = html;
-        
+
         // Remove BR tags specifically from within LI elements
         tempDiv.querySelectorAll('li').forEach(li => {
           li.querySelectorAll('br').forEach(br => br.remove());
         });
-        
+
         html = tempDiv.innerHTML;
-        
+
         // Remove empty paragraphs
         html = html.replace(/<p>\s*<\/p>/gi, '');
-        
+
         // Convert HTML to markdown
         const markdown = htmlToMarkdown(html);
-        
+
         // Set clipboard - use markdown as plain text
         e.clipboardData.setData('text/plain', markdown);
         e.clipboardData.setData('text/html', html);
-        
+
         console.log('Copied markdown:', markdown);
       } catch (error) {
         console.error('Error in copy handler:', error);
@@ -8445,11 +8445,11 @@ renderMathInElement(document.body, {
       e.preventDefault();
       const rawText = e.clipboardData.getData('text/plain');
       const text = stripCitationArtifacts(stripMarkdownFenceWrappers(rawText));
-      
+
       // Get current selection
       const selection = window.getSelection();
       if (selection.rangeCount === 0) return;
-      
+
       const range = selection.getRangeAt(0);
 
       const findAncestor = (node, predicate) => {
@@ -8467,10 +8467,10 @@ renderMathInElement(document.body, {
         probe.setEnd(range.startContainer, range.startOffset);
         return probe.toString().length === 0;
       };
-      
+
       // Convert markdown to HTML
       const html = markdownToHtml(text);
-      
+
       // Create temporary container with the HTML
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = html;
@@ -8512,7 +8512,7 @@ renderMathInElement(document.body, {
         editor.dispatchEvent(new Event('input', { bubbles: true }));
         return;
       }
-      
+
       // Remove all style attributes to prevent font size changes
       const allElements = tempDiv.querySelectorAll('*');
       allElements.forEach(el => {
@@ -8527,7 +8527,7 @@ renderMathInElement(document.body, {
           el.parentNode.replaceChild(textNode, el);
         }
       });
-      
+
       // CRITICAL: Convert any unwanted <div> elements to <p>
       // This prevents browser from wrapping content in divs with wrong font size
       const divs = tempDiv.querySelectorAll(':scope > div');
@@ -8562,10 +8562,10 @@ renderMathInElement(document.body, {
           console.warn('KaTeX paste rendering failed:', err);
         }
       }
-      
+
       // Delete current selection
       range.deleteContents();
-      
+
       // Insert HTML nodes directly - preserves list structure including nested lists
       let lastNode = null;
       while (tempDiv.firstChild) {
@@ -8574,16 +8574,16 @@ renderMathInElement(document.body, {
         lastNode = node;
         range.setStartAfter(node);
       }
-      
+
       // Move cursor after all inserted content
       if (lastNode) {
         range.setStartAfter(lastNode);
         range.collapse(true);
       }
-      
+
       selection.removeAllRanges();
       selection.addRange(range);
-      
+
       // CRITICAL: Clean up empty paragraphs (<p><br></p> or <p></p>) that browser may add
       // Do this immediately after paste, before input event
       const emptyParagraphs = editor.querySelectorAll('p');
@@ -8592,7 +8592,7 @@ renderMathInElement(document.body, {
         const textContent = p.textContent.trim();
         const hasOnlyBr = p.children.length === 1 && p.querySelector('br') && textContent === '';
         const isEmpty = textContent === '' && !p.querySelector('img, input, table, ul, ol, h1, h2, h3, h4, h5, h6, blockquote');
-        
+
         // Preserve intentionally added blank lines (especially around topic dividers).
         if (isEmpty && !hasOnlyBr) {
           // Only remove if it's not between list items (to preserve list structure)
@@ -8600,7 +8600,7 @@ renderMathInElement(document.body, {
           const nextSibling = p.nextElementSibling;
           const isBetweenListItems = (prevSibling && (prevSibling.tagName === 'LI' || prevSibling.tagName === 'UL' || prevSibling.tagName === 'OL')) &&
                                     (nextSibling && (nextSibling.tagName === 'LI' || nextSibling.tagName === 'UL' || nextSibling.tagName === 'OL'));
-          
+
           if (!isBetweenListItems) {
             p.remove();
           }
@@ -8608,7 +8608,7 @@ renderMathInElement(document.body, {
       });
 
       repairInvalidHeadingStructureInEditor();
-      
+
       // Trigger input event to save history
       editor.dispatchEvent(new Event('input', { bubbles: true }));
     });
@@ -8668,7 +8668,7 @@ renderMathInElement(document.body, {
 
       // Check if clicking on a link
       let target = e.target;
-      
+
       // Find parent link if clicking on child element
       while (target && target !== editor) {
         if (target.tagName === 'A') {
@@ -8678,13 +8678,13 @@ renderMathInElement(document.body, {
             const href = target.getAttribute('href');
             if (href && href !== '#') {
               window.open(href, '_blank');
-              
+
               // Show notification
               const notification = document.createElement('div');
-              notification.textContent = `🔗 Opening: ${href}`;
+              notification.textContent = `ðŸ”— Opening: ${href}`;
               notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
               document.body.appendChild(notification);
-              
+
               setTimeout(() => {
                 notification.style.transition = 'opacity 0.3s';
                 notification.style.opacity = '0';
@@ -8700,7 +8700,7 @@ renderMathInElement(document.body, {
               tooltip.textContent = `Ctrl+Click to open: ${href}`;
               tooltip.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #374151; color: white; padding: 8px 14px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 12px;';
               document.body.appendChild(tooltip);
-              
+
               setTimeout(() => {
                 tooltip.style.transition = 'opacity 0.3s';
                 tooltip.style.opacity = '0';
@@ -9035,14 +9035,14 @@ renderMathInElement(document.body, {
       let markdown = '';
       const parser = new DOMParser();
       const doc = parser.parseFromString('<div>' + html + '</div>', 'text/html');
-      
+
       const processNode = (node, insideListItem = false, depth = 0) => {
         if (node.nodeType === 3) {
           // Text node
           return node.textContent;
         } else if (node.nodeType === 1) {
           const tag = node.tagName.toLowerCase();
-          
+
           if (tag === 'h1') {
             return '# ' + processChildren(node, false, depth) + '\n';
           } else if (tag === 'h2') {
@@ -9115,17 +9115,17 @@ renderMathInElement(document.body, {
           } else if (tag === 'ul') {
             let items = '';
             const itemIndent = '  '.repeat(depth);
-            
+
             // Process both direct LI children and direct nested UL/OL children
             for (let child of node.childNodes) {
               if (child.nodeType === 1) {
                 const childTag = child.tagName.toLowerCase();
-                
+
                 if (childTag === 'li') {
                   // Process list item
                   let textContent = '';
                   let nestedLists = [];
-                  
+
                   for (let liChild of child.childNodes) {
                     if (liChild.nodeType === 3) {
                       // Text node
@@ -9141,10 +9141,10 @@ renderMathInElement(document.body, {
                       }
                     }
                   }
-                  
+
                   // Add main item
                   items += itemIndent + '- ' + textContent.trim() + '\n';
-                  
+
                   // Process all nested lists with increased depth
                   nestedLists.forEach(nestedList => {
                     const nestedItems = processNode(nestedList, false, depth + 1);
@@ -9162,17 +9162,17 @@ renderMathInElement(document.body, {
             let items = '';
             let counter = 1;
             const itemIndent = '  '.repeat(depth);
-            
+
             // Process both direct LI children and direct nested UL/OL children
             for (let child of node.childNodes) {
               if (child.nodeType === 1) {
                 const childTag = child.tagName.toLowerCase();
-                
+
                 if (childTag === 'li') {
                   // Process list item
                   let textContent = '';
                   let nestedLists = [];
-                  
+
                   for (let liChild of child.childNodes) {
                     if (liChild.nodeType === 3) {
                       // Text node
@@ -9188,11 +9188,11 @@ renderMathInElement(document.body, {
                       }
                     }
                   }
-                  
+
                   // Add main item
                   items += itemIndent + counter + '. ' + textContent.trim() + '\n';
                   counter++;
-                  
+
                   // Process all nested lists with increased depth
                   nestedLists.forEach(nestedList => {
                     const nestedItems = processNode(nestedList, false, depth + 1);
@@ -9220,7 +9220,7 @@ renderMathInElement(document.body, {
         }
         return '';
       };
-      
+
       const processChildren = (node, insideListItem = false, depth = 0) => {
         let result = '';
         for (let child of node.childNodes) {
@@ -9228,11 +9228,11 @@ renderMathInElement(document.body, {
         }
         return result;
       };
-      
+
       const processTable = (table) => {
         let markdown = '';
         const rows = table.querySelectorAll('tr');
-        
+
         rows.forEach((row, rowIdx) => {
           const cells = row.querySelectorAll('td, th');
           markdown += '| ';
@@ -9242,7 +9242,7 @@ renderMathInElement(document.body, {
             markdown += cellContent + ' | ';
           });
           markdown += '\n';
-          
+
           if (rowIdx === 0) {
             markdown += '| ';
             for (let i = 0; i < cells.length; i++) {
@@ -9251,12 +9251,12 @@ renderMathInElement(document.body, {
             markdown += '\n';
           }
         });
-        
+
         return markdown;
       };
-      
+
       markdown = processChildren(doc.querySelector('div'));
-      
+
       // Clean up multiple consecutive newlines and trim
       return markdown.replace(/\n\n+/g, '\n').trim();
     }
@@ -9268,17 +9268,17 @@ renderMathInElement(document.body, {
       let i = 0;
       let iterations = 0;
       const MAX_ITERATIONS = 10000; // Safety limit
-      
+
       while (i < lines.length && iterations < MAX_ITERATIONS) {
         iterations++;
         const line = lines[i];
-        
+
         // Skip empty lines
         if (!line.trim()) {
           i++;
           continue;
         }
-        
+
         // Headings
         if (line.startsWith('#### ')) {
           html += '<h4>' + applyInlineFormatting(line.substring(5)) + '</h4>';
@@ -9309,7 +9309,7 @@ renderMathInElement(document.body, {
           const listResult = processListBlock(lines, i);
           html += listResult.html;
           i = listResult.nextIndex;
-          
+
           // Safety check: make sure i moved forward
           if (i <= oldI) {
             console.error('processListBlock did not advance! Breaking to prevent infinite loop.');
@@ -9323,10 +9323,10 @@ renderMathInElement(document.body, {
           while (i < lines.length && lines[i].includes('|') && tableIterations < 1000) {
             tableIterations++;
             const cells = lines[i].split('|').map(c => c.trim()).filter(c => c !== '');
-            
+
             // Skip header separator lines (lines where ALL cells are dashes/colons)
             const isHeaderSeparator = cells.length > 0 && cells.every(c => /^:?-+:?$/.test(c));
-            
+
             if (cells.length > 0 && !isHeaderSeparator) {
               tableHtml += '<tr>';
               cells.forEach(cell => {
@@ -9345,48 +9345,48 @@ renderMathInElement(document.body, {
           i++;
         }
       }
-      
+
       if (iterations >= MAX_ITERATIONS) {
         console.error('markdownToHtml: MAX_ITERATIONS reached! Returning partial HTML.');
       }
-      
+
       return html;
     }
-    
+
     // Process a block of list lines and create proper nested HTML
     function processListBlock(lines, startIndex) {
       let i = startIndex;
       let html = '';
       let iterations = 0;
       const MAX_ITERATIONS = 1000;
-      
+
       // Simple approach: build list recursively by level
       function processListAtLevel(startIdx, minLevel) {
         let idx = startIdx;
         let result = '';
         let currentTag = null;
-        
+
         while (idx < lines.length && iterations < MAX_ITERATIONS) {
           iterations++;
           const line = lines[idx];
-          
+
           if (!line.trim()) {
             idx++;
             continue;
           }
-          
+
           const match = line.match(/^(\s*)([-*]|\d+\.)\s+(.*)$/);
           if (!match) break;
-          
+
           const indent = match[1].length;
           const level = Math.floor(indent / 2);
           const marker = match[2];
           const content = match[3];
           const tag = /^\d+\.$/.test(marker) ? 'ol' : 'ul';
-          
+
           // If level is less than minLevel, stop and return
           if (level < minLevel) break;
-          
+
           // If level is greater than minLevel, recursively process nested list
           if (level > minLevel) {
             const nested = processListAtLevel(idx, level);
@@ -9394,22 +9394,22 @@ renderMathInElement(document.body, {
             idx = nested.nextIdx;
             continue;
           }
-          
+
           // Same level
           if (currentTag !== tag) {
             if (currentTag) result += '</' + currentTag + '>';
             currentTag = tag;
             result += '<' + tag + '>';
           }
-          
+
           result += '<li>' + applyInlineFormatting(content) + '</li>';
           idx++;
         }
-        
+
         if (currentTag) result += '</' + currentTag + '>';
         return { html: result, nextIdx: idx };
       }
-      
+
       const listResult = processListAtLevel(startIndex, 0);
       return { html: listResult.html, nextIndex: listResult.nextIdx };
     }
@@ -9522,17 +9522,17 @@ renderMathInElement(document.body, {
       const filePath = urlParams.get('path');
       const loadFromHash = urlParams.get('loadFromHash');
       const editMode = urlParams.get('editMode');
-      
+
       // Check for sessionStorage content (from md-viewer edit button)
       if (editMode === 'true') {
         const sessionContent = sessionStorage.getItem('editFileContent');
         const sessionPath = sessionStorage.getItem('editFilePath');
-        
+
         if (sessionContent && sessionPath) {
           try {
             // Set global base path for images
             const basePath = sessionPath.substring(0, sessionPath.lastIndexOf('/') + 1);
-            
+
             if (window.location.protocol === 'file:') {
               const currentPath = window.location.pathname;
               const currentDir = currentPath.substring(0, currentPath.lastIndexOf('/') + 1);
@@ -9541,15 +9541,15 @@ renderMathInElement(document.body, {
               const currentOrigin = window.location.origin;
               globalImageBasePath = currentOrigin + '/' + basePath;
             }
-            
+
             console.log('Global Image Base Path:', globalImageBasePath);
-            
+
             // Parse content (could be HTML or Markdown)
             isLoadingFile = true;
             let html = '';
             const fileName = sessionPath.split('/').pop();
             const isHtmlFile = fileName.endsWith('.html');
-            
+
             if (isHtmlFile && sessionContent.includes('<!DOCTYPE')) {
               // It's HTML - extract body content
               const parser = new DOMParser();
@@ -9559,41 +9559,41 @@ renderMathInElement(document.body, {
               // Treat as Markdown
               html = markdownToHtml(sessionContent);
             }
-            
+
             editor.innerHTML = html;
             renderMathInEditorContent();
             saveToHistory();
             setTimeout(() => { isLoadingFile = false; }, 100);
-            
+
             // Update page title
             const cleanName = fileName.replace(/\.(md|txt|html)$/i, '').replace(/^\d+(\.\d+)?-/, '').replace(/^msg-/i, '');
-            document.title = cleanName + ' — Text Editor';
-            
+            document.title = cleanName + ' â€” Text Editor';
+
             // Clear sessionStorage
             sessionStorage.removeItem('editFileContent');
             sessionStorage.removeItem('editFilePath');
-            
+
             // Clear URL parameters
             window.history.replaceState({}, document.title, window.location.pathname);
             return;
           } catch (err) {
-            alert('Грешка при зареждане на съдържанието: ' + err.message);
+            alert('Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° ÑÑŠÐ´ÑŠÑ€Ð¶Ð°Ð½Ð¸ÐµÑ‚Ð¾: ' + err.message);
             console.error('Load error:', err);
             sessionStorage.removeItem('editFileContent');
             sessionStorage.removeItem('editFilePath');
           }
         }
       }
-      
+
       if (loadFromHash === 'true' && window.location.hash) {
         // Load from URL hash (content passed from index.html)
         try {
           const markdownContent = decodeURIComponent(window.location.hash.substring(1));
-          
+
           // Set global base path for images
           if (filePath) {
             const basePath = filePath.substring(0, filePath.lastIndexOf('/') + 1);
-            
+
             // For file:// protocol, construct path differently
             if (window.location.protocol === 'file:') {
               // Get the directory of the current HTML file
@@ -9605,29 +9605,29 @@ renderMathInElement(document.body, {
               const currentOrigin = window.location.origin;
               globalImageBasePath = currentOrigin + '/' + basePath;
             }
-            
+
             console.log('Global Image Base Path:', globalImageBasePath);
           }
-          
+
           // Convert markdown to HTML (now with absolute image paths built-in)
           isLoadingFile = true;
           const html = markdownToHtml(markdownContent);
           editor.innerHTML = html;
           setTimeout(() => { isLoadingFile = false; }, 100); // Reset after load
-          
+
           history = [editor.innerHTML];
           historyIndex = 0;
-          
+
           // Update page title
           if (filePath) {
             const fileName = filePath.split('/').pop();
-            document.title = fileName.replace(/\.(md|txt)$/i, '').replace(/^\d+-/, '').replace(/^msg-/i, '') + ' — Text Editor';
+            document.title = fileName.replace(/\.(md|txt)$/i, '').replace(/^\d+-/, '').replace(/^msg-/i, '') + ' â€” Text Editor';
           }
-          
+
           // Clear URL parameters to prevent auto-reload on refresh
           window.history.replaceState({}, document.title, window.location.pathname);
         } catch (err) {
-          alert('Грешка при зареждане на съдържанието: ' + err.message);
+          alert('Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° ÑÑŠÐ´ÑŠÑ€Ð¶Ð°Ð½Ð¸ÐµÑ‚Ð¾: ' + err.message);
           console.error('Load error:', err);
         }
       } else if (filePath) {
@@ -9637,7 +9637,7 @@ renderMathInElement(document.body, {
         const absoluteUrl = (window.location.origin && window.location.origin !== 'null')
           ? new URL(encodedPath, window.location.origin).href
           : encodedPath;
-        
+
         // Load file from path
         fetch(absoluteUrl)
           .then(r => {
@@ -9648,10 +9648,10 @@ renderMathInElement(document.body, {
             // Determine if it's HTML or Markdown based on file extension
             const fileName = decodedPath.split('/').pop();
             const isHtmlFile = fileName.endsWith('.html');
-            
+
             isLoadingFile = true;
             let html = '';
-            
+
             if (isHtmlFile) {
               // It's HTML - extract ONLY what's between <body> tags, NOT the <head>
               const bodyMatch = content.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
@@ -9675,7 +9675,7 @@ renderMathInElement(document.body, {
                   html = '';
                 }
               }
-              
+
               // REMOVE ALL <br> tags between list items - this fixes the indent list problem
               // Loop until no more <br> tags found between list elements
               let prevHtml;
@@ -9684,49 +9684,49 @@ renderMathInElement(document.body, {
                 // Remove <br> between any list-related closing and opening tags
                 html = html.replace(/<\/(li|ul|ol)>\s*<br\s*\/?>\s*</gi, '</$1><');
               } while (html !== prevHtml);
-              
+
               // Also remove leading empty <br> and whitespace
               html = html.replace(/^\s*<br\s*\/?>\s*/i, '');
               // CRITICAL: Remove all block-level tags that shouldn't be in contenteditable
               // Keep only formatting tags: strong, em, u, code, a, img, li, ul, ol, h1-h4, blockquote, table
               // Remove: p, div, span, style, meta, script, head, body, html, link, etc.
-              
+
               // First, unwrap <p> tags - keep content but remove the tag itself
               html = html.replace(/<\/?p[^>]*>/gi, '');
-              
+
               // Remove <div> tags but keep content
               html = html.replace(/<\/?div[^>]*>/gi, '');
-              
+
               // Remove <span> tags but keep content
               html = html.replace(/<\/?span[^>]*>/gi, '');
-              
+
               // Remove ALL <style> blocks
               html = html.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '');
-              
+
               // Remove ALL <script> blocks
               html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '');
-              
+
               // Remove <meta> tags
               html = html.replace(/<meta[^>]*>/gi, '');
-              
+
               // Remove <link> tags
               html = html.replace(/<link[^>]*>/gi, '');
-              
+
               // Remove <title> tags
               html = html.replace(/<title[^>]*>[\s\S]*?<\/title>/gi, '');
-              
+
               // Remove <head> tags
               html = html.replace(/<\/?head[^>]*>/gi, '');
-              
+
               // Remove <html> tags
               html = html.replace(/<\/?html[^>]*>/gi, '');
             } else {
               // It's Markdown - convert to HTML
               html = markdownToHtml(content);
             }
-            
+
             editor.innerHTML = html;
-            
+
             // CRITICAL: After setting innerHTML, remove all <br> tags that are between list items
             // This prevents visual empty lines that appear when editing
             let editorHtml = editor.innerHTML;
@@ -9736,22 +9736,22 @@ renderMathInElement(document.body, {
               // Remove <br> between list-related tags
               editorHtml = editorHtml.replace(/<\/(li|ul|ol)>\s*<br\s*\/?>\s*</gi, '</$1><');
             } while (editorHtml !== prevEditorHtml);
-            
+
             editor.innerHTML = editorHtml;
-            
+
             setTimeout(() => { isLoadingFile = false; }, 100);
             history = [editorHtml];
             historyIndex = 0;
-            
+
             // Update page title
-            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' — Text Editor';
+            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' â€” Text Editor';
           })
           .catch(err => {
             const isFile = window.location.protocol === 'file:';
             const hint = isFile
-              ? '\n\nСъвет: Отвори сайта през локален HTTP сървър (напр. VS Code Live Server), тъй като браузърите блокират fetch от file://'
+              ? '\n\nÐ¡ÑŠÐ²ÐµÑ‚: ÐžÑ‚Ð²Ð¾Ñ€Ð¸ ÑÐ°Ð¹Ñ‚Ð° Ð¿Ñ€ÐµÐ· Ð»Ð¾ÐºÐ°Ð»ÐµÐ½ HTTP ÑÑŠÑ€Ð²ÑŠÑ€ (Ð½Ð°Ð¿Ñ€. VS Code Live Server), Ñ‚ÑŠÐ¹ ÐºÐ°Ñ‚Ð¾ Ð±Ñ€Ð°ÑƒÐ·ÑŠÑ€Ð¸Ñ‚Ðµ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð°Ñ‚ fetch Ð¾Ñ‚ file://'
               : '';
-            alert('Грешка при зареждане на файла: ' + err.message + hint);
+            alert('Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° Ñ„Ð°Ð¹Ð»Ð°: ' + err.message + hint);
             console.error('Load error:', err);
           });
       } else {
@@ -9816,7 +9816,7 @@ renderMathInElement(document.body, {
           const row = cell.closest('tr');
           const table = cell.closest('table');
           const isLastCell = cell.cellIndex === row.cells.length - 1;
-          
+
           // Set fixed widths for all cells in all rows
           const allRows = table.querySelectorAll('tr');
           allRows.forEach(r => {
@@ -9827,7 +9827,7 @@ renderMathInElement(document.body, {
           });
           table.style.tableLayout = 'fixed';
           originalTableWidth = table.offsetWidth;
-          
+
           if (isLastCell) {
             resizingTable = table;
             startWidth = table.offsetWidth;
@@ -9856,7 +9856,7 @@ renderMathInElement(document.body, {
         const newWidth = Math.max(30, startWidth + diff);
         const colIndex = resizingColumn.cellIndex;
         const table = resizingColumn.closest('table');
-        
+
         if (table) {
           // Update ONLY the dragged column width
           const allRows = table.querySelectorAll('tr');
@@ -9887,7 +9887,7 @@ renderMathInElement(document.body, {
         const cell = e.target;
         const rect = cell.getBoundingClientRect();
         const isAtRightEdge = Math.abs(e.clientX - rect.right) < 5;
-        
+
         if (isAtRightEdge && e.clientX > rect.left + 50) {
           document.body.style.cursor = 'col-resize';
         } else {
@@ -9901,7 +9901,7 @@ renderMathInElement(document.body, {
         const cell = e.target;
         const rect = cell.getBoundingClientRect();
         const isAtRightEdge = Math.abs(e.clientX - rect.right) < 5;
-        
+
         if (isAtRightEdge && e.clientX > rect.left + 50) {
           document.body.style.cursor = 'col-resize';
         } else {
@@ -9920,7 +9920,7 @@ renderMathInElement(document.body, {
       if (selection.rangeCount > 0) {
         savedAnchorSelection = selection.getRangeAt(0).cloneRange();
       }
-      
+
       document.getElementById('anchorLinkModal').style.display = 'block';
       anchorLinkModalOpen = true;
       refreshAnchorsList();
@@ -9958,7 +9958,7 @@ renderMathInElement(document.body, {
       const headingType = document.getElementById('anchorHeadingTypeInput').value;
 
       if (!anchorId || !anchorText) {
-        alert('⚠️ Please fill in both Anchor ID and Anchor Text');
+        alert('âš ï¸ Please fill in both Anchor ID and Anchor Text');
         return;
       }
 
@@ -9974,7 +9974,7 @@ renderMathInElement(document.body, {
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(savedAnchorSelection);
-        
+
         const range = savedAnchorSelection;
         range.insertNode(heading);
         range.setStartAfter(heading);
@@ -9996,7 +9996,7 @@ renderMathInElement(document.body, {
 
       // Show success message
       const notification = document.createElement('div');
-      notification.textContent = '✅ Anchor created: #' + anchorId;
+      notification.textContent = 'âœ… Anchor created: #' + anchorId;
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
       document.body.appendChild(notification);
 
@@ -10013,7 +10013,7 @@ renderMathInElement(document.body, {
       let linkText = document.getElementById('linkTextInput').value.trim();
 
       if (!selectedAnchor) {
-        alert('⚠️ Please select an anchor first');
+        alert('âš ï¸ Please select an anchor first');
         return;
       }
 
@@ -10041,7 +10041,7 @@ renderMathInElement(document.body, {
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(savedAnchorSelection);
-        
+
         const range = savedAnchorSelection;
         range.insertNode(link);
         range.setStartAfter(link);
@@ -10059,7 +10059,7 @@ renderMathInElement(document.body, {
 
       // Show success message
       const notification = document.createElement('div');
-      notification.textContent = '✅ Link created to #' + selectedAnchor;
+      notification.textContent = 'âœ… Link created to #' + selectedAnchor;
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #3b82f6; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
       document.body.appendChild(notification);
 
@@ -10077,7 +10077,7 @@ renderMathInElement(document.body, {
 
       // Find all elements with IDs (h2, h3, h4, etc.)
       const anchors = editor.querySelectorAll('[id]');
-      
+
       if (anchors.length === 0) {
         select.innerHTML = '<option value="">-- No anchors found --</option>';
         return;
@@ -10099,35 +10099,35 @@ renderMathInElement(document.body, {
         // Only prevent default if href is local anchor (starts with #)
         if (href.startsWith('#')) {
           e.preventDefault();
-          
+
           const anchorId = href.substring(1);
           const targetElement = document.getElementById(anchorId);
-          
+
           console.log('Anchor click - ID:', anchorId, 'Found:', !!targetElement);
-          
+
           if (targetElement) {
             // Scroll to the element
             targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            
+
             // Highlight the element briefly
             const originalBg = window.getComputedStyle(targetElement).backgroundColor;
             targetElement.style.backgroundColor = '#fff3cd';
             targetElement.style.transition = 'background-color 0.3s';
-            
+
             setTimeout(() => {
               targetElement.style.backgroundColor = originalBg;
             }, 1500);
-            
+
             // Update URL
             window.history.pushState(null, null, href);
           }
         }
       }
     }
-    
+
     // Attach to editor
     editor.addEventListener('click', handleAnchorClick);
-    
+
     // Also attach globally for any page
     document.addEventListener('click', handleAnchorClick);
 
@@ -10145,7 +10145,7 @@ renderMathInElement(document.body, {
     const combineFilesInput = document.getElementById('combineFilesInput');
     const filesList = document.getElementById('filesList');
     const saveCombineFilesBtn = document.getElementById('saveCombineFilesBtn');
-    
+
     // Tab switching
     const combineLocalTab = document.getElementById('combineLocalTab');
     const combineCourseTab = document.getElementById('combineCourseTab');
@@ -10162,9 +10162,9 @@ renderMathInElement(document.body, {
     // Build index of all course files
     function buildCourseFilesIndex() {
       allCourseFilesIndex = [];
-      
+
       if (typeof courses === 'undefined') return;
-      
+
       courses.forEach(course => {
         function searchSection(section, breadcrumb = '') {
           const currentPath = breadcrumb ? breadcrumb + ' > ' + section.name : course.title;
@@ -10214,11 +10214,11 @@ renderMathInElement(document.body, {
       combineFilesModal.classList.add('open');
       uploadedFiles = [];
       selectedCourseFiles = [];
-      filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>';
-      courseFilesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Избери файлове от курсове</div>';
+      filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">ÐšÐ°Ñ‡Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð·Ð° Ð´Ð° Ð³Ð¸ Ð²Ð¸Ð´Ð¸Ñˆ Ñ‚ÑƒÐº</div>';
+      courseFilesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Ð˜Ð·Ð±ÐµÑ€Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð¾Ñ‚ ÐºÑƒÑ€ÑÐ¾Ð²Ðµ</div>';
       combineFilesInput.value = '';
       combineFileSearch.value = '';
-      
+
       // Build course index on modal open
       buildCourseFilesIndex();
     });
@@ -10270,7 +10270,7 @@ renderMathInElement(document.body, {
 
     function renderFilesList() {
       if (uploadedFiles.length === 0) {
-        filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Качи файлове за да ги видиш тук</div>';
+        filesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">ÐšÐ°Ñ‡Ð¸ Ñ„Ð°Ð¹Ð»Ð¾Ð²Ðµ Ð·Ð° Ð´Ð° Ð³Ð¸ Ð²Ð¸Ð´Ð¸Ñˆ Ñ‚ÑƒÐº</div>';
         return;
       }
 
@@ -10293,7 +10293,7 @@ renderMathInElement(document.body, {
         `;
 
         const dragHandle = document.createElement('span');
-        dragHandle.textContent = '⋮⋮';
+        dragHandle.textContent = 'â‹®â‹®';
         dragHandle.style.cssText = 'color: #9ca3af; cursor: grab;';
 
         const fileName = document.createElement('span');
@@ -10301,7 +10301,7 @@ renderMathInElement(document.body, {
         fileName.style.cssText = 'flex: 1; font-size: 0.9em;';
 
         const removeBtn = document.createElement('button');
-        removeBtn.textContent = '✕';
+        removeBtn.textContent = 'âœ•';
         removeBtn.style.cssText = `
           background: #ef4444;
           color: white;
@@ -10346,15 +10346,15 @@ renderMathInElement(document.body, {
         fileItem.addEventListener('drop', (e) => {
           e.preventDefault();
           fileItem.style.borderTop = 'none';
-          
-          const draggedIndex = parseInt(e.dataTransfer.getData('text/html') ? 
+
+          const draggedIndex = parseInt(e.dataTransfer.getData('text/html') ?
             document.querySelector('[style*="opacity: 0.5"]')?.dataset.index : -1);
-          
+
           const draggedItem = document.querySelector('[style*="opacity: 0.5"]');
           if (draggedItem) {
             const draggedIdx = parseInt(draggedItem.dataset.index);
             const dropIdx = index;
-            
+
             if (draggedIdx !== dropIdx) {
               const temp = uploadedFiles[draggedIdx];
               uploadedFiles[draggedIdx] = uploadedFiles[dropIdx];
@@ -10368,24 +10368,24 @@ renderMathInElement(document.body, {
 
     function renderCourseFilesList() {
       const searchTerm = combineFileSearch.value.toLowerCase();
-      
+
       let filteredFiles = allCourseFilesIndex;
       if (searchTerm) {
-        filteredFiles = allCourseFilesIndex.filter(file => 
+        filteredFiles = allCourseFilesIndex.filter(file =>
           file.name.toLowerCase().includes(searchTerm) ||
           file.breadcrumb.toLowerCase().includes(searchTerm)
         );
       }
 
       if (filteredFiles.length === 0) {
-        courseFilesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">Нема резултати</div>';
+        courseFilesList.innerHTML = '<div style="color: #9ca3af; text-align: center; padding: 20px;">ÐÐµÐ¼Ð° Ñ€ÐµÐ·ÑƒÐ»Ñ‚Ð°Ñ‚Ð¸</div>';
         return;
       }
 
       courseFilesList.innerHTML = '';
       filteredFiles.forEach((file, idx) => {
         const isSelected = selectedCourseFiles.some(f => f.path === file.path);
-        
+
         const fileItem = document.createElement('div');
         fileItem.style.cssText = `
           display: flex;
@@ -10435,7 +10435,7 @@ renderMathInElement(document.body, {
     saveCombineFilesBtn.addEventListener('click', async () => {
       if (currentCombineMode === 'local') {
         if (uploadedFiles.length === 0) {
-          alert('Моля качи поне един файл');
+          alert('ÐœÐ¾Ð»Ñ ÐºÐ°Ñ‡Ð¸ Ð¿Ð¾Ð½Ðµ ÐµÐ´Ð¸Ð½ Ñ„Ð°Ð¹Ð»');
           return;
         }
 
@@ -10449,9 +10449,9 @@ renderMathInElement(document.body, {
           const parser = new DOMParser();
           const doc = parser.parseFromString(text, 'text/html');
           const bodyContent = normalizeHtmlForEditor(doc.body.innerHTML);
-          
+
           combinedHtml += bodyContent;
-          
+
           // Add separator between files (but not after the last one)
           if (i < uploadedFiles.length - 1) {
             combinedHtml += '<hr style="border: none; border-top: 2px dashed #73a372;">';
@@ -10467,7 +10467,7 @@ renderMathInElement(document.body, {
       } else {
         // Handle course files combining
         if (selectedCourseFiles.length === 0) {
-          alert('Моля избери поне един файл');
+          alert('ÐœÐ¾Ð»Ñ Ð¸Ð·Ð±ÐµÑ€Ð¸ Ð¿Ð¾Ð½Ðµ ÐµÐ´Ð¸Ð½ Ñ„Ð°Ð¹Ð»');
           return;
         }
 
@@ -10479,7 +10479,7 @@ renderMathInElement(document.body, {
           if (!file.content) {
             continue;
           }
-          
+
           // Extract HTML content
           if (file.type === 'html' || file.content.includes('<!DOCTYPE')) {
             const parser = new DOMParser();
@@ -10489,7 +10489,7 @@ renderMathInElement(document.body, {
             // Treat as markdown
             combinedHtml += markdownToHtml(file.content);
           }
-          
+
           // Add separator between files
           if (i < selectedCourseFiles.length - 1) {
             combinedHtml += '<hr style="border: none; border-top: 2px dashed #73a372;">';
@@ -10503,16 +10503,16 @@ renderMathInElement(document.body, {
         editor.innerHTML = combinedHtml;
         saveToHistory();
       }
-      
+
       // Close modal
       combineFilesModal.classList.remove('open');
-      
+
       // Show notification
       const notification = document.createElement('div');
-      notification.textContent = '✓ Файлове комбинирани успешно!';
+      notification.textContent = 'âœ“ Ð¤Ð°Ð¹Ð»Ð¾Ð²Ðµ ÐºÐ¾Ð¼Ð±Ð¸Ð½Ð¸Ñ€Ð°Ð½Ð¸ ÑƒÑÐ¿ÐµÑˆÐ½Ð¾!';
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
       document.body.appendChild(notification);
-      
+
       setTimeout(() => {
         notification.style.opacity = '0';
         notification.style.transition = 'opacity 0.3s';
@@ -10527,8 +10527,8 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260430bx"></script>
-  
+    <script src="js/chat.js?v=202604302m8"></script>
+
 <script src="js/version-check.js?v=202602171mhr"></script>
 </body>
 
