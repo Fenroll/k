@@ -48,7 +48,7 @@ class ChatFirebaseREST {
       // Assume app is already initialized globally. Just get the default app.
       const app = firebaseInstance.app();
       this.db = firebaseInstance.database();
-      // console.log('âœ“ Firebase SDK Initialized'); // Can be removed
+      // console.log('✓ Firebase SDK Initialized'); // Can be removed
     } catch (e) {
       console.error("Firebase Init Error: Ensure Firebase is initialized globally in the HTML.", e);
     }
@@ -180,7 +180,7 @@ class ChatFirebaseREST {
       this.oldestLoadedTimestamp = messages.length > 0 ? messages[0].timestamp : null;
       this.hasMoreMessages = messages.length === 200; // If we got 200, there might be more
 
-      console.log(`âœ… Initial load: ${messages.length} messages, hasMore: ${this.hasMoreMessages}`);
+      console.log(`✅ Initial load: ${messages.length} messages, hasMore: ${this.hasMoreMessages}`);
 
       return messages;
     } catch (error) {
@@ -196,7 +196,7 @@ class ChatFirebaseREST {
     await this._ensureInit();
     this.isLoadingMore = true;
 
-    console.log(`ðŸ“¥ Loading more messages (batch: ${batchSize}, current total: ${this.messages.length})`);
+    console.log(`📥 Loading more messages (batch: ${batchSize}, current total: ${this.messages.length})`);
 
     try {
       const messagesRef = firebase.database().ref(`messages/${this.documentId}`);
@@ -209,7 +209,7 @@ class ChatFirebaseREST {
       if (!snapshot.exists()) {
         this.hasMoreMessages = false;
         this.isLoadingMore = false;
-        console.log('ðŸ“­ No more messages to load');
+        console.log('📭 No more messages to load');
         return [];
       }
 
@@ -236,7 +236,7 @@ class ChatFirebaseREST {
       this.hasMoreMessages = newMessages.length === batchSize;
       this.isLoadingMore = false;
 
-      console.log(`âœ… Loaded ${newMessages.length} older messages. Total now: ${this.messages.length}, hasMore: ${this.hasMoreMessages}`);
+      console.log(`✅ Loaded ${newMessages.length} older messages. Total now: ${this.messages.length}, hasMore: ${this.hasMoreMessages}`);
 
       return newMessages;
     } catch (error) {
@@ -755,7 +755,7 @@ class ChatFirebaseREST {
         this.heartbeatInterval = null;
     }
 
-    // console.log('ðŸ›‘ ChatFirebaseREST ÑÐ¿Ñ€ÑÐ½.'); // Can be removed
+    // console.log('🛑 ChatFirebaseREST спрян.'); // Can be removed
   }
 }
 
@@ -765,10 +765,10 @@ class ChatFirebaseREST {
 
 class ChatUIManager {
   constructor(containerId, documentId, options = {}) {
-    // console.log('ðŸ’¬ ChatUIManager Ð¸Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð°Ð¼...'); // Can be removed
+    // console.log('💬 ChatUIManager инициализирам...'); // Can be removed
     this.container = document.getElementById(containerId);
     if (!this.container) {
-      console.error('Container Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½:', containerId);
+      console.error('Container не е намерен:', containerId);
       return;
     }
 
@@ -783,12 +783,12 @@ class ChatUIManager {
     this.lastReadMessageId = localStorage.getItem(`lastReadMessage_${documentId}`) || null;
     this.notificationsDisabled = localStorage.getItem(`notificationsDisabled_${documentId}`) === 'true';
     this.unreadCount = 0;
-    this.lastMessages = [];  // Ð¡ÑŠÑ…Ñ€Ð°Ð½ÑÐ²Ð°Ð¼ Ð¿Ñ€ÐµÐ´Ð¸ÑˆÐ½Ð¸ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ñ
+    this.lastMessages = [];  // Съхранявам предишни съобщения
     this.lastRenderedLastMessageId = null;
-    this.userNameMappings = {}; // ÐšÐ°Ñ€Ñ‚Ð° Ð·Ð° ÑÑ‚Ð°Ñ€Ð¸ ÐºÑŠÐ¼ Ð½Ð¾Ð²Ð¸ Ð¸Ð¼ÐµÐ½Ð°
-    this.reactionsCache = {}; // ÐšÐµÑˆ Ð·Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ð¸
+    this.userNameMappings = {}; // Карта за стари към нови имена
+    this.reactionsCache = {}; // Кеш за реакции
     this.reactionHtmlCache = new Map();
-    this.activeUsers = {}; // Ð¡Ð¿Ð¸ÑÑŠÐº Ñ Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¸ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»Ð¸ Ð·Ð° Ð»Ð¾Ð³Ð¸ÐºÐ° Ñ Ñ€ÐµÐ°ÐºÑ†Ð¸Ð¸
+    this.activeUsers = {}; // Списък с активни потребители за логика с реакции
     this.activeTyping = {}; // State for typing indicators
     this.showMembers = localStorage.getItem(`showMembers_${this.documentId}`) === 'true'; // Default to false if not set
     this.lastActiveMembersSignature = '';
@@ -960,8 +960,10 @@ class ChatUIManager {
 .message-actions.two-btns {
   right: -53px;
 }
-.chat-message:hover .message-actions {
-  display: flex;
+@media (hover: hover) and (pointer: fine) {
+  .chat-message:hover .message-actions {
+    display: flex;
+  }
 }
 .message-actions button {
   transition: background 0.2s;
@@ -979,38 +981,85 @@ class ChatUIManager {
 .message-actions button:hover {
   background: rgba(0, 0, 0, 0.05) !important;
 }
+            @keyframes menuPop {
+                from { opacity: 0; transform: scale(0.92) translateY(4px); }
+                to   { opacity: 1; transform: scale(1)    translateY(0);    }
+            }
+            @keyframes sheetSlideUp {
+                from { opacity: 0; transform: translateY(100%); }
+                to   { opacity: 1; transform: translateY(0);    }
+            }
             .message-options-menu {
                 position: fixed;
                 background: white;
                 border-radius: 12px;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                box-shadow: 0 4px 20px rgba(0,0,0,0.18);
                 border: 1px solid var(--chat-border);
                 padding: 4px;
                 z-index: 10002;
                 display: flex;
                 flex-direction: column;
-                min-width: 100px;
+                min-width: 140px;
+                animation: menuPop 0.15s ease both;
+                transform-origin: top center;
+            }
+            .message-options-menu.mobile-sheet {
+                bottom: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                top: auto !important;
+                border-radius: 20px 20px 0 0 !important;
+                padding: 8px 8px calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
+                min-width: unset !important;
+                box-shadow: 0 -4px 30px rgba(0,0,0,0.15) !important;
+                animation: sheetSlideUp 0.22s cubic-bezier(0.32, 0.72, 0, 1) both !important;
+                transform-origin: bottom center !important;
+            }
+            .message-options-backdrop {
+                position: fixed;
+                inset: 0;
+                z-index: 10001;
+                background: rgba(0,0,0,0.25);
+                animation: menuPop 0.15s ease both;
             }
             .message-option-item {
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                padding: 8px 12px;
-                font-size: 13px;
+                gap: 10px;
+                padding: 10px 14px;
+                font-size: 14px;
                 cursor: pointer;
-                border-radius: 8px;
+                border-radius: 10px;
                 color: var(--chat-text);
-                transition: background 0.2s;
+                transition: background 0.15s;
+                -webkit-tap-highlight-color: transparent;
+                user-select: none;
             }
             .message-option-item:hover {
                 background: var(--chat-secondary);
+            }
+            .message-option-item:active {
+                background: var(--chat-secondary);
+                transform: scale(0.98);
             }
             .message-option-item.delete {
                 color: #ef4444;
             }
             .message-option-item img {
-                width: 14px;
-                height: 14px;
+                width: 16px;
+                height: 16px;
+                flex-shrink: 0;
+            }
+            @media (hover: none) and (pointer: coarse) {
+                .message-option-item {
+                    padding: 13px 18px;
+                    font-size: 15px;
+                    border-radius: 12px;
+                }
+                .message-option-item img {
+                    width: 18px;
+                    height: 18px;
+                }
             }
             .message-actions button:hover {
                 background: #dbeafe !important;
@@ -1031,110 +1080,103 @@ class ChatUIManager {
             /* User Profile Modal */
             .user-profile-modal-overlay {
                 position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.4);
-                display: flex;
-                align-items: center;
-                justify-content: center;
+                inset: 0;
                 z-index: 20000;
-                backdrop-filter: blur(2px);
-                animation: fadeIn 0.2s ease;
+            }
+            @keyframes profilePop {
+                from { opacity: 0; transform: scale(0.93) translateY(6px); }
+                to   { opacity: 1; transform: scale(1)    translateY(0);   }
             }
             .user-profile-modal {
+                position: fixed;
                 background: white;
                 border-radius: 16px;
-                width: 280px;
-                padding: 24px;
-                box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+                width: 260px;
+                box-shadow: 0 8px 32px rgba(0,0,0,0.18), 0 2px 8px rgba(0,0,0,0.08);
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 text-align: center;
+                overflow: hidden;
+                animation: profilePop 0.18s cubic-bezier(0.34, 1.3, 0.64, 1) both;
+                z-index: 20001;
+            }
+            .profile-modal-header {
+                width: 100%;
+                height: 64px;
+                flex-shrink: 0;
+            }
+            .profile-modal-avatar-wrap {
+                margin-top: -36px;
+                margin-bottom: 10px;
                 position: relative;
-                animation: modalSlideUp 0.3s cubic-bezier(0.18, 0.89, 0.32, 1.28);
+                display: inline-flex;
             }
-            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-            @keyframes modalSlideUp { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-            .profile-modal-close {
-                position: absolute;
-                top: 12px;
-                right: 12px;
-                background: none;
-                border: none;
-                font-size: 20px;
-                color: #9ca3af;
-                cursor: pointer;
-                padding: 4px;
-                line-height: 1;
-            }
-            .profile-modal-close:hover { color: #4b5563; }
-
             .profile-modal-avatar {
-                width: 100px;
-                height: 100px;
+                width: 72px;
+                height: 72px;
                 border-radius: 50%;
-                margin-bottom: 16px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 color: white;
-                font-size: 36px;
+                font-size: 28px;
                 font-weight: bold;
-                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                border: 3px solid white;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.15);
                 object-fit: cover;
+                flex-shrink: 0;
+            }
+            .profile-modal-online-ring {
+                position: absolute;
+                bottom: 3px;
+                right: 3px;
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                border: 2px solid white;
+            }
+            .profile-modal-body {
+                padding: 0 16px 12px;
+                width: 100%;
+                box-sizing: border-box;
             }
             .profile-modal-name {
-                font-size: 18px;
+                font-size: 16px;
                 font-weight: 700;
                 color: #111827;
-                margin-bottom: 4px;
+                margin-bottom: 2px;
+                line-height: 1.3;
             }
-            .profile-modal-status {
-                font-size: 13px;
-                color: #059669;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-                margin-bottom: 16px;
+            .profile-modal-lastseen {
+                font-size: 11px;
+                color: #9ca3af;
+                margin-bottom: 12px;
             }
-            .status-dot { width: 8px; height: 8px; background: #10b981; border-radius: 50%; }
-
+            .profile-modal-divider {
+                width: 100%;
+                height: 1px;
+                background: #f3f4f6;
+                margin: 10px 0;
+            }
             .profile-modal-info {
                 width: 100%;
-                background: #f9fafb;
-                border-radius: 12px;
-                padding: 12px;
-                margin-bottom: 20px;
                 font-size: 12px;
                 color: #4b5563;
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: 6px;
+                margin-bottom: 14px;
+                text-align: left;
             }
-            .info-item { display: flex; justify-content: space-between; }
-            .info-label { font-weight: 600; }
-
-            .profile-modal-actions {
+            .info-item {
                 display: flex;
+                justify-content: space-between;
+                align-items: center;
                 gap: 8px;
-                width: 100%;
             }
-            .profile-action-btn {
-                flex: 1;
-                padding: 10px;
-                border-radius: 8px;
-                border: none;
-                font-size: 13px;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.2s;
-            }
-            .btn-mention { background: var(--chat-primary); color: white; }
-            .btn-mention:hover { background: #588157; }
+            .info-label { font-weight: 600; color: #9ca3af; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+            .info-value { color: #374151; font-size: 12px; }
         `;
         document.head.appendChild(style);
     }
@@ -1165,13 +1207,13 @@ class ChatUIManager {
       this.setupCrossTabNotificationSync();
       // await this.chatFirebase.markUserActive(); // Removed - using site-wide presence.js
 
-      // Ð—Ð°Ñ€ÐµÐ´Ð¸ Ð¿ÑŠÑ€Ð²Ð¾Ð½Ð°Ñ‡Ð°Ð»Ð½Ð¸ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ñ - Ð¾Ñ‚ localStorage Ð¸Ð»Ð¸ Firebase
+      // Зареди първоначални съобщения - от localStorage или Firebase
       let messages = this.loadFromCache();
       if (!messages || messages.length === 0) {
-        console.log('ðŸ“‚ No cache, loading from Firebase...');
+        console.log('📂 No cache, loading from Firebase...');
         messages = await this.chatFirebase.loadMessages();
       } else {
-        console.log(`ðŸ’¾ Loaded ${messages.length} messages from cache`);
+        console.log(`💾 Loaded ${messages.length} messages from cache`);
         // Restore pagination state from cached messages
         this.chatFirebase.messages = messages;
         this.chatFirebase.messageIds = new Set(messages.map(message => message.id));
@@ -1182,7 +1224,7 @@ class ChatUIManager {
         }
       }
 
-      // Ð—Ð°Ñ€ÐµÐ´Ð¸ Ð¼Ð°Ð¿Ð¸Ð½Ð³Ð¸ Ð½Ð° Ð¸Ð¼ÐµÐ½Ð°
+      // Зареди мапинги на имена
       this.protectedNames = await this.chatFirebase.getProtectedNames();
 
       this.chatFirebase.startNameMappingsPolling((mappings) => {
@@ -1240,16 +1282,16 @@ class ChatUIManager {
           this.renderTypingIndicators(activeTyping);
       });
 
-      // Ð¡Ð¸Ð½Ñ…Ñ€Ð¾Ð½Ð¸Ð·Ð°Ñ†Ð¸Ñ Ð½Ð° Ð¿Ñ€Ð¾Ñ‡ÐµÑ‚ÐµÐ½Ð¸ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ñ
+      // Синхронизация на прочетени съобщения
       this.chatFirebase.startLastReadPolling(currentUser.userName, (lastReadId) => {
         // Only update if the new ID is "greater" (newer) than what we have
         if (lastReadId && (!this.lastReadMessageId || lastReadId > this.lastReadMessageId)) {
-          console.log(`ðŸ”„ Synchronized newer lastReadId: ${lastReadId}`);
+          console.log(`🔄 Synchronized newer lastReadId: ${lastReadId}`);
           this.applyReadSync(lastReadId, { persistLocal: true });
         }
       });
 
-      // Listener Ð·Ð° ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ñ
+      // Listener за уведомления
       this.chatFirebase.addMessageListener((newMessage) => {
         // Check if the message is from the current user
         const isMyMessage = (window.currentUser.userId && newMessage.userId === window.currentUser.userId) ||
@@ -1275,19 +1317,19 @@ class ChatUIManager {
 
       this.attachEventListeners();
 
-      // ÐŸÑ€Ð¸Ð»Ð¾Ð¶Ð¸ Ð½Ð°Ñ‡Ð°Ð»Ð½Ð¾ ÑÑŠÑÑ‚Ð¾ÑÐ½Ð¸Ðµ Ð½Ð° ÑÐ¿Ð¸ÑÑŠÐºÐ° Ñ Ñ‡Ð»ÐµÐ½Ð¾Ð²Ðµ
+      // Приложи начално състояние на списъка с членове
       const chatPanel = this.container.querySelector('.chat-panel');
       if (chatPanel && this.showMembers) {
         chatPanel.classList.add('show-members');
       }
 
-      // Ð˜Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð°Ð¹ Ð±ÑƒÑ‚Ð¾Ð½ Ð·Ð° ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸Ñ ÐµÐ´Ð¸Ð½ Ð¿ÑŠÑ‚
+      // Инициализирай бутон за уведомления един път
       this.initNotificationButton();
 
       // Setup lazy loading for images using Intersection Observer
       this.setupLazyLoading();
 
-      // console.log('âœ“âœ“âœ“ ChatUIManager Ð³Ð¾Ñ‚Ð¾Ð²'); // Can be removed
+      // console.log('✓✓✓ ChatUIManager готов'); // Can be removed
     } catch (error) {
       console.error('Init error:', error);
     }
@@ -1892,7 +1934,7 @@ class ChatUIManager {
     item.appendChild(row);
 
     item.addEventListener('click', () => {
-      this.showUserProfile(item.dataset.userId);
+      this.showUserProfile(item.dataset.userId, item);
     });
 
     this.patchActiveUserItemElement(item, user);
@@ -1983,7 +2025,7 @@ class ChatUIManager {
     });
   }
 
-  showUserProfile(userId) {
+  showUserProfile(userId, anchorEl = null) {
     const user = this.activeUsers[userId] || (this.userProfiles && this.userProfiles[userId]);
     if (!user) return;
 
@@ -2050,66 +2092,82 @@ class ChatUIManager {
     const modalOverlay = document.createElement('div');
     modalOverlay.className = 'user-profile-modal-overlay';
 
-    modalOverlay.innerHTML = `
-        <div class="user-profile-modal">
-            <button class="profile-modal-close">&times;</button>
+    const statusColor = isOnline ? '#22c55e' : '#9ca3af';
+    const headerBg = userColor;
 
-            ${hasAvatar ?
-                `<img src="${user.avatar}" class="profile-modal-avatar">` :
-                `<div class="profile-modal-avatar" style="background-color: ${userColor}">${initial}</div>`
+    const card = document.createElement('div');
+    card.className = 'user-profile-modal';
+    card.innerHTML = `
+        <div class="profile-modal-header" style="background: ${headerBg};"></div>
+
+        <div class="profile-modal-avatar-wrap">
+            ${hasAvatar
+                ? `<img src="${user.avatar}" class="profile-modal-avatar" style="border-color: white;">`
+                : `<div class="profile-modal-avatar" style="background: ${userColor};">${initial}</div>`
             }
+            <span class="profile-modal-online-ring" style="background: ${statusColor};"></span>
+        </div>
 
+        <div class="profile-modal-body">
             <div class="profile-modal-name">${this.escapeHtml(resolvedName)}</div>
-            <div class="profile-modal-status" style="color: ${isOnline ? '#22c55e' : '#9ca3af'}">
-                <span class="status-dot" style="background-color: ${isOnline ? '#22c55e' : '#9ca3af'}"></span>
-                ${isOnline ? 'Online' : 'Offline'}
-            </div>
-            ${!isOnline && lastSeenText ? `<div style="font-size: 12px; color: #6b7280; margin-top: -4px;">Last seen: ${lastSeenText}</div>` : ''}
+            ${!isOnline && lastSeenText ? `<div class="profile-modal-lastseen">Last seen ${lastSeenText}</div>` : ''}
+
+            <div class="profile-modal-divider"></div>
 
             <div class="profile-modal-info">
                 <div class="info-item">
                     <span class="info-label">Role</span>
-                    <span>${statusText}</span>
+                    <span class="info-value">${statusText}</span>
                 </div>
-                ${actualUsername ? `
-                <div class="info-item">
+                ${actualUsername ? `<div class="info-item">
                     <span class="info-label">Username</span>
-                    <span>@${actualUsername}</span>
+                    <span class="info-value">@${this.escapeHtml(actualUsername)}</span>
                 </div>` : ''}
-                ${user.email && !user.isGuest ? `
-                <div class="info-item">
+                ${user.email && !user.isGuest ? `<div class="info-item">
                     <span class="info-label">Email</span>
-                    <span>${user.email}</span>
+                    <span class="info-value">${this.escapeHtml(user.email)}</span>
                 </div>` : ''}
             </div>
 
-            <div class="profile-modal-actions">
-                <button class="profile-action-btn btn-mention">@ Mention</button>
-            </div>
         </div>
     `;
 
+    modalOverlay.appendChild(card);
     document.body.appendChild(modalOverlay);
 
-    // Close on click overlay
-    modalOverlay.addEventListener('click', (e) => {
-        if (e.target === modalOverlay) {
-            modalOverlay.remove();
+    // Position near anchor
+    requestAnimationFrame(() => {
+        const cardW = card.offsetWidth;
+        const cardH = card.offsetHeight;
+        const margin = 8;
+        const vw = window.innerWidth;
+        const vh = window.innerHeight;
+
+        let top, left;
+        if (anchorEl) {
+            const rect = anchorEl.getBoundingClientRect();
+            // Try right of anchor, else left
+            if (rect.right + margin + cardW <= vw) {
+                left = rect.right + margin;
+            } else {
+                left = rect.left - cardW - margin;
+            }
+            // Align top with anchor, push up if overflows bottom
+            top = rect.top;
+            if (top + cardH > vh - margin) top = vh - cardH - margin;
+            if (top < margin) top = margin;
+            if (left < margin) left = margin;
+        } else {
+            left = vw / 2 - cardW / 2;
+            top  = vh / 2 - cardH / 2;
         }
+        card.style.top  = top  + 'px';
+        card.style.left = left + 'px';
     });
 
-    // Close on button
-    modalOverlay.querySelector('.profile-modal-close').onclick = () => modalOverlay.remove();
-
-    // Mention button
-    modalOverlay.querySelector('.btn-mention').onclick = () => {
-        const input = this.container.querySelector('.chat-input');
-        if (input) {
-            this.insertMention(input, resolvedName);
-            modalOverlay.remove();
-            // Open chat if closed? It's likely open if they clicked active members
-        }
-    };
+    modalOverlay.addEventListener('click', (e) => {
+        if (e.target === modalOverlay) modalOverlay.remove();
+    });
   }
 
   async handleSendMessage() {
@@ -2122,13 +2180,13 @@ class ChatUIManager {
     const trimmedText = text.trim();
     const lowerTrimmedText = trimmedText.toLowerCase();
 
-    // Ð ÐµÐ´Ð°ÐºÑ‚Ð¸Ñ€Ð°Ð½Ðµ Ð½Ð° ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ðµ
+    // Редактиране на съобщение
     if (this.editingMessage) {
         await this.editMessage(this.editingMessage.key, text);
         return;
     }
 
-    // ÐŸÑ€Ð¾Ð²ÐµÑ€Ð¸ Ð´Ð°Ð»Ð¸ Ð¸Ð¼Ð° reply
+    // Провери дали има reply
     const replyTo = input.dataset.replyTo;
     const replyAuthor = input.dataset.replyAuthor;
 
@@ -2174,12 +2232,12 @@ class ChatUIManager {
       input.style.height = 'auto';
       input.focus();
 
-      // ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð¸ reply indicator
+      // Премахни reply indicator
       const replyIndicator = this.container.querySelector('.reply-indicator');
       if (replyIndicator) replyIndicator.remove();
 
-      // Realtime listener Ñ‰Ðµ ÑÐµ Ð¿Ð¾Ð³Ñ€Ð¸Ð¶Ð¸ Ð·Ð° Ð¾Ð±Ð½Ð¾Ð²ÑÐ²Ð°Ð½ÐµÑ‚Ð¾
-      // ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð°Ñ…Ð¼Ðµ Ñ€ÑŠÑ‡Ð½Ð¾Ñ‚Ð¾ Ð¿Ñ€ÐµÐ·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ, Ð·Ð° Ð´Ð° Ð¸Ð·Ð±ÐµÐ³Ð½ÐµÐ¼ race conditions
+      // Realtime listener ще се погрижи за обновяването
+      // Премахнахме ръчното презареждане, за да избегнем race conditions
     }
   }
 
@@ -2632,7 +2690,7 @@ class ChatUIManager {
       messagesMapObj[m.id] = m;
     });
 
-    // ÐÐºÐ¾ Ð¸Ð¼Ð° reply, Ð½Ð°Ð¼ÐµÑ€Ð¸ Ð¾Ñ€Ð¸Ð³Ð¸Ð½Ð°Ð»Ð½Ð¾Ñ‚Ð¾ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ðµ
+    // Ако има reply, намери оригиналното съобщение
     let replyHTML = '';
     if (msg.replyTo && messagesMapObj[msg.replyTo]) {
       const originalMsg = messagesMapObj[msg.replyTo];
@@ -2715,14 +2773,14 @@ class ChatUIManager {
                  ${msg.edited ? `<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>` : ''}
                </div>
                <div class="message-actions ${actionClass}">
-                 <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="ÐžÑ‚Ð³Ð¾Ð²Ð¾Ñ€Ð¸">
+                 <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Отговори">
                    <img src="svg/chat/icon-reply.svg" alt="Reply" style="width: 16px; height: 16px">
                  </button>
-                 <button class="message-reaction-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Ð”Ð¾Ð±Ð°Ð²Ð¸ Ñ€ÐµÐ°ÐºÑ†Ð¸Ñ">
+                 <button class="message-reaction-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Добави реакция">
                    <img src="svg/chat/icon-reaction.svg" alt="Reaction" style="width: 16px; height: 16px">
                  </button>
                  ${isCurrentUser ? `
-                 <button class="message-options-btn" data-message-id="${msg.id}" data-message-key="${msg.key}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="ÐžÑ‰Ðµ Ð¾Ð¿Ñ†Ð¸Ð¸">
+                 <button class="message-options-btn" data-message-id="${msg.id}" data-message-key="${msg.key}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Още опции">
                    <img src="svg/chat/icon-three-dots-vertical.svg" alt="More" style="width: 16px; height: 16px">
                  </button>` : ''}
                </div>
@@ -2742,19 +2800,18 @@ class ChatUIManager {
   }
 
   attachMessageListeners(msgEl) {
-    // Hover effect now handled by CSS (.chat-message:hover .message-actions)
     this.initializeCustomAudioPlayers(msgEl);
 
-    // Ð”Ð¾Ð±Ð°Ð²Ð¸ listener Ð·Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ð¸
+    // Добави listener за реакции
     const reactionBtn = msgEl.querySelector('.message-reaction-btn');
     if (reactionBtn) {
       reactionBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.showReactionPicker(msgEl.dataset.messageId);
+        this.showReactionPicker(msgEl.dataset.messageId, reactionBtn);
       });
     }
 
-    // Ð”Ð¾Ð±Ð°Ð²Ð¸ listener Ð·Ð° reply
+    // Добави listener за reply
     const replyBtn = msgEl.querySelector('.message-reply-btn');
     if (replyBtn) {
       replyBtn.addEventListener('click', (e) => {
@@ -2763,7 +2820,7 @@ class ChatUIManager {
       });
     }
 
-    // Ð”Ð¾Ð±Ð°Ð²Ð¸ listener Ð·Ð° options
+    // Добави listener за options
     const optionsBtn = msgEl.querySelector('.message-options-btn');
     if (optionsBtn) {
       optionsBtn.addEventListener('click', (e) => {
@@ -2778,6 +2835,27 @@ class ChatUIManager {
       this.showMessageOptions(msgEl.dataset.messageId, msgEl.dataset.messageKey, msgEl, e, msgEl, 'full');
     });
 
+    // Long-press for mobile
+    let _lpTimer = null;
+    let _lpMoved = false;
+    msgEl.addEventListener('touchstart', (e) => {
+      if (e.target.closest('.message-reply-btn, .message-reaction-btn, .message-options-btn, .message-reactions, .reaction-badge')) return;
+      _lpMoved = false;
+      const touch = e.touches[0];
+      const touchX = touch.clientX;
+      const touchY = touch.clientY;
+      _lpTimer = setTimeout(() => {
+        if (_lpMoved) return;
+        if (navigator.vibrate) navigator.vibrate(30);
+        msgEl.classList.add('lp-active');
+        this.showMessageOptions(msgEl.dataset.messageId, msgEl.dataset.messageKey, msgEl, { clientX: touchX, clientY: touchY }, msgEl, 'full');
+        setTimeout(() => msgEl.classList.remove('lp-active'), 300);
+      }, 450);
+    }, { passive: true });
+    msgEl.addEventListener('touchmove', () => { _lpMoved = true; clearTimeout(_lpTimer); }, { passive: true });
+    msgEl.addEventListener('touchend', () => { clearTimeout(_lpTimer); }, { passive: true });
+    msgEl.addEventListener('touchcancel', () => { clearTimeout(_lpTimer); msgEl.classList.remove('lp-active'); }, { passive: true });
+
     // Add listener for profile view
     const avatar = msgEl.querySelector('.message-avatar');
     const author = msgEl.querySelector('.message-author');
@@ -2787,14 +2865,14 @@ class ChatUIManager {
         avatar.style.cursor = 'pointer';
         avatar.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.showUserProfile(userId);
+            this.showUserProfile(userId, avatar);
         });
     }
     if (author) {
         author.style.cursor = 'pointer';
         author.addEventListener('click', (e) => {
             e.stopPropagation();
-            this.showUserProfile(userId);
+            this.showUserProfile(userId, author);
         });
     }
 
@@ -2940,44 +3018,58 @@ class ChatUIManager {
       </div>
     `;
 
-    document.body.appendChild(menu);
+    const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
 
-    const menuRect = menu.getBoundingClientRect();
-    const rect = anchorEl.getBoundingClientRect();
-
-    let top = rect.bottom + 5;
-    let left = rect.right - menuRect.width;
-
-    if (triggerEvent && Number.isFinite(triggerEvent.clientX) && Number.isFinite(triggerEvent.clientY)) {
-      left = triggerEvent.clientX;
-      top = triggerEvent.clientY;
+    let backdrop = null;
+    if (isMobile) {
+      menu.classList.add('mobile-sheet');
+      backdrop = document.createElement('div');
+      backdrop.className = 'message-options-backdrop';
+      document.body.appendChild(backdrop);
     }
 
-    if (top + menuRect.height > window.innerHeight) top = rect.top - menuRect.height - 5;
-    if (left < 10) left = 10;
-    if (left + menuRect.width > window.innerWidth - 10) left = window.innerWidth - menuRect.width - 10;
-    if (top < 10) top = 10;
-    if (top + menuRect.height > window.innerHeight - 10) top = window.innerHeight - menuRect.height - 10;
+    document.body.appendChild(menu);
 
-    menu.style.top = top + 'px';
-    menu.style.left = left + 'px';
+    if (!isMobile) {
+      const menuRect = menu.getBoundingClientRect();
+      const rect = anchorEl.getBoundingClientRect();
+      let top = rect.bottom + 5;
+      let left = rect.right - menuRect.width;
+      if (triggerEvent && Number.isFinite(triggerEvent.clientX) && Number.isFinite(triggerEvent.clientY)) {
+        left = triggerEvent.clientX;
+        top = triggerEvent.clientY;
+      }
+      if (top + menuRect.height > window.innerHeight) top = rect.top - menuRect.height - 5;
+      if (left < 10) left = 10;
+      if (left + menuRect.width > window.innerWidth - 10) left = window.innerWidth - menuRect.width - 10;
+      if (top < 10) top = 10;
+      if (top + menuRect.height > window.innerHeight - 10) top = window.innerHeight - menuRect.height - 10;
+      menu.style.top = top + 'px';
+      menu.style.left = left + 'px';
+    }
+
+    const dismiss = () => {
+      menu.remove();
+      if (backdrop) backdrop.remove();
+      document.removeEventListener('mousedown', onOutside);
+      document.removeEventListener('touchstart', onOutside);
+    };
 
     const replyItem = menu.querySelector('.reply');
     if (replyItem) {
       replyItem.onclick = () => {
-        menu.remove();
+        dismiss();
         const targetMsgEl = sourceMessageEl || document.querySelector(`.chat-message[data-message-id="${messageId}"]`);
-        if (targetMsgEl) {
-          this.startReply(messageId, targetMsgEl);
-        }
+        if (targetMsgEl) this.startReply(messageId, targetMsgEl);
       };
     }
 
     const reactionItem = menu.querySelector('.reaction');
     if (reactionItem) {
       reactionItem.onclick = () => {
-        menu.remove();
-        this.showReactionPicker(messageId);
+        dismiss();
+        const bubbleEl = sourceMessageEl ? sourceMessageEl.querySelector('.message-text') : null;
+        this.showReactionPicker(messageId, bubbleEl || sourceMessageEl);
       };
     }
 
@@ -2992,25 +3084,20 @@ class ChatUIManager {
     }
 
     if (isOwner) {
-      menu.querySelector('.edit').onclick = () => {
-        menu.remove();
-        this.startEditing(messageId, messageKey);
-      };
-      menu.querySelector('.delete').onclick = () => {
-        menu.remove();
-        this.deleteMessage(messageKey);
-      };
+      editItem.onclick = () => { dismiss(); this.startEditing(messageId, messageKey); };
+      deleteItem.onclick = () => { dismiss(); this.deleteMessage(messageKey); };
     }
 
-    const closeMenu = (e) => {
-      if (!menu.contains(e.target) && e.target !== anchorEl) {
-        menu.remove();
-        document.removeEventListener('mousedown', closeMenu);
-        document.removeEventListener('touchstart', closeMenu);
+    const onOutside = (e) => {
+      if (!menu.contains(e.target) && e.target !== anchorEl && (!backdrop || e.target === backdrop)) {
+        dismiss();
       }
     };
-    document.addEventListener('mousedown', closeMenu);
-    document.addEventListener('touchstart', closeMenu, { passive: true });
+    if (backdrop) backdrop.addEventListener('click', dismiss);
+    setTimeout(() => {
+      document.addEventListener('mousedown', onOutside);
+      document.addEventListener('touchstart', onOutside, { passive: true });
+    }, 0);
   }
 
   startEditing(messageId, messageKey) {
@@ -3380,7 +3467,7 @@ class ChatUIManager {
     const badgeEl = document.querySelector('.chat-badge-count');
     const icon = document.querySelector('.chat-icon');
 
-    // ÐŸÐ¾ÐºÐ°Ð·Ð¸ Ð±Ñ€Ð¾Ð¹ Ð½ÐµÐ¿Ñ€Ð¾Ñ‡ÐµÑ‚ÐµÐ½Ð¸ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸Ñ Ð¡ÐÐœÐž Ð°ÐºÐ¾ ÑƒÐ²ÐµÐ´Ð¾Ð¼Ð»ÐµÐ½Ð¸ÑÑ‚Ð° ÑÐ° Ð²ÐºÐ»ÑŽÑ‡ÐµÐ½Ð¸ Ð˜ Ñ‡Ð°Ñ‚ÑŠÑ‚ Ðµ Ð·Ð°Ñ‚Ð²Ð¾Ñ€ÐµÐ½
+    // Покази брой непрочетени съобщения САМО ако уведомленията са включени И чатът е затворен
     if (badgeEl) {
       if (this.notificationsDisabled || this.isOpen) {
         badgeEl.style.display = 'none';
@@ -3683,8 +3770,8 @@ class ChatUIManager {
     this.observeLazyImages();
   }
 
-  showReactionPicker(messageId) {
-    // ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð¸ ÑÑ‚Ð°Ñ€ picker Ð°ÐºÐ¾ ÑÑŠÑ‰ÐµÑÑ‚Ð²ÑƒÐ²Ð°
+  showReactionPicker(messageId, anchorEl = null) {
+    // Премахни стар picker ако съществува
     const oldPicker = document.querySelector('.reaction-picker');
     if (oldPicker) oldPicker.remove();
 
@@ -3737,12 +3824,12 @@ class ChatUIManager {
       return btn;
     };
 
-    // Ð”Ð¾Ð±Ð°Ð²Ð¸ ÑÑ‚Ð°Ð½Ð´Ð°Ñ€Ñ‚Ð½Ð¸ ÐµÐ¼Ð¾Ð´Ð¶Ð¸Ñ‚Ð°
+    // Добави стандартни емоджита
     emojis.forEach(emoji => {
       picker.appendChild(addEmojiButton(emoji, messageId));
     });
 
-    // Ð”Ð¾Ð±Ð°Ð²Ð¸ Ð±ÑƒÑ‚Ð¾Ð½ Ð·Ð° Ð¿ÐµÑ€ÑÐ¾Ð½Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð°Ð½Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ñ
+    // Добави бутон за персонализирана реакция
     const customBtn = document.createElement('button');
     customBtn.innerHTML = `
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -3750,7 +3837,7 @@ class ChatUIManager {
         <line x1="5" y1="12" x2="19" y2="12"></line>
       </svg>
     `;
-    customBtn.title = "Ð”Ð¾Ð±Ð°Ð²Ð¸ Ð´Ñ€ÑƒÐ³Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ñ";
+    customBtn.title = "Добави друга реакция";
     customBtn.style.cssText = `
       background: ${customBtnBg};
       border: none;
@@ -3767,7 +3854,7 @@ class ChatUIManager {
     `;
     customBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const customEmoji = prompt("Ð’ÑŠÐ²ÐµÐ´Ð¸ ÐµÐ¼Ð¾Ð´Ð¶Ð¸ Ð¸Ð»Ð¸ ÐºÑ€Ð°Ñ‚ÑŠÐº Ñ‚ÐµÐºÑÑ‚ Ð·Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ñ:");
+      const customEmoji = prompt("Въведи емоджи или кратък текст за реакция:");
       if (customEmoji && customEmoji.trim()) {
         this.addReaction(messageId, customEmoji.trim().substring(0, 5));
       }
@@ -3776,25 +3863,22 @@ class ChatUIManager {
     });
     picker.appendChild(customBtn);
 
-    // ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ picker Ð´Ð¾ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸ÐµÑ‚Ð¾
-    const msgEl = document.querySelector(`[data-message-id="${messageId}"]`);
-    if (msgEl) {
-      const rect = msgEl.getBoundingClientRect();
-      document.body.appendChild(picker);
-
-      const pickerRect = picker.getBoundingClientRect();
-      // ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ Ð² Ð³Ð¾Ñ€Ð½Ð¸Ñ Ð´ÐµÑÐµÐ½ ÑŠÐ³ÑŠÐ» Ð½Ð° ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸ÐµÑ‚Ð¾
-      let left = rect.right - pickerRect.width;
-      let top = rect.top - pickerRect.height - 5;
-
-      // ÐžÑÐ¸Ð³ÑƒÑ€Ð¸ Ð´Ð° Ð½Ðµ Ð¸Ð·Ð»Ð¸Ð·Ð° Ð¸Ð·Ð²ÑŠÐ½ ÐµÐºÑ€Ð°Ð½Ð° Ð½Ð°Ð»ÑÐ²Ð¾
+    // Позиционирай picker до съобщението
+    document.body.appendChild(picker);
+    const pickerRect = picker.getBoundingClientRect();
+    const refEl = anchorEl || document.querySelector(`[data-message-id="${messageId}"]`);
+    if (refEl) {
+      const rect = refEl.getBoundingClientRect();
+      let left = rect.left + rect.width / 2 - pickerRect.width / 2;
+      let top = rect.top - pickerRect.height - 8;
       if (left < 10) left = 10;
-
+      if (left + pickerRect.width > window.innerWidth - 10) left = window.innerWidth - pickerRect.width - 10;
+      if (top < 10) top = rect.bottom + 8;
       picker.style.left = left + 'px';
       picker.style.top = top + 'px';
     }
 
-    // Ð¤ÑƒÐ½ÐºÑ†Ð¸Ñ Ð·Ð° Ð·Ð°Ñ‚Ð²Ð°Ñ€ÑÐ½Ðµ Ð½Ð° picker
+    // Функция за затваряне на picker
     const closePicker = (e) => {
       if (!picker.contains(e.target) && !e.target.closest('.message-reaction-btn')) {
         picker.remove();
@@ -3813,7 +3897,7 @@ class ChatUIManager {
   }
 
   showReactionTooltip(badgeElement) {
-    this.hideReactionTooltip(); // Ð¡ÐºÑ€Ð¸Ð¹ Ð¿Ñ€ÐµÐ´Ð¸ÑˆÐ½Ð¸, Ð°ÐºÐ¾ Ð¸Ð¼Ð°
+    this.hideReactionTooltip(); // Скрий предишни, ако има
 
     const messageId = badgeElement.dataset.messageId;
     const emoji = badgeElement.dataset.emoji;
@@ -3829,26 +3913,26 @@ class ChatUIManager {
       return;
     }
 
-    // Ð¡ÑŠÐ·Ð´Ð°Ð¹ ÐºÐ°Ñ€Ñ‚Ð° Ð½Ð° userId -> userName Ð¾Ñ‚ Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð½Ð°Ð»Ð¸Ñ‡Ð½Ð¸ Ð¸Ð·Ñ‚Ð¾Ñ‡Ð½Ð¸Ñ†Ð¸
+    // Създай карта на userId -> userName от всички налични източници
     const userMap = {};
-    // 1. ÐžÑ‚ Ð°ÐºÑ‚Ð¸Ð²Ð½Ð¸Ñ‚Ðµ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»Ð¸ (Ð½Ð°Ð¹-Ð°ÐºÑ‚ÑƒÐ°Ð»Ð½Ð¸ Ð¸Ð¼ÐµÐ½Ð°)
+    // 1. От активните потребители (най-актуални имена)
     for (const userId in this.activeUsers) {
         userMap[userId] = this.activeUsers[userId].userName;
     }
-    // 2. ÐžÑ‚ Ð¸ÑÑ‚Ð¾Ñ€Ð¸ÑÑ‚Ð° Ð½Ð° ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸ÑÑ‚Ð° (Ð·Ð° Ð¾Ñ„Ð»Ð°Ð¹Ð½ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»Ð¸)
+    // 2. От историята на съобщенията (за офлайн потребители)
     this.chatFirebase.messages.forEach(msg => {
         if (!userMap[msg.userId]) {
             userMap[msg.userId] = msg.userName;
         }
     });
 
-    // ÐŸÑ€ÐµÐ¾Ð±Ñ€Ð°Ð·ÑƒÐ²Ð°Ð¹ ID-Ñ‚Ð°Ñ‚Ð° Ð² Ð¸Ð¼ÐµÐ½Ð°
+    // Преобразувай ID-тата в имена
     const reactorNames = reactorIds.map(id => {
-        const rawName = userMap[id] || 'ÐÐµÐ¸Ð·Ð²ÐµÑÑ‚ÐµÐ½';
+        const rawName = userMap[id] || 'Неизвестен';
         const resolvedName = this.resolveName(rawName);
         const isMe = this._getMyUserIds().includes(id);
-        // ÐœÐ°Ñ€ÐºÐ¸Ñ€Ð°Ð¹ Ñ‚ÐµÐºÑƒÑ‰Ð¸Ñ Ð¿Ð¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»
-        return isMe ? `<strong>${this.escapeHtml(resolvedName)} (ÐÐ·)</strong>` : this.escapeHtml(resolvedName);
+        // Маркирай текущия потребител
+        return isMe ? `<strong>${this.escapeHtml(resolvedName)} (Аз)</strong>` : this.escapeHtml(resolvedName);
     }).join('<br>');
 
     const tooltip = document.createElement('div');
@@ -3861,7 +3945,7 @@ class ChatUIManager {
     const badgeRect = badgeElement.getBoundingClientRect();
     const tooltipRect = tooltip.getBoundingClientRect();
 
-    // ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ Ð½Ð°Ð´ Ð±ÑƒÑ‚Ð¾Ð½Ð°, Ñ†ÐµÐ½Ñ‚Ñ€Ð¸Ñ€Ð°Ð½Ð¾
+    // Позиционирай над бутона, центрирано
     let top = badgeRect.top - tooltipRect.height - 5;
     let left = badgeRect.left + (badgeRect.width / 2) - (tooltipRect.width / 2);
 
@@ -3920,7 +4004,7 @@ class ChatUIManager {
     const reactionCounts = {};
     const myReactions = {};
 
-    const myUserIds = this._getMyUserIds(); // Ð’Ð·ÐµÐ¼Ð¸ Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð¼Ð¾Ð¸ userId-Ñ‚Ð°
+    const myUserIds = this._getMyUserIds(); // Вземи всички мои userId-та
 
     Object.keys(reactionsForMessage).forEach(emoji => {
         const usersObj = reactionsForMessage[emoji] || {};
@@ -3929,7 +4013,7 @@ class ChatUIManager {
 
         if (count > 0) {
             reactionCounts[emoji] = count;
-            // ÐŸÑ€Ð¾Ð²ÐµÑ€Ð¸ Ð´Ð°Ð»Ð¸ Ð½ÑÐºÐ¾Ðµ Ð¾Ñ‚ Ð¼Ð¾Ð¸Ñ‚Ðµ userId-Ñ‚Ð° Ðµ Ñ€ÐµÐ°Ð³Ð¸Ñ€Ð°Ð»Ð¾
+            // Провери дали някое от моите userId-та е реагирало
             if (userIdsWhoReacted.some(id => myUserIds.includes(id))) {
                 myReactions[emoji] = true;
             }
@@ -3970,15 +4054,15 @@ class ChatUIManager {
         const myReactingIds = myUserIds.filter(id => reactorsForEmoji[id] === true);
 
         if (myReactingIds.length > 0) {
-          // ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð¸ Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð¼Ð¾Ð¸ Ñ€ÐµÐ°ÐºÑ†Ð¸Ð¸ Ð·Ð° Ñ‚Ð¾Ð²Ð° ÐµÐ¼Ð¾Ð´Ð¶Ð¸
+          // Премахни всички мои реакции за това емоджи
           this.chatFirebase.bulkRemoveReactions(msgId, emoji, myReactingIds);
         } else {
-          // Ð”Ð¾Ð±Ð°Ð²Ð¸ Ð½Ð¾Ð²Ð° Ñ€ÐµÐ°ÐºÑ†Ð¸Ñ
+          // Добави нова реакция
           this.addReaction(msgId, emoji);
         }
       });
 
-      // Ð”Ð¾Ð±Ð°Ð²Ð¸ hover ÑÐ»ÑƒÑˆÐ°Ñ‚ÐµÐ»Ð¸ Ð·Ð° tooltip
+      // Добави hover слушатели за tooltip
       btn.addEventListener('mouseenter', e => {
         this.showReactionTooltip(e.currentTarget);
       });
@@ -4075,10 +4159,10 @@ class ChatUIManager {
         // when messages were rendered while the panel was hidden.
         this.observeLazyImages();
 
-        // ÐœÐ°Ñ€ÐºÐ¸Ñ€Ð°Ð¹ ÑÑŠÐ¾Ð±Ñ‰ÐµÐ½Ð¸ÑÑ‚Ð° ÐºÐ°Ñ‚Ð¾ Ð¿Ñ€Ð¾Ñ‡ÐµÑ‚ÐµÐ½Ð¸
+        // Маркирай съобщенията като прочетени
         this.markAsRead();
 
-        // ÐŸÑ€ÐµÐ²ÑŠÑ€Ñ‚Ð¸ Ð´Ð¾ Ð´Ð¾Ð»Ñƒ Ð²ÐµÐ´Ð½Ð°Ð³Ð° Ð¸ ÑÐ»ÐµÐ´ Ð¼Ð°Ð»ÐºÐ¾ Ð·Ð°ÐºÑŠÑÐ½ÐµÐ½Ð¸Ðµ (Ð·Ð°Ñ€Ð°Ð´Ð¸ Ð°Ð½Ð¸Ð¼Ð°Ñ†Ð¸ÑÑ‚Ð°)
+        // Превърти до долу веднага и след малко закъснение (заради анимацията)
         this.scrollToBottom();
         requestAnimationFrame(() => this.scrollToBottom());
         setTimeout(() => this.scrollToBottom(), 100);
@@ -4244,7 +4328,7 @@ class ChatUIManager {
     // 4. Mentions (@username)
     const currentName = window.currentUser ? (window.currentUser.userName || window.currentUser.displayName || "").toLowerCase() : "";
 
-    processed = processed.replace(/@([a-zA-Z0-9Ð-Ð¯Ð°-Ñ._-]+)/g, (match, username) => {
+    processed = processed.replace(/@([a-zA-Z0-9А-Яа-я._-]+)/g, (match, username) => {
         const lowerName = username.toLowerCase();
 
         // Special case: @everyone
@@ -4363,7 +4447,7 @@ class ChatUIManager {
                 }
             }
 
-            // ÐŸÑ€ÐµÐ¼Ð°Ñ…Ð½Ð¸ Ð»Ð¾ÐºÐ°Ð»Ð½Ð¾ Ð²ÐµÐ´Ð½Ð°Ð³Ð° Ñ Ð°Ð½Ð¸Ð¼Ð°Ñ†Ð¸Ñ
+            // Премахни локално веднага с анимация
             const messagesContainer = this.container.querySelector('.chat-messages');
             const messageEl = messagesContainer.querySelector(`[data-message-key="${messageKey}"]`);
             if (messageEl) {
@@ -5435,6 +5519,10 @@ class ChatUIManager {
   cursor: pointer;
 }
 
+#chat-widget .is-self-message .chat-audio-progress {
+  background: #a8bea4;
+}
+
 #chat-widget .chat-audio-progress-fill {
   width: 0;
   height: 100%;
@@ -5451,6 +5539,15 @@ class ChatUIManager {
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
+}
+
+#chat-widget .is-self-message .chat-audio-time {
+  color: #2d4d2d;
+}
+
+#chat-widget .chat-message.lp-active .message-bubble-container {
+  transform: scale(0.96);
+  transition: transform 0.12s ease;
 }
 
 #chat-widget .chat-audio-volume-row {
@@ -5636,22 +5733,22 @@ class ChatUIManager {
   }
 
   function initChat() {
-    // console.log('Ð˜Ð½Ð¸Ñ†Ð¸Ð°Ð»Ð¸Ð·Ð¸Ñ€Ð°Ð¼ Chat UI...'); // Can be removed
+    // console.log('Инициализирам Chat UI...'); // Can be removed
 
     const chatWidget = document.getElementById('chat-widget');
     if (!chatWidget) {
-      console.error('Chat widget Ð½Ðµ Ðµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½!');
+      console.error('Chat widget не е намерен!');
       return;
     }
 
-    // Ð“Ð›ÐžÐ‘ÐÐ›Ð•Ð Ð§ÐÐ¢ Ð—Ð Ð’Ð¡Ð˜Ð§ÐšÐ˜ Ð¡ÐÐ™Ð¢ÐžÐ’Ð•
+    // ГЛОБАЛЕН ЧАТ ЗА ВСИЧКИ САЙТОВЕ
     const documentId = 'global-chat';
 
     let chatManager;
     try {
       chatManager = new ChatUIManager('chat-widget', documentId);
       window.chatManager = chatManager;
-    //  console.log('âœ“âœ“âœ“ Chat ÑÐ¸ÑÑ‚ÐµÐ¼Ð° Ð“ÐžÐ¢ÐžÐ’Ð!');
+    //  console.log('✓✓✓ Chat система ГОТОВА!');
     } catch (error) {
       console.error('Chat init error:', error);
       return;
@@ -5662,7 +5759,7 @@ class ChatUIManager {
       chatIcon.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        // console.log('ðŸ’¬ Click'); // Can be removed
+        // console.log('💬 Click'); // Can be removed
         if (window.chatManager) {
           window.chatManager.toggleChat();
         }
@@ -5685,24 +5782,24 @@ class ChatUIManager {
       currentUserNameEl.textContent = window.currentUser.userName;
     }
 
-    // console.log('ÐŸÐ¾Ñ‚Ñ€ÐµÐ±Ð¸Ñ‚ÐµÐ»:', window.currentUser.userName); // Can be removed
+    // console.log('Потребител:', window.currentUser.userName); // Can be removed
   }
 
   tryInit();
 })();
 
 // ============================================
-// GLOBAL RESET FUNCTION - Ð´Ð¾ÑÑ‚ÑŠÐ¿Ð½Ð° Ð¾Ñ‚Ð²ÑÑÐºÑŠÐ´Ðµ
+// GLOBAL RESET FUNCTION - достъпна отвсякъде
 // ============================================
 
 window.resetChat = function() {
   localStorage.removeItem('userId');
   localStorage.removeItem('userName');
   localStorage.removeItem('userColor');
-  console.log('âœ… Ð ÐµÑÐµÑ‚ Ð·Ð°Ð²ÑŠÑ€ÑˆÐµÐ½! ÐÐ°Ð¿Ð¸ÑˆÐ¸ Ð² ÐºÐ¾Ð½ÑÐ¾Ð»Ð°Ñ‚Ð°: location.reload()');
+  console.log('✅ Ресет завършен! Напиши в консолата: location.reload()');
 };
 
-// console.log('ðŸ’¡ ÐšÐ¾Ð¼Ð°Ð½Ð´Ð¸: resetChat() - Ñ€ÐµÑÐµÑ‚ Ð½Ð° Ð¸Ð¼Ðµ');
+// console.log('💡 Команди: resetChat() - ресет на име');
 
 // Cache buster
 const CHAT_VERSION = '20260122_v2';

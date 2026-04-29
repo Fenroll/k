@@ -6,7 +6,7 @@
   <script>
     // Firebase configuration (extracted from js/chat.js)
     const firebaseConfig = {
-      apiKey: "API_KEY", // Ð—Ð°Ð¼ÐµÐ½Ð¸ Ñ Ñ‚Ð²Ð¾Ñ API Key
+      apiKey: "API_KEY", // Замени с твоя API Key
       authDomain: "med-student-chat.firebaseapp.com",
       databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
       projectId: "med-student-chat",
@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202604302m8"></script>
+  <script src="js/auth-guard.js?v=202604303wq"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -954,7 +954,7 @@
     text-align: left;
   }
 
-  /* Show line break after "Ð¸" only on mobile */
+  /* Show line break after "и" only on mobile */
   .mobile-break {
     display: none;
   }
@@ -1859,16 +1859,16 @@
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 12H18M6 12L11 7M6 12L11 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            <span class="btn-text-label">ÐŸÑ€ÐµÐ´Ð¸ÑˆÐ½Ð°</span>
+            <span class="btn-text-label">Предишна</span>
           </button>
 
           <div class="week-info">
-            <div id="weekDateRange">Ð¡ÐµÐ´Ð¼Ð¸Ñ†Ð° 1<span style="color: #588157;"></span></div>
-            <span class="week-number" id="weekNumber">4 Ð½Ð¾ÐµÐ¼Ð²Ñ€Ð¸ - 8 Ð½Ð¾ÐµÐ¼Ð²Ñ€Ð¸ 2025</span>
+            <div id="weekDateRange">Седмица 1<span style="color: #588157;"></span></div>
+            <span class="week-number" id="weekNumber">4 ноември - 8 ноември 2025</span>
           </div>
 
           <button class="week-btn" id="nextWeekBtn" onclick="changeWeek(1)">
-            <span class="btn-text-label">Ð¡Ð»ÐµÐ´Ð²Ð°Ñ‰Ð°</span>
+            <span class="btn-text-label">Следваща</span>
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M6 12H18M18 12L13 7M18 12L13 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -1886,10 +1886,10 @@
         <!-- Christmas vacation screen -->
         <div id="christmasScreen" style="display: none;">
           <div style="text-align: center; padding: 60px 20px;">
-            <div style="font-size: 80px; margin-bottom: 20px;">ðŸŽ…ðŸŽ„</div>
-            <h2 style="color: #dc2626; font-size: 32px; margin-bottom: 10px;">ÐšÐ¾Ð»ÐµÐ´Ð½Ð° Ð²Ð°ÐºÐ°Ð½Ñ†Ð¸Ñ!</h2>
-            <div style="font-size: 60px;">ðŸŽâ„ï¸â›„</div>
-            <p style="color: #9ca3af; margin-top: 30px; font-size: 14px;">Ð§ÐµÑÑ‚Ð¸Ñ‚Ð° ÐšÐ¾Ð»ÐµÐ´Ð° Ð¸ Ð©Ð°ÑÑ‚Ð»Ð¸Ð²Ð° ÐÐ¾Ð²Ð° Ð“Ð¾Ð´Ð¸Ð½Ð°! ðŸŽ‰</p>
+            <div style="font-size: 80px; margin-bottom: 20px;">🎅🎄</div>
+            <h2 style="color: #dc2626; font-size: 32px; margin-bottom: 10px;">Коледна ваканция!</h2>
+            <div style="font-size: 60px;">🎁❄️⛄</div>
+            <p style="color: #9ca3af; margin-top: 30px; font-size: 14px;">Честита Коледа и Щастлива Нова Година! 🎉</p>
           </div>
         </div>
 
@@ -1905,11 +1905,11 @@
         <div id="scheduleGrid" class="calendar-grid">
           <!-- Header Row -->
           <div class="header-cell time-header"></div>
-          <div class="header-cell">ÐŸÐžÐ</div>
-          <div class="header-cell">Ð’Ð¢</div>
-          <div class="header-cell">Ð¡Ð </div>
-          <div class="header-cell">Ð§Ð•Ð¢</div>
-          <div class="header-cell">ÐŸÐ•Ð¢</div>
+          <div class="header-cell">ПОН</div>
+          <div class="header-cell">ВТ</div>
+          <div class="header-cell">СР</div>
+          <div class="header-cell">ЧЕТ</div>
+          <div class="header-cell">ПЕТ</div>
           <!-- Grid Content will be injected by JS -->
         </div>
 
@@ -1918,7 +1918,7 @@
           <div class="schedule-notes-header">
             <div class="schedule-notes-heading">
               <div class="schedule-notes-title">Schedule Notes</div>
-              <div id="scheduleNotesLastEdit" class="schedule-notes-last-edit">Last edit: â€”</div>
+              <div id="scheduleNotesLastEdit" class="schedule-notes-last-edit">Last edit: —</div>
             </div>
             <button id="editScheduleNotesBtn" class="schedule-notes-edit-btn" type="button">
               <svg class="schedule-notes-edit-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
@@ -1944,7 +1944,7 @@
   <!-- Modal for schedule details -->
   <div class="modal-overlay" id="modalOverlay">
     <div class="modal-content">
-      <button class="modal-close" onclick="closeModal()">Ã—</button>
+      <button class="modal-close" onclick="closeModal()">×</button>
       <h2 class="modal-title" id="modalSubject"></h2>
       <span class="modal-type" id="modalType"></span>
       <div class="modal-info">
@@ -1953,7 +1953,7 @@
             <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
           </svg>
           <div>
-            <div class="modal-info-label">Ð§Ð°Ñ:</div>
+            <div class="modal-info-label">Час:</div>
             <div class="modal-info-value" id="modalTime"></div>
           </div>
         </div>
@@ -1962,7 +1962,7 @@
             <path d="M12,11.5A2.5,2.5 0 0,1 9.5,9A2.5,2.5 0 0,1 12,6.5A2.5,2.5 0 0,1 14.5,9A2.5,2.5 0 0,1 12,11.5M12,2A7,7 0 0,0 5,9C5,14.25 12,22 12,22C12,22 19,14.25 19,9A7,7 0 0,0 12,2Z"/>
           </svg>
           <div>
-            <div class="modal-info-label">Ð¡Ð³Ñ€Ð°Ð´Ð°:</div>
+            <div class="modal-info-label">Сграда:</div>
             <div class="modal-info-value" id="modalBuilding"></div>
           </div>
         </div>
@@ -1971,7 +1971,7 @@
             <path d="M5,3V21H11V17.5H13V21H19V3H5M7,5H9V7H7V5M11,5H13V7H11V5M15,5H17V7H15V5M7,9H9V11H7V9M11,9H13V11H11V9M15,9H17V11H15V9M7,13H9V15H7V13M11,13H13V15H11V13M15,13H17V15H15V13M7,17H9V19H7V17M15,17H17V19H15V17Z"/>
           </svg>
           <div>
-            <div class="modal-info-label">Ð¡Ñ‚Ð°Ñ:</div>
+            <div class="modal-info-label">Стая:</div>
             <div class="modal-info-value" id="modalRoomInfo">
               <span id="modalRoom"></span><span id="modalFloorText"></span>
             </div>
@@ -1982,7 +1982,7 @@
             <path d="M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z"/>
           </svg>
           <div>
-            <div class="modal-info-label">ÐŸÑ€ÐµÐ¿Ð¾Ð´Ð°Ð²Ð°Ñ‚ÐµÐ»:</div>
+            <div class="modal-info-label">Преподавател:</div>
             <div class="modal-info-value" id="modalTeacher"></div>
           </div>
         </div>
@@ -1992,7 +1992,7 @@
             <path d="M11,9H13V7H11M12,20C7.59,20 4,16.41 4,12C4,7.59 7.59,4 12,4C16.41,4 20,7.59 20,12C20,16.41 16.41,20 12,20M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M11,17H13V11H11V17Z"/>
           </svg>
           <div>
-            <div class="modal-info-label">Ð”Ð¾Ð¿ÑŠÐ»Ð½Ð¸Ñ‚ÐµÐ»Ð½Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ:</div>
+            <div class="modal-info-label">Допълнителна информация:</div>
             <div class="modal-info-value" id="modalAdditionalInfo"></div>
           </div>
         </div>
@@ -2003,28 +2003,28 @@
   <!-- Exam Info Modal -->
   <div class="modal-overlay" id="examInfoModal">
     <div class="modal-content">
-      <button class="modal-close" onclick="closeExamModal()">Ã—</button>
-      <h2 class="modal-title">Ð”Ð¾Ð¿ÑŠÐ»Ð½Ð¸Ñ‚ÐµÐ»Ð½Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ</h2>
+      <button class="modal-close" onclick="closeExamModal()">×</button>
+      <h2 class="modal-title">Допълнителна информация</h2>
 
       <!-- Calculator Section (hidden by default) -->
       <div id="calculatorSection" style="display: none; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #e5e7eb;">
-        <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 1.1em; text-align: center;">ÐšÐ°Ð»ÐºÑƒÐ»Ð°Ñ‚Ð¾Ñ€ Ð½Ð° Ð¸Ð·Ð¿Ð¸Ñ‚Ð°</h3>
+        <h3 style="margin: 0 0 15px 0; color: #2c3e50; font-size: 1.1em; text-align: center;">Калкулатор на изпита</h3>
 
         <div class="calc-input-group">
-          <label for="calcAnnualGrade">Ð“Ð¾Ð´Ð¸ÑˆÐ½Ð° Ð¾Ñ†ÐµÐ½ÐºÐ°:</label>
-          <input type="number" id="calcAnnualGrade" step="0.01" min="2" max="6" placeholder="ÐÐ°Ð¿Ñ€. 5.00">
+          <label for="calcAnnualGrade">Годишна оценка:</label>
+          <input type="number" id="calcAnnualGrade" step="0.01" min="2" max="6" placeholder="Напр. 5.00">
         </div>
 
         <div class="calc-input-group">
-          <label for="calcTargetGrade">Ð–ÐµÐ»Ð°Ð½Ð° ÐºÑ€Ð°Ð¹Ð½Ð° Ð¾Ñ†ÐµÐ½ÐºÐ°:</label>
+          <label for="calcTargetGrade">Желана крайна оценка:</label>
           <select id="calcTargetGrade">
-            <option value="3.50">3.50 (Ð”Ð¾Ð±ÑŠÑ€)</option>
-            <option value="4.50">4.50 (ÐœÐ½Ð¾Ð³Ð¾ Ð´Ð¾Ð±ÑŠÑ€)</option>
-            <option value="5.50">5.50 (ÐžÑ‚Ð»Ð¸Ñ‡ÐµÐ½)</option>
+            <option value="3.50">3.50 (Добър)</option>
+            <option value="4.50">4.50 (Много добър)</option>
+            <option value="5.50">5.50 (Отличен)</option>
           </select>
         </div>
 
-        <button onclick="calculateExamPoints()" style="width: 100%; padding: 10px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95em; font-weight: bold;">Ð˜Ð·Ñ‡Ð¸ÑÐ»Ð¸</button>
+        <button onclick="calculateExamPoints()" style="width: 100%; padding: 10px; background-color: #3498db; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.95em; font-weight: bold;">Изчисли</button>
 
         <div id="calcResult" style="margin-top: 15px; padding: 12px; border-radius: 6px; display: none; text-align: center; line-height: 1.5; font-size: 13px;"></div>
       </div>
@@ -2039,7 +2039,7 @@
 
   <div class="modal-overlay" id="scheduleNotesEditModal" style="display: none;">
     <div class="modal-content schedule-notes-modal-content">
-      <button class="modal-close" type="button" onclick="closeScheduleNotesModal()">Ã—</button>
+      <button class="modal-close" type="button" onclick="closeScheduleNotesModal()">×</button>
       <h2 class="modal-title">Edit Schedule Notes</h2>
       <div id="scheduleNotesModalError" class="schedule-notes-modal-error"></div>
       <textarea id="scheduleNotesEditor" style="width: 100%; min-height: 320px; resize: vertical; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px;"></textarea>
@@ -2169,8 +2169,8 @@
           console.error('Error fetching schedule from Firebase:', error);
           const weekDateRangeEl = document.getElementById('weekDateRange');
           const weekNumberEl = document.getElementById('weekNumber');
-          if (weekDateRangeEl) weekDateRangeEl.textContent = 'Ð Ð°Ð·Ð¿Ð¸ÑÐ°Ð½Ð¸Ðµ';
-          if (weekNumberEl) weekNumberEl.textContent = 'Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ. ÐœÐ¾Ð»Ñ, Ð¾Ð¿Ð¸Ñ‚Ð°Ð¹Ñ‚Ðµ Ð¿Ð¾-ÐºÑŠÑÐ½Ð¾.';
+          if (weekDateRangeEl) weekDateRangeEl.textContent = 'Разписание';
+          if (weekNumberEl) weekNumberEl.textContent = 'Грешка при зареждане. Моля, опитайте по-късно.';
         }
       }
 
@@ -2227,9 +2227,9 @@
     }
 
     function formatLastEdited(lastEditedAt) {
-      if (!lastEditedAt) return 'Last edit: â€”';
+      if (!lastEditedAt) return 'Last edit: —';
       const date = new Date(lastEditedAt);
-      if (Number.isNaN(date.getTime())) return 'Last edit: â€”';
+      if (Number.isNaN(date.getTime())) return 'Last edit: —';
       const formatted = date.toLocaleString('bg-BG', {
         day: '2-digit',
         month: '2-digit',
@@ -2253,7 +2253,7 @@
           .map(line => `<h2>${marked.parseInline(line)}</h2>`)
           .join('');
       } else {
-        infoContent.innerHTML = '<p>ÐÑÐ¼Ð° Ð²ÑŠÐ²ÐµÐ´ÐµÐ½Ð¸ Ð±ÐµÐ»ÐµÐ¶ÐºÐ¸. ÐÐ°Ñ‚Ð¸ÑÐ½Ð¸ <strong>Edit</strong>, Ð·Ð° Ð´Ð° Ð´Ð¾Ð±Ð°Ð²Ð¸Ñˆ.</p>';
+        infoContent.innerHTML = '<p>Няма въведени бележки. Натисни <strong>Edit</strong>, за да добавиш.</p>';
       }
     }
 
@@ -2263,9 +2263,9 @@
 
       const timeText = formatLastEdited(lastEditedAt).replace('Last edit: ', '');
       if (lastEditedBy && lastEditedAt) {
-        lastEditEl.textContent = `Last edit: ${lastEditedBy} Â· ${timeText}`;
+        lastEditEl.textContent = `Last edit: ${lastEditedBy} · ${timeText}`;
       } else {
-        lastEditEl.textContent = 'Last edit: â€”';
+        lastEditEl.textContent = 'Last edit: —';
       }
     }
 
@@ -2823,7 +2823,7 @@
       return { startHour, endHour };
     }
 
-    // Get current day of week (ÐŸÐžÐ, Ð’Ð¢, etc.) or Monday if weekend
+    // Get current day of week (ПОН, ВТ, etc.) or Monday if weekend
     // Returns null if we're viewing a different week than current
     function getCurrentDay() {
       const today = new Date();
@@ -2844,11 +2844,11 @@
       }
 
       const dayIndex = today.getDay(); // 0=Sunday, 1=Monday, etc.
-      const days = ['ÐŸÐžÐ', 'Ð’Ð¢', 'Ð¡Ð ', 'Ð§Ð•Ð¢', 'ÐŸÐ•Ð¢'];
+      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
 
       // If Saturday (6) or Sunday (0), return Monday (for current week only)
       if (dayIndex === 0 || dayIndex === 6) {
-        return 'ÐŸÐžÐ';
+        return 'ПОН';
       }
 
       // Otherwise return the current day (Monday=1 -> index 0)
@@ -2857,7 +2857,7 @@
 
     function renderSchedule() {
       const grid = document.getElementById('scheduleGrid');
-      const days = ['ÐŸÐžÐ', 'Ð’Ð¢', 'Ð¡Ð ', 'Ð§Ð•Ð¢', 'ÐŸÐ•Ð¢'];
+      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
       const currentDay = getCurrentDay();
 
       // Update Dates in Headers
@@ -2941,13 +2941,13 @@
           const el = document.createElement('div');
 
           const typeMap = {
-            'Ð£Ð¿Ñ€Ð°Ð¶Ð½ÐµÐ½Ð¸Ðµ': 'type-exercise',
-            'Ð›ÐµÐºÑ†Ð¸Ñ': 'type-lecture',
-            'Ð’Ð°Ð¶Ð½Ð° Ð»ÐµÐºÑ†Ð¸Ñ': 'type-important-lecture',
+            'Упражнение': 'type-exercise',
+            'Лекция': 'type-lecture',
+            'Важна лекция': 'type-important-lecture',
             'ImportantLecture': 'type-important-lecture',
-            'ÐšÐ¾Ð»Ð¾ÐºÐ²Ð¸ÑƒÐ¼': 'type-exam',
-            'ÐŸÐ¾Ð¿Ñ€Ð°Ð²ÐºÐ° Ð½Ð° ÐšÐ¾Ð»Ð¾ÐºÐ²Ð¸ÑƒÐ¼': 'type-makeup',
-            'Ð¢ÐµÑÑ‚': 'type-test'
+            'Колоквиум': 'type-exam',
+            'Поправка на Колоквиум': 'type-makeup',
+            'Тест': 'type-test'
           };
           const typeClass = typeMap[ev.type] || 'type-lecture';
 
@@ -3033,7 +3033,7 @@
       const grid = document.getElementById('scheduleGrid');
       if (!grid) return;
 
-      const days = ['ÐŸÐžÐ', 'Ð’Ð¢', 'Ð¡Ð ', 'Ð§Ð•Ð¢', 'ÐŸÐ•Ð¢'];
+      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
       const stepMinutes = 15;
       const totalMinutes = (endHour - startHour) * 60;
       const totalRows = totalMinutes / stepMinutes;
@@ -3091,7 +3091,7 @@
       if (!grid) return;
 
       const headerCells = grid.querySelectorAll('.header-cell:not(.time-header)');
-      const days = ['ÐŸÐžÐ', 'Ð’Ð¢', 'Ð¡Ð ', 'Ð§Ð•Ð¢', 'ÐŸÐ•Ð¢'];
+      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
       headerCells.forEach((cell, i) => {
         cell.innerHTML = `<div>${days[i]}</div><div style="font-weight:400; font-size: 0.9em; opacity: 0.55; margin-top: 2px;">--.--</div>`;
         cell.style.backgroundColor = '';
@@ -3126,17 +3126,17 @@
       // Check if this is week 15 (last week before Christmas) - only show Mon-Tue
       const weekNumber = currentWeekIndex + 1;
       if (weekNumber === 15) {
-        endDate.setDate(endDate.getDate() + 1); // Only Tuesday (Ð¿Ð¾Ð½ÐµÐ´ÐµÐ»Ð½Ð¸Ðº + 1 Ð´ÐµÐ½ = Ð²Ñ‚Ð¾Ñ€Ð½Ð¸Ðº)
+        endDate.setDate(endDate.getDate() + 1); // Only Tuesday (понеделник + 1 ден = вторник)
       } else {
-        endDate.setDate(endDate.getDate() + 6); // Sunday (Ð¿Ð¾Ð½ÐµÐ´ÐµÐ»Ð½Ð¸Ðº + 6 Ð´Ð½Ð¸ = Ð½ÐµÐ´ÐµÐ»Ñ)
+        endDate.setDate(endDate.getDate() + 6); // Sunday (понеделник + 6 дни = неделя)
       }
 
       // Get week type - use the type from the week object itself (already calculated during generation)
       const weekType = currentWeek.type || getWeekType(currentWeek.startDate);
 
       // Format dates
-      const months = ['ÑÐ½ÑƒÐ°Ñ€Ð¸', 'Ñ„ÐµÐ²Ñ€ÑƒÐ°Ñ€Ð¸', 'Ð¼Ð°Ñ€Ñ‚', 'Ð°Ð¿Ñ€Ð¸Ð»', 'Ð¼Ð°Ð¹', 'ÑŽÐ½Ð¸',
-                      'ÑŽÐ»Ð¸', 'Ð°Ð²Ð³ÑƒÑÑ‚', 'ÑÐµÐ¿Ñ‚ÐµÐ¼Ð²Ñ€Ð¸', 'Ð¾ÐºÑ‚Ð¾Ð¼Ð²Ñ€Ð¸', 'Ð½Ð¾ÐµÐ¼Ð²Ñ€Ð¸', 'Ð´ÐµÐºÐµÐ¼Ð²Ñ€Ð¸'];
+      const months = ['януари', 'февруари', 'март', 'април', 'май', 'юни',
+                      'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
 
       const startDay = startDate.getDate();
       const startMonth = months[startDate.getMonth()];
@@ -3158,7 +3158,7 @@
 
       if (weekType === 'christmas') {
         // Christmas break - show special screen
-        weekDateRangeEl.textContent = 'ðŸŽ„ ÐšÐ¾Ð»ÐµÐ´Ð½Ð° Ð²Ð°ÐºÐ°Ð½Ñ†Ð¸Ñ';
+        weekDateRangeEl.textContent = '🎄 Коледна ваканция';
         weekDateRangeEl.style.color = '#dc2626';
 
         // Hide table, show Christmas screen
@@ -3187,7 +3187,7 @@
         return; // Skip normal rendering
       } else if (weekType === 'exam') {
         // Exam period - show special screen
-        weekDateRangeEl.textContent = 'Ð˜Ð·Ð¿Ð¸Ñ‚Ð½Ð° ÑÐµÑÐ¸Ñ';
+        weekDateRangeEl.textContent = 'Изпитна сесия';
         weekDateRangeEl.style.color = '#588157';
 
         // Hide table, show exam screen
@@ -3222,7 +3222,7 @@
         examScreen.style.display = 'none';
 
         // Normal week - show week number from semester start
-        weekDateRangeEl.textContent = `Ð¡ÐµÐ´Ð¼Ð¸Ñ†Ð° ${actualWeekNumber}`;
+        weekDateRangeEl.textContent = `Седмица ${actualWeekNumber}`;
         weekDateRangeEl.style.color = '#588157';
       }
 
@@ -3246,7 +3246,7 @@
     // Update dates in table header
     function updateTableHeaderDates(startDate) {
       const headerCells = document.querySelectorAll('#scheduleGrid .header-cell:not(.time-header)');
-      const days = ['ÐŸÐžÐ', 'Ð’Ð¢', 'Ð¡Ð ', 'Ð§Ð•Ð¢', 'ÐŸÐ•Ð¢'];
+      const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
       const currentDay = getCurrentDay();
 
       if (!headerCells.length) return;
@@ -3282,7 +3282,7 @@
       if (infoHtml) {
         examAdditionalInfo.innerHTML = infoHtml;
       } else {
-        examAdditionalInfo.innerHTML = 'ÐÑÐ¼Ð° Ð´Ð¾Ð±Ð°Ð²ÐµÐ½Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ.';
+        examAdditionalInfo.innerHTML = 'Няма добавена информация.';
       }
 
       // Show/hide calculator based on flag
@@ -3323,7 +3323,7 @@
       const resultDiv = document.getElementById('calcResult');
 
       if (isNaN(annual) || annual < 2 || annual > 6) {
-        resultDiv.textContent = 'ÐœÐ¾Ð»Ñ, Ð²ÑŠÐ²ÐµÐ´ÐµÑ‚Ðµ Ð²Ð°Ð»Ð¸Ð´Ð½Ð° Ð³Ð¾Ð´Ð¸ÑˆÐ½Ð° Ð¾Ñ†ÐµÐ½ÐºÐ° Ð¼ÐµÐ¶Ð´Ñƒ 2 Ð¸ 6.';
+        resultDiv.textContent = 'Моля, въведете валидна годишна оценка между 2 и 6.';
         resultDiv.className = 'warning';
         resultDiv.style.display = 'block';
         return;
@@ -3342,14 +3342,14 @@
       resultDiv.style.display = "block";
       if (foundPoints === "" && neededExamGrade > 6) {
         resultDiv.className = "warning";
-        resultDiv.innerHTML = `Ð—Ð° ÑÑŠÐ¶Ð°Ð»ÐµÐ½Ð¸Ðµ, Ñ†ÐµÐ»Ñ‚Ð° Ð¾Ñ‚ <strong>${target.toFixed(2)}</strong> Ðµ Ð¼Ð°Ñ‚ÐµÐ¼Ð°Ñ‚Ð¸Ñ‡ÐµÑÐºÐ¸ Ð½ÐµÐ´Ð¾ÑÑ‚Ð¸Ð¶Ð¸Ð¼Ð° Ñ Ð³Ð¾Ð´Ð¸ÑˆÐ½Ð° Ð¾Ñ†ÐµÐ½ÐºÐ° ${annual.toFixed(2)}.`;
+        resultDiv.innerHTML = `За съжаление, целта от <strong>${target.toFixed(2)}</strong> е математически недостижима с годишна оценка ${annual.toFixed(2)}.`;
       } else if (neededExamGrade <= 3.00) {
         resultDiv.className = "success";
-        resultDiv.innerHTML = `Ð¢ÑŠÐ¹ ÐºÐ°Ñ‚Ð¾ Ð³Ð¾Ð´Ð¸ÑˆÐ½Ð°Ñ‚Ð° Ð’Ð¸ Ð¾Ñ†ÐµÐ½ÐºÐ° Ðµ Ð²Ð¸ÑÐ¾ÐºÐ°, Ð’Ð¸ Ñ‚Ñ€ÑÐ±Ð²Ð°Ñ‚ ÑÐ°Ð¼Ð¾ Ð¼Ð¸Ð½Ð¸Ð¼Ð°Ð»Ð½Ð¸Ñ‚Ðµ <strong>60 Ñ‚Ð¾Ñ‡ÐºÐ¸</strong>, Ð·Ð° Ð´Ð° Ð¿Ñ€ÐµÐ¼Ð¸Ð½ÐµÑ‚Ðµ Ð¸Ð·Ð¿Ð¸Ñ‚Ð°.`;
+        resultDiv.innerHTML = `Тъй като годишната Ви оценка е висока, Ви трябват само минималните <strong>60 точки</strong>, за да преминете изпита.`;
       } else {
         const actualScaleGrade = scoreScale.find(e => e.pts === foundPoints).val;
         resultDiv.className = "success";
-        resultDiv.innerHTML = `Ð—Ð° ÐºÑ€Ð°Ð¹Ð½Ð° Ð¾Ñ†ÐµÐ½ÐºÐ° <strong>${target.toFixed(2)}</strong>,<br>Ð½Ð° Ð¸Ð·Ð¿Ð¸Ñ‚Ð° Ð’Ð¸ Ñ‚Ñ€ÑÐ±Ð²Ð°Ñ‚ Ð¼Ð¸Ð½Ð¸Ð¼ÑƒÐ¼:<br><span style="font-size: 1.3em;"><strong>${foundPoints} Ñ‚Ð¾Ñ‡ÐºÐ¸</strong></span><br>(Ð¢Ð¾Ð²Ð° ÑÑŠÐ¾Ñ‚Ð²ÐµÑ‚ÑÑ‚Ð²Ð° Ð½Ð° <strong>${actualScaleGrade.toFixed(2)}</strong> Ð¾Ñ‚ Ñ‚ÐµÑÑ‚Ð° Ð½Ð° Ð¸Ð·Ð¿Ð¸Ñ‚Ð°)`;
+        resultDiv.innerHTML = `За крайна оценка <strong>${target.toFixed(2)}</strong>,<br>на изпита Ви трябват минимум:<br><span style="font-size: 1.3em;"><strong>${foundPoints} точки</strong></span><br>(Това съответства на <strong>${actualScaleGrade.toFixed(2)}</strong> от теста на изпита)`;
       }
     }
 
@@ -3392,17 +3392,17 @@
           floor = null; // Floor is now integrated into room in old entries
       }
 
-      document.getElementById('modalBuilding').textContent = building || 'ÐÐµ Ðµ Ð¿Ð¾ÑÐ¾Ñ‡ÐµÐ½Ð°';
-      document.getElementById('modalRoom').textContent = room || 'ÐÐµ Ðµ Ð¿Ð¾ÑÐ¾Ñ‡ÐµÐ½Ð°';
+      document.getElementById('modalBuilding').textContent = building || 'Не е посочена';
+      document.getElementById('modalRoom').textContent = room || 'Не е посочена';
 
       // Only show floor if it's explicitly provided (new/separate field cases)
       if (floor && floor !== '-' && floor !== '') {
-        document.getElementById('modalFloorText').textContent = ` (Ð•Ñ‚Ð°Ð¶ ${floor})`;
+        document.getElementById('modalFloorText').textContent = ` (Етаж ${floor})`;
       } else {
         document.getElementById('modalFloorText').textContent = '';
       }
 
-      document.getElementById('modalTeacher').textContent = event.teacher || 'ÐÐµ Ðµ Ð¿Ð¾ÑÐ¾Ñ‡ÐµÐ½';
+      document.getElementById('modalTeacher').textContent = event.teacher || 'Не е посочен';
 
       const additionalInfoElement = document.getElementById('modalAdditionalInfo');
       const additionalInfoRow = document.getElementById('modalAdditionalInfoRow');
@@ -3476,7 +3476,7 @@
     function renderExams(examPeriod) {
       const examsList = document.getElementById('examsList');
       if (!scheduleData.exams || scheduleData.exams.length === 0) {
-        examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">ÐÑÐ¼Ð° Ð¸Ð½Ñ„Ð¾Ñ€Ð¼Ð°Ñ†Ð¸Ñ Ð·Ð° Ð¸Ð·Ð¿Ð¸Ñ‚Ð¸.</p>';
+        examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">Няма информация за изпити.</p>';
         return;
       }
 
@@ -3498,12 +3498,12 @@
       }
 
       if (examsToShow.length === 0) {
-          examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">ÐÑÐ¼Ð° Ð¸Ð·Ð¿Ð¸Ñ‚Ð¸ Ð·Ð° Ñ‚Ð¾Ð·Ð¸ Ð¿ÐµÑ€Ð¸Ð¾Ð´.</p>';
+          examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">Няма изпити за този период.</p>';
           return;
       }
 
-      const months = ['ÑÐ½ÑƒÐ°Ñ€Ð¸', 'Ñ„ÐµÐ²Ñ€ÑƒÐ°Ñ€Ð¸', 'Ð¼Ð°Ñ€Ñ‚', 'Ð°Ð¿Ñ€Ð¸Ð»', 'Ð¼Ð°Ð¹', 'ÑŽÐ½Ð¸',
-                      'ÑŽÐ»Ð¸', 'Ð°Ð²Ð³ÑƒÑÑ‚', 'ÑÐµÐ¿Ñ‚ÐµÐ¼Ð²Ñ€Ð¸', 'Ð¾ÐºÑ‚Ð¾Ð¼Ð²Ñ€Ð¸', 'Ð½Ð¾ÐµÐ¼Ð²Ñ€Ð¸', 'Ð´ÐµÐºÐµÐ¼Ð²Ñ€Ð¸'];
+      const months = ['януари', 'февруари', 'март', 'април', 'май', 'юни',
+                      'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
 
       examsList.innerHTML = examsToShow.map(exam => {
         // Format exam date
@@ -3513,11 +3513,11 @@
         const examYear = examDate.getFullYear();
         const examDateFormatted = `${examDay} ${examMonth} ${examYear}`;
 
-        // Format retake date - handle multiple dates separated by " Ð¸ " (and)
+        // Format retake date - handle multiple dates separated by " и " (and)
         let retakeDateFormatted = '';
-        if (exam.retakeDate && exam.retakeDate.includes(' Ð¸ ')) {
+        if (exam.retakeDate && exam.retakeDate.includes(' и ')) {
           // Multiple dates
-          const retakeDates = exam.retakeDate.split(' Ð¸ ').map(d => d.trim());
+          const retakeDates = exam.retakeDate.split(' и ').map(d => d.trim());
           const formattedDates = retakeDates.map(dateStr => {
             const d = new Date(dateStr);
             if (isNaN(d.getTime())) return dateStr; // Return original if invalid
@@ -3526,8 +3526,8 @@
             const year = d.getFullYear();
             return `${day} ${month} ${year}`;
           });
-          // Add <br> after "Ð¸" for mobile devices
-          retakeDateFormatted = formattedDates.join(' Ð¸ <span class="mobile-break"></span>');
+          // Add <br> after "и" for mobile devices
+          retakeDateFormatted = formattedDates.join(' и <span class="mobile-break"></span>');
         } else if (exam.retakeDate) {
           // Single date
           const retakeDate = new Date(exam.retakeDate);
@@ -3552,15 +3552,15 @@
                 <svg class="exam-section-icon" viewBox="0 0 24 24">
                   <path d="M9,10H7V12H9V10M13,10H11V12H13V10M17,10H15V12H17V10M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z"/>
                 </svg>
-                Ð ÐµÐ´Ð¾Ð²ÐµÐ½ Ð¸Ð·Ð¿Ð¸Ñ‚
+                Редовен изпит
               </div>
               <div class="exam-info-grid">
                 <div class="exam-info-item">
-                  <span class="exam-info-label">Ð”Ð°Ñ‚Ð°:</span>
+                  <span class="exam-info-label">Дата:</span>
                   <span class="exam-info-value">${examDateFormatted}</span>
                 </div>
                 <div class="exam-info-item">
-                  <span class="exam-info-label">Ð§Ð°Ñ:</span>
+                  <span class="exam-info-label">Час:</span>
                   <span class="exam-info-value">${exam.examTime || ''}</span>
                 </div>
               </div>
@@ -3571,15 +3571,15 @@
                 <svg class="exam-section-icon" viewBox="0 0 24 24">
                   <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
                 </svg>
-                ÐŸÐ¾Ð¿Ñ€Ð°Ð²ÐºÐ°
+                Поправка
               </div>
               <div class="exam-info-grid">
                 <div class="exam-info-item">
-                  <span class="exam-info-label">Ð”Ð°Ñ‚Ð°:</span>
+                  <span class="exam-info-label">Дата:</span>
                   <span class="exam-info-value">${retakeDateFormatted}</span>
                 </div>
                 <div class="exam-info-item">
-                  <span class="exam-info-label">Ð§Ð°Ñ:</span>
+                  <span class="exam-info-label">Час:</span>
                   <span class="exam-info-value">${exam.retakeTime || ''}</span>
                 </div>
               </div>
@@ -4005,7 +4005,7 @@
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202604302m8"></script>
+    <script src="js/chat.js?v=202604303wq"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>

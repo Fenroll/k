@@ -48,7 +48,7 @@ class ChatFirebaseREST {
       // Assume app is already initialized globally. Just get the default app.
       const app = firebaseInstance.app();
       this.db = firebaseInstance.database();
-      // console.log('✓ Firebase SDK Initialized'); // Can be removed
+      // console.log('? Firebase SDK Initialized'); // Can be removed
     } catch (e) {
       console.error("Firebase Init Error: Ensure Firebase is initialized globally in the HTML.", e);
     }
@@ -180,7 +180,7 @@ class ChatFirebaseREST {
       this.oldestLoadedTimestamp = messages.length > 0 ? messages[0].timestamp : null;
       this.hasMoreMessages = messages.length === 200; // If we got 200, there might be more
 
-      console.log(`✅ Initial load: ${messages.length} messages, hasMore: ${this.hasMoreMessages}`);
+      console.log(`? Initial load: ${messages.length} messages, hasMore: ${this.hasMoreMessages}`);
 
       return messages;
     } catch (error) {
@@ -196,7 +196,7 @@ class ChatFirebaseREST {
     await this._ensureInit();
     this.isLoadingMore = true;
 
-    console.log(`📥 Loading more messages (batch: ${batchSize}, current total: ${this.messages.length})`);
+    console.log(`?? Loading more messages (batch: ${batchSize}, current total: ${this.messages.length})`);
 
     try {
       const messagesRef = firebase.database().ref(`messages/${this.documentId}`);
@@ -209,7 +209,7 @@ class ChatFirebaseREST {
       if (!snapshot.exists()) {
         this.hasMoreMessages = false;
         this.isLoadingMore = false;
-        console.log('📭 No more messages to load');
+        console.log('?? No more messages to load');
         return [];
       }
 
@@ -236,7 +236,7 @@ class ChatFirebaseREST {
       this.hasMoreMessages = newMessages.length === batchSize;
       this.isLoadingMore = false;
 
-      console.log(`✅ Loaded ${newMessages.length} older messages. Total now: ${this.messages.length}, hasMore: ${this.hasMoreMessages}`);
+      console.log(`? Loaded ${newMessages.length} older messages. Total now: ${this.messages.length}, hasMore: ${this.hasMoreMessages}`);
 
       return newMessages;
     } catch (error) {
@@ -755,7 +755,7 @@ class ChatFirebaseREST {
         this.heartbeatInterval = null;
     }
 
-    // console.log('🛑 ChatFirebaseREST спрян.'); // Can be removed
+    // console.log('?? ChatFirebaseREST ?????.'); // Can be removed
   }
 }
 
@@ -765,10 +765,10 @@ class ChatFirebaseREST {
 
 class ChatUIManager {
   constructor(containerId, documentId, options = {}) {
-    // console.log('💬 ChatUIManager инициализирам...'); // Can be removed
+    // console.log('?? ChatUIManager ?????????????...'); // Can be removed
     this.container = document.getElementById(containerId);
     if (!this.container) {
-      console.error('Container не е намерен:', containerId);
+      console.error('Container ?? ? ???????:', containerId);
       return;
     }
 
@@ -783,12 +783,12 @@ class ChatUIManager {
     this.lastReadMessageId = localStorage.getItem(`lastReadMessage_${documentId}`) || null;
     this.notificationsDisabled = localStorage.getItem(`notificationsDisabled_${documentId}`) === 'true';
     this.unreadCount = 0;
-    this.lastMessages = [];  // Съхранявам предишни съобщения
+    this.lastMessages = [];  // ?????????? ???????? ?????????
     this.lastRenderedLastMessageId = null;
-    this.userNameMappings = {}; // Карта за стари към нови имена
-    this.reactionsCache = {}; // Кеш за реакции
+    this.userNameMappings = {}; // ????? ?? ????? ??? ???? ?????
+    this.reactionsCache = {}; // ??? ?? ???????
     this.reactionHtmlCache = new Map();
-    this.activeUsers = {}; // Списък с активни потребители за логика с реакции
+    this.activeUsers = {}; // ?????? ? ??????? ??????????? ?? ?????? ? ???????
     this.activeTyping = {}; // State for typing indicators
     this.showMembers = localStorage.getItem(`showMembers_${this.documentId}`) === 'true'; // Default to false if not set
     this.lastActiveMembersSignature = '';
@@ -1165,13 +1165,13 @@ class ChatUIManager {
       this.setupCrossTabNotificationSync();
       // await this.chatFirebase.markUserActive(); // Removed - using site-wide presence.js
 
-      // Зареди първоначални съобщения - от localStorage или Firebase
+      // ?????? ???????????? ????????? - ?? localStorage ??? Firebase
       let messages = this.loadFromCache();
       if (!messages || messages.length === 0) {
-        console.log('📂 No cache, loading from Firebase...');
+        console.log('?? No cache, loading from Firebase...');
         messages = await this.chatFirebase.loadMessages();
       } else {
-        console.log(`💾 Loaded ${messages.length} messages from cache`);
+        console.log(`?? Loaded ${messages.length} messages from cache`);
         // Restore pagination state from cached messages
         this.chatFirebase.messages = messages;
         this.chatFirebase.messageIds = new Set(messages.map(message => message.id));
@@ -1182,7 +1182,7 @@ class ChatUIManager {
         }
       }
 
-      // Зареди мапинги на имена
+      // ?????? ??????? ?? ?????
       this.protectedNames = await this.chatFirebase.getProtectedNames();
 
       this.chatFirebase.startNameMappingsPolling((mappings) => {
@@ -1240,16 +1240,16 @@ class ChatUIManager {
           this.renderTypingIndicators(activeTyping);
       });
 
-      // Синхронизация на прочетени съобщения
+      // ????????????? ?? ????????? ?????????
       this.chatFirebase.startLastReadPolling(currentUser.userName, (lastReadId) => {
         // Only update if the new ID is "greater" (newer) than what we have
         if (lastReadId && (!this.lastReadMessageId || lastReadId > this.lastReadMessageId)) {
-          console.log(`🔄 Synchronized newer lastReadId: ${lastReadId}`);
+          console.log(`?? Synchronized newer lastReadId: ${lastReadId}`);
           this.applyReadSync(lastReadId, { persistLocal: true });
         }
       });
 
-      // Listener за уведомления
+      // Listener ?? ???????????
       this.chatFirebase.addMessageListener((newMessage) => {
         // Check if the message is from the current user
         const isMyMessage = (window.currentUser.userId && newMessage.userId === window.currentUser.userId) ||
@@ -1275,19 +1275,19 @@ class ChatUIManager {
 
       this.attachEventListeners();
 
-      // Приложи начално състояние на списъка с членове
+      // ??????? ??????? ????????? ?? ??????? ? ???????
       const chatPanel = this.container.querySelector('.chat-panel');
       if (chatPanel && this.showMembers) {
         chatPanel.classList.add('show-members');
       }
 
-      // Инициализирай бутон за уведомления един път
+      // ????????????? ????? ?? ??????????? ???? ???
       this.initNotificationButton();
 
       // Setup lazy loading for images using Intersection Observer
       this.setupLazyLoading();
 
-      // console.log('✓✓✓ ChatUIManager готов'); // Can be removed
+      // console.log('??? ChatUIManager ?????'); // Can be removed
     } catch (error) {
       console.error('Init error:', error);
     }
@@ -2122,13 +2122,13 @@ class ChatUIManager {
     const trimmedText = text.trim();
     const lowerTrimmedText = trimmedText.toLowerCase();
 
-    // Редактиране на съобщение
+    // ??????????? ?? ?????????
     if (this.editingMessage) {
         await this.editMessage(this.editingMessage.key, text);
         return;
     }
 
-    // Провери дали има reply
+    // ??????? ???? ??? reply
     const replyTo = input.dataset.replyTo;
     const replyAuthor = input.dataset.replyAuthor;
 
@@ -2174,12 +2174,12 @@ class ChatUIManager {
       input.style.height = 'auto';
       input.focus();
 
-      // Премахни reply indicator
+      // ???????? reply indicator
       const replyIndicator = this.container.querySelector('.reply-indicator');
       if (replyIndicator) replyIndicator.remove();
 
-      // Realtime listener ще се погрижи за обновяването
-      // Премахнахме ръчното презареждане, за да избегнем race conditions
+      // Realtime listener ?? ?? ??????? ?? ????????????
+      // ??????????? ??????? ????????????, ?? ?? ???????? race conditions
     }
   }
 
@@ -2632,7 +2632,7 @@ class ChatUIManager {
       messagesMapObj[m.id] = m;
     });
 
-    // Ако има reply, намери оригиналното съобщение
+    // ??? ??? reply, ?????? ???????????? ?????????
     let replyHTML = '';
     if (msg.replyTo && messagesMapObj[msg.replyTo]) {
       const originalMsg = messagesMapObj[msg.replyTo];
@@ -2715,14 +2715,14 @@ class ChatUIManager {
                  ${msg.edited ? `<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>` : ''}
                </div>
                <div class="message-actions ${actionClass}">
-                 <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Отговори">
+                 <button class="message-reply-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="????????">
                    <img src="svg/chat/icon-reply.svg" alt="Reply" style="width: 16px; height: 16px">
                  </button>
-                 <button class="message-reaction-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Добави реакция">
+                 <button class="message-reaction-btn" data-message-id="${msg.id}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="?????? ???????">
                    <img src="svg/chat/icon-reaction.svg" alt="Reaction" style="width: 16px; height: 16px">
                  </button>
                  ${isCurrentUser ? `
-                 <button class="message-options-btn" data-message-id="${msg.id}" data-message-key="${msg.key}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="Още опции">
+                 <button class="message-options-btn" data-message-id="${msg.id}" data-message-key="${msg.key}" style="background: none; border: none; cursor: pointer; padding: 4px; border-radius: 50%; width: 24px; height: 24px;" title="??? ?????">
                    <img src="svg/chat/icon-three-dots-vertical.svg" alt="More" style="width: 16px; height: 16px">
                  </button>` : ''}
                </div>
@@ -2745,7 +2745,7 @@ class ChatUIManager {
     // Hover effect now handled by CSS (.chat-message:hover .message-actions)
     this.initializeCustomAudioPlayers(msgEl);
 
-    // Добави listener за реакции
+    // ?????? listener ?? ???????
     const reactionBtn = msgEl.querySelector('.message-reaction-btn');
     if (reactionBtn) {
       reactionBtn.addEventListener('click', (e) => {
@@ -2754,7 +2754,7 @@ class ChatUIManager {
       });
     }
 
-    // Добави listener за reply
+    // ?????? listener ?? reply
     const replyBtn = msgEl.querySelector('.message-reply-btn');
     if (replyBtn) {
       replyBtn.addEventListener('click', (e) => {
@@ -2763,7 +2763,7 @@ class ChatUIManager {
       });
     }
 
-    // Добави listener за options
+    // ?????? listener ?? options
     const optionsBtn = msgEl.querySelector('.message-options-btn');
     if (optionsBtn) {
       optionsBtn.addEventListener('click', (e) => {
@@ -3380,7 +3380,7 @@ class ChatUIManager {
     const badgeEl = document.querySelector('.chat-badge-count');
     const icon = document.querySelector('.chat-icon');
 
-    // Покази брой непрочетени съобщения САМО ако уведомленията са включени И чатът е затворен
+    // ?????? ???? ??????????? ????????? ???? ??? ????????????? ?? ???????? ? ????? ? ????????
     if (badgeEl) {
       if (this.notificationsDisabled || this.isOpen) {
         badgeEl.style.display = 'none';
@@ -3684,7 +3684,7 @@ class ChatUIManager {
   }
 
   showReactionPicker(messageId) {
-    // Премахни стар picker ако съществува
+    // ???????? ???? picker ??? ??????????
     const oldPicker = document.querySelector('.reaction-picker');
     if (oldPicker) oldPicker.remove();
 
@@ -3737,12 +3737,12 @@ class ChatUIManager {
       return btn;
     };
 
-    // Добави стандартни емоджита
+    // ?????? ?????????? ????????
     emojis.forEach(emoji => {
       picker.appendChild(addEmojiButton(emoji, messageId));
     });
 
-    // Добави бутон за персонализирана реакция
+    // ?????? ????? ?? ??????????????? ???????
     const customBtn = document.createElement('button');
     customBtn.innerHTML = `
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -3750,7 +3750,7 @@ class ChatUIManager {
         <line x1="5" y1="12" x2="19" y2="12"></line>
       </svg>
     `;
-    customBtn.title = "Добави друга реакция";
+    customBtn.title = "?????? ????? ???????";
     customBtn.style.cssText = `
       background: ${customBtnBg};
       border: none;
@@ -3767,7 +3767,7 @@ class ChatUIManager {
     `;
     customBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const customEmoji = prompt("Въведи емоджи или кратък текст за реакция:");
+      const customEmoji = prompt("?????? ?????? ??? ?????? ????? ?? ???????:");
       if (customEmoji && customEmoji.trim()) {
         this.addReaction(messageId, customEmoji.trim().substring(0, 5));
       }
@@ -3776,25 +3776,25 @@ class ChatUIManager {
     });
     picker.appendChild(customBtn);
 
-    // Позиционирай picker до съобщението
+    // ???????????? picker ?? ???????????
     const msgEl = document.querySelector(`[data-message-id="${messageId}"]`);
     if (msgEl) {
       const rect = msgEl.getBoundingClientRect();
       document.body.appendChild(picker);
 
       const pickerRect = picker.getBoundingClientRect();
-      // Позиционирай в горния десен ъгъл на съобщението
+      // ???????????? ? ?????? ????? ???? ?? ???????????
       let left = rect.right - pickerRect.width;
       let top = rect.top - pickerRect.height - 5;
 
-      // Осигури да не излиза извън екрана наляво
+      // ??????? ?? ?? ?????? ????? ?????? ??????
       if (left < 10) left = 10;
 
       picker.style.left = left + 'px';
       picker.style.top = top + 'px';
     }
 
-    // Функция за затваряне на picker
+    // ??????? ?? ????????? ?? picker
     const closePicker = (e) => {
       if (!picker.contains(e.target) && !e.target.closest('.message-reaction-btn')) {
         picker.remove();
@@ -3813,7 +3813,7 @@ class ChatUIManager {
   }
 
   showReactionTooltip(badgeElement) {
-    this.hideReactionTooltip(); // Скрий предишни, ако има
+    this.hideReactionTooltip(); // ????? ????????, ??? ???
 
     const messageId = badgeElement.dataset.messageId;
     const emoji = badgeElement.dataset.emoji;
@@ -3829,26 +3829,26 @@ class ChatUIManager {
       return;
     }
 
-    // Създай карта на userId -> userName от всички налични източници
+    // ?????? ????? ?? userId -> userName ?? ?????? ??????? ?????????
     const userMap = {};
-    // 1. От активните потребители (най-актуални имена)
+    // 1. ?? ????????? ??????????? (???-???????? ?????)
     for (const userId in this.activeUsers) {
         userMap[userId] = this.activeUsers[userId].userName;
     }
-    // 2. От историята на съобщенията (за офлайн потребители)
+    // 2. ?? ????????? ?? ??????????? (?? ?????? ???????????)
     this.chatFirebase.messages.forEach(msg => {
         if (!userMap[msg.userId]) {
             userMap[msg.userId] = msg.userName;
         }
     });
 
-    // Преобразувай ID-тата в имена
+    // ???????????? ID-???? ? ?????
     const reactorNames = reactorIds.map(id => {
-        const rawName = userMap[id] || 'Неизвестен';
+        const rawName = userMap[id] || '??????????';
         const resolvedName = this.resolveName(rawName);
         const isMe = this._getMyUserIds().includes(id);
-        // Маркирай текущия потребител
-        return isMe ? `<strong>${this.escapeHtml(resolvedName)} (Аз)</strong>` : this.escapeHtml(resolvedName);
+        // ???????? ??????? ??????????
+        return isMe ? `<strong>${this.escapeHtml(resolvedName)} (??)</strong>` : this.escapeHtml(resolvedName);
     }).join('<br>');
 
     const tooltip = document.createElement('div');
@@ -3861,7 +3861,7 @@ class ChatUIManager {
     const badgeRect = badgeElement.getBoundingClientRect();
     const tooltipRect = tooltip.getBoundingClientRect();
 
-    // Позиционирай над бутона, центрирано
+    // ???????????? ??? ??????, ??????????
     let top = badgeRect.top - tooltipRect.height - 5;
     let left = badgeRect.left + (badgeRect.width / 2) - (tooltipRect.width / 2);
 
@@ -3920,7 +3920,7 @@ class ChatUIManager {
     const reactionCounts = {};
     const myReactions = {};
 
-    const myUserIds = this._getMyUserIds(); // Вземи всички мои userId-та
+    const myUserIds = this._getMyUserIds(); // ????? ?????? ??? userId-??
 
     Object.keys(reactionsForMessage).forEach(emoji => {
         const usersObj = reactionsForMessage[emoji] || {};
@@ -3929,7 +3929,7 @@ class ChatUIManager {
 
         if (count > 0) {
             reactionCounts[emoji] = count;
-            // Провери дали някое от моите userId-та е реагирало
+            // ??????? ???? ????? ?? ????? userId-?? ? ?????????
             if (userIdsWhoReacted.some(id => myUserIds.includes(id))) {
                 myReactions[emoji] = true;
             }
@@ -3970,15 +3970,15 @@ class ChatUIManager {
         const myReactingIds = myUserIds.filter(id => reactorsForEmoji[id] === true);
 
         if (myReactingIds.length > 0) {
-          // Премахни всички мои реакции за това емоджи
+          // ???????? ?????? ??? ??????? ?? ???? ??????
           this.chatFirebase.bulkRemoveReactions(msgId, emoji, myReactingIds);
         } else {
-          // Добави нова реакция
+          // ?????? ???? ???????
           this.addReaction(msgId, emoji);
         }
       });
 
-      // Добави hover слушатели за tooltip
+      // ?????? hover ????????? ?? tooltip
       btn.addEventListener('mouseenter', e => {
         this.showReactionTooltip(e.currentTarget);
       });
@@ -4075,10 +4075,10 @@ class ChatUIManager {
         // when messages were rendered while the panel was hidden.
         this.observeLazyImages();
 
-        // Маркирай съобщенията като прочетени
+        // ???????? ??????????? ???? ?????????
         this.markAsRead();
 
-        // Превърти до долу веднага и след малко закъснение (заради анимацията)
+        // ???????? ?? ???? ??????? ? ???? ????? ?????????? (?????? ??????????)
         this.scrollToBottom();
         requestAnimationFrame(() => this.scrollToBottom());
         setTimeout(() => this.scrollToBottom(), 100);
@@ -4244,7 +4244,7 @@ class ChatUIManager {
     // 4. Mentions (@username)
     const currentName = window.currentUser ? (window.currentUser.userName || window.currentUser.displayName || "").toLowerCase() : "";
 
-    processed = processed.replace(/@([a-zA-Z0-9А-Яа-я._-]+)/g, (match, username) => {
+    processed = processed.replace(/@([a-zA-Z0-9?-??-?._-]+)/g, (match, username) => {
         const lowerName = username.toLowerCase();
 
         // Special case: @everyone
@@ -4363,7 +4363,7 @@ class ChatUIManager {
                 }
             }
 
-            // Премахни локално веднага с анимация
+            // ???????? ??????? ??????? ? ????????
             const messagesContainer = this.container.querySelector('.chat-messages');
             const messageEl = messagesContainer.querySelector(`[data-message-key="${messageKey}"]`);
             if (messageEl) {
@@ -5636,22 +5636,22 @@ class ChatUIManager {
   }
 
   function initChat() {
-    // console.log('Инициализирам Chat UI...'); // Can be removed
+    // console.log('????????????? Chat UI...'); // Can be removed
 
     const chatWidget = document.getElementById('chat-widget');
     if (!chatWidget) {
-      console.error('Chat widget не е намерен!');
+      console.error('Chat widget ?? ? ???????!');
       return;
     }
 
-    // ГЛОБАЛЕН ЧАТ ЗА ВСИЧКИ САЙТОВЕ
+    // ???????? ??? ?? ?????? ???????
     const documentId = 'global-chat';
 
     let chatManager;
     try {
       chatManager = new ChatUIManager('chat-widget', documentId, { readOnly: true });
       window.chatManager = chatManager;
-    //  console.log('✓✓✓ Chat система ГОТОВА!');
+    //  console.log('??? Chat ??????? ??????!');
     } catch (error) {
       console.error('Chat init error:', error);
       return;
@@ -5662,7 +5662,7 @@ class ChatUIManager {
       chatIcon.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        // console.log('💬 Click'); // Can be removed
+        // console.log('?? Click'); // Can be removed
         if (window.chatManager) {
           window.chatManager.toggleChat();
         }
@@ -5685,24 +5685,24 @@ class ChatUIManager {
       currentUserNameEl.textContent = window.currentUser.userName;
     }
 
-    // console.log('Потребител:', window.currentUser.userName); // Can be removed
+    // console.log('??????????:', window.currentUser.userName); // Can be removed
   }
 
   tryInit();
 })();
 
 // ============================================
-// GLOBAL RESET FUNCTION - достъпна отвсякъде
+// GLOBAL RESET FUNCTION - ???????? ?????????
 // ============================================
 
 window.resetChat = function() {
   localStorage.removeItem('userId');
   localStorage.removeItem('userName');
   localStorage.removeItem('userColor');
-  console.log('✅ Ресет завършен! Напиши в консолата: location.reload()');
+  console.log('? ????? ????????! ?????? ? ?????????: location.reload()');
 };
 
-// console.log('💡 Команди: resetChat() - ресет на име');
+// console.log('?? ???????: resetChat() - ????? ?? ???');
 
 // Cache buster
 const CHAT_VERSION = '20260122_v2';
