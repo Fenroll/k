@@ -13,9 +13,16 @@
   function readMode() {
     try {
       var stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === null) return EDGE_MODE;
-      return normalizeMode(stored);
-    } catch (_) {
+      console.log('[desktop-nav] localStorage key:', JSON.stringify(STORAGE_KEY), '=> raw value:', JSON.stringify(stored));
+      if (stored === null) {
+        console.log('[desktop-nav] No stored preference, defaulting to:', EDGE_MODE);
+        return EDGE_MODE;
+      }
+      var normalized = normalizeMode(stored);
+      console.log('[desktop-nav] normalizeMode(' + JSON.stringify(stored) + ') =>', JSON.stringify(normalized));
+      return normalized;
+    } catch (e) {
+      console.warn('[desktop-nav] localStorage error, defaulting to:', EDGE_MODE, e);
       return EDGE_MODE;
     }
   }
@@ -34,9 +41,14 @@
 
   function applyMode(mode) {
     const enabled = mode === EDGE_MODE;
+    console.log('[desktop-nav] applyMode(' + JSON.stringify(mode) + ') => enabled:', enabled);
     document.documentElement.classList.toggle(CLASS_NAME, enabled);
+    console.log('[desktop-nav] html classes:', document.documentElement.className);
     if (document.body) {
       document.body.classList.toggle(CLASS_NAME, enabled);
+      console.log('[desktop-nav] body classes:', document.body.className);
+    } else {
+      console.log('[desktop-nav] document.body not available yet');
     }
   }
 
@@ -201,7 +213,9 @@
     return requested === EDGE_MODE ? EDGE_MODE : '';
   }
 
+  console.log('[desktop-nav] script loaded, v=202605014kp');
   const initialMode = applyFromUrl();
+  console.log('[desktop-nav] initialMode:', JSON.stringify(initialMode));
   applyMode(initialMode);
 
   function showPrivacyModalShared() {
