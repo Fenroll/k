@@ -74,20 +74,20 @@
     </style>
     <title>Notes</title>
 
-    <script src="js/auth-guard.js?v=202605013sv"></script>
+    <script src="js/auth-guard.js?v=202605014kp"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=202605013sv"></script>
-    <script src="courses.generated.js?v=202605013sv"></script>
+    <script src="js/user-identity.js?v=202605014kp"></script>
+    <script src="courses.generated.js?v=202605014kp"></script>
 
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202605013sv">
-  <script src="js/desktop-nav.js?v=20260430nav4"></script>
-  <link rel="stylesheet" href="css/desktop-nav.css?v=20260430nav5">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605014kp">
+  <script src="js/desktop-nav.js?v=20260501a"></script>
+  <link rel="stylesheet" href="css/desktop-nav.css?v=20260501a">
     <script src="js/version-manager.js?v=2026031715gu"></script>
 
     <style>
@@ -679,37 +679,6 @@
             background: #121212;
         }
 
-        body.dark-mode #side-menu,
-        body.dark-mode .logo-header {
-            background: #121212;
-            border-bottom-color: #303030;
-        }
-
-        body.dark-mode .sidebar-nav a {
-            background: #121212;
-            color: #f1f1f1 !important;
-        }
-
-        body.dark-mode .sidebar-nav a:hover {
-            background: #121212;
-        }
-
-        body.dark-mode .sidebar-nav .active a {
-            background: #1a1a1a;
-        }
-
-        body.dark-mode .sidebar-nav .active a::before {
-            background: #588157;
-        }
-
-        body.dark-mode .sidebar-nav .svg-icon {
-            filter: brightness(0) invert(1);
-        }
-
-        body.dark-mode .sidebar-footer-links,
-        body.dark-mode .sidebar-footer-item {
-            color: #cdcdcd;
-        }
 
         body.dark-mode .notes-header,
         body.dark-mode .courses-panel,
@@ -1107,74 +1076,74 @@
     </style>
 </head>
 <body>
-    <div id="side-menu">
+    <div id="side-menu" class="mode-light hide-in-background themed-background-primary-fill-only left-off-canvas-menu color-selection-live-mode">
+      <div class="bb-inner-wrap">
         <div class="logo-header">
-            <a href="index.html?v=2026031715gu">
-                <img class="logo-img" src="svg/logo-coursebook.svg?v=2026031715gu" alt="StudyBoard">
-            </a>
+          <a href="index.html?v=20260501a">
+            <img class="logo-img" src="svg/logo-coursebook.svg?v=20260501a" alt="StudyBoard">
+          </a>
         </div>
-
-        <nav class="sidebar-nav">
-            <ul>
-                <li class="base-navigation-button">
-                    <a href="https://elearn.mu-varna.bg/ultra/course">
-                        <img class="svg-icon" src="svg/icon-blackboard.svg?v=2026031715gu" style="filter: brightness(0) invert(1);">
-                        <span>Blackboard</span>
-                    </a>
-                </li>
-                <li class="base-navigation-button">
-                    <a href="account.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-account.svg?v=2026031715gu">
-                        <span>Account</span>
-                    </a>
-                </li>
-                <li class="base-navigation-button">
-                    <a href="index.html?v=2026031715gu">
-                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603151sxu" alt="Courses" style="filter: brightness(0) invert(1);" />
-                        <span>Courses</span>
-                    </a>
-                </li>
-                <li class="base-navigation-button active">
-                    <a href="notes.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-notebook.svg" style="filter: brightness(0) invert(1);">
-                        <span>Notes</span>
-                    </a>
-                </li>
-                <li class="base-navigation-button">
-                    <a href="calendar.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-calendar.svg?v=2026031715gu">
-                        <span>Calendar</span>
-                    </a>
-                </li>
-                <li class="base-navigation-button">
-                    <a href="tools.html?v=2026031715gu">
-                        <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=2026031715gu" alt="Tools" />
-                        <span>Tools</span>
-                    </a>
-                </li>
-                <li class="base-navigation-button">
-                    <a href="text-editor.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-editor.svg?v=2026031715gu" style="filter: brightness(0) invert(1);">
-                        <span>Editor</span>
-                    </a>
-                </li>
-                <li class="base-navigation-button" id="admin-button" style="display: none;">
-                    <a href="admin.html?v=2026031715gu">
-                        <img class="svg-icon" src="svg/icon-admin.svg?v=2026031715gu" style="filter: brightness(0) invert(1);">
-                        <span>Admin</span>
-                    </a>
-                </li>
-                <li class="base-navigation-button">
-                    <a href="#" onclick="handleLogout()">
-                        <img class="svg-icon" src="svg/icon-signout.svg?v=2026031715gu">
-                        <span>Logout</span>
-                    </a>
-                </li>
-            </ul>
+        <nav class="sidebar-nav" aria-label="Main">
+          <ul class="off-canvas-list" id="base_tools">
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content" href="https://elearn.mu-varna.bg/ultra/course">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-blackboard.svg?v=20260501a" alt="blackboard" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Blackboard</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="account.html?v=20260501a">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=20260501a" alt="Account" />
+                <span class="link-text">Account</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="index.html?v=20260501a">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=20260501a" alt="Courses" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Courses</span>
+              </a>
+            </li>
+            <li class="base-navigation-button active">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="notes.html?v=20260501a">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-notebook.svg" alt="Notes" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Notes</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="calendar.html?v=20260501a">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=20260501a" alt="Calendar" />
+                <span class="link-text">Calendar</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="tools.html?v=20260501a">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=20260501a" alt="Tools" />
+                <span class="link-text">Tools</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=20260501a">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=20260501a" alt="Editor" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Editor</span>
+              </a>
+            </li>
+            <li class="base-navigation-button" id="admin-button" style="display: none;">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=20260501a">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=20260501a" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
+                <span class="link-text">Admin</span>
+              </a>
+            </li>
+            <li class="base-navigation-button">
+              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="#" onclick="handleLogout()">
+                <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=20260501a" alt="Logout" />
+                <span class="link-text">Logout</span>
+              </a>
+            </li>
+          </ul>
         </nav>
-
         <div class="sidebar-footer-links">
         </div>
+      </div>
     </div>
 
     <div class="main-content">
@@ -3115,7 +3084,7 @@
     </script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=202605013sv"></script>
-    <script src="js/mobile-nav.js?v=202605013sv"></script>
+    <script src="js/chat.js?v=202605014kp"></script>
+    <script src="js/mobile-nav.js?v=202605014kp"></script>
 </body>
 </html>
