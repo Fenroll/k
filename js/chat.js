@@ -1239,6 +1239,19 @@ class ChatUIManager {
         }
       }
 
+      // If no local lastRead marker, fetch from Firebase before rendering
+      if (!this.lastReadMessageId && currentUser.userName) {
+        try {
+          const safeUserName = currentUser.userName.replace(/[.#$[\]/]/g, '_');
+          const snap = await firebase.database().ref(`last_read/${this.documentId}/${safeUserName}`).once('value');
+          const fbLastRead = snap.val();
+          if (fbLastRead) {
+            this.lastReadMessageId = fbLastRead;
+            localStorage.setItem(this.lastReadStorageKey, fbLastRead);
+          }
+        } catch (_) {}
+      }
+
       // Зареди мапинги на имена
       this.protectedNames = await this.chatFirebase.getProtectedNames();
 

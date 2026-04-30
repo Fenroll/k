@@ -21,3 +21,6 @@ Thumbs.db
 
 # System files
 *.log
+
+# Claude Code worktrees
+.claude/worktrees/
