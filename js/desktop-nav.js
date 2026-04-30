@@ -12,9 +12,11 @@
 
   function readMode() {
     try {
-      return normalizeMode(localStorage.getItem(STORAGE_KEY));
+      var stored = localStorage.getItem(STORAGE_KEY);
+      if (stored === null) return EDGE_MODE;
+      return normalizeMode(stored);
     } catch (_) {
-      return '';
+      return EDGE_MODE;
     }
   }
 
