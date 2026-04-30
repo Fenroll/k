@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="bg">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,6 +10,65 @@
                 visibility: hidden !important;
                 opacity: 0 !important;
                 pointer-events: none !important;
+            }
+        }
+
+        @media (hover: none), (pointer: coarse), (max-width: 1000px) {
+            html,
+            body {
+                min-height: 100dvh !important;
+                overflow-x: hidden !important;
+                overflow-y: hidden !important;
+            }
+
+            body {
+                display: block !important;
+                height: 100dvh !important;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+                padding: 0 !important;
+                box-sizing: border-box !important;
+                height: calc(100dvh - 60px - env(safe-area-inset-bottom)) !important;
+                overflow: hidden !important;
+            }
+
+            .notes-header {
+                display: none !important;
+            }
+
+            .notes-layout {
+                display: grid !important;
+                grid-template-columns: minmax(0, 1fr) !important;
+                width: 100% !important;
+                max-width: 100vw !important;
+                height: 100% !important;
+                overflow: hidden !important;
+            }
+
+            .courses-panel {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+            }
+
+            .editor-panel {
+                width: 100% !important;
+                max-width: 100% !important;
+                height: 100% !important;
+                min-height: 0 !important;
+                overflow: hidden !important;
+            }
+
+            .mobile-course-select {
+                height: 32px !important;
+                min-height: 32px !important;
+                margin: 0 0 2px 0 !important;
+                padding: 4px 34px 4px 10px !important;
+                font-size: 14px !important;
             }
         }
     </style>
@@ -26,7 +85,7 @@
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=20260430tap3">
+    <link rel="stylesheet" href="css/mobile-nav-20260430tap5.css">
   <script src="js/desktop-nav.js?v=20260430nav4"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=20260430nav5">
     <script src="js/version-manager.js?v=2026031715gu"></script>
@@ -254,12 +313,16 @@
             background: #f9fafb;
         }
 
-        .md-btn img {
-            width: 18px;
-            height: 18px;
-            object-fit: contain;
-            display: block;
-        }
+            .md-btn img {
+                width: 18px;
+                height: 18px;
+                object-fit: contain;
+                display: block;
+            }
+
+            .toolbar-toggle {
+                display: none;
+            }
 
         .notes-editor {
             flex: 1;
@@ -761,7 +824,7 @@
 
         @media (max-width: 1000px) {
             body {
-                overflow: auto;
+                overflow: hidden;
             }
 
             #side-menu {
@@ -770,11 +833,16 @@
 
             .main-content {
                 margin-left: 0;
-                padding: 0px;
+                padding: 0 !important;
+                padding-bottom: 0 !important;
+                height: calc(100dvh - 60px - env(safe-area-inset-bottom));
+                overflow: hidden;
             }
 
             .notes-layout {
                 grid-template-columns: 1fr;
+                height: 100%;
+                min-height: 0;
             }
 
             .courses-panel {
@@ -782,29 +850,234 @@
                 padding: 0px;
             }
 
+            .notes-header {
+                display: none !important;
+            }
+
+            .notes-layout {
+                gap: 0;
+            }
+
             .editor-panel {
-                min-height: 420px;
+                height: 100%;
+                min-height: 0;
+                border-radius: 10px 10px 0 0;
             }
 
             .editor-panel .panel-header {
-                display: flex;
-                flex-direction: column;
-                align-items: stretch;
-                padding-right: 14px;
+                display: grid;
+                grid-template-columns: minmax(0, 1fr) auto;
+                align-items: center;
+                gap: 3px 7px;
+                padding: 6px 10px;
+                padding-right: 12px;
+                background: #fff;
+                border-bottom: 0;
             }
 
             .editor-panel .panel-header #notesStatus {
                 position: static;
                 transform: none;
-                align-self: flex-end;
-                margin-top: 8px;
+                align-self: center;
+                justify-self: end;
+                margin: 0;
+                padding: 4px 7px;
+                font-size: 11px;
+                line-height: 1;
+                grid-column: 2;
+                grid-row: 2;
+                border-color: #cfd6df;
+                background: #f8fafc;
+                color: #1f2937;
             }
 
             .mobile-course-select {
                 display: block;
+                grid-column: 1 / -1;
                 order: -1;
-                margin-top: 0;
-                margin-bottom: 10px;
+                height: 32px;
+                min-height: 32px;
+                margin: 0 0 2px 0;
+                padding: 4px 34px 4px 10px;
+                border-radius: 8px;
+                font-size: 14px;
+                line-height: 18px;
+                border-color: #cfd6df;
+                background: #fbfcfd;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+            }
+
+            .editor-meta {
+                display: none;
+            }
+
+            .collab-meta {
+                grid-column: 1;
+                grid-row: 2;
+                font-size: 11px;
+                line-height: 20px;
+                min-height: 20px;
+                margin: 0;
+                justify-self: start;
+                color: #64748b !important;
+                display: inline-flex;
+                align-items: center;
+            }
+
+            .collab-meta:not(.has-active) {
+                display: block;
+            }
+
+            .collab-meta .collab-avatars-wrap > span:first-child {
+                display: inline-flex;
+                align-items: center;
+                margin-right: 4px;
+                color: #64748b;
+            }
+
+            .collab-avatars-wrap {
+                display: inline-flex;
+                align-items: center;
+                gap: 0;
+                min-height: 20px;
+                line-height: 20px;
+            }
+
+            .collab-avatar {
+                width: 18px;
+                height: 18px;
+                flex-basis: 18px;
+                font-size: 9px;
+            }
+
+            .md-toolbar {
+                padding: 0;
+                gap: 5px;
+                height: 20px;
+                max-height: 20px;
+                overflow: hidden;
+                position: relative;
+                display: block;
+                border: 0;
+                border-bottom: 0;
+                background: #fff;
+                transition: max-height 0.2s ease;
+            }
+
+            .md-toolbar::before {
+                content: '';
+                position: absolute;
+                left: 0;
+                right: 0;
+                top: 10px;
+                height: 1px;
+                background: #edf0f2;
+                z-index: 0;
+            }
+
+            .md-toolbar.is-expanded {
+                height: auto;
+                max-height: 165px;
+                overflow: hidden;
+                background: #fff;
+                border-top: 0;
+                border-bottom: 1px solid #d1d8e0;
+            }
+
+            .md-toolbar.is-expanded::before {
+                top: 10px;
+                background: #dfe5ec;
+            }
+
+            .toolbar-buttons {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 5px;
+                margin-top: 19px;
+                max-height: 0;
+                overflow: hidden;
+                padding: 0 9px;
+                background: #fff;
+                border-top: 0;
+                opacity: 0;
+                box-sizing: border-box;
+                transition: max-height 0.2s ease, padding 0.2s ease, opacity 0.14s ease;
+            }
+
+            .md-toolbar.is-expanded .toolbar-buttons {
+                max-height: 140px;
+                padding: 8px 9px 34px;
+                opacity: 1;
+                border-top: 0;
+                border-bottom: 0;
+            }
+
+            .md-btn {
+                padding: 5px 8px;
+                min-width: 34px;
+                min-height: 30px;
+                border-radius: 7px;
+            }
+
+            .md-btn img {
+                width: 16px;
+                height: 16px;
+            }
+
+            .toolbar-toggle {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                position: absolute;
+                left: 50%;
+                top: 10px;
+                transform: translate(-50%, -50%);
+                width: 52px;
+                height: 16px;
+                border: 1px solid #d6dde6;
+                border-radius: 999px;
+                background: #fff;
+                color: #475569;
+                font-size: 13px;
+                font-weight: 800;
+                line-height: 1;
+                cursor: pointer;
+                z-index: 2;
+                box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+            }
+
+            .md-toolbar.is-expanded .toolbar-toggle {
+                background: #fff;
+            }
+
+            .toolbar-toggle::before {
+                content: '';
+                width: 7px;
+                height: 7px;
+                border-right: 2px solid currentColor;
+                border-bottom: 2px solid currentColor;
+                transform: translateY(-2px) rotate(45deg);
+            }
+
+            .md-toolbar.is-expanded .toolbar-toggle::before {
+                transform: translateY(2px) rotate(225deg);
+            }
+
+            .notes-editor {
+                padding: 12px 14px calc(12px + env(safe-area-inset-bottom));
+                border-bottom: 0;
+                height: 100%;
+            }
+
+            .notes-editor-shell {
+                flex: 1 1 auto;
+                min-height: 0;
+                height: 100%;
+            }
+
+            #chat-widget {
+                bottom: calc(72px + env(safe-area-inset-bottom)) !important;
+                right: 14px !important;
             }
 
             #selectedCourseTitle {
@@ -905,20 +1178,22 @@
         <div class="notes-layout">
             <section class="courses-panel">
                 <div class="panel-header">
-                    <input id="courseSearch" class="search-input" type="text" placeholder="Търси предмет...">
+                    <input id="courseSearch" class="search-input" type="text" placeholder="Search course...">
                 </div>
                 <ul id="coursesList" class="courses-list"></ul>
             </section>
 
             <section class="editor-panel">
                 <div id="editorPanelHeader" class="panel-header">
-                    <h2 id="selectedCourseTitle" class="panel-title">Избери предмет</h2>
-                    <div id="selectedCourseMeta" class="editor-meta">Последна редакция: —</div>
-                    <div id="collabStatus" class="collab-meta">Офлайн</div>
-                    <div id="notesStatus" class="status-chip">Запазено</div>
+                    <h2 id="selectedCourseTitle" class="panel-title">Select a course</h2>
+                    <div id="selectedCourseMeta" class="editor-meta">Last edit: —</div>
+                    <div id="collabStatus" class="collab-meta">Offline</div>
+                    <div id="notesStatus" class="status-chip">Saved</div>
                     <select id="courseSelectMobile" class="mobile-course-select"></select>
                 </div>
-                <div class="md-toolbar">
+                <div class="md-toolbar" id="mdToolbar">
+                    <button type="button" class="toolbar-toggle" id="toolbarToggle" aria-label="Expand toolbar" aria-expanded="false"></button>
+                    <div class="toolbar-buttons">
                     <button type="button" class="md-btn" data-cmd="h1" title="H1 (Ctrl/Cmd+1)"><img src="svg/md-editor/icon-h1.svg?v=2026031715gu" alt="H1"></button>
                     <button type="button" class="md-btn" data-cmd="h2" title="H2 (Ctrl/Cmd+2)"><img src="svg/md-editor/icon-h2.svg?v=2026031715gu" alt="H2"></button>
                     <button type="button" class="md-btn" data-cmd="h3" title="H3 (Ctrl/Cmd+3)"><img src="svg/md-editor/icon-h3.svg?v=2026031715gu" alt="H3"></button>
@@ -933,9 +1208,10 @@
                     <button type="button" class="md-btn" data-cmd="symbols" title="Insert symbols"><img src="svg/md-editor/icon-symbols.svg?v=2026031715gu" alt="Symbols"></button>
                     <button type="button" class="md-btn" data-cmd="link" title="Link"><img src="svg/md-editor/icon-link.svg?v=2026031715gu" alt="Link"></button>
                     <button type="button" class="md-btn" data-cmd="separator" title="Horizontal separator">---</button>
+                    </div>
                 </div>
                 <div class="notes-editor-shell">
-                    <div id="courseNotesEditor" class="notes-editor" contenteditable="true" data-placeholder="Въведи бележки за избрания курс..."></div>
+                    <div id="courseNotesEditor" class="notes-editor" contenteditable="true" data-placeholder="Write notes for the selected course..."></div>
                     <div id="selectionOverlay" class="selection-overlay"></div>
                 </div>
             </section>
@@ -1075,7 +1351,8 @@
                 liveblocksEnabled: !!LIVEBLOCKS_AUTH_ENDPOINT,
                 localEditVersion: 0,
                 imageObserver: null,
-                savedImageRange: null
+                savedImageRange: null,
+                currentMetaValue: null
             };
 
             const els = {
@@ -1090,6 +1367,8 @@
                 courseNotesEditor: document.getElementById('courseNotesEditor'),
                 selectionOverlay: document.getElementById('selectionOverlay'),
                 notesStatus: document.getElementById('notesStatus'),
+                mdToolbar: document.getElementById('mdToolbar'),
+                toolbarToggle: document.getElementById('toolbarToggle'),
                 mdButtons: Array.from(document.querySelectorAll('.md-btn'))
             };
 
@@ -1106,38 +1385,32 @@
 
             function setDraftState(isDirty) {
                 state.isDirty = isDirty;
-                els.notesStatus.textContent = isDirty ? 'Незапазено' : 'Запазено';
+                els.notesStatus.textContent = isDirty ? 'Unsaved' : 'Saved';
                 els.notesStatus.classList.remove('error');
                 els.notesStatus.classList.toggle('dirty', isDirty);
             }
 
-            function setCollabSimpleStatus(text = 'Офлайн', color = '#6b7280') {
+            function setCollabSimpleStatus(text = 'Offline', color = '#6b7280') {
                 if (!els.collabStatus) return;
+                els.collabStatus.classList.remove('has-active');
                 els.collabStatus.textContent = text;
                 els.collabStatus.style.color = color;
             }
 
             function placeNotesStatusForViewport() {
-                if (!els.notesStatus || !els.notesHeader || !els.editorPanelHeader) return;
-
-                const isMobileViewport = window.matchMedia('(max-width: 1000px)').matches;
-                if (isMobileViewport) {
-                    if (els.notesStatus.parentElement !== els.notesHeader) {
-                        els.notesHeader.appendChild(els.notesStatus);
-                    }
-                    return;
-                }
+                if (!els.notesStatus || !els.editorPanelHeader) return;
 
                 if (els.notesStatus.parentElement !== els.editorPanelHeader) {
-                    if (els.courseSelectMobile && els.courseSelectMobile.parentElement === els.editorPanelHeader) {
-                        els.editorPanelHeader.insertBefore(els.notesStatus, els.courseSelectMobile);
-                    } else {
-                        els.editorPanelHeader.appendChild(els.notesStatus);
-                    }
+                    els.editorPanelHeader.appendChild(els.notesStatus);
                 }
             }
 
-            window.addEventListener('resize', placeNotesStatusForViewport);
+            window.addEventListener('resize', () => {
+                placeNotesStatusForViewport();
+                if (state.currentMetaValue) {
+                    renderCurrentMeta(state.currentMetaValue);
+                }
+            });
 
             function clearAutosaveTimer() {
                 if (state.autosaveTimer) {
@@ -1360,7 +1633,7 @@
                 state.liveblocksRenderHash = '';
                 state.liveblocksLastSelections = {};
                 clearSelectionOverlay();
-                setCollabSimpleStatus('Офлайн');
+                setCollabSimpleStatus('Offline');
             }
 
             function buildLiveblocksPresencePayload(overrides = {}) {
@@ -1401,9 +1674,9 @@
                 if (!Array.isArray(others)) {
                     clearSelectionOverlay();
                     if (state.liveblocksConnected) {
-                        setCollabSimpleStatus('Офлайн');
+                        setCollabSimpleStatus('Offline');
                     } else {
-                        setCollabSimpleStatus('Офлайн');
+                        setCollabSimpleStatus('Offline');
                     }
                     return;
                 }
@@ -1464,12 +1737,13 @@
                             return `<span class="collab-avatar" title="${safeTitle}" style="background:${color}">${initial}</span>`;
                         }).join('');
 
-                        els.collabStatus.innerHTML = `<span class="collab-avatars-wrap"><span>Активни:</span>${avatars}</span>`;
+                        els.collabStatus.classList.add('has-active');
+                        els.collabStatus.innerHTML = `<span class="collab-avatars-wrap"><span>Active:</span>${avatars}</span>`;
                     } else {
                         if (state.liveblocksConnected) {
-                            setCollabSimpleStatus('Офлайн');
+                            setCollabSimpleStatus('Offline');
                         } else {
-                            setCollabSimpleStatus('Офлайн');
+                            setCollabSimpleStatus('Offline');
                         }
                     }
                 }
@@ -1509,7 +1783,7 @@
                 stopLiveblocksPresence();
 
                 try {
-                    setCollabSimpleStatus('Офлайн');
+                    setCollabSimpleStatus('Offline');
 
                     await ensureLiveblocksModule();
                     if (!state.liveblocksClient) {
@@ -1588,7 +1862,7 @@
                     state.liveblocksRoom = entered.room;
                     state.liveblocksRoomId = roomId;
                     state.liveblocksLeave = entered.leave;
-                    setCollabSimpleStatus('Офлайн');
+                    setCollabSimpleStatus('Offline');
 
                     if (typeof state.liveblocksRoom.subscribe === 'function') {
                         state.liveblocksRoom.subscribe('status', (status) => {
@@ -1645,7 +1919,7 @@
                     });
                 } catch (error) {
                     console.error('Liveblocks init failed:', error);
-                    setCollabSimpleStatus('Офлайн');
+                    setCollabSimpleStatus('Offline');
                     stopLiveblocksPresence();
                 }
             }
@@ -1730,12 +2004,12 @@
                 if (!state.filteredCourses.length) {
                     const li = document.createElement('li');
                     li.className = 'empty-courses';
-                    li.textContent = 'Няма намерени предмети.';
+                    li.textContent = 'No courses found.';
                     els.coursesList.appendChild(li);
 
                     const option = document.createElement('option');
                     option.value = '';
-                    option.textContent = 'Няма намерени предмети';
+                    option.textContent = 'No courses found';
                     els.courseSelectMobile.appendChild(option);
                     return;
                 }
@@ -1754,7 +2028,7 @@
                     li.addEventListener('click', async () => {
                         if (course.id === state.selectedCourseId) return;
                         if (state.isDirty) {
-                            const shouldDiscard = confirm('Има незапазени промени. Продължи без запазване?');
+                            const shouldDiscard = confirm('You have unsaved changes. Continue without saving?');
                             if (!shouldDiscard) return;
                         }
                         await selectCourse(course.id, course.title);
@@ -1764,9 +2038,9 @@
             }
 
             function financeDate(value) {
-                if (!value) return '—';
+                if (!value) return '\u2014';
                 const date = new Date(value);
-                if (Number.isNaN(date.getTime())) return '—';
+                if (Number.isNaN(date.getTime())) return '\u2014';
 
                 const day = String(date.getDate());
                 const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -1777,6 +2051,22 @@
                 return `${day}.${month}.${year}, ${hours}:${minutes}`;
             }
 
+            function compactFinanceDate(value) {
+                if (!value) return '\u2014';
+                const date = new Date(value);
+                if (Number.isNaN(date.getTime())) return '\u2014';
+
+                const day = String(date.getDate());
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+
+                return `${day}.${month}, ${hours}:${minutes}`;
+            }
+
+            function isCompactMetaViewport() {
+                return window.matchMedia('(max-width: 1000px), (hover: none), (pointer: coarse)').matches;
+            }
             function normalizeHtml(html) {
                 const text = String(html || '').trim();
                 return text ? html : '';
@@ -1916,7 +2206,7 @@
                 const safeContribution = escapeHtml(contribution).replace(/\n/g, '<br>');
                 const mergedBlock = `
 <p><br></p>
-<div data-author="${safeAuthor}" title="Автор: ${safeAuthor}">${safeContribution}</div>`;
+<div data-author="${safeAuthor}" title="Author: ${safeAuthor}">${safeContribution}</div>`;
 
                 return `${currentNormalized}${mergedBlock}`;
             }
@@ -2133,16 +2423,23 @@
             }
 
             function renderCurrentMeta(value) {
+                state.currentMetaValue = value || {};
                 const updatedBy = value?.updatedBy || 'Unknown';
-                const updatedAt = financeDate(value?.updatedAt);
-                els.selectedCourseMeta.textContent = `Последна редакция: ${updatedAt}${updatedAt === '—' ? '' : ` · ${updatedBy}`}`;
-            }
+                const compact = isCompactMetaViewport();
+                const updatedAt = compact ? compactFinanceDate(value?.updatedAt) : financeDate(value?.updatedAt);
 
+                if (compact) {
+                    els.selectedCourseMeta.textContent = `${updatedAt}${updatedAt === '\u2014' ? '' : ` \u00b7 ${updatedBy}`}`;
+                    return;
+                }
+
+                els.selectedCourseMeta.textContent = `Last edit: ${updatedAt}${updatedAt === '\u2014' ? '' : ` \u00b7 ${updatedBy}`}`;
+            }
             function normalizeAuthorTitles() {
                 const authoredNodes = els.courseNotesEditor.querySelectorAll('[data-author]');
                 authoredNodes.forEach(node => {
                     const author = node.getAttribute('data-author') || 'Unknown';
-                    node.setAttribute('title', `Автор: ${author}`);
+                    node.setAttribute('title', `Author: ${author}`);
                 });
             }
 
@@ -2169,7 +2466,7 @@
                 const authorName = state.currentUser?.displayName || state.currentUser?.userName || state.currentUser?.userId || 'Unknown';
                 block.setAttribute('data-author', authorName);
                 block.setAttribute('data-author-id', state.currentUser?.userId || 'unknown');
-                block.setAttribute('title', `Автор: ${authorName}`);
+                block.setAttribute('title', `Author: ${authorName}`);
             }
 
             function stopCurrentSubscription() {
@@ -2331,7 +2628,7 @@
                     }
                 }
 
-                const url = prompt('Въведи линк (https://...)');
+                const url = prompt('Enter a link (https://...)');
                 if (!url) return;
                 const normalizedUrl = /^(https?:\/\/)/i.test(url) ? url : `https://${url}`;
                 document.execCommand('createLink', false, normalizedUrl);
@@ -2455,7 +2752,7 @@
                 renderCoursesList();
 
                 if (!state.liveblocksEnabled) {
-                    setCollabSimpleStatus('Офлайн');
+                    setCollabSimpleStatus('Offline');
                 }
 
                 if (state.courses.length > 0) {
@@ -2468,9 +2765,9 @@
 
                     await selectCourse(preferredCourse.id, preferredCourse.title);
                 } else {
-                    els.selectedCourseTitle.textContent = 'Няма налични предмети';
+                    els.selectedCourseTitle.textContent = 'No courses available';
                     els.courseNotesEditor.contentEditable = 'false';
-                    els.notesStatus.textContent = 'Няма налични предмети';
+                    els.notesStatus.textContent = 'No courses available';
                     els.notesStatus.classList.add('error');
                 }
             }
@@ -2484,7 +2781,7 @@
                 if (!course) return;
 
                 if (state.isDirty && courseId !== state.selectedCourseId) {
-                    const shouldDiscard = confirm('Има незапазени промени. Продължи без запазване?');
+                    const shouldDiscard = confirm('You have unsaved changes. Continue without saving?');
                     if (!shouldDiscard) {
                         event.target.value = state.selectedCourseId || '';
                         return;
@@ -2535,7 +2832,7 @@
                     }
                 } finally {
                     if (els.notesStatus && !state.isDirty) {
-                        els.notesStatus.textContent = previousStatus || 'Запазено';
+                        els.notesStatus.textContent = previousStatus || 'Saved';
                     }
                 }
             });
@@ -2698,6 +2995,14 @@
                 });
             }
 
+            if (els.toolbarToggle && els.mdToolbar) {
+                els.toolbarToggle.addEventListener('click', () => {
+                    const expanded = els.mdToolbar.classList.toggle('is-expanded');
+                    els.toolbarToggle.setAttribute('aria-expanded', String(expanded));
+                    els.toolbarToggle.setAttribute('aria-label', expanded ? 'Collapse toolbar' : 'Expand toolbar');
+                });
+            }
+
             if (symbolsModal) {
                 symbolsModal.addEventListener('click', (event) => {
                     if (event.target === symbolsModal) {
@@ -2782,6 +3087,6 @@
 
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/chat.js?v=20260430chatui4"></script>
-    <script src="js/mobile-nav.js?v=20260430tap3"></script>
+    <script src="js/mobile-nav-20260430tap5.js"></script>
 </body>
 </html>
