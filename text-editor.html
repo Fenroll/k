@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605016ba"></script>
+  <script src="js/auth-guard.js?v=202605017h7"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605016ba">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605017h7">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -593,18 +593,18 @@
 
     .modal-content {
       background: #fff;
-      border-radius: 8px;
+      border-radius: 14px;
       width: 100%;
       max-width: 1400px;
       max-height: 80vh;
       display: flex;
       flex-direction: column;
-      box-shadow: 0 20px 25px rgba(0,0,0,0.15);
+      box-shadow: 0 24px 48px rgba(0,0,0,0.18);
     }
 
     .modal-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid #e5e7eb;
+      padding: 18px 22px;
+      border-bottom: 1px solid #f0f0f0;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -613,7 +613,8 @@
     .modal-header h2 {
       margin: 0;
       color: #1f2937;
-      font-size: 1.2em;
+      font-size: 1.1em;
+      font-weight: 700;
     }
 
     .modal-close {
@@ -631,7 +632,7 @@
     .modal-body {
       flex: 1;
       overflow: auto;
-      padding: 16px 20px;
+      padding: 20px 22px;
     }
 
     .raw-code {
@@ -647,26 +648,28 @@
     }
 
     .modal-footer {
-      padding: 16px 20px;
-      border-top: 1px solid #e5e7eb;
+      padding: 14px 22px;
+      border-top: 1px solid #f0f0f0;
       display: flex;
-      gap: 10px;
+      gap: 8px;
       justify-content: flex-end;
     }
 
     .modal-footer button {
-      padding: 8px 16px;
-      border: 1px solid #d1d5db;
-      background: #fff;
-      border-radius: 4px;
+      padding: 8px 18px;
+      border: 1px solid #e5e7eb;
+      background: #fafafa;
+      border-radius: 8px;
       cursor: pointer;
-      font-size: 0.9em;
-      font-weight: 500;
-      transition: all 0.2s;
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      transition: background 0.12s, border-color 0.12s;
     }
 
     .modal-footer button:hover {
-      background: #f3f4f6;
+      background: #f0f0f0;
+      border-color: #d1d5db;
     }
 
     .modal-footer button.primary {
@@ -676,7 +679,7 @@
     }
 
     .modal-footer button.primary:hover {
-      background: #588157;
+      background: #4a6d49;
     }
 
     /* File list styles */
@@ -1083,9 +1086,9 @@
       top: 100%;
       left: 0;
       background: white;
-      border: 1px solid #d1d5db;
-      border-radius: 6px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
       z-index: 1000;
       min-width: 240px;
       padding: 8px 0;
@@ -1126,6 +1129,151 @@
       height: 22px;
     }
 
+    /* Format dropdown */
+    .format-dropdown {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 6px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      z-index: 1000;
+      width: max-content;
+    }
+
+    .format-option {
+      padding: 8px 14px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-radius: 6px;
+      transition: background 0.12s ease;
+      color: #1f2937;
+      white-space: nowrap;
+    }
+
+    .format-option:hover {
+      background: #f3f4f6;
+    }
+
+    .format-option:active {
+      background: #e8f5e9;
+    }
+
+    .format-option img {
+      width: 18px;
+      height: 18px;
+      opacity: 0.6;
+    }
+
+    /* Color picker footer */
+    .color-picker-footer {
+      padding: 10px 8px;
+      border-top: 1px solid #f0f0f0;
+      margin-top: 6px;
+      display: flex;
+      gap: 6px;
+      align-items: stretch;
+      height: 32px;
+    }
+
+    .color-picker-footer .remove-color-btn,
+    .color-picker-footer input[type="text"],
+    .color-picker-footer input[type="color"] {
+      height: 32px;
+      box-sizing: border-box;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      font-size: 12px;
+    }
+
+    .color-picker-footer .remove-color-btn {
+      background: #f3f4f6;
+      padding: 0 12px;
+      cursor: pointer;
+      font-weight: 500;
+      color: #374151;
+      flex: 1;
+      transition: background 0.12s, border-color 0.12s;
+    }
+
+    .color-picker-footer .remove-color-btn:hover {
+      background: #e5e7eb;
+      border-color: #d1d5db;
+    }
+
+    .color-picker-footer input[type="text"] {
+      width: 72px;
+      padding: 0 8px;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      color: #6b7280;
+      background: #fafafa;
+      transition: border-color 0.12s;
+    }
+
+    .color-picker-footer input[type="text"]:focus {
+      border-color: #588157;
+      outline: none;
+      color: #1f2937;
+      background: #fff;
+    }
+
+    .color-picker-footer input[type="color"] {
+      width: 32px;
+      cursor: pointer;
+      padding: 3px;
+      background: #fff;
+      flex-shrink: 0;
+    }
+
+    /* Heading color picker */
+    .heading-color-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+      z-index: 1000;
+      min-width: 200px;
+    }
+
+    .heading-color-dropdown .heading-color-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #9ca3af;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0 2px 8px;
+    }
+
+    .heading-color-grid {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .heading-color-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 2px solid #e5e7eb;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
+    }
+
+    .heading-color-btn:hover {
+      transform: scale(1.15);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      border-color: #9ca3af;
+    }
+
     /* Toggle button active state */
     .toolbar button.toggle-btn.active {
       background: #e8e8e8;
@@ -1142,6 +1290,18 @@
     /* ── Mobile ── */
     @media (max-width: 768px), (hover: none) and (pointer: coarse) {
       .mobile-extra { display: none !important; }
+
+      #formatOptions {
+        position: fixed !important;
+        top: 48px !important;
+        left: 8px !important;
+        right: 8px !important;
+        width: auto !important;
+        min-width: 0 !important;
+        border-radius: 12px !important;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.18) !important;
+        z-index: 2000 !important;
+      }
       .toolbar-group.merge-right { border-right: 1px solid #e8eaed; padding-right: 3px; }
       .toolbar-group.merge-right + .toolbar-group { padding-left: 3px; }
 
@@ -1168,10 +1328,10 @@
       .more-tools-panel {
         display: none;
         position: fixed;
-        bottom: 70px;
+        top: 48px;
         right: 8px;
         left: 8px;
-        max-height: 65dvh;
+        bottom: 70px;
         overflow-y: auto;
         background: #fff;
         border: 1px solid #d1d5db;
@@ -1243,26 +1403,21 @@
     <div class="toolbar-group merge-right" style="position: relative;">
       <div style="position: relative; display: inline-flex;">
         <button id="formatToggleBtn" title="Format"><img src="svg/md-editor/icon-format.svg?v=2026031715gu" alt="Format" class="toolbar-icon"></button>
-        <div id="formatOptions" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 180px;">
-          <div class="format-option" data-format="p" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <img src="svg/md-editor/icon-format.svg?v=2026031715gu" alt="Normal" class="toolbar-icon">
-            <span>Normal</span>
+        <div id="formatOptions" class="format-dropdown">
+          <div class="format-option" data-format="p">
+            <span style="font-size: 14px;">Normal</span>
           </div>
-          <div class="format-option" data-format="h1" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <img src="svg/md-editor/icon-h1.svg?v=2026031715gu" alt="H1" class="toolbar-icon">
-            <span>Heading 1</span>
+          <div class="format-option" data-format="h1">
+            <span style="font-size: 20px; font-weight: 700;">Heading 1</span>
           </div>
-          <div class="format-option" data-format="h2" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <img src="svg/md-editor/icon-h2.svg?v=2026031715gu" alt="H2" class="toolbar-icon">
-            <span>Heading 2</span>
+          <div class="format-option" data-format="h2">
+            <span style="font-size: 17px; font-weight: 700;">Heading 2</span>
           </div>
-          <div class="format-option" data-format="h3" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <img src="svg/md-editor/icon-h3.svg?v=2026031715gu" alt="H3" class="toolbar-icon">
-            <span>Heading 3</span>
+          <div class="format-option" data-format="h3">
+            <span style="font-size: 15px; font-weight: 600;">Heading 3</span>
           </div>
-          <div class="format-option" data-format="h4" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
-            <img src="svg/md-editor/icon-h4.svg?v=2026031715gu" alt="H4" class="toolbar-icon">
-            <span>Heading 4</span>
+          <div class="format-option" data-format="h4">
+            <span style="font-size: 13px; font-weight: 600; color: #555;">Heading 4</span>
           </div>
         </div>
       </div>
@@ -1285,10 +1440,10 @@
           <div id="textThemeColors" class="theme-colors-grid"></div>
           <div style="padding: 8px 8px 4px 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-top: 4px;">Standard Colors</div>
           <div id="textStandardColors" class="standard-colors-row"></div>
-          <div style="padding: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px; display: flex; gap: 8px; align-items: center;">
-            <button id="removeTextColorBtn" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; flex: 1;">Remove Color</button>
-            <input type="text" id="textColorHexInput" placeholder="#1f2937" style="width: 80px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-family: monospace; font-size: 12px;">
-            <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px; padding: 2px;">
+          <div class="color-picker-footer">
+            <button id="removeTextColorBtn" class="remove-color-btn">Remove Color</button>
+            <input type="text" id="textColorHexInput" placeholder="#1f2937">
+            <input type="color" id="textColorControl" value="#1f2937">
           </div>
         </div>
       </div>
@@ -1299,24 +1454,15 @@
           <div id="highlightThemeColors" class="theme-colors-grid"></div>
           <div style="padding: 8px 8px 4px 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-top: 4px;">Standard Colors</div>
           <div id="highlightStandardColors" class="standard-colors-row"></div>
-          <div style="padding: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px; display: flex; gap: 8px; align-items: center;">
-            <button id="removeHighlightBtn" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; flex: 1;">Remove Highlight</button>
-            <input type="text" id="highlightColorHexInput" placeholder="#ffeb3b" style="width: 80px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-family: monospace; font-size: 12px;">
-            <input type="color" id="highlightColorControl" value="#ffeb3b" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px; padding: 2px;">
+          <div class="color-picker-footer">
+            <button id="removeHighlightBtn" class="remove-color-btn">Remove Highlight</button>
+            <input type="text" id="highlightColorHexInput" placeholder="#ffeb3b">
+            <input type="color" id="highlightColorControl" value="#ffeb3b">
           </div>
         </div>
       </div>
-      <div style="position: relative; display: inline-block;">
-        <button id="headingColorToggleBtn" title="Heading Color"><img src="svg/md-editor/icon-heading-clor.svg?v=2026031715gu" alt="Heading Color" class="toolbar-icon"></button>
-        <div id="headingColorOptions" style="position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 8px; flex-direction: row; flex-wrap: wrap; max-width: 250px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; gap: 6px; display: none !important; flex: 1;">
-          <button class="heading-color-btn" data-color="#000000" title="Black" style="background-color: #000000; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#1f2937" title="Dark Gray" style="background-color: #1f2937; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#1e40af" title="Deep Blue" style="background-color: #1e40af; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#7c2d12" title="Deep Orange" style="background-color: #7c2d12; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#588157" title="Lime Green" style="background-color: #588157; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#7e22ce" title="Purple" style="background-color: #7e22ce; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-        </div>
-      </div>
+
+
     </div>
 
     <!-- G3: Alignment -->
@@ -1672,7 +1818,7 @@
         <h2>Insert Symbol</h2>
         <span class="close" id="closeSymbolsModalBtn">&times;</span>
       </div>
-      <div class="modal-body" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 400px; overflow-y: auto;">
+       <div class="modal-body" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 400px; overflow-y: auto;">
         <button class="symbol-btn" data-symbol="↑" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↑</button>
         <button class="symbol-btn" data-symbol="↓" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↓</button>
         <button class="symbol-btn" data-symbol="←" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">←</button>
@@ -1694,12 +1840,6 @@
         <button class="symbol-btn" data-symbol="℃" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">℃</button>
         <button class="symbol-btn" data-symbol="‰" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">‰</button>
         <button class="symbol-btn" data-symbol="t½" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">t½</button>
-      </div>
-      <div class="modal-footer" style="padding: 12px; border-top: 1px solid #e5e7eb; display: flex; align-items: center;">
-        <label style="display: flex; align-items: center; cursor: pointer; flex: 1;">
-          <input type="checkbox" id="symbolCopyCheckbox" style="margin-right: 8px; cursor: pointer;">
-          Copy to clipboard
-        </label>
       </div>
     </div>
   </div>
@@ -1775,7 +1915,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202605016ba"></script>
+  <script src="courses.generated.js?v=202605017h7"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -10636,12 +10776,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=202605016ba"></script>
+  <script src="js/user-identity.js?v=202605017h7"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202605016ba"></script>
+    <script src="js/chat.js?v=202605017h7"></script>
 
 <script src="js/version-check.js?v=202602171mhr"></script>
-  <script src="js/mobile-nav.js?v=202605016ba"></script>
+  <script src="js/mobile-nav.js?v=202605017h7"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');

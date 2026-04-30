@@ -5787,12 +5787,12 @@ class ChatUIManager {
   width: 100%;
   padding: 2px 12px;
   font-size: 10px;
-  color: #9ca3af;
+  color: #6b7f60;
   min-height: 16px;
   display: flex;
   align-items: center;
   gap: 4px;
-  background: rgba(255,255,255,0.8);
+  background: rgba(237,243,232,0.92);
   pointer-events: none;
   z-index: 5;
 }
@@ -5804,7 +5804,7 @@ class ChatUIManager {
 .typing-dot {
   width: 3px;
   height: 3px;
-  background-color: #9ca3af;
+  background-color: #88a67e;
   border-radius: 50%;
   animation: typingBounce 1.4s infinite ease-in-out both;
 }
