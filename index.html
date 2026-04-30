@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260430kys"></script>
+  <script src="js/auth-guard.js?v=20260430l9l"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -62,6 +62,45 @@
       body.index-beta .beta-empty-state {
         display: none !important;
       }
+
+      body.index-beta .beta-panel-header {
+        padding: 0 0 12px 0 !important;
+        border-bottom: 0 !important;
+        background: transparent !important;
+        text-align: center !important;
+        box-sizing: border-box !important;
+      }
+
+      body.index-beta .beta-search-input,
+      body.index-beta #courses-overview-filter-search {
+        display: block !important;
+        width: 100% !important;
+        height: 42px !important;
+        margin: 0 !important;
+        padding: 10px 12px !important;
+        box-sizing: border-box !important;
+        border: 1px solid #d1d5db !important;
+        border-radius: 8px !important;
+        background: #fff !important;
+        color: #111827 !important;
+        font: 14px 'Open Sans', Arial, sans-serif !important;
+        line-height: 20px !important;
+        outline: none !important;
+        box-shadow: none !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+      }
+
+      body.index-beta .beta-search-input::placeholder,
+      body.index-beta #courses-overview-filter-search::placeholder {
+        color: #6b7280 !important;
+        opacity: 1 !important;
+      }
+
+      body.index-beta .beta-panel-header.is-loading-courses {
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
     }
 
     @media (max-width: 768px) {
@@ -77,7 +116,7 @@
   <link rel="icon" href="favicon.svg?v=202603151sxu" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260430tap1">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260430tap3">
   <script src="js/desktop-nav.js?v=20260430nav4"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=20260430nav5">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
@@ -1042,7 +1081,7 @@
   .base-footer a:hover { text-decoration: underline; color: #fff; }
     .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
   </style>
-  <script src="courses.generated.js?v=20260430kys"></script>
+  <script src="courses.generated.js?v=20260430l9l"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 
 <!-- Subtle UI tweaks -->
@@ -1168,7 +1207,7 @@
       </header>
       <div class="beta-courses-layout">
         <section class="course-org-list beta-courses-panel" id="course-org-list">
-          <div class="beta-panel-header">
+          <div class="beta-panel-header is-loading-courses">
             <input id="courses-overview-filter-search" class="beta-search-input" type="text" placeholder="Търси предмет...">
           </div>
           <div id="dynamic-course-list"></div>
@@ -1580,6 +1619,13 @@ function renderCourseList() {
         openRightOverlayForCard(firstCourseCard, { keepCourseListVisible: true });
       }
     }
+  }
+
+  const searchHeader = document.querySelector('.beta-panel-header.is-loading-courses');
+  if (searchHeader) {
+    requestAnimationFrame(() => {
+      searchHeader.classList.remove('is-loading-courses');
+    });
   }
 }
 
@@ -2000,7 +2046,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=20260430kys"></script>
+<script src="js/chat.js?v=20260430l9l"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -3299,7 +3345,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       <script src="html-priority.js"></script>
       <script src="js/presence.js"></script>
       <script src="js/version-check.js"></script>
-      <script src="js/mobile-nav.js?v=20260430tap1"></script>
+      <script src="js/mobile-nav.js?v=20260430tap3"></script>
 <!-- Privacy Modal -->
 <div id="privacyModal" class="text-modal" style="display: none;">
   <div class="text-modal-content" style="max-width: 500px;">
@@ -3910,11 +3956,17 @@ body.index-beta .overlay-header {
     overflow: visible;
   }
 
-  body.index-beta .beta-panel-header {
-    background: transparent;
-    border-bottom: 0;
-    padding: 0 0 12px 0;
-    text-align: center;
+      body.index-beta .beta-panel-header {
+        background: transparent;
+        border-bottom: 0;
+        padding: 0 0 12px 0;
+        text-align: center;
+        transition: opacity 0.12s ease;
+      }
+
+  body.index-beta .beta-panel-header.is-loading-courses {
+    opacity: 0;
+    pointer-events: none;
   }
 
   body.index-beta .beta-panel-title {
