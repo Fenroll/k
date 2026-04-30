@@ -2279,7 +2279,7 @@ class ChatUIManager {
       return;
     }
      if (lowerTrimmedText === '/youdidking') {
-      const YOUDIDKING_AUDIO_URL = 'https://chat.coursebook.lol/Fenroll/2026-04-30/chat-audio/1777549176759-Who%20Made%20That%20Mess.mp3';
+      const YOUDIDKING_AUDIO_URL = 'https://chat.coursebook.lol/Fenroll/2026-04-30/chat-audio/1777580571729-Who%20Made%20That%20Mess.mp3';
       const success = await this.chatFirebase.sendMessage(YOUDIDKING_AUDIO_URL, replyTo, replyAuthor);
       if (success) {
         this.unreadCount = 0;
