@@ -109,6 +109,24 @@
     display: none;
 }
 
+/* Constrain nav icons unconditionally so SVGs never flash at natural size */
+.bottom-nav-item img,
+.bottom-nav-item svg {
+    width: 24px;
+    height: 24px;
+    max-width: 24px;
+    max-height: 24px;
+    flex-shrink: 0;
+}
+
+.others-menu-item img {
+    width: 20px;
+    height: 20px;
+    max-width: 20px;
+    max-height: 20px;
+    flex-shrink: 0;
+}
+
 @media (max-width: 768px) {
     .bottom-nav {
         display: flex;

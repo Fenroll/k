@@ -19,15 +19,15 @@
     const navHTML = `
     <div class="bottom-nav" id="bottom-nav">
         <a href="index.html" class="bottom-nav-item ${activeTab === 'courses' ? 'active' : ''}">
-            <img src="svg/icon-courses.svg" alt="Courses">
+            <img src="svg/icon-courses.svg" alt="Courses" width="24" height="24">
             <span>Courses</span>
         </a>
         <a href="notes.html" class="bottom-nav-item ${activeTab === 'notes' ? 'active' : ''}">
-            <img src="svg/icon-notebook.svg" alt="Notes">
+            <img src="svg/icon-notebook.svg" alt="Notes" width="24" height="24">
             <span>Notes</span>
         </a>
         <a href="calendar.html" class="bottom-nav-item ${activeTab === 'calendar' ? 'active' : ''}">
-            <img src="svg/icon-calendar.svg" alt="Calendar">
+            <img src="svg/icon-calendar.svg" alt="Calendar" width="24" height="24">
             <span>Calendar</span>
         </a>
         <div class="bottom-nav-item" id="others-toggle">
@@ -41,26 +41,26 @@
     <div class="others-menu-overlay" id="others-menu-overlay">
         <div class="others-menu-content">
             <a href="https://elearn.mu-varna.bg/ultra/course" class="others-menu-item">
-                <img src="svg/icon-blackboard.svg" alt="Blackboard"> Blackboard
+                <img src="svg/icon-blackboard.svg" alt="Blackboard" width="20" height="20"> Blackboard
             </a>
             <a href="account.html" class="others-menu-item">
-                <img src="svg/icon-account.svg" alt="Account"> Account
+                <img src="svg/icon-account.svg" alt="Account" width="20" height="20"> Account
             </a>
-            <a href="tools.html"  class="others-menu-item">
-                <img src="svg/icon-tools.svg" alt="Tools">
-            <span>Tools</span>
-              </a>
+            <a href="tools.html" class="others-menu-item">
+                <img src="svg/icon-tools.svg" alt="Tools" width="20" height="20">
+                <span>Tools</span>
+            </a>
             <a href="anamnesis.html" class="others-menu-item">
-                <img src="svg/icon-anamnesis.svg" alt="Anamnesis"> Anamnesis
+                <img src="svg/icon-anamnesis.svg" alt="Anamnesis" width="20" height="20"> Anamnesis
             </a>
             <a href="text-editor.html" class="others-menu-item">
-                <img src="svg/icon-editor.svg" alt="Editor"> Editor
+                <img src="svg/icon-editor.svg" alt="Editor" width="20" height="20"> Editor
             </a>
             <a href="admin.html" class="others-menu-item" id="mobile-admin-link" style="display: none;">
-                <img src="svg/icon-admin.svg" alt="Admin"> Admin 
+                <img src="svg/icon-admin.svg" alt="Admin" width="20" height="20"> Admin
             </a>
             <a href="#" id="mobile-logout" class="others-menu-item">
-                <img src="svg/icon-signout.svg" alt="Logout"> Logout
+                <img src="svg/icon-signout.svg" alt="Logout" width="20" height="20"> Logout
             </a>
         </div>
     </div>
