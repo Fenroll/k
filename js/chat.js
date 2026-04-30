@@ -2279,7 +2279,7 @@ class ChatUIManager {
       return;
     }
      if (lowerTrimmedText === '/youdidking') {
-      const YOUDIDKING_AUDIO_URL = 'https://chat.coursebook.lol/Fenroll/2026-04-30/chat-audio/1777580571729-Who%20Made%20That%20Mess.mp3';
+      const YOUDIDKING_AUDIO_URL = 'https://files.coursebook.lol/Quick%20Upload/2026-04-30/quick/1777590475449-Who%20Made%20That%20Mess.mp3';
       const success = await this.chatFirebase.sendMessage(YOUDIDKING_AUDIO_URL, replyTo, replyAuthor);
       if (success) {
         this.unreadCount = 0;
@@ -4526,13 +4526,15 @@ class ChatUIManager {
             // Hide tooltip if it was showing for this message
             this.hideReactionTooltip();
 
-            // Check if message contains an R2 image URL and delete it
+            // Delete the R2 file only if the current user uploaded it
             if (msg && msg.text) {
                 const chatImageRegex = /https:\/\/chat\.coursebook\.lol\/([^\s]+)/g;
                 const matches = [...msg.text.matchAll(chatImageRegex)];
+                const currentUserName = (typeof currentUser !== 'undefined' && currentUser.userName) || '';
 
                 for (const match of matches) {
                     const imageKey = decodeURIComponent(match[1]);
+                    if (!currentUserName || !imageKey.startsWith(currentUserName + '/')) continue;
                     try {
                         const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
                         await fetch(R2_WORKER_URL, {
@@ -4543,9 +4545,9 @@ class ChatUIManager {
                                 bucketType: 'chat'
                             })
                         });
-                        console.log('Image deleted from R2:', imageKey);
+                        console.log('File deleted from R2:', imageKey);
                     } catch (error) {
-                        console.error('Failed to delete image from R2:', error);
+                        console.error('Failed to delete file from R2:', error);
                     }
                 }
             }
