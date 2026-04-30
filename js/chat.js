@@ -2278,6 +2278,25 @@ class ChatUIManager {
       }
       return;
     }
+     if (lowerTrimmedText === '/youdidking') {
+      const YOUDIDKING_AUDIO_URL = 'https://chat.coursebook.lol/Fenroll/2026-04-30/chat-audio/1777549176759-Who%20Made%20That%20Mess.mp3';
+      const success = await this.chatFirebase.sendMessage(YOUDIDKING_AUDIO_URL, replyTo, replyAuthor);
+      if (success) {
+        this.unreadCount = 0;
+        this.unreadHasMention = false;
+        this.updateActiveCount();
+
+        input.value = '';
+        input.dataset.replyTo = '';
+        input.dataset.replyAuthor = '';
+        input.style.height = 'auto';
+        input.focus();
+
+        const replyIndicator = this.container.querySelector('.reply-indicator');
+        if (replyIndicator) replyIndicator.remove();
+      }
+      return;
+    }
 
     const success = await this.chatFirebase.sendMessage(text, replyTo, replyAuthor);
     if (success) {
