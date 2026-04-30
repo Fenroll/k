@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=20260430u7a"></script>
+  <script src="js/auth-guard.js?v=20260430zg7"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -16,7 +16,7 @@
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <!-- Mobile Navigation CSS -->
-  <link rel="stylesheet" href="css/mobile-nav-20260430nav6.css">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260430zg7">
 
   <!-- Firebase SDKs - Moved to head and using compat versions -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
@@ -629,7 +629,7 @@
 </head>
 <body>
   <header>
-    <h1 id="docTitle">ÐŸÑ€ÐµÐ³Ð»ÐµÐ´ Ð½Ð° Ð´Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚</h1>
+    <h1 id="docTitle">Преглед на документ</h1>
     <a id="closeViewerBtn" class="btn" href="index.html" title="Back to course overview">
       <img src="svg/md-viewer/icon-close.svg?v=2026031715gu" alt="Back to course overview" width="25" height="25">
     </a>
@@ -658,7 +658,7 @@
 
   <div id="imageLightbox" class="image-lightbox" aria-hidden="true">
     <div id="imageLightboxStage" class="image-lightbox-stage">
-      <img id="imageLightboxImage" class="image-lightbox-image" src="" alt="Ð£Ð²ÐµÐ»Ð¸Ñ‡ÐµÐ½Ð¾ Ð¸Ð·Ð¾Ð±Ñ€Ð°Ð¶ÐµÐ½Ð¸Ðµ">
+      <img id="imageLightboxImage" class="image-lightbox-image" src="" alt="Увеличено изображение">
     </div>
   </div>
 
@@ -1143,7 +1143,7 @@
         if (!src) return;
 
         overlayImage.setAttribute('src', src);
-        overlayImage.setAttribute('alt', img.getAttribute('alt') || 'Ð£Ð²ÐµÐ»Ð¸Ñ‡ÐµÐ½Ð¾ Ð¸Ð·Ð¾Ð±Ñ€Ð°Ð¶ÐµÐ½Ð¸Ðµ');
+        overlayImage.setAttribute('alt', img.getAttribute('alt') || 'Увеличено изображение');
 
         overlay.classList.add('is-open');
         overlay.setAttribute('aria-hidden', 'false');
@@ -1598,7 +1598,7 @@
       }
       const path = getParam('path');
       const loadFromHash = getParam('loadFromHash') === 'true';
-      if(!path){ document.getElementById('content').textContent = 'Ð›Ð¸Ð¿ÑÐ²Ð° Ð¿Ð°Ñ€Ð°Ð¼ÐµÑ‚ÑŠÑ€ path.'; return; }
+      if(!path){ document.getElementById('content').textContent = 'Липсва параметър path.'; return; }
       const decodedPath = decodeURIComponent(path);
       const title = decodedPath.split('/').pop()
         .replace(/^\d+-msg-/, '') // Remove "NUMBER-msg-" prefix
@@ -1657,7 +1657,7 @@
             }
           });
         } catch (err) {
-          document.getElementById('content').textContent = 'Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° ÑÑŠÐ´ÑŠÑ€Ð¶Ð°Ð½Ð¸ÐµÑ‚Ð¾: ' + err.message;
+          document.getElementById('content').textContent = 'Грешка при зареждане на съдържанието: ' + err.message;
         }
         return;
       } else {
@@ -1767,8 +1767,8 @@
           console.warn('Initial fetch failed, attempting to recover from courses data:', err);
 
           const contentDiv = document.getElementById('content');
-          // Don't show error yet, keep "Ð—Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ..." or show a softer message if needed
-          // contentDiv.textContent = 'Ð—Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð¾Ñ‚ Ð»Ð¾ÐºÐ°Ð»Ð½Ð¸ Ð´Ð°Ð½Ð½Ð¸...';
+          // Don't show error yet, keep "Зареждане..." or show a softer message if needed
+          // contentDiv.textContent = 'Зареждане от локални данни...';
 
           // Polling mechanism to wait for courses.generated.js
           let attempts = 0;
@@ -1897,7 +1897,7 @@
 
           function showError(error) {
             const message = (error && error.message) ? error.message : 'Unknown error';
-            contentDiv.textContent = 'ÐÐµÑƒÑÐ¿ÐµÑˆÐ½Ð¾ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° Ñ„Ð°Ð¹Ð»Ð°: ' + message;
+            contentDiv.textContent = 'Неуспешно зареждане на файла: ' + message;
           }
         });
     })();
@@ -2177,7 +2177,7 @@
           const normalizedPath = decodeURIComponent(filePath).replace(/\\/g, '/');
           const hasCourses = await waitForCoursesData();
           if (!hasCourses) {
-            alert('ÐÐµ Ð±ÐµÑˆÐµ Ð·Ð°Ñ€ÐµÐ´ÐµÐ½Ð° ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð°Ñ‚Ð° Ð½Ð° ÐºÑƒÑ€ÑÐ¾Ð²ÐµÑ‚Ðµ. ÐžÐ¿Ð¸Ñ‚Ð°Ð¹ Ð¾Ñ‚Ð½Ð¾Ð²Ð¾ ÑÐ»ÐµÐ´ Ð¼Ð°Ð»ÐºÐ¾.');
+            alert('Не беше заредена структурата на курсовете. Опитай отново след малко.');
             return;
           }
 
@@ -2196,7 +2196,7 @@
             // Navigate to md-editor
             window.location.href = `text-editor.html?editMode=true`;
           } else {
-            alert('ÐÐµ Ð±ÐµÑˆÐµ Ð½Ð°Ð¼ÐµÑ€ÐµÐ½Ð¾ ÑÑŠÐ´ÑŠÑ€Ð¶Ð°Ð½Ð¸Ðµ Ð·Ð° Ñ‚Ð¾Ð·Ð¸ Ñ„Ð°Ð¹Ð» Ð² courses-data.');
+            alert('Не беше намерено съдържание за този файл в courses-data.');
           }
         });
       }
@@ -2214,7 +2214,7 @@
   </script>
 
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260430u7a"></script>
+  <script src="courses.generated.js?v=20260430zg7"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2321,7 +2321,7 @@
 
 <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260430u7a"></script>
+    <script src="js/chat.js?v=20260430zg7"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=20260324a"></script>
 
@@ -3109,9 +3109,9 @@
     <div class="notes-panel">
       <div class="notes-header">
         <div class="notes-header-title">
-          <div style="font-size: 18px; font-weight: bold; margin: 0;">Ð‘ÐµÐ»ÐµÐ¶ÐºÐ¸</div>
+          <div style="font-size: 18px; font-weight: bold; margin: 0;">Бележки</div>
         </div>
-        <button class="notes-close-btn" id="notes-close" title="Ð—Ð°Ñ‚Ð²Ð¾Ñ€Ð¸ Ð±ÐµÐ»ÐµÐ¶ÐºÐ¸">âœ•</button>
+        <button class="notes-close-btn" id="notes-close" title="Затвори бележки">✕</button>
       </div>
 
       <div class="notes-container">
@@ -3119,8 +3119,8 @@
       </div>
 
       <div class="notes-input-area">
-        <textarea class="notes-input" placeholder="ÐÐ°Ð¿Ð¸ÑˆÐ¸ Ð±ÐµÐ»ÐµÐ¶ÐºÐ°..." style="max-height: 80px; resize: vertical;"></textarea>
-        <button class="notes-send-btn" title="Ð”Ð¾Ð±Ð°Ð²Ð¸ Ð±ÐµÐ»ÐµÐ¶ÐºÐ°">
+        <textarea class="notes-input" placeholder="Напиши бележка..." style="max-height: 80px; resize: vertical;"></textarea>
+        <button class="notes-send-btn" title="Добави бележка">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
             <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16151496 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.4429026 C0.994623095,2.08 0.837654326,3.0226 1.15159189,3.97788954 L3.03521743,10.4188814 C3.03521743,10.5759788 3.34915502,10.7330762 3.50612381,10.7330762 L16.6915026,11.5185631 C16.6915026,11.5185631 17.1624089,11.5185631 17.1624089,12.0598639 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"></path>
           </svg>

@@ -561,7 +561,9 @@ function updateHtmlFiles(version) {
     path.join(__dirname, 'admin.html'),
     path.join(__dirname, 'account.html'),
     path.join(__dirname, 'calendar.html'),
-    path.join(__dirname, 'anamnesis.html')
+    path.join(__dirname, 'anamnesis.html'),
+    path.join(__dirname, 'notes.html'),
+    path.join(__dirname, 'tools.html')
   ];
 
   htmlFiles.forEach(filePath => {
@@ -607,6 +609,23 @@ function updateHtmlFiles(version) {
       
       if (guardPattern.test(content)) {
         content = content.replace(guardPattern, newGuardTag);
+        updated = true;
+      }
+
+      // 5. Replace shared mobile navigation assets
+      const mobileNavCssPattern = /<link rel="stylesheet" href="css\/mobile-nav(?:-[^"']+)?\.css(?:\?v=[a-zA-Z0-9_]+)?">/g;
+      const newMobileNavCssTag = `<link rel="stylesheet" href="css/mobile-nav.css?v=${version}">`;
+
+      if (mobileNavCssPattern.test(content)) {
+        content = content.replace(mobileNavCssPattern, newMobileNavCssTag);
+        updated = true;
+      }
+
+      const mobileNavJsPattern = /<script src="js\/mobile-nav(?:-[^"']+)?\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
+      const newMobileNavJsTag = `<script src="js/mobile-nav.js?v=${version}"></script>`;
+
+      if (mobileNavJsPattern.test(content)) {
+        content = content.replace(mobileNavJsPattern, newMobileNavJsTag);
         updated = true;
       }
       

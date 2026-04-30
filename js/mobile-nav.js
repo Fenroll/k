@@ -3,6 +3,98 @@
     if (document.getElementById('bottom-nav')) return;
 
     const THEME_KEY = 'index-copy-theme';
+    const NAV_CACHE_KEY = 'coursebook-mobile-nav-html-v1';
+    const CRITICAL_STYLE_ID = 'coursebook-mobile-nav-critical';
+
+    function installCriticalMobileNavStyles() {
+        if (document.getElementById(CRITICAL_STYLE_ID)) return;
+
+        const style = document.createElement('style');
+        style.id = CRITICAL_STYLE_ID;
+        style.textContent = `
+@media (max-width: 768px), (hover: none), (pointer: coarse) {
+  #bottom-nav.bottom-nav {
+    display: flex !important;
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100% !important;
+    height: 60px !important;
+    background: #fff !important;
+    border-top: 1px solid #e0e0e0 !important;
+    z-index: 9999 !important;
+    justify-content: space-around !important;
+    align-items: center !important;
+    box-sizing: content-box !important;
+    padding-bottom: env(safe-area-inset-bottom) !important;
+    overflow: hidden !important;
+  }
+
+  #bottom-nav .bottom-nav-item {
+    display: flex !important;
+    flex: 1 1 0 !important;
+    height: 100% !important;
+    min-width: 0 !important;
+    align-items: center !important;
+    justify-content: center !important;
+    flex-direction: column !important;
+    text-decoration: none !important;
+    color: #888 !important;
+    font: 11px 'Open Sans', Arial, sans-serif !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+
+  #bottom-nav .bottom-nav-item img,
+  #bottom-nav .bottom-nav-item svg {
+    width: 24px !important;
+    height: 24px !important;
+    max-width: 24px !important;
+    max-height: 24px !important;
+    margin: 0 0 4px 0 !important;
+    flex: 0 0 24px !important;
+  }
+
+  #others-menu-overlay.others-menu-overlay {
+    display: none;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 9998 !important;
+  }
+
+  #side-menu {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+  }
+}
+@media (min-width: 769px) and (hover: hover) and (pointer: fine) {
+  #bottom-nav.bottom-nav,
+  #others-menu-overlay.others-menu-overlay {
+    display: none !important;
+  }
+}`;
+        document.head.appendChild(style);
+    }
+
+    function getCachedNavHTML() {
+        try {
+            return localStorage.getItem(NAV_CACHE_KEY) || '';
+        } catch (_) {
+            return '';
+        }
+    }
+
+    function cacheNavHTML(html) {
+        try {
+            localStorage.setItem(NAV_CACHE_KEY, html);
+        } catch (_) {
+            // Ignore storage errors in private/restricted contexts.
+        }
+    }
+
+    installCriticalMobileNavStyles();
 
     // Detect current page to set active state
     const path = window.location.pathname;
@@ -16,21 +108,21 @@
     else if (page.includes('tools')) activeTab = 'tools';
     
     // HTML Structure
-    const navHTML = `
+    const builtNavHTML = `
     <div class="bottom-nav" id="bottom-nav">
-        <a href="index.html" class="bottom-nav-item ${activeTab === 'courses' ? 'active' : ''}">
+        <a href="index.html" class="bottom-nav-item ${activeTab === 'courses' ? 'active' : ''}" data-mobile-tab="courses">
             <img src="svg/icon-courses.svg" alt="Courses" width="24" height="24">
             <span>Courses</span>
         </a>
-        <a href="notes.html" class="bottom-nav-item ${activeTab === 'notes' ? 'active' : ''}">
+        <a href="notes.html" class="bottom-nav-item ${activeTab === 'notes' ? 'active' : ''}" data-mobile-tab="notes">
             <img src="svg/icon-notebook.svg" alt="Notes" width="24" height="24">
             <span>Notes</span>
         </a>
-        <a href="calendar.html" class="bottom-nav-item ${activeTab === 'calendar' ? 'active' : ''}">
+        <a href="calendar.html" class="bottom-nav-item ${activeTab === 'calendar' ? 'active' : ''}" data-mobile-tab="calendar">
             <img src="svg/icon-calendar.svg" alt="Calendar" width="24" height="24">
             <span>Calendar</span>
         </a>
-        <div class="bottom-nav-item" id="others-toggle">
+        <div class="bottom-nav-item" id="others-toggle" data-mobile-tab="others">
             <svg viewBox="0 0 24 24" width="24" height="24">
                 <path d="M6 10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm12 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm-6 0c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"/>
             </svg>
@@ -67,9 +159,21 @@
     `;
 
     // Inject HTML
+    const cachedNavHTML = getCachedNavHTML();
+    const navHTML = cachedNavHTML || builtNavHTML;
     const div = document.createElement('div');
     div.innerHTML = navHTML;
     document.body.appendChild(div);
+
+    if (navHTML !== builtNavHTML) {
+        const currentActive = div.querySelector('.bottom-nav-item.active');
+        if (currentActive) currentActive.classList.remove('active');
+
+        const nextActive = activeTab ? div.querySelector(`.bottom-nav-item[data-mobile-tab="${activeTab}"]`) : null;
+        if (nextActive) nextActive.classList.add('active');
+    }
+
+    cacheNavHTML(builtNavHTML);
 
     function getStoredThemePreference() {
         try {

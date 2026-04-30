@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=20260430u7a"></script>
+    <script src="js/auth-guard.js?v=20260430zg7"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/user-identity.js?v=202602171mhr"></script>
@@ -12,57 +12,48 @@
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-    <link rel="stylesheet" href="css/mobile-nav-20260430nav6.css">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=20260430zg7">
     <title>Admin Panel</title>
     <style>
         :root {
-            --bg: #0d1110;
-            --panel: rgba(25, 32, 29, 0.82);
-            --panel-strong: rgba(31, 40, 36, 0.96);
-            --panel-border: rgba(163, 177, 138, 0.18);
-            --text: #edf4ee;
-            --muted: #aeb9ad;
-            --accent: #a3b18a;
-            --accent-strong: #d2e5bd;
-            --danger: #f08a9b;
+            --bg: #111312;
+            --panel: #181c19;
+            --panel-strong: #202620;
+            --panel-border: #30392f;
+            --text: #f2f5f1;
+            --muted: #a8b0a6;
+            --accent: #8fa978;
+            --accent-strong: #c4d6b1;
+            --danger: #d46a78;
             --danger-strong: #ef4444;
-            --control: rgba(10, 15, 13, 0.62);
-            --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
+            --control: #101310;
+            --shadow: 0 14px 34px rgba(0, 0, 0, 0.32);
         }
         * {
             box-sizing: border-box;
         }
         body {
-            font-family: "Aptos Display", "Segoe UI", sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(163, 177, 138, 0.24), transparent 34rem),
-                radial-gradient(circle at 88% 12%, rgba(88, 129, 87, 0.20), transparent 28rem),
-                linear-gradient(135deg, #0a0f0d 0%, #111715 48%, #080b0a 100%);
+            font-family: "Segoe UI", "Noto Sans", sans-serif;
+            background: var(--bg);
             color: var(--text);
             margin: 0;
             min-height: 100vh;
-            padding: 2rem;
+            padding: 1.5rem;
         }
         body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            background-image:
-                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-            background-size: 44px 44px;
-            mask-image: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
+            display: none;
         }
         .admin-shell {
             position: relative;
-            z-index: 1;
             max-width: 1480px;
             margin: 0 auto;
         }
         .admin-hero {
-            margin: 3rem 0 2rem;
-            text-align: center;
+            margin: 0 0 1rem;
+            padding: 1.15rem 1.35rem;
+            background: var(--panel);
+            border: 1px solid var(--panel-border);
+            border-radius: 14px;
         }
         .admin-container {
             display: grid;
@@ -71,39 +62,30 @@
         }
         .admin-module {
             position: relative;
-            overflow: hidden;
             background: var(--panel);
             border: 1px solid var(--panel-border);
-            border-radius: 24px;
-            padding: 1.5rem;
-            box-shadow: 0 18px 48px rgba(0,0,0,0.24);
-            backdrop-filter: blur(16px);
+            border-radius: 14px;
+            padding: 1.25rem;
+            box-shadow: var(--shadow);
         }
         .admin-module::before {
-            content: "";
-            position: absolute;
-            inset: 0 0 auto;
-            height: 3px;
-            background: linear-gradient(90deg, transparent, rgba(163, 177, 138, 0.72), transparent);
-            opacity: 0.72;
+            display: none;
         }
         .admin-module:hover {
-            border-color: rgba(163, 177, 138, 0.34);
-            transform: translateY(-1px);
-            transition: transform 0.2s ease, border-color 0.2s ease;
+            border-color: #43513f;
         }
         h1, h2 {
             color: var(--accent-strong);
-            border-bottom: 1px solid rgba(163, 177, 138, 0.14);
+            border-bottom: 1px solid var(--panel-border);
             padding-bottom: 0.65rem;
         }
         h1 {
             margin: 0;
             border: 0;
             padding: 0;
-            font-size: clamp(2.1rem, 4vw, 4rem);
-            letter-spacing: -0.06em;
-            line-height: 0.95;
+            font-size: 1.7rem;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
         }
         h2 {
             margin-top: 0;
@@ -117,7 +99,7 @@
         }
         li {
             padding: 0.5rem 0;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
+            border-bottom: 1px solid var(--panel-border);
         }
         li:last-child {
             border-bottom: none;
@@ -135,26 +117,26 @@
         input[type="text"], input[type="password"], textarea, select {
             width: 100%;
             padding: 0.82rem 0.9rem;
-            border: 1px solid rgba(163, 177, 138, 0.2);
-            border-radius: 14px;
+            border: 1px solid #3a4438;
+            border-radius: 10px;
             background: var(--control);
             color: var(--text);
             outline: none;
             transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
         }
         input[type="text"]:focus, input[type="password"]:focus, textarea:focus, select:focus {
-            border-color: rgba(210, 229, 189, 0.72);
-            box-shadow: 0 0 0 4px rgba(163, 177, 138, 0.12);
-            background: rgba(6, 10, 8, 0.72);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(143, 169, 120, 0.16);
+            background: #0d100d;
         }
         .btn {
             width: 100%;
             min-height: 40px;
             padding: 0.65rem 0.95rem !important;
-            border: 1px solid rgba(163, 177, 138, 0.34) !important;
+            border: 1px solid #6f865f !important;
             border-radius: 10px !important;
-            background: #a3b18a !important;
-            color: #0c120f !important;
+            background: #7f9a6d !important;
+            color: #0d120d !important;
             font-family: inherit;
             font-size: 0.9rem !important;
             font-weight: 700;
@@ -171,8 +153,8 @@
             box-shadow: none;
         }
         .btn:hover {
-            background: #b7c79d !important;
-            border-color: rgba(210, 229, 189, 0.52) !important;
+            background: #91ac7d !important;
+            border-color: #9fba8a !important;
         }
         .btn-green {
             background-color: #588157;
@@ -182,23 +164,23 @@
             background-color: #7a9a6a;
         }
         .btn-red {
-            background: #b85b68 !important;
+            background: #a84e5c !important;
             color: #fff7f8 !important;
-            border-color: rgba(255, 190, 200, 0.28) !important;
+            border-color: #bd6673 !important;
         }
         .btn-red:hover {
-            background: #cf6679 !important;
+            background: #bd5c6b !important;
             color: #ffffff !important;
         }
         .btn-secondary {
-            background: rgba(255,255,255,0.065) !important;
+            background: #252b25 !important;
             color: var(--text) !important;
-            border-color: rgba(255,255,255,0.14) !important;
+            border-color: #3b4639 !important;
             box-shadow: none !important;
         }
         .btn-secondary:hover {
-            background: rgba(255,255,255,0.11) !important;
-            border-color: rgba(255,255,255,0.22) !important;
+            background: #2d352c !important;
+            border-color: #4a5846 !important;
         }
         .btn:disabled {
             opacity: 0.55;
@@ -230,8 +212,8 @@
         }
         .error-message {
             color: #ffd8de;
-            background: rgba(207, 102, 121, 0.13);
-            border: 1px solid rgba(207, 102, 121, 0.22);
+            background: #2d171c;
+            border: 1px solid #6d303b;
             padding: 0.75rem;
             border-radius: 8px;
             margin-bottom: 1rem;
@@ -239,9 +221,9 @@
             display: none;
         }
         .edit-user-btn {
-            background: rgba(163, 177, 138, 0.08);
+            background: #222922;
             color: var(--accent-strong);
-            border: 1px solid rgba(163, 177, 138, 0.42);
+            border: 1px solid #54664d;
             padding: 0.45rem 0.7rem;
             border-radius: 10px;
             cursor: pointer;
@@ -257,7 +239,7 @@
             color: var(--text);
             padding: 1rem 1.5rem;
             border-radius: 8px;
-            border: 1px solid rgba(163, 177, 138, 0.42);
+            border: 1px solid var(--panel-border);
             box-shadow: var(--shadow);
             z-index: 2000;
             opacity: 0;
@@ -269,19 +251,16 @@
             transform: translateY(0);
         }
         .back-btn {
-            position: fixed;
-            top: 2rem;
-            left: 2rem;
+            position: static;
             width: auto;
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
             text-align: center;
-            z-index: 10;
+            margin-bottom: 1rem;
             padding: 0.65rem 1rem;
-            background: rgba(8, 12, 10, 0.64);
-            color: var(--text);
-            border-color: rgba(255,255,255,0.12);
-            backdrop-filter: blur(14px);
+            background: #252b25 !important;
+            color: var(--text) !important;
+            border-color: #3b4639 !important;
         }
 
         /* Visual Editor Styles */
@@ -1182,7 +1161,7 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=20260430u7a"></script>
+    <script src="courses.generated.js?v=20260430zg7"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=20260429domain1"></script>
     <script src="js/admin-visual-editor.js?v=202602171mhr"></script>
