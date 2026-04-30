@@ -35,7 +35,10 @@ class AccountSystem {
         this.changeDisplaynameForm = null;
         this.changeColorForm = null;
         this.changeFontForm = null;
+        this.changeBannerForm = null;
         this.deleteAccountForm = null;
+        this.bannerCropState = null;
+        this.pendingBannerCrop = null;
     }
 
     decodeStoredPassword(passwordValue) {
@@ -89,9 +92,10 @@ class AccountSystem {
             this.changeColorForm = document.getElementById('change-color-form');
             this.changeFontForm = document.getElementById('change-font-form');
             this.changeAvatarForm = document.getElementById('change-avatar-form');
+            this.changeBannerForm = document.getElementById('change-banner-form');
             this.deleteAccountForm = document.getElementById('delete-account-form');
 
-            if (!this.accountInfo || !this.loadingSpinner || !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm || !this.changeFontForm || !this.deleteAccountForm) {
+            if (!this.accountInfo || !this.loadingSpinner || !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm || !this.changeFontForm || !this.changeAvatarForm || !this.changeBannerForm || !this.deleteAccountForm) {
                 console.error("Account page UI elements not found. Aborting.");
                 return;
             }
@@ -240,6 +244,19 @@ class AccountSystem {
                 });
             }
             document.getElementById('show-change-avatar-btn').addEventListener('click', () => this.showForm('change-avatar'));
+            document.getElementById('show-change-banner-btn').addEventListener('click', () => {
+                this.updateBannerPreview();
+                this.showForm('change-banner');
+            });
+            const bannerFileInput = document.getElementById('new-banner-file');
+            const bannerUrlInput = document.getElementById('new-banner-url');
+            if (bannerFileInput) {
+                bannerFileInput.addEventListener('change', () => this.previewBannerFile(bannerFileInput.files && bannerFileInput.files[0]));
+            }
+            if (bannerUrlInput) {
+                bannerUrlInput.addEventListener('change', () => this.openBannerCropModal(bannerUrlInput.value.trim()));
+            }
+            this.initBannerCropModal();
 
             // Cancel buttons
             document.querySelectorAll('.cancel-action-btn').forEach(btn => {
@@ -292,6 +309,22 @@ class AccountSystem {
                     this.showError('change-avatar-error', 'Моля, изберете файл или въведете URL.');
                 }
             });
+
+            document.getElementById('change-banner-form-element').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const fileInput = document.getElementById('new-banner-file');
+                const urlInput = document.getElementById('new-banner-url');
+
+                if (this.pendingBannerCrop) {
+                    this.changeBanner(this.pendingBannerCrop, true);
+                } else if (fileInput.files.length > 0 || urlInput.value.trim()) {
+                    this.showError('change-banner-error', 'Please choose the crop first.');
+                } else {
+                    this.showError('change-banner-error', 'Please choose an image file or enter an image URL.');
+                }
+            });
+
+            document.getElementById('remove-banner-btn').addEventListener('click', () => this.changeBanner(null));
 
             document.getElementById('delete-account-form-element').addEventListener('submit', (e) => {
                 e.preventDefault();
@@ -791,6 +824,323 @@ class AccountSystem {
         }
     }
 
+    async changeBanner(bannerSource, alreadyProcessed = false) {
+        this.loadingSpinner.style.display = 'block';
+        this.showForm(null);
+        this.hideError('change-banner-error');
+
+        try {
+            const finalBanner = bannerSource
+                ? (alreadyProcessed ? bannerSource : await this.renderBannerSourceToCrop(bannerSource))
+                : null;
+            const userRef = this.db.ref(`site_users/${this.user.uid}`);
+            await userRef.update({ banner: finalBanner });
+
+            this.user.banner = finalBanner;
+            localStorage.setItem('loggedInUser', JSON.stringify(this.user));
+
+            const fileInput = document.getElementById('new-banner-file');
+            const urlInput = document.getElementById('new-banner-url');
+            if (fileInput) fileInput.value = '';
+            if (urlInput) urlInput.value = '';
+            this.pendingBannerCrop = null;
+            this.resetBannerCropControls();
+
+            this.updateUI();
+        } catch (error) {
+            console.error("Banner change error:", error);
+            this.showError('change-banner-error', error.message || 'Could not save the banner image.');
+            this.showForm('change-banner');
+            this.updateBannerPreview();
+        } finally {
+            this.loadingSpinner.style.display = 'none';
+        }
+    }
+
+    updateBannerPreview() {
+        const profilePreview = document.getElementById('user-banner-preview');
+        const formPreview = document.getElementById('current-banner-preview');
+        const banner = this.user && this.user.banner ? this.user.banner : '';
+        const color = this.user && this.user.color ? this.user.color : '#588157';
+
+        if (profilePreview) {
+            profilePreview.style.backgroundImage = banner ? `url("${banner}")` : 'none';
+            profilePreview.style.backgroundColor = banner ? 'transparent' : color;
+        }
+
+        if (formPreview) {
+            formPreview.style.display = banner ? 'block' : 'none';
+            formPreview.style.backgroundImage = banner ? `url("${banner}")` : 'none';
+            formPreview.style.backgroundPosition = 'center';
+            formPreview.style.backgroundSize = 'cover';
+        }
+    }
+
+    previewBannerFile(file) {
+        if (!file) return;
+        if (file.size > 4 * 1024 * 1024) {
+            this.showError('change-banner-error', 'Banner image is too large. Maximum size is 4MB.');
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (event) => this.openBannerCropModal(event.target.result);
+        reader.onerror = () => this.showError('change-banner-error', 'Could not read the banner file.');
+        reader.readAsDataURL(file);
+    }
+
+    async renderBannerSourceToCrop(src) {
+        this.openBannerCropModal(src);
+        throw new Error('Please choose the crop first.');
+    }
+
+    initBannerCropModal() {
+        const modal = document.getElementById('banner-crop-modal');
+        const stage = document.getElementById('banner-crop-stage');
+        const image = document.getElementById('banner-crop-image');
+        const zoom = document.getElementById('banner-modal-zoom');
+        const applyBtn = document.getElementById('apply-banner-crop-btn');
+        const cancelBtn = document.getElementById('cancel-banner-crop-btn');
+        if (!modal || !stage || !image || !zoom || !applyBtn || !cancelBtn) return;
+
+        zoom.addEventListener('input', () => {
+            if (!this.bannerCropState) return;
+            this.setBannerCropZoom(Number(zoom.value) || 1);
+        });
+
+        let dragState = null;
+        const activePointers = new Map();
+        let pinchState = null;
+        const pointerDistance = () => {
+            const points = Array.from(activePointers.values());
+            if (points.length < 2) return 0;
+            return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
+        };
+        stage.addEventListener('pointerdown', (event) => {
+            if (!this.bannerCropState) return;
+            stage.setPointerCapture(event.pointerId);
+            activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            if (activePointers.size >= 2) {
+                pinchState = {
+                    distance: pointerDistance(),
+                    zoom: this.bannerCropState.zoom
+                };
+                dragState = null;
+            } else {
+                dragState = {
+                    pointerId: event.pointerId,
+                    startX: event.clientX,
+                    startY: event.clientY,
+                    offsetX: this.bannerCropState.offsetX,
+                    offsetY: this.bannerCropState.offsetY
+                };
+            }
+        });
+
+        stage.addEventListener('pointermove', (event) => {
+            if (!this.bannerCropState || !activePointers.has(event.pointerId)) return;
+            activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
+            if (pinchState && activePointers.size >= 2) {
+                const nextDistance = pointerDistance();
+                if (pinchState.distance > 0 && nextDistance > 0) {
+                    this.setBannerCropZoom(pinchState.zoom * (nextDistance / pinchState.distance));
+                }
+                return;
+            }
+            if (!dragState || dragState.pointerId !== event.pointerId) return;
+            this.bannerCropState.offsetX = dragState.offsetX + event.clientX - dragState.startX;
+            this.bannerCropState.offsetY = dragState.offsetY + event.clientY - dragState.startY;
+            this.clampBannerCropOffset();
+            this.renderBannerCropModal();
+        });
+
+        const endDrag = (event) => {
+            activePointers.delete(event.pointerId);
+            if (dragState && dragState.pointerId === event.pointerId) dragState = null;
+            if (activePointers.size < 2) pinchState = null;
+        };
+        stage.addEventListener('pointerup', endDrag);
+        stage.addEventListener('pointercancel', endDrag);
+        stage.addEventListener('wheel', (event) => {
+            if (!this.bannerCropState) return;
+            event.preventDefault();
+            const direction = event.deltaY > 0 ? -1 : 1;
+            this.setBannerCropZoom(this.bannerCropState.zoom + direction * 0.08);
+        }, { passive: false });
+
+        applyBtn.addEventListener('click', () => this.applyBannerCropFromModal());
+        cancelBtn.addEventListener('click', () => this.closeBannerCropModal());
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) this.closeBannerCropModal();
+        });
+    }
+
+    openBannerCropModal(src) {
+        const modal = document.getElementById('banner-crop-modal');
+        const stage = document.getElementById('banner-crop-stage');
+        const image = document.getElementById('banner-crop-image');
+        const zoom = document.getElementById('banner-modal-zoom');
+        if (!modal || !stage || !image || !zoom || !src) return;
+
+        this.hideError('change-banner-error');
+        modal.classList.add('is-open');
+        modal.setAttribute('aria-hidden', 'false');
+        image.crossOrigin = 'anonymous';
+        image.onload = () => {
+            const stageRect = stage.getBoundingClientRect();
+            const frame = this.getBannerCropFrameRect();
+            const baseScale = Math.max(frame.width / image.naturalWidth, frame.height / image.naturalHeight);
+            const minZoom = 1;
+            const maxZoom = 3;
+            this.bannerCropState = {
+                src,
+                naturalWidth: image.naturalWidth,
+                naturalHeight: image.naturalHeight,
+                stageWidth: stageRect.width,
+                stageHeight: stageRect.height,
+                frame,
+                baseScale,
+                zoom: minZoom,
+                minZoom,
+                maxZoom,
+                offsetX: 0,
+                offsetY: 0
+            };
+            zoom.min = String(minZoom);
+            zoom.max = String(maxZoom);
+            zoom.step = '0.01';
+            zoom.value = String(minZoom);
+            this.renderBannerCropModal();
+        };
+        image.onerror = () => {
+            this.closeBannerCropModal();
+            this.showError('change-banner-error', 'Could not load this banner image.');
+        };
+        image.src = src;
+    }
+
+    closeBannerCropModal() {
+        const modal = document.getElementById('banner-crop-modal');
+        if (modal) {
+            modal.classList.remove('is-open');
+            modal.setAttribute('aria-hidden', 'true');
+        }
+    }
+
+    setBannerCropZoom(nextZoom) {
+        const state = this.bannerCropState;
+        const zoom = document.getElementById('banner-modal-zoom');
+        if (!state) return;
+        state.zoom = Math.min(state.maxZoom, Math.max(state.minZoom, nextZoom));
+        if (zoom) zoom.value = String(state.zoom);
+        this.clampBannerCropOffset();
+        this.renderBannerCropModal();
+    }
+
+    getBannerCropFrameRect() {
+        const stage = document.getElementById('banner-crop-stage');
+        const frameEl = stage ? stage.querySelector('.banner-crop-frame') : null;
+        if (!stage || !frameEl) return { left: 0, top: 0, width: 640, height: 190 };
+        const stageRect = stage.getBoundingClientRect();
+        const frameRect = frameEl.getBoundingClientRect();
+        return {
+            left: frameRect.left - stageRect.left,
+            top: frameRect.top - stageRect.top,
+            width: frameRect.width,
+            height: frameRect.height
+        };
+    }
+
+    getBannerCropImageMetrics() {
+        const state = this.bannerCropState;
+        if (!state) return null;
+        const scale = state.baseScale * state.zoom;
+        const width = state.naturalWidth * scale;
+        const height = state.naturalHeight * scale;
+        const centerX = state.stageWidth / 2 + state.offsetX;
+        const centerY = state.stageHeight / 2 + state.offsetY;
+        return { scale, width, height, left: centerX - width / 2, top: centerY - height / 2 };
+    }
+
+    clampBannerCropOffset() {
+        const state = this.bannerCropState;
+        if (!state) return;
+        state.stageWidth = document.getElementById('banner-crop-stage').clientWidth;
+        state.stageHeight = document.getElementById('banner-crop-stage').clientHeight;
+        state.frame = this.getBannerCropFrameRect();
+        const metrics = this.getBannerCropImageMetrics();
+        if (!metrics) return;
+
+        const centerBaseX = state.stageWidth / 2;
+        const centerBaseY = state.stageHeight / 2;
+        const minCenterX = state.frame.left + state.frame.width - metrics.width / 2;
+        const maxCenterX = state.frame.left + metrics.width / 2;
+        const minCenterY = state.frame.top + state.frame.height - metrics.height / 2;
+        const maxCenterY = state.frame.top + metrics.height / 2;
+        const currentCenterX = centerBaseX + state.offsetX;
+        const currentCenterY = centerBaseY + state.offsetY;
+        state.offsetX = Math.min(maxCenterX, Math.max(minCenterX, currentCenterX)) - centerBaseX;
+        state.offsetY = Math.min(maxCenterY, Math.max(minCenterY, currentCenterY)) - centerBaseY;
+    }
+
+    renderBannerCropModal() {
+        const image = document.getElementById('banner-crop-image');
+        const state = this.bannerCropState;
+        const stage = document.getElementById('banner-crop-stage');
+        if (!image || !state || !stage) return;
+        state.stageWidth = stage.clientWidth;
+        state.stageHeight = stage.clientHeight;
+        state.frame = this.getBannerCropFrameRect();
+        const scale = state.baseScale * state.zoom;
+        image.style.width = `${state.naturalWidth}px`;
+        image.style.height = `${state.naturalHeight}px`;
+        image.style.transform = `translate(-50%, -50%) translate(${state.offsetX}px, ${state.offsetY}px) scale(${scale})`;
+    }
+
+    applyBannerCropFromModal() {
+        try {
+            const cropped = this.renderBannerCropToDataUrl();
+            this.pendingBannerCrop = cropped;
+            const formPreview = document.getElementById('current-banner-preview');
+            if (formPreview) {
+                formPreview.style.display = 'block';
+                formPreview.style.backgroundImage = `url("${cropped}")`;
+                formPreview.style.backgroundPosition = 'center';
+                formPreview.style.backgroundSize = 'cover';
+            }
+            this.closeBannerCropModal();
+        } catch (error) {
+            this.showError('change-banner-error', error.message || 'Could not crop this image.');
+            this.closeBannerCropModal();
+        }
+    }
+
+    renderBannerCropToDataUrl() {
+        const image = document.getElementById('banner-crop-image');
+        const state = this.bannerCropState;
+        this.clampBannerCropOffset();
+        const metrics = this.getBannerCropImageMetrics();
+        if (!image || !state || !metrics) throw new Error('No banner crop is selected.');
+
+        const canvas = document.createElement('canvas');
+        canvas.width = 640;
+        canvas.height = 190;
+        const ctx = canvas.getContext('2d');
+        const sourceX = (state.frame.left - metrics.left) / metrics.scale;
+        const sourceY = (state.frame.top - metrics.top) / metrics.scale;
+        const sourceW = state.frame.width / metrics.scale;
+        const sourceH = state.frame.height / metrics.scale;
+        ctx.drawImage(image, sourceX, sourceY, sourceW, sourceH, 0, 0, canvas.width, canvas.height);
+
+        let dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+        if (dataUrl.length > 240000) dataUrl = canvas.toDataURL('image/jpeg', 0.78);
+        return dataUrl;
+    }
+
+    resetBannerCropControls() {
+        this.pendingBannerCrop = null;
+        this.closeBannerCropModal();
+    }
+
     async deleteAccount(password) {
         if (!password) {
             this.showError('delete-account-error', 'Моля, въведете паролата си.');
@@ -842,6 +1192,7 @@ class AccountSystem {
                 if (colorPreview) {
                     colorPreview.style.backgroundColor = this.user.color || '#ccc';
                 }
+                this.updateBannerPreview();
 
                 const fontValue = document.getElementById('user-font');
                 if (fontValue) {
@@ -880,6 +1231,7 @@ class AccountSystem {
             if (this.changeColorForm) this.changeColorForm.style.display = 'none';
             if (this.changeFontForm) this.changeFontForm.style.display = 'none';
             if (this.changeAvatarForm) this.changeAvatarForm.style.display = 'none';
+            if (this.changeBannerForm) this.changeBannerForm.style.display = 'none';
             if (this.deleteAccountForm) this.deleteAccountForm.style.display = 'none';
             
             if (formId === 'account' && this.accountInfo) this.accountInfo.style.display = 'block';
@@ -889,6 +1241,7 @@ class AccountSystem {
             else if (formId === 'change-color' && this.changeColorForm) this.changeColorForm.style.display = 'block';
             else if (formId === 'change-font' && this.changeFontForm) this.changeFontForm.style.display = 'block';
             else if (formId === 'change-avatar' && this.changeAvatarForm) this.changeAvatarForm.style.display = 'block';
+            else if (formId === 'change-banner' && this.changeBannerForm) this.changeBannerForm.style.display = 'block';
             else if (formId === 'delete-account' && this.deleteAccountForm) this.deleteAccountForm.style.display = 'block';
         }
     }

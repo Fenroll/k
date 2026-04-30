@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260430zx6"></script>
+  <script src="js/auth-guard.js?v=20260430125y"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,6 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260430125y">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -48,25 +49,26 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: #ffffff;
-      border-bottom: 1px solid #e0e0e0;
-      padding: 10px 16px;
+      background: #fafbfc;
+      border-bottom: 1px solid #e5e7eb;
+      padding: 2px 10px;
       display: flex;
       gap: 0;
       align-items: center;
-      flex-wrap: wrap;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      flex-wrap: nowrap;
+      overflow-x: visible;
+      overflow-y: visible;
     }
 
     .toolbar-group {
       display: flex;
-      gap: 0;
+      gap: 2px;
       align-items: center;
-      padding: 0;
+      padding: 0 5px;
       background: transparent;
       border-radius: 0;
       border: none;
-      border-right: 1px solid #e0e0e0;
+      border-right: 1px solid #e8eaed;
     }
 
     .toolbar-group:last-child {
@@ -75,55 +77,40 @@
 
     .toolbar-group:hover {
       background: transparent;
-      border-color: #e0e0e0;
     }
 
     .toolbar button {
-      padding: 8px 12px;
+      padding: 7px;
       border: none;
       background: transparent;
-      color: #4a4a4a;
-      border-radius: 0;
+      color: #5f6368;
+      border-radius: 7px;
       cursor: pointer;
-      font-size: 0.95em;
+      font-size: 0.9em;
       font-weight: 400;
-      transition: all 0.15s ease;
+      transition: background 0.12s ease, color 0.12s ease;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 4px;
       position: relative;
       overflow: hidden;
-      height: 36px;
-      min-width: 36px;
+      height: 38px;
+      min-width: 38px;
     }
 
     .toolbar button img {
-      width: 21px;
-      height: 21px;
+      width: 23px;
+      height: 23px;
       stroke-width: 1.5;
       flex-shrink: 0;
+      opacity: 0.75;
+      transition: opacity 0.12s;
     }
 
-    /* UpToDate icon - larger size only */
-    #uptodateBtn img {
-      width: 29px;
-      height: 29px;
-    }
-
-      #shortcutsBtn img {
-      width: 23px;
-      height: 23px;
-    }
-
-     #ulBtn img {
-      width: 23px;
-      height: 23px;
-    }
-
-     #olBtn img {
-      width: 24px;
-      height: 24px;
+    .toolbar button:hover img,
+    .toolbar button.active img {
+      opacity: 1;
     }
 
     .toolbar button::before {
@@ -131,23 +118,22 @@
     }
 
     .toolbar button:hover {
-      background: #f5f5f5;
+      background: #e8eaed;
       color: #1a1a1a;
     }
 
     .toolbar button:active {
-      background: #ececec;
+      background: #dde0e4;
     }
 
     .toolbar button.active {
-      background: #e8e8e8;
-      color: #1a1a1a;
-      font-weight: 500;
+      background: #d3e3fd;
+      color: #1a73e8;
     }
 
     .toolbar-icon {
-      width: 18px;
-      height: 18px;
+      width: 23px;
+      height: 23px;
       object-fit: contain;
     }
 
@@ -857,70 +843,140 @@
       position: relative;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+      /* ── Layout ── */
+      html, body {
+        height: 100%;
+        overflow: hidden;
+      }
+
+      body {
+        display: flex;
+        flex-direction: column;
+        height: 100dvh;
+      }
+
+      .editor-container {
+        flex: 1;
+        overflow: hidden;
+        min-height: 0;
+      }
+
+      /* ── Toolbar: single scrollable row ── */
       .toolbar {
-        padding: 8px 12px;
+        flex-shrink: 0;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 0 4px;
+        height: 48px;
+        min-height: 48px;
+        gap: 0;
+        align-items: center;
+      }
+
+      .toolbar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .toolbar-group {
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
       }
 
       .toolbar button {
-        padding: 5px 8px;
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        padding: 0;
+        flex-shrink: 0;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
         font-size: 0.85em;
+      }
+
+      .toolbar button img,
+      .toolbar button svg {
+        width: 20px;
+        height: 20px;
+        pointer-events: none;
+      }
+
+      /* UpToDate larger icon */
+      #uptodateBtn img { width: 26px; height: 26px; }
+      #shortcutsBtn img { width: 21px; height: 21px; }
+      #ulBtn img { width: 21px; height: 21px; }
+      #olBtn img { width: 22px; height: 22px; }
+
+      .toolbar select {
+        height: 42px;
+        flex-shrink: 0;
+        font-size: 0.85em;
+        padding: 0 8px;
       }
 
       .shortcuts-hint {
         display: none;
       }
 
+      /* ── Editor area ── */
       #editor {
-        padding: 16px;
+        padding: 12px 16px;
+        font-size: 16px; /* prevent iOS auto-zoom on focus */
+        padding-bottom: calc(80px + env(safe-area-inset-bottom));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
 
+      /* ── FAB raw-code button ── */
       .raw-code-btn {
-        width: 45px;
-        height: 45px;
-        bottom: 15px;
-        right: 15px;
+        width: 44px;
+        height: 44px;
+        bottom: calc(76px + env(safe-area-inset-bottom));
+        right: 14px;
       }
 
-      /* Mobile font sizes for viewer */
-      #editor h1 {
-        font-size: 1.65em;
+      /* ── Chat widget above nav bar ── */
+      #chat-widget {
+        bottom: calc(68px + env(safe-area-inset-bottom)) !important;
+        right: 14px !important;
       }
 
-      #editor h2 {
-        font-size: 1.3em;
-      }
-
-      #editor h3 {
-        font-size: 1.1em;
-      }
-
-      #editor h4 {
-        font-size: 1em;
-      }
-
-      #editor h5,
-      #editor h6 {
-        font-size: 0.95em;
-      }
+      /* ── Mobile font sizes ── */
+      #editor h1 { font-size: 1.5em; }
+      #editor h2 { font-size: 1.25em; }
+      #editor h3 { font-size: 1.1em; }
+      #editor h4 { font-size: 1em; }
+      #editor h5, #editor h6 { font-size: 0.95em; }
 
       #editor p,
       #editor li,
       #editor div {
-        font-size: 0.9em;
-        line-height: 1.4;
+        font-size: 0.95em;
+        line-height: 1.5;
       }
 
-      #editor code {
-        font-size: 0.8em;
+      #editor code { font-size: 0.82em; }
+      #editor blockquote { font-size: 0.92em; }
+      #editor table { font-size: 0.85em; }
+
+      /* ── Table options: full-width on mobile ── */
+      .table-options-menu {
+        min-width: 180px;
+        right: 0;
+        left: auto;
       }
 
-      #editor blockquote {
-        font-size: 0.9em;
-      }
-
-      #editor table {
-        font-size: 0.85em;
+      /* ── HTML editor modal: full screen ── */
+      .html-editor-container {
+        margin: 0;
+        width: 100%;
+        height: 100dvh;
+        border-radius: 0;
+        max-width: 100%;
       }
     }
 
@@ -1076,166 +1132,354 @@
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
     }
 
+    /* More Tools: Desktop - inline, ordered like the original toolbar */
+    #moreToolsBtn { display: none; }
+    .toolbar-group-format { order: 10; }
+    .toolbar-group-core { order: 20; }
+    .toolbar-group-lists { order: 60; }
+    .toolbar-group-history { order: 100; }
+    .toolbar-group-table { order: 80; }
+    .toolbar-group-download { order: 120; }
+    .toolbar-group-more { display: contents; }
+    .more-tools-panel {
+      display: contents;
+    }
+    .more-tools-section { display: contents; }
+    .more-tools-label { display: none; }
+    .more-tools-row { display: contents; }
+    .more-tools-panel .mobile-only-btn { display: none; }
+    .toolbar-inline-wrap {
+      display: inline-flex;
+      position: relative;
+    }
+    #strikeBtn { order: 30; }
+    #subscriptBtn { order: 31; }
+    #superscriptBtn { order: 32; }
+    .color-text-wrap { order: 40; }
+    .color-highlight-wrap { order: 41; }
+    .color-heading-wrap { order: 42; }
+    #alignLeftBtn { order: 50; }
+    #alignCenterBtn { order: 51; }
+    #alignRightBtn { order: 52; }
+    #outdentBtn { order: 70; }
+    #indentBtn { order: 71; }
+    #editTableBtn { order: 81; }
+    #quoteBtn { order: 90; }
+    #symbolsBtn { order: 91; }
+    #linkBtn { order: 92; }
+    #imageBtn { order: 93; }
+    #noteBtn { order: 94; }
+    #hrBtn { order: 95; }
+    #dashedLineBtn { order: 96; }
+    #openLocalBtn { order: 110; }
+    #openCoursesBtn { order: 111; }
+    #anchorLinkBtn { order: 112; }
+    #htmlEditorBtn { order: 113; }
+    #combineFilesBtn { order: 114; }
+    #clearBtn { order: 130; }
+    #shortcutsBtn { order: 131; }
+    #resetFontSizeBtn { order: 132; }
+
+    /* More Tools: Mobile - dropdown panel */
+    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+      .toolbar-group-more {
+        display: flex;
+        order: 900;
+        position: relative;
+      }
+
+      #moreToolsBtn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 42px;
+        height: 42px;
+        min-width: 42px;
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .toolbar-group-table { display: none !important; }
+
+      .more-tools-panel {
+        display: none;
+        position: fixed;
+        top: 52px;
+        right: 8px;
+        min-width: 260px;
+        max-width: calc(100vw - 16px);
+        max-height: calc(100dvh - 68px);
+        overflow-y: auto;
+        background: #fff;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        z-index: 2000;
+        padding: 8px 0;
+      }
+
+      .more-tools-panel.open { display: block; }
+
+      .more-tools-section {
+        display: block;
+        padding: 4px 8px 6px;
+      }
+
+      .more-tools-section + .more-tools-section {
+        border-top: 1px solid #f0f0f0;
+        padding-top: 6px;
+      }
+
+      .more-tools-label {
+        display: block;
+        font-size: 10px;
+        font-weight: 700;
+        color: #9ca3af;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 2px 4px 4px;
+      }
+
+      .more-tools-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2px;
+      }
+
+      .more-tools-row button {
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        padding: 0;
+        border: none;
+        background: transparent;
+        color: #4a4a4a;
+        border-radius: 4px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background 0.12s;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      .more-tools-row button:hover { background: #f5f5f5; }
+      .more-tools-row button:active { background: #ececec; }
+      .more-tools-row button.active { background: #e8e8e8; }
+
+      .more-tools-row button img {
+        width: 18px;
+        height: 18px;
+      }
+
+      .more-tools-row button svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      .more-tools-panel .mobile-only-btn { display: flex; }
+    }
+
+    @media (max-width: 480px) {
+      .more-tools-panel {
+        right: 8px;
+        min-width: calc(100vw - 16px);
+        max-height: 70dvh;
+        overflow-y: auto;
+      }
+    }
+
   </style>
   <script src="js/version-manager.js?v=2026031715gu"></script>
 </head>
 <body>
   <!-- Toolbar -->
   <div class="toolbar">
-    <div class="toolbar-group" style="position: relative; display: inline-block;">
+    <!-- Format -->
+    <div class="toolbar-group toolbar-group-format" style="position: relative;">
       <button id="formatToggleBtn" title="Format"><img src="svg/md-editor/icon-format.svg?v=2026031715gu" alt="Format" class="toolbar-icon"></button>
       <div id="formatOptions" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 8px 0; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 180px;">
-        <div class="format-option" data-format="p" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
+        <div class="format-option" data-format="p" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
           <img src="svg/md-editor/icon-format.svg?v=2026031715gu" alt="Normal" class="toolbar-icon">
           <span>Normal</span>
         </div>
-        <div class="format-option" data-format="h1" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
+        <div class="format-option" data-format="h1" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
           <img src="svg/md-editor/icon-h1.svg?v=2026031715gu" alt="H1" class="toolbar-icon">
           <span>Heading 1</span>
         </div>
-        <div class="format-option" data-format="h2" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
+        <div class="format-option" data-format="h2" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
           <img src="svg/md-editor/icon-h2.svg?v=2026031715gu" alt="H2" class="toolbar-icon">
           <span>Heading 2</span>
         </div>
-        <div class="format-option" data-format="h3" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
+        <div class="format-option" data-format="h3" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
           <img src="svg/md-editor/icon-h3.svg?v=2026031715gu" alt="H3" class="toolbar-icon">
           <span>Heading 3</span>
         </div>
-        <div class="format-option" data-format="h4" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px; hover: background: #f3f4f6;">
+        <div class="format-option" data-format="h4" style="padding: 8px 12px; cursor: pointer; display: flex; align-items: center; gap: 8px;">
           <img src="svg/md-editor/icon-h4.svg?v=2026031715gu" alt="H4" class="toolbar-icon">
           <span>Heading 4</span>
         </div>
       </div>
     </div>
 
-    <div class="toolbar-group">
+    <!-- Core formatting -->
+    <div class="toolbar-group toolbar-group-core">
       <button id="boldBtn" title="Bold (Ctrl+B)"><img src="svg/md-editor/icon-bold.svg?v=2026031715gu" alt="Bold" class="toolbar-icon"></button>
       <button id="italicBtn" title="Italic (Ctrl+I)"><img src="svg/md-editor/icon-italic.svg?v=2026031715gu" alt="Italic" class="toolbar-icon"></button>
       <button id="underlineBtn" title="Underline (Ctrl+U)"><img src="svg/md-editor/icon-underline.svg?v=2026031715gu" alt="Underline" class="toolbar-icon"></button>
-      <button id="strikeBtn" title="Strikethrough"><img src="svg/md-editor/icon-strikethrough.svg?v=2026031715gu" alt="Strikethrough" class="toolbar-icon"></button>
-      <button id="subscriptBtn" title="Subscript"><img src="svg/md-editor/icon-subscript.svg?v=2026031715gu" alt="Subscript" class="toolbar-icon"></button>
-      <button id="superscriptBtn" title="Superscript"><img src="svg/md-editor/icon-superscript.svg?v=2026031715gu" alt="Superscript" class="toolbar-icon"></button>
-
-      <!-- Text Color Button -->
-      <div style="position: relative; display: inline-block;">
-        <button id="textColorToggleBtn" title="Text Color"><img src="svg/md-editor/icon-text-color.svg?v=2026031715gu" alt="Text Color" class="toolbar-icon"></button>
-        <div id="textColorOptions" class="color-picker-dropdown" style="display: none;">
-          <div style="padding: 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase;">Theme Colors</div>
-          <div id="textThemeColors" class="theme-colors-grid"></div>
-          <div style="padding: 8px 8px 4px 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-top: 4px;">Standard Colors</div>
-          <div id="textStandardColors" class="standard-colors-row"></div>
-          <div style="padding: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px; display: flex; gap: 8px; align-items: center;">
-            <button id="removeTextColorBtn" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; flex: 1;">Remove Color</button>
-            <input type="text" id="textColorHexInput" placeholder="#1f2937" style="width: 80px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-family: monospace; font-size: 12px;">
-            <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px; padding: 2px;">
-          </div>
-        </div>
-      </div>
-
-      <!-- Heading Color Button -->
-      <div style="position: relative; display: inline-block;">
-        <button id="headingColorToggleBtn" title="Heading Color"><img src="svg/md-editor/icon-heading-clor.svg?v=2026031715gu" alt="Heading Color" class="toolbar-icon"></button>
-        <div id="headingColorOptions" style="position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 8px; flex-direction: row; flex-wrap: wrap; max-width: 250px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; gap: 6px; display: none !important; flex: 1;">
-          <button class="heading-color-btn" data-color="#000000" title="Black" style="background-color: #000000; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#1f2937" title="Dark Gray" style="background-color: #1f2937; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#1e40af" title="Deep Blue" style="background-color: #1e40af; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#7c2d12" title="Deep Orange" style="background-color: #7c2d12; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#588157" title="Lime Green" style="background-color: #588157; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-          <button class="heading-color-btn" data-color="#7e22ce" title="Purple" style="background-color: #7e22ce; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
-        </div>
-      </div>
-
-      <!-- Highlight Button -->
-      <div style="position: relative; display: inline-block;">
-        <button id="highlightToggleBtn" title="Highlight"><img src="svg/md-editor/icon-highlight.svg?v=2026031715gu" alt="Highlight" class="toolbar-icon"></button>
-        <div id="highlightOptions" class="color-picker-dropdown" style="display: none;">
-          <div style="padding: 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase;">Theme Colors</div>
-          <div id="highlightThemeColors" class="theme-colors-grid"></div>
-          <div style="padding: 8px 8px 4px 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-top: 4px;">Standard Colors</div>
-          <div id="highlightStandardColors" class="standard-colors-row"></div>
-          <div style="padding: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px; display: flex; gap: 8px; align-items: center;">
-            <button id="removeHighlightBtn" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; flex: 1;">Remove Highlight</button>
-            <input type="text" id="highlightColorHexInput" placeholder="#ffeb3b" style="width: 80px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-family: monospace; font-size: 12px;">
-            <input type="color" id="highlightColorControl" value="#ffeb3b" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px; padding: 2px;">
-          </div>
-        </div>
-      </div>
     </div>
 
-    <div class="toolbar-group">
-      <button id="alignLeftBtn" title="Align Left"><img src="svg/md-editor/icon-align-left.svg?v=2026031715gu" alt="Align Left" class="toolbar-icon"></button>
-      <button id="alignCenterBtn" title="Align Center"><img src="svg/md-editor/icon-align-center.svg?v=2026031715gu" alt="Align Center" class="toolbar-icon"></button>
-      <button id="alignRightBtn" title="Align Right"><img src="svg/md-editor/icon-align-right.svg?v=2026031715gu" alt="Align Right" class="toolbar-icon"></button>
-    </div>
-
-    <div class="toolbar-group">
+    <!-- Lists -->
+    <div class="toolbar-group toolbar-group-lists">
       <button id="ulBtn" title="Unordered List (Ctrl+Shift+U)"><img src="svg/md-editor/icon-unordered.svg?v=2026031715gu" alt="Unordered List" class="toolbar-icon"></button>
       <button id="olBtn" title="Ordered List (Ctrl+Shift+O)"><img src="svg/md-editor/icon-ordered.svg?v=2026031715gu" alt="Ordered List" class="toolbar-icon"></button>
     </div>
 
-    <div class="toolbar-group">
-      <button id="outdentBtn" title="Outdent (Shift+Tab)"><img src="svg/md-editor/icon-outdent.svg?v=2026031715gu" alt="Outdent" class="toolbar-icon"></button>
-      <button id="indentBtn" title="Indent (Tab)"><img src="svg/md-editor/icon-indent.svg?v=2026031715gu" alt="Indent" class="toolbar-icon"></button>
-    </div>
-
-    <div class="toolbar-group" style="position: relative;">
-      <button id="tableBtn" title="Insert Table"><img src="svg/md-editor/icon-table.svg?v=2026031715gu" alt="Table" class="toolbar-icon"></button>
-      <button id="editTableBtn" title="Edit table with Tables Generator"><img src="svg/md-editor/icon-edit-table.svg?v=2026031715gu" alt="Edit Table" class="toolbar-icon"></button>
-      <!-- Table Options Dropdown Menu -->
-      <div id="tableOptionsMenu" class="table-options-menu" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 220px; white-space: nowrap;">
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu"  alt="Table" class="toolbar-icon"> Insert row above</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu"  alt="Table" class="toolbar-icon"> Insert row below</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableColumnBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu"  alt="Table" class="toolbar-icon"> Insert column left</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableColumnAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu"  alt="Table" class="toolbar-icon"> Insert column right</div>
-      <hr style="margin: 4px 0; border: none; border-top: 1px solid #eee;">
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTableRow(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu"  alt="Table" class="toolbar-icon">Remove Table Row</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTableColumn(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu"  alt="Table" class="toolbar-icon"> Delete column</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTable(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu"  alt="Table" class="toolbar-icon"> Delete table</div>
-      <hr style="margin: 4px 0; border: none; border-top: 1px solid #eee;">
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); setCellBackgroundColor(); closeTableMenu();"><img src="svg/md-editor/icon-table-colors.svg?v=2026031715gu"  alt="Table" class="toolbar-icon"> Set Cell Background Color</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); mergeTableCells(); closeTableMenu();"><img src="svg/md-editor/icon-cell-merge.svg?v=2026031715gu"  alt="Table" class="toolbar-icon"> Merge cells</div>
-      <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); splitTableCell(); closeTableMenu();"><img src="svg/md-editor/icon-split-cells.svg?v=2026031715gu"  alt="Table" class="toolbar-icon"> Split cell</div>
-      </div>
-    </div>
-
-    <div class="toolbar-group">
-      <button id="quoteBtn" title="Toggle Quote (Ctrl+Q)" class="toggle-btn"><img src="svg/md-editor/icon-quote.svg?v=2026031715gu" alt="Quote" class="toolbar-icon"></button>
-      <button id="symbolsBtn" title="Insert Symbols"><img src="svg/md-editor/icon-symbols.svg?v=2026031715gu" alt="Symbols" class="toolbar-icon"></button>
-    </div>
-
-    <div class="toolbar-group">
-
-      <button id="linkBtn" title="Link"><img src="svg/md-editor/icon-link.svg?v=2026031715gu" alt="Bold" class="toolbar-icon"></button>
-      <button id="imageBtn" title="Add Image"><img src="svg/md-editor/icon-image.svg?v=2026031715gu" alt="Image" class="toolbar-icon"></button>
-      <button id="noteBtn" title="Add Note"><img src="svg/md-editor/icon-note.svg?v=2026031715gu" alt="Note" class="toolbar-icon"></button>
-      <button id="hrBtn" title="Horizontal Line"><svg width="18" height="18" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32s-14.33-32-32-32H64c-17.67 0-32 14.33-32 32z"/></svg></button>
-      <button id="dashedLineBtn" title="Topic Divider (Dashed Line)"><img src="svg/md-editor/icon-dashed-line.svg?v=2026031715gu" alt="Dashed Line" class="toolbar-icon"></button>
-    </div>
-
-    <div class="toolbar-group">
+    <!-- Undo / Redo -->
+    <div class="toolbar-group toolbar-group-history">
       <button id="undoBtn" title="Undo (Ctrl+Z)"><img src="svg/md-editor/icon-undo.svg?v=2026031715gu" alt="Undo" class="toolbar-icon"></button>
       <button id="redoBtn" title="Redo (Ctrl+Y)"><img src="svg/md-editor/icon-redo.svg?v=2026031715gu" alt="Redo" class="toolbar-icon"></button>
     </div>
 
-    <div class="toolbar-group">
-      <button id="openLocalBtn" title="Open file from computer"><img src="svg/md-editor/icon-open-local.svg?v=2026031715gu" alt="Open Local" class="toolbar-icon"></button>
-      <button id="openCoursesBtn" title="Open file from courses"><img src="svg/md-editor/icon-open-courses.svg?v=2026031715gu" alt="Open Courses" class="toolbar-icon"></button>
-      <button id="anchorLinkBtn" title="Create/Link Anchors"><img src="svg/md-editor/icon-anchor-link.svg?v=2026031715gu" alt="Anchor Link" class="toolbar-icon"></button>
-      <button id="htmlEditorBtn" title="Edit HTML/Source Code"><img src="svg/md-editor/icon-html-editor.svg?v=2026031715gu" alt="HTML Editor" class="toolbar-icon"></button>
-      <button id="combineFilesBtn" title="Combine HTML files"><img src="svg/md-editor/icon-combine-files.svg?v=2026031715gu" alt="Combine Files" class="toolbar-icon"></button>
+    <!-- Table -->
+    <div class="toolbar-group toolbar-group-table" style="position: relative;">
+      <button id="tableBtn" title="Insert Table"><img src="svg/md-editor/icon-table.svg?v=2026031715gu" alt="Table" class="toolbar-icon"></button>
+      <div id="tableOptionsMenu" class="table-options-menu" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 220px; white-space: nowrap;">
+        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Insert row above</div>
+        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Insert row below</div>
+        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableColumnBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Insert column left</div>
+        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableColumnAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Insert column right</div>
+        <hr style="margin: 4px 0; border: none; border-top: 1px solid #eee;">
+        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTableRow(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Remove Table Row</div>
+        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTableColumn(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Delete column</div>
+        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTable(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Delete table</div>
+        <hr style="margin: 4px 0; border: none; border-top: 1px solid #eee;">
+        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); setCellBackgroundColor(); closeTableMenu();"><img src="svg/md-editor/icon-table-colors.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Set Cell Background Color</div>
+        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); mergeTableCells(); closeTableMenu();"><img src="svg/md-editor/icon-cell-merge.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Merge cells</div>
+        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); splitTableCell(); closeTableMenu();"><img src="svg/md-editor/icon-split-cells.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Split cell</div>
+      </div>
     </div>
 
-    <div class="toolbar-group">
+    <!-- Download -->
+    <div class="toolbar-group toolbar-group-download">
       <button id="downloadBtn" title="Download as .html file"><img src="svg/md-editor/icon-download.svg?v=2026031715gu" alt="Download" class="toolbar-icon"></button>
-      <button id="clearBtn" title="Clear all content"><img src="svg/md-editor/icon-clear.svg?v=2026031715gu" alt="Clear" class="toolbar-icon"></button>
-      <button id="shortcutsBtn" title="Show keyboard shortcuts"><img src="svg/md-editor/icon-shortcuts.svg?v=2026031715gu" alt="Shortcuts" class="toolbar-icon"></button>
-      <button id="resetFontSizeBtn" title="Reset font size to default"><img src="svg/md-editor/icon-reset-font-size.svg?v=2026031715gu" alt="Reset Font Size" class="toolbar-icon"></button>
     </div>
 
-    <div class="toolbar-group">
-      <button id="geminiBtn" title="Send to Gemini AI"><img src="svg/md-editor/icon-gemini.svg?v=2026031715gu" alt="Gemini" class="toolbar-icon"></button>
-      <button id="chatgptBtn" title="Open ChatGPT"><img src="svg/md-editor/icon-chatgpt.svg?v=2026031715gu" alt="ChatGPT" class="toolbar-icon"></button>
-      <button id="uptodateBtn" title="Open UpToDate"><img src="svg/md-editor/icon-uptodate.svg?v=2026031715gu" alt="UpToDate" class="toolbar-icon"></button>
+    <!-- More Tools -->
+    <div class="toolbar-group toolbar-group-more" style="position: relative;">
+      <button id="moreToolsBtn" title="More tools" style="font-size: 18px; letter-spacing: 1px; padding: 0 10px; font-weight: 700; color: #555;">···</button>
+      <div id="moreToolsPanel" class="more-tools-panel">
+
+        <!-- Formatting -->
+        <div class="more-tools-section">
+          <div class="more-tools-label">Formatting</div>
+          <div class="more-tools-row">
+            <button id="strikeBtn" title="Strikethrough"><img src="svg/md-editor/icon-strikethrough.svg?v=2026031715gu" alt="Strikethrough" class="toolbar-icon"></button>
+            <button id="subscriptBtn" title="Subscript"><img src="svg/md-editor/icon-subscript.svg?v=2026031715gu" alt="Subscript" class="toolbar-icon"></button>
+            <button id="superscriptBtn" title="Superscript"><img src="svg/md-editor/icon-superscript.svg?v=2026031715gu" alt="Superscript" class="toolbar-icon"></button>
+            <button id="outdentBtn" title="Outdent (Shift+Tab)"><img src="svg/md-editor/icon-outdent.svg?v=2026031715gu" alt="Outdent" class="toolbar-icon"></button>
+            <button id="indentBtn" title="Indent (Tab)"><img src="svg/md-editor/icon-indent.svg?v=2026031715gu" alt="Indent" class="toolbar-icon"></button>
+          </div>
+        </div>
+
+        <!-- Color -->
+        <div class="more-tools-section">
+          <div class="more-tools-label">Color</div>
+          <div class="more-tools-row">
+            <!-- Text Color -->
+            <div class="toolbar-inline-wrap color-text-wrap">
+              <button id="textColorToggleBtn" title="Text Color"><img src="svg/md-editor/icon-text-color.svg?v=2026031715gu" alt="Text Color" class="toolbar-icon"></button>
+              <div id="textColorOptions" class="color-picker-dropdown" style="display: none;">
+                <div style="padding: 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase;">Theme Colors</div>
+                <div id="textThemeColors" class="theme-colors-grid"></div>
+                <div style="padding: 8px 8px 4px 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-top: 4px;">Standard Colors</div>
+                <div id="textStandardColors" class="standard-colors-row"></div>
+                <div style="padding: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px; display: flex; gap: 8px; align-items: center;">
+                  <button id="removeTextColorBtn" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; flex: 1;">Remove Color</button>
+                  <input type="text" id="textColorHexInput" placeholder="#1f2937" style="width: 80px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                  <input type="color" id="textColorControl" value="#1f2937" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px; padding: 2px;">
+                </div>
+              </div>
+            </div>
+            <!-- Heading Color -->
+            <div class="toolbar-inline-wrap color-heading-wrap">
+              <button id="headingColorToggleBtn" title="Heading Color"><img src="svg/md-editor/icon-heading-clor.svg?v=2026031715gu" alt="Heading Color" class="toolbar-icon"></button>
+              <div id="headingColorOptions" style="position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; padding: 8px; flex-direction: row; flex-wrap: wrap; max-width: 250px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; gap: 6px; display: none !important; flex: 1;">
+                <button class="heading-color-btn" data-color="#000000" title="Black" style="background-color: #000000; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+                <button class="heading-color-btn" data-color="#1f2937" title="Dark Gray" style="background-color: #1f2937; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+                <button class="heading-color-btn" data-color="#1e40af" title="Deep Blue" style="background-color: #1e40af; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+                <button class="heading-color-btn" data-color="#7c2d12" title="Deep Orange" style="background-color: #7c2d12; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+                <button class="heading-color-btn" data-color="#588157" title="Lime Green" style="background-color: #588157; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+                <button class="heading-color-btn" data-color="#7e22ce" title="Purple" style="background-color: #7e22ce; width: 24px; height: 24px; border-radius: 4px; border: 2px solid #e5e7eb; cursor: pointer;"></button>
+              </div>
+            </div>
+            <!-- Highlight -->
+            <div class="toolbar-inline-wrap color-highlight-wrap">
+              <button id="highlightToggleBtn" title="Highlight"><img src="svg/md-editor/icon-highlight.svg?v=2026031715gu" alt="Highlight" class="toolbar-icon"></button>
+              <div id="highlightOptions" class="color-picker-dropdown" style="display: none;">
+                <div style="padding: 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase;">Theme Colors</div>
+                <div id="highlightThemeColors" class="theme-colors-grid"></div>
+                <div style="padding: 8px 8px 4px 8px; font-size: 11px; font-weight: 600; color: #666; text-transform: uppercase; margin-top: 4px;">Standard Colors</div>
+                <div id="highlightStandardColors" class="standard-colors-row"></div>
+                <div style="padding: 8px; border-top: 1px solid #e5e7eb; margin-top: 8px; display: flex; gap: 8px; align-items: center;">
+                  <button id="removeHighlightBtn" style="background: #f3f4f6; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; flex: 1;">Remove Highlight</button>
+                  <input type="text" id="highlightColorHexInput" placeholder="#ffeb3b" style="width: 80px; padding: 6px; border: 1px solid #d1d5db; border-radius: 4px; font-family: monospace; font-size: 12px;">
+                  <input type="color" id="highlightColorControl" value="#ffeb3b" style="width: 40px; height: 32px; cursor: pointer; border: 1px solid #d1d5db; border-radius: 4px; padding: 2px;">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Alignment & Style -->
+        <div class="more-tools-section">
+          <div class="more-tools-label">Alignment &amp; Style</div>
+          <div class="more-tools-row">
+            <button id="alignLeftBtn" title="Align Left"><img src="svg/md-editor/icon-align-left.svg?v=2026031715gu" alt="Align Left" class="toolbar-icon"></button>
+            <button id="alignCenterBtn" title="Align Center"><img src="svg/md-editor/icon-align-center.svg?v=2026031715gu" alt="Align Center" class="toolbar-icon"></button>
+            <button id="alignRightBtn" title="Align Right"><img src="svg/md-editor/icon-align-right.svg?v=2026031715gu" alt="Align Right" class="toolbar-icon"></button>
+            <button id="quoteBtn" title="Toggle Quote (Ctrl+Q)" class="toggle-btn"><img src="svg/md-editor/icon-quote.svg?v=2026031715gu" alt="Quote" class="toolbar-icon"></button>
+            <button id="symbolsBtn" title="Insert Symbols"><img src="svg/md-editor/icon-symbols.svg?v=2026031715gu" alt="Symbols" class="toolbar-icon"></button>
+          </div>
+        </div>
+
+        <!-- Insert -->
+        <div class="more-tools-section">
+          <div class="more-tools-label">Insert</div>
+          <div class="more-tools-row">
+            <button id="mobileTableBtn" class="mobile-only-btn" title="Insert Table" onclick="document.getElementById('tableBtn').click();"><img src="svg/md-editor/icon-table.svg?v=2026031715gu" alt="Table" class="toolbar-icon"></button>
+            <button id="linkBtn" title="Link"><img src="svg/md-editor/icon-link.svg?v=2026031715gu" alt="Link" class="toolbar-icon"></button>
+            <button id="imageBtn" title="Add Image"><img src="svg/md-editor/icon-image.svg?v=2026031715gu" alt="Image" class="toolbar-icon"></button>
+            <button id="noteBtn" title="Add Note"><img src="svg/md-editor/icon-note.svg?v=2026031715gu" alt="Note" class="toolbar-icon"></button>
+            <button id="hrBtn" title="Horizontal Line"><svg width="18" height="18" viewBox="0 0 512 512"><path fill="currentColor" d="M32 256c0 17.67 14.33 32 32 32h384c17.67 0 32-14.33 32-32s-14.33-32-32-32H64c-17.67 0-32 14.33-32 32z"/></svg></button>
+            <button id="dashedLineBtn" title="Topic Divider (Dashed Line)"><img src="svg/md-editor/icon-dashed-line.svg?v=2026031715gu" alt="Dashed Line" class="toolbar-icon"></button>
+            <button id="anchorLinkBtn" title="Create/Link Anchors"><img src="svg/md-editor/icon-anchor-link.svg?v=2026031715gu" alt="Anchor Link" class="toolbar-icon"></button>
+          </div>
+        </div>
+
+        <!-- File -->
+        <div class="more-tools-section">
+          <div class="more-tools-label">File</div>
+          <div class="more-tools-row">
+            <button id="openLocalBtn" title="Open file from computer"><img src="svg/md-editor/icon-open-local.svg?v=2026031715gu" alt="Open Local" class="toolbar-icon"></button>
+            <button id="openCoursesBtn" title="Open file from courses"><img src="svg/md-editor/icon-open-courses.svg?v=2026031715gu" alt="Open Courses" class="toolbar-icon"></button>
+            <button id="editTableBtn" title="Edit table with Tables Generator"><img src="svg/md-editor/icon-edit-table.svg?v=2026031715gu" alt="Edit Table" class="toolbar-icon"></button>
+            <button id="htmlEditorBtn" title="Edit HTML/Source Code"><img src="svg/md-editor/icon-html-editor.svg?v=2026031715gu" alt="HTML Editor" class="toolbar-icon"></button>
+            <button id="combineFilesBtn" title="Combine HTML files"><img src="svg/md-editor/icon-combine-files.svg?v=2026031715gu" alt="Combine Files" class="toolbar-icon"></button>
+          </div>
+        </div>
+
+        <!-- Tools -->
+        <div class="more-tools-section">
+          <div class="more-tools-label">Tools</div>
+          <div class="more-tools-row">
+            <button id="clearBtn" title="Clear all content"><img src="svg/md-editor/icon-clear.svg?v=2026031715gu" alt="Clear" class="toolbar-icon"></button>
+            <button id="shortcutsBtn" title="Show keyboard shortcuts"><img src="svg/md-editor/icon-shortcuts.svg?v=2026031715gu" alt="Shortcuts" class="toolbar-icon"></button>
+            <button id="resetFontSizeBtn" title="Reset font size to default"><img src="svg/md-editor/icon-reset-font-size.svg?v=2026031715gu" alt="Reset Font Size" class="toolbar-icon"></button>
+          </div>
+        </div>
+
+      </div>
     </div>
   </div>
 
@@ -1664,7 +1908,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260430zx6"></script>
+  <script src="courses.generated.js?v=20260430125y"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -10527,9 +10771,39 @@ renderMathInElement(document.body, {
 
   <script src="js/user-identity.js?v=202602171mhr"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260430zx6"></script>
+    <script src="js/chat.js?v=20260430125y"></script>
 
 <script src="js/version-check.js?v=202602171mhr"></script>
+  <script src="js/mobile-nav.js?v=20260430125y"></script>
+  <script>
+    (function() {
+      var moreBtn = document.getElementById('moreToolsBtn');
+      var morePanel = document.getElementById('moreToolsPanel');
+      if (!moreBtn || !morePanel) return;
+
+      function toggleMore(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        morePanel.classList.toggle('open');
+      }
+
+      moreBtn.addEventListener('pointerdown', toggleMore);
+
+      document.addEventListener('pointerdown', function(e) {
+        if (morePanel.classList.contains('open') && !morePanel.contains(e.target) && e.target !== moreBtn) {
+          morePanel.classList.remove('open');
+        }
+      });
+
+      morePanel.addEventListener('click', function(e) {
+        var btn = e.target.closest('button');
+        if (btn && !btn.id.endsWith('ToggleBtn') && btn.id !== 'headingColorToggleBtn') {
+          morePanel.classList.remove('open');
+        }
+      });
+    })();
+  </script>
 </body>
 
 </html>
+

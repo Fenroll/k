@@ -650,6 +650,7 @@ class ChatFirebaseREST {
                                 userName: userProfile.displayName || userProfile.username,
                                 color: userProfile.color,
                                 avatar: userProfile.avatar,
+                                banner: userProfile.banner,
                                 isAdmin: userProfile.isAdmin || false,
                                 deviceCount: deviceCount,
                                 hasMobile: hasMobile,
@@ -1103,18 +1104,21 @@ class ChatUIManager {
             }
             .profile-modal-header {
                 width: 100%;
-                height: 64px;
+                height: 92px;
                 flex-shrink: 0;
+                background-size: cover;
+                background-position: center;
+                background-repeat: no-repeat;
             }
             .profile-modal-avatar-wrap {
-                margin-top: -36px;
-                margin-bottom: 10px;
+                margin-top: -34px;
+                margin-bottom: 6px;
                 position: relative;
                 display: inline-flex;
             }
             .profile-modal-avatar {
-                width: 72px;
-                height: 72px;
+                width: 68px;
+                height: 68px;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
@@ -1137,7 +1141,7 @@ class ChatUIManager {
                 border: 2px solid white;
             }
             .profile-modal-body {
-                padding: 0 16px 12px;
+                padding: 0 14px 8px;
                 width: 100%;
                 box-sizing: border-box;
             }
@@ -1157,7 +1161,7 @@ class ChatUIManager {
                 width: 100%;
                 height: 1px;
                 background: #f3f4f6;
-                margin: 10px 0;
+                margin: 8px 0;
             }
             .profile-modal-info {
                 width: 100%;
@@ -1165,8 +1169,8 @@ class ChatUIManager {
                 color: #4b5563;
                 display: flex;
                 flex-direction: column;
-                gap: 6px;
-                margin-bottom: 14px;
+                gap: 4px;
+                margin-bottom: 6px;
                 text-align: left;
             }
             .info-item {
@@ -1783,6 +1787,7 @@ class ChatUIManager {
           userName: meProfile.displayName || meProfile.username || fallbackName,
           color: meProfile.color || (typeof window.currentUser !== 'undefined' ? window.currentUser.color : '#588157') || '#588157',
           avatar: meProfile.avatar || (typeof window.currentUser !== 'undefined' ? window.currentUser.avatar : null) || null,
+          banner: meProfile.banner || (typeof window.currentUser !== 'undefined' ? window.currentUser.banner : null) || null,
           isAdmin: !!meProfile.isAdmin,
           hasMobile: false,
           isGuest: !!meProfile.isGuest,
@@ -2136,12 +2141,16 @@ class ChatUIManager {
     modalOverlay.className = 'user-profile-modal-overlay';
 
     const statusColor = isOnline ? '#22c55e' : '#9ca3af';
-    const headerBg = userColor;
+    const userBanner = typeof user.banner === 'string' && user.banner.length > 5 ? user.banner : '';
+    const safeBanner = userBanner ? this.escapeHtml(userBanner).replace(/'/g, '&#39;') : '';
+    const headerStyle = userBanner
+      ? `background-color: ${userColor}; background-image: url('${safeBanner}');`
+      : `background: ${userColor};`;
 
     const card = document.createElement('div');
     card.className = 'user-profile-modal';
     card.innerHTML = `
-        <div class="profile-modal-header" style="background: ${headerBg};"></div>
+        <div class="profile-modal-header" style="${headerStyle}"></div>
 
         <div class="profile-modal-avatar-wrap">
             ${hasAvatar
