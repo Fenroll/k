@@ -74,18 +74,18 @@
     </style>
     <title>Notes</title>
 
-    <script src="js/auth-guard.js?v=20260430125y"></script>
+    <script src="js/auth-guard.js?v=202604301efp"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=202602171mhr"></script>
-    <script src="courses.generated.js?v=20260430125y"></script>
+    <script src="js/user-identity.js?v=202604301efp"></script>
+    <script src="courses.generated.js?v=202604301efp"></script>
 
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=20260430125y">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202604301efp">
   <script src="js/desktop-nav.js?v=20260430nav4"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=20260430nav5">
     <script src="js/version-manager.js?v=2026031715gu"></script>
@@ -1358,6 +1358,8 @@
                 liveblocksRenderHash: '',
                 liveblocksLastSelections: {},
                 liveblocksEnabled: !!LIVEBLOCKS_AUTH_ENDPOINT,
+                collabProfiles: {},
+                collabProfilesRef: null,
                 localEditVersion: 0,
                 imageObserver: null,
                 savedImageRange: null,
@@ -1450,6 +1452,40 @@
                 if (value.startsWith('/')) return value;
                 if (/^(javascript|vbscript):/i.test(value)) return '';
                 return value;
+            }
+
+            function getCollabProfile(userId, fallback = {}) {
+                const uid = String(userId || '');
+                const current = state.currentUser || {};
+                const isMe = uid && (
+                    uid === String(current.userId || '') ||
+                    uid === String(current.uid || '') ||
+                    uid === String(current.legacyNotesId || '')
+                );
+                const profile = isMe ? current : ((state.collabProfiles && state.collabProfiles[uid]) || {});
+                const name = profile.displayName || profile.userName || profile.username || fallback.name || uid || 'Unknown';
+                const color = profile.color || fallback.color || colorFromUserId(uid);
+                const avatar = sanitizeAvatarUrl(
+                    profile.avatar ||
+                    profile.avatarUrl ||
+                    profile.photoURL ||
+                    profile.profileImage ||
+                    profile.profilePicture ||
+                    ''
+                );
+
+                return { name, color, avatar };
+            }
+
+            function startCollabProfileListener() {
+                if (state.collabProfilesRef || typeof firebase === 'undefined' || !firebase.database) return;
+                state.collabProfilesRef = firebase.database().ref('site_users');
+                state.collabProfilesRef.on('value', (snapshot) => {
+                    state.collabProfiles = snapshot.val() || {};
+                    if (state.liveblocksOthers) {
+                        renderLiveblocksOthers(state.liveblocksOthers, true);
+                    }
+                });
             }
 
             function escapeAttribute(value) {
@@ -1649,16 +1685,6 @@
                 const userId = state.currentUser?.userId || 'unknown';
                 return {
                     userId,
-                    name: state.currentUser?.displayName || state.currentUser?.userName || userId,
-                    color: state.currentUser?.color || colorFromUserId(userId),
-                    avatar: sanitizeAvatarUrl(
-                        state.currentUser?.avatar ||
-                        state.currentUser?.avatarUrl ||
-                        state.currentUser?.photoURL ||
-                        state.currentUser?.profileImage ||
-                        state.currentUser?.profilePicture ||
-                        ''
-                    ),
                     typing: !!state.localIsTyping,
                     selection: state.isEditorFocused ? getCurrentSelectionOffsets() : null,
                     ...overrides
@@ -1712,7 +1738,9 @@
 
                 const renderHash = JSON.stringify(entries.map(item => ({
                     userId: item.userId || '',
-                    name: item.name || '',
+                    profileName: getCollabProfile(item.userId, item).name,
+                    profileAvatar: getCollabProfile(item.userId, item).avatar,
+                    profileColor: getCollabProfile(item.userId, item).color,
                     typing: !!item.typing,
                     start: item.selection?.start ?? null,
                     end: item.selection?.end ?? null
@@ -1735,11 +1763,12 @@
                         });
 
                         const avatars = uniqueUsers.map((item) => {
-                            const color = item.color || colorFromUserId(item.userId);
-                            const name = item.name || 'Unknown';
+                            const profile = getCollabProfile(item.userId, item);
+                            const color = profile.color;
+                            const name = profile.name;
                             const initial = escapeHtml(name.charAt(0).toUpperCase() || '?');
                             const safeTitle = escapeHtml(name);
-                            const avatarUrl = sanitizeAvatarUrl(item.avatar || '');
+                            const avatarUrl = profile.avatar;
                             if (avatarUrl) {
                                 return `<span class="collab-avatar" title="${safeTitle}" style="background:${color}"><img src="${escapeAttribute(avatarUrl)}" alt="${safeTitle}" referrerpolicy="no-referrer"></span>`;
                             }
@@ -1801,17 +1830,7 @@
                                 const user = state.currentUser || await window.currentUserPromise;
                                 const payload = {
                                     room,
-                                    userId: String(user?.userId || 'unknown'),
-                                    name: String(user?.displayName || user?.userName || user?.userId || 'Unknown'),
-                                    color: String(user?.color || '#4ECDC4'),
-                                    avatar: sanitizeAvatarUrl(
-                                        user?.avatar ||
-                                        user?.avatarUrl ||
-                                        user?.photoURL ||
-                                        user?.profileImage ||
-                                        user?.profilePicture ||
-                                        ''
-                                    )
+                                    userId: String(user?.userId || 'unknown')
                                 };
 
                                 const isLocalFileOrigin =
@@ -2755,6 +2774,7 @@
                 } catch (error) {
                     console.error('Error loading current user:', error);
                 }
+                startCollabProfileListener();
 
                 state.courses = getCoursesFromGlobal();
                 state.filteredCourses = [...state.courses];
@@ -3095,7 +3115,7 @@
     </script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=20260430125y"></script>
-    <script src="js/mobile-nav.js?v=20260430125y"></script>
+    <script src="js/chat.js?v=202604301efp"></script>
+    <script src="js/mobile-nav.js?v=202604301efp"></script>
 </body>
 </html>

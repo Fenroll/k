@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260430125y"></script>
+  <script src="js/auth-guard.js?v=202604301efp"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -640,7 +640,7 @@
       filter: brightness(0) invert(1) !important;
     }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260430125y">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202604301efp">
   <script src="js/desktop-nav.js?v=20260430nav4"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=20260430nav5">
   <script src="js/version-manager.js?v=202603101mce"></script>
@@ -1399,7 +1399,7 @@
     updateAdminButtonVisibility();
   </script>
 
-  <script src="js/user-identity.js?v=202602171mhr"></script>
+  <script src="js/user-identity.js?v=202604301efp"></script>
   <!-- Mobile menu overlay -->
   <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
@@ -1407,7 +1407,7 @@
        FIREBASE & CHAT WIDGET
        ============================================ -->
   <!-- Initialize Chat Widget -->
-    <script src="js/chat.js?v=20260430125y"></script>
+    <script src="js/chat.js?v=202604301efp"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
@@ -1427,6 +1427,7 @@
       const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
       let initialized = false;
       let currentUserName = '';
+      let currentUserIdentitySet = new Set();
       let currentUserIsAdmin = false;
       let activeTab = 'general';
       let hoverPreviewWrap = null;
@@ -1552,11 +1553,19 @@
         hoverPreviewHideTimer = setTimeout(hideHoverPreview, 70);
       }
       let allRows = [];
-      let uploaderAvatarMap = new Map();
+      let uploaderProfileMap = new Map();
 
       function byId(id) { return document.getElementById(id); }
       function normalizeIdentity(v) { return String(v || '').trim().toLowerCase(); }
+      function addIdentity(set, value) {
+        const normalized = normalizeIdentity(value);
+        if (normalized) set.add(normalized);
+      }
       function isHttpUrl(v) { return /^https?:\/\//i.test(String(v || '').trim()); }
+      function isAvatarUrl(v) {
+        const value = String(v || '').trim();
+        return isHttpUrl(value) || value.startsWith('data:image/');
+      }
       function escapeHtml(v) { return String(v || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\"/g, '&quot;').replace(/'/g, '&#39;'); }
 
       function showStatus(message, isError) {
@@ -1756,27 +1765,42 @@
         } catch (_) { return ''; }
       }
 
-      async function loadUploaderAvatarMap(db) {
-        uploaderAvatarMap = new Map();
+      async function loadUploaderProfileMap(db) {
+        uploaderProfileMap = new Map();
         try {
-          const usersSnap = await db.ref('site_users').once('value');
+          const [usersSnap, mappingsSnap] = await Promise.all([
+            db.ref('site_users').once('value'),
+            db.ref('name_mappings').once('value').catch(() => ({ val: () => ({}) }))
+          ]);
           const users = usersSnap.val() || {};
+          const nameMappings = mappingsSnap.val() || {};
+          const profileByDisplayName = new Map();
           for (const uid of Object.keys(users)) {
             const user = users[uid] || {};
-            const avatar = isHttpUrl(user.avatar) ? String(user.avatar).trim() : '';
-            if (!avatar) continue;
+            const avatar = isAvatarUrl(user.avatar) ? String(user.avatar).trim() : '';
+            const displayName = String(user.displayName || user.userName || user.username || uid);
+            const profile = { displayName, avatar };
+            profileByDisplayName.set(normalizeIdentity(displayName), profile);
             const aliases = [uid, user.uid, user.userId, user.username, user.displayName, user.userName];
             for (const alias of aliases) {
               const normalized = normalizeIdentity(alias);
               if (!normalized) continue;
-              if (!uploaderAvatarMap.has(normalized)) uploaderAvatarMap.set(normalized, avatar);
+              if (!uploaderProfileMap.has(normalized)) uploaderProfileMap.set(normalized, profile);
+            }
+          }
+          for (const oldName of Object.keys(nameMappings)) {
+            const newName = nameMappings[oldName];
+            const profile = profileByDisplayName.get(normalizeIdentity(newName));
+            const oldKey = normalizeIdentity(oldName);
+            if (profile && oldKey && !uploaderProfileMap.has(oldKey)) {
+              uploaderProfileMap.set(oldKey, profile);
             }
           }
         } catch (_) {}
       }
 
-      function getUploaderAvatarUrl(name) {
-        return uploaderAvatarMap.get(normalizeIdentity(name)) || '';
+      function getUploaderProfile(name) {
+        return uploaderProfileMap.get(normalizeIdentity(name)) || { displayName: String(name || 'unknown'), avatar: '' };
       }
 
       function normalizeRecord(item, pathHint, keyHint) {
@@ -1848,9 +1872,7 @@
       function canDeleteRow(row) {
         if (!row || !row.key) return false;
         if (currentUserIsAdmin) return true;
-        const me = normalizeIdentity(currentUserName);
-        if (!me) return false;
-        return normalizeIdentity(row.uploader) === me;
+        return currentUserIdentitySet.has(normalizeIdentity(row.uploader));
       }
 
       async function loadFromWorkerBucket(bucketType) {
@@ -1950,7 +1972,9 @@
         const scope = scopeSelect.value;
 
         let rows = allRows.slice();
-        if (scope === 'mine' && currentUserName) rows = rows.filter((r) => String(r.uploader || '').toLowerCase() === currentUserName.toLowerCase());
+        if (scope === 'mine' && currentUserIdentitySet.size > 0) {
+          rows = rows.filter((r) => currentUserIdentitySet.has(normalizeIdentity(r.uploader)));
+        }
         rows = rows.filter((r) => !isAvatarRow(r));
         if (activeTab === 'general') rows = rows.filter((r) => !(isTextEditorRow(r) || isChatImagesRow(r) || isNotesImagesRow(r)));
         else if (activeTab === 'admin-text-editor') rows = currentUserIsAdmin ? rows.filter((r) => isTextEditorRow(r)) : [];
@@ -1976,15 +2000,17 @@
 
         tableBody.innerHTML = rows.map((r, idx) => {
           const safeName = escapeHtml(r.name);
-          const safeUploader = escapeHtml(r.uploader || 'unknown');
+          const uploaderProfile = getUploaderProfile(r.uploader);
+          const uploaderLabel = uploaderProfile.displayName || r.uploader || 'unknown';
+          const safeUploader = escapeHtml(uploaderLabel);
           const resolvedOpenUrl = String(getResolvedUrlForRow(r) || r.url || '');
           const safeUrl = escapeHtml(resolvedOpenUrl);
           const safeDate = escapeHtml(toDateString(r.uploadedAt));
           const safeIcon = escapeHtml(getFileTypeIconPath(r));
           const canOpenInBrowser = !shouldHideOpenAction(r);
-          const avatarUrl = getUploaderAvatarUrl(r.uploader);
+          const avatarUrl = uploaderProfile.avatar || '';
           const safeAvatarUrl = escapeHtml(avatarUrl);
-          const uploaderInitial = escapeHtml((String(r.uploader || '?').trim().charAt(0) || '?').toUpperCase());
+          const uploaderInitial = escapeHtml((String(uploaderLabel || '?').trim().charAt(0) || '?').toUpperCase());
           const uploaderHtml = avatarUrl
             ? ('<span style="display:inline-flex;align-items:center;gap:8px;">' +
                 '<a href="' + safeAvatarUrl + '" target="_blank" rel="noopener noreferrer" title="Open avatar" style="display:inline-flex;width:24px;height:24px;border-radius:999px;overflow:hidden;border:1px solid #d1d5db;background:#f3f4f6;text-decoration:none;">' +
@@ -2183,9 +2209,18 @@
           try {
             const user = await window.currentUserPromise;
             currentUserName = (user && (user.userName || user.username || user.displayName)) || '';
+            currentUserIdentitySet = new Set();
+            addIdentity(currentUserIdentitySet, user && user.userName);
+            addIdentity(currentUserIdentitySet, user && user.username);
+            addIdentity(currentUserIdentitySet, user && user.displayName);
+            addIdentity(currentUserIdentitySet, user && user.uid);
+            addIdentity(currentUserIdentitySet, user && user.userId);
+            addIdentity(currentUserIdentitySet, user && user.legacyChatId);
+            addIdentity(currentUserIdentitySet, user && user.legacyNotesId);
             currentUserIsAdmin = Boolean(user && user.isAdmin);
           } catch (_) {
             currentUserName = '';
+            currentUserIdentitySet = new Set();
             currentUserIsAdmin = false;
           }
         }
@@ -2193,7 +2228,7 @@
         if (!currentUserIsAdmin && activeTab !== 'general') activeTab = 'general';
         syncViewCycleButton();
 
-        await loadUploaderAvatarMap(db);
+        await loadUploaderProfileMap(db);
         await loadUploads(db);
       }
 
@@ -2614,6 +2649,10 @@
       const card = document.getElementById('financeMyDonationCard');
       const textEl = document.getElementById('financeMyDonationText');
       if (!card || !textEl) return;
+      if (state.isAdmin) {
+        card.style.display = 'none';
+        return;
+      }
 
       const meNames = new Set(getCurrentUserIdentityNames());
       const meUid = normalizeText(state.currentUser?.uid || state.currentUser?.userId || '');
@@ -2681,6 +2720,13 @@
     function setLastUpdate(meta) {
       const lastUpdateEl = document.getElementById('financeLastUpdate');
       if (!lastUpdateEl) return;
+      if (state.isAdmin) {
+        lastUpdateEl.style.display = 'none';
+        lastUpdateEl.textContent = '';
+        return;
+      }
+
+      lastUpdateEl.style.display = '';
 
       if (!meta || !meta.updatedAt) {
         lastUpdateEl.textContent = 'Последна редакция: няма';
@@ -2946,6 +2992,6 @@
     }
   }
 </script>
-<script src="js/mobile-nav.js?v=20260430125y"></script>
+<script src="js/mobile-nav.js?v=202604301efp"></script>
 </body>
 </html>

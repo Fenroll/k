@@ -128,7 +128,7 @@ async function getFirebaseUserCached(userId, env) {
   return value;
 }
 
-async function authorizeLiveblocks({ userId, room, userInfo, env }) {
+async function authorizeLiveblocks({ userId, room, env }) {
   const secret = sanitizeString(env.LIVEBLOCKS_SECRET_KEY);
   if (!secret) {
     throw new Error("Missing LIVEBLOCKS_SECRET_KEY");
@@ -148,7 +148,6 @@ async function authorizeLiveblocks({ userId, room, userInfo, env }) {
     body: JSON.stringify({
       userId,
       permissions,
-      userInfo,
     }),
   });
 
@@ -200,29 +199,9 @@ export default {
         return json({ error: "Missing userId" }, 401, corsHeaders);
       }
 
-      let firebaseUser = null;
-      try {
-        firebaseUser = await getFirebaseUserCached(userId, env);
-      } catch (_error) {
-      }
-
-      if (firebaseUser && typeof firebaseUser !== "object") {
-        firebaseUser = null;
-      }
-
-      const userInfo = {
-        name: sanitizeString(firebaseUser?.displayName, sanitizeString(body.name, userId)),
-        color: sanitizeString(firebaseUser?.color, sanitizeString(body.color, "#4ECDC4")),
-        avatar: sanitizeString(
-          firebaseUser?.avatar,
-          sanitizeString(firebaseUser?.avatarUrl, sanitizeString(body.avatar, ""))
-        ),
-      };
-
       const authResponse = await authorizeLiveblocks({
         userId,
         room,
-        userInfo,
         env,
       });
 

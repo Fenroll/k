@@ -16,10 +16,10 @@
     <title>Anamnesis</title>
 
     <!-- Scripts -->
-    <script src="js/auth-guard.js?v=20260430125y"></script>
+    <script src="js/auth-guard.js?v=202604301efp"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=20260127"></script>
+    <script src="js/user-identity.js?v=202604301efp"></script>
 
     <!-- Fonts & Icons -->
     <link rel="icon" href="favicon.svg?v=7" type="image/svg+xml">
@@ -551,15 +551,29 @@
         }
 
         @media (max-width: 900px) {
+            body {
+                height: 100dvh;
+                min-height: 100dvh;
+                overflow: hidden;
+            }
+
             /* Main Layout */
             .main-content {
                 padding-left: 0;
+                width: 100%;
+                height: calc(100dvh - 60px - env(safe-area-inset-bottom));
+                min-height: 0;
+                overflow: hidden;
             }
 
             .anamnesis-layout {
                 display: flex;
                 padding: 0;
                 gap: 0;
+                width: 100%;
+                height: 100%;
+                min-height: 0;
+                flex: 1;
             }
 
             #side-menu {
@@ -580,18 +594,27 @@
             .patient-list-panel {
                 width: 100%;
                 flex: 1;
+                height: 100%;
+                min-height: 0;
                 border-radius: 0;
                 border: 0;
                 display: flex;
+                flex-direction: column;
             }
             .workspace-panel {
                 position: fixed;
-                top: 0; left: 0; right: 0; bottom: 0;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: calc(60px + env(safe-area-inset-bottom));
                 width: 100%;
+                max-width: 100vw;
+                min-height: 0;
                 z-index: 200; /* Above list */
                 display: none; /* Hidden by default */
                 gap: 0;
                 flex-direction: column;
+                overflow: hidden;
             }
             .workspace-panel.active {
                 display: flex;
@@ -602,15 +625,25 @@
                 padding: 16px;
                 border-radius: 0;
                 border: 0;
+                width: 100%;
+                min-height: 100%;
+                box-sizing: border-box;
             }
             .workspace-content {
                 padding: 0;
+                margin: 0;
+                flex: 1;
+                min-height: 0;
+                width: 100%;
+                overflow-y: auto;
+                -webkit-overflow-scrolling: touch;
             }
             .workspace-header {
                 padding: 12px 16px;
                 border-radius: 0;
                 border-left: 0;
                 border-right: 0;
+                flex: 0 0 auto;
             }
             .workspace-title {
                 font-size: 1.2rem;
@@ -654,7 +687,7 @@
             }
         }
     </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260430125y">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202604301efp">
   <script src="js/desktop-nav.js?v=20260430nav4"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=20260430nav5">
 </head>
@@ -1003,7 +1036,7 @@
 
     <!-- CHAT SYSTEM -->
     <script src="js/presence.js?v=20260131"></script>
-    <script src="js/chat.js?v=20260430125y"></script>
+    <script src="js/chat.js?v=202604301efp"></script>
 
     <script>
         function handleLogout() {
@@ -1058,6 +1091,6 @@
 
         updateAdminButtonVisibility();
     </script>
-<script src="js/mobile-nav.js?v=20260430125y"></script>
+<script src="js/mobile-nav.js?v=202604301efp"></script>
 </body>
 </html>

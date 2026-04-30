@@ -612,7 +612,16 @@ function updateHtmlFiles(version) {
         updated = true;
       }
 
-      // 5. Replace shared mobile navigation assets
+      // 5. Replace js/user-identity.js script tags
+      const userIdentityPattern = /<script src="js\/user-identity\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
+      const newUserIdentityTag = `<script src="js/user-identity.js?v=${version}"></script>`;
+
+      if (userIdentityPattern.test(content)) {
+        content = content.replace(userIdentityPattern, newUserIdentityTag);
+        updated = true;
+      }
+
+      // 6. Replace shared mobile navigation assets
       const mobileNavCssPattern = /<link rel="stylesheet" href="css\/mobile-nav(?:-[^"']+)?\.css(?:\?v=[a-zA-Z0-9_]+)?">/g;
       const newMobileNavCssTag = `<link rel="stylesheet" href="css/mobile-nav.css?v=${version}">`;
 

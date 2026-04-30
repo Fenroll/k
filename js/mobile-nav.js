@@ -3,7 +3,7 @@
     if (document.getElementById('bottom-nav')) return;
 
     const THEME_KEY = 'index-copy-theme';
-    const NAV_CACHE_KEY = 'coursebook-mobile-nav-html-v1';
+    const NAV_CACHE_KEY = 'coursebook-mobile-nav-html-v2';
     const CRITICAL_STYLE_ID = 'coursebook-mobile-nav-critical';
 
     function installCriticalMobileNavStyles() {
@@ -132,9 +132,6 @@
 
     <div class="others-menu-overlay" id="others-menu-overlay">
         <div class="others-menu-content">
-            <a href="https://elearn.mu-varna.bg/ultra/course" class="others-menu-item">
-                <img src="svg/icon-blackboard.svg" alt="Blackboard" width="20" height="20"> Blackboard
-            </a>
             <a href="account.html" class="others-menu-item">
                 <img src="svg/icon-account.svg" alt="Account" width="20" height="20"> Account
             </a>

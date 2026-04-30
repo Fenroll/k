@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="bg">
 <head>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=20260430125y"></script>
+  <script src="js/auth-guard.js?v=202604301efp"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -49,7 +49,7 @@
   <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
 
   <style>
-  body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; overflow-y: scroll; }
+  body { background: #f2f4f1; font-family: 'Open Sans', Arial, sans-serif; margin: 0; overflow-y: scroll; }
   .layout { display: flex; min-height: 100vh; }
   /* Main content */
   .main-content {
@@ -89,15 +89,15 @@
 
   /* Current Information Panel */
   .info-panel {
-    background: linear-gradient(180deg, #fbfdf9 0%, #ffffff 100%);
-    border-radius: 8px;
-    padding: 24px;
-    margin-top: 24px;
-    box-shadow: 0 6px 18px rgba(52, 78, 65, 0.12);
+    background: #fff;
+    border-radius: 10px;
+    padding: 22px 24px;
+    margin-top: 32px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
     position: relative;
-    min-height: 50px; /* Add this to reserve space */
-    transition: opacity 0.3s ease-in-out; /* Add for smooth transition */
-    border: 1px solid #d8e2d2;
+    min-height: 50px;
+    transition: opacity 0.3s ease-in-out;
+    border: 1px solid #dde5d8;
   }
 
   .schedule-notes-header {
@@ -117,40 +117,41 @@
   }
 
   .schedule-notes-title {
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 700;
-    letter-spacing: 0.01em;
-    color: #3a5a40;
+    letter-spacing: -0.01em;
+    color: #2d4a35;
     line-height: 1.2;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
   }
 
   .schedule-notes-edit-btn {
     position: absolute;
     top: 0;
     right: 0;
-    border: none;
-    border-radius: 6px;
-    padding: 7px 12px;
-    background: #588157;
-    color: #fff;
-    font-size: 13px;
+    border: 1px solid #c8d9c0;
+    border-radius: 7px;
+    padding: 9px 16px;
+    background: #f0f5ee;
+    color: #3a5a40;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: all 0.18s;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
   }
 
   .schedule-notes-edit-icon {
-    width: 13px;
-    height: 13px;
+    width: 15px;
+    height: 15px;
     flex: 0 0 auto;
   }
 
   .schedule-notes-edit-btn:hover {
-    background: #344e41;
+    background: #ddebd6;
+    border-color: #a3b18a;
   }
 
   .schedule-notes-last-edit {
@@ -230,13 +231,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 20px;
-    margin-bottom: 12px; /* Reduced from 24px */
+    gap: 16px;
+    margin-bottom: 12px;
     background: #fff;
-    padding: 16px 150px 16px 24px;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    padding: 10px 16px;
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
     position: relative;
+    border: 1px solid #e5e9e2;
   }
 
   .week-btn {
@@ -255,9 +257,9 @@
   }
 
   .week-btn:hover {
-    background: #344e41;
+    background: #3a5a40;
     transform: translateY(-1px);
-    box-shadow: 0 2px 8px rgba(124,58,237,0.3);
+    box-shadow: 0 2px 8px rgba(52,78,65,0.25);
   }
 
   .week-btn:disabled {
@@ -267,31 +269,39 @@
   }
 
   .week-edit-btn {
-    background: #588157;
+    background: #f0f5ee;
+    border: 1px solid #c8d9c0 !important;
+    color: #3a5a40 !important;
     position: absolute;
-    right: 24px;
+    right: 16px;
     top: 50%;
     transform: translateY(-50%);
+    box-shadow: none;
   }
 
   .week-edit-btn:hover {
-    background: #344e41;
+    background: #ddebd6;
+    border-color: #a3b18a !important;
     transform: translateY(calc(-50% - 1px));
+    box-shadow: none;
   }
 
   .week-info {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
-    color: #374151;
+    color: #1f2937;
     text-align: center;
-    padding: 0 10px; /* Minimal padding */
+    min-width: 210px;
+    letter-spacing: -0.01em;
+    white-space: nowrap;
   }
 
   .week-number {
-    color: #588157;
+    color: #6b7280;
     font-size: 14px;
+    font-weight: 500;
     display: block;
-    margin-top: 4px;
+    margin-top: 3px;
   }
 
   /* Vertical Schedule Grid Styles */
@@ -308,12 +318,11 @@
 
   .calendar-wrapper {
     background: #fff;
-    border-radius: 8px; /* Reduced from 16px */
-    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    border-radius: 10px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.05);
     max-width: 100%;
     margin: 0 auto;
-    border: 1px solid #d3cdcd;
-    /* Force clipping of sticky elements */
+    border: 1px solid #dde5d8;
     mask-image: radial-gradient(white, black);
     -webkit-mask-image: -webkit-radial-gradient(white, black);
     overflow: hidden;
@@ -339,7 +348,7 @@
     .main-content {
       flex: 1;
       margin-left: 200px;
-      background: #f5f5f5;
+      background: #f2f4f1;
       padding: 24px !important;
       box-sizing: border-box;
       display: flex;
@@ -378,13 +387,12 @@
     }
 
     .week-selector {
-      justify-content: center;
-      min-height: 64px;
+      min-height: 0;
       margin-bottom: 0;
-      padding: 12px 150px 12px 18px;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06);
+      padding: 10px 16px;
+      border: 1px solid #e5e9e2;
+      border-radius: 10px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
     }
 
     .week-btn {
@@ -407,9 +415,9 @@
     }
 
     .info-panel {
-      margin-top: 16px;
-      border: 1px solid #e5e7eb;
-      box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06);
+      margin-top: 8px;
+      border: 1px solid #dde5d8;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.07), 0 4px 12px rgba(0,0,0,0.04);
       background: #fff;
     }
   }
@@ -434,22 +442,37 @@
   .header-cell {
     background-color: var(--col-fern);
     color: white;
-    font-weight: 600;
+    font-weight: 700;
     text-align: center;
-    padding: 12px 4px; /* Reduced from 16px */
+    padding: 14px 4px;
     position: sticky;
     top: 0;
     z-index: 100;
-    grid-row: 1 / span 3; /* Reduced from span 4 */
+    grid-row: 1 / span 3;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    font-size: 14px; /* Reduced from 15px */
-    border-right: 1px solid rgba(255,255,255,0.2);
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    line-height: 1.2;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-right: 1px solid rgba(255,255,255,0.15);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+    line-height: 1.3;
     isolation: isolate;
+    gap: 3px;
+  }
+
+  .header-cell .header-date {
+    font-size: 18px;
+    font-weight: 300;
+    opacity: 0.95;
+    line-height: 1;
+    letter-spacing: 0;
+  }
+
+  .header-cell.current-day-header {
+    background-color: #2d5a3d;
   }
 
   .header-cell.time-header {
@@ -470,35 +493,36 @@
   .time-label {
     grid-column: 1;
     text-align: right;
-    padding-right: 4px;
-    color: #888;
+    padding-right: 5px;
+    color: #9ca3af;
     font-size: 10px;
+    font-weight: 500;
     position: relative;
-    border-right: 1px solid #eee;
+    border-right: 1px solid #e8ede5;
     pointer-events: none;
   }
 
   /* Grid Lines */
   .grid-line {
     grid-column: 2 / -1;
-    border-top: 1px solid #f4f4f4;
+    border-top: 1px solid #f0f0ee;
     pointer-events: none;
   }
 
   .grid-line.hour-marker {
-    border-top: 1px solid #e0e0e0;
+    border-top: 1px solid #dde5d8;
   }
 
   /* Event Card */
   .event-card {
     margin: 1px 2px;
     padding: 4px 6px;
-    border-radius: 4px;
+    border-radius: 6px;
     font-size: 13px; /* Increased base size */
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    box-shadow: none;
     line-height: 1.2;
     cursor: pointer;
     transition: transform 0.1s;
@@ -640,39 +664,39 @@
 
   /* Types */
   .type-exercise {
-    background: linear-gradient(135deg, #dbeafe 0%, #91c3fd 100%);
-    border-left: 3px solid #2563eb;
-    color: #1e40af;
+    background: #93c5fd;
+    border: 1.5px solid #1d4ed8;
+    color: #1e3a8a;
   }
 
   .type-lecture {
-    background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-    border-left: 3px solid #9ca3af;
-    color: #4b5563;
+    background: #e8ecf0;
+    border: 1.5px solid #94a3b8;
+    color: #334155;
   }
 
   .type-important-lecture {
-    background: linear-gradient(135deg, #e5e7eb 0%, #dad7cd 110%);
-    border-left: 3px solid #646c7e;
-    color: #374151;
+    background: #c7d2fe;
+    border: 1.5px solid #6366f1;
+    color: #312e81;
   }
 
   .type-exam {
-    background: linear-gradient(135deg, #e2aa98 0%, #d87060 100%);
-    border-left: 3px solid #b34d41;
-    color: #7a2f26;
+    background: #fca5a5;
+    border: 1.5px solid #b91c1c;
+    color: #450a0a;
   }
 
   .type-test {
-    background: linear-gradient(135deg, #d1fae5 0%, #6ee7b7 100%);
-    border-left: 3px solid #732c2c;
-    color: #047857;
+    background: #6ee7b7;
+    border: 1.5px solid #047857;
+    color: #022c22;
   }
 
   .type-makeup {
-    background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
-    border-left: 3px solid #f97316;
-    color: #c2410c;
+    background: #fbbf24;
+    border: 1.5px solid #92400e;
+    color: #451a03;
   }
 
   /* Compact mode for mobile */
@@ -805,15 +829,16 @@
 
   .modal-content {
     background: #fff;
-    border-radius: 16px;
-    padding: 32px;
-    max-width: 500px;
+    border-radius: 14px;
+    padding: 28px;
+    max-width: 480px;
     width: 90%;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-    animation: slideIn 0.3s ease;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.15), 0 32px 64px rgba(0,0,0,0.12);
+    animation: slideIn 0.25s ease;
     position: relative;
+    border: 1px solid #e5e7eb;
   }
 
   @keyframes slideIn {
@@ -853,35 +878,37 @@
   /* Exam card styles */
   .exam-card {
     background: #fff;
-    border-radius: 12px;
-    padding: 12px 14px 14px 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-left: 4px solid #588157;
+    border-radius: 10px;
+    padding: 14px 16px 16px 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 12px rgba(0,0,0,0.05);
+    border: 1px solid #d8e4d0;
     cursor: pointer;
-    transition: all 0.2s ease;
+    transition: all 0.18s ease;
   }
 
   .exam-card:hover {
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1), 0 8px 20px rgba(52,78,65,0.1);
+    border-color: #a3b18a;
     transform: translateY(-2px);
   }
 
   .exam-card-header {
     margin-bottom: 10px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #edf0eb;
   }
 
   .exam-card-title {
-    color: #588157;
-    font-size: 16px;
+    color: #3a5a40;
+    font-size: 15px;
     font-weight: 700;
-    margin: 0;
+    margin: 0 0 2px 0;
+    letter-spacing: -0.01em;
   }
 
   .exam-card-subtitle {
     color: #6b7280;
-    font-size: 13px;
+    font-size: 12.5px;
     margin: 0;
   }
 
@@ -933,24 +960,25 @@
   .exam-info-item {
     display: flex;
     flex-direction: column;
-    padding: 4px 8px;
-    background: #f9fafb;
-    border-radius: 4px;
+    padding: 6px 10px;
+    background: #f8faf6;
+    border-radius: 6px;
+    border: 1px solid #edf0eb;
   }
 
   .exam-info-label {
-    color: #6b7280;
-    font-size: 14px;
-    font-weight: 500;
-    margin-bottom: 3px;
+    color: #888;
+    font-size: 10.5px;
+    font-weight: 600;
+    margin-bottom: 2px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.6px;
   }
 
   .exam-info-value {
     color: #111827;
-    font-size: 13.5px;
-    font-weight: 500;
+    font-size: 13px;
+    font-weight: 600;
     text-align: left;
   }
 
@@ -966,50 +994,62 @@
   }
 
   .modal-title {
-    margin: 0 0 8px 0;
-    color: #588157;
-    font-size: 1.8em;
+    margin: 0 0 6px 0;
+    color: #2d4a35;
+    font-size: 1.45em;
     font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.25;
+    padding-right: 36px;
   }
 
   .modal-type {
     display: inline-block;
-    background: #dad7cd;
-    color: #344e41;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 0.9em;
+    background: #eef3eb;
+    color: #3a5a40;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.78em;
     font-weight: 600;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
+    border: 1px solid #c8d9c0;
+    letter-spacing: 0.01em;
   }
 
   .modal-info {
-    margin: 16px 0;
+    margin: 14px 0;
   }
 
   .modal-info-row {
     display: flex;
-    align-items: flex-start;
-    margin-bottom: 12px;
-    gap: 12px;
+    align-items: center;
+    padding: 9px 12px;
+    margin-bottom: 5px;
+    gap: 11px;
+    background: #f8faf7;
+    border: 1px solid #edf0eb;
+    border-radius: 8px;
   }
 
   .modal-info-icon {
     flex-shrink: 0;
-    width: 20px;
-    height: 20px;
+    width: 17px;
+    height: 17px;
     fill: #588157;
+    opacity: 0.8;
   }
 
   .modal-info-label {
     font-weight: 600;
-    color: #374151;
-    min-width: 100px;
+    color: #4b5563;
+    min-width: 95px;
+    font-size: 13px;
   }
 
   .modal-info-value {
-    color: #6b7280;
+    color: #111827;
     flex: 1;
+    font-size: 13px;
   }
 
   #modalAdditionalInfo {
@@ -1426,7 +1466,7 @@
     }
   }
   .schedule-notes-modal-content {
-    max-width: 760px;
+    max-width: 720px;
     width: calc(100% - 32px);
   }
 
@@ -1438,33 +1478,47 @@
   }
 
   .schedule-notes-modal-actions {
-    margin-top: 12px;
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid #edf0eb;
     display: flex;
     justify-content: flex-end;
-    gap: 10px;
+    gap: 8px;
   }
 
   .schedule-notes-btn {
-    border: none;
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-size: 14px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 9px 18px;
+    font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
+    transition: all 0.18s;
   }
 
   .schedule-notes-btn.cancel {
+    background: #f3f4f6;
+    color: #374151;
+    border-color: #d1d5db;
+  }
+
+  .schedule-notes-btn.cancel:hover {
     background: #e5e7eb;
-    color: #111827;
+    border-color: #9ca3af;
   }
 
   .schedule-notes-btn.save {
     background: #588157;
     color: #fff;
+    border-color: #4a6e47;
+  }
+
+  .schedule-notes-btn.save:hover {
+    background: #3a5a40;
   }
 
   .schedule-notes-btn:disabled {
-    opacity: 0.7;
+    opacity: 0.6;
     cursor: not-allowed;
   }
 
@@ -1749,7 +1803,7 @@
     border-color: #3f3f3f !important;
   }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260430125y">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202604301efp">
   <script src="js/desktop-nav.js?v=20260430nav4"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=20260430nav5">
   <script src="js/version-manager.js?v=202603151sxu"></script>
@@ -2042,7 +2096,7 @@
       <button class="modal-close" type="button" onclick="closeScheduleNotesModal()">×</button>
       <h2 class="modal-title">Edit Schedule Notes</h2>
       <div id="scheduleNotesModalError" class="schedule-notes-modal-error"></div>
-      <textarea id="scheduleNotesEditor" style="width: 100%; min-height: 320px; resize: vertical; padding: 12px; border: 1px solid #d1d5db; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px;"></textarea>
+      <textarea id="scheduleNotesEditor" style="width: 100%; min-height: 320px; resize: vertical; padding: 14px; border: 1px solid #dde5d8; border-radius: 8px; box-sizing: border-box; font-family: inherit; font-size: 14px; line-height: 1.65; background: #f8faf7; color: #1f2937; outline: none; transition: border-color 0.18s;" onfocus="this.style.borderColor='#588157'" onblur="this.style.borderColor='#dde5d8'"></textarea>
       <div class="schedule-notes-modal-actions">
         <button id="cancelScheduleNotesBtn" type="button" class="schedule-notes-btn cancel" onclick="closeScheduleNotesModal()">Cancel</button>
         <button id="saveScheduleNotesBtn" type="button" class="schedule-notes-btn save" onclick="saveScheduleNotesFromModal()">Save</button>
@@ -2876,11 +2930,11 @@
               const m = date.getMonth() + 1;
               const dateStr = `${d}.${m < 10 ? '0' + m : m}`;
               // Using divs for flex column layout
-              cell.innerHTML = `<div>${days[i]}</div><div style="font-weight:400; font-size: 0.9em; opacity: 0.9; margin-top: 2px;">${dateStr}</div>`;
+              cell.innerHTML = `<div style="font-size:10px;font-weight:700;letter-spacing:0.08em;opacity:0.7;">${days[i]}</div><div style="font-size:20px;font-weight:300;letter-spacing:-0.01em;margin-top:2px;opacity:0.95;">${dateStr}</div>`;
 
               // Highlight current day
               if (days[i] === currentDay) {
-                  cell.style.backgroundColor = 'var(--col-pine)'; // Darker highlight
+                  cell.style.backgroundColor = 'var(--col-pine)'; // Current day highlight
               } else {
                   cell.style.backgroundColor = ''; // Reset (uses CSS default)
               }
@@ -3093,7 +3147,7 @@
       const headerCells = grid.querySelectorAll('.header-cell:not(.time-header)');
       const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
       headerCells.forEach((cell, i) => {
-        cell.innerHTML = `<div>${days[i]}</div><div style="font-weight:400; font-size: 0.9em; opacity: 0.55; margin-top: 2px;">--.--</div>`;
+        cell.innerHTML = `<div style="font-size:10px;font-weight:700;letter-spacing:0.08em;opacity:0.7;">${days[i]}</div><div style="font-size:20px;font-weight:300;letter-spacing:-0.01em;margin-top:2px;opacity:0.4;">--</div>`;
         cell.style.backgroundColor = '';
       });
 
@@ -4003,12 +4057,12 @@
          CHAT SYSTEM - Complete (Firebase REST + UI)
          ============================================ -->
 
-<script src="js/user-identity.js?v=202602171mhr"></script>
+<script src="js/user-identity.js?v=202604301efp"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260430125y"></script>
+    <script src="js/chat.js?v=202604301efp"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202602171mhr"></script>
-<script src="js/mobile-nav.js?v=20260430125y"></script>
+<script src="js/mobile-nav.js?v=202604301efp"></script>
 </body>
     </html>

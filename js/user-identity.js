@@ -31,13 +31,13 @@ class CurrentUser {
     let userName = localStorage.getItem('anonymous_userName');
     if (!userName) {
       const adjectives = [
-        'Умен', 'Бърз', 'Силен', 'Весел', 'Смелен',
-        'Спокоен', 'Оптимистичен', 'Брилянтен', 'Всеобхватен', 'Бдителен', 'Скромен',
-        'Остър', 'Модерен', 'Елегантен', 'Енергичен', 'Креативен'
+        'Smart', 'Quick', 'Steady', 'Bright', 'Calm',
+        'Curious', 'Focused', 'Brave', 'Kind', 'Sharp',
+        'Modern', 'Creative', 'Patient', 'Helpful', 'Quiet'
       ];
       const nouns = [
-        'Студент', 'Лекар', 'Учен', 'Гений', 'Мъдрец',
-        'Тигър', 'Дракон', 'Лъв', 'Вълк', 'Доктор', 'Професор'
+        'Student', 'Doctor', 'Scholar', 'Reader', 'Medic',
+        'Tiger', 'Dragon', 'Lion', 'Wolf', 'Professor', 'Helper'
       ];
       userName = `${adjectives[Math.floor(Math.random() * adjectives.length)]} ${nouns[Math.floor(Math.random() * nouns.length)]}`;
       localStorage.setItem('anonymous_userName', userName);

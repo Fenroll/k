@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="bg">
 <head>
-    <script src="js/auth-guard.js?v=20260430125y"></script>
+    <script src="js/auth-guard.js?v=202604301efp"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Fira+Sans:wght@400;500;700&family=Rubik:wght@400;500;700&display=swap">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=20260430125y">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202604301efp">
     <style>
         :root {
             --page-bg: #eef1ec;
@@ -234,6 +234,7 @@
         .color-value {
             width: 30px;
             height: 30px;
+            flex: 0 0 30px;
             border-radius: 50%;
             border: 3px solid #fff;
             box-shadow: 0 0 0 1px #cbd5cb;
@@ -241,6 +242,7 @@
         .banner-value {
             width: 86px;
             height: 34px;
+            flex: 0 0 86px;
             border-radius: 10px;
             border: 3px solid #fff;
             box-shadow: 0 0 0 1px #cbd5cb, 0 6px 14px rgba(20, 32, 23, 0.10);
@@ -393,6 +395,11 @@
         }
 
         input[type="color"] {
+            width: 58px;
+            height: 42px;
+            max-width: 58px;
+            min-width: 58px;
+            flex: 0 0 58px;
             border: 1px solid #cbd5cb;
             border-radius: 12px;
             padding: 4px;
@@ -545,6 +552,22 @@
             .data-value {
                 flex: 1 1 auto;
                 white-space: normal;
+            }
+
+            .color-value {
+                width: 30px;
+                height: 30px;
+                flex: 0 0 30px;
+                min-width: 30px;
+                max-width: 30px;
+            }
+
+            .banner-value {
+                width: 86px;
+                height: 34px;
+                flex: 0 0 86px;
+                min-width: 86px;
+                max-width: 86px;
             }
 
             .change-btn {
@@ -831,7 +854,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
 
     <!-- Нашият скрипт за акаунти -->
-    <script src="./js/account-system.js?v=20260430125y"></script>
+    <script src="./js/account-system.js?v=202604301efp"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/version-check.js?v=202602171mhr"></script>
     <script>

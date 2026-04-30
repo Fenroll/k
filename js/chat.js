@@ -870,6 +870,14 @@ class ChatUIManager {
     // Check all possible sources for user info (avatar, color)
     let avatar = null;
     let color = null;
+    const current = typeof window.currentUser !== 'undefined' ? window.currentUser : null;
+    const idText = String(userId || '');
+
+    if (current && idText && (idText === String(current.userId || '') || idText === String(current.uid || '') || idText === String(current.legacyChatId || ''))) {
+      avatar = current.avatar || avatar;
+      color = current.color || color;
+      if (avatar && color) return { avatar, color };
+    }
 
     // 1. Check userProfiles (site_users) by ID
     if (this.userProfiles && userId) {
@@ -883,11 +891,14 @@ class ChatUIManager {
 
     // 2. Check userProfiles by name (case-insensitive)
     if (this.userProfiles && userName) {
-      const searchName = userName.toLowerCase();
+      const searchNames = Array.from(new Set([
+        String(userName || '').toLowerCase(),
+        String(this.resolveName(userName) || '').toLowerCase()
+      ].filter(Boolean)));
       const profile = Object.values(this.userProfiles).find(p =>
-        (p.username && p.username.toLowerCase() === searchName) ||
-        (p.displayName && p.displayName.toLowerCase() === searchName) ||
-        (p.userName && p.userName.toLowerCase() === searchName)
+        searchNames.includes(String(p.username || '').toLowerCase()) ||
+        searchNames.includes(String(p.displayName || '').toLowerCase()) ||
+        searchNames.includes(String(p.userName || '').toLowerCase())
       );
       if (profile) {
         avatar = avatar || profile.avatar;
@@ -1263,7 +1274,7 @@ class ChatUIManager {
       });
 
       // New site-wide presence polling
-      let profilesLoaded = false;
+      let profilesSignature = '';
       this.chatFirebase.startSiteWidePresencePolling((data) => {
         // Cache user data
         this.activeUsers = data.users || {};
@@ -1273,9 +1284,15 @@ class ChatUIManager {
         this.updateNotificationButton(data);
         this.updateHeaderOnlineCount(data.count);
 
-        // Re-render messages ONCE when profiles first load to update avatars
-        if (!profilesLoaded && Object.keys(this.userProfiles).length > 0 && this.lastMessages.length > 0) {
-          profilesLoaded = true;
+        // Re-render message metadata when profile names/avatars change.
+        const nextProfilesSignature = JSON.stringify(Object.entries(this.userProfiles).map(([uid, profile]) => [
+          uid,
+          profile && (profile.displayName || profile.userName || profile.username || ''),
+          profile && (profile.avatar || ''),
+          profile && (profile.color || '')
+        ]));
+        if (nextProfilesSignature !== profilesSignature && this.lastMessages.length > 0) {
+          profilesSignature = nextProfilesSignature;
           this.refreshRenderedMessageMetadata();
         }
       });
@@ -2722,6 +2739,10 @@ class ChatUIManager {
 
       const currentImg = el.querySelector('img.message-avatar');
       const placeholder = el.querySelector('.message-avatar-container > .message-avatar:not(img)');
+      if (currentImg && currentImg.getAttribute('src') !== userInfo.avatar) {
+        currentImg.setAttribute('src', userInfo.avatar);
+        currentImg.style.display = '';
+      }
       const shouldUpgradeAvatar = !currentImg || (placeholder && placeholder.style.display !== 'none');
       if (!shouldUpgradeAvatar) return;
 
