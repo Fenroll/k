@@ -1793,13 +1793,14 @@ class ChatUIManager {
     }
 
     const count = Math.max(remoteCount, onlineUsers.length);
+    const onlineUserIds = new Set(onlineUsers.map(user => String(user.userId || '')));
 
     // Get offline users who should be shown (filter by showInMembersList flag)
     const offlineUsers = [];
     for (const uid in allUsers) {
       const user = allUsers[uid];
       // Skip if already online or if not flagged to show in members list
-      if (data.users[uid] || !user.showInMembersList) continue;
+      if (data.users[uid] || onlineUserIds.has(String(uid)) || !user.showInMembersList) continue;
 
       offlineUsers.push({
         userId: uid,
@@ -5577,7 +5578,7 @@ class ChatUIManager {
 }
 
 #chat-widget .is-self-message .chat-audio-progress {
-  background: #a8bea4;
+  background: #f2f7ef;
 }
 
 #chat-widget .chat-audio-progress-fill {
@@ -5585,6 +5586,10 @@ class ChatUIManager {
   height: 100%;
   border-radius: inherit;
   background: var(--chat-primary);
+}
+
+#chat-widget .is-self-message .chat-audio-progress-fill {
+  background: #315f38;
 }
 
 #chat-widget .chat-audio-time {
@@ -5598,7 +5603,23 @@ class ChatUIManager {
 }
 
 #chat-widget .is-self-message .chat-audio-time {
-  color: #2d4d2d;
+  color: #244b2b;
+}
+
+#chat-widget .is-self-message .chat-audio-volume-icon {
+  color: #315f38;
+}
+
+#chat-widget .is-self-message .chat-audio-volume::-webkit-slider-runnable-track {
+  background: linear-gradient(to right, #315f38 0 var(--volume-percent), #f2f7ef var(--volume-percent) 100%);
+}
+
+#chat-widget .is-self-message .chat-audio-volume::-moz-range-track {
+  background: #f2f7ef;
+}
+
+#chat-widget .is-self-message .chat-audio-volume::-moz-range-progress {
+  background: #315f38;
 }
 
 #chat-widget .chat-message.lp-active .message-bubble-container {
