@@ -158,6 +158,23 @@
     const content = overlay.querySelector('.others-menu-content');
     const logoutBtn = document.getElementById('mobile-logout');
 
+    function installPressFeedback(selector) {
+        document.querySelectorAll(selector).forEach(item => {
+            const clearPress = () => item.classList.remove('is-pressing');
+
+            item.addEventListener('pointerdown', () => {
+                item.classList.add('is-pressing');
+            }, { passive: true });
+
+            item.addEventListener('pointerup', clearPress, { passive: true });
+            item.addEventListener('pointercancel', clearPress, { passive: true });
+            item.addEventListener('pointerleave', clearPress, { passive: true });
+            item.addEventListener('blur', clearPress);
+        });
+    }
+
+    installPressFeedback('.bottom-nav-item, .others-menu-item');
+
     function toggleMenu() {
         if (overlay.classList.contains('open')) {
             overlay.classList.remove('open');

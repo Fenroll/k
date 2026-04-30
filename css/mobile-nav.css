@@ -144,29 +144,45 @@
         cursor: pointer;
         padding: 4px 0 0 0;
         font-family: 'Open Sans', sans-serif;
-        -webkit-tap-highlight-color: rgba(128, 128, 128, 0.18);
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
         user-select: none;
+        border-radius: 14px;
+        transform: translateZ(0);
+        transition:
+            color 0.16s ease,
+            background-color 0.16s ease,
+            transform 0.12s ease;
     }
 
-    /* Touch feedback circle around the icon area (mobile press state) */
-    .bottom-nav-item::after {
+    .bottom-nav-item::before {
         content: '';
         position: absolute;
-        top: 16px;
-        left: 50%;
-        width: 36px;
-        height: 36px;
-        border-radius: 50%;
-        background: rgba(120, 120, 120, 0.24);
-        transform: translateX(-50%) scale(0.7);
+        inset: 7px 8px 6px;
+        border-radius: 16px;
+        background: rgba(88, 129, 87, 0.12);
         opacity: 0;
         pointer-events: none;
-        transition: transform 0.14s ease, opacity 0.14s ease;
+        transform: scale(0.94);
+        transition: opacity 0.16s ease, transform 0.16s ease;
     }
 
-    .bottom-nav-item:active::after {
+    .bottom-nav-item > img,
+    .bottom-nav-item > svg,
+    .bottom-nav-item > span {
+        position: relative;
+        z-index: 1;
+    }
+
+    .bottom-nav-item.is-pressing,
+    .bottom-nav-item:active {
+        transform: translateY(1px) scale(0.97);
+    }
+
+    .bottom-nav-item.is-pressing::before,
+    .bottom-nav-item:active::before {
         opacity: 1;
-        transform: translateX(-50%) scale(1);
+        transform: scale(1);
     }
     
     .bottom-nav-item.active {
@@ -189,7 +205,7 @@
     .bottom-nav-item img {
         filter: brightness(0); /* White -> Black, Black -> Black */
         opacity: 0.6; /* Black -> Grey */
-        transition: filter 0.2s, opacity 0.2s;
+        transition: filter 0.18s ease, opacity 0.18s ease, transform 0.12s ease;
     }
     
     /* Step 2: Colorize active icons to Green */
@@ -203,6 +219,7 @@
     /* For the Inline SVG "Others" icon */
     .bottom-nav-item svg {
         fill: #888;
+        transition: fill 0.18s ease, transform 0.12s ease;
     }
     
     .bottom-nav-item.active svg {
@@ -253,12 +270,16 @@
         text-decoration: none;
         color: #333;
         font-size: 14px;
-        transition: background 0.1s;
+        transition: background-color 0.16s ease, transform 0.12s ease;
         font-family: 'Open Sans', sans-serif;
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
     }
     
+    .others-menu-item.is-pressing,
     .others-menu-item:active {
-        background: #f5f5f5;
+        background: rgba(88, 129, 87, 0.12);
+        transform: scale(0.985);
     }
     
     .others-menu-item img {

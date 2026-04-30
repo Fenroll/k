@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260430kok"></script>
+  <script src="js/auth-guard.js?v=20260430kys"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -12,6 +12,62 @@
         opacity: 0 !important;
         pointer-events: none !important;
       }
+
+      body.index-beta {
+        background: #f5f5f5 !important;
+        min-height: 100dvh !important;
+        overflow-x: hidden !important;
+      }
+
+      body.index-beta .layout {
+        display: block !important;
+        min-height: 100dvh !important;
+      }
+
+      body.index-beta .main-content {
+        margin-left: 0 !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        padding: 16px !important;
+        padding-bottom: calc(92px + env(safe-area-inset-bottom)) !important;
+        box-sizing: border-box !important;
+        overflow: visible !important;
+      }
+
+      body.index-beta .beta-courses-layout {
+        display: grid !important;
+        grid-template-columns: 1fr !important;
+        gap: 8px !important;
+      }
+
+      body.index-beta .beta-courses-panel {
+        display: flex !important;
+        background: transparent !important;
+        border: 0 !important;
+        border-radius: 0 !important;
+      }
+
+      body.index-beta .beta-editor-panel {
+        display: none !important;
+      }
+
+      body.index-beta.beta-showing-course .beta-courses-panel {
+        display: none !important;
+      }
+
+      body.index-beta.beta-showing-course .beta-editor-panel {
+        display: flex !important;
+      }
+
+      body.index-beta .beta-empty-state {
+        display: none !important;
+      }
+    }
+
+    @media (max-width: 768px) {
+      body.index-beta .main-header {
+        display: none !important;
+      }
     }
   </style>
   <meta name="robots" content="noindex, nofollow">
@@ -21,7 +77,7 @@
   <link rel="icon" href="favicon.svg?v=202603151sxu" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260318navdark2">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260430tap1">
   <script src="js/desktop-nav.js?v=20260430nav4"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=20260430nav5">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
@@ -986,7 +1042,7 @@
   .base-footer a:hover { text-decoration: underline; color: #fff; }
     .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
   </style>
-  <script src="courses.generated.js?v=20260430kok"></script>
+  <script src="courses.generated.js?v=20260430kys"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 
 <!-- Subtle UI tweaks -->
@@ -1944,7 +2000,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      ============================================ -->
 
 <script src="js/user-identity.js?v=202404231000"></script>
-<script src="js/chat.js?v=20260430kok"></script>
+<script src="js/chat.js?v=20260430kys"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -2779,7 +2835,9 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       document.querySelectorAll('.element-card.active').forEach(activeCard => {
         activeCard.classList.remove('active');
       });
-      card.classList.add('active');
+      if (window.innerWidth > 900) {
+        card.classList.add('active');
+      }
 
       const titleEl = document.getElementById('betaCourseTitle');
       const metaEl = document.getElementById('betaCourseMeta');
@@ -3241,7 +3299,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       <script src="html-priority.js"></script>
       <script src="js/presence.js"></script>
       <script src="js/version-check.js"></script>
-      <script src="js/mobile-nav.js?v=20260318navdark2"></script>
+      <script src="js/mobile-nav.js?v=20260430tap1"></script>
 <!-- Privacy Modal -->
 <div id="privacyModal" class="text-modal" style="display: none;">
   <div class="text-modal-content" style="max-width: 500px;">
@@ -3879,9 +3937,19 @@ body.index-beta .overlay-header {
     border-left-width: 5px !important;
     box-shadow: 0 1px 2px rgba(17, 24, 39, 0.06) !important;
     font-weight: 700;
+    -webkit-tap-highlight-color: transparent;
   }
+  body.index-beta .element-card:hover,
+  body.index-beta .element-card:active,
+  body.index-beta .element-card:focus {
+    background: #fff !important;
+    outline: none !important;
+  }
+
+  @media (hover: hover) and (pointer: fine) {
   body.index-beta .element-card:hover {
     background: #f3f4f6 !important;
+  }
   }
 
   body.index-beta .element-card.active {
