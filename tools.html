@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026050112vg"></script>
+  <script src="js/auth-guard.js?v=202605011jcj"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -479,7 +479,7 @@
     }
 
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050112vg">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605011jcj">
   <script src="js/desktop-nav.js?v=202605014kp"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
   <script src="js/version-manager.js?v=202603101mce"></script>
@@ -691,8 +691,8 @@
           </div>
         </div>
 
-        <div id="uploadsTool" class="test-container" style="display: none;">
-          <div style="max-width: 1300px; margin: 24px auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);">
+        <div id="uploadsTool" class="test-container" style="display: none; background: #fff;">
+          <div style="max-width: 1300px; margin: 24px auto; padding: 24px; background: #fff;">
 
             <!-- Header row -->
             <div id="toolsUploadsHeaderRow" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; padding: 0 2px;">
@@ -1237,7 +1237,7 @@
     updateAdminButtonVisibility();
   </script>
 
-  <script src="js/user-identity.js?v=2026050112vg"></script>
+  <script src="js/user-identity.js?v=202605011jcj"></script>
   <!-- Mobile menu overlay -->
   <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
@@ -1245,7 +1245,7 @@
        FIREBASE & CHAT WIDGET
        ============================================ -->
   <!-- Initialize Chat Widget -->
-    <script src="js/chat.js?v=2026050112vg"></script>
+    <script src="js/chat.js?v=202605011jcj"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
@@ -1632,6 +1632,20 @@
           const users = usersSnap.val() || {};
           const nameMappings = mappingsSnap.val() || {};
           const profileByDisplayName = new Map();
+
+          // Resolve a name through the rename chain, e.g. Alice -> Charlie -> Bob.
+          const resolveFinalName = (startName) => {
+            let current = startName;
+            const seen = new Set();
+            let depth = 0;
+            while (current && nameMappings[current] && !seen.has(current) && depth < 16) {
+              seen.add(current);
+              current = nameMappings[current];
+              depth++;
+            }
+            return current;
+          };
+
           for (const uid of Object.keys(users)) {
             const user = users[uid] || {};
             const avatar = isAvatarUrl(user.avatar) ? String(user.avatar).trim() : '';
@@ -1645,15 +1659,17 @@
               if (!uploaderProfileMap.has(normalized)) uploaderProfileMap.set(normalized, profile);
             }
           }
-          // Map old names -> current profile; always overwrite so renamed users resolve to current profile
+
+          // Map old names -> current profile, walking the rename chain so multi-step renames resolve.
           for (const oldName of Object.keys(nameMappings)) {
-            const newName = nameMappings[oldName];
-            const profile = profileByDisplayName.get(normalizeIdentity(newName));
+            const finalName = resolveFinalName(oldName);
+            const profile = profileByDisplayName.get(normalizeIdentity(finalName));
             const oldKey = normalizeIdentity(oldName);
             if (profile && oldKey) {
               uploaderProfileMap.set(oldKey, profile);
             }
           }
+
           // Re-register every alias for each user with overwrite so files uploaded
           // under a previous username/displayName still resolve to the current profile.
           for (const uid of Object.keys(users)) {
@@ -1667,6 +1683,8 @@
               user.username, user.userName, user.displayName,
               user.previousUserName, user.previousUsername, user.oldUserName
             ];
+            // Also pull any historical names from the user record's previousNames array if present.
+            if (Array.isArray(user.previousNames)) allAliases.push(...user.previousNames);
             for (const alias of allAliases) {
               const normalized = normalizeIdentity(alias);
               if (normalized) uploaderProfileMap.set(normalized, currentProfile);
@@ -2142,6 +2160,13 @@
             addIdentity(currentUserIdentitySet, user && user.userId);
             addIdentity(currentUserIdentitySet, user && user.legacyChatId);
             addIdentity(currentUserIdentitySet, user && user.legacyNotesId);
+            // Previous names (set by user.html when renaming) — keep ownership over old uploads.
+            addIdentity(currentUserIdentitySet, user && user.previousUserName);
+            addIdentity(currentUserIdentitySet, user && user.previousUsername);
+            addIdentity(currentUserIdentitySet, user && user.oldUserName);
+            if (user && Array.isArray(user.previousNames)) {
+              user.previousNames.forEach((n) => addIdentity(currentUserIdentitySet, n));
+            }
             currentUserIsAdmin = Boolean(user && user.isAdmin);
           } catch (_) {
             currentUserName = '';
@@ -2154,6 +2179,31 @@
         syncViewCycleButton();
 
         await loadUploaderProfileMap(db);
+
+        // Walk name_mappings to find any old name that resolves (transitively) to one of my current
+        // identities — these are aliases of mine and should match for the "Mine" filter as well.
+        try {
+          const mappingsSnap = await db.ref('name_mappings').once('value').catch(() => null);
+          const nameMappings = (mappingsSnap && mappingsSnap.val()) || {};
+          const resolveFinalName = (start) => {
+            let current = start;
+            const seen = new Set();
+            let depth = 0;
+            while (current && nameMappings[current] && !seen.has(current) && depth < 16) {
+              seen.add(current);
+              current = nameMappings[current];
+              depth++;
+            }
+            return current;
+          };
+          for (const oldName of Object.keys(nameMappings)) {
+            const finalName = resolveFinalName(oldName);
+            if (finalName && currentUserIdentitySet.has(normalizeIdentity(finalName))) {
+              addIdentity(currentUserIdentitySet, oldName);
+            }
+          }
+        } catch (_) {}
+
         await loadUploads(db);
       }
 
@@ -2492,16 +2542,23 @@
       const usersSnap = await firebase.database().ref('site_users').once('value');
       const users = usersSnap.val() || {};
 
+      const EXCLUDED_USERNAMES = new Set(['test', 'fenroll']);
+      const isExcludedUser = (user) => {
+        if (!user) return true;
+        const username = normalizeText(user.username);
+        const displayName = normalizeText(user.displayName);
+        const userName = normalizeText(user.userName);
+        return EXCLUDED_USERNAMES.has(username)
+          || EXCLUDED_USERNAMES.has(displayName)
+          || EXCLUDED_USERNAMES.has(userName);
+      };
+
       return Object.entries(users)
         .filter(([, user]) => {
           if (!user) return false;
+          if (isExcludedUser(user)) return false;
 
-          const username = normalizeText(user.username);
-          const displayName = normalizeText(user.displayName);
-          const userName = normalizeText(user.userName);
-          const isTestAccount = username === 'test' || displayName === 'test' || userName === 'test';
-
-          if (!user.showInMembersList && !isTestAccount) return false;
+          if (!user.showInMembersList) return false;
 
           const specialRule = getSpecialRuleForUser(user);
           if (specialRule && specialRule.label === 'Owner') {
@@ -2517,14 +2574,9 @@
           uid,
           user: user.displayName || user.username || uid,
           username: user.username || '',
-          isTestAccount: normalizeText(user.username) === 'test' || normalizeText(user.displayName) === 'test' || normalizeText(user.userName) === 'test',
           specialLabel: getSpecialRuleForUser(user)?.label || ''
         }))
-        .sort((a, b) => {
-          if (a.isTestAccount && !b.isTestAccount) return 1;
-          if (!a.isTestAccount && b.isTestAccount) return -1;
-          return a.user.localeCompare(b.user, 'bg');
-        });
+        .sort((a, b) => a.user.localeCompare(b.user, 'bg'));
     }
 
     function mergeDonationsByMembers(savedRows, members) {
@@ -2917,6 +2969,6 @@
     }
   }
 </script>
-<script src="js/mobile-nav.js?v=2026050112vg"></script>
+<script src="js/mobile-nav.js?v=202605011jcj"></script>
 </body>
 </html>

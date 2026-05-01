@@ -1034,7 +1034,7 @@
                 console.error("Fatal error during app initialization:", error);
                 const container = document.querySelector('.account-container');
                 if (container) {
-                    container.innerHTML = `<p style="color:#b91c1c;text-align:center;font-weight:bold;">Възникна критична грешка: ${error.message}. Проверете конзолата (F12).</p>`;
+                    container.innerHTML = `<p style="color:#b91c1c;text-align:center;font-weight:bold;">A critical error occurred: ${error.message}. Check the console (F12).</p>`;
                 }
             }
         })();
