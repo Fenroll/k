@@ -74,18 +74,18 @@
     </style>
     <title>Notes</title>
 
-    <script src="js/auth-guard.js?v=2026050229e"></script>
+    <script src="js/auth-guard.js?v=202605022uz"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=2026050229e"></script>
-    <script src="courses.generated.js?v=2026050229e"></script>
+    <script src="js/user-identity.js?v=202605022uz"></script>
+    <script src="courses.generated.js?v=202605022uz"></script>
 
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=2026050229e">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605022uz">
   <script src="js/desktop-nav.js?v=202605014kp"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
     <script src="js/version-manager.js?v=2026031715gu"></script>
@@ -498,71 +498,107 @@
         }
 
         .image-modal-body {
-            padding: 16px;
+            padding: 20px 22px 6px;
         }
 
-        .image-modal-body label {
+        .image-modal-body > label {
             display: block;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-weight: 600;
             color: #374151;
-            font-size: 13px;
+            font-size: 12.5px;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
         }
 
         .image-modal-input {
             width: 100%;
             box-sizing: border-box;
-            padding: 10px 12px;
+            padding: 11px 14px;
             border: 1px solid #d1d5db;
-            border-radius: 8px;
+            border-radius: 10px;
             font-family: inherit;
             font-size: 14px;
+            color: #111827;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+        }
+
+        .image-modal-input:focus {
+            border-color: #588157;
+            box-shadow: 0 0 0 3px rgba(88, 129, 87, 0.15);
         }
 
         .image-upload-row {
-            margin-top: 12px;
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            background: #f9fafb;
+            margin-top: 16px;
+            padding: 14px;
+            border: 1px dashed #cbd5cb;
+            border-radius: 12px;
+            background: #f6faf4;
+            transition: border-color 0.15s ease, background 0.15s ease;
+        }
+
+        .image-upload-row:hover {
+            border-color: #8aad82;
+            background: #eef5ec;
         }
 
         .image-upload-controls {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             flex-wrap: wrap;
         }
 
         .image-upload-btn {
             display: inline-flex;
             align-items: center;
-            justify-content: center;
-            padding: 8px 12px;
-            border-radius: 8px;
+            gap: 6px;
+            padding: 9px 14px;
+            border-radius: 9px;
             border: 1px solid #588157;
             background: #588157;
-            color: #ffffff;
+            color: #fff;
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
+            box-shadow: 0 2px 6px rgba(58, 90, 64, 0.18);
+            transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+        }
+
+        .image-upload-btn:hover {
+            background: #4a6d49;
+            box-shadow: 0 3px 10px rgba(58, 90, 64, 0.26);
+        }
+
+        .image-upload-btn:active {
+            transform: scale(0.97);
         }
 
         .image-upload-name {
-            font-size: 12px;
-            color: #6b7280;
+            font-size: 12.5px;
+            color: #4b5563;
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1;
         }
 
         .image-upload-status {
-            margin-top: 8px;
-            min-height: 18px;
             font-size: 12px;
             color: #6b7280;
         }
 
+        .image-upload-status:not(:empty) {
+            margin-top: 10px;
+            min-height: 18px;
+        }
+
         .image-modal-footer {
-            padding: 12px 16px;
-            border-top: 1px solid #e5e7eb;
+            padding: 14px 22px 18px;
+            border-top: 1px solid #f1f5f1;
             display: flex;
             justify-content: flex-end;
             gap: 8px;
@@ -571,18 +607,47 @@
         .image-modal-btn {
             border: 1px solid #d1d5db;
             background: #fff;
-            color: #111827;
-            border-radius: 8px;
-            padding: 8px 12px;
+            color: #374151;
+            border-radius: 10px;
+            padding: 9px 16px;
             font-size: 13px;
-            font-weight: 700;
+            font-weight: 600;
             cursor: pointer;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+        }
+
+        .image-modal-btn:hover {
+            background: #f9fafb;
+            border-color: #9ca3af;
+            color: #111827;
+        }
+
+        .image-modal-btn:active {
+            transform: scale(0.97);
         }
 
         .image-modal-btn.primary {
             border-color: #588157;
             background: #588157;
             color: #fff;
+            box-shadow: 0 2px 6px rgba(58, 90, 64, 0.22);
+        }
+
+        .image-modal-btn.primary:hover {
+            background: #4a6d49;
+            border-color: #4a6d49;
+            color: #fff;
+            box-shadow: 0 3px 10px rgba(58, 90, 64, 0.30);
+        }
+
+        @keyframes notesModalFadeIn {
+            from { opacity: 0; }
+            to   { opacity: 1; }
+        }
+
+        @keyframes notesModalPop {
+            from { opacity: 0; transform: translateY(12px) scale(0.96); }
+            to   { opacity: 1; transform: translateY(0)     scale(1);    }
         }
 
         .modal {
@@ -592,62 +657,185 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(14, 22, 18, 0.55);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
             z-index: 5000;
             align-items: center;
             justify-content: center;
             padding: 20px;
+            animation: notesModalFadeIn 0.18s ease both;
         }
 
         .modal-content {
             background: #fff;
-            border-radius: 8px;
+            border-radius: 16px;
             width: 100%;
             max-width: 500px;
-            max-height: 80vh;
+            max-height: 86vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 25px rgba(0,0,0,0.15);
+            overflow: hidden;
+            border: 1px solid rgba(88, 129, 87, 0.12);
+            box-shadow: 0 24px 60px rgba(22, 34, 24, 0.22), 0 4px 14px rgba(22, 34, 24, 0.10);
+            animation: notesModalPop 0.22s cubic-bezier(0.32, 0.72, 0, 1) both;
         }
 
         .modal-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid #e5e7eb;
+            padding: 16px 22px;
+            border-bottom: 1px solid #f1f5f1;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            background: #fbfcfb;
         }
 
         .modal-header h2 {
             margin: 0;
-            color: #1f2937;
-            font-size: 1.1em;
+            color: #111827;
+            font-size: 1.05em;
+            font-weight: 700;
+            letter-spacing: -0.01em;
         }
 
         .close {
-            font-size: 24px;
+            font-size: 22px;
             line-height: 1;
             cursor: pointer;
             color: #6b7280;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            transition: background 0.15s ease, color 0.15s ease;
+            user-select: none;
         }
 
         .close:hover {
-            color: #1f2937;
+            color: #111827;
+            background: #eef2ec;
+        }
+
+        #symbolsModal .modal-content {
+            max-height: min(86vh, 620px);
+            overflow-y: auto;
+        }
+
+        .symbol-section {
+            padding: 14px 22px 4px;
+        }
+
+        .symbol-section + .symbol-section {
+            padding-top: 8px;
+        }
+
+        .symbol-section:last-child {
+            padding-bottom: 18px;
+        }
+
+        .symbol-section-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #587058;
+            margin-bottom: 10px;
+        }
+
+        .symbol-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        @media (max-width: 480px) {
+            .symbol-grid {
+                grid-template-columns: repeat(4, minmax(0, 1fr));
+            }
         }
 
         .symbol-btn {
-            padding: 12px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 10px;
+            min-height: 46px;
+            border: 1px solid #e2e8e0;
+            border-radius: 10px;
             cursor: pointer;
             font-size: 18px;
-            font-weight: bold;
-            background: #fff;
+            font-weight: 600;
+            color: #111827;
+            background: #fbfcfb;
+            transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.10s ease, box-shadow 0.12s ease;
         }
 
         .symbol-btn:hover {
-            background: #f3f4f6;
-            border-color: #c7cfd9;
+            background: #eef5ec;
+            border-color: #8aad82;
+            color: #344e41;
+            box-shadow: 0 2px 6px rgba(58, 90, 64, 0.10);
+        }
+
+        .symbol-btn:active {
+            transform: scale(0.96);
+            background: #d9ecd4;
+        }
+
+        body.dark-mode .modal {
+            background: rgba(8, 12, 10, 0.62);
+        }
+
+        body.dark-mode .modal-content {
+            background: #1f2937;
+            border-color: rgba(166, 197, 162, 0.12);
+            color: #e5e7eb;
+        }
+
+        body.dark-mode .modal-header {
+            background: #1a232f;
+            border-bottom-color: rgba(255, 255, 255, 0.06);
+        }
+
+        body.dark-mode .modal-header h2 { color: #f3f4f6; }
+        body.dark-mode .close:hover { background: rgba(255,255,255,0.08); color: #f3f4f6; }
+        body.dark-mode .symbol-btn {
+            background: #273241;
+            border-color: rgba(255,255,255,0.08);
+            color: #e5e7eb;
+        }
+        body.dark-mode .symbol-btn:hover {
+            background: #344e41;
+            border-color: #588157;
+            color: #fff;
+        }
+        body.dark-mode .image-modal-input {
+            background: #273241;
+            border-color: rgba(255,255,255,0.10);
+            color: #f3f4f6;
+        }
+        body.dark-mode .image-modal-input:focus {
+            border-color: #588157;
+            background: #1f2937;
+        }
+        body.dark-mode .image-upload-row {
+            background: #1f2937;
+            border-color: rgba(255,255,255,0.10);
+        }
+        body.dark-mode .image-upload-row:hover {
+            background: #25323f;
+            border-color: #588157;
+        }
+        body.dark-mode .image-modal-btn {
+            background: #273241;
+            border-color: rgba(255,255,255,0.10);
+            color: #e5e7eb;
+        }
+        body.dark-mode .image-modal-btn:hover {
+            background: #2f3a47;
+            color: #fff;
+        }
+        body.dark-mode .image-modal-footer {
+            border-top-color: rgba(255,255,255,0.06);
         }
 
         .save-btn {
@@ -1197,36 +1385,45 @@
     </div>
 
     <div id="symbolsModal" class="modal">
-        <div class="modal-content" style="max-width: 500px;">
+        <div class="modal-content" style="max-width: 460px;">
             <div class="modal-header">
-                <h2>Insert Symbol</h2>
-                <span class="close" id="closeSymbolsModalBtn">&times;</span>
+                <h2>Insert symbol</h2>
+                <span class="close" id="closeSymbolsModalBtn" role="button" aria-label="Close">&times;</span>
             </div>
-            <div class="modal-body" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 400px; overflow-y: auto; padding: 16px;">
-                <button class="symbol-btn" data-symbol="↑">↑</button>
-                <button class="symbol-btn" data-symbol="↓">↓</button>
-                <button class="symbol-btn" data-symbol="←">←</button>
-                <button class="symbol-btn" data-symbol="→">→</button>
-                <button class="symbol-btn" data-symbol="↔">↔</button>
-                <button class="symbol-btn" data-symbol="α">α</button>
-                <button class="symbol-btn" data-symbol="β">β</button>
-                <button class="symbol-btn" data-symbol="γ">γ</button>
-                <button class="symbol-btn" data-symbol="δ">δ</button>
-                <button class="symbol-btn" data-symbol="ε">ε</button>
-                <button class="symbol-btn" data-symbol="μ">μ</button>
-                <button class="symbol-btn" data-symbol="≈">≈</button>
-                <button class="symbol-btn" data-symbol="≠">≠</button>
-                <button class="symbol-btn" data-symbol="≤">≤</button>
-                <button class="symbol-btn" data-symbol="≥">≥</button>
-                <button class="symbol-btn" data-symbol="±">±</button>
-                <button class="symbol-btn" data-symbol="÷">÷</button>
-                <button class="symbol-btn" data-symbol="°">°</button>
-                <button class="symbol-btn" data-symbol="℃">℃</button>
-                <button class="symbol-btn" data-symbol="t½">t½</button>
+            <div class="symbol-section">
+                <div class="symbol-section-label">Arrows</div>
+                <div class="symbol-grid">
+                    <button class="symbol-btn" data-symbol="↑">↑</button>
+                    <button class="symbol-btn" data-symbol="↓">↓</button>
+                    <button class="symbol-btn" data-symbol="←">←</button>
+                    <button class="symbol-btn" data-symbol="→">→</button>
+                    <button class="symbol-btn" data-symbol="↔">↔</button>
+                </div>
             </div>
-            <div class="modal-footer" style="padding: 12px; border-top: 1px solid #e5e7eb; display: flex; align-items: center;">
-                <label style="display: flex; align-items: center; cursor: pointer; flex: 1;">
-                </label>
+            <div class="symbol-section">
+                <div class="symbol-section-label">Greek</div>
+                <div class="symbol-grid">
+                    <button class="symbol-btn" data-symbol="α">α</button>
+                    <button class="symbol-btn" data-symbol="β">β</button>
+                    <button class="symbol-btn" data-symbol="γ">γ</button>
+                    <button class="symbol-btn" data-symbol="δ">δ</button>
+                    <button class="symbol-btn" data-symbol="ε">ε</button>
+                    <button class="symbol-btn" data-symbol="μ">μ</button>
+                </div>
+            </div>
+            <div class="symbol-section">
+                <div class="symbol-section-label">Math &amp; units</div>
+                <div class="symbol-grid">
+                    <button class="symbol-btn" data-symbol="≈">≈</button>
+                    <button class="symbol-btn" data-symbol="≠">≠</button>
+                    <button class="symbol-btn" data-symbol="≤">≤</button>
+                    <button class="symbol-btn" data-symbol="≥">≥</button>
+                    <button class="symbol-btn" data-symbol="±">±</button>
+                    <button class="symbol-btn" data-symbol="÷">÷</button>
+                    <button class="symbol-btn" data-symbol="°">°</button>
+                    <button class="symbol-btn" data-symbol="℃">℃</button>
+                    <button class="symbol-btn" data-symbol="t½">t½</button>
+                </div>
             </div>
         </div>
     </div>
@@ -3084,7 +3281,7 @@
     </script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=2026050229e"></script>
-    <script src="js/mobile-nav.js?v=2026050229e"></script>
+    <script src="js/chat.js?v=202605022uz"></script>
+    <script src="js/mobile-nav.js?v=202605022uz"></script>
 </body>
 </html>

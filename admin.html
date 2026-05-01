@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=2026050229e"></script>
+    <script src="js/auth-guard.js?v=202605022uz"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=2026050229e"></script>
+    <script src="js/user-identity.js?v=202605022uz"></script>
     <script src="js/admin-guard.js?v=202602171mhr"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=2026050229e">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605022uz">
     <title>Admin Panel</title>
     <style>
         :root {
@@ -877,9 +877,24 @@
         <div class="ve-header">
             <h2>Visual Schedule Editor</h2>
             <div class="ve-header-actions">
-                <button id="save-visual-editor" class="btn" style="width: auto; background-color: #588157; color: #121212;">Save to Firebase</button>
-                <button id="manage-semesters-btn" class="btn" style="width: auto; background-color: #588157;">Manage Semesters</button>
-                <button id="close-visual-editor" class="btn btn-secondary" style="width: auto;">Close & Back</button>
+                <button id="save-visual-editor" class="btn ve-icon-btn" style="width: auto; background-color: #588157; color: #121212;" aria-label="Save to Firebase" title="Save to Firebase">
+                    <span class="ve-btn-icon" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                    </span>
+                    <span class="ve-btn-text">Save to Firebase</span>
+                </button>
+                <button id="manage-semesters-btn" class="btn ve-icon-btn" style="width: auto; background-color: #588157;" aria-label="Manage Semesters" title="Manage Semesters">
+                    <span class="ve-btn-icon" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </span>
+                    <span class="ve-btn-text">Manage Semesters</span>
+                </button>
+                <button id="close-visual-editor" class="btn btn-secondary ve-icon-btn" style="width: auto;" aria-label="Close & Back" title="Close &amp; Back">
+                    <span class="ve-btn-icon" aria-hidden="true">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </span>
+                    <span class="ve-btn-text">Close &amp; Back</span>
+                </button>
             </div>
         </div>
 
@@ -891,10 +906,21 @@
                     <option value="template-summer">Edit Template: Summer</option>
                 </select>
             </div>
-            <button id="ve-prev-week-btn" class="btn btn-secondary" style="width: auto;" onclick="changeWeekAdmin(-1)">Previous Week</button>
+            <button id="ve-prev-week-btn" class="btn btn-secondary ve-icon-btn" style="width: auto;" onclick="changeWeekAdmin(-1)" aria-label="Previous Week" title="Previous Week">
+                <span class="ve-btn-icon" aria-hidden="true">◀</span>
+                <span class="ve-btn-text">Previous Week</span>
+            </button>
             <div class="week-info" id="ve-week-info">Week 1</div>
-            <button id="ve-next-week-btn" class="btn btn-secondary" style="width: auto;" onclick="changeWeekAdmin(1)">Next Week</button>
-            <button id="ve-edit-week-btn" class="btn btn-secondary" style="width: auto; margin-left: 10px;">Edit Week Date</button>
+            <button id="ve-next-week-btn" class="btn btn-secondary ve-icon-btn" style="width: auto;" onclick="changeWeekAdmin(1)" aria-label="Next Week" title="Next Week">
+                <span class="ve-btn-text">Next Week</span>
+                <span class="ve-btn-icon" aria-hidden="true">▶</span>
+            </button>
+            <button id="ve-edit-week-btn" class="btn btn-secondary ve-icon-btn" style="width: auto; margin-left: 10px;" aria-label="Edit Week Date" title="Edit Week Date">
+                <span class="ve-btn-icon" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                </span>
+                <span class="ve-btn-text">Edit Week Date</span>
+            </button>
         </div>
 
         <div class="ve-table-wrap">
@@ -1161,7 +1187,7 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=2026050229e"></script>
+    <script src="courses.generated.js?v=202605022uz"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=20260429domain1"></script>
     <script src="js/admin-visual-editor.js?v=202602171mhr"></script>

@@ -244,37 +244,64 @@ class NotesUIManager {
   }
 
   async init() {
-    this.createUI(); // Keep for initial debugging
-    
-    // Start polling for name mappings // Can be removed, less critical
-    // console.log('NotesUIManager: Starting name mappings polling.');
-    this.db.startNameMappingsPolling((mappings) => {
-        this.userNameMappings = mappings;
+    this.createUI();
+
+    this._initialRenderDone = false;
+
+    // Coalesce burst of initial Firebase 'value' events (name_mappings, site_users, messages)
+    // into a single render. Until the first render lands we use a longer window (220ms) so all
+    // three listeners' initial fires reliably collapse into one paint; afterwards a short
+    // 50ms debounce is enough for live updates.
+    this._scheduleForceRebuild = () => {
+      if (this._forceRebuildTimer) return;
+      const delay = this._initialRenderDone ? 50 : 220;
+      this._forceRebuildTimer = setTimeout(() => {
+        this._forceRebuildTimer = null;
         if (this.lastMessages.length > 0) {
-            this.renderMessages(this.lastMessages, { forceRebuild: true });
+          this.renderMessages(this.lastMessages, { forceRebuild: true });
+          this._initialRenderDone = true;
+        } else if (this._initialMessagesFired) {
+          // Empty-thread case: messages fired with [] so there's nothing to render, but the
+          // initial-load gate should still flip so live updates take the fast path.
+          this._initialRenderDone = true;
         }
+      }, delay);
+    };
+
+    this.db.startNameMappingsPolling((mappings) => {
+      const sig = JSON.stringify(mappings || {});
+      if (sig === this._lastNameMappingsSig) return;
+      this._lastNameMappingsSig = sig;
+      this.userNameMappings = mappings;
+      this._scheduleForceRebuild();
     });
 
     this.db.startSiteUsersPolling((users) => {
+      const sig = JSON.stringify(users || {});
+      if (sig === this._lastUserProfilesSig) return;
+      this._lastUserProfilesSig = sig;
       this.userProfiles = users || {};
       this.avatarCache.clear();
-      if (this.lastMessages.length > 0) {
-        this.renderMessages(this.lastMessages, { forceRebuild: true });
-      }
+      this._scheduleForceRebuild();
     });
-    
-    // Listen for reactions (Realtime) // Can be removed, less critical
-    // console.log('NotesUIManager: Starting reaction polling.');
+
     this.db.startReactionPolling((reactions) => {
-        this.reactionsCache = reactions;
-        this.updateReactionsUI();
+      this.reactionsCache = reactions;
+      this.updateReactionsUI();
     });
-    
-    // Listen for messages (Realtime)
-    // console.log('NotesUIManager: Starting messages polling.');
-    this.db.startPolling((messages) => { // Can be removed, less critical
-        this.lastMessages = messages;
-        this.renderMessages(messages);
+
+    this.db.startPolling((messages) => {
+      this.lastMessages = messages;
+      this._initialMessagesFired = true;
+      if (!this._initialRenderDone) {
+        // Route the very first paint through the same debounced scheduler so it absorbs any
+        // mappings/users events that arrive within the same window — even if messages fires first.
+        this._scheduleForceRebuild();
+        return;
+      }
+      // Live update after the initial paint — let renderMessages take its fast paths
+      // (append-only / single edit / single delete) for incremental updates.
+      this.renderMessages(messages);
     });
   }
 
