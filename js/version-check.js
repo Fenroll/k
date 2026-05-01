@@ -44,6 +44,10 @@
         from { transform: translateY(-12px) scale(0.96); opacity: 0; }
         to   { transform: translateY(0)     scale(1);    opacity: 1; }
       }
+      @keyframes updateIconPulse {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(88, 129, 87, 0.35); }
+        50%      { box-shadow: 0 0 0 8px rgba(88, 129, 87, 0);    }
+      }
       #update-notification {
         position: fixed;
         top: 20px;
@@ -53,7 +57,8 @@
         background: #fff;
         color: #1f2937;
         border: 1px solid #cddbc8;
-        border-radius: 14px;
+        border-left: 4px solid #588157;
+        border-radius: 12px;
         box-shadow: 0 12px 32px rgba(58, 90, 64, 0.18), 0 2px 6px rgba(58, 90, 64, 0.08);
         padding: 14px 16px;
         max-width: 360px;
@@ -77,6 +82,7 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        animation: updateIconPulse 2.4s ease-in-out infinite;
       }
       #update-notification .upd-title {
         font-size: 14px;
@@ -92,7 +98,7 @@
         color: #9ca3af;
         font-size: 22px;
         line-height: 1;
-        padding: 0 2px;
+        padding: 0 4px;
         border-radius: 6px;
         transition: background 0.15s, color 0.15s;
       }
@@ -101,6 +107,7 @@
         font-size: 13px;
         line-height: 1.45;
         color: #4b5563;
+        padding-left: 42px;
       }
       #update-notification .upd-body a {
         color: #588157;
@@ -120,20 +127,26 @@
         border-radius: 8px;
         padding: 8px 14px;
         cursor: pointer;
-        transition: background 0.15s, transform 0.12s;
+        transition: background 0.15s, transform 0.12s, box-shadow 0.15s;
       }
       #update-notification .upd-btn-primary {
         background: #588157;
         color: #fff;
         box-shadow: 0 2px 6px rgba(58, 90, 64, 0.22);
       }
-      #update-notification .upd-btn-primary:hover { background: #4a6d49; }
+      #update-notification .upd-btn-primary:hover { background: #4a6d49; box-shadow: 0 3px 10px rgba(58, 90, 64, 0.30); }
       #update-notification .upd-btn-primary:active { transform: scale(0.97); }
       #update-notification .upd-btn-ghost {
         background: transparent;
         color: #6b7280;
       }
       #update-notification .upd-btn-ghost:hover { color: #374151; background: #f3f4f6; }
+      #update-notification.is-refreshing .upd-actions { pointer-events: none; opacity: 0.6; }
+      #update-notification.is-refreshing .upd-btn-primary { background: #4a6d49; }
+      @media (prefers-reduced-motion: reduce) {
+        #update-notification { animation: none; }
+        #update-notification .upd-icon { animation: none; }
+      }
       @media (max-width: 768px) {
         #update-notification {
           left: max(12px, env(safe-area-inset-left));
@@ -141,6 +154,7 @@
           top: max(12px, env(safe-area-inset-top));
           max-width: none;
         }
+        #update-notification .upd-body { padding-left: 0; }
       }
     `;
     document.head.appendChild(style);
@@ -161,12 +175,10 @@
     notification.setAttribute('aria-live', 'polite');
     notification.innerHTML = `
       <div class="upd-row">
-        <div class="upd-icon">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <polyline points="1 20 1 14 7 14"></polyline>
-            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"></path>
-            <path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        <div class="upd-icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3l1.9 5.5L19 10l-5.1 1.5L12 17l-1.9-5.5L5 10l5.1-1.5L12 3z"></path>
+            <path d="M5 17l.7 2L8 19.7 5.7 20.4 5 22.7l-.7-2.3L2 19.7l2.3-.7z"></path>
           </svg>
         </div>
         <div class="upd-title">A new version is available</div>
@@ -190,7 +202,12 @@
       notification.remove();
     };
 
-    document.getElementById('update-refresh-btn').addEventListener('click', () => {
+    const refreshBtn = document.getElementById('update-refresh-btn');
+    refreshBtn.addEventListener('click', () => {
+      // Indicate refresh is in progress so multiple clicks don't pile up.
+      notification.classList.add('is-refreshing');
+      refreshBtn.disabled = true;
+      refreshBtn.textContent = 'Refreshing…';
       try { localStorage.removeItem(DISMISSED_KEY); } catch (_) {}
       const url = new URL(window.location.href);
       url.searchParams.set('v', Date.now());
