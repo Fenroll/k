@@ -251,7 +251,7 @@ class NotesUIManager {
     this.db.startNameMappingsPolling((mappings) => {
         this.userNameMappings = mappings;
         if (this.lastMessages.length > 0) {
-            this.renderMessages(this.lastMessages);
+            this.renderMessages(this.lastMessages, { forceRebuild: true });
         }
     });
 
@@ -259,7 +259,7 @@ class NotesUIManager {
       this.userProfiles = users || {};
       this.avatarCache.clear();
       if (this.lastMessages.length > 0) {
-        this.renderMessages(this.lastMessages);
+        this.renderMessages(this.lastMessages, { forceRebuild: true });
       }
     });
     
@@ -348,28 +348,28 @@ class NotesUIManager {
     // UI Structure mimic chat.js but tailored
     this.container.innerHTML = `
         <div class="notes-header">
-            <span>Бележки за този файл</span>
-            <button class="notes-close-btn">✕</button>
+            <span>Notes for this file</span>
+            <button class="notes-close-btn" title="Close">&times;</button>
         </div>
         <div class="notes-messages" id="notes-messages-list">
             <!-- Messages go here -->
         </div>
-        
+
         <div class="notes-input-area">
-             <textarea class="notes-input" placeholder="Напиши бележка..." rows="1"></textarea>
-             <button class="notes-send-btn">➤</button>
+             <textarea class="notes-input" placeholder="Write a note..." rows="1"></textarea>
+             <button class="notes-send-btn">&#10148;</button>
         </div>
     `;
 
     // Inject CSS
     const css = `
         .notes-widget {
-            /* CSS Variables for consistency with chat.js */
-            --chat-text: #2c1810;
-            --chat-text-light: #6d4c41;
-            --chat-secondary: #efebe9;
-          --chat-primary: #588157;
-            
+            --chat-text: #1f2937;
+            --chat-text-light: #587058;
+            --chat-secondary: #eef5ec;
+            --chat-primary: #588157;
+            --chat-border: #cddbc8;
+
             position: fixed;
             bottom: 20px;
             left: 20px;
@@ -378,24 +378,26 @@ class NotesUIManager {
             max-height: calc(100dvh - 24px);
             background: #fff;
             border-radius: 12px;
-            box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+            box-shadow: 0 5px 40px rgba(58, 90, 64, 0.18);
             z-index: 9999;
             display: flex;
             flex-direction: column;
-            font-family: 'Segoe UI', sans-serif;
-            border: 1px solid #e2e8f0;
+            font-family: 'Open Sans', 'Segoe UI', Arial, sans-serif;
+            border: 1px solid #cddbc8;
             transition: transform 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
         }
         .notes-widget.hidden {
-            display: none !important; /* Force hidden to fix "always visible" issue */
+            display: none !important;
             transform: translateY(20px) scale(0.95);
             opacity: 0;
             pointer-events: none;
         }
         .notes-header {
-            padding: 16px;
-            background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%);
-            border-bottom: 1px solid #e2e8f0;
+            padding: 15px 16px;
+            background: #588157;
+            border-bottom: 1px solid rgba(52, 78, 65, 0.3);
+            box-shadow: inset 0 -1px 0 rgba(255, 255, 255, 0.12);
             border-radius: 12px 12px 0 0;
             display: flex;
             justify-content: space-between;
@@ -403,12 +405,14 @@ class NotesUIManager {
             font-weight: 600;
             font-size: 18px;
             color: white;
+            letter-spacing: -0.01em;
         }
         .notes-close-btn {
-            background: rgba(255, 255, 255, 0.2);
-            border: none;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
             color: white;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
             padding: 0;
             width: 32px;
@@ -416,276 +420,455 @@ class NotesUIManager {
             display: flex;
             align-items: center;
             justify-content: center;
-            border-radius: 6px;
+            border-radius: 10px;
             transition: background 0.2s;
             line-height: 1;
         }
         .notes-close-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.24);
         }
-        
+
         .notes-messages {
             flex: 1;
             overflow-y: auto;
-          overflow-x: hidden;
-          -webkit-overflow-scrolling: touch;
-          overscroll-behavior: contain;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain;
             padding: 12px 0 20px 0;
-            background: #fff;
+            background: #edf3e8;
             display: flex;
             flex-direction: column;
-          gap: 0;
+            gap: 0;
+        }
+        .notes-messages::-webkit-scrollbar { width: 6px; }
+        .notes-messages::-webkit-scrollbar-track { background: transparent; }
+        .notes-messages::-webkit-scrollbar-thumb { background: var(--chat-border); border-radius: 3px; }
+        .notes-messages::-webkit-scrollbar-thumb:hover { background: var(--chat-text-light); }
+        .notes-messages a {
+            color: #4ade80 !important;
+            text-decoration: underline !important;
+            cursor: pointer !important;
         }
 
+        /* Date separator: pill on horizontal line */
         .notes-date-separator {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          margin: 16px 0 8px 0;
-          padding: 0 16px;
-          height: 1px;
-          background: #e2e8f0;
-          position: relative;
-          flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: auto;
+            margin: 18px 14px 14px;
+            padding: 0;
+            background: transparent;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .notes-date-separator::before,
+        .notes-date-separator::after {
+            content: "";
+            flex: 1;
+            height: 1px;
+            background: #cad9c5;
+        }
+        .notes-date-separator span {
+            position: static;
+            transform: none;
+            top: auto;
+            margin: 0 10px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #f7faf4;
+            border: 1px solid #d7e5d2;
+            color: #587058;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            box-shadow: 0 1px 2px rgba(58, 90, 64, 0.06);
         }
 
-        .notes-date-separator span {
-          background: #fff;
-          padding: 2px 10px;
-          font-size: 11px;
-          font-weight: 600;
-          color: var(--chat-text-light);
-          transform: translateY(-50%);
-          position: absolute;
-          top: 50%;
-        }
-        
         .notes-input-area {
             padding: 12px;
-          padding-bottom: calc(12px + env(safe-area-inset-bottom));
-            border-top: 1px solid #bcaaa4;
-            background: #fff;
+            padding-bottom: calc(12px + env(safe-area-inset-bottom));
+            border-top: 1px solid #cddbc8;
+            background: #f4f8f1;
+            box-shadow: 0 -1px 0 rgba(255, 255, 255, 0.75) inset;
             border-radius: 0 0 12px 12px;
         }
         .notes-input-row {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: flex-end;
+            width: 100%;
         }
         .notes-input {
             flex: 1;
             padding: 8px 12px;
-            border: 1px solid #bcaaa4;
-            border-radius: 8px;
+            border: 1px solid #b9cdb3;
+            border-radius: 10px;
             outline: none;
-          font-size: 16px;
+            font-size: 16px;
             min-height: 36px;
             resize: none;
             overflow: hidden;
             transition: all 0.2s;
+            background: #fbfcf7;
+            box-shadow: inset 0 1px 2px rgba(58, 90, 64, 0.05);
+            font-family: inherit;
+            color: var(--chat-text);
+            line-height: 1.4;
         }
         .notes-input:focus {
-            border-color: #7c3aed;
-            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+            border-color: #588157;
+            box-shadow: 0 0 0 3px rgba(88, 129, 87, 0.13);
         }
-        .notes-image-upload-btn {
-          width: 36px;
-          height: 36px;
-          border: none;
-          background: var(--chat-primary);
-          color: white;
-          border-radius: 8px;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          transition: all 0.2s;
-          flex-shrink: 0;
-          padding: 0;
-          line-height: 1;
-        }
-        .notes-image-upload-btn:hover {
-          transform: scale(1.05);
-        }
-        .notes-image-upload-btn:active {
-          transform: scale(0.95);
-        }
-        .notes-image-upload-btn:disabled {
-          opacity: 0.75;
-          cursor: wait;
-          transform: none;
-        }
-        .notes-image-upload-btn img {
-          width: 18px;
-          height: 18px;
-          display: block;
-          filter: brightness(0) invert(1);
-        }
+        .notes-image-upload-btn,
         .notes-send-btn {
-            background: #7c3aed; color: white; border: none; padding: 0;
-            border-radius: 8px; width: 36px; height: 36px; cursor: pointer;
-            display: flex; align-items: center; justify-content: center;
-            flex-shrink: 0;
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--chat-primary);
+            color: white;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.2s;
+            flex-shrink: 0;
+            padding: 0;
+            line-height: 1;
+            box-shadow: 0 2px 6px rgba(58, 90, 64, 0.16);
         }
+        .notes-image-upload-btn:hover,
         .notes-send-btn:hover {
             transform: scale(1.05);
         }
+        .notes-image-upload-btn:active,
         .notes-send-btn:active {
             transform: scale(0.95);
         }
-        
-        /* Message Styles (Copied & Simplified from chat.js) */
+        .notes-image-upload-btn:disabled {
+            opacity: 0.75;
+            cursor: wait;
+            transform: none;
+        }
+        .notes-image-upload-btn svg,
+        .notes-send-btn svg {
+            display: block;
+        }
+
+        /* Message Styles — sage green theme matching chat.js */
         .note-message {
             position: relative;
             transition: background 0.2s;
-          display: flex;
-          gap: 8px;
-          align-items: flex-start;
+            display: flex;
+            gap: 8px;
+            align-items: flex-start;
+            padding: 0 12px;
+            margin-bottom: 2px;
+            animation: notesSlideIn 0.3s ease;
+        }
+        @keyframes notesSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         .note-message.note-message-continuation {
-          margin-top: -3px;
-          margin-bottom: 0;
+            margin-top: -1px;
+            margin-bottom: 0;
         }
-        .note-message.note-message-continuation .note-content {
-          padding-top: 2px;
+        .note-message.note-message-continuation .note-content { gap: 0; }
+        .note-message.note-message-continuation .note-bubble-container { gap: 0; }
+        .note-message.note-message-continuation .note-text {
+            padding-top: 5px;
+            padding-bottom: 5px;
         }
-        .note-message:hover { background: #f8fafc; }
+
         .note-avatar {
-          width: 32px;
-          height: 32px;
-          min-width: 32px;
-          min-height: 32px;
-          max-width: 32px;
-          max-height: 32px;
-          aspect-ratio: 1 / 1;
-          border-radius: 50%;
-          flex-shrink: 0;
-          object-fit: cover;
-          display: block;
+            width: 32px;
+            height: 32px;
+            min-width: 32px;
+            min-height: 32px;
+            max-width: 32px;
+            max-height: 32px;
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+            flex-shrink: 0;
+            object-fit: cover;
+            display: block;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 7px rgba(58, 90, 64, 0.18);
         }
         .note-avatar-fallback {
-          width: 32px;
-          height: 32px;
-          border-radius: 50%;
-          flex-shrink: 0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: white;
-          font-size: 14px;
-          font-weight: 700;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 14px;
+            font-weight: 700;
+            border: 2px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 2px 7px rgba(58, 90, 64, 0.18);
         }
+
         .note-content {
-          flex: 1;
-          display: flex;
-          flex-direction: column;
-          gap: 2px;
-          margin-right: 80px;
-          min-width: 0;
-          max-width: 100%;
-          word-wrap: break-word;
-          position: relative;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-right: 80px;
+            min-width: 0;
+            max-width: 100%;
+            word-wrap: break-word;
+            position: relative;
         }
         .note-header {
             display: flex;
             gap: 8px;
             align-items: baseline;
-          margin-bottom: 2px;
+            margin-bottom: 2px;
         }
-        .note-author { font-weight: 600; font-size: 13px; color: var(--chat-text); }
-        .note-time { font-size: 11px; color: var(--chat-text-light); }
-        .note-text { font-size: 13px; line-height: 1.4; color: var(--chat-text); padding: 4px 10px; border-radius: 8px; word-break: break-word; overflow-wrap: anywhere; box-sizing: border-box; max-width: 100%; width: fit-content; }
+        .note-author {
+            font-weight: 600;
+            font-size: 13px;
+            color: var(--chat-text);
+        }
+        .note-time {
+            font-size: 11px;
+            color: var(--chat-text-light);
+        }
+
+        .note-bubble-container {
+            position: relative;
+            width: fit-content;
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            max-width: 100%;
+        }
+
+        .note-text {
+            font-size: 13px;
+            line-height: 1.4;
+            color: var(--chat-text);
+            padding: 4px 10px;
+            border-radius: 10px;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+            box-sizing: border-box;
+            max-width: 100%;
+            width: fit-content;
+            background: #fbfcf7;
+            border: 1px solid #dfe8dc;
+            box-shadow: 0 1px 3px rgba(58, 90, 64, 0.08);
+        }
+        .note-text strong { font-weight: 700; color: inherit; }
+        .note-text em { font-style: italic; color: inherit; }
         .note-text a { word-break: break-all; overflow-wrap: anywhere; }
         .note-text img {
-          display: block;
-          max-width: 100%;
-          max-height: 280px;
-          object-fit: contain;
-          background: #f8fafc;
-          border: 1px solid rgba(0, 0, 0, 0.08);
-          border-radius: 8px;
-          cursor: zoom-in;
+            display: block;
+            max-width: 100%;
+            max-height: 280px;
+            object-fit: contain;
+            background: #f7faf4;
+            border: 1px solid rgba(58, 90, 64, 0.12);
+            border-radius: 8px;
+            cursor: zoom-in;
         }
-        .note-reactions { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px; }
-        .reaction-badge { font-size: 14px !important; padding: 4px 8px !important; border-radius: 12px !important; }
-        
+        .note-message.is-self-message .note-text {
+            background: #d9ecd4;
+            border-color: #b7d1af;
+            box-shadow: 0 2px 7px rgba(58, 90, 64, 0.14);
+        }
+
+        /* Inline reply preview inside messages */
+        .note-reply-preview {
+            background: #eef5ec;
+            border-left: 3px solid #8aad82;
+            color: #1f2937;
+            padding: 4px 8px;
+            margin-bottom: 2px;
+            font-size: 11px;
+            border-radius: 8px;
+            box-shadow: inset 0 0 0 1px rgba(88, 129, 87, 0.08);
+            opacity: 0.92;
+        }
+        .note-reply-preview b { color: #111827; }
+
+        /* Reactions */
+        .note-reactions {
+            margin: 2px 0 2px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            min-height: 0;
+        }
+        .note-reactions:empty { display: none; margin: 0; }
+        .note-message.note-message-continuation .note-reactions {
+            margin: 1px 0 1px;
+        }
+
+        #notes-widget-container .reaction-badge {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: #111827;
+            font-size: 12px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            margin-right: 0;
+            transition: transform 0.15s;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            font-weight: 600;
+        }
+        #notes-widget-container .reaction-badge.is-other-reaction {
+            background: #eef5ec;
+            border: 1px solid #c9dcc3;
+            box-shadow: 0 1px 3px rgba(58, 90, 64, 0.12);
+            font-weight: 600;
+        }
+        #notes-widget-container .reaction-badge.is-my-reaction {
+            background: #b9d8b1;
+            border: 1px solid #7faa75;
+            box-shadow: 0 1px 5px rgba(58, 90, 64, 0.18);
+            font-weight: 800;
+        }
+        #notes-widget-container .reaction-badge:hover {
+            transform: translateY(-1px);
+        }
+
         /* Action buttons */
         .note-actions {
-          position: absolute;
-          top: 50%;
-          transform: translateY(-50%);
-          right: -79px;
-            display: none; background: white; border-radius: 4px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-          gap: 2px;
-          z-index: 10;
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            right: -79px;
+            display: none;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(58, 90, 64, 0.12);
+            border: 1px solid #dfe8dc;
+            gap: 2px;
+            z-index: 10;
+            padding: 2px;
         }
         .note-actions.two-btns { right: -53px; }
-        .note-message:hover .note-actions { display: flex; }
+        @media (hover: hover) and (pointer: fine) {
+            .note-message:hover .note-actions { display: flex; }
+        }
         .note-action-btn {
-            background: none; border: none; cursor: pointer; padding: 4px;
-            font-size: 14px; opacity: 0.6;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            transition: background 0.2s;
+            opacity: 0.85;
         }
-        .note-action-btn:hover { opacity: 1; background: #f1f5f9; }
-        
-        .reply-indicator {
-            background: #f1f5f9; border-left: 3px solid #3b82f6;
-            padding: 8px; margin-bottom: 8px; border-radius: 4px;
-            font-size: 12px; display: flex; justify-content: space-between; items-align: center;
+        .note-action-btn:hover {
+            background: rgba(88, 129, 87, 0.1);
+            opacity: 1;
         }
-        
+
+        /* Reply indicator above input */
+        #notes-widget-container .reply-indicator {
+            background: #eef5ec;
+            border-left: 3px solid #588157;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            font-size: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 10px;
+            box-shadow: inset 0 0 0 1px rgba(88, 129, 87, 0.08);
+        }
+        #notes-widget-container .reply-indicator-author {
+            font-weight: 700;
+            color: #588157;
+            margin-bottom: 2px;
+        }
+        #notes-widget-container .reply-indicator-text {
+            opacity: 0.75;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--chat-text);
+        }
+        #notes-widget-container .reply-indicator-close {
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 16px;
+            color: #6b7f60;
+            padding: 0 4px;
+            line-height: 1;
+        }
+        #notes-widget-container .reply-indicator-close:hover {
+            color: #344e41;
+        }
+
         .reaction-picker { z-index: 10001; }
 
         .message-option-item.disabled {
-          opacity: 0.45;
-          cursor: default;
-          pointer-events: none;
+            opacity: 0.45;
+            cursor: default;
+            pointer-events: none;
         }
 
         @supports not (height: 100dvh) {
-          .notes-widget {
-            height: calc(100vh - 100px);
-            max-height: 800px;
-          }
+            .notes-widget {
+                height: calc(100vh - 100px);
+                max-height: 800px;
+            }
         }
 
         @media (max-width: 768px) {
-          .notes-widget {
-            left: max(8px, env(safe-area-inset-left));
-            right: max(8px, env(safe-area-inset-right));
-            top: max(8px, env(safe-area-inset-top));
-            bottom: calc(max(8px, env(safe-area-inset-bottom)) + var(--mobile-keyboard-offset, 0px));
-            width: auto;
-            height: auto;
-            max-height: none;
-            transform: none;
-          }
+            .notes-widget {
+                left: max(8px, env(safe-area-inset-left));
+                right: max(8px, env(safe-area-inset-right));
+                top: max(8px, env(safe-area-inset-top));
+                bottom: calc(max(8px, env(safe-area-inset-bottom)) + var(--mobile-keyboard-offset, 0px));
+                width: auto;
+                height: auto;
+                max-height: none;
+                transform: none;
+            }
 
-          .notes-widget.notes-keyboard-open {
-            top: max(4px, env(safe-area-inset-top));
-            bottom: calc(max(4px, env(safe-area-inset-bottom)) + var(--mobile-keyboard-offset, 0px));
-            height: auto;
-          }
+            .notes-widget.notes-keyboard-open {
+                top: max(4px, env(safe-area-inset-top));
+                bottom: calc(max(4px, env(safe-area-inset-bottom)) + var(--mobile-keyboard-offset, 0px));
+                height: auto;
+            }
 
-          .notes-widget.hidden {
-            transform: translateY(16px) scale(0.96);
-          }
+            .notes-widget.hidden {
+                transform: translateY(16px) scale(0.96);
+            }
 
-          html.notes-widget-open,
-          body.notes-widget-open {
-            overflow: hidden !important;
-            overscroll-behavior: none;
-          }
+            html.notes-widget-open,
+            body.notes-widget-open {
+                overflow: hidden !important;
+                overscroll-behavior: none;
+            }
 
-          html.notes-widget-open #chat-widget .chat-icon,
-          body.notes-widget-open #chat-widget .chat-icon,
-          html.notes-widget-open #chat-toggle,
-          body.notes-widget-open #chat-toggle {
-            display: none !important;
-            visibility: hidden !important;
-            pointer-events: none !important;
-          }
+            html.notes-widget-open #chat-widget .chat-icon,
+            body.notes-widget-open #chat-widget .chat-icon,
+            html.notes-widget-open #chat-toggle,
+            body.notes-widget-open #chat-toggle {
+                display: none !important;
+                visibility: hidden !important;
+                pointer-events: none !important;
+            }
         }
     `;
     const styleEl = document.createElement('style');
@@ -705,18 +888,20 @@ class NotesUIManager {
     const inputArea = this.container.querySelector('.notes-input-area');
     inputArea.innerHTML = `
         <div id="notes-reply-preview"></div>
-        <div class="notes-input-row" style="display: flex; gap: 12px; align-items: flex-end;">
-             <div style="display: flex; flex-direction: column; gap: 0; align-items: center; min-width: 36px; flex-shrink: 0;">
-               <button type="button" class="notes-image-upload-btn" title="Upload image">
-                 <img src="svg/md-editor/icon-image.svg?v=2026031715gu" alt="Image">
-               </button>
-             </div>
-             <textarea class="notes-input" placeholder="Напиши бележка..." rows="1"></textarea>
-             <button class="notes-send-btn" title="Изпрати">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                  <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16151496 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.4429026 C0.994623095,2.08 0.837654326,3.0226 1.15159189,3.97788954 L3.03521743,10.4188814 C3.03521743,10.5759788 3.34915502,10.7330762 3.50612381,10.7330762 L16.6915026,11.5185631 C16.6915026,11.5185631 17.1624089,11.5185631 17.1624089,12.0598639 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"></path>
+        <div class="notes-input-row">
+            <button type="button" class="notes-image-upload-btn" title="Upload image">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                    <circle cx="8.5" cy="8.5" r="1.5"/>
+                    <polyline points="21 15 16 10 5 21"/>
                 </svg>
-             </button>
+            </button>
+            <textarea class="notes-input" placeholder="Write a note..." rows="1"></textarea>
+            <button class="notes-send-btn" title="Send">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M16.6915026,12.4744748 L3.50612381,13.2599618 C3.19218622,13.2599618 3.03521743,13.4170592 3.03521743,13.5741566 L1.15159189,20.0151496 C0.8376543,20.8006365 0.99,21.89 1.77946707,22.52 C2.41,22.99 3.50612381,23.1 4.13399899,22.8429026 L21.714504,14.0454487 C22.6563168,13.5741566 23.1272231,12.6315722 22.9702544,11.6889879 L4.13399899,1.16151496 C3.34915502,0.9 2.40734225,0.9 1.77946707,1.4429026 C0.994623095,2.08 0.837654326,3.0226 1.15159189,3.97788954 L3.03521743,10.4188814 C3.03521743,10.5759788 3.34915502,10.7330762 3.50612381,10.7330762 L16.6915026,11.5185631 C16.6915026,11.5185631 17.1624089,11.5185631 17.1624089,12.0598639 C17.1624089,12.4744748 16.6915026,12.4744748 16.6915026,12.4744748 Z"></path>
+                </svg>
+            </button>
         </div>
         <input type="file" class="notes-image-upload-input" accept="image/*" style="display: none;">
     `;
@@ -1302,24 +1487,202 @@ class NotesUIManager {
 
   getDateSeparatorLabel(timestamp) {
       const date = new Date(Number(timestamp) || Date.now());
-      return date.toLocaleDateString('bg-BG', {
+      return date.toLocaleDateString('en-US', {
           day: 'numeric',
           month: 'long',
           year: 'numeric'
       });
   }
 
-  renderMessages(messages) {
+  formatNoteTime(timestamp) {
+      if (!timestamp) return '';
+      const date = new Date(Number(timestamp) || Date.now());
+      const now = new Date();
+      const isToday = date.getDate() === now.getDate()
+          && date.getMonth() === now.getMonth()
+          && date.getFullYear() === now.getFullYear();
+
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+
+      if (isToday) {
+          return `${hours}:${minutes}`;
+      }
+      const month = date.toLocaleString('en-US', { month: 'short' });
+      const day = date.getDate();
+      return `${month} ${day}, ${hours}:${minutes}`;
+  }
+
+  escapeAttrValue(value) {
+      return String(value == null ? '' : value).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
+
+  isContinuationOf(prevMsg, msg) {
+      if (!prevMsg) return false;
+      if (prevMsg.userId !== msg.userId) return false;
+      if (this.getDateSeparatorLabel(prevMsg.timestamp) !== this.getDateSeparatorLabel(msg.timestamp)) return false;
+      return (Number(msg.timestamp) - Number(prevMsg.timestamp) < 3 * 60 * 1000);
+  }
+
+  buildDateSeparatorEl(label) {
+      const dateSep = document.createElement('div');
+      dateSep.className = 'notes-date-separator';
+      dateSep.dataset.date = label;
+      const span = document.createElement('span');
+      span.textContent = label;
+      dateSep.appendChild(span);
+      return dateSep;
+  }
+
+  renderMessages(messages, options = {}) {
       const list = this.container.querySelector('#notes-messages-list');
-      if(!list) return;
+      if (!list) return;
+
+      const forceRebuild = !!options.forceRebuild;
 
       const wasAtBottom = list.scrollHeight - list.scrollTop - list.clientHeight < 50;
       const previousScrollTop = list.scrollTop;
 
       const orderedMessages = Array.isArray(messages)
-        ? [...messages].sort((a, b) => (Number(a.timestamp) || 0) - (Number(b.timestamp) || 0))
-        : [];
+          ? [...messages].sort((a, b) => (Number(a.timestamp) || 0) - (Number(b.timestamp) || 0))
+          : [];
 
+      if (forceRebuild) {
+          list.innerHTML = '';
+      }
+
+      // 1. Remove deleted messages from DOM
+      const newIds = new Set(orderedMessages.map(m => m.id));
+      let messageRemoved = false;
+      list.querySelectorAll('.note-message').forEach(el => {
+          if (!newIds.has(el.dataset.id)) {
+              el.remove();
+              messageRemoved = true;
+          }
+      });
+
+      const previousMessages = Array.isArray(this.lastRenderedMessages) ? this.lastRenderedMessages : [];
+
+      // Fast path: append-only (one new message at the end, prior order unchanged)
+      const isAppendOnly =
+          !forceRebuild &&
+          !messageRemoved &&
+          orderedMessages.length === previousMessages.length + 1 &&
+          previousMessages.every((prev, idx) => prev.id === orderedMessages[idx].id);
+
+      if (isAppendOnly) {
+          const newMsg = orderedMessages[orderedMessages.length - 1];
+          const prevMsg = orderedMessages.length > 1 ? orderedMessages[orderedMessages.length - 2] : null;
+
+          const newDateLabel = this.getDateSeparatorLabel(newMsg.timestamp);
+          const prevDateLabel = prevMsg ? this.getDateSeparatorLabel(prevMsg.timestamp) : null;
+
+          if (newDateLabel !== prevDateLabel) {
+              list.appendChild(this.buildDateSeparatorEl(newDateLabel));
+          }
+
+          const messageEl = this.createMessageElement(newMsg, orderedMessages, this.isContinuationOf(prevMsg, newMsg));
+          list.appendChild(messageEl);
+
+          this.lastRenderedMessages = orderedMessages.slice();
+          if (wasAtBottom) this.scrollToBottom();
+          return;
+      }
+
+      // Fast path: single message edited in place
+      const isSameOrderAndIds =
+          !forceRebuild &&
+          !messageRemoved &&
+          orderedMessages.length === previousMessages.length &&
+          orderedMessages.every((msg, idx) => msg.id === previousMessages[idx].id);
+
+      if (isSameOrderAndIds) {
+          const changedIndexes = [];
+          orderedMessages.forEach((msg, idx) => {
+              const prev = previousMessages[idx];
+              if ((msg.text || '') !== (prev.text || '') ||
+                  !!msg.edited !== !!prev.edited ||
+                  (msg.replyTo || '') !== (prev.replyTo || '') ||
+                  (msg.replyAuthor || '') !== (prev.replyAuthor || '')) {
+                  changedIndexes.push(idx);
+              }
+          });
+
+          if (changedIndexes.length === 0) {
+              this.lastRenderedMessages = orderedMessages.slice();
+              return;
+          }
+
+          if (changedIndexes.length === 1) {
+              const changedIndex = changedIndexes[0];
+              const changedMsg = orderedMessages[changedIndex];
+              const prevMsg = changedIndex > 0 ? orderedMessages[changedIndex - 1] : null;
+              const isContinuation = this.isContinuationOf(prevMsg, changedMsg);
+
+              const existingEl = list.querySelector(`.note-message[data-id="${this.escapeAttrValue(changedMsg.id)}"]`);
+              if (existingEl) {
+                  const replacementEl = this.createMessageElement(changedMsg, orderedMessages, isContinuation);
+                  existingEl.replaceWith(replacementEl);
+                  this.lastRenderedMessages = orderedMessages.slice();
+                  return;
+              }
+          }
+      }
+
+      // Fast path: single deletion (already removed above; just refresh adjacent continuation)
+      const isSingleDelete =
+          !forceRebuild &&
+          messageRemoved &&
+          previousMessages.length === orderedMessages.length + 1;
+
+      if (isSingleDelete) {
+          let i = 0;
+          let j = 0;
+          let removedIndex = -1;
+          while (i < previousMessages.length && j < orderedMessages.length) {
+              if (previousMessages[i].id === orderedMessages[j].id) {
+                  i++;
+                  j++;
+              } else if (removedIndex === -1) {
+                  removedIndex = i;
+                  i++;
+              } else {
+                  removedIndex = -1;
+                  break;
+              }
+          }
+          if (removedIndex === -1 && i === previousMessages.length - 1 && j === orderedMessages.length) {
+              removedIndex = i;
+              i++;
+          }
+
+          const validSingleDelete = removedIndex !== -1 && i === previousMessages.length && j === orderedMessages.length;
+          if (validSingleDelete) {
+              const removedMsg = previousMessages[removedIndex];
+              const removedDateKey = this.getDateSeparatorLabel(removedMsg.timestamp);
+              const hasRemainingOnDate = orderedMessages.some(m => this.getDateSeparatorLabel(m.timestamp) === removedDateKey);
+              if (!hasRemainingOnDate) {
+                  const orphan = list.querySelector(`.notes-date-separator[data-date="${this.escapeAttrValue(removedDateKey)}"]`);
+                  if (orphan) orphan.remove();
+              }
+
+              const affectedIndex = removedIndex;
+              if (affectedIndex < orderedMessages.length) {
+                  const affectedMsg = orderedMessages[affectedIndex];
+                  const prevMsg = affectedIndex > 0 ? orderedMessages[affectedIndex - 1] : null;
+                  const affectedEl = list.querySelector(`.note-message[data-id="${this.escapeAttrValue(affectedMsg.id)}"]`);
+                  if (affectedEl) {
+                      const replacementEl = this.createMessageElement(affectedMsg, orderedMessages, this.isContinuationOf(prevMsg, affectedMsg));
+                      affectedEl.replaceWith(replacementEl);
+                  }
+              }
+
+              this.lastRenderedMessages = orderedMessages.slice();
+              return;
+          }
+      }
+
+      // Slow path: full reconcile, but reuse existing nodes by render signature
       const fragment = document.createDocumentFragment();
       let prevMsg = null;
       let prevDateLabel = '';
@@ -1327,32 +1690,28 @@ class NotesUIManager {
       orderedMessages.forEach((msg) => {
           const currentDateLabel = this.getDateSeparatorLabel(msg.timestamp);
           if (currentDateLabel !== prevDateLabel) {
-              const dateSep = document.createElement('div');
-              dateSep.className = 'notes-date-separator';
-              dateSep.dataset.date = currentDateLabel;
-
-              const label = document.createElement('span');
-              label.textContent = currentDateLabel;
-              dateSep.appendChild(label);
-              fragment.appendChild(dateSep);
-
+              const existingSep = list.querySelector(`.notes-date-separator[data-date="${this.escapeAttrValue(currentDateLabel)}"]`);
+              fragment.appendChild(existingSep || this.buildDateSeparatorEl(currentDateLabel));
               prevDateLabel = currentDateLabel;
           }
 
-          const isContinuation = !!(
-            prevMsg &&
-            prevMsg.userId === msg.userId &&
-            this.getDateSeparatorLabel(prevMsg.timestamp) === currentDateLabel &&
-            (Number(msg.timestamp) - Number(prevMsg.timestamp) < 3 * 60 * 1000)
-          );
+          const isContinuation = this.isContinuationOf(prevMsg, msg);
+          const newSig = this.buildMessageRenderSignature(msg, isContinuation);
+          const existingEl = list.querySelector(`.note-message[data-id="${this.escapeAttrValue(msg.id)}"]`);
 
-          const messageEl = this.createMessageElement(msg, orderedMessages, isContinuation);
-          fragment.appendChild(messageEl);
+          if (existingEl && existingEl.dataset.renderSig === newSig) {
+              fragment.appendChild(existingEl);
+          } else {
+              const messageEl = this.createMessageElement(msg, orderedMessages, isContinuation);
+              fragment.appendChild(messageEl);
+          }
           prevMsg = msg;
       });
 
       list.innerHTML = '';
       list.appendChild(fragment);
+
+      this.lastRenderedMessages = orderedMessages.slice();
 
       if (wasAtBottom) {
           this.scrollToBottom();
@@ -1381,14 +1740,13 @@ class NotesUIManager {
           const original = allMessages.find(m => m.id === msg.replyTo);
           if (original) {
                replyHTML = `
-                 <div style="background: #f1f5f9; border-left: 3px solid #cbd5e1; padding: 4px 8px; margin-bottom: 4px; font-size: 11px; border-radius: 4px; opacity: 0.8;">
+                 <div class="note-reply-preview">
                    <b>${this.escapeHtml(msg.replyAuthor || 'Someone')}:</b> ${this.escapeHtml(original.text.substring(0, 50))}...
                  </div>
                `;
           }
       }
 
-      const bg = isMe ? '#e8f5e9' : 'var(--chat-secondary)';
       const initial = (resolvedName || '?').charAt(0).toUpperCase();
       const avatarVisibility = isContinuation ? 'visibility:hidden;' : 'visibility:visible;';
       const headerDisplay = isContinuation ? 'display:none;' : 'display:flex;';
@@ -1410,11 +1768,11 @@ class NotesUIManager {
          <div class="note-content">
            <div class="note-header" style="${headerDisplay}">
                 <span class="note-author">${this.escapeHtml(resolvedName)}</span>
-                <span class="note-time">${new Date(msg.timestamp).toLocaleTimeString('bg-BG', {hour: '2-digit', minute:'2-digit'})}</span>
+                <span class="note-time">${this.formatNoteTime(msg.timestamp)}</span>
              </div>
              ${replyHTML}
-             <div class="note-bubble-container" style="position: relative; width: fit-content; display: flex; flex-direction: column;">
-               <div class="note-text" style="background:${bg}">${this.linkify(msg.text)}${msg.edited ? '<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>' : ''}</div>
+             <div class="note-bubble-container">
+               <div class="note-text">${this.linkify(msg.text)}${msg.edited ? '<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>' : ''}</div>
                <div class="note-actions ${actionClass}">
                <button class="note-action-btn reply-btn" title="Reply">
                  <img src="svg/chat/icon-reply.svg" alt="Reply" style="width: 16px; height: 16px">
@@ -1582,11 +1940,16 @@ class NotesUIManager {
       input.dataset.replyTo = msg.id;
       const replyAuthorName = this.getDisplayNameByUserId(msg.userId, msg.userName);
       input.dataset.replyAuthor = replyAuthorName;
-      
+
+      const previewText = (msg.text || '').length > 60 ? (msg.text || '').substring(0, 57) + '...' : (msg.text || '');
+
       preview.innerHTML = `
-        <div class="reply-indicator" style="background: #f1f5f9; border-left: 3px solid #3b82f6; padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Replying to <b>${this.escapeHtml(replyAuthorName)}</b></span>
-            <button type="button" onpointerdown="window.notesManager.cancelReply(event); return false;" onclick="window.notesManager.cancelReply(event); return false;" style="border:none;background:none;cursor:pointer;">✖</button>
+        <div class="reply-indicator">
+            <div style="flex: 1; min-width: 0;">
+                <div class="reply-indicator-author">Replying to ${this.escapeHtml(replyAuthorName)}</div>
+                <div class="reply-indicator-text">${this.escapeHtml(previewText)}</div>
+            </div>
+            <button type="button" class="reply-indicator-close" onpointerdown="window.notesManager.cancelReply(event); return false;" onclick="window.notesManager.cancelReply(event); return false;">&times;</button>
         </div>
       `;
       input.focus();
@@ -1622,9 +1985,9 @@ class NotesUIManager {
       input.style.overflowY = input.scrollHeight > maxInputHeight ? 'auto' : 'hidden';
 
       preview.innerHTML = `
-        <div class="reply-indicator" style="background: #fef3c7; border-left: 3px solid #d97706; padding: 8px; margin-bottom: 8px; border-radius: 4px; font-size: 12px; display: flex; justify-content: space-between; align-items: center;">
-            <span>Editing message</span>
-            <button onclick="window.notesManager.cancelEditing()" style="border:none;background:none;cursor:pointer;">✖</button>
+        <div class="reply-indicator">
+            <span><strong class="reply-indicator-author" style="margin-bottom:0;">Editing message</strong></span>
+            <button type="button" class="reply-indicator-close" onclick="window.notesManager.cancelEditing()">&times;</button>
         </div>
       `;
 
@@ -1728,69 +2091,119 @@ class NotesUIManager {
   }
   
   showReactionPicker(msgId, targetBtn) {
-       // Simple picker
       const existing = document.querySelector('.reaction-picker');
-       if(existing) existing.remove();
-       
-       const emojis1 = ['👍', '👎', '😂', '❤️', '😮', '🐐'];
+      if (existing) existing.remove();
 
-       const picker = document.createElement('div');
-       picker.className = 'reaction-picker';
-       picker.style.cssText = `
-         position: fixed; background: white; border: 1px solid #ddd;
-         padding: 8px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-         display: flex; flex-direction: column; gap: 4px; z-index: 10001;
-       `;
-       
-       const createRow = (emojis) => {
-           const row = document.createElement('div');
-           row.style.cssText = 'display: flex; gap: 4px; justify-content: space-around;';
-           emojis.forEach(emoji => {
-               const btn = document.createElement('button');
-               btn.textContent = emoji;
-               btn.style.cssText = "background:none;border:none;font-size:18px;cursor:pointer;padding:4px;";
-               btn.onclick = () => {
-                   this.db.addReaction(msgId, emoji);
-                   picker.remove();
-               };
-               row.appendChild(btn);
-           });
-           return row;
-       };
+      const emojis = ['\u{1F44D}', '\u{1F44E}', '\u{1F602}', '\u{2764}\u{FE0F}', '\u{1F62D}', '\u{1F62E}', '\u{1F410}'];
+      const pickerHover = '#eef5ec';
 
-       picker.appendChild(createRow(emojis1));
-       
-       document.body.appendChild(picker);
+      const picker = document.createElement('div');
+      picker.className = 'reaction-picker';
+      picker.style.cssText = `
+        position: fixed;
+        background: #ffffff;
+        color: #1f2937;
+        border: 1px solid #cddbc8;
+        border-radius: 20px;
+        padding: 6px 10px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        box-shadow: 0 4px 15px rgba(58, 90, 64, 0.15);
+        z-index: 10001;
+      `;
 
-       const targetRect = targetBtn && targetBtn.getBoundingClientRect ? targetBtn.getBoundingClientRect() : null;
-       const pickerRect = picker.getBoundingClientRect();
-       let left = targetRect ? (targetRect.left + targetRect.width / 2 - pickerRect.width / 2) : ((window.innerWidth - pickerRect.width) / 2);
-       let top = targetRect ? (targetRect.top - pickerRect.height - 8) : ((window.innerHeight - pickerRect.height) / 2);
+      const addEmojiButton = (emoji) => {
+          const btn = document.createElement('button');
+          btn.textContent = emoji;
+          btn.style.cssText = `
+            background: none;
+            border: none;
+            font-size: 18px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+          `;
+          btn.addEventListener('mouseenter', () => btn.style.background = pickerHover);
+          btn.addEventListener('mouseleave', () => btn.style.background = 'none');
+          btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              this.db.addReaction(msgId, emoji);
+              picker.remove();
+              document.removeEventListener('click', closePicker);
+          });
+          return btn;
+      };
 
-       if (left < 10) left = 10;
-       if (left + pickerRect.width > window.innerWidth - 10) {
-         left = window.innerWidth - pickerRect.width - 10;
-       }
-       if (top < 10) {
-         top = targetRect ? (targetRect.bottom + 8) : 10;
-       }
-       if (top + pickerRect.height > window.innerHeight - 10) {
-         top = window.innerHeight - pickerRect.height - 10;
-       }
+      emojis.forEach(emoji => picker.appendChild(addEmojiButton(emoji)));
 
-       picker.style.left = `${Math.round(left)}px`;
-       picker.style.top = `${Math.round(top)}px`;
-       
-       // Close on click outside
-       setTimeout(() => {
-           document.addEventListener('click', function close(e) {
-               if(!picker.contains(e.target)) { // Can be removed
-                   console.log('NotesUIManager: Reaction picker closed.');
-                   picker.remove();
-                   document.removeEventListener('click', close);
-               }
-           });
-       }, 0);
+      const customBtn = document.createElement('button');
+      customBtn.innerHTML = `
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="12" y1="5" x2="12" y2="19"></line>
+          <line x1="5" y1="12" x2="19" y2="12"></line>
+        </svg>
+      `;
+      customBtn.title = 'Add custom reaction';
+      customBtn.style.cssText = `
+        background: #f3f4f6;
+        border: none;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-left: 4px;
+        color: #6b7280;
+        transition: all 0.2s;
+      `;
+      customBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const customEmoji = prompt('Enter an emoji or short text for the reaction:');
+          if (customEmoji && customEmoji.trim()) {
+              this.db.addReaction(msgId, customEmoji.trim().substring(0, 5));
+          }
+          picker.remove();
+          document.removeEventListener('click', closePicker);
+      });
+      picker.appendChild(customBtn);
+
+      document.body.appendChild(picker);
+
+      const targetRect = targetBtn && targetBtn.getBoundingClientRect ? targetBtn.getBoundingClientRect() : null;
+      const pickerRect = picker.getBoundingClientRect();
+      let left = targetRect ? (targetRect.left + targetRect.width / 2 - pickerRect.width / 2) : ((window.innerWidth - pickerRect.width) / 2);
+      let top = targetRect ? (targetRect.top - pickerRect.height - 8) : ((window.innerHeight - pickerRect.height) / 2);
+
+      if (left < 10) left = 10;
+      if (left + pickerRect.width > window.innerWidth - 10) {
+          left = window.innerWidth - pickerRect.width - 10;
+      }
+      if (top < 10) {
+          top = targetRect ? (targetRect.bottom + 8) : 10;
+      }
+      if (top + pickerRect.height > window.innerHeight - 10) {
+          top = window.innerHeight - pickerRect.height - 10;
+      }
+
+      picker.style.left = `${Math.round(left)}px`;
+      picker.style.top = `${Math.round(top)}px`;
+
+      const closePicker = (e) => {
+          if (!picker.contains(e.target) && !(e.target && e.target.closest && e.target.closest('.react-btn'))) {
+              picker.remove();
+              document.removeEventListener('click', closePicker);
+          }
+      };
+      setTimeout(() => {
+          document.addEventListener('click', closePicker);
+      }, 0);
   }
   
   updateReactionsUI() {
@@ -1828,7 +2241,7 @@ class NotesUIManager {
       const fallback = messageMap[uid] || '';
       const resolved = this.getDisplayNameByUserId(uid, fallback);
       const isMe = currentUser && currentUser.userId && String(currentUser.userId) === String(uid);
-      return isMe ? `<strong>${this.escapeHtml(resolved)} (Аз)</strong>` : this.escapeHtml(resolved);
+      return isMe ? `<strong>${this.escapeHtml(resolved)} (You)</strong>` : this.escapeHtml(resolved);
     }).join('<br>');
 
     const tooltip = document.createElement('div');
@@ -1890,9 +2303,8 @@ class NotesUIManager {
     });
 
     return Object.keys(reactionCounts).map(emoji => `
-        <button class="reaction-badge" data-emoji="${emoji}" data-msgid="${msgId}"
-           style="background:${myReactions[emoji] ? '#93c5fd' : '#f1f5f9'};border:none;border-radius:12px;padding:4px 8px;font-size:14px;margin-right:4px;cursor:pointer;font-weight:${myReactions[emoji] ? 'bold' : 'normal'}">
-           ${emoji} ${reactionCounts[emoji]}
+        <button class="reaction-badge ${myReactions[emoji] ? 'is-my-reaction' : 'is-other-reaction'}" data-emoji="${emoji}" data-msgid="${msgId}">
+           ${emoji} <span>${reactionCounts[emoji]}</span>
         </button>
     `).join('');
   }
