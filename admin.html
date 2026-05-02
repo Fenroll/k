@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=20260502zgw"></script>
+    <script src="js/auth-guard.js?v=202605021bwc"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=20260502zgw"></script>
+    <script src="js/user-identity.js?v=202605021bwc"></script>
     <script src="js/admin-guard.js?v=202602171mhr"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=20260502zgw">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605021bwc">
     <title>Admin Panel</title>
     <style>
         :root {
@@ -330,8 +330,23 @@
         .schedule-table th {
             background: #588157;
             color: #fff;
-            padding: 16px 12px;
+            padding: 12px 10px;
             border-right: 1px solid #344e41;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .schedule-table th .ve-th-day {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            opacity: 0.85;
+        }
+        .schedule-table th .ve-th-date {
+            font-size: 18px;
+            font-weight: 300;
+            letter-spacing: -0.01em;
+            margin-top: 2px;
         }
         .schedule-table td {
             padding: 8px;
@@ -344,26 +359,49 @@
         .schedule-table td:hover {
             background-color: #2a2a2a;
         }
+        /* Schedule item — matched to calendar.html .event-card design */
         .schedule-item {
+            margin: 1px 2px;
+            padding: 4px 6px;
             border-radius: 6px;
-            padding: 8px 10px;
-            margin-bottom: 6px;
+            font-size: 13px;
+            line-height: 1.2;
+            display: flex;
+            flex-direction: column;
             cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            color: #121212; /* Text color for items */
+            box-shadow: none;
+            transition: transform 0.1s ease;
+            overflow: hidden;
         }
-        /* Item types - simplified colors for admin */
-        .type-exercise { background: #91c3fd; border-left: 4px solid #2563eb; }
-        .type-lecture { background: #e5e7eb; border-left: 4px solid #9ca3af; }
-        .type-important-lecture { background: #dad7cd; border-left: 4px solid #646c7e; }
-        .type-exam { background: #d87060; border-left: 4px solid #b34d41; }
-        .type-makeup { background: #fdba74; border-left: 4px solid #f97316; }
-        .type-test { background: #6ee7b7; border-left: 4px solid #732c2c; }
-        .type-colloquium { background: #fdba74; border-left: 4px solid #f97316; } /* Added Colloquium mapping */
+        .schedule-item + .schedule-item { margin-top: 3px; }
+        .schedule-item:hover {
+            transform: scale(1.02);
+            z-index: 15;
+        }
 
-        .schedule-subject { font-weight: 600; font-size: 13px; }
-        .schedule-time { font-size: 11px; opacity: 0.8; }
+        /* Item types — colors mirror calendar.html */
+        .type-exercise { background: #93c5fd; border: 1.5px solid #1d4ed8; color: #1e3a8a; }
+        .type-lecture { background: #e8ecf0; border: 1.5px solid #94a3b8; color: #334155; }
+        .type-important-lecture { background: #c7d2fe; border: 1.5px solid #6366f1; color: #312e81; }
+        .type-exam { background: #fca5a5; border: 1.5px solid #b91c1c; color: #450a0a; }
+        .type-test { background: #6ee7b7; border: 1.5px solid #047857; color: #022c22; }
+        .type-makeup { background: #fbbf24; border: 1.5px solid #92400e; color: #451a03; }
+        .type-colloquium { background: #fbbf24; border: 1.5px solid #92400e; color: #451a03; }
+
+        .schedule-subject {
+            font-weight: 700;
+            font-size: 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: inherit;
+        }
+        .schedule-time {
+            font-size: 13px;
+            opacity: 0.9;
+            white-space: nowrap;
+            color: inherit;
+        }
         
         .add-event-btn-cell {
             display: none;
@@ -501,50 +539,91 @@
             background: #3a2a2a;
         }
 
-        @media (max-width: 768px) {
+        @media (max-width: 900px) {
             #visual-editor-container {
                 padding: 1rem;
             }
 
             .ve-header {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 12px;
-                margin-bottom: 1rem;
+                flex-direction: row;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 0.85rem;
+                flex-wrap: wrap;
+            }
+
+            .ve-header h2 {
+                flex: 1 1 auto;
+                font-size: 1.05rem;
+                margin: 0;
+                padding: 0;
+                border: 0;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .ve-header-actions {
-                width: 100%;
+                display: flex;
+                gap: 6px;
+                flex: 0 0 auto;
             }
 
-            .ve-header-actions .btn {
-                flex: 1;
+            /* Compact icon-only buttons in the header on mobile */
+            .ve-header-actions .ve-icon-btn,
+            #ve-prev-week-btn,
+            #ve-next-week-btn {
+                width: 40px !important;
+                height: 40px;
+                min-height: 40px;
+                padding: 0 !important;
+                flex: 0 0 40px !important;
+                gap: 0 !important;
+            }
+
+            .ve-header-actions .ve-icon-btn .ve-btn-text,
+            #ve-prev-week-btn .ve-btn-text,
+            #ve-next-week-btn .ve-btn-text {
+                display: none;
+            }
+
+            .ve-header-actions .ve-icon-btn .ve-btn-icon,
+            #ve-prev-week-btn .ve-btn-icon,
+            #ve-next-week-btn .ve-btn-icon {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 16px;
+                line-height: 1;
             }
 
             .week-selector {
                 display: grid;
-                grid-template-columns: auto 1fr auto;
-                gap: 10px;
-                padding: 12px;
-                margin-bottom: 14px;
+                grid-template-columns: 1fr auto auto;
+                gap: 8px;
+                padding: 10px;
+                margin-bottom: 12px;
+                align-items: center;
             }
 
-            .ve-mode-wrap,
-            #ve-edit-week-btn {
+            .ve-mode-wrap {
                 grid-column: 1 / -1;
-            }
-
-            #ve-prev-week-btn {
-                grid-column: 1;
-                grid-row: 2;
+                grid-row: 1;
             }
 
             .week-info {
-                grid-column: 2;
+                grid-column: 1;
                 grid-row: 2;
                 font-size: 0.95rem;
-                line-height: 1.35;
-                padding: 0 6px;
+                line-height: 1.25;
+                padding: 0 4px;
+                text-align: left;
+                min-width: 0;
+            }
+
+            #ve-prev-week-btn {
+                grid-column: 2;
+                grid-row: 2;
             }
 
             #ve-next-week-btn {
@@ -552,28 +631,22 @@
                 grid-row: 2;
             }
 
-            #ve-mode-selector,
+            /* Edit Week Date is the one button that keeps its text on mobile */
             #ve-edit-week-btn {
+                grid-column: 1 / -1;
+                grid-row: 3;
+                width: 100% !important;
+                margin-left: 0 !important;
+                height: auto;
+                padding: 0.6rem 0.95rem !important;
+                flex: 1 1 auto !important;
+            }
+            #ve-edit-week-btn .ve-btn-text {
+                display: inline;
+            }
+
+            #ve-mode-selector {
                 width: 100%;
-            }
-
-            #ve-prev-week-btn,
-            #ve-next-week-btn {
-                width: auto !important;
-                min-width: 44px;
-                padding: 10px 12px;
-                font-size: 0;
-                line-height: 1;
-            }
-
-            #ve-prev-week-btn::before {
-                content: '◀';
-                font-size: 18px;
-            }
-
-            #ve-next-week-btn::before {
-                content: '▶';
-                font-size: 18px;
             }
 
             .week-selector.template-mode {
@@ -585,19 +658,62 @@
                 grid-row: auto;
             }
 
+            .ve-table-wrap {
+                overflow-x: hidden;
+                -webkit-overflow-scrolling: auto;
+            }
+
             .schedule-table {
-                min-width: 560px;
+                min-width: 0;
+                width: 100%;
+                table-layout: fixed;
             }
 
             .schedule-table th {
-                padding: 10px 8px;
-                font-size: 0.95rem;
-                white-space: nowrap;
+                padding: 8px 4px;
+                font-size: 0.85rem;
+            }
+
+            .schedule-table th .ve-th-day {
+                font-size: 9px;
+                letter-spacing: 0.04em;
+            }
+
+            .schedule-table th .ve-th-date {
+                font-size: 14px;
+                margin-top: 1px;
             }
 
             .schedule-table td {
-                padding: 6px;
+                padding: 3px 2px;
+                width: 20%;
             }
+
+            .schedule-item {
+                margin: 1px 0;
+                padding: 3px 4px;
+                border-radius: 5px;
+                line-height: 1.15;
+            }
+
+            .schedule-subject { font-size: 12px; font-weight: 700; }
+            .schedule-time { font-size: 10px; opacity: 0.85; }
+
+            .add-event-btn-cell {
+                font-size: 10px;
+                padding: 3px 2px;
+                margin-top: 4px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .schedule-table th { padding: 6px 2px; }
+            .schedule-table th .ve-th-day { font-size: 8px; }
+            .schedule-table th .ve-th-date { font-size: 12px; }
+            .schedule-table td { padding: 2px 1px; }
+            .schedule-item { padding: 2px 3px; }
+            .schedule-subject { font-size: 11px; }
+            .schedule-time { font-size: 9px; }
         }
     </style>
   <script src="js/version-manager.js?v=2026031715gu"></script>
@@ -1187,10 +1303,10 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=20260502zgw"></script>
+    <script src="courses.generated.js?v=202605021bwc"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=20260429domain1"></script>
-    <script src="js/admin-visual-editor.js?v=202602171mhr"></script>
+    <script src="js/admin-visual-editor.js?v=20260502ve2"></script>
   </main>
 </body>
 </html>

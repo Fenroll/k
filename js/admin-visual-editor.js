@@ -385,10 +385,10 @@
                 return;
             }
 
-            const options = { day: 'numeric', month: 'long', year: 'numeric' };
+            const options = { day: 'numeric', month: 'long' };
             const start = new Date(currentWeek.startDate);
             let end;
-            
+
             if (currentWeek.type === 'exam') {
                 // For exam weeks, calculate end date from exam period or use endDate if set
                 if (currentWeek.endDate) {
@@ -442,9 +442,29 @@
 
         function renderTableView(currentWeek) {
             const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
+            const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
             const tbody = document.getElementById('ve-schedule-body');
             tbody.innerHTML = '';
-            
+
+            // Update table headers with day name + date (week starts on Monday)
+            const headerRow = document.querySelector('#ve-schedule-table thead tr');
+            if (headerRow) {
+                const ths = headerRow.querySelectorAll('th');
+                const startDate = currentWeek && currentWeek.startDate ? new Date(currentWeek.startDate) : null;
+                ths.forEach((th, i) => {
+                    if (startDate) {
+                        const d = new Date(startDate);
+                        d.setDate(d.getDate() + i);
+                        const day = d.getDate();
+                        const mon = d.getMonth() + 1;
+                        const dateStr = `${day}.${mon < 10 ? '0' + mon : mon}`;
+                        th.innerHTML = `<div class="ve-th-day">${dayNames[i]}</div><div class="ve-th-date">${dateStr}</div>`;
+                    } else {
+                        th.textContent = dayNames[i];
+                    }
+                });
+            }
+
             const scheduleData = currentWeek.schedule;
             
             const eventsByDay = {};
@@ -498,12 +518,21 @@
             periodStart.setHours(0,0,0,0);
             periodEnd.setHours(0,0,0,0);
 
-            const filteredExams = allExams.filter(exam => {
-                if (!exam.examDate) return false;
-                const d = new Date(exam.examDate);
-                d.setHours(0,0,0,0);
-                return d >= periodStart && d <= periodEnd;
-            });
+            const filteredExams = allExams
+                .filter(exam => {
+                    if (!exam.examDate) return false;
+                    const d = new Date(exam.examDate);
+                    d.setHours(0, 0, 0, 0);
+                    return d >= periodStart && d <= periodEnd;
+                })
+                .sort((a, b) => {
+                    const da = new Date(a.examDate).getTime();
+                    const db = new Date(b.examDate).getTime();
+                    if (Number.isNaN(da) && Number.isNaN(db)) return 0;
+                    if (Number.isNaN(da)) return 1;
+                    if (Number.isNaN(db)) return -1;
+                    return da - db;
+                });
 
             const months = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
 
