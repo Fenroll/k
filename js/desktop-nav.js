@@ -267,6 +267,13 @@
 
   installGlobalUtilities();
 
+  // Pages that don't load courses.generated.js (tools.html, calendar.html, etc.)
+  // never have window.buildTimestamp set, so the version popover would show
+  // "Unknown" until the async fetch completes — and the popover auto-hides at
+  // 5s, sometimes before the fetch resolves. Kick off the fetch eagerly so the
+  // timestamp is cached on window/localStorage by the time the user clicks.
+  loadVersionTimestamp().catch(function() { /* swallow — getVersionText will fall back */ });
+
   document.addEventListener('keydown', function(event) {
     if (event.key === 'Escape') {
       closePrivacyModalShared();

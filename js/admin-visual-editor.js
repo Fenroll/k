@@ -443,27 +443,33 @@
         function renderTableView(currentWeek) {
             const days = ['ПОН', 'ВТ', 'СР', 'ЧЕТ', 'ПЕТ'];
             const dayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
-            const tbody = document.getElementById('ve-schedule-body');
-            tbody.innerHTML = '';
 
-            // Update table headers with day name + date (week starts on Monday)
+            // Update table headers FIRST so any later error doesn't strand them on stale text.
             const headerRow = document.querySelector('#ve-schedule-table thead tr');
             if (headerRow) {
                 const ths = headerRow.querySelectorAll('th');
-                const startDate = currentWeek && currentWeek.startDate ? new Date(currentWeek.startDate) : null;
+                let baseDate = null;
+                if (currentWeek && currentWeek.startDate) {
+                    const parsed = new Date(currentWeek.startDate);
+                    if (!Number.isNaN(parsed.getTime())) baseDate = parsed;
+                }
                 ths.forEach((th, i) => {
-                    if (startDate) {
-                        const d = new Date(startDate);
+                    if (baseDate) {
+                        const d = new Date(baseDate);
                         d.setDate(d.getDate() + i);
                         const day = d.getDate();
                         const mon = d.getMonth() + 1;
                         const dateStr = `${day}.${mon < 10 ? '0' + mon : mon}`;
                         th.innerHTML = `<div class="ve-th-day">${dayNames[i]}</div><div class="ve-th-date">${dateStr}</div>`;
                     } else {
-                        th.textContent = dayNames[i];
+                        // Template mode (no real start date) — keep just the day name with the styled label class so layout is consistent.
+                        th.innerHTML = `<div class="ve-th-day">${dayNames[i]}</div>`;
                     }
                 });
             }
+
+            const tbody = document.getElementById('ve-schedule-body');
+            if (tbody) tbody.innerHTML = '';
 
             const scheduleData = currentWeek.schedule;
             
