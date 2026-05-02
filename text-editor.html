@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260502vyb"></script>
+  <script src="js/auth-guard.js?v=20260502wpo"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260502vyb">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260502wpo">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -846,7 +846,7 @@
       position: relative;
     }
 
-    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    @media (max-width: 900px){
       /* ── Layout ── */
       html, body {
         height: 100%;
@@ -1289,7 +1289,7 @@
     .toolbar-group-more { display: none; }
 
     /* ── Mobile ── */
-    @media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    @media (max-width: 900px){
       .mobile-extra { display: none !important; }
 
       #formatOptions {
@@ -2065,7 +2065,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=20260502vyb"></script>
+  <script src="courses.generated.js?v=20260502wpo"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -5587,7 +5587,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       margin-top: 0.1em;
       padding-left: 1.5em;
     }
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       body {
         margin: 0.5rem 0;
         padding: 0 0.5rem;
@@ -10564,19 +10564,19 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=20260502vyb"></script>
+  <script src="js/user-identity.js?v=20260502wpo"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260502vyb"></script>
+    <script src="js/chat.js?v=20260502wpo"></script>
 
 <script src="js/version-check.js?v=202605021vc"></script>
-  <script src="js/mobile-nav.js?v=20260502vyb"></script>
+  <script src="js/mobile-nav.js?v=20260502wpo"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');
       var morePanel = document.getElementById('moreToolsPanel');
       if (!moreBtn || !morePanel) return;
 
-      var isMobile = window.matchMedia('(max-width: 768px), (hover: none) and (pointer: coarse)').matches;
+      var isMobile = window.matchMedia('(max-width: 900px)').matches;
       if (isMobile) {
         var labels = {
           'Formatting': ['strikeBtn','subscriptBtn','superscriptBtn'],

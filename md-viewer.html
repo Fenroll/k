@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=20260502vyb"></script>
+  <script src="js/auth-guard.js?v=20260502wpo"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -16,7 +16,7 @@
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <!-- Mobile Navigation CSS -->
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260502vyb">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260502wpo">
 
   <!-- Firebase SDKs - Moved to head and using compat versions -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
@@ -126,8 +126,7 @@
     header a.btn:hover { background: #e0e7ff; color: var(--link-hover); }
     main { max-width: 1700px; margin: 0 auto; padding: 3px 3px; flex: 1; width: 100%; margin-top: 25px; }
 
-    /* Hide edit button on mobile (screens 768px and smaller) */
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       header button#editBtn,
       header button#editBtn.visible {
         display: none !important;
@@ -250,7 +249,7 @@
       touch-action: none;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       .image-lightbox {
         padding: 8px;
       }
@@ -528,7 +527,7 @@
       font-weight: 600;
     }
 
-    @media (max-width: 768px) {
+    @media (max-width: 900px) {
       main { padding: 12px; }
       .markdown-body { font-size: 1em; font-weight: 400; }
       .table-scroll table { font-size: 1em; }
@@ -2114,7 +2113,7 @@
       if (filePath) {
         currentEditPath = filePath;
         // Make button visible on desktop/tablet
-        if (window.innerWidth > 768) {
+        if (window.innerWidth > 900) {
           editBtn.classList.add('visible');
         }
 
@@ -2214,7 +2213,7 @@
   </script>
 
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=20260502vyb"></script>
+  <script src="courses.generated.js?v=20260502wpo"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2319,15 +2318,15 @@
 
 
 
-<script src="js/user-identity.js?v=20260502vyb"></script>
+<script src="js/user-identity.js?v=20260502wpo"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260502vyb"></script>
+    <script src="js/chat.js?v=20260502wpo"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202605022sg"></script>
 
   <script>
     (function() {
-      const isMobile = () => window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+      const isMobile = () => window.matchMedia('(max-width: 900px), (pointer: coarse)').matches;
 
       const setKeyboardOffset = () => {
         if (!isMobile()) {
