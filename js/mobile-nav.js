@@ -12,7 +12,7 @@
         const style = document.createElement('style');
         style.id = CRITICAL_STYLE_ID;
         style.textContent = `
-@media (max-width: 768px), (hover: none), (pointer: coarse) {
+@media (max-width: 900px) {
   #bottom-nav.bottom-nav {
     display: flex !important;
     position: fixed !important;
@@ -69,7 +69,7 @@
     pointer-events: none !important;
   }
 }
-@media (min-width: 769px) and (hover: hover) and (pointer: fine) {
+@media (min-width: 901px) {
   #bottom-nav.bottom-nav,
   #others-menu-overlay.others-menu-overlay {
     display: none !important;

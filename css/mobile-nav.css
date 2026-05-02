@@ -1,10 +1,10 @@
 /* mobile-nav.css */
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     /* Hide existing mobile toggle and sidebar */
     .mobile-menu-toggle {
         display: none !important;
     }
-    
+
     #side-menu {
         display: none !important;
     }
@@ -127,7 +127,7 @@
     flex-shrink: 0;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 900px) {
     .bottom-nav {
         display: flex;
         position: fixed;
