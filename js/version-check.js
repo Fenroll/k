@@ -56,8 +56,7 @@
         font-family: 'Open Sans', Arial, sans-serif;
         background: #fff;
         color: #1f2937;
-        border: 1px solid #cddbc8;
-        border-left: 4px solid #588157;
+        border: 1px solid #588157;
         border-radius: 12px;
         box-shadow: 0 12px 32px rgba(58, 90, 64, 0.18), 0 2px 6px rgba(58, 90, 64, 0.08);
         padding: 14px 16px;
