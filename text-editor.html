@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605035sb"></script>
+  <script src="js/auth-guard.js?v=2026050317zn"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605035sb">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050317zn">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -78,6 +78,58 @@
     .toolbar-group:hover {
       background: transparent;
     }
+
+    /* Push the back-to-courses group to the far right of the toolbar */
+    .toolbar-group-back {
+      margin-left: auto;
+      border-left: 1px solid #e8eaed;
+      border-right: none !important;
+      padding-left: 8px;
+    }
+
+    .toolbar-back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 8px;
+      background: #588157;
+      color: #fff;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-decoration: none;
+      border: 1px solid #4a6d49;
+      box-shadow: 0 1px 3px rgba(58, 90, 64, 0.18);
+      transition: background 0.15s ease, transform 0.12s ease, box-shadow 0.15s ease;
+      cursor: pointer;
+    }
+
+    .toolbar-back-link:hover {
+      background: #4a6d49;
+      box-shadow: 0 2px 8px rgba(58, 90, 64, 0.26);
+    }
+
+    .toolbar-back-link:active {
+      transform: scale(0.97);
+    }
+
+    .toolbar-back-link svg {
+      flex-shrink: 0;
+      stroke: currentColor;
+    }
+
+   @media (max-width: 900px) {
+  .toolbar-back-link {
+    display: none !important;
+  }
+}
+@media (max-width: 900px) {
+  .toolbar-group-back {
+    display: none !important;
+  }
+}
 
     .toolbar button {
       padding: 7px;
@@ -1309,7 +1361,7 @@
       .toolbar-group-more {
         display: flex !important;
         margin-left: auto;
-        border-right: none;
+        border-right: none !important;
       }
 
       #moreToolsBtn {
@@ -1527,16 +1579,110 @@
     .file-item-name { font-size: 0.875rem; font-weight: 500; color: var(--text); }
     .file-item-path { font-size: 0.78rem; color: var(--text-muted); }
 
-    /* ── Symbol buttons ── */
+    /* ── Symbols modal (matches notes.html structure) ── */
+    @keyframes symbolsModalFadeIn {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes symbolsModalPop {
+      from { opacity: 0; transform: translateY(12px) scale(0.96); }
+      to   { opacity: 1; transform: translateY(0)     scale(1);    }
+    }
+    #symbolsModal[style*="flex"] {
+      background: rgba(14, 22, 18, 0.55);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      animation: symbolsModalFadeIn 0.18s ease both;
+    }
+    .symbols-modal-content {
+      max-width: 460px !important;
+      max-height: min(86vh, 620px) !important;
+      border-radius: 16px !important;
+      overflow-y: auto !important;
+      border: 1px solid rgba(88, 129, 87, 0.12) !important;
+      box-shadow: 0 24px 60px rgba(22, 34, 24, 0.22), 0 4px 14px rgba(22, 34, 24, 0.10) !important;
+      animation: symbolsModalPop 0.22s cubic-bezier(0.32, 0.72, 0, 1) both !important;
+    }
+    .symbols-modal-content > .modal-header {
+      background: #fbfcfb;
+      padding: 16px 22px !important;
+      border-bottom: 1px solid #f1f5f1 !important;
+    }
+    .symbols-modal-content > .modal-header h2 {
+      font-size: 1.05em !important;
+      font-weight: 700 !important;
+      letter-spacing: -0.01em !important;
+      color: #111827 !important;
+    }
+    .symbols-modal-content .close,
+    .symbols-modal-content .modal-close {
+      width: 32px;
+      height: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #6b7280;
+      font-size: 22px;
+      line-height: 1;
+      user-select: none;
+      transition: background 0.15s ease, color 0.15s ease;
+    }
+    .symbols-modal-content .close:hover,
+    .symbols-modal-content .modal-close:hover {
+      color: #111827;
+      background: #eef2ec;
+    }
+    .symbol-section {
+      padding: 14px 22px 4px;
+    }
+    .symbol-section + .symbol-section {
+      padding-top: 8px;
+    }
+    .symbol-section:last-child {
+      padding-bottom: 18px;
+    }
+    .symbol-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: #587058;
+      margin-bottom: 10px;
+    }
+    .symbol-grid {
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 8px;
+    }
+    @media (max-width: 480px) {
+      .symbol-grid {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
     .symbol-btn {
-      border: 1.5px solid var(--border) !important; border-radius: var(--radius-sm) !important;
-      background: #fafcfa !important; color: var(--text) !important; font-size: 1.1rem !important;
-      font-weight: 500 !important; padding: 10px !important; cursor: pointer !important;
-      transition: background var(--transition), border-color var(--transition), transform var(--transition) !important;
+      padding: 10px !important;
+      min-height: 46px !important;
+      border: 1px solid #e2e8e0 !important;
+      border-radius: 10px !important;
+      cursor: pointer !important;
+      font-size: 18px !important;
+      font-weight: 600 !important;
+      color: #111827 !important;
+      background: #fbfcfb !important;
+      transition: background 0.12s ease, border-color 0.12s ease, color 0.12s ease, transform 0.10s ease, box-shadow 0.12s ease !important;
     }
     .symbol-btn:hover {
-      background: var(--brand-light) !important; border-color: var(--brand) !important;
-      color: var(--brand) !important; transform: scale(1.08) !important;
+      background: #eef5ec !important;
+      border-color: #8aad82 !important;
+      color: #344e41 !important;
+      box-shadow: 0 2px 6px rgba(58, 90, 64, 0.10) !important;
+      transform: none !important;
+    }
+    .symbol-btn:active {
+      transform: scale(0.96) !important;
+      background: #d9ecd4 !important;
     }
 
     /* ── HTML Editor Modal ── */
@@ -1748,6 +1894,17 @@
     <div class="toolbar-group toolbar-group-more" style="position: relative;">
       <button id="moreToolsBtn" title="More tools">···</button>
       <div id="moreToolsPanel" class="more-tools-panel"></div>
+    </div>
+
+    <!-- Back to courses (far right) -->
+    <div class="toolbar-group toolbar-group-back">
+      <a href="index.html" id="backToCoursesBtn" class="toolbar-back-link" title="Back to courses">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="19" y1="12" x2="5" y2="12"></line>
+          <polyline points="12 19 5 12 12 5"></polyline>
+        </svg>
+        <span class="toolbar-back-label">Courses</span>
+      </a>
     </div>
   </div>
 
@@ -2013,34 +2170,47 @@
     </div>
   </div>
 
-  <div id="symbolsModal" class="modal">
-    <div class="modal-content" style="max-width: 500px;">
+  <div id="symbolsModal" class="modal symbols-modal">
+    <div class="modal-content symbols-modal-content">
       <div class="modal-header">
-        <h2>Insert Symbol</h2>
-        <span class="close" id="closeSymbolsModalBtn">&times;</span>
+        <h2>Insert symbol</h2>
+        <span class="close modal-close" id="closeSymbolsModalBtn" role="button" aria-label="Close">&times;</span>
       </div>
-       <div class="modal-body" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; max-height: 400px; overflow-y: auto;">
-        <button class="symbol-btn" data-symbol="↑" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↑</button>
-        <button class="symbol-btn" data-symbol="↓" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↓</button>
-        <button class="symbol-btn" data-symbol="←" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">←</button>
-        <button class="symbol-btn" data-symbol="→" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">→</button>
-        <button class="symbol-btn" data-symbol="↔" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">↔</button>
-        <button class="symbol-btn" data-symbol="α" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">α</button>
-        <button class="symbol-btn" data-symbol="β" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">β</button>
-        <button class="symbol-btn" data-symbol="γ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">γ</button>
-        <button class="symbol-btn" data-symbol="δ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">δ</button>
-        <button class="symbol-btn" data-symbol="ε" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">ε</button>
-        <button class="symbol-btn" data-symbol="μ" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">μ</button>
-        <button class="symbol-btn" data-symbol="≈" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≈</button>
-        <button class="symbol-btn" data-symbol="≠" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≠</button>
-        <button class="symbol-btn" data-symbol="≤" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≤</button>
-        <button class="symbol-btn" data-symbol="≥" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">≥</button>
-        <button class="symbol-btn" data-symbol="±" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">±</button>
-        <button class="symbol-btn" data-symbol="÷" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">÷</button>
-        <button class="symbol-btn" data-symbol="°" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">°</button>
-        <button class="symbol-btn" data-symbol="℃" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">℃</button>
-        <button class="symbol-btn" data-symbol="‰" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">‰</button>
-        <button class="symbol-btn" data-symbol="t½" style="padding: 12px; border: 1px solid #ddd; border-radius: 4px; cursor: pointer; font-size: 18px; font-weight: bold;">t½</button>
+      <div class="symbol-section">
+        <div class="symbol-section-label">Arrows</div>
+        <div class="symbol-grid">
+          <button class="symbol-btn" data-symbol="↑">↑</button>
+          <button class="symbol-btn" data-symbol="↓">↓</button>
+          <button class="symbol-btn" data-symbol="←">←</button>
+          <button class="symbol-btn" data-symbol="→">→</button>
+          <button class="symbol-btn" data-symbol="↔">↔</button>
+        </div>
+      </div>
+      <div class="symbol-section">
+        <div class="symbol-section-label">Greek</div>
+        <div class="symbol-grid">
+          <button class="symbol-btn" data-symbol="α">α</button>
+          <button class="symbol-btn" data-symbol="β">β</button>
+          <button class="symbol-btn" data-symbol="γ">γ</button>
+          <button class="symbol-btn" data-symbol="δ">δ</button>
+          <button class="symbol-btn" data-symbol="ε">ε</button>
+          <button class="symbol-btn" data-symbol="μ">μ</button>
+        </div>
+      </div>
+      <div class="symbol-section">
+        <div class="symbol-section-label">Math &amp; units</div>
+        <div class="symbol-grid">
+          <button class="symbol-btn" data-symbol="≈">≈</button>
+          <button class="symbol-btn" data-symbol="≠">≠</button>
+          <button class="symbol-btn" data-symbol="≤">≤</button>
+          <button class="symbol-btn" data-symbol="≥">≥</button>
+          <button class="symbol-btn" data-symbol="±">±</button>
+          <button class="symbol-btn" data-symbol="÷">÷</button>
+          <button class="symbol-btn" data-symbol="°">°</button>
+          <button class="symbol-btn" data-symbol="℃">℃</button>
+          <button class="symbol-btn" data-symbol="‰">‰</button>
+          <button class="symbol-btn" data-symbol="t½">t½</button>
+        </div>
       </div>
     </div>
   </div>
@@ -2065,7 +2235,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202605035sb"></script>
+  <script src="courses.generated.js?v=2026050317zn"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -4195,13 +4365,26 @@
       editor.focus();
     });
 
+    let savedSymbolsSelection = null;
     document.getElementById('symbolsBtn').addEventListener('click', () => {
+      // Capture the editor caret position BEFORE the modal steals focus, so the
+      // selected symbol gets inserted exactly where the user was typing.
+      savedSymbolsSelection = saveSelection();
       const symbolsModal = document.getElementById('symbolsModal');
       symbolsModal.style.display = 'flex';
     });
 
     document.getElementById('closeSymbolsModalBtn').addEventListener('click', () => {
       document.getElementById('symbolsModal').style.display = 'none';
+      savedSymbolsSelection = null;
+    });
+
+    // Click on the dim backdrop closes the symbols modal
+    document.getElementById('symbolsModal').addEventListener('click', (e) => {
+      if (e.target.id === 'symbolsModal') {
+        document.getElementById('symbolsModal').style.display = 'none';
+        savedSymbolsSelection = null;
+      }
     });
 
     // Handle symbol button clicks
@@ -4209,32 +4392,31 @@
       btn.addEventListener('click', function(e) {
         e.preventDefault();
         const symbol = this.getAttribute('data-symbol');
-        const shouldCopy = document.getElementById('symbolCopyCheckbox').checked;
 
-        if (shouldCopy) {
-          // Copy to clipboard
-          navigator.clipboard.writeText(symbol).then(() => {
-            // Optional: show feedback
-            console.log('Symbol copied to clipboard: ' + symbol);
-          }).catch(() => {
-            alert('Failed to copy to clipboard');
-          });
-        } else {
-          // Get cursor position
-          const selection = window.getSelection();
-          if (selection.rangeCount === 0) {
-            alert('Please click in the editor first');
-            return;
-          }
-
-          // Insert symbol at cursor
-          document.execCommand('insertText', false, symbol);
-
-          saveToHistory();
-          editor.focus();
+        // Restore the editor selection that was saved when the modal opened so
+        // execCommand inserts at the original caret position rather than where
+        // the user happened to click in the modal.
+        if (savedSymbolsSelection) {
+          restoreSelection(savedSymbolsSelection);
         }
 
-        // Close modal
+        const selection = window.getSelection();
+        if (!selection || selection.rangeCount === 0 || !editor.contains(selection.anchorNode)) {
+          // No active selection in the editor — fall back to appending at the end.
+          editor.focus();
+          const range = document.createRange();
+          range.selectNodeContents(editor);
+          range.collapse(false);
+          const sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+
+        document.execCommand('insertText', false, symbol);
+        saveToHistory();
+        editor.focus();
+
+        savedSymbolsSelection = null;
         document.getElementById('symbolsModal').style.display = 'none';
       });
     });
@@ -4739,93 +4921,6 @@
     // Apply formatting to selected text
     function applyFormatting(property, value) {
       const selection = window.getSelection();
-      const findClosestHeading = (node) => {
-        let current = node;
-        if (current && current.nodeType === Node.TEXT_NODE) {
-          current = current.parentNode;
-        }
-
-        while (current && current !== editor) {
-          if (current.nodeType === Node.ELEMENT_NODE && /^H[1-6]$/.test(current.tagName)) {
-            return current;
-          }
-          current = current.parentNode;
-        }
-        return null;
-      };
-
-      const stripDescendantHeadingColors = (headingEl) => {
-        headingEl.querySelectorAll('span[style], font[color]').forEach((node) => {
-          if (node.tagName === 'FONT') {
-            node.removeAttribute('color');
-            return;
-          }
-
-          const styleValue = node.getAttribute('style') || '';
-          const declarations = styleValue
-            .split(';')
-            .map((part) => part.trim())
-            .filter(Boolean)
-            .filter((part) => {
-              const separatorIndex = part.indexOf(':');
-              if (separatorIndex === -1) return false;
-              const prop = part.slice(0, separatorIndex).trim().toLowerCase();
-              return prop !== 'color';
-            });
-
-          if (declarations.length === 0) {
-            node.removeAttribute('style');
-          } else {
-            node.setAttribute('style', declarations.join('; '));
-          }
-        });
-      };
-
-      if (property === 'color' && selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const anchorInEditor = editor.contains(selection.anchorNode);
-        const focusInEditor = editor.contains(selection.focusNode);
-
-        if (anchorInEditor && focusInEditor) {
-          const headingsToColor = [];
-          const addHeading = (headingEl) => {
-            if (!headingEl || !editor.contains(headingEl)) return;
-            if (!headingsToColor.includes(headingEl)) {
-              headingsToColor.push(headingEl);
-            }
-          };
-
-          if (range.collapsed) {
-            addHeading(findClosestHeading(range.startContainer));
-          } else {
-            editor.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((headingEl) => {
-              try {
-                if (range.intersectsNode(headingEl)) {
-                  addHeading(headingEl);
-                }
-              } catch (_) {
-                // Ignore nodes that cannot be intersected by this range.
-              }
-            });
-
-            // Fallback for edge selections where intersectsNode is inconsistent.
-            if (headingsToColor.length === 0) {
-              addHeading(findClosestHeading(selection.anchorNode));
-              addHeading(findClosestHeading(selection.focusNode));
-            }
-          }
-
-          if (headingsToColor.length > 0) {
-            headingsToColor.forEach((headingEl) => {
-              stripDescendantHeadingColors(headingEl);
-              headingEl.style.setProperty('color', value, 'important');
-            });
-            localStorage.setItem('textEditorTextColor', value);
-            saveToHistory();
-            return;
-          }
-        }
-      }
 
       // If no selection or selection is in editor
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
@@ -10564,12 +10659,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=202605035sb"></script>
+  <script src="js/user-identity.js?v=2026050317zn"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202605035sb"></script>
+    <script src="js/chat.js?v=2026050317zn"></script>
 
 <script src="js/version-check.js?v=202605021hcw"></script>
-  <script src="js/mobile-nav.js?v=202605035sb"></script>
+  <script src="js/mobile-nav.js?v=2026050317zn"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');
