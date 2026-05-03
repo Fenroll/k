@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026050317zn"></script>
+  <script src="js/auth-guard.js?v=202605031m2j"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050317zn">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605031m2j">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -2235,7 +2235,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=2026050317zn"></script>
+  <script src="courses.generated.js?v=202605031m2j"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -8563,13 +8563,23 @@ renderMathInElement(document.body, {
     }
 
     function cleanupHeadingInlineArtifacts() {
+      // Properties that are pure browser/paste artifacts inside a heading and
+      // can be safely stripped (the heading itself controls font, weight, size).
+      // `color` is NOT in this list — intentional per-selection coloring must survive.
+      const HEADING_ARTIFACT_PROPS = new Set([
+        'font-weight',
+        'font-size',
+        'white-space-collapse',
+        'font-family'
+      ]);
+
       const headings = editor.querySelectorAll('h1, h2, h3, h4, h5, h6');
       headings.forEach(heading => {
         heading.querySelectorAll('span').forEach(span => {
           if (span.classList.contains('editor-note') || span.hasAttribute('data-note')) return;
 
           const attributes = Array.from(span.attributes);
-          const hasOnlySafeStyle = attributes.every(attr => {
+          const hasOnlyArtifactStyle = attributes.every(attr => {
             if (attr.name.toLowerCase() !== 'style') return false;
 
             const declarations = (attr.value || '')
@@ -8581,16 +8591,10 @@ renderMathInElement(document.body, {
 
             if (declarations.length === 0) return true;
 
-            return declarations.every(property =>
-              property === 'color'
-              || property === 'font-weight'
-              || property === 'font-size'
-              || property === 'white-space-collapse'
-              || property === 'font-family'
-            );
+            return declarations.every(property => HEADING_ARTIFACT_PROPS.has(property));
           });
 
-          if (!hasOnlySafeStyle) return;
+          if (!hasOnlyArtifactStyle) return;
 
           while (span.firstChild) {
             span.parentNode.insertBefore(span.firstChild, span);
@@ -10659,12 +10663,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=2026050317zn"></script>
+  <script src="js/user-identity.js?v=202605031m2j"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=2026050317zn"></script>
+    <script src="js/chat.js?v=202605031m2j"></script>
 
 <script src="js/version-check.js?v=202605021hcw"></script>
-  <script src="js/mobile-nav.js?v=2026050317zn"></script>
+  <script src="js/mobile-nav.js?v=202605031m2j"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');
