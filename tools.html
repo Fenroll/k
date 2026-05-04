@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605041bsj"></script>
+  <script src="js/auth-guard.js?v=202605041ldg"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -383,7 +383,9 @@
         grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
         max-width: 100% !important;
       }
-
+  #uplThead {
+    display: none !important;
+  }
       .test-menu-btn {
         width: 100%;
         min-height: 46px;
@@ -551,7 +553,7 @@
     }
 
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605041bsj">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605041ldg">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
   <script src="js/version-manager.js?v=202603101mce"></script>
@@ -823,6 +825,13 @@
                 <option value="all">all</option>
                 <option value="mine">mine</option>
               </select>
+              <div class="upl-thead" id="uplThead">
+                <div class="upl-thead-cell upl-sort-hdr" data-sort="name" style="cursor:pointer; user-select:none; display:flex; align-items:center; gap:4px;">File <span class="upl-sort-arrow" data-col="name"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.3"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+                <div class="upl-thead-cell upl-sort-hdr" data-sort="largest" style="cursor:pointer; user-select:none; display:flex; align-items:center; gap:4px;">Size <span class="upl-sort-arrow" data-col="size"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.3"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+                <div class="upl-thead-cell">Uploader</div>
+                <div class="upl-thead-cell upl-sort-hdr" data-sort="newest" style="cursor:pointer; user-select:none; display:flex; align-items:center; gap:4px;">Date <span class="upl-sort-arrow active" data-col="date"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span></div>
+                <div class="upl-thead-cell" style="text-align:right;">Actions</div>
+              </div>
               <div id="toolsUploadsTableBody">
                 <div style="padding: 32px; text-align: center; color: #9ca3af; font-size: 14px;">Open this tab to load files…</div>
               </div>
@@ -1301,7 +1310,7 @@
     updateAdminButtonVisibility();
   </script>
 
-  <script src="js/user-identity.js?v=202605041bsj"></script>
+  <script src="js/user-identity.js?v=202605041ldg"></script>
   <!-- Mobile menu overlay -->
   <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
@@ -1309,7 +1318,7 @@
        FIREBASE & CHAT WIDGET
        ============================================ -->
   <!-- Initialize Chat Widget -->
-    <script src="js/chat.js?v=202605041bsj"></script>
+    <script src="js/chat.js?v=202605041ldg"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
@@ -3053,6 +3062,6 @@
     }
   }
 </script>
-<script src="js/mobile-nav.js?v=202605041bsj"></script>
+<script src="js/mobile-nav.js?v=202605041ldg"></script>
 </body>
 </html>

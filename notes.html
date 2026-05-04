@@ -74,18 +74,18 @@
     </style>
     <title>Notes</title>
 
-    <script src="js/auth-guard.js?v=202605041bsj"></script>
+    <script src="js/auth-guard.js?v=202605041ldg"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=202605041bsj"></script>
-    <script src="courses.generated.js?v=202605041bsj"></script>
+    <script src="js/user-identity.js?v=202605041ldg"></script>
+    <script src="courses.generated.js?v=202605041ldg"></script>
 
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202605041bsj">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605041ldg">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
     <script src="js/version-manager.js?v=2026031715gu"></script>
@@ -2902,13 +2902,12 @@
                         currentNormalized !== localNormalized;
 
                     if (currentNormalized) {
-                        // On conflict: always save the version being overwritten (no rate limit)
-                        // Otherwise: save a periodic checkpoint every ~5 minutes
+                        // Always save the version being overwritten to history (dedup prevents identical entries)
                         saveHistorySnapshot(
                             state.selectedCourseId,
                             currentNormalized,
                             currentValue.updatedBy || 'Unknown',
-                            hasConflict
+                            true
                         );
                     }
 
@@ -2954,33 +2953,49 @@
             // ============================================================
 
             async function saveHistorySnapshot(courseId, html, savedBy, force = false) {
-                if (!courseId || !html) return;
+                if (!courseId || !html) {
+                    console.log('[History] saveHistorySnapshot skipped: missing courseId or html', { courseId, htmlLen: html?.length });
+                    return;
+                }
                 const now = Date.now();
-                if (!force && now - state.lastHistorySavedAt < HISTORY_MIN_INTERVAL_MS) return;
+                if (!force && now - state.lastHistorySavedAt < HISTORY_MIN_INTERVAL_MS) {
+                    console.log('[History] saveHistorySnapshot skipped: rate limited', {
+                        force, msSinceLast: now - state.lastHistorySavedAt, limitMs: HISTORY_MIN_INTERVAL_MS
+                    });
+                    return;
+                }
                 const normalizedForHistory = normalizeHtml(html);
-                if (normalizedForHistory === state.lastHistorySavedHtml) return;
+                if (normalizedForHistory === state.lastHistorySavedHtml) {
+                    console.log('[History] saveHistorySnapshot skipped: content identical to last saved snapshot');
+                    return;
+                }
+                console.log('[History] saveHistorySnapshot SAVING', { courseId, savedBy, force, htmlLen: normalizedForHistory.length });
                 state.lastHistorySavedAt = now;
                 state.lastHistorySavedHtml = normalizedForHistory;
 
                 try {
                     const histRef = firebase.database().ref(`${COURSE_NOTE_HISTORY_ROOT}/${courseId}`);
-                    await histRef.push({
+                    const pushRef = await histRef.push({
                         html: normalizedForHistory,
                         savedBy: savedBy || 'Unknown',
                         savedAt: firebase.database.ServerValue.TIMESTAMP
                     });
+                    console.log('[History] pushed snapshot key:', pushRef.key);
 
                     // Prune: keep only the latest HISTORY_MAX_ENTRIES entries
-                    const allSnap = await histRef.orderByChild('savedAt').once('value');
-                    const keys = [];
-                    allSnap.forEach(child => keys.push(child.key));
-                    if (keys.length > HISTORY_MAX_ENTRIES) {
+                    const allSnap = await histRef.once('value');
+                    const allEntries = [];
+                    allSnap.forEach(child => { allEntries.push({ key: child.key, savedAt: (child.val() || {}).savedAt || 0 }); });
+                    allEntries.sort((a, b) => a.savedAt - b.savedAt); // oldest first
+                    console.log('[History] total entries after push:', allEntries.length, 'max:', HISTORY_MAX_ENTRIES);
+                    if (allEntries.length > HISTORY_MAX_ENTRIES) {
                         const pruneUpdates = {};
-                        keys.slice(0, keys.length - HISTORY_MAX_ENTRIES).forEach(k => { pruneUpdates[k] = null; });
+                        allEntries.slice(0, allEntries.length - HISTORY_MAX_ENTRIES).forEach(e => { pruneUpdates[e.key] = null; });
+                        console.log('[History] pruning', Object.keys(pruneUpdates).length, 'old entries');
                         await histRef.update(pruneUpdates);
                     }
                 } catch (e) {
-                    console.error('History snapshot failed:', e);
+                    console.error('[History] snapshot failed:', e);
                 }
             }
 
@@ -2988,12 +3003,15 @@
                 if (!courseId) return [];
                 try {
                     const histRef = firebase.database().ref(`${COURSE_NOTE_HISTORY_ROOT}/${courseId}`);
-                    const snap = await histRef.orderByChild('savedAt').limitToLast(HISTORY_MAX_ENTRIES).once('value');
+                    console.log('[History] loadHistoryEntries querying path:', `${COURSE_NOTE_HISTORY_ROOT}/${courseId}`);
+                    const snap = await histRef.once('value');
                     const entries = [];
-                    snap.forEach(child => entries.push({ id: child.key, ...child.val() }));
-                    return entries.reverse(); // newest first
+                    snap.forEach(child => { entries.push({ id: child.key, ...child.val() }); });
+                    console.log('[History] loadHistoryEntries raw count:', entries.length, 'keys:', entries.map(e => e.id));
+                    entries.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+                    return entries.slice(0, HISTORY_MAX_ENTRIES);
                 } catch (e) {
-                    console.error('Failed to load history:', e);
+                    console.error('[History] Failed to load history:', e);
                     return [];
                 }
             }
@@ -3620,8 +3638,8 @@
     </script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=202605041bsj"></script>
+    <script src="js/chat.js?v=202605041ldg"></script>
     <script src="js/version-check.js?v=202605021hcw"></script>
-    <script src="js/mobile-nav.js?v=202605041bsj"></script>
+    <script src="js/mobile-nav.js?v=202605041ldg"></script>
 </body>
 </html>
