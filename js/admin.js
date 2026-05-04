@@ -37,6 +37,7 @@
         const closeModalBtn = modal.querySelector('.close-button');
         const saveChangesBtn = document.getElementById('save-user-changes');
         const resetPasswordBtn = document.getElementById('reset-password');
+        const deleteAccountBtn = document.getElementById('delete-account');
         const notificationContainer = document.getElementById('notification-container');
 
         // Upload limit settings elements
@@ -778,6 +779,29 @@
                 console.error(error);
             }
         };
+
+        if (deleteAccountBtn) {
+            deleteAccountBtn.onclick = async () => {
+                const uid = document.getElementById('edit-user-uid').value;
+                if (!uid) {
+                    showError('edit-user-error', 'User ID is missing.');
+                    return;
+                }
+
+                const confirmed = window.confirm('Delete this account? This cannot be undone.');
+                if (!confirmed) return;
+
+                try {
+                    await db.ref(`site_users/${uid}`).remove();
+                    showNotification('User deleted successfully.');
+                    hideError('edit-user-error');
+                    modal.style.display = 'none';
+                } catch (error) {
+                    showError('edit-user-error', 'Failed to delete user: ' + (error.message || error));
+                    console.error(error);
+                }
+            };
+        }
 
 
         // Schedule Data (JSON) Management

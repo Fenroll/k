@@ -622,7 +622,7 @@ function updateHtmlFiles(version) {
       }
 
       // 6. Replace shared mobile navigation assets
-      const mobileNavCssPattern = /<link rel="stylesheet" href="css\/mobile-nav(?:-[^"']+)?\.css(?:\?v=[a-zA-Z0-9_]+)?">/g;
+      const mobileNavCssPattern = /<link\s+rel="stylesheet"\s+href="(?:\.\/)?css\/mobile-nav(?:-[^"']+)?\.css(?:\?v=[a-zA-Z0-9_]+)?">/g;
       const newMobileNavCssTag = `<link rel="stylesheet" href="css/mobile-nav.css?v=${version}">`;
 
       if (mobileNavCssPattern.test(content)) {
@@ -630,7 +630,7 @@ function updateHtmlFiles(version) {
         updated = true;
       }
 
-      const mobileNavJsPattern = /<script src="js\/mobile-nav(?:-[^"']+)?\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
+      const mobileNavJsPattern = /<script\s+src="(?:\.\/)?js\/mobile-nav(?:-[^"']+)?\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
       const newMobileNavJsTag = `<script src="js/mobile-nav.js?v=${version}"></script>`;
 
       if (mobileNavJsPattern.test(content)) {
