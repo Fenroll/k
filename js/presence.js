@@ -32,17 +32,15 @@
         try {
             const user = JSON.parse(loggedInUserStr);
             if (!user.uid) {
-                console.warn('Presence: Invalid user data, missing uid');
-                localStorage.removeItem('loggedInUser');
+                console.warn('Presence: Invalid user data, missing uid — skipping presence');
                 return;
             }
             currentUid = user.uid;
-            currentUserName = user.userName || user.displayName; // Assuming userName or displayName for current user
+            currentUserName = user.userName || user.displayName;
             isGuest = false;
             presenceRefPath = '/online_users/';
         } catch (e) {
             console.error('Presence: Failed to parse loggedInUser:', e);
-            localStorage.removeItem('loggedInUser');
             return;
         }
     } else if (guestMode) {

@@ -392,6 +392,30 @@ class ChatFirebaseREST {
             };
             this._trackRealtimeListener(q, 'child_added', onChildAdded);
 
+        // Reconcile any messages that arrived in the gap between loadMessages() and
+        // the realtime listener attaching (startAfter is exclusive on timestamp).
+        setTimeout(async () => {
+            if (!this.messages.length) return;
+            const gapTs = this.messages[this.messages.length - 1].timestamp;
+            try {
+                const snap = await messagesRef.orderByChild('timestamp').startAt(gapTs).once('value');
+                if (!snap.exists()) return;
+                let added = false;
+                snap.forEach(child => {
+                    if (!this.messageIds.has(child.key)) {
+                        const val = child.val();
+                        const msg = this._normalizeMessageAuthor({ ...val, key: child.key, id: child.key, timestamp: val.timestamp || Date.now() });
+                        this.messages.push(msg);
+                        this.messageIds.add(child.key);
+                        this.listeners.forEach(l => l(msg));
+                        this.lastNotifiedId = child.key;
+                        added = true;
+                    }
+                });
+                if (added) callback(this.messages);
+            } catch (e) {}
+        }, 500);
+
         // Listen for deletions (all messages, not just new ones)
         const qAll = messagesRef.orderByChild('timestamp');
             const onChildRemoved = (snapshot) => {
@@ -2343,6 +2367,17 @@ class ChatUIManager {
   }
 
   recalculateUnreadCount(messages) {
+    // While the chat panel is open, keep the read pointer at the latest message
+    // so the badge never accumulates stale counts that snap visible on close.
+    if (this.isOpen) {
+        if (messages.length > 0) {
+            this.lastReadMessageId = messages[messages.length - 1].id;
+        }
+        this.unreadCount = 0;
+        this.unreadHasMention = false;
+        return;
+    }
+
     // Helper to check if a message is from the current user
     const isMyMessage = (msg) => {
         return msg.userId === window.currentUser.userId || (window.currentUser.legacyChatId && msg.userId === window.currentUser.legacyChatId);
@@ -3584,9 +3619,12 @@ class ChatUIManager {
         badgeEl.textContent = this.unreadCount;
         badgeEl.style.display = this.unreadCount > 0 ? 'flex' : 'none';
 
-        // Remove mention highlight if no unread messages have a mention
-        if (icon && !this.unreadHasMention) {
-            icon.classList.remove('has-mention');
+        if (icon) {
+            if (this.unreadHasMention) {
+                icon.classList.add('has-mention');
+            } else {
+                icon.classList.remove('has-mention');
+            }
         }
       }
     }
@@ -3608,18 +3646,23 @@ class ChatUIManager {
   }
 
   showMentionNotification() {
-    const icon = document.querySelector('.chat-icon');
-    if (icon) {
-      icon.classList.add('has-mention');
-      // Special mention doesn't auto-remove as quickly as pulse
-      // It stays until chat is opened or markAsRead is called
-    }
+    if (this.isOpen) return;
 
-    // Optional: Play sound if permitted
+    const icon = document.querySelector('.chat-icon');
+    if (icon) icon.classList.add('has-mention');
+
+    // Rate-limit: at most one sound per 2 seconds; reuse a single Audio instance
+    const now = Date.now();
+    if (this._lastMentionSoundTs && now - this._lastMentionSoundTs < 2000) return;
+    this._lastMentionSoundTs = now;
+
     try {
-        const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
-        audio.volume = 0.5;
-        audio.play().catch(e => console.log('Audio play blocked by browser'));
+        if (!this._mentionAudio) {
+            this._mentionAudio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+            this._mentionAudio.volume = 0.5;
+        }
+        this._mentionAudio.currentTime = 0;
+        this._mentionAudio.play().catch(() => {});
     } catch (e) {}
   }
 
@@ -4283,6 +4326,8 @@ class ChatUIManager {
         if (input && document.activeElement === input) {
           input.blur();
         }
+        // Refresh badge immediately so it reflects current unread state on close
+        this.updateActiveCount();
         clearIconRestoreTimer();
         this._iconRestoreTimer = setTimeout(() => {
           this.container.classList.remove('chat-open');

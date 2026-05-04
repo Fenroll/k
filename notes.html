@@ -74,18 +74,18 @@
     </style>
     <title>Notes</title>
 
-    <script src="js/auth-guard.js?v=2026050418vl"></script>
+    <script src="js/auth-guard.js?v=202605041bsj"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=2026050418vl"></script>
-    <script src="courses.generated.js?v=2026050418vl"></script>
+    <script src="js/user-identity.js?v=202605041bsj"></script>
+    <script src="courses.generated.js?v=202605041bsj"></script>
 
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=2026050418vl">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605041bsj">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
     <script src="js/version-manager.js?v=2026031715gu"></script>
@@ -313,7 +313,8 @@
             background: #f9fafb;
         }
 
-            .md-btn img {
+            .md-btn img,
+            .md-btn svg {
                 width: 18px;
                 height: 18px;
                 object-fit: contain;
@@ -1261,6 +1262,126 @@
             pointer-events: none !important;
         }
 
+
+        /* History modal entries */
+        .history-loading {
+            color: #6b7280;
+            text-align: center;
+            padding: 24px;
+            font-size: 14px;
+        }
+        .history-entry {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 12px 14px;
+            background: #fafafa;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .history-entry-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .history-entry-time {
+            font-size: 13px;
+            font-weight: 600;
+            color: #111827;
+        }
+        .history-entry-author {
+            font-size: 12px;
+            color: #588157;
+            font-weight: 600;
+        }
+        .history-entry-preview {
+            font-size: 12px;
+            color: #4b5563;
+            line-height: 1.5;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .history-entry-actions {
+            margin-top: 2px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+        .history-preview-btn {
+            border: 1px solid #d1d5db;
+            background: transparent;
+            color: #6b7280;
+            border-radius: 7px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s, color 0.15s;
+        }
+        .history-preview-btn:hover {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        .history-preview-render {
+            display: none;
+            margin-top: 10px;
+            padding: 12px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #fff;
+            font-size: 13px;
+            line-height: 1.6;
+            max-height: 320px;
+            overflow-y: auto;
+            color: #1f2937;
+            user-select: text;
+        }
+        .history-preview-render a,
+        .history-preview-render button { pointer-events: none; }
+        .history-preview-render.is-open { display: block; }
+        .history-preview-render h1 { font-size: 1.4em; font-weight: 700; color: #588157; margin: 0.1em 0; }
+        .history-preview-render h2 { font-size: 1.2em; font-weight: 700; color: #588157; margin: 0.1em 0; }
+        .history-preview-render h3,
+        .history-preview-render h4 { font-size: 1.05em; font-weight: 700; color: #588157; margin: 0.1em 0; }
+        .history-preview-render p { margin: 0.15em 0; }
+        .history-preview-render ul,
+        .history-preview-render ol { padding-left: 1.4em; margin: 0.1em 0; }
+        .history-preview-render img { max-width: 100%; border-radius: 6px; display: block; margin: 6px 0; }
+        body.dark-mode .history-preview-render {
+            background: #111827;
+            border-color: #303030;
+            color: #e5e7eb;
+        }
+        body.dark-mode .history-preview-btn { border-color: #374151; color: #9ca3af; }
+        body.dark-mode .history-preview-btn:hover { background: #1f2937; color: #e5e7eb; }
+        .history-restore-btn {
+            border: 1px solid #588157;
+            background: transparent;
+            color: #588157;
+            border-radius: 7px;
+            padding: 5px 12px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease;
+            font-family: inherit;
+        }
+        .history-restore-btn:hover {
+            background: #588157;
+            color: #fff;
+        }
+        body.dark-mode .history-entry {
+            background: #1f2937;
+            border-color: #303030;
+        }
+        body.dark-mode .history-entry-time { color: #f1f1f1; }
+        body.dark-mode .history-entry-author { color: #8aad82; }
+        body.dark-mode .history-entry-preview { color: #9ca3af; }
+        body.dark-mode .history-restore-btn { border-color: #588157; color: #8aad82; }
+        body.dark-mode .history-restore-btn:hover { background: #588157; color: #fff; }
+
     </style>
 </head>
 <body>
@@ -1374,6 +1495,9 @@
                     <button type="button" class="md-btn" data-cmd="symbols" title="Insert symbols"><img src="svg/md-editor/icon-symbols.svg?v=2026031715gu" alt="Symbols"></button>
                     <button type="button" class="md-btn" data-cmd="link" title="Link"><img src="svg/md-editor/icon-link.svg?v=2026031715gu" alt="Link"></button>
                     <button type="button" class="md-btn" data-cmd="separator" title="Horizontal separator"><img src="svg/md-editor/icon-separator.svg?v=2026031715gu" alt="Horizontal separator"></button>
+                    <button type="button" class="md-btn" id="historyBtn" title="Note history">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    </button>
                     </div>
                 </div>
                 <div class="notes-editor-shell">
@@ -1454,6 +1578,20 @@
         </div>
     </div>
 
+    <div id="historyModal" class="modal">
+        <div class="modal-content" style="max-width: 580px;">
+            <div class="modal-header">
+                <h2>Note History</h2>
+                <span class="close" id="closeHistoryModalBtn" role="button" aria-label="Close">&times;</span>
+            </div>
+            <div id="historyList" style="padding: 16px; overflow-y: auto; max-height: 55vh; display: flex; flex-direction: column; gap: 10px;">
+            </div>
+            <div style="padding: 14px 22px 18px; border-top: 1px solid #f1f5f1; display: flex; justify-content: flex-end;">
+                <button type="button" id="closeHistoryBtn" class="image-modal-btn">Close</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         function handleLogout() {
             localStorage.removeItem('loggedInUser');
@@ -1481,6 +1619,9 @@
             };
 
             const COURSE_NOTE_ROOT = 'course_notes';
+            const COURSE_NOTE_HISTORY_ROOT = 'course_notes_history';
+            const HISTORY_MAX_ENTRIES = 10;
+            const HISTORY_MIN_INTERVAL_MS = 300000;
             const AUTOSAVE_DELAY_MS = 900;
             const LIVEBLOCKS_START_DELAY_MS = 260;
             const NOTES_R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
@@ -1507,6 +1648,9 @@
                 hasLoadedCurrentNote: false,
                 autosaveTimer: null,
                 lastSavedHtml: '',
+                lastHistorySavedAt: 0,
+                lastHistorySavedHtml: '',
+                historyIntervalTimer: null,
                 currentUser: null,
                 presenceTypingTimer: null,
                 isEditorFocused: false,
@@ -2663,8 +2807,16 @@
                 block.setAttribute('title', `Author: ${authorName}`);
             }
 
+            function clearHistoryInterval() {
+                if (state.historyIntervalTimer) {
+                    clearInterval(state.historyIntervalTimer);
+                    state.historyIntervalTimer = null;
+                }
+            }
+
             function stopCurrentSubscription() {
                 clearAutosaveTimer();
+                clearHistoryInterval();
                 if (state.currentNoteRef && state.noteListener) {
                     state.currentNoteRef.off('value', state.noteListener);
                 }
@@ -2672,6 +2824,8 @@
                 state.currentNoteRef = null;
                 state.noteListener = null;
                 state.hasLoadedCurrentNote = false;
+                state.lastHistorySavedAt = 0;
+                state.lastHistorySavedHtml = '';
             }
 
             async function subscribeCurrentNote() {
@@ -2702,6 +2856,15 @@
                     console.error('Failed loading course note:', error);
                 }
 
+                clearHistoryInterval();
+                state.historyIntervalTimer = setInterval(async () => {
+                    if (!state.selectedCourseId) return;
+                    const html = getEditorHtml();
+                    if (!html) return;
+                    const me = state.currentUser?.displayName || state.currentUser?.userName || 'Unknown';
+                    await saveHistorySnapshot(state.selectedCourseId, html, me, true);
+                }, HISTORY_MIN_INTERVAL_MS);
+
                 startLiveblocksPresence();
             }
 
@@ -2711,10 +2874,11 @@
                 const ref = getCurrentNoteRef();
                 if (!ref) return;
 
-                const html = getEditorHtml();
-                const normalizedHtmlAtStart = normalizeHtml(html);
+                const localHtml = getEditorHtml();
+                const localNormalized = normalizeHtml(localHtml);
                 const localEditVersionAtStart = state.localEditVersion;
-                if (html === state.lastSavedHtml) {
+
+                if (localNormalized === state.lastSavedHtml) {
                     setDraftState(false);
                     return;
                 }
@@ -2724,59 +2888,52 @@
                 try {
                     const user = state.currentUser || await window.currentUserPromise;
                     const updatedBy = user?.displayName || user?.userName || user?.userId || 'Unknown';
-                    const baseHtml = state.lastSavedHtml;
 
-                    const txResult = await ref.transaction((currentValue) => {
-                        const currentHtml = typeof currentValue?.html === 'string'
-                            ? currentValue.html
-                            : plainTextToHtml(typeof currentValue?.text === 'string' ? currentValue.text : '');
+                    // Read what Firebase currently has (to detect conflicts & save to history)
+                    const currentSnap = await ref.get();
+                    const currentValue = currentSnap.val() || {};
+                    const currentHtml = typeof currentValue.html === 'string' ? currentValue.html : '';
+                    const currentNormalized = normalizeHtml(currentHtml);
 
-                        const currentNormalized = normalizeHtml(currentHtml);
-                        const localNormalized = normalizeHtml(html);
-                        const baseNormalized = normalizeHtml(baseHtml);
+                    // If Firebase has content that differs from our last-loaded base, someone else
+                    // wrote while we were editing — save their version to history before overwriting.
+                    const hasConflict = currentNormalized &&
+                        currentNormalized !== state.lastSavedHtml &&
+                        currentNormalized !== localNormalized;
 
-                        let finalHtml = localNormalized;
-                        if (currentNormalized && currentNormalized !== baseNormalized && currentNormalized !== localNormalized) {
-                            finalHtml = mergeConcurrentHtml(currentNormalized, baseNormalized, localNormalized, updatedBy);
-                        }
+                    if (currentNormalized) {
+                        // On conflict: always save the version being overwritten (no rate limit)
+                        // Otherwise: save a periodic checkpoint every ~5 minutes
+                        saveHistorySnapshot(
+                            state.selectedCourseId,
+                            currentNormalized,
+                            currentValue.updatedBy || 'Unknown',
+                            hasConflict
+                        );
+                    }
 
-                        return {
-                            html: finalHtml,
-                            text: htmlToPlainText(finalHtml),
-                            updatedAt: firebase.database.ServerValue.TIMESTAMP,
-                            updatedBy
-                        };
+                    // Last-write-wins: our local content becomes the new truth
+                    await ref.set({
+                        html: localNormalized,
+                        text: htmlToPlainText(localNormalized),
+                        updatedAt: firebase.database.ServerValue.TIMESTAMP,
+                        updatedBy
                     });
 
-                    const savedValue = txResult?.snapshot?.val() || {};
-                    const savedHtml = typeof savedValue.html === 'string'
-                        ? savedValue.html
-                        : plainTextToHtml(typeof savedValue.text === 'string' ? savedValue.text : '');
+                    state.lastSavedHtml = localNormalized;
 
-                    state.lastSavedHtml = normalizeHtml(savedHtml);
-
-                    const currentEditorHtml = normalizeHtml(getEditorHtml());
+                    // Only mark clean if user didn't type more while we were saving
                     const editedDuringSave =
                         state.localEditVersion !== localEditVersionAtStart ||
-                        currentEditorHtml !== normalizedHtmlAtStart;
+                        normalizeHtml(getEditorHtml()) !== localNormalized;
 
-                    if (editedDuringSave) {
-                        const stillDirty = currentEditorHtml !== state.lastSavedHtml;
-                        setDraftState(stillDirty);
-                        if (stillDirty) {
-                            scheduleAutosave();
-                        }
-                        return;
-                    }
+                    setDraftState(editedDuringSave);
+                    if (editedDuringSave) scheduleAutosave();
 
-                    if (state.lastSavedHtml !== currentEditorHtml) {
-                        setEditorHtml(state.lastSavedHtml);
-                        normalizeAuthorTitles();
-                    }
-
-                    setDraftState(false);
                 } catch (error) {
                     console.error('Failed saving course note:', error);
+                    els.notesStatus.textContent = 'Save failed';
+                    els.notesStatus.classList.add('error');
                     setDraftState(true);
                 } finally {
                     state.isSaving = false;
@@ -2791,6 +2948,153 @@
                     }
                 }, AUTOSAVE_DELAY_MS);
             }
+
+            // ============================================================
+            // HISTORY SYSTEM
+            // ============================================================
+
+            async function saveHistorySnapshot(courseId, html, savedBy, force = false) {
+                if (!courseId || !html) return;
+                const now = Date.now();
+                if (!force && now - state.lastHistorySavedAt < HISTORY_MIN_INTERVAL_MS) return;
+                const normalizedForHistory = normalizeHtml(html);
+                if (normalizedForHistory === state.lastHistorySavedHtml) return;
+                state.lastHistorySavedAt = now;
+                state.lastHistorySavedHtml = normalizedForHistory;
+
+                try {
+                    const histRef = firebase.database().ref(`${COURSE_NOTE_HISTORY_ROOT}/${courseId}`);
+                    await histRef.push({
+                        html: normalizedForHistory,
+                        savedBy: savedBy || 'Unknown',
+                        savedAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+
+                    // Prune: keep only the latest HISTORY_MAX_ENTRIES entries
+                    const allSnap = await histRef.orderByChild('savedAt').once('value');
+                    const keys = [];
+                    allSnap.forEach(child => keys.push(child.key));
+                    if (keys.length > HISTORY_MAX_ENTRIES) {
+                        const pruneUpdates = {};
+                        keys.slice(0, keys.length - HISTORY_MAX_ENTRIES).forEach(k => { pruneUpdates[k] = null; });
+                        await histRef.update(pruneUpdates);
+                    }
+                } catch (e) {
+                    console.error('History snapshot failed:', e);
+                }
+            }
+
+            async function loadHistoryEntries(courseId) {
+                if (!courseId) return [];
+                try {
+                    const histRef = firebase.database().ref(`${COURSE_NOTE_HISTORY_ROOT}/${courseId}`);
+                    const snap = await histRef.orderByChild('savedAt').limitToLast(HISTORY_MAX_ENTRIES).once('value');
+                    const entries = [];
+                    snap.forEach(child => entries.push({ id: child.key, ...child.val() }));
+                    return entries.reverse(); // newest first
+                } catch (e) {
+                    console.error('Failed to load history:', e);
+                    return [];
+                }
+            }
+
+            function formatHistoryTimestamp(ts) {
+                if (!ts) return 'Unknown time';
+                try {
+                    return new Date(ts).toLocaleString([], {
+                        year: 'numeric', month: 'short', day: 'numeric',
+                        hour: '2-digit', minute: '2-digit'
+                    });
+                } catch (_) { return 'Unknown time'; }
+            }
+
+            async function openHistoryModal() {
+                if (!state.selectedCourseId) {
+                    alert('Please select a course first.');
+                    return;
+                }
+
+                const modal = document.getElementById('historyModal');
+                const listEl = document.getElementById('historyList');
+                if (!modal || !listEl) return;
+
+                listEl.innerHTML = '<div class="history-loading">Loading history…</div>';
+                modal.style.display = 'flex';
+
+                const entries = await loadHistoryEntries(state.selectedCourseId);
+
+                if (!entries.length) {
+                    listEl.innerHTML = '<div class="history-loading">No history entries found for this course.</div>';
+                    return;
+                }
+
+                listEl.innerHTML = '';
+                entries.forEach((entry) => {
+                    const preview = htmlToPlainText(entry.html || '').replace(/\s+/g, ' ').trim().slice(0, 140);
+                    const hasMore = htmlToPlainText(entry.html || '').length > 140;
+
+                    const item = document.createElement('div');
+                    item.className = 'history-entry';
+
+                    const meta = document.createElement('div');
+                    meta.className = 'history-entry-meta';
+                    meta.innerHTML = `
+                        <span class="history-entry-time">${formatHistoryTimestamp(entry.savedAt)}</span>
+                        <span class="history-entry-author">${escapeHtml(entry.savedBy || 'Unknown')}</span>
+                    `;
+
+                    const previewText = document.createElement('div');
+                    previewText.className = 'history-entry-preview';
+                    previewText.textContent = preview + (hasMore ? '…' : '');
+
+                    const previewRender = document.createElement('div');
+                    previewRender.className = 'history-preview-render';
+                    previewRender.innerHTML = entry.html || '';
+
+                    const actions = document.createElement('div');
+                    actions.className = 'history-entry-actions';
+
+                    const previewBtn = document.createElement('button');
+                    previewBtn.type = 'button';
+                    previewBtn.className = 'history-preview-btn';
+                    previewBtn.textContent = 'Preview';
+
+                    const restoreBtn = document.createElement('button');
+                    restoreBtn.type = 'button';
+                    restoreBtn.className = 'history-restore-btn';
+                    restoreBtn.textContent = 'Restore';
+
+                    actions.append(previewBtn, restoreBtn);
+                    item.append(meta, previewText, actions, previewRender);
+
+                    previewBtn.addEventListener('click', () => {
+                        const open = previewRender.classList.toggle('is-open');
+                        previewBtn.textContent = open ? 'Hide preview' : 'Preview';
+                        previewText.style.display = open ? 'none' : '';
+                    });
+
+                    restoreBtn.addEventListener('click', () => {
+                        if (!confirm('Replace the current note with this version?\n\nYour current content will be saved to history first so nothing is permanently lost.')) return;
+
+                        const currentHtml = getEditorHtml();
+                        if (currentHtml) {
+                            const me = state.currentUser?.displayName || state.currentUser?.userName || 'Unknown';
+                            saveHistorySnapshot(state.selectedCourseId, currentHtml, me, true);
+                        }
+
+                        setEditorHtml(entry.html || '');
+                        normalizeAuthorTitles();
+                        bumpLocalEditVersion();
+                        setDraftState(true);
+                        scheduleAutosave();
+                        modal.style.display = 'none';
+                    });
+
+                    listEl.appendChild(item);
+                });
+            }
+
+            // ============================================================
 
             function toggleHeading(tagName) {
                 const selection = window.getSelection();
@@ -2891,6 +3195,12 @@
             }
 
             async function selectCourse(courseId, courseTitle) {
+                if (state.selectedCourseId && state.hasLoadedCurrentNote) {
+                    const html = getEditorHtml();
+                    const me = state.currentUser?.displayName || state.currentUser?.userName || 'Unknown';
+                    await saveHistorySnapshot(state.selectedCourseId, html, me, true);
+                }
+
                 state.selectedCourseId = courseId;
                 els.selectedCourseTitle.textContent = courseTitle;
                 if (els.courseSelectMobile.value !== courseId) {
@@ -3198,6 +3508,27 @@
                 });
             }
 
+            // History modal wiring
+            const historyBtn = document.getElementById('historyBtn');
+            const historyModal = document.getElementById('historyModal');
+            const closeHistoryModalBtn = document.getElementById('closeHistoryModalBtn');
+            const closeHistoryBtn = document.getElementById('closeHistoryBtn');
+
+            if (historyBtn) {
+                historyBtn.addEventListener('click', () => openHistoryModal());
+            }
+            if (closeHistoryModalBtn) {
+                closeHistoryModalBtn.addEventListener('click', () => { historyModal.style.display = 'none'; });
+            }
+            if (closeHistoryBtn) {
+                closeHistoryBtn.addEventListener('click', () => { historyModal.style.display = 'none'; });
+            }
+            if (historyModal) {
+                historyModal.addEventListener('click', (e) => {
+                    if (e.target === historyModal) historyModal.style.display = 'none';
+                });
+            }
+
             if (symbolsModal) {
                 symbolsModal.addEventListener('click', (event) => {
                     if (event.target === symbolsModal) {
@@ -3268,6 +3599,14 @@
                 }
             });
 
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'hidden' && state.selectedCourseId && state.hasLoadedCurrentNote) {
+                    const html = getEditorHtml();
+                    const me = state.currentUser?.displayName || state.currentUser?.userName || 'Unknown';
+                    saveHistorySnapshot(state.selectedCourseId, html, me, true);
+                }
+            });
+
             window.addEventListener('pagehide', () => {
                 stopLiveblocksPresence();
             });
@@ -3281,8 +3620,8 @@
     </script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=2026050418vl"></script>
+    <script src="js/chat.js?v=202605041bsj"></script>
     <script src="js/version-check.js?v=202605021hcw"></script>
-    <script src="js/mobile-nav.js?v=2026050418vl"></script>
+    <script src="js/mobile-nav.js?v=202605041bsj"></script>
 </body>
 </html>

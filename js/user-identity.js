@@ -115,8 +115,17 @@ async function createAndInitUser() {
                     throw new Error("User not found in database.");
                 }
             } catch (e) {
-                console.error('Failed to refresh session from DB, logging out.', e.message);
-                localStorage.removeItem('loggedInUser');
+                console.warn('Failed to refresh session from DB, using cached data.', e.message);
+                // Network failure (e.g. mobile tab wake-up) — keep the cached session alive
+                const plainPassword = decodeStoredPassword(sessionData.password || '');
+                user._populate({
+                    ...sessionData,
+                    userId: sessionData.uid,
+                    userName: sessionData.displayName,
+                    password: plainPassword,
+                    isGuest: false
+                });
+                return user;
             }
         }
     }

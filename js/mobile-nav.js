@@ -20,14 +20,14 @@
     right: 0 !important;
     bottom: 0 !important;
     width: 100% !important;
-        height: calc(60px + env(safe-area-inset-bottom)) !important;
+        height: calc(60px + var(--locked-safe-area-bottom, env(safe-area-inset-bottom))) !important;
     background: #fff !important;
     border-top: 1px solid #e0e0e0 !important;
     z-index: 9999 !important;
     justify-content: space-around !important;
     align-items: center !important;
         box-sizing: border-box !important;
-    padding-bottom: env(safe-area-inset-bottom) !important;
+    padding-bottom: var(--locked-safe-area-bottom, env(safe-area-inset-bottom)) !important;
     overflow: hidden !important;
         transform: translate3d(0, 0, 0) !important;
         will-change: transform !important;
@@ -100,6 +100,24 @@
     }
 
     installCriticalMobileNavStyles();
+
+    function setLockedSafeAreaInset() {
+        const root = document.documentElement;
+        if (!root) return;
+
+        const host = document.body || root;
+        const probe = document.createElement('div');
+        probe.style.cssText = 'position:absolute; height:0; padding-bottom: env(safe-area-inset-bottom);';
+        host.appendChild(probe);
+        const value = getComputedStyle(probe).paddingBottom || '0px';
+        probe.remove();
+        root.style.setProperty('--locked-safe-area-bottom', value);
+    }
+
+    setLockedSafeAreaInset();
+    window.addEventListener('orientationchange', () => {
+        setTimeout(setLockedSafeAreaInset, 250);
+    });
 
     // Detect current page to set active state
     const path = window.location.pathname;

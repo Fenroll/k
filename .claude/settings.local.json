@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"d:\\\\Filen\\\\Personal\\\\Coursebook\" -Recurse -File)",
+      "Bash(Select-Object FullName)"
+    ]
+  }
+}
