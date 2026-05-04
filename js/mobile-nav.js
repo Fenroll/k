@@ -20,15 +20,20 @@
     right: 0 !important;
     bottom: 0 !important;
     width: 100% !important;
-    height: 60px !important;
+        height: calc(60px + env(safe-area-inset-bottom)) !important;
     background: #fff !important;
     border-top: 1px solid #e0e0e0 !important;
     z-index: 9999 !important;
     justify-content: space-around !important;
     align-items: center !important;
-    box-sizing: content-box !important;
+        box-sizing: border-box !important;
     padding-bottom: env(safe-area-inset-bottom) !important;
     overflow: hidden !important;
+        transform: translate3d(0, 0, 0) !important;
+        will-change: transform !important;
+        backface-visibility: hidden !important;
+        -webkit-backface-visibility: hidden !important;
+        -webkit-transform: translate3d(0, 0, 0) !important;
   }
 
   #bottom-nav .bottom-nav-item {

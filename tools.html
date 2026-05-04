@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605031m2j"></script>
+  <script src="js/auth-guard.js?v=2026050418b7"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -270,7 +270,27 @@
     .upl-cell { padding: 0 6px; min-width: 0; }
     .upl-cell:first-child { padding-left: 0; }
     .upl-cell:last-child { padding-right: 0; }
-    .upl-file-name { font-weight: 600; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: flex; align-items: center; gap: 7px; }
+    .upl-file-name { font-weight: 600; color: #111827; display: flex; align-items: center; gap: 7px; min-width: 0; position: relative; }
+    .upl-file-name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+    .upl-file-name::after {
+      content: attr(data-full-name);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 6px);
+      display: none;
+      max-width: min(70vw, 360px);
+      padding: 6px 8px;
+      background: rgba(17, 24, 39, 0.92);
+      color: #ffffff;
+      border-radius: 6px;
+      font-size: 12px;
+      line-height: 1.35;
+      white-space: normal;
+      word-break: break-word;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.18);
+      z-index: 5;
+    }
+    .upl-file-name.is-name-open::after { display: block; }
     .upl-actions { display: flex; gap: 4px; align-items: center; justify-content: flex-end; flex-wrap: nowrap; }
     .upl-btn {
       display: inline-flex; align-items: center; gap: 3px; padding: 4px 9px; border-radius: 6px;
@@ -319,6 +339,16 @@
     .upl-btn-icon:hover { background: #f3f4f6; border-color: #d1d5db; }
     .upl-btn-icon-del { border-color: #fecaca; color: #dc2626; }
     .upl-btn-icon-del:hover { background: #fef2f2; border-color: #fca5a5; }
+    .upl-btn-icon-spacer {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      border: 1px solid transparent;
+      background: transparent;
+      display: inline-flex;
+      flex-shrink: 0;
+      pointer-events: none;
+    }
 
     /* Responsive grid — all columns flex proportionally */
     .upl-thead,
@@ -469,6 +499,48 @@
         min-width: 760px;
       }
 
+      .upl-thead,
+      .upl-row {
+        grid-template-columns: minmax(0, 1fr) auto auto;
+      }
+
+      .upl-thead-cell:nth-child(2),
+      .upl-thead-cell:nth-child(4),
+      .upl-row .upl-cell:nth-child(2),
+      .upl-row .upl-cell:nth-child(4) {
+        display: none !important;
+      }
+
+      .upl-uploader {
+        justify-content: center;
+      }
+
+      .upl-uploader-name {
+        display: none !important;
+      }
+
+      .upl-thead-cell,
+      .upl-row .upl-cell {
+        border-left: 1px solid #f3f4f6;
+      }
+
+      .upl-thead-cell:first-child,
+      .upl-row .upl-cell:first-child {
+        border-left: none;
+      }
+
+      .tools-uploads-copy {
+        display: none !important;
+      }
+
+      #toolsUploadsTableWrap {
+        overflow-x: hidden !important;
+      }
+
+      #toolsUploadsTable {
+        min-width: 0;
+      }
+
       .main-header {
         display: none !important;
       }
@@ -479,7 +551,7 @@
     }
 
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605031m2j">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050418b7">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
   <script src="js/version-manager.js?v=202603101mce"></script>
@@ -698,7 +770,6 @@
             <div id="toolsUploadsHeaderRow" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 16px; padding: 0 2px;">
               <div>
                 <h2 style="margin: 0; color: #111827; font-size: 20px; font-weight: 700;">Uploaded Files</h2>
-                <p style="margin: 2px 0 0 0; font-size: 13px; color: #9ca3af;">All files uploaded to the system</p>
               </div>
               <button id="toolsUploadsRefreshBtn" class="upl-refresh-btn" type="button">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -752,13 +823,6 @@
                 <option value="all">all</option>
                 <option value="mine">mine</option>
               </select>
-              <div class="upl-thead" id="uplThead">
-                <div class="upl-thead-cell upl-sort-hdr" data-sort="name" style="cursor:pointer; user-select:none; display:flex; align-items:center; gap:4px;">File <span class="upl-sort-arrow" data-col="name"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.3"><polyline points="6 9 12 15 18 9"/></svg></span></div>
-                <div class="upl-thead-cell upl-sort-hdr" data-sort="largest" style="cursor:pointer; user-select:none; display:flex; align-items:center; gap:4px;">Size <span class="upl-sort-arrow" data-col="size"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" opacity="0.3"><polyline points="6 9 12 15 18 9"/></svg></span></div>
-                <div class="upl-thead-cell">Uploader</div>
-                <div class="upl-thead-cell upl-sort-hdr" data-sort="newest" style="cursor:pointer; user-select:none; display:flex; align-items:center; gap:4px;">Date <span class="upl-sort-arrow active" data-col="date"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg></span></div>
-                <div class="upl-thead-cell" style="text-align:right;">Actions</div>
-              </div>
               <div id="toolsUploadsTableBody">
                 <div style="padding: 32px; text-align: center; color: #9ca3af; font-size: 14px;">Open this tab to load files…</div>
               </div>
@@ -1237,7 +1301,7 @@
     updateAdminButtonVisibility();
   </script>
 
-  <script src="js/user-identity.js?v=202605031m2j"></script>
+  <script src="js/user-identity.js?v=2026050418b7"></script>
   <!-- Mobile menu overlay -->
   <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
@@ -1245,7 +1309,7 @@
        FIREBASE & CHAT WIDGET
        ============================================ -->
   <!-- Initialize Chat Widget -->
-    <script src="js/chat.js?v=202605031m2j"></script>
+    <script src="js/chat.js?v=2026050418b7"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
@@ -1926,10 +1990,10 @@
 
           const openBtn = canOpenInBrowser
             ? '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" class="upl-btn-icon" title="Open">' + svgOpen + '</a>'
-            : '';
+            : '<span class="upl-btn-icon-spacer" aria-hidden="true"></span>';
 
           return '<div class="upl-row">' +
-            '<div class="upl-cell"><div class="upl-file-name tools-uploads-preview-target" data-idx="' + idx + '" tabindex="0" style="cursor:' + (shouldHaveHoverPreview(r) ? 'zoom-in' : 'default') + '">' +
+            '<div class="upl-cell"><div class="upl-file-name tools-uploads-preview-target" data-idx="' + idx + '" data-full-name="' + safeName + '" tabindex="0" style="cursor:' + (shouldHaveHoverPreview(r) ? 'zoom-in' : 'default') + '">' +
               '<img src="' + safeIcon + '" alt="" loading="lazy" style="width:15px;height:15px;object-fit:contain;flex-shrink:0;opacity:0.6" onerror="this.src=\'svg/uploads/note-icon.svg\'">' +
               '<span>' + safeName + '</span>' +
             '</div></div>' +
@@ -2036,6 +2100,26 @@
           el.addEventListener('focus', () => showHoverPreview(row, el));
           el.addEventListener('mouseleave', scheduleHideHoverPreview);
           el.addEventListener('blur', scheduleHideHoverPreview);
+        });
+
+        if (tableBody.dataset.nameTipBound !== '1') {
+          document.addEventListener('click', () => {
+            tableBody.querySelectorAll('.upl-file-name.is-name-open').forEach((el) => {
+              el.classList.remove('is-name-open');
+            });
+          });
+          tableBody.dataset.nameTipBound = '1';
+        }
+
+        tableBody.querySelectorAll('.upl-file-name').forEach((el) => {
+          el.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isOpen = el.classList.contains('is-name-open');
+            tableBody.querySelectorAll('.upl-file-name.is-name-open').forEach((openEl) => {
+              openEl.classList.remove('is-name-open');
+            });
+            if (!isOpen) el.classList.add('is-name-open');
+          });
         });
 
         if (tableBody.dataset.previewLeaveBound !== '1') {
@@ -2969,6 +3053,6 @@
     }
   }
 </script>
-<script src="js/mobile-nav.js?v=202605031m2j"></script>
+<script src="js/mobile-nav.js?v=2026050418b7"></script>
 </body>
 </html>
