@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605051m7z"></script>
+  <script src="js/auth-guard.js?v=202605051nqw"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -159,228 +159,20 @@
   <link rel="icon" href="favicon.svg?v=202603151sxu" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605051m7z">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605051nqw">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605015kp">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <!-- Marked.js library for Markdown rendering -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
-    .toggle-btn.selected {
-      background: #111 !important;
-      border-color: #111 !important;
-    }
-    .toggle-btn img {
-      filter: none;
-      transition: filter 0.15s;
-    }
-    .toggle-btn.selected img {
-      filter: brightness(0) invert(1);
-    }
-    /* Overlay header styling to match main header */
-    .overlay-header {
-  background: #fff;
-  color: #000;
-  font-family: 'Open Sans', Arial, sans-serif;
-  font-weight: 400;
-  position: absolute;
-      top: 1px;
-  left: 0;
-  right: 0;
-  width: 100%;
-  height: 80px;
-  min-height: 80px;
-  max-height: 80px;
-  padding: 0 0 0 0;
-  display: flex;
-  align-items: center;
-  border-bottom: 1px solid #d3cdcd;
-  margin: 0;
-  box-sizing: border-box;
-  z-index: 2101;
-    }
-    .overlay-header .page-title {
-      font-weight: 400 !important;
-      font-size: 1.6em;
-      margin: 0;
-      color: #262626;
-    }
-    .right-overlay {
-      position: fixed;
-      top: 0;
-      right: 0;
-      height: 100vh;
-      width: 90vw;
-      max-width: none;
-      min-width: 0;
-      background: #fff;
-      box-shadow: -4px 0 24px rgba(0,0,0,0.18);
-      z-index: 2000;
-      transform: translateX(100%);
-      transition: transform 0.35s cubic-bezier(.4,0,.2,1);
-      display: flex;
-      flex-direction: column;
-      pointer-events: none;
-    }
-    .right-overlay.open {
-      transform: translateX(0);
-      pointer-events: auto;
-    }
     @media (max-width: 900px) {
       html, body {
         height: 100vh !important;
         min-height: 100vh !important;
         overflow-x: hidden;
       }
-      .mobile-overlay {
-        display: none;
-      }
-      .mobile-overlay.active {
-        display: block !important;
-        position: fixed;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        right: 0;
-        width: 100vw;
-        height: 100vh;
-        min-height: 100vh;
-        background: rgba(0,0,0,0.5);
-        z-index: 3100;
-      }
-    }
-    .overlay-ribbon {
-      display: none;
-      align-items: center;
-      justify-content: center;
-      background: #a3b18a;
-      color: #fff;
-      height: 48px;
-      position: absolute;
-      left: -29px;
-      top: 24px;
-      width: 48px;
-      box-shadow: none;
-      z-index: 2200;
-      border-radius: 0;
-      font-size: 2.1em;
-      font-weight: 400;
-    }
-    .overlay-ribbon::before {
-      content: '';
-      position: absolute;
-      left: 1px;
-      top: 100%;
-      width: 0;
-      height: 0;
-      border-left: 28px solid transparent;
-      border-top: 22px solid #588157;
-      z-index: -1;
-    }
-    .right-overlay.open .overlay-ribbon {
-      display: flex;
-    }
-    .overlay-close {
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 22px;
-      cursor: pointer;
-      margin-top: 2px;
-      padding: 0;
-      width: 32px;
-      height: 32px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .overlay-content {
-  padding: 120px 32px 32px 58px;
-      margin-top: 0;
-      overflow-y: auto;
-      flex: 1 1 auto;
-    }
-    @media (max-width: 600px) {
-      .right-overlay {
-        width: 100vw;
-        min-width: 0;
-        left: 0;
-        right: 0;
-      }
-      .overlay-content {
-        padding: 100px 12px 20px 12px;
-      }
-      /* Hide desktop ribbon on phones */
-      .overlay-ribbon, .overlay-close { display: none !important; }
-      .overlay-header {
-        justify-content: center;
-        text-align: center;
-        padding: 10px 55px 10px 12px;
-      }
-      .overlay-header .page-title {
-        text-align: center;
-        width: 100%;
-        font-size: 1.2em !important;
-        line-height: 1.3 !important;
-        word-wrap: break-word;
-        overflow-wrap: break-word;
-        word-break: break-word;
-        hyphens: auto;
-      }
-    }
-    /* --- EVENT INFO OVERLAY STYLES (DESKTOP AND MOBILE) --- */
-    .event-info-overlay {
-      padding: 0;
-      line-height: 1.7;
-      color: #333;
-    }
-    .event-info-overlay h1 {
-      font-size: 22px;
-      margin: 0 0 12px 0;
-      color: #588157;
-      font-weight: 600;
-      border-bottom: 2px solid #1565c0;
-      padding-bottom: 8px;
-    }
-    .event-info-overlay h2 {
-      font-size: 18px;
-      margin: 16px 0 8px 0;
-      color: #588157;
-      font-weight: 600;
-    }
-    .event-info-overlay ul {
-      margin: 8px 0;
-      padding-left: 24px;
-    }
-    .event-info-overlay li {
-      margin: 4px 0;
-      color: #444;
-    }
-    .event-info-overlay ul ul {
-      margin: 4px 0;
-      padding-left: 20px;
-    }
-    .event-info-overlay p {
-      margin: 8px 0;
     }
     /* --- MOBILE IMPROVEMENTS --- */
 @media (max-width: 768px) {
-  .right-overlay {
-    height: 100vh !important;
-    min-height: 100vh !important;
-    max-height: 100vh !important;
-    overflow-y: auto !important;
-    width: 100vw;
-    left: 0;
-    right: 0;
-  }
-  /* Ensure desktop ribbon button is hidden on mobile (incl. landscape) */
-  .overlay-ribbon, .overlay-close { display: none !important; }
-  .status-bar {
-    display: none !important;
- }
   .element-card {
     border-radius: 12px;
     min-height: 75px;
@@ -427,40 +219,6 @@
     font-size: 10px !important;
     line-height: 1.2 !important;
     color: #666666 !important;
-  }
-
-
-  .mobile-overlay-close {
-    position: fixed;
-    top: 18px;
-    right: 18px;
-    z-index: 3100;
-    background: rgba(0,0,0,0.7);
-    color: #fff;
-    border: none;
-    border-radius: 50%;
-    width: 44px;
-    height: 44px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-    cursor: pointer;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition: opacity 0.3s, visibility 0.3s;
-  }
-  .right-overlay.open .mobile-overlay-close {
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
-  }
-
-  /* Скрий всички елементи от .filter-bar освен .filter-search-group */
-  .filter-bar > *:not(.filter-search-group) {
-    display: none !important;
   }
 
   .main-header {
@@ -511,75 +269,6 @@
   }
 
 }
-@media (min-width: 769px) {
-  .mobile-overlay-close {
-    display: none !important;
-  }
-}
-
-/* Text Cards - Large folder-style cards */
-.text-cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
-  margin-bottom: 32px;
-}
-
-.text-card-big {
-  background: #588157;
-  border-radius: 16px;
-  padding: 24px;
-  min-height: 180px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  position: relative;
-  overflow: hidden;
-}
-
-
-
-.text-card-big:hover {
-  transform: translateY(-8px) scale(1.03);
-  box-shadow: 0 12px 28px rgba(0,0,0,0.25);
-}
-
-.text-card-big-title {
-  margin: 0 0 12px 0;
-  color: white;
-  font-size: 1.25em;
-  font-weight: 700;
-  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
-  z-index: 1;
-  position: relative;
-  line-height: 1.3;
-}
-
-.text-card-big-preview {
-  color: rgba(255, 255, 255, 0.95);
-  font-size: 0.9em;
-  line-height: 1.6;
-  max-height: 90px;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  z-index: 1;
-  position: relative;
-}
-
-.text-card-big-icon {
-  position: absolute;
-  bottom: 16px;
-  right: 16px;
-  width: 40px;
-  height: 40px;
-  opacity: 0.25;
-}
-
 /* Modal for text content */
 .text-modal {
   display: none;
@@ -692,336 +381,6 @@
   font-size: 1.05em;
 }
 
-.msg-note-arrow {
-  transition: transform 0.3s ease;
-  flex-shrink: 0;
-  margin-left: 8px; /* small gap next to title/eye */
-}
-
-.msg-note.open .msg-note-arrow {
-  transform: rotate(180deg);
-}
-
-.msg-note-content {
-  margin-top: 8px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(146, 64, 14, 0.2);
-  color: #78350f;
-  line-height: 1;
-  animation: slideDown 0.3s ease;
-}
-
-.msg-note-content pre {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  font-family: inherit;
-  font-size: 1em;
-  margin: 0;
-  padding: 0;
-  background: transparent;
-  border-radius: 0;
-}
-
-/* Markdown content styling */
-.markdown-content {
-  font-family: 'Open Sans', Arial, sans-serif;
-  font-size: 0.95em;
-}
-
-.markdown-content h1, .markdown-content h2, .markdown-content h3, .markdown-content h4 {
-  color: #92400e;
-  margin-top: 0.8em;
-  margin-bottom: 0.3em;
-  font-weight: 600;
-}
-
-.markdown-content h1 { font-size: 1.5em; }
-.markdown-content h2 { font-size: 1.3em; }
-.markdown-content h3 { font-size: 1.1em; }
-.markdown-content h4 { font-size: 1.05em; }
-
-.markdown-content p {
-  margin: 0.7em 0;
-  white-space: pre-wrap;
-}
-
-/* Reduce space between paragraph and following list */
-.markdown-content p + ul,
-.markdown-content p + ol {
-  margin-top: -0.5em;
-}
-
-/* Reduce space between heading and following content */
-.markdown-content h1 + p,
-.markdown-content h2 + p,
-.markdown-content h3 + p,
-.markdown-content h4 + p,
-.markdown-content h1 + ul,
-.markdown-content h2 + ul,
-.markdown-content h3 + ul,
-.markdown-content h4 + ul,
-.markdown-content h1 + ol,
-.markdown-content h2 + ol,
-.markdown-content h3 + ol,
-.markdown-content h4 + ol {
-  margin-top: 0.1em;
-}
-
-/* Reduce space between heading and following table */
-.markdown-content h1 + .table-scroll,
-.markdown-content h2 + .table-scroll,
-.markdown-content h3 + .table-scroll {
-  margin-top: -0.5em;
-}
-
-.markdown-content h4 + .table-scroll {
-  margin-top: -0.5em;
-}
-
-/* Reduce space between h3 and h4 */
-.markdown-content h3 + h4 {
-  margin-top: 0.3em;
-}
-
-.markdown-content ul, .markdown-content ol {
-  margin: 0.3em 0;
-  padding-left: 1.5em;
-}
-
-.markdown-content li {
-  margin: 0.15em 0;
-}
-
-.markdown-content strong {
-  font-weight: 600;
-  color: #92400e;
-}
-
-.markdown-content em {
-  font-style: italic;
-  color: #92400e;
-}
-
-.markdown-content code {
-  background: rgba(146, 64, 14, 0.1);
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-family: 'Courier New', monospace;
-  font-size: 0.9em;
-}
-
-.markdown-content pre {
-  background: rgba(255, 255, 255, 0.5);
-  padding: 12px;
-  border-radius: 4px;
-  overflow-x: auto;
-  margin: 0.5em 0;
-}
-
-.markdown-content pre code {
-  background: none;
-  padding: 0;
-}
-
-.markdown-content blockquote {
-  border-left: 3px solid #f59e0b;
-  padding-left: 1em;
-  margin: 0.5em 0;
-  font-style: italic;
-  color: #78350f;
-}
-
-.markdown-content a {
-  color: #f59e0b;
-  text-decoration: underline;
-}
-
-.markdown-content a:hover {
-  color: #d97706;
-}
-
-/* Responsive images in markdown content */
-.markdown-content img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-  margin: 1em 0;
-  border-radius: 4px;
-}
-
-/* Scrollable wrapper for wide markdown tables */
-.table-scroll {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  margin: 0.5em 0;
-}
-.table-scroll table {
-  min-width: 560px; /* ensure horizontal scroll for many columns on mobile */
-}
-
-/* Utility Class for toggling visibility */
-.hidden {
-  display: none !important;
-}
-
-/* Mobile tweaks for markdown readability */
-@media (max-width: 768px) {
-  /* Slightly smaller and lighter text on mobile for better fit */
-  .markdown-content { font-size: 0.92em; font-weight: 300; }
-  .markdown-content p,
-  .markdown-content li,
-  .markdown-content td { font-weight: 300; }
-  .table-scroll table { font-size: 0.92em; }
-}
-
-/* Markdown tables with visible outlines */
-.markdown-content table {
-  border-collapse: collapse;
-  margin: 0.75em 0;
-  table-layout: auto;
-}
-.markdown-content th,
-.markdown-content td {
-  border: 1px solid rgba(146,64,14,0.35);
-  padding: 6px 10px;
-  text-align: left;
-  vertical-align: top;
-}
-.markdown-content thead th {
-  background: rgba(196, 127, 9, 0.08)
-}
-
-.markdown-content tbody tr:nth-child(odd) {
-  background: rgba(146, 64, 14, 0.03);
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    max-height: 0;
-  }
-  to {
-    opacity: 1;
-    max-height: 1000px;
-  }
-}
-
-/* Filter Bar Styles */
-.filter-bar {
-  display: flex;
-  align-items: flex-end;
-  gap: 34px;
-  background: #f5f5f5;
-  padding: 18px 37px 18px 35px;
-  border-bottom: none;
-}
-.filter-search-group,
-.filter-select-group {
-  position: relative;
-  margin-top: 18px;
-}
-.filter-search-group {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-width: 220px;
-}
-.filter-select-group {
-  display: flex;
-  flex-direction: column;
-  min-width: 140px;
-  position: relative;
-}
-/* Ensure all filter boxes are the same width behavior */
-.filter-search-group,
-.filter-select-group:not(:last-of-type) {
-  min-width: 0;
-  flex: 1 1 0;
-  max-width: none;
-  box-sizing: border-box;
-}
-.filter-label {
-  position: absolute;
-  top: -0.8em;
-  left: 12px;
-  background: #f5f5f5;
-  padding: 0 4px;
-  font-size: 0.85em;
-  color: #888;
-  font-weight: normal;
-  font-family: 'Open Sans', Arial, sans-serif;
-  z-index: 2;
-  pointer-events: none;
-  transition: color 0.2s;
-}
-.filter-search-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-}
-.filter-search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #888;
-  pointer-events: none;
-  z-index: 2;
-}
-.filter-search-input,
-.filter-select {
-  width: 100%;
-  height: 42px;
-  line-height: 46px;
-  padding: 10px 12px 10px 40px;
-  border: 1.5px solid #444;
-  border-radius: 0 !important;
-  font-size: 1em;
-  font-family: 'Open Sans', Arial, sans-serif;
-  background: #fff;
-  outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  margin-bottom: 0;
-  margin-top: 2px;
-  transition: border 0.2s;
-  box-sizing: border-box;
-  display: block;
-}
-.filter-select {
-  padding: 10px 32px 10px 12px;
-  font-family: 'Roboto', Arial, sans-serif;
-  vertical-align: middle;
-}
-.filter-search-input:focus,
-.filter-select:focus {
-  border-color: #588157;
-}
-.filter-select-group:last-of-type .filter-select-wrapper {
-  box-shadow: none !important;
-}
-.filter-select-arrow {
-  position: absolute;
-  right: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  pointer-events: none;
-  fill: #000;
-  z-index: 2;
-  opacity: 1;
-  display: block;
-}
-.filter-select-arrow.arrow-up {
-  opacity: 0;
-}
-.filter-select-wrapper:has(.filter-select:focus) .arrow-down {
-  opacity: 0;
-}
-.filter-select-wrapper:has(.filter-select:focus) .arrow-up {
-  opacity: 1;
-}
-
   body { background: #f5f5f5; font-family: 'Open Sans', Arial, sans-serif; margin: 0; }
     .base-courses-header-container { background: #262626; color: #fff; padding: 1rem; }
   .page-title { font-size: 30px !important; margin-left: 30px !important; font-family: 'Open Sans', serif; font-weight: 700; }
@@ -1103,11 +462,6 @@
   .course-title { font-size: 20px; color: #262626; text-decoration: none; font-weight: 525; }
   .course-custom-text { font-size: 13px; color: #555; line-height: 1.4; }
   .course-id { color: #888888; font-size: 14px; margin-bottom: 0.5rem; font-weight: 525; display: none !important; }
-  .status-bar { margin-top: 0.5rem; font-size: 0.88rem; display: flex; align-items: center; gap: 8px; }
-  .status-divider { display: inline-block; width: 1.5px; height: 16px; background: #444; margin: 0 8px; border-radius: 1px; vertical-align: middle; }
-  .status-open { font-size: 12px; font-weight: 400; color: #666666; }
-  .status-moreinfo { color: #222222; font-size: 12px; font-weight: 400; cursor: pointer; margin-left: 2px; display: flex; align-items: center; text-decoration: none; gap: 3px; }
-  .status-instructors { color: #1976D2; text-decoration: underline; font-weight: 400; font-size: 14px; }
     .controls {
   text-align: right;
   min-width: 80px;
@@ -1117,14 +471,8 @@
   height: 100%;
   padding: 0 1.2rem;
     }
-        .base-footer { background: #262626; color: #fff; padding: 1.2rem 1rem; text-align: center; font-size: 1em; border-top: 1px solid #222; }
-  .base-footer .footer-links { display: inline-block; margin-left: 1.5em; font-size: 12px !important; }
-  .base-footer .footer-links a { font-size: 12px !important; }
-  .base-footer a { color: #cdcdcd; margin: 0 0.7em; text-decoration: none; }
-  .base-footer a:hover { text-decoration: underline; color: #fff; }
-    .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
   </style>
-  <script src="courses.generated.js?v=202605051m7z"></script>
+  <script src="courses.generated.js?v=202605051nqw"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 
 <!-- Subtle UI tweaks -->
@@ -1151,7 +499,6 @@
 
 #betaCourseContent li img,
 #betaCourseContent li svg,
-#betaCourseContent li .material-icons,
 #betaCourseContent li i {
   font-size: 1.06em !important;
   transform: scale(1.06);
@@ -1161,16 +508,8 @@
 
 </head>
 <body class="index-beta">
-<!-- Right-side overlay for course card click -->
-    <div id="rightOverlay" class="right-overlay">
-      <button class="mobile-overlay-close" onclick="closeRightOverlay()">✕</button>
-      <div class="overlay-content" id="overlayContent">
-        <!-- Dynamic content will be injected here -->
-      </div>
-    </div>
-
   <div class="layout">
-  <div id="side-menu" class="mode-light hide-in-background themed-background-primary-fill-only left-off-canvas-menu color-selection-live-mode">
+  <div id="side-menu" class="hide-in-background left-off-canvas-menu">
       <div class="bb-inner-wrap">
         <div class="logo-header">
           <a href="index.html?v=202603151sxu">
@@ -1186,49 +525,49 @@
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="account.html?v=202603151sxu">
+              <a class="base-navigation-button-content" href="account.html?v=202603151sxu">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-account.svg?v=202603151sxu" alt="Account" />
                 <span class="link-text">Account</span>
               </a>
             </li>
             <li class="base-navigation-button active">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="index.html?v=202603151sxu">
+              <a class="base-navigation-button-content" href="index.html?v=202603151sxu">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-courses.svg?v=202603151sxu" alt="Courses" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Courses</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="notes.html?v=202603151sxu">
+              <a class="base-navigation-button-content" href="notes.html?v=202603151sxu">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-notebook.svg" alt="Notes" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Notes</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="calendar.html?v=202603151sxu">
+              <a class="base-navigation-button-content" href="calendar.html?v=202603151sxu">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-calendar.svg?v=202603151sxu" alt="Calendar" />
                 <span class="link-text">Calendar</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="tools.html?v=202603151sxu">
+              <a class="base-navigation-button-content" href="tools.html?v=202603151sxu">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-tools.svg?v=202603151sxu" alt="Tools" />
                 <span class="link-text">Tools</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="text-editor.html?v=202603151sxu">
+              <a class="base-navigation-button-content" href="text-editor.html?v=202603151sxu">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-editor.svg?v=202603151sxu" alt="Editor" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Editor</span>
               </a>
             </li>
             <li class="base-navigation-button" id="admin-button" style="display: none;">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="admin.html?v=202603151sxu">
+              <a class="base-navigation-button-content" href="admin.html?v=202603151sxu">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-admin.svg?v=202603151sxu" alt="Admin Panel" style="filter: brightness(0) invert(1);" />
                 <span class="link-text">Admin</span>
               </a>
             </li>
             <li class="base-navigation-button">
-              <a class="base-navigation-button-content themed-background-primary-alt-fill-only theme-border-left-active" href="#" onclick="handleLogout()">
+              <a class="base-navigation-button-content" href="#" onclick="handleLogout()">
                 <img class="svg-icon" width="22" height="22" src="svg/icon-signout.svg?v=202603151sxu" alt="Logout" />
                 <span class="link-text">Logout</span>
               </a>
@@ -1269,30 +608,6 @@
         </section>
       </div>
 <script>
-    // Overlay logic for course cards
-    document.addEventListener('DOMContentLoaded', function() {
-      // Close overlay when clicking outside overlay-content
-      var overlay = document.getElementById('rightOverlay');
-      if (overlay) {
-        overlay.addEventListener('mousedown', function(e) {
-          // Only close if clicking directly on the overlay background, not on content or ribbon/close
-          if (e.target === overlay) {
-            closeRightOverlay();
-          }
-        });
-      }
-
-      var courseList = document.getElementById('course-org-list');
-      if (courseList) {
-        courseList.querySelectorAll('.element-card').forEach(function(card) {
-          card.style.cursor = 'pointer';
-          card.addEventListener('click', function(e) {
-            openRightOverlayForCard(card);
-            e.stopPropagation();
-          });
-        });
-      }
-    });
 
 const COURSE_COLORS = [
   // Greens / teals
@@ -1525,17 +840,7 @@ function getUniqueShuffledColors(count, isArchived = false) {
   return result;
 }
 
-// Function to get color mapping for all courses (for debugging/reference)
-function getColorMapping() {
-  if (typeof courses !== 'undefined' && Array.isArray(courses)) {
-    return courses.map(course => ({
-      id: course.id,
-      title: course.title,
-      color: generateColorFromId(course.id)
-    }));
-  }
-  return [];
-}
+
 
 // Render course cards dynamically using the global courses array from courses.generated.js
 function renderCourseList() {
@@ -1595,7 +900,7 @@ function renderCourseList() {
       card.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          openRightOverlayForCard(card);
+          openCourseContentForCard(card);
         }
       });
 
@@ -1639,7 +944,7 @@ function renderCourseList() {
         card.addEventListener('keydown', function(e) {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
-            openRightOverlayForCard(card);
+            openCourseContentForCard(card);
           }
         });
 
@@ -1651,7 +956,7 @@ function renderCourseList() {
     list.querySelectorAll('.element-card').forEach(function(card) {
       card.style.cursor = 'pointer';
       card.addEventListener('click', function(e) {
-        openRightOverlayForCard(card);
+        openCourseContentForCard(card);
         e.stopPropagation();
       });
     });
@@ -1659,7 +964,7 @@ function renderCourseList() {
     if (document.body.classList.contains('index-beta')) {
       const firstCourseCard = list.querySelector('.element-card');
       if (firstCourseCard) {
-        openRightOverlayForCard(firstCourseCard, { keepCourseListVisible: true });
+        openCourseContentForCard(firstCourseCard, { keepCourseListVisible: true });
       }
     }
   }
@@ -1836,180 +1141,14 @@ document.addEventListener('DOMContentLoaded', function() {
       font-weight: 400 !important;
     }
     .page-title { font-size: 2rem; margin: 0; }
-    .filter-bar {
-      display: flex;
-      align-items: flex-end;
-  gap: 34px;
-      background: #f5f5f5;
-  padding: 18px 37px 18px 35px;
-      border-bottom: none;
-    }
-    .filter-label {
-      font-size: 0.8em;
-      color: #888;
-      margin-bottom: 0;
-      margin-left: 4px;
-  font-family: 'Open Sans', Arial, sans-serif;
-    }
-    .filter-search-group {
-      display: flex;
-      flex-direction: column;
-      flex: 1;
-      min-width: 220px;
-    }
-    .filter-search-input-wrapper {
-  position: relative;
-  display: flex;
-  align-items: flex-end;
-}
-    .filter-search-icon {
-  position: absolute;
-  left: 10px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #888;
-  pointer-events: none;
-  z-index: 2;
-}
-    .filter-search-input {
-      width: 100%;
-  padding: 10px 12px 10px 40px;
-      border: 1.5px solid #bdbdbd;
-      border-radius: 0 !important;
-      font-size: 1em;
-  font-family: 'Open Sans', Arial, sans-serif;
-      transition: border 0.2s;
-    }
-    .filter-select-group {
-      display: flex;
-      flex-direction: column;
-      min-width: 140px;
-      position: relative;
-    }
-    .filter-select-wrapper {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-    .filter-select {
-      width: 100%;
-      padding: 10px 32px 10px 12px;
-  height: 46px;
-      line-height: 20px;
-      border: 1.5px solid #444;
-      border-radius: 0 !important;
-      font-size: 1em;
-      font-family: 'Roboto', Arial, sans-serif;
-      background: #fff;
-      outline: none;
-      appearance: none;
-      -webkit-appearance: none;
-      -moz-appearance: none;
-      margin-bottom: 0;
-      margin-top: 2px;
-      transition: border 0.2s;
-      vertical-align: middle;
-    }
-    .filter-select:focus {
-      border-color: #588157;
-    }
-    .filter-select-arrow {
-      position: absolute;
-      right: 10px;
-      top: 50%;
-      transform: translateY(-50%);
-      pointer-events: none;
-      fill: #000;
-      z-index: 2;
-      opacity: 1;
-      display: block;
-    }
-    .filter-select-arrow.arrow-up {
-      opacity: 0;
-    }
-    .filter-select-wrapper:has(.filter-select:focus) .arrow-down {
-      opacity: 0;
-    }
-    .filter-select-wrapper:has(.filter-select:focus) .arrow-up {
-      opacity: 1;
-    }
-  .base-footer {
-    background: #262626;
-    color: #fff;
-    padding: 1.2rem 1rem 1.2rem 1.2rem;
-    text-align: left;
-    font-size: 0.85em;
-    border-top: 1px solid #222;
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    box-sizing: border-box;
-  }
-    .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
     @media (max-width: 900px) {
       .layout { flex-direction: column; }
       .main-content { padding: 0; }
-      .main-header, .filter-bar, .course-org-list { padding-left: 16px; padding-right: 16px; }
+      .main-header, .course-org-list { padding-left: 16px; padding-right: 16px; }
 
-      /* Mobile overlay header styling */
-      .overlay-header {
-        justify-content: center !important;
-        padding-left: 16px !important;
-        padding-right: 16px !important;
-      }
-      .overlay-header .page-title {
-        font-family: 'Open Sans', Arial, sans-serif !important;
-        font-size: 1.3em !important;
-        font-weight: 700 !important;
-        text-align: center !important;
-        width: 100%;
-      }
     }
   </style>
   <style>
-.filter-search-group, .filter-select-group {
-  position: relative;
-  margin-top: 18px;
-}
-.filter-label {
-  position: absolute;
-  top: -0.8em;
-  left: 12px;
-  background: #f5f5f5;
-  padding: 0 4px;
-  font-size: 0.85em;
-  color: #222;
-  font-weight: normal;
-  font-family: 'Open Sans', Arial, sans-serif;
-  z-index: 2;
-  pointer-events: none;
-  transition: color 0.2s;
-}
-.filter-search-input,
-.filter-select {
-  height: 42px;
-  line-height: 46px;
-  padding: 0 32px 0 12px;
-  border: 1.5px solid #444;
-  border-radius: 0 !important;
-  font-size: 1em;
-  font-family: 'Open Sans', Arial, sans-serif;
-  background: #fff;
-  outline: none;
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: none;
-  margin-bottom: 0;
-  margin-top: 2px;
-  transition: none;
-  box-sizing: border-box;
-  display: block;
-}
-.filter-search-input {
-  padding-left: 40px;
-}
-
 .folder-toggle-row {
   display: flex;
   align-items: center;
@@ -2089,8 +1228,8 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      CHAT SYSTEM - Complete (Firebase REST + UI)
      ============================================ -->
 
-<script src="js/user-identity.js?v=202605051m7z"></script>
-<script src="js/chat.js?v=202605051m7z"></script>
+<script src="js/user-identity.js?v=202605051nqw"></script>
+<script src="js/chat.js?v=202605051nqw"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -2115,173 +1254,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
 </style>
 
     <script>
-    // Function to process table rowspans (convert ^ to rowspan)
-    function processTableRowspans(html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const tables = doc.querySelectorAll('table');
 
-      tables.forEach(table => {
-        const rows = Array.from(table.querySelectorAll('tbody tr'));
-
-        // Process each column
-        const maxCols = Math.max(...rows.map(row => row.cells.length));
-
-        for (let colIndex = 0; colIndex < maxCols; colIndex++) {
-          let spanStart = -1;
-          let spanCount = 0;
-
-          for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
-            const cell = rows[rowIndex].cells[colIndex];
-
-            if (!cell) continue;
-
-            const cellText = cell.textContent.trim();
-
-            if (cellText === '^') {
-              // Mark cell for deletion and count span
-              cell.setAttribute('data-delete', 'true');
-              spanCount++;
-            } else {
-              // If we were counting spans, apply rowspan
-              if (spanCount > 0 && spanStart >= 0) {
-                const spanCell = rows[spanStart].cells[colIndex];
-                if (spanCell) {
-                  spanCell.setAttribute('rowspan', spanCount + 1);
-                }
-              }
-              // Reset for next potential span
-              spanStart = rowIndex;
-              spanCount = 0;
-            }
-          }
-
-          // Handle trailing spans
-          if (spanCount > 0 && spanStart >= 0) {
-            const spanCell = rows[spanStart].cells[colIndex];
-            if (spanCell) {
-              spanCell.setAttribute('rowspan', spanCount + 1);
-            }
-          }
-        }
-
-        // Remove cells marked for deletion
-        table.querySelectorAll('[data-delete="true"]').forEach(cell => cell.remove());
-      });
-
-      return doc.body.innerHTML;
-    }
-
-    // Function to process table colspans (convert < to colspan)
-    function processTableColspans(html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const tables = doc.querySelectorAll('table');
-
-      tables.forEach(table => {
-        const rows = Array.from(table.querySelectorAll('tbody tr'));
-
-        // Process each row
-        rows.forEach(row => {
-          const cells = Array.from(row.cells);
-          let spanStart = -1;
-          let spanCount = 0;
-
-          for (let colIndex = 0; colIndex < cells.length; colIndex++) {
-            const cell = cells[colIndex];
-            const cellText = cell.innerHTML.trim();
-
-            if (cellText === '&lt;') {
-              // Mark cell for deletion and count span
-              cell.setAttribute('data-delete-colspan', 'true');
-              spanCount++;
-            } else {
-              // If we were counting spans, apply colspan
-              if (spanCount > 0 && spanStart >= 0) {
-                const spanCell = cells[spanStart];
-                if (spanCell) {
-                  spanCell.setAttribute('colspan', spanCount + 1);
-                }
-              }
-              // Reset for next potential span
-              spanStart = colIndex;
-              spanCount = 0;
-            }
-          }
-
-          // Handle trailing spans
-          if (spanCount > 0 && spanStart >= 0) {
-            const spanCell = cells[spanStart];
-            if (spanCell) {
-              spanCell.setAttribute('colspan', spanCount + 1);
-            }
-          }
-        });
-
-        // Remove cells marked for deletion
-        table.querySelectorAll('[data-delete-colspan="true"]').forEach(cell => cell.remove());
-      });
-
-      return doc.body.innerHTML;
-    }
-
-    // Function to process table cell alignment (>>text<<, <<text, text>>)
-    function processTableAlignment(html) {
-      const parser = new DOMParser();
-      const doc = parser.parseFromString(html, 'text/html');
-      const tables = doc.querySelectorAll('table');
-
-      tables.forEach(table => {
-        const allCells = table.querySelectorAll('td, th');
-
-        allCells.forEach(cell => {
-          let content = cell.innerHTML.trim();
-
-          // Check for center alignment >>text<<
-          if (content.startsWith('&gt;&gt;') && content.endsWith('&lt;&lt;')) {
-            cell.style.textAlign = 'center';
-            cell.innerHTML = content.slice(8, -8); // Remove &gt;&gt; and &lt;&lt;
-          }
-          // Check for left alignment <<text
-          else if (content.startsWith('&lt;&lt;')) {
-            cell.style.textAlign = 'left';
-            cell.innerHTML = content.slice(8); // Remove &lt;&lt;
-          }
-          // Check for right alignment text>>
-          else if (content.endsWith('&gt;&gt;')) {
-            cell.style.textAlign = 'right';
-            cell.innerHTML = content.slice(0, -8); // Remove &gt;&gt;
-          }
-        });
-      });
-
-      return doc.body.innerHTML;
-    }
-
-    // Overlay logic for course cards
-    document.addEventListener('DOMContentLoaded', function() {
-      // Close overlay when clicking outside overlay-content
-      var overlay = document.getElementById('rightOverlay');
-      if (overlay) {
-        overlay.addEventListener('mousedown', function(e) {
-          // Only close if clicking directly on the overlay background, not on content or ribbon/close
-          if (e.target === overlay) {
-            closeRightOverlay();
-          }
-        });
-      }
-
-      var courseList = document.getElementById('course-org-list');
-      if (courseList) {
-        courseList.querySelectorAll('.element-card').forEach(function(card) {
-          card.style.cursor = 'pointer';
-          card.addEventListener('click', function(e) {
-            openRightOverlayForCard(card);
-            e.stopPropagation();
-          });
-        });
-      }
-    });
   function fitBetaCourseTitle() {
     const titleEl = document.getElementById('betaCourseTitle');
     if (!titleEl) return;
@@ -2305,11 +1278,9 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
     titleEl.style.fontSize = minSize + 'px';
   }
 
-  function openRightOverlayForCard(card, options = {}) {
-  var isBetaPage = document.body.classList.contains('index-beta');
-  var overlay = document.getElementById('rightOverlay');
-  var content = isBetaPage ? document.getElementById('betaCourseContent') : document.getElementById('overlayContent');
-  if (content && (isBetaPage || overlay)) {
+  function openCourseContentForCard(card, options = {}) {
+  var content = document.getElementById('betaCourseContent');
+  if (content) {
     var title = card.querySelector('.course-title')?.textContent || 'Course';
     var courseId = card.querySelector('.course-id')?.textContent || '';
     var isArchivedCard = card.style.opacity === '0.75'; // Archived cards have opacity
@@ -2326,35 +1297,16 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
 
     let customContent = '';
 
-    // Check if this is "Актуални събития Event center" course - show event info instead
-    if (title.includes('Актуални събит') || title.includes('Event center')) {
-      if (typeof eventInfo !== 'undefined' && eventInfo && eventInfo.trim().length > 0) {
-        customContent = `<div class="event-info-overlay">` + marked.parse(eventInfo) + `</div>`;
-      } else {
-        customContent = '<div style="color:#888;">Няма информация за актуални събития.</div>';
-      }
+    if (courseObj && Array.isArray(courseObj.sections) && courseObj.sections.length > 0) {
+      customContent += `<div style="display:flex; flex-direction:column; gap:18px;">`;
+      const orderedTopLevelSections = sortTopLevelSections(courseObj.sections);
+      orderedTopLevelSections.forEach(section => {
+        sortFilesAndFolders(section);
+        customContent += renderSection(section, 1);
+      });
+      customContent += `</div>`;
     } else {
-      // Render text cards if available
-      if (courseObj && Array.isArray(courseObj.textCards) && courseObj.textCards.length > 0) {
-        customContent += `<div class="text-cards-container">`;
-        courseObj.textCards.forEach(card => {
-          customContent += renderTextCardBig(card);
-        });
-        customContent += `</div>`;
-      }
-
-      if (courseObj && Array.isArray(courseObj.sections) && courseObj.sections.length > 0) {
-        customContent += `<div style="display:flex; flex-direction:column; gap:18px;">`;
-        const orderedTopLevelSections = sortTopLevelSections(courseObj.sections);
-        orderedTopLevelSections.forEach(section => {
-          // Sort files and folders before rendering
-          sortFilesAndFolders(section);
-          customContent += renderSection(section, 1); // 1 = first level sections (Материали, Колоквиум I, etc.)
-        });
-        customContent += `</div>`;
-      } else if (!courseObj || !courseObj.textCards || courseObj.textCards.length === 0) {
-        customContent = '<div style="color:#888;">Няма съдържание за този курс.</div>';
-      }
+      customContent = '<div style="color:#888;">Няма съдържание за този курс.</div>';
     }
 
     // Function to render big text card (folder-style)
@@ -2473,27 +1425,6 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       return cleaned;
     }
 
-    function renderTextCardBig(card) {
-      const title = card.title || 'Без заглавие';
-      const content = card.content || '';
-      const maxLength = 200;
-      const preview = content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
-      const cardId = 'card-' + Math.random().toString(36).substr(2, 9);
-
-      return `
-        <div class="text-card-big" onclick="showTextCardModal('${cardId}', '${title.replace(/'/g, "\\'")}', this.getAttribute('data-content'));"
-             data-content="${content.replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/\n/g, '&#10;')}">
-          <div>
-            <h3 class="text-card-big-title">${title}</h3>
-            <p class="text-card-big-preview">${preview}</p>
-          </div>
-          <svg class="text-card-big-icon" viewBox="0 0 24 24" fill="rgba(255,255,255,0.3)">
-            <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/>
-          </svg>
-        </div>
-      `;
-    }
-
     //custom icons
     window.customLinkIconRules = [
       { pathExact: 'files/Вътрешни болести 1 ч/Кардиология/Англоезични материали/Pathophysiology of Heart Disease.url', icon: 'svg/icon-book.svg' },
@@ -2563,15 +1494,17 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         const isPrivateCoursebookWorkerHost =
           hostname.endsWith('.workers.dev') && hostname.includes('sergey-2210-pavlov');
 
-        if (isCoursebookHost || isPrivateCoursebookWorkerHost) {
+        if (isCoursebookHost) {
           return {
             primary: 'https://coursebook.lol/favicon.ico',
             fallbacks: [
-              'https://coursebook.lol/favicon.svg',
-              `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
-              `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
+              'https://coursebook.lol/favicon.svg'
             ]
           };
+        }
+
+        if (isPrivateCoursebookWorkerHost) {
+          return { primary: '', fallbacks: [] };
         }
 
         // Force Google Docs-family links to use the correct app icon.
@@ -2593,10 +1526,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           return {
             primary: docsPrimary,
             fallbacks: [
-              docsFallback,
-              'https://www.google.com/s2/favicons?domain=docs.google.com&sz=64',
-              'https://docs.google.com/favicon.ico',
-              `https://icons.duckduckgo.com/ip3/${hostname}.ico`
+              docsFallback
             ]
           };
         }
@@ -2606,10 +1536,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           return {
             primary: 'https://www.gstatic.com/images/branding/product/1x/drive_2020q4_48dp.png',
             fallbacks: [
-              'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_folder_x16.png',
-              `https://www.google.com/s2/favicons?domain=drive.google.com&sz=64`,
-              `https://${hostname}/favicon.ico`,
-              `https://icons.duckduckgo.com/ip3/${hostname}.ico`
+              'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_folder_x16.png'
             ]
           };
         }
@@ -2617,19 +1544,17 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         if (hostname === 'google.com' || hostname.endsWith('.google.com')) {
           return {
             primary: `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`,
-            fallbacks: [
-              `https://${hostname}/favicon.ico`,
-              `https://icons.duckduckgo.com/ip3/${hostname}.ico`
-            ]
+            fallbacks: []
           };
         }
 
-        // Prefer the origin favicon first; proxy providers are used as fallbacks.
         return {
-          primary: `https://${hostname}/favicon.ico`,
+          primary: `${parsedUrl.protocol}//${hostname}/favicon.ico`,
           fallbacks: [
+            `${parsedUrl.protocol}//${hostname}/favicon.png`,
+            `${parsedUrl.protocol}//${hostname}/apple-touch-icon.png`,
             `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
-            `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
+            `https://www.google.com/s2/favicons?domain=${encodeURIComponent(hostname)}&sz=64`
           ]
         };
       } catch (e) {
@@ -2773,17 +1698,16 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           // Skip files with -summary in name
           if (note.name.toLowerCase().includes('-summary')) return;
 
-          const noteId = `msg-note-${sectionId}-${idx}`;
           const isHtml = /\.html$/i.test(note.path || '');
+          const notePathForJs = String(note.path || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
           sectionContent += `
-            <div class="msg-note ${isHtml ? 'msg-note-html' : ''}" onclick="openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" data-note-path="${note.path}">
+            <div class="msg-note ${isHtml ? 'msg-note-html' : ''}" onclick="openMdNoteFull('${notePathForJs}'); return false;">
               <div class="msg-note-header">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="${isHtml ? '#588157' : '#f59e0b'}" style="flex-shrink:0;">
                   <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
                 </svg>
                 <span class="msg-note-title" style="${isHtml ? 'color: #588157;' : ''}">${isHtml ? removeOrderPrefix(note.name).replace(/\.html$/i, '') : removeOrderPrefix(note.name)}</span>
               </div>
-              <div class="msg-note-content" id="${noteId}" style="display:none;"></div>
             </div>
           `;
         });
@@ -2900,7 +1824,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       }
       return sectionContent;
     }
-      if (isBetaPage) {
+
       if (!options.keepCourseListVisible || window.innerWidth > 900) {
         document.body.classList.add('beta-showing-course');
       }
@@ -2931,24 +1855,8 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         });
       }
       return;
-    }
-
-    content.innerHTML = `
-      <div class="overlay-ribbon">
-        <button class="overlay-close" onclick="closeRightOverlay()">&#10005;</button>
-      </div>
-      <header class="main-header overlay-header">
-        <h1 class="page-title">${title}</h1>
-      </header>
-      <div class="overlay-main-content" style="margin-top:18px;">${customContent}</div>
-    `;
-    overlay.classList.add('open');
   }
 }
-    function closeRightOverlay() {
-      var overlay = document.getElementById('rightOverlay');
-      if (overlay) overlay.classList.remove('open');
-    }
 
     function showBetaCourseList() {
       document.body.classList.remove('beta-showing-course');
@@ -2969,28 +1877,8 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       fitBetaCourseTitle();
     });
 
-    // Close overlay when clicking outside on desktop
-    document.addEventListener('click', function(e) {
-      const overlay = document.getElementById('rightOverlay');
-      const overlayContent = document.getElementById('overlayContent');
-      const modal = document.getElementById('textCardModal');
-      // Only close on desktop (not mobile)
-      if (window.innerWidth > 768 && overlay && overlay.classList.contains('open')) {
-        // Check if click is outside overlay-content and NOT inside modal
-        if (!overlayContent.contains(e.target) && !e.target.closest('.element-card') && !e.target.closest('#textCardModal')) {
-          closeRightOverlay();
-        }
-      }
-    });
-
-    // Open msg-note files by path; index no longer renders note previews inline.
-    function openMdNoteFull(noteId, rawTitle) {
+    function openMdNoteFull(notePath) {
       try {
-        const contentEl = document.getElementById(noteId);
-        if (!contentEl) return;
-
-        const noteElement = contentEl.closest('.msg-note');
-        const notePath = noteElement ? noteElement.getAttribute('data-note-path') : '';
         if (!notePath) return;
 
         const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}`;
@@ -3011,60 +1899,6 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       } else {
         versionInfo.style.display = 'none';
       }
-    }
-
-    // Function to copy git commands
-    function copyGitCommand(type) {
-      let command = '';
-      if (type === 'main') {
-        command = 'node generate_courses.js; git add .; git commit -m "update"; git push';
-      } else if (type === 'files') {
-        command = 'cd files; git add .; git commit -m "update"; git push; cd ..';
-      }
-
-      // Copy to clipboard
-      navigator.clipboard.writeText(command).then(() => {
-        // Show temporary notification
-        const versionInfo = document.getElementById('versionInfo');
-        versionInfo.textContent = 'Copied: ' + command;
-        versionInfo.style.display = 'inline-block';
-        setTimeout(() => {
-          versionInfo.style.display = 'none';
-        }, 3000);
-      }).catch(err => {
-        console.error('Failed to copy:', err);
-        alert('Failed to copy command');
-      });
-    }
-
-    // Function to show text card in modal
-    function showTextCardModal(cardId, title, content) {
-      // Decode HTML entities
-      content = content.replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&#10;/g, '\n');
-
-      // Create modal
-      const modal = document.createElement('div');
-      modal.id = 'textCardModal';
-      modal.className = 'text-modal';
-      modal.style.display = 'block';
-      modal.onclick = function(e) {
-        if (e.target === modal) closeTextCardModal();
-      };
-
-      const modalContent = document.createElement('div');
-      modalContent.className = 'text-modal-content';
-
-      modalContent.innerHTML = `
-        <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
-        <h2 class="text-modal-title">${title}</h2>
-        <div class="text-modal-body">${content}</div>
-      `;
-
-      modal.appendChild(modalContent);
-      document.body.appendChild(modal);
-
-      // Prevent body scroll
-      document.body.style.overflow = 'hidden';
     }
 
     function closeTextCardModal() {
@@ -3109,76 +1943,10 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         return;
       }
 
-      // Find the HTML content from courses data
-      let htmlContent = '';
-      if (typeof courses !== 'undefined') {
-        outerLoop: for (let course of courses) {
-          for (let section of course.sections) {
-            if (section.msgNotes) {
-              for (let note of section.msgNotes) {
-                if (note.path === filePath && note.type === 'html') {
-                  htmlContent = note.content;
-                  break outerLoop;
-                }
-              }
-            }
-          }
-        }
-      }
-
-      if (htmlContent) {
-        // Store in sessionStorage
-        const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        sessionStorage.setItem(sessionKey, htmlContent);
-        sessionStorage.setItem(sessionKey + '_path', filePath);
-
-        const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(filePath)}&sessionKey=${sessionKey}`;
-        window.open(mdViewerUrl, '_blank');
-      } else {
-        // Fallback: allow md-viewer to fetch by path even when content isn't in courses cache.
-        console.warn(`HTML content for ${filePath} not found in courses data. Falling back to direct path open.`);
-        const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(filePath)}`;
-        window.open(mdViewerUrl, '_blank');
-      }
+      const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(filePath)}`;
+      window.open(mdViewerUrl, '_blank');
     }
 
-    // Function to render DOCX files
-    async function renderDocxFile(filePath, fileName) {
-      try {
-        // Fetch the docx file
-        const response = await fetch(filePath);
-        const arrayBuffer = await response.arrayBuffer();
-
-        // Create modal
-        const modal = document.createElement('div');
-        modal.id = 'textCardModal';
-  modal.className = 'text-modal';
-  modal.style.display = 'block';
-        modal.onclick = function(e) {
-          if (e.target === modal) closeTextCardModal();
-        };
-
-        const modalContent = document.createElement('div');
-        modalContent.className = 'text-modal-content';
-        modalContent.innerHTML = `
-          <span class="text-modal-close" onclick="closeTextCardModal()">&times;</span>
-          <h2 class="text-modal-title">${fileName}</h2>
-          <div class="text-modal-body" id="docx-container" style="padding: 20px; background: white; max-height: 70vh; overflow-y: auto;"></div>
-        `;
-
-        modal.appendChild(modalContent);
-        document.body.appendChild(modal);
-        document.body.style.overflow = 'hidden';
-
-        // Render the docx file
-        const container = document.getElementById('docx-container');
-        await docx.renderAsync(arrayBuffer, container);
-
-      } catch (error) {
-        console.error('Error rendering DOCX file:', error);
-        alert('Грешка при зареждане на документа. Моля опитайте отново.');
-      }
-    }
 
     // Show image in modal overlay
     function showImageModal(imgPath, imgName, allImages = [], currentIndex = -1) {
@@ -3251,7 +2019,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       <script src="html-priority.js"></script>
       <script src="js/presence.js"></script>
       <script src="js/version-check.js?v=202605021hcw"></script>
-      <script src="js/mobile-nav.js?v=202605051m7z"></script>
+      <script src="js/mobile-nav.js?v=202605051nqw"></script>
 <!-- Privacy Modal -->
 <div id="privacyModal" class="text-modal" style="display: none;">
   <div class="text-modal-content" style="max-width: 500px;">
@@ -3561,8 +2329,7 @@ body.index-beta .beta-overlay-main-content li[style*="font-size"] a {
 
 body.index-beta .beta-overlay-main-content li img,
 body.index-beta .beta-overlay-main-content li svg,
-body.index-beta .beta-overlay-main-content li i,
-body.index-beta .beta-overlay-main-content li .material-icons {
+body.index-beta .beta-overlay-main-content li i {
   transform: scale(1.04);
   transform-origin: center;
 }
@@ -3611,26 +2378,6 @@ body.index-beta .beta-overlay-main-content .msg-note-header .msg-note-title {
   color: #588157 !important;
   font-weight: 600;
   font-size: 1.05em;
-}
-
-body.index-beta .beta-overlay-main-content .msg-note-content {
-  margin-top: 8px !important;
-  padding-top: 8px !important;
-  border-top: 1px solid rgba(146, 64, 14, 0.2) !important;
-  color: #78350f !important;
-  line-height: 1 !important;
-}
-
-body.index-beta .beta-overlay-main-content .text-cards-container {
-  display: grid !important;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 10px !important;
-}
-
-body.index-beta .beta-overlay-main-content .text-card-big {
-  border-radius: 8px !important;
-  box-shadow: none !important;
-  min-height: 120px !important;
 }
 
 body.index-beta .beta-panel-header {
@@ -3784,15 +2531,6 @@ body.index-beta .archive-separator::after {
   height: 1px;
   flex: 1 1 auto;
   background: #e5e7eb;
-}
-
-body.index-beta .right-overlay {
-  border-left: 1px solid #e5e7eb;
-  box-shadow: -10px 0 30px rgba(17, 24, 39, 0.12);
-}
-
-body.index-beta .overlay-header {
-  border-bottom: 1px solid #e5e7eb !important;
 }
 
 
@@ -4030,11 +2768,6 @@ body.index-beta .overlay-header {
 
   body.index-beta .beta-overlay-main-content .msg-note-html:hover {
     box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15) !important;
-    transform: none !important;
-  }
-
-  body.index-beta .beta-overlay-main-content .text-card-big:hover {
-    box-shadow: none !important;
     transform: none !important;
   }
 

@@ -37,12 +37,10 @@ const quietLogPrefixes = [
 console.log = (...args) => {
   const first = String(args[0] || '');
   const isNoisyHtmlUpdate = first.includes(' Updated ') && first.includes(' with version ');
-  const isNoisyOptionalInfo = first.includes('Event info file not found');
   const isNoisySavedVersion = first.includes('Saved version to:');
   const isNoisyMissingHtml = first.includes('Skipping ') || first.includes('No versioned script tags found');
   const isNoisy = quietLogPrefixes.some(prefix => first.startsWith(prefix)) ||
     isNoisyHtmlUpdate ||
-    isNoisyOptionalInfo ||
     isNoisySavedVersion ||
     isNoisyMissingHtml;
 
@@ -732,17 +730,6 @@ function main() {
   // Get regular courses
   const courses = getAllCourses();
 
-  // Load event info from INFO.md - try to read it directly
-  let eventInfo = '';
-  const eventInfoPath = path.join(ELEMENTS_DIR, 'Актуални събития Event center', 'INFO.md');
-  try {
-    eventInfo = fs.readFileSync(eventInfoPath, 'utf8');
-    console.log('✓ Loaded event info from:', eventInfoPath);
-    console.log('  Event info length:', eventInfo.length, 'characters');
-  } catch (error) {
-    console.log('ℹ Event info file not found or could not be read');
-  }
-
   // Generate build timestamp and version (YYYYMMDD + time-based hash for uniqueness)
   const buildDate = new Date();
   const pad = n => n.toString().padStart(2, '0');
@@ -767,7 +754,6 @@ function main() {
   // Write JS file with version at the top
   const js = 'window.coursesVersion = "' + version + '";\n' +
              'window.courses = ' + JSON.stringify(courses, null, 2) + ';\n' +
-             'window.eventInfo = ' + JSON.stringify(eventInfo) + ';\n' +
              'window.buildTimestamp = "' + buildTimestamp + '";\n';
   fs.writeFileSync(OUTPUT_FILE, js, 'utf8');
   console.log(`Generated courses.generated.js (${Math.round(Buffer.byteLength(js, 'utf8') / 1024)} KB)`);
