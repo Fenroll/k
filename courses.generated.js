@@ -1,4 +1,4 @@
-window.coursesVersion = "202605051908";
+window.coursesVersion = "20260505190g";
 window.courses = [
   {
     "id": "000001",
