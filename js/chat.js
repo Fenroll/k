@@ -1451,7 +1451,146 @@ class ChatUIManager {
     }
   }
 
+  clearChatIconNotifications() {
+    const icon = document.querySelector('.chat-icon');
+    const badgeEl = document.querySelector('.chat-badge-count');
+
+    this.unreadCount = 0;
+    this.unreadHasMention = false;
+
+    if (icon) {
+      icon.classList.remove('has-notification', 'has-mention');
+    }
+    if (badgeEl) {
+      badgeEl.textContent = '0';
+      badgeEl.style.display = 'none';
+    }
+  }
+
+  removeChatNotifications() {
+    if (this.chatFirebase && this.chatFirebase.messages && this.chatFirebase.messages.length > 0) {
+      this.markAsRead();
+    }
+    this.clearChatIconNotifications();
+  }
+
+  stopChatNotifications() {
+    this.notificationsDisabled = !this.notificationsDisabled;
+    localStorage.setItem(`notificationsDisabled_${this.documentId}`, this.notificationsDisabled);
+    this.updateNotificationButtonColor();
+    this.clearChatIconNotifications();
+    this.updateChatIconMenuState();
+  }
+
+  hideChatWidget() {
+    const chatPanel = this.container.querySelector('.chat-panel');
+
+    this.isOpen = false;
+    this.container.classList.remove('chat-open');
+    this.container.classList.add('chat-hidden');
+    if (chatPanel) {
+      chatPanel.classList.remove('open');
+    }
+    this.dismissChatIconMenu();
+  }
+
+  dismissChatIconMenu() {
+    const menu = this.container.querySelector('#chat-icon-menu');
+    if (menu) {
+      menu.hidden = true;
+      menu.classList.remove('is-open');
+    }
+  }
+
+  showChatIconMenu(event) {
+    const menu = this.container.querySelector('#chat-icon-menu');
+    if (!menu) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.updateChatIconMenuState();
+    menu.hidden = false;
+    menu.classList.add('is-open');
+  }
+
+  updateChatIconMenuState() {
+    const menu = this.container.querySelector('#chat-icon-menu');
+    if (!menu) return;
+
+    const toggleBtn = menu.querySelector('[data-chat-menu-action="toggle-notifications"]');
+    if (!toggleBtn) return;
+
+    const label = toggleBtn.querySelector('.chat-icon-menu-label');
+    const icon = toggleBtn.querySelector('.chat-icon-menu-icon');
+
+    toggleBtn.setAttribute('aria-pressed', String(this.notificationsDisabled));
+    toggleBtn.classList.toggle('is-active', this.notificationsDisabled);
+    if (label) {
+      label.textContent = this.notificationsDisabled ? 'Resume notifications' : 'Stop notifications';
+    }
+    if (icon) {
+      icon.innerHTML = this.notificationsDisabled
+        ? '<img src="svg/chat/icon-notifications-disabled.svg" alt="">'
+        : '<img src="svg/chat/icon-notifications-enabled.svg" alt="">';
+    }
+  }
+
+  setupChatIconContextMenu() {
+    const chatIcon = this.container.querySelector('#chat-toggle');
+    const menu = this.container.querySelector('#chat-icon-menu');
+    if (!chatIcon || !menu || menu.dataset.bound === 'true') return;
+
+    menu.dataset.bound = 'true';
+
+    chatIcon.addEventListener('contextmenu', (event) => this.showChatIconMenu(event));
+
+    const clearNotificationsBtn = menu.querySelector('[data-chat-menu-action="clear-notifications"]');
+    const stopNotificationsBtn = menu.querySelector('[data-chat-menu-action="toggle-notifications"]');
+    const hideChatBtn = menu.querySelector('[data-chat-menu-action="hide-chat"]');
+
+    if (clearNotificationsBtn) {
+      clearNotificationsBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.removeChatNotifications();
+        this.dismissChatIconMenu();
+      });
+    }
+
+    if (stopNotificationsBtn) {
+      stopNotificationsBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.stopChatNotifications();
+        this.dismissChatIconMenu();
+      });
+    }
+
+    if (hideChatBtn) {
+      hideChatBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        this.hideChatWidget();
+      });
+    }
+
+    document.addEventListener('click', (event) => {
+      if (!menu.contains(event.target)) {
+        this.dismissChatIconMenu();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        this.dismissChatIconMenu();
+      }
+    });
+  }
+
   attachEventListeners() {
+    this.setupChatIconContextMenu();
+
     const sendBtn = this.container.querySelector('.chat-send-btn');
     const input = this.container.querySelector('.chat-input'); // This is now a textarea
 
@@ -4679,6 +4818,26 @@ class ChatUIManager {
     <span class="chat-badge-count" style="display: none;">0</span>
     <span class="chat-notification-pulse"></span>
   </button>
+  <div class="chat-icon-menu" id="chat-icon-menu" role="menu" aria-label="Chat options" hidden>
+    <button type="button" role="menuitem" data-chat-menu-action="clear-notifications">
+      <span class="chat-icon-menu-icon" aria-hidden="true">
+        <img src="svg/chat/icon-eraser.svg" alt="">
+      </span>
+      <span class="chat-icon-menu-label">Clear notifications</span>
+    </button>
+    <button type="button" role="menuitem" data-chat-menu-action="toggle-notifications" aria-pressed="false">
+      <span class="chat-icon-menu-icon" aria-hidden="true">
+        <img src="svg/chat/icon-notifications-enabled.svg" alt="">
+      </span>
+      <span class="chat-icon-menu-label">Stop notifications</span>
+    </button>
+    <button type="button" role="menuitem" data-chat-menu-action="hide-chat">
+      <span class="chat-icon-menu-icon" aria-hidden="true">
+        <img src="svg/chat/icon-eye-slash.svg" alt="">
+      </span>
+      <span class="chat-icon-menu-label">Hide chat</span>
+    </button>
+  </div>
 
   <div class="chat-panel">
     <div class="chat-header">
@@ -4874,6 +5033,9 @@ class ChatUIManager {
   z-index: 5000;
   font-family: 'Open Sans', Arial, sans-serif;
 }
+.chat-widget.chat-hidden {
+  display: none !important;
+}
 .chat-icon {
   width: 56px;
   height: 56px;
@@ -4893,6 +5055,86 @@ class ChatUIManager {
   background: #344e41;
   box-shadow: 0 6px 16px rgba(93, 64, 55, 0.5);
   transform: scale(1.1);
+}
+.chat-icon-menu {
+  position: absolute;
+  right: 0;
+  bottom: 66px;
+  min-width: 218px;
+  padding: 7px;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(88, 129, 87, 0.24);
+  border-radius: 10px;
+  box-shadow: 0 18px 40px rgba(15, 23, 42, 0.22), 0 2px 8px rgba(15, 23, 42, 0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 2;
+  backdrop-filter: blur(12px);
+}
+.chat-icon-menu[hidden] {
+  display: none;
+}
+.chat-icon-menu button {
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #1f2937;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13.5px;
+  font-weight: 600;
+  line-height: 1.25;
+  padding: 9px 10px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.16s ease, color 0.16s ease, transform 0.16s ease;
+}
+.chat-icon-menu button:hover,
+.chat-icon-menu button:focus-visible {
+  background: #eef4e8;
+  color: #344e41;
+  outline: none;
+}
+.chat-icon-menu button:active {
+  transform: scale(0.98);
+}
+.chat-icon-menu-icon {
+  width: 18px;
+  height: 18px;
+  color: #588157;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 18px;
+}
+.chat-icon-menu button.is-active .chat-icon-menu-icon {
+  color: #b45309;
+}
+.chat-icon-menu-icon svg,
+.chat-icon-menu-icon img {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+.chat-icon-menu-icon svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chat-icon-menu-icon img {
+  filter: invert(45%) sepia(12%) saturate(1194%) hue-rotate(70deg) brightness(92%) contrast(87%);
+}
+.chat-icon-menu [data-chat-menu-action="clear-notifications"] .chat-icon-menu-icon img {
+  filter: brightness(0) saturate(100%) invert(46%) sepia(16%) saturate(1067%) hue-rotate(69deg) brightness(95%) contrast(89%);
+}
+.chat-icon-menu button.is-active .chat-icon-menu-icon img {
+  filter: invert(38%) sepia(87%) saturate(795%) hue-rotate(2deg) brightness(88%) contrast(91%);
 }
 .chat-badge-count {
   position: absolute;

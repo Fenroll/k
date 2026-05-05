@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605051489"></script>
+  <script src="js/auth-guard.js?v=2026050517og"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -159,7 +159,7 @@
   <link rel="icon" href="favicon.svg?v=202603151sxu" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605051489">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050517og">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605015kp">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
@@ -1124,7 +1124,7 @@
   .base-footer a:hover { text-decoration: underline; color: #fff; }
     .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
   </style>
-  <script src="courses.generated.js?v=202605051489"></script>
+  <script src="courses.generated.js?v=2026050517og"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 
 <!-- Subtle UI tweaks -->
@@ -2032,16 +2032,17 @@ document.addEventListener('DOMContentLoaded', function() {
   color: #3f6f3e;
   font-size: 1.08rem;
   font-weight: 700;
-  width: 20px;
-  height: 20px;
-  min-width: 20px;
+  width: 24px;
+  height: 24px;
+  min-width: 24px;
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
-  background: linear-gradient(180deg, #e8f1e6 0%, #d6e8d2 100%);
-  box-shadow: 0 1px 2px rgba(37, 79, 36, 0.2);
+  border-radius: 8px;
+  background: rgba(88, 129, 87, 0.10);
+  border: 1px solid rgba(88, 129, 87, 0.18);
+  box-shadow: 0 1px 2px rgba(17, 24, 39, 0.05);
   transform-origin: center;
   transition: transform 0.2s ease, color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
 }
@@ -2088,8 +2089,8 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      CHAT SYSTEM - Complete (Firebase REST + UI)
      ============================================ -->
 
-<script src="js/user-identity.js?v=202605051489"></script>
-<script src="js/chat.js?v=202605051489"></script>
+<script src="js/user-identity.js?v=2026050517og"></script>
+<script src="js/chat.js?v=2026050517og"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -2499,7 +2500,6 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       { pathExact: 'files/Вътрешни болести 1 ч/Кардиология/Англоезични материали/The ECG Made Easy.url', icon: 'svg/icon-book.svg' },
       { pathExact: 'files/Blackboard Help/Много Тежки Учебни Материали/link.txt#4', icon: 'https://www.google.com/s2/favicons?domain=doctordle.org&sz=64' }
     ];
-
     //custom h3 order
     // Lower number = earlier in the list. Unlisted section names are sorted naturally after listed ones.
     window.customH3SectionOrder = {
@@ -2568,8 +2568,6 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
             primary: 'https://coursebook.lol/favicon.ico',
             fallbacks: [
               'https://coursebook.lol/favicon.svg',
-              `https://icon.horse/icon/${hostname}`,
-              `https://api.faviconkit.com/${hostname}/64`,
               `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
               `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
             ]
@@ -2598,9 +2596,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
               docsFallback,
               'https://www.google.com/s2/favicons?domain=docs.google.com&sz=64',
               'https://docs.google.com/favicon.ico',
-              `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
-              `https://icon.horse/icon/${hostname}`,
-              `https://api.faviconkit.com/${hostname}/64`
+              `https://icons.duckduckgo.com/ip3/${hostname}.ico`
             ]
           };
         }
@@ -2613,23 +2609,17 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
               'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_folder_x16.png',
               `https://www.google.com/s2/favicons?domain=drive.google.com&sz=64`,
               `https://${hostname}/favicon.ico`,
-              `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
-              `https://icon.horse/icon/${hostname}`,
-              `https://api.faviconkit.com/${hostname}/64`
+              `https://icons.duckduckgo.com/ip3/${hostname}.ico`
             ]
           };
         }
 
-        // FaviconKit can return an empty icon for some Google subdomains
-        // (e.g. notebooklm.google.com), so prefer Google's own endpoint first.
         if (hostname === 'google.com' || hostname.endsWith('.google.com')) {
           return {
             primary: `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`,
             fallbacks: [
               `https://${hostname}/favicon.ico`,
-              `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
-              `https://icon.horse/icon/${hostname}`,
-              `https://api.faviconkit.com/${hostname}/64`
+              `https://icons.duckduckgo.com/ip3/${hostname}.ico`
             ]
           };
         }
@@ -2638,8 +2628,6 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
         return {
           primary: `https://${hostname}/favicon.ico`,
           fallbacks: [
-            `https://icon.horse/icon/${hostname}`,
-            `https://api.faviconkit.com/${hostname}/64`,
             `https://icons.duckduckgo.com/ip3/${hostname}.ico`,
             `https://www.google.com/s2/favicons?domain=${hostname}&sz=64`
           ]
@@ -2647,6 +2635,48 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       } catch (e) {
         return { primary: '', fallbacks: [] };
       }
+    }
+
+    function loadLinkFavicon(img) {
+      if (!img || img.dataset.faviconStarted === 'true') return;
+
+      const sources = (img.dataset.faviconSources || '').split('|').filter(Boolean);
+      if (sources.length === 0) return;
+
+      img.dataset.faviconStarted = 'true';
+
+      let resolved = false;
+      const maxParallelLoads = 4;
+
+      sources.slice(0, maxParallelLoads).forEach((candidateUrl) => {
+        const probe = new Image();
+        probe.onload = () => {
+          if (resolved) return;
+          resolved = true;
+          img.src = candidateUrl;
+        };
+        probe.onerror = () => {};
+        probe.src = candidateUrl;
+      });
+    }
+
+    window.loadLinkFavicon = loadLinkFavicon;
+
+    function buildLinkFaviconIcon(customIconUrl, autoFavicon, iconFilterStyle) {
+      const fallbackIcon = 'svg/icon-www.svg';
+
+      if (customIconUrl) {
+        const safeCustomIconUrl = escapeHtmlAttr(customIconUrl);
+        return `<img src="${safeCustomIconUrl}" width="18" height="18" style="flex-shrink:0; border-radius:4px; object-fit:contain; ${iconFilterStyle}" onerror="this.onerror=null; this.src='${fallbackIcon}';" />`;
+      }
+
+      const faviconSources = [
+        autoFavicon && autoFavicon.primary,
+        ...(Array.isArray(autoFavicon && autoFavicon.fallbacks) ? autoFavicon.fallbacks : [])
+      ].filter(Boolean);
+      const safeFaviconSources = escapeHtmlAttr(faviconSources.join('|'));
+
+      return `<img src="${fallbackIcon}" data-favicon-sources="${safeFaviconSources}" data-favicon-started="false" width="18" height="18" style="flex-shrink:0; border-radius:4px; object-fit:contain;" onload="loadLinkFavicon(this)" />`;
     }
 
     function canShowFileByRequires(file) {
@@ -2847,17 +2877,11 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
             // Custom icon by exact file path. If missing, try automatic favicon providers.
             const customIconUrl = getCustomLinkIconForFile(file);
             const autoFavicon = customIconUrl ? { primary: '', fallbacks: [] } : getAutoFaviconUrlsForFile(file);
-            const faviconUrl = customIconUrl || autoFavicon.primary;
             const iconFilterStyle = (customIconUrl && !/^https?:\/\//i.test(customIconUrl))
               ? 'filter: brightness(0) saturate(100%) invert(46%) sepia(16%) saturate(1067%) hue-rotate(69deg) brightness(95%) contrast(89%);'
               : '';
 
-            const safeFaviconUrl = escapeHtmlAttr(faviconUrl);
-            const fallbackSources = Array.isArray(autoFavicon.fallbacks) ? autoFavicon.fallbacks.filter(Boolean) : [];
-            const safeFallbackSources = escapeHtmlAttr(fallbackSources.join('|'));
-            fileIcon = faviconUrl
-              ? `<img src="${safeFaviconUrl}" data-fallback-sources="${safeFallbackSources}" data-fallback-index="0" width="18" height="18" style="flex-shrink:0; border-radius:4px; object-fit:contain; ${iconFilterStyle}" onerror="const sources=(this.dataset.fallbackSources||'').split('|').filter(Boolean); const idx=Number(this.dataset.fallbackIndex||'0'); if(idx < sources.length){ this.dataset.fallbackIndex=String(idx+1); this.src=sources[idx]; return; } this.style.display='none'; if(this.nextElementSibling){ this.nextElementSibling.style.display='inline'; }" /><svg width="18" height="18" viewBox="0 0 24 24" fill="#3b82f6" style="flex-shrink:0;display:none;"><path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>`
-              : `<svg width="18" height="18" viewBox="0 0 24 24" fill="#3b82f6" style="flex-shrink:0;"><path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z"/></svg>`;
+            fileIcon = buildLinkFaviconIcon(customIconUrl, autoFavicon, iconFilterStyle);
           }
 
           sectionContent += `<li style="margin-bottom:6px; font-size:0.95em; display:flex; align-items:center; gap:8px; min-width:0;">`;
@@ -3388,7 +3412,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       <script src="html-priority.js"></script>
       <script src="js/presence.js"></script>
       <script src="js/version-check.js?v=202605021hcw"></script>
-      <script src="js/mobile-nav.js?v=202605051489"></script>
+      <script src="js/mobile-nav.js?v=2026050517og"></script>
 <!-- Privacy Modal -->
 <div id="privacyModal" class="text-modal" style="display: none;">
   <div class="text-modal-content" style="max-width: 500px;">
@@ -3643,14 +3667,14 @@ body.index-beta .beta-overlay-main-content section h3[style] {
 body.index-beta .beta-overlay-main-content .folder-toggle-row {
   min-height: 24px;
   padding: 2px 6px;
-  border-radius: 8px;
-  background: #f9fafb;
-  border: 1px solid #eef0f3;
+  border-radius: 0;
+  background: transparent;
+  border: 0;
   box-sizing: border-box;
 }
 
 body.index-beta .beta-overlay-main-content .folder-toggle-row:hover {
-  background: #f3f4f6;
+  background: transparent;
 }
 
 body.index-beta .beta-overlay-main-content .folder-toggle-row h4 {
@@ -3969,6 +3993,12 @@ body.index-beta .overlay-header {
     overflow: visible !important;
   }
 
+  body.index-beta.beta-showing-course .main-content {
+    background:
+      radial-gradient(circle at 50% 0%, rgba(88, 129, 87, 0.10) 0, rgba(88, 129, 87, 0.045) 36%, rgba(255, 255, 255, 0) 68%),
+      linear-gradient(180deg, #fbfdfb 0%, #ffffff 58%) !important;
+  }
+
   body.index-beta .main-content > .main-header {
     padding-left: 20px !important;
   }
@@ -4041,12 +4071,6 @@ body.index-beta .overlay-header {
     outline: none !important;
   }
 
-  @media (hover: hover) and (pointer: fine) {
-  body.index-beta .element-card:hover {
-    background: #f3f4f6 !important;
-  }
-  }
-
   body.index-beta .element-card.active {
     min-height: 58px !important;
     padding: 16px 16px !important;
@@ -4086,6 +4110,7 @@ body.index-beta .overlay-header {
     position: relative;
     padding-right: 24px;
     padding-left: 4px;
+    border-bottom: 0 !important;
   }
 
   body.index-beta .beta-mobile-back {
@@ -4093,16 +4118,20 @@ body.index-beta .overlay-header {
     align-items: center;
     justify-content: center;
     position: absolute;
-    top: 2px;
+    top: 0;
     right: 0;
     left: auto;
-    width: 22px;
-    height: 22px;
-    min-height: 22px;
-    color: #111827;
-    font-size: 22px;
+    width: 32px;
+    height: 32px;
+    min-height: 32px;
+    border-radius: 10px;
+    background: rgba(88, 129, 87, 0.10);
+    border: 1px solid rgba(88, 129, 87, 0.18);
+    color: #1f2937;
+    font-size: 24px;
     line-height: 1;
     font-weight: 400;
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.05);
   }
 
   body.index-beta .beta-editor-title,
@@ -4135,12 +4164,58 @@ body.index-beta .overlay-header {
     overflow: visible;
   }
 
+  body.index-beta .beta-course-content,
+  body.index-beta .beta-overlay-main-content {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body.index-beta .beta-overlay-main-content .folder-toggle-row:hover {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.index-beta .beta-overlay-main-content li:hover {
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+
+  body.index-beta .beta-overlay-main-content li a:hover {
+    color: #588157 !important;
+    text-decoration: none !important;
+  }
+
+  body.index-beta .beta-overlay-main-content .msg-note:hover {
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.15) !important;
+    transform: none !important;
+  }
+
+  body.index-beta .beta-overlay-main-content .msg-note-html:hover {
+    box-shadow: 0 2px 8px rgba(124, 58, 237, 0.15) !important;
+    transform: none !important;
+  }
+
+  body.index-beta .beta-overlay-main-content .text-card-big:hover {
+    box-shadow: none !important;
+    transform: none !important;
+  }
+
   body.index-beta .beta-overlay-main-content section h3 {
     font-size: 18px !important;
+    padding-bottom: 2px;
   }
 
   body.index-beta .beta-overlay-main-content .folder-toggle-row h4 {
     font-size: 16px !important;
+  }
+
+  body.index-beta .beta-overlay-main-content .folder-toggle-arrow {
+    width: 24px;
+    height: 24px;
+    min-width: 24px;
+    border-radius: 8px;
+    background: rgba(88, 129, 87, 0.10) !important;
+    border: 1px solid rgba(88, 129, 87, 0.18);
+    box-shadow: 0 1px 2px rgba(17, 24, 39, 0.05);
   }
 
   body.index-beta .beta-overlay-main-content li {
@@ -4156,9 +4231,48 @@ body.index-beta .overlay-header {
   }
 
   body.index-beta .beta-course-content {
-    padding: 10px;
+    min-height: calc(100dvh - 190px);
+    padding: 8px 0 0;
     background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
     overflow: visible;
+  }
+
+  body.index-beta .beta-overlay-main-content {
+    gap: 8px;
+  }
+
+  body.index-beta .beta-overlay-main-content section {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    padding: 0 4px 0 2px !important;
+  }
+
+  body.index-beta .beta-overlay-main-content section + section {
+    margin-top: 14px !important;
+  }
+
+  body.index-beta .beta-overlay-main-content section:has(+ section) {
+    border-bottom-left-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+  }
+
+  body.index-beta .beta-overlay-main-content .folder-toggle-row,
+  body.index-beta .beta-overlay-main-content .folder-toggle-row[style] {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+
+  body.index-beta .beta-overlay-main-content li,
+  body.index-beta .beta-overlay-main-content li[style] {
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
 
   body.index-beta .main-header .page-title,

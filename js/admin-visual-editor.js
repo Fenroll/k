@@ -28,6 +28,113 @@
         let currentWeekIndex = 0;
         let scheduleByWeek = [];
         let viewMode = 'schedule'; // 'schedule', 'template-winter', 'template-summer'
+        const timePattern = /^([01]\d|2[0-3]):[0-5]\d$/;
+
+        function getTimeMinutes(value) {
+            const [hours, minutes] = String(value || '').split(':').map(Number);
+            return hours * 60 + minutes;
+        }
+
+        function setVisualEditorError(elementId, message) {
+            const errorEl = document.getElementById(elementId);
+            if (!errorEl) return;
+            const messageEl = errorEl.querySelector('.ve-validation-message');
+            if (messageEl) messageEl.textContent = message;
+            errorEl.classList.add('is-visible');
+        }
+
+        function clearVisualEditorError(elementId) {
+            const errorEl = document.getElementById(elementId);
+            if (errorEl) errorEl.classList.remove('is-visible');
+        }
+
+        function markInvalidTimeInputs(ids = []) {
+            ['ve-start', 've-end'].forEach((id) => {
+                const el = document.getElementById(id);
+                if (el) el.classList.toggle('ve-input-invalid', ids.includes(id));
+            });
+        }
+
+        function validateEventTimes(startTime, endTime) {
+            const start = String(startTime || '').trim();
+            const end = String(endTime || '').trim();
+
+            if (!timePattern.test(start)) {
+                return {
+                    ok: false,
+                    fields: ['ve-start'],
+                    message: 'Start time must use HH:MM, for example 08:30.'
+                };
+            }
+
+            if (!timePattern.test(end)) {
+                return {
+                    ok: false,
+                    fields: ['ve-end'],
+                    message: 'End time must use HH:MM, for example 10:15.'
+                };
+            }
+
+            if (getTimeMinutes(end) <= getTimeMinutes(start)) {
+                return {
+                    ok: false,
+                    fields: ['ve-start', 've-end'],
+                    message: 'End time must be later than start time.'
+                };
+            }
+
+            return { ok: true, fields: [], message: '' };
+        }
+
+        function describeEvent(entry, source) {
+            const parts = [];
+            if (source) parts.push(source);
+            if (entry && entry.subject) parts.push(entry.subject);
+            if (entry && entry.day) parts.push(entry.day);
+            return parts.join(' - ') || 'Schedule item';
+        }
+
+        function findInvalidScheduleTime(data) {
+            if (!data || typeof data !== 'object') return null;
+            const collections = [];
+
+            if (Array.isArray(data.template)) {
+                collections.push({ source: 'Legacy template', items: data.template });
+            }
+
+            if (data.templates && typeof data.templates === 'object') {
+                Object.keys(data.templates).forEach((key) => {
+                    if (Array.isArray(data.templates[key])) {
+                        collections.push({ source: `${key} template`, items: data.templates[key] });
+                    }
+                });
+            }
+
+            if (data.overrides && typeof data.overrides === 'object') {
+                Object.keys(data.overrides).forEach((week) => {
+                    if (Array.isArray(data.overrides[week])) {
+                        collections.push({ source: `Week ${week} override`, items: data.overrides[week] });
+                    }
+                });
+            }
+
+            for (const collection of collections) {
+                for (const entry of collection.items) {
+                    if (!entry || entry.remove || entry.removeDay || (entry.changes && entry.changes.removed === true)) continue;
+                    const candidate = entry.changes ? { ...entry, ...entry.changes } : entry;
+                    if (!candidate.startTime && !candidate.endTime) continue;
+                    const result = validateEventTimes(candidate.startTime, candidate.endTime);
+                    if (!result.ok) {
+                        return {
+                            message: `${describeEvent(candidate, collection.source)}: ${result.message}`,
+                            entry: candidate
+                        };
+                    }
+                }
+            }
+
+            return null;
+        }
 
         function openVisualEditorPanel(options = {}) {
             const { silentNoData = false } = options;
@@ -101,6 +208,8 @@
         // Save Visual Editor data to Firebase using the existing JSON save flow.
         if (visualSaveBtn) {
             visualSaveBtn.addEventListener('click', () => {
+                clearVisualEditorError('ve-save-error');
+
                 if (!currentScheduleData) {
                     alert('No schedule data loaded to save.');
                     return;
@@ -108,6 +217,12 @@
 
                 if (!scheduleJsonEditor) {
                     alert('Schedule JSON editor is missing. Cannot save.');
+                    return;
+                }
+
+                const invalidTime = findInvalidScheduleTime(currentScheduleData);
+                if (invalidTime) {
+                    setVisualEditorError('ve-save-error', invalidTime.message);
                     return;
                 }
 
@@ -673,7 +788,9 @@
             document.getElementById('ve-room-input').value = roomVal;
             
             document.getElementById('ve-info').value = event.additionalInfo || '';
-            
+
+            clearVisualEditorError('ve-event-error');
+            markInvalidTimeInputs();
             deleteBtn.style.display = 'block';
             modal.style.display = 'flex';
         }
@@ -686,13 +803,26 @@
             modalForm.reset();
             document.getElementById('ve-type').value = 'Лекция';
             
+            clearVisualEditorError('ve-event-error');
+            markInvalidTimeInputs();
             deleteBtn.style.display = 'none';
             modal.style.display = 'flex';
         }
 
         window.closeVeModal = () => {
+            clearVisualEditorError('ve-event-error');
+            markInvalidTimeInputs();
             modal.style.display = 'none';
         };
+
+        ['ve-start', 've-end'].forEach((id) => {
+            const input = document.getElementById(id);
+            if (!input) return;
+            input.addEventListener('input', () => {
+                clearVisualEditorError('ve-event-error');
+                markInvalidTimeInputs();
+            });
+        });
 
         // Handle Save Event
         document.getElementById('ve-save-btn').addEventListener('click', () => {
@@ -710,14 +840,27 @@
                 subject: getVal('ve-subject'),
                 fullName: getVal('ve-fullname'),
                 type: getVal('ve-type'),
-                startTime: getVal('ve-start'),
-                endTime: getVal('ve-end'),
+                startTime: getVal('ve-start').trim(),
+                endTime: getVal('ve-end').trim(),
                 teacher: getVal('ve-teacher'),
                 building: getVal('ve-building-input'),
                 room: getVal('ve-room-input'),
                 floor: undefined, // Clear legacy floor
                 additionalInfo: getVal('ve-info')
             };
+
+            const timeValidation = validateEventTimes(newEventData.startTime, newEventData.endTime);
+            if (!timeValidation.ok) {
+                setVisualEditorError('ve-event-error', timeValidation.message);
+                markInvalidTimeInputs(timeValidation.fields);
+                const firstInvalidId = timeValidation.fields[0];
+                const firstInvalidEl = firstInvalidId ? document.getElementById(firstInvalidId) : null;
+                if (firstInvalidEl) firstInvalidEl.focus();
+                return;
+            }
+
+            clearVisualEditorError('ve-event-error');
+            markInvalidTimeInputs();
             
             // Clean up undefined
             delete newEventData.floor;

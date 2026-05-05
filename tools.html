@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605051489"></script>
+  <script src="js/auth-guard.js?v=2026050517og"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -242,7 +242,7 @@
     .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #588157, #7ab87a); width: 0%; transition: width 0.3s ease; border-radius: 99px; }
 
     /* ── Uploads modern row list ── */
-    .upl-list-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden; background: #fff; }
+    .upl-list-wrap { border: 1px solid #e5e7eb; border-radius: 12px; overflow: visible; background: #fff; position: relative; }
     .upl-thead {
       display: grid;
       grid-template-columns: 2fr minmax(64px,0.55fr) minmax(120px,0.9fr) minmax(110px,0.9fr) 168px;
@@ -264,9 +264,11 @@
       transition: background 0.12s;
       font-size: 13.5px;
       color: #1f2937;
+      position: relative;
     }
     .upl-row:last-child { border-bottom: none; }
     .upl-row:hover { background: #f9fafb; }
+    .upl-row:has(.upl-file-name.is-name-open) { z-index: 20; }
     .upl-cell { padding: 0 6px; min-width: 0; }
     .upl-cell:first-child { padding-left: 0; }
     .upl-cell:last-child { padding-right: 0; }
@@ -288,7 +290,11 @@
       white-space: normal;
       word-break: break-word;
       box-shadow: 0 8px 18px rgba(0,0,0,0.18);
-      z-index: 5;
+      z-index: 30;
+    }
+    #toolsUploadsTableBody .upl-row:first-child .upl-file-name::after {
+      top: calc(100% + 6px);
+      bottom: auto;
     }
     .upl-file-name.is-name-open::after { display: block; }
     .upl-actions { display: flex; gap: 4px; align-items: center; justify-content: flex-end; flex-wrap: nowrap; }
@@ -495,6 +501,7 @@
 
       #toolsUploadsTableWrap {
         overflow-x: auto !important;
+        overflow-y: visible !important;
       }
 
       #toolsUploadsTable {
@@ -536,7 +543,7 @@
       }
 
       #toolsUploadsTableWrap {
-        overflow-x: hidden !important;
+        overflow: visible !important;
       }
 
       #toolsUploadsTable {
@@ -553,7 +560,7 @@
     }
 
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605051489">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050517og">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
   <script src="js/version-manager.js?v=202603101mce"></script>
@@ -1310,7 +1317,7 @@
     updateAdminButtonVisibility();
   </script>
 
-  <script src="js/user-identity.js?v=202605051489"></script>
+  <script src="js/user-identity.js?v=2026050517og"></script>
   <!-- Mobile menu overlay -->
   <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
@@ -1318,7 +1325,7 @@
        FIREBASE & CHAT WIDGET
        ============================================ -->
   <!-- Initialize Chat Widget -->
-    <script src="js/chat.js?v=202605051489"></script>
+    <script src="js/chat.js?v=2026050517og"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
@@ -3062,6 +3069,6 @@
     }
   }
 </script>
-<script src="js/mobile-nav.js?v=202605051489"></script>
+<script src="js/mobile-nav.js?v=2026050517og"></script>
 </body>
 </html>

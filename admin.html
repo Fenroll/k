@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=202605051489"></script>
+    <script src="js/auth-guard.js?v=2026050517og"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=202605051489"></script>
+    <script src="js/user-identity.js?v=2026050517og"></script>
     <script src="js/admin-guard.js?v=202602171mhr"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202605051489">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=2026050517og">
     <title>Admin Panel</title>
     <style>
         :root {
@@ -401,6 +401,40 @@
             opacity: 0.9;
             white-space: nowrap;
             color: inherit;
+        }
+
+        .ve-validation-error {
+            display: none;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 0 0 16px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid rgba(248, 113, 113, 0.45);
+            background: rgba(127, 29, 29, 0.32);
+            color: #fee2e2;
+            font-size: 13px;
+            line-height: 1.45;
+            box-shadow: 0 8px 22px rgba(0, 0, 0, 0.16);
+        }
+        .ve-validation-error.is-visible {
+            display: flex;
+        }
+        .ve-validation-error svg {
+            width: 18px;
+            height: 18px;
+            flex: 0 0 18px;
+            margin-top: 1px;
+            color: #fca5a5;
+        }
+        .ve-validation-error strong {
+            display: block;
+            margin-bottom: 2px;
+            color: #fff1f2;
+        }
+        .ve-input-invalid {
+            border-color: #f87171 !important;
+            box-shadow: 0 0 0 2px rgba(248, 113, 113, 0.18);
         }
         
         .add-event-btn-cell {
@@ -1040,6 +1074,17 @@
         </div>
 
         <div class="ve-table-wrap">
+            <div id="ve-save-error" class="ve-validation-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <div>
+                    <strong>Fix the time format before saving.</strong>
+                    <span class="ve-validation-message">Use HH:MM, for example 08:30.</span>
+                </div>
+            </div>
             <table class="schedule-table" id="ve-schedule-table">
                 <thead>
                     <tr>
@@ -1074,6 +1119,17 @@
             <div class="ve-modal-header">
                 <h3 id="ve-modal-title">Edit Event</h3>
                 <span style="cursor: pointer; font-size: 24px;" onclick="closeVeModal()">×</span>
+            </div>
+            <div id="ve-event-error" class="ve-validation-error" role="alert" aria-live="polite">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <circle cx="12" cy="12" r="10"></circle>
+                    <line x1="12" y1="8" x2="12" y2="12"></line>
+                    <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                </svg>
+                <div>
+                    <strong>Fix the time format before saving.</strong>
+                    <span class="ve-validation-message">Use HH:MM, for example 08:30.</span>
+                </div>
             </div>
             <form id="ve-event-form">
                 <div class="form-group">
@@ -1303,10 +1359,10 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=202605051489"></script>
+    <script src="courses.generated.js?v=2026050517og"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=20260429domain1"></script>
-    <script src="js/admin-visual-editor.js?v=20260502ve3"></script>
+    <script src="js/admin-visual-editor.js?v=20260505time1"></script>
   </main>
 </body>
 </html>
