@@ -1,4 +1,4 @@
-window.coursesVersion = "2026050519uz";
+window.coursesVersion = "2026050519xj";
 window.courses = [
   {
     "id": "000001",
@@ -406,6 +406,17 @@ window.courses = [
           {
             "name": "3-msg-Клинични задачи.html",
             "path": "files/Клинична Патология/Изпит/3-msg-Клинични задачи.html",
+            "type": "html"
+          }
+        ]
+      },
+      {
+        "name": "Колоквиум 1 - Сърдечно-съдова система",
+        "files": [],
+        "msgNotes": [
+          {
+            "name": "1-msg-Сърдечно-съдова система.html",
+            "path": "files/Клинична Патология/Колоквиум 1 - Сърдечно-съдова система/1-msg-Сърдечно-съдова система.html",
             "type": "html"
           }
         ]
@@ -1230,4 +1241,4 @@ window.courses = [
   }
 ];
 window.eventInfo = "";
-window.buildTimestamp = "05.05.2026 16:30";
+window.buildTimestamp = "05.05.2026 16:32";
