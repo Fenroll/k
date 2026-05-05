@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026050518ao"></script>
+  <script src="js/auth-guard.js?v=202605051908"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -159,7 +159,7 @@
   <link rel="icon" href="favicon.svg?v=202603151sxu" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050518ao">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605051908">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605015kp">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
@@ -1124,7 +1124,7 @@
   .base-footer a:hover { text-decoration: underline; color: #fff; }
     .course-type { display: inline-block; background: #e0e0e0; color: #333; border-radius: 3px; padding: 2px 8px; font-size: 0.9em; margin-left: 8px; }
   </style>
-  <script src="courses.generated.js?v=2026050518ao"></script>
+  <script src="courses.generated.js?v=202605051908"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 
 <!-- Subtle UI tweaks -->
@@ -2089,8 +2089,8 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      CHAT SYSTEM - Complete (Firebase REST + UI)
      ============================================ -->
 
-<script src="js/user-identity.js?v=2026050518ao"></script>
-<script src="js/chat.js?v=2026050518ao"></script>
+<script src="js/user-identity.js?v=202605051908"></script>
+<script src="js/chat.js?v=202605051908"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -2776,55 +2776,14 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           const noteId = `msg-note-${sectionId}-${idx}`;
           const isHtml = /\.html$/i.test(note.path || '');
           sectionContent += `
-            <div class="msg-note ${isHtml ? 'msg-note-html' : ''}" onclick="${isHtml ? `openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;` : `toggleMsgNote('${noteId}')`}" data-note-path="${note.path}">
+            <div class="msg-note ${isHtml ? 'msg-note-html' : ''}" onclick="openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" data-note-path="${note.path}">
               <div class="msg-note-header">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="${isHtml ? '#588157' : '#f59e0b'}" style="flex-shrink:0;">
                   <path d="M20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20M6,10V8H18V10H6M6,14V12H18V14H6M6,18V16H18V18H6Z"/>
                 </svg>
                 <span class="msg-note-title" style="${isHtml ? 'color: #588157;' : ''}">${isHtml ? removeOrderPrefix(note.name).replace(/\.html$/i, '') : removeOrderPrefix(note.name)}</span>
-                ${!isHtml && /\.md$/i.test(note.path || '') ? `<a href="#" title="Отвори на цял екран" onclick="event.stopPropagation(); openMdNoteFull('${noteId}', '${note.name.replace(/\\/g, '\\\\').replace(/'/g, "\\'")}'); return false;" style="display:inline-flex; align-items:center; justify-content:center; margin-left:auto; margin-right:6px; text-decoration:none; flex-shrink:0;">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="#588157" style="transition: fill 0.2s;"><path d="M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9M12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17M12,4.5C7,4.5 2.73,7.61 1,12C2.73,16.39 7,19.5 12,19.5C17,19.5 21.27,16.39 23,12C21.27,7.61 17,4.5 12,4.5Z"/></svg>
-                </a>` : ''}
-                ${!isHtml ? `<svg class="msg-note-arrow" width="18" height="18" viewBox="0 0 24 24">
-                  <path d="M7.41,8.58L12,13.17L16.59,8.58L18,10L12,16L6,10L7.41,8.58Z" fill="#f59e0b"/>
-                </svg>` : ''}
               </div>
-              <div class="msg-note-content" id="${noteId}" style="display:none;">
-                ${note.type === 'text' ? `<pre>${note.content}</pre>` : (note.type === 'markdown' ? (() => {
-                  // Configure marked for GFM tables
-                  marked.setOptions({
-                    gfm: true,
-                    breaks: false,
-                    tables: true
-                  });
-                  // Parse markdown and fix relative image paths
-                  let html = marked.parse(note.content);
-
-                  // Process tables to support rowspan with ^ syntax (only if needed)
-                  if (html.includes('^')) {
-                    html = processTableRowspans(html);
-                  }
-
-                  // Process tables to support cell alignment with >>text<<, <<text, text>> (BEFORE colspan!)
-                  if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) {
-                    html = processTableAlignment(html);
-                  }
-
-                  // Process tables to support colspan with < syntax (only if needed)
-                  if (html.includes('&lt;')) {
-                    html = processTableColspans(html);
-                  }
-
-                  // Get base directory from note path (e.g., "files/Course/Section/")
-                  const basePath = note.path.substring(0, note.path.lastIndexOf('/') + 1);
-                  // Fix relative image paths: any relative path (not starting with http:// or /) -> prepend basePath
-                  let fixedHtml = html.replace(/<img([^>]+)src="(?!https?:\/\/)(?!\/)([^"]+)"/g,
-                    (match, attrs, src) => `<img${attrs}src="${basePath}${src}"`);
-                  // Add target="_blank" to all links
-                  fixedHtml = fixedHtml.replace(/<a /g, '<a target="_blank" rel="noopener noreferrer" ');
-                  return `<div class="markdown-content">${fixedHtml}</div>`;
-                })() : '<p><i>Word файл - отвори за да видиш съдържанието</i><br><a href="' + note.path + '" target="_blank" style="color:#f59e0b;">Отвори файла</a></p>')}
-              </div>
+              <div class="msg-note-content" id="${noteId}" style="display:none;"></div>
             </div>
           `;
         });
@@ -3024,138 +2983,18 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       }
     });
 
-    // Function to toggle msg note content
-    function toggleMsgNote(noteId) {
-      const noteContent = document.getElementById(noteId);
-      const noteElement = noteContent.closest('.msg-note');
-
-      if (noteContent.style.display === 'none' || noteContent.style.display === '') {
-        noteContent.style.display = 'block';
-        noteElement.classList.add('open');
-        // Wrap any markdown tables with a horizontal scroll container (mobile-friendly)
-        try {
-          const mdRoot = noteContent.querySelector('.markdown-content');
-          if (mdRoot) {
-            mdRoot.querySelectorAll('table').forEach(tbl => {
-              if (!tbl.parentElement.classList.contains('table-scroll')) {
-                const wrap = document.createElement('div');
-                wrap.className = 'table-scroll';
-                tbl.parentElement.insertBefore(wrap, tbl);
-                wrap.appendChild(tbl);
-              }
-            });
-          }
-        } catch (_) { /* noop */ }
-      } else {
-        noteContent.style.display = 'none';
-        noteElement.classList.remove('open');
-      }
-    }
-
-    // Open a markdown msg-note in a full-screen new tab without fetching files
+    // Open msg-note files by path; index no longer renders note previews inline.
     function openMdNoteFull(noteId, rawTitle) {
       try {
         const contentEl = document.getElementById(noteId);
         if (!contentEl) return;
 
-        // Find the parent msg-note element to get the note path
         const noteElement = contentEl.closest('.msg-note');
         const notePath = noteElement ? noteElement.getAttribute('data-note-path') : '';
-        const basePath = notePath ? notePath.substring(0, notePath.lastIndexOf('/') + 1) : '';
+        if (!notePath) return;
 
-        // Check if this is an HTML file - open in md-viewer with content passed via sessionStorage
-        if (notePath && /\.html$/i.test(notePath)) {
-          // Find the HTML content from courses data
-          let htmlContent = '';
-          if (typeof courses !== 'undefined') {
-            outerLoop: for (let course of courses) {
-              for (let section of course.sections) {
-                if (section.msgNotes) {
-                  for (let note of section.msgNotes) {
-                    if (note.path === notePath && note.type === 'html') {
-                      htmlContent = note.content;
-                      break outerLoop;
-                    }
-                  }
-                }
-              }
-            }
-          }
-
-          if (htmlContent) {
-            // Try to store in sessionStorage, but fallback to hash if quota exceeded
-            const sessionKey = 'htmlContent_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            try {
-              sessionStorage.setItem(sessionKey, htmlContent);
-              sessionStorage.setItem(sessionKey + '_path', notePath);
-
-              const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&sessionKey=${sessionKey}`;
-              window.open(mdViewerUrl, '_blank');
-            } catch (quotaError) {
-              // SessionStorage full - clear old htmlContent keys and try again
-              console.warn('SessionStorage quota exceeded, cleaning up old keys...');
-              const keysToRemove = [];
-              for (let i = 0; i < sessionStorage.length; i++) {
-                const key = sessionStorage.key(i);
-                if (key && key.startsWith('htmlContent_')) {
-                  keysToRemove.push(key);
-                }
-              }
-              keysToRemove.forEach(k => sessionStorage.removeItem(k));
-
-              // Try one more time
-              try {
-                sessionStorage.setItem(sessionKey, htmlContent);
-                sessionStorage.setItem(sessionKey + '_path', notePath);
-                const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}&sessionKey=${sessionKey}`;
-                window.open(mdViewerUrl, '_blank');
-              } catch (e2) {
-                // Still failed - open without sessionKey, let md-viewer fetch it
-                console.error('Cannot store in sessionStorage, opening without cache');
-                const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}`;
-                window.open(mdViewerUrl, '_blank');
-              }
-            }
-          } else {
-            // Fallback: open by path when HTML content is not present in the current courses cache.
-            const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}`;
-            window.open(mdViewerUrl, '_blank');
-          }
-          return;
-        }
-
-        // For markdown/text files, open in md-viewer or simple window
-        const mdHtmlEl = contentEl.querySelector('.markdown-content');
-        let htmlInner = '';
-        if (mdHtmlEl) {
-          htmlInner = mdHtmlEl.innerHTML;
-        } else {
-          const pre = contentEl.querySelector('pre');
-          htmlInner = pre ? ('<pre>' + pre.textContent.replace(/[&<>]/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[s])) + '</pre>') : contentEl.innerHTML;
-        }
-
-        // Create a simple window with the content
-        const w = window.open();
-        if (!w) return;
-        w.document.write(`
-          <!DOCTYPE html>
-          <html>
-          <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${rawTitle || 'Документ'}</title>
-            <style>
-              body { font-family: 'Open Sans', Arial, sans-serif; max-width: 1400px; margin: 0 auto; padding: 16px; background: #fafafa; }
-              h1, h2, h3 { color: #333; }
-              a { color: #588157; }
-            </style>
-          </head>
-          <body>
-            <div>${htmlInner}</div>
-          </body>
-          </html>
-        `);
-        w.document.close();
+        const mdViewerUrl = `md-viewer.html?path=${encodeURIComponent(notePath)}`;
+        window.open(mdViewerUrl, '_blank');
       } catch (e) { console.error('openMdNoteFull error', e); }
     }
 
@@ -3412,7 +3251,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       <script src="html-priority.js"></script>
       <script src="js/presence.js"></script>
       <script src="js/version-check.js?v=202605021hcw"></script>
-      <script src="js/mobile-nav.js?v=2026050518ao"></script>
+      <script src="js/mobile-nav.js?v=202605051908"></script>
 <!-- Privacy Modal -->
 <div id="privacyModal" class="text-modal" style="display: none;">
   <div class="text-modal-content" style="max-width: 500px;">

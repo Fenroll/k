@@ -132,7 +132,7 @@
     
     let activeTab = '';
     // Check for index.html or root
-    if (page === 'index.html' || page === 'indexlegacy.html' || page === '') activeTab = 'courses';
+    if (page === 'index.html' || page === '') activeTab = 'courses';
     else if (page.includes('notes') || page.includes('anamnesis')) activeTab = 'notes';
     else if (page.includes('calendar')) activeTab = 'calendar';
     else if (page.includes('tools')) activeTab = 'tools';

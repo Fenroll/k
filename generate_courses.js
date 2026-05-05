@@ -11,6 +11,9 @@ const OUTPUT_FILE = path.join(__dirname, 'courses.generated.js');
 const ID_MAPPING_FILE = path.join(__dirname, 'course-ids.json');
 const NAME_MAPPING_FILE = path.join(__dirname, 'folder-name-mappings.json');
 const FILES_INDEX_FILE = path.join(__dirname, 'files-index.json');
+const COURSE_CONTENT_DIR = path.join(__dirname, 'courses-data');
+
+let generatedCourseContent = {};
 
 function padId(num) {
   return num.toString().padStart(6, '0');
@@ -81,6 +84,26 @@ function saveIdMappings(mappings) {
   const data = JSON.stringify(mappings, null, 2);
   fs.writeFileSync(ID_MAPPING_FILE, data, 'utf8');
   console.log('Updated ID mappings saved to:', ID_MAPPING_FILE);
+}
+
+function writeCourseContentFiles() {
+  if (!fs.existsSync(COURSE_CONTENT_DIR)) {
+    fs.mkdirSync(COURSE_CONTENT_DIR, { recursive: true });
+  }
+
+  fs.readdirSync(COURSE_CONTENT_DIR)
+    .filter(file => file.toLowerCase().endsWith('.js'))
+    .forEach(file => {
+      fs.unlinkSync(path.join(COURSE_CONTENT_DIR, file));
+    });
+
+  Object.entries(generatedCourseContent).forEach(([contentKey, contentMap]) => {
+    const outputPath = path.join(COURSE_CONTENT_DIR, `${contentKey}.js`);
+    const js = `(window.courseContent = window.courseContent || {})[${JSON.stringify(contentKey)}] = ${JSON.stringify(contentMap)};\n`;
+    fs.writeFileSync(outputPath, js, 'utf8');
+  });
+
+  console.log(`Generated ${Object.keys(generatedCourseContent).length} course content file(s):`, COURSE_CONTENT_DIR);
 }
 
 // Get or assign ID for a course title
@@ -203,6 +226,7 @@ function readLinkTxtFile(filePath) {
 
 function getAllCourses() {
   if (!fs.existsSync(ELEMENTS_DIR)) return [];
+  generatedCourseContent = {};
   
   // Load existing ID mappings and name mappings
   const idMappings = loadIdMappings();
@@ -276,25 +300,35 @@ function getAllCourses() {
     const displayTitle = getMappedName(subjectForMapping, nameMappings);
     const customText = getCustomText(subjectForMapping, nameMappings);
     
+    const courseContentMap = {};
     const sections = fs.readdirSync(subjectPath, { withFileTypes: true })
       .filter(dirent => dirent.isDirectory())
       .map(dirent => dirent.name)
       .map(section => {
         const sectionPath = path.join(subjectPath, section);
-  return processSection(section, sectionPath, `files/${originalSubjectName}/${section}`, nameMappings);
+  return processSection(section, sectionPath, `files/${originalSubjectName}/${section}`, nameMappings, courseContentMap);
       });
-    
-    return {
+
+    const course = {
       id: id,
       title: displayTitle,
       customText: customText,
       isArchived: isArchivedFolder, // Set isArchived flag here
       sections
     };
+
+    Object.defineProperty(course, '__contentMap', {
+      value: courseContentMap,
+      writable: true,
+      configurable: true,
+      enumerable: false
+    });
+
+    return course;
   });
   
   // Recursive function to process sections and subsections
-  function processSection(sectionName, sectionPath, relativePath, nameMappings) {
+  function processSection(sectionName, sectionPath, relativePath, nameMappings, courseContentMap) {
     const entries = fs.readdirSync(sectionPath, { withFileTypes: true });
     
     // Supported file extensions
@@ -395,11 +429,15 @@ function getAllCourses() {
             content = readTextFile(filePath);
             content = replaceColors(content);
           }
-          
+
+          const notePath = `${relativePath}/${fileName}`;
+          if (content) {
+            courseContentMap[notePath] = content;
+          }
+
           msgNotes.push({
             name: fileName,
-            path: `${relativePath}/${fileName}`,
-            content: content,
+            path: notePath,
             type: fileExt === '.txt' ? 'text' : (fileExt === '.md' ? 'markdown' : (fileExt === '.html' ? 'html' : 'docx'))
           });
         } else {
@@ -466,7 +504,7 @@ function getAllCourses() {
       .map(dirent => {
         const subPath = path.join(sectionPath, dirent.name);
         const subRelativePath = `${relativePath}/${dirent.name}`;
-        return processSection(dirent.name, subPath, subRelativePath, nameMappings);
+        return processSection(dirent.name, subPath, subRelativePath, nameMappings, courseContentMap);
       });
     
     // Apply name mapping for display
@@ -548,14 +586,24 @@ function getAllCourses() {
   console.log('Archived courses after defragmentation:', archivedCourses.map(c => `${c.id}: ${c.title}`).join(', '));
   
   // Combine: active courses first, then archived courses
-  return [...activeCourses, ...archivedCourses];
+  const combinedCourses = [...activeCourses, ...archivedCourses];
+  combinedCourses.forEach(course => {
+    const contentMap = course.__contentMap || {};
+    if (Object.keys(contentMap).length > 0) {
+      const contentKey = `${course.isArchived ? 'archived-' : ''}${course.id}`;
+      course._contentKey = contentKey;
+      generatedCourseContent[contentKey] = contentMap;
+    }
+    delete course.__contentMap;
+  });
+
+  return combinedCourses;
 }
 
 function updateHtmlFiles(version) {
   // HTML files that need cache-busting updates
   const htmlFiles = [
     path.join(__dirname, 'index.html'),
-    path.join(__dirname, 'indexlegacy.html'),
     path.join(__dirname, 'md-viewer.html'),
     path.join(__dirname, 'text-editor.html'),
     path.join(__dirname, 'admin.html'),
@@ -695,6 +743,7 @@ function main() {
   console.log('Generated courses:', OUTPUT_FILE);
   console.log('Build timestamp:', buildTimestamp);
   console.log('coursesVersion:', version);
+  writeCourseContentFiles();
 
   // Save version to JSON file for external reference
   const versionData = { version, timestamp: buildTimestamp };

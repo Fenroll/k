@@ -1,10 +1,10 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026050518ao"></script>
+  <script src="js/auth-guard.js?v=202605051908"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Тext Editor</title>
+  <title>Ð¢ext Editor</title>
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050518ao">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605051908">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -899,7 +899,7 @@
     }
 
     @media (max-width: 900px){
-      /* ── Layout ── */
+      /* â”€â”€ Layout â”€â”€ */
       html, body {
         height: 100%;
         overflow: hidden;
@@ -917,7 +917,7 @@
         min-height: 0;
       }
 
-      /* ── Toolbar: single scrollable row ── */
+      /* â”€â”€ Toolbar: single scrollable row â”€â”€ */
       .toolbar {
         flex-shrink: 0;
         flex-wrap: nowrap;
@@ -977,7 +977,7 @@
         display: none;
       }
 
-      /* ── Editor area ── */
+      /* â”€â”€ Editor area â”€â”€ */
       #editor {
         padding: 12px 16px;
         font-size: 16px; /* prevent iOS auto-zoom on focus */
@@ -986,7 +986,7 @@
         -webkit-overflow-scrolling: touch;
       }
 
-      /* ── FAB raw-code button ── */
+      /* â”€â”€ FAB raw-code button â”€â”€ */
       .raw-code-btn {
         width: 44px;
         height: 44px;
@@ -994,13 +994,13 @@
         right: 14px;
       }
 
-      /* ── Chat widget above nav bar ── */
+      /* â”€â”€ Chat widget above nav bar â”€â”€ */
       #chat-widget {
         bottom: calc(68px + env(safe-area-inset-bottom)) !important;
         right: 14px !important;
       }
 
-      /* ── Mobile font sizes ── */
+      /* â”€â”€ Mobile font sizes â”€â”€ */
       #editor h1 { font-size: 1.5em; }
       #editor h2 { font-size: 1.25em; }
       #editor h3 { font-size: 1.1em; }
@@ -1018,14 +1018,14 @@
       #editor blockquote { font-size: 0.92em; }
       #editor table { font-size: 0.85em; }
 
-      /* ── Table options: full-width on mobile ── */
+      /* â”€â”€ Table options: full-width on mobile â”€â”€ */
       .table-options-menu {
         min-width: 180px;
         right: 0;
         left: auto;
       }
 
-      /* ── HTML editor modal: full screen ── */
+      /* â”€â”€ HTML editor modal: full screen â”€â”€ */
       .html-editor-container {
         margin: 0;
         width: 100%;
@@ -1333,14 +1333,14 @@
       box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
     }
 
-    /* ── Desktop: merge adjacent sub-groups into one visual group ── */
+    /* â”€â”€ Desktop: merge adjacent sub-groups into one visual group â”€â”€ */
     .toolbar-group.merge-right { border-right: none; padding-right: 0; }
     .toolbar-group.merge-right + .toolbar-group { padding-left: 0; }
 
-    /* ── Desktop: hide More button entirely ── */
+    /* â”€â”€ Desktop: hide More button entirely â”€â”€ */
     .toolbar-group-more { display: none; }
 
-    /* ── Mobile ── */
+    /* â”€â”€ Mobile â”€â”€ */
     @media (max-width: 900px){
       .mobile-extra { display: none !important; }
 
@@ -1447,9 +1447,9 @@
     }
 
   
-    /* ═══════════════════════════════════════════════
-       MODERNIZATION PATCH — matches login.html tokens
-       ═══════════════════════════════════════════════ */
+    /* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       MODERNIZATION PATCH â€” matches login.html tokens
+       â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
 
     :root {
       --brand:        #588157;
@@ -1467,7 +1467,7 @@
       --font:         'DM Sans', 'Open Sans', sans-serif;
     }
 
-    /* ── Toolbar ── */
+    /* â”€â”€ Toolbar â”€â”€ */
     .toolbar {
       background: #f8f9f7;
       border-bottom: 1px solid var(--border);
@@ -1490,12 +1490,12 @@
     .toolbar select { border-radius: 6px; font-family: var(--font); color: #4a5248; }
     .toolbar select:hover { background: #e8ede7; color: var(--text); }
 
-    /* ── Format dropdown ── */
+    /* â”€â”€ Format dropdown â”€â”€ */
     .format-dropdown { border-radius: var(--radius-md); border: 1px solid var(--border); box-shadow: var(--shadow-md); padding: 4px; }
     .format-option { border-radius: 6px; padding: 7px 12px; }
     .format-option:hover { background: var(--brand-light); }
 
-    /* ── Table / context menus ── */
+    /* â”€â”€ Table / context menus â”€â”€ */
     .table-options-menu, .table-context-menu {
       border-radius: var(--radius-md) !important; border: 1px solid var(--border) !important;
       box-shadow: var(--shadow-md) !important; padding: 4px 0 !important; overflow: hidden;
@@ -1509,7 +1509,7 @@
     .table-context-menu button:hover { background: var(--brand-light) !important; color: var(--brand) !important; }
     .table-context-menu button:first-child, .table-context-menu button:last-child { border-radius: 0 !important; }
 
-    /* ── Color picker ── */
+    /* â”€â”€ Color picker â”€â”€ */
     .color-picker-dropdown {
       border-radius: var(--radius-md);
       border: 1px solid var(--border);
@@ -1519,10 +1519,10 @@
     /* Ensure toolbar and ancestors don't clip dropdowns */
     .toolbar, .toolbar-group, .toolbar * { overflow: visible !important; }
 
-    /* ── Modal overlay ── */
+    /* â”€â”€ Modal overlay â”€â”€ */
     .modal { background: rgba(15,23,42,0.45); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
 
-    /* ── Modal card ── */
+    /* â”€â”€ Modal card â”€â”€ */
     .modal-content {
       border-radius: var(--radius-lg) !important; border: 1px solid rgba(0,0,0,0.055);
       box-shadow: var(--shadow-lg); font-family: var(--font);
@@ -1535,7 +1535,7 @@
     .modal-header { padding: 16px 20px; border-bottom: 1px solid #f0f2ef; }
     .modal-header h2 { font-family: var(--font); font-size: 1rem; font-weight: 600; color: var(--text); letter-spacing: -0.01em; }
 
-    /* ── Unified close buttons ── */
+    /* â”€â”€ Unified close buttons â”€â”€ */
     .modal-header .close, .modal-header .modal-close, .modal-header .close-btn {
       display: inline-flex !important; align-items: center !important; justify-content: center !important;
       width: 30px !important; height: 30px !important; border-radius: 8px !important;
@@ -1560,7 +1560,7 @@
     }
     .modal-body label { font-family: var(--font); font-size: 0.8125rem; font-weight: 500; color: var(--text-muted); }
 
-    /* ── Modal footer ── */
+    /* â”€â”€ Modal footer â”€â”€ */
     .modal-footer { padding: 12px 20px; border-top: 1px solid #f0f2ef; gap: 8px; }
     .modal-footer button {
       padding: 7px 16px !important; border-radius: var(--radius-sm) !important;
@@ -1572,14 +1572,14 @@
     .modal-footer button.primary { background: var(--brand) !important; color: #fff !important; border-color: var(--brand) !important; }
     .modal-footer button.primary:hover { background: var(--brand-dark) !important; border-color: var(--brand-dark) !important; }
 
-    /* ── File browser ── */
+    /* â”€â”€ File browser â”€â”€ */
     .course-header { background: var(--brand) !important; border-bottom: 1px solid var(--brand-dark) !important; font-size: 0.8125rem !important; padding: 8px 14px !important; }
     .file-item { padding: 9px 14px; border-bottom: 1px solid #f0f2ef; }
     .file-item:hover { background: var(--brand-light) !important; }
     .file-item-name { font-size: 0.875rem; font-weight: 500; color: var(--text); }
     .file-item-path { font-size: 0.78rem; color: var(--text-muted); }
 
-    /* ── Symbols modal (matches notes.html structure) ── */
+    /* â”€â”€ Symbols modal (matches notes.html structure) â”€â”€ */
     @keyframes symbolsModalFadeIn {
       from { opacity: 0; }
       to   { opacity: 1; }
@@ -1685,7 +1685,7 @@
       background: #d9ecd4 !important;
     }
 
-    /* ── HTML Editor Modal ── */
+    /* â”€â”€ HTML Editor Modal â”€â”€ */
     #htmlEditorModal {
       background: rgba(15,23,42,0.45) !important; backdrop-filter: blur(4px) !important;
       -webkit-backdrop-filter: blur(4px) !important;
@@ -1719,25 +1719,25 @@
     }
     #htmlEditorTextarea:focus { border-color: transparent !important; outline: none !important; box-shadow: none !important; }
 
-    /* ── Raw code textarea ── */
+    /* â”€â”€ Raw code textarea â”€â”€ */
     .modal .raw-code {
       border: 1.5px solid var(--border) !important; border-radius: var(--radius-sm) !important;
       font-size: 0.875rem !important; background: #fafcfa !important; color: var(--text) !important; padding: 12px 14px !important;
     }
     .modal .raw-code:focus { border-color: var(--brand) !important; box-shadow: 0 0 0 3px rgba(88,129,87,0.1) !important; outline: none !important; }
 
-    /* ── FAB ── */
+    /* â”€â”€ FAB â”€â”€ */
     .raw-code-btn { background: var(--brand) !important; border-radius: 14px !important; }
     .raw-code-btn:hover { background: var(--brand-dark) !important; transform: scale(1.06) !important; }
 
-    /* ── Choose image labels ── */
+    /* â”€â”€ Choose image labels â”€â”€ */
     label[for="imageUploadFileInput"], label[for="noteImageUploadFileInput"] {
       border-radius: var(--radius-sm) !important; background: var(--brand) !important;
       border-color: var(--brand) !important; font-family: var(--font) !important; transition: background var(--transition) !important;
     }
     label[for="imageUploadFileInput"]:hover, label[for="noteImageUploadFileInput"]:hover { background: var(--brand-dark) !important; }
 
-    /* ── Mobile more-tools panel ── */
+    /* â”€â”€ Mobile more-tools panel â”€â”€ */
     .more-tools-panel { border-radius: var(--radius-md) !important; border: 1px solid var(--border) !important; box-shadow: var(--shadow-md) !important; }
 
   </style>
@@ -1892,7 +1892,7 @@
 
     <!-- More (mobile only) -->
     <div class="toolbar-group toolbar-group-more" style="position: relative;">
-      <button id="moreToolsBtn" title="More tools">···</button>
+      <button id="moreToolsBtn" title="More tools">Â·Â·Â·</button>
       <div id="moreToolsPanel" class="more-tools-panel"></div>
     </div>
 
@@ -1947,7 +1947,7 @@
     <div class="modal-content" style="max-width: 600px;">
       <div class="modal-header">
         <h2>Keyboard Shortcuts</h2>
-        <button class="close-btn" id="closeShortcutsBtn">✕</button>
+        <button class="close-btn" id="closeShortcutsBtn">âœ•</button>
       </div>
       <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
         <h3>Formatting</h3>
@@ -2107,7 +2107,7 @@
         </div>
         <div style="margin-bottom: 16px;">
           <label for="fileNameInput" style="display: block; margin-bottom: 6px; font-weight: 500; color: #374151;">File Name</label>
-          <input type="text" id="fileNameInput" placeholder="e.g., ХОББ, Белодробен карцином" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
+          <input type="text" id="fileNameInput" placeholder="e.g., Ð¥ÐžÐ‘Ð‘, Ð‘ÐµÐ»Ð¾Ð´Ñ€Ð¾Ð±ÐµÐ½ ÐºÐ°Ñ€Ñ†Ð¸Ð½Ð¾Ð¼" style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
         </div>
         <div style="padding: 10px; background: #f3f4f6; border-radius: 4px; font-size: 0.9em; color: #4b5563;">
           <strong>Preview:</strong> <span id="fileNamePreview" style="color: #588157; font-family: monospace;">document.html</span>
@@ -2155,11 +2155,11 @@
         <p style="margin-bottom: 16px; color: #6b7280;">Select merge direction:</p>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
           <button id="mergeRightBtn" style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; background: white; transition: all 0.2s;">
-            <div style="font-size: 24px; margin-bottom: 4px;">→</div>
+            <div style="font-size: 24px; margin-bottom: 4px;">â†’</div>
             <div>Merge Right</div>
           </button>
           <button id="mergeDownBtn" style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; background: white; transition: all 0.2s;">
-            <div style="font-size: 24px; margin-bottom: 4px;">↓</div>
+            <div style="font-size: 24px; margin-bottom: 4px;">â†“</div>
             <div>Merge Down</div>
           </button>
         </div>
@@ -2179,37 +2179,37 @@
       <div class="symbol-section">
         <div class="symbol-section-label">Arrows</div>
         <div class="symbol-grid">
-          <button class="symbol-btn" data-symbol="↑">↑</button>
-          <button class="symbol-btn" data-symbol="↓">↓</button>
-          <button class="symbol-btn" data-symbol="←">←</button>
-          <button class="symbol-btn" data-symbol="→">→</button>
-          <button class="symbol-btn" data-symbol="↔">↔</button>
+          <button class="symbol-btn" data-symbol="â†‘">â†‘</button>
+          <button class="symbol-btn" data-symbol="â†“">â†“</button>
+          <button class="symbol-btn" data-symbol="â†">â†</button>
+          <button class="symbol-btn" data-symbol="â†’">â†’</button>
+          <button class="symbol-btn" data-symbol="â†”">â†”</button>
         </div>
       </div>
       <div class="symbol-section">
         <div class="symbol-section-label">Greek</div>
         <div class="symbol-grid">
-          <button class="symbol-btn" data-symbol="α">α</button>
-          <button class="symbol-btn" data-symbol="β">β</button>
-          <button class="symbol-btn" data-symbol="γ">γ</button>
-          <button class="symbol-btn" data-symbol="δ">δ</button>
-          <button class="symbol-btn" data-symbol="ε">ε</button>
-          <button class="symbol-btn" data-symbol="μ">μ</button>
+          <button class="symbol-btn" data-symbol="Î±">Î±</button>
+          <button class="symbol-btn" data-symbol="Î²">Î²</button>
+          <button class="symbol-btn" data-symbol="Î³">Î³</button>
+          <button class="symbol-btn" data-symbol="Î´">Î´</button>
+          <button class="symbol-btn" data-symbol="Îµ">Îµ</button>
+          <button class="symbol-btn" data-symbol="Î¼">Î¼</button>
         </div>
       </div>
       <div class="symbol-section">
         <div class="symbol-section-label">Math &amp; units</div>
         <div class="symbol-grid">
-          <button class="symbol-btn" data-symbol="≈">≈</button>
-          <button class="symbol-btn" data-symbol="≠">≠</button>
-          <button class="symbol-btn" data-symbol="≤">≤</button>
-          <button class="symbol-btn" data-symbol="≥">≥</button>
-          <button class="symbol-btn" data-symbol="±">±</button>
-          <button class="symbol-btn" data-symbol="÷">÷</button>
-          <button class="symbol-btn" data-symbol="°">°</button>
-          <button class="symbol-btn" data-symbol="℃">℃</button>
-          <button class="symbol-btn" data-symbol="‰">‰</button>
-          <button class="symbol-btn" data-symbol="t½">t½</button>
+          <button class="symbol-btn" data-symbol="â‰ˆ">â‰ˆ</button>
+          <button class="symbol-btn" data-symbol="â‰ ">â‰ </button>
+          <button class="symbol-btn" data-symbol="â‰¤">â‰¤</button>
+          <button class="symbol-btn" data-symbol="â‰¥">â‰¥</button>
+          <button class="symbol-btn" data-symbol="Â±">Â±</button>
+          <button class="symbol-btn" data-symbol="Ã·">Ã·</button>
+          <button class="symbol-btn" data-symbol="Â°">Â°</button>
+          <button class="symbol-btn" data-symbol="â„ƒ">â„ƒ</button>
+          <button class="symbol-btn" data-symbol="â€°">â€°</button>
+          <button class="symbol-btn" data-symbol="tÂ½">tÂ½</button>
         </div>
       </div>
     </div>
@@ -2219,9 +2219,9 @@
   <div id="htmlEditorModal">
     <div class="html-editor-container">
       <div class="html-editor-header">
-        <h2>📄 HTML Source Code Editor</h2>
+        <h2>ðŸ“„ HTML Source Code Editor</h2>
         <div class="html-editor-actions">
-          <button id="htmlEditorSaveBtn" class="html-editor-button html-editor-save">💾 Save & Update</button>
+          <button id="htmlEditorSaveBtn" class="html-editor-button html-editor-save">ðŸ’¾ Save & Update</button>
           <button id="htmlEditorCloseBtn" class="html-editor-button html-editor-close">Close</button>
         </div>
       </div>
@@ -2235,7 +2235,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=2026050518ao"></script>
+  <script src="courses.generated.js?v=202605051908"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2946,7 +2946,7 @@
         return paragraph;
       };
 
-      // Запази позицијата на курсорот
+      // Ð—Ð°Ð¿Ð°Ð·Ð¸ Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ñ˜Ð°Ñ‚Ð° Ð½Ð° ÐºÑƒÑ€ÑÐ¾Ñ€Ð¾Ñ‚
       const preCaretRange = range.cloneRange();
       preCaretRange.selectNodeContents(editor);
       preCaretRange.setEnd(range.startContainer, range.startOffset);
@@ -2954,7 +2954,7 @@
 
       let node = range.commonAncestorContainer;
 
-      // Ако е text node, оди до parent
+      // ÐÐºÐ¾ Ðµ text node, Ð¾Ð´Ð¸ Ð´Ð¾ parent
       if (node.nodeType === 3) {
         node = node.parentNode;
       }
@@ -2984,7 +2984,7 @@
         return !Array.from(candidate.children).some(child => structuralBlockTags.has(child.tagName.toLowerCase()));
       };
 
-      // Оди нагоре додека не найдеш форматирачки блок
+      // ÐžÐ´Ð¸ Ð½Ð°Ð³Ð¾Ñ€Ðµ Ð´Ð¾Ð´ÐµÐºÐ° Ð½Ðµ Ð½Ð°Ð¹Ð´ÐµÑˆ Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð¸Ñ€Ð°Ñ‡ÐºÐ¸ Ð±Ð»Ð¾Ðº
       while (node && node !== editor) {
         const tagName = node.tagName.toLowerCase();
         if (['h1', 'h2', 'h3', 'h4', 'p'].includes(tagName) || isSimpleDivBlock(node)) {
@@ -2993,7 +2993,7 @@
         node = node.parentNode;
       }
 
-      // Проверка дали имаме валиден блок елемент
+      // ÐŸÑ€Ð¾Ð²ÐµÑ€ÐºÐ° Ð´Ð°Ð»Ð¸ Ð¸Ð¼Ð°Ð¼Ðµ Ð²Ð°Ð»Ð¸Ð´ÐµÐ½ Ð±Ð»Ð¾Ðº ÐµÐ»ÐµÐ¼ÐµÐ½Ñ‚
       if (!node || node === editor) {
         return;
       }
@@ -3009,29 +3009,29 @@
         return;
       }
 
-      // Замена на блок елементот
+      // Ð—Ð°Ð¼ÐµÐ½Ð° Ð½Ð° Ð±Ð»Ð¾Ðº ÐµÐ»ÐµÐ¼ÐµÐ½Ñ‚Ð¾Ñ‚
       const targetTag = (tagName === tag) ? 'p' : tag;
       const newEl = document.createElement(targetTag);
 
-      // Копирај детелја
+      // ÐšÐ¾Ð¿Ð¸Ñ€Ð°Ñ˜ Ð´ÐµÑ‚ÐµÐ»Ñ˜Ð°
       while (node.firstChild) {
         const child = node.firstChild;
         newEl.appendChild(child);
       }
 
-      // Зачувај text-align ако постои
+      // Ð—Ð°Ñ‡ÑƒÐ²Ð°Ñ˜ text-align Ð°ÐºÐ¾ Ð¿Ð¾ÑÑ‚Ð¾Ð¸
       const oldAlign = node.style.textAlign;
       if (oldAlign) {
         newEl.style.textAlign = oldAlign;
       }
 
-      // Замени во DOM
+      // Ð—Ð°Ð¼ÐµÐ½Ð¸ Ð²Ð¾ DOM
       node.parentNode.replaceChild(newEl, node);
 
       // Keep headings structurally valid in the live editor DOM.
       repairInvalidHeadingStructureInEditor();
 
-      // Врати фокус на иста позиција
+      // Ð’Ñ€Ð°Ñ‚Ð¸ Ñ„Ð¾ÐºÑƒÑ Ð½Ð° Ð¸ÑÑ‚Ð° Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ñ˜Ð°
       const newRange = document.createRange();
       const sel = window.getSelection();
 
@@ -3291,7 +3291,7 @@
 
     function addTableColumnBefore() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
 
@@ -3305,7 +3305,7 @@
 
     function addTableColumnAfter() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
 
@@ -3319,7 +3319,7 @@
 
     function deleteTableColumn() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
 
@@ -3331,7 +3331,7 @@
 
     function addTableRowBefore() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       const row = cell.closest('tr');
       const newRow = document.createElement('tr');
@@ -3346,7 +3346,7 @@
 
     function addTableRowAfter() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       const row = cell.closest('tr');
       const newRow = document.createElement('tr');
@@ -3361,7 +3361,7 @@
 
     function deleteTableRow() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const row = cell.closest('tr');
       row.remove();
       saveToHistory();
@@ -3369,7 +3369,7 @@
 
     function deleteTable() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
       const table = getTableFromCell(cell);
       table.remove();
       saveToHistory();
@@ -3377,16 +3377,16 @@
 
     function mergeTableCells() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
 
       const row = cell.closest('tr');
-      if (!row) return alert('Позиционирай курсора в таблица');
+      if (!row) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
 
       // Get current cell index and next cell
       const cellIndex = cell.cellIndex;
       const nextCell = row.cells[cellIndex + 1];
 
-      if (!nextCell) return alert('Нямаш следваща клетка за мърджване');
+      if (!nextCell) return alert('ÐÑÐ¼Ð°Ñˆ ÑÐ»ÐµÐ´Ð²Ð°Ñ‰Ð° ÐºÐ»ÐµÑ‚ÐºÐ° Ð·Ð° Ð¼ÑŠÑ€Ð´Ð¶Ð²Ð°Ð½Ðµ');
 
       // Merge content
       cell.textContent = (cell.textContent + ' ' + nextCell.textContent).trim();
@@ -3403,8 +3403,8 @@
 
     function setCellBackgroundColor() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
-      const color = prompt('Цвят (hex):', '#FAF594');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
+      const color = prompt('Ð¦Ð²ÑÑ‚ (hex):', '#FAF594');
       if (color) {
         cell.style.backgroundColor = color;
         saveToHistory();
@@ -3413,11 +3413,11 @@
 
     function splitTableCell() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return alert('ÐŸÐ¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² Ñ‚Ð°Ð±Ð»Ð¸Ñ†Ð°');
 
       const colspan = parseInt(cell.getAttribute('colspan')) || 1;
 
-      if (colspan <= 1) return alert('Клетката няма colspan за разделяне');
+      if (colspan <= 1) return alert('ÐšÐ»ÐµÑ‚ÐºÐ°Ñ‚Ð° Ð½ÑÐ¼Ð° colspan Ð·Ð° Ñ€Ð°Ð·Ð´ÐµÐ»ÑÐ½Ðµ');
 
       const row = cell.closest('tr');
       const cellIndex = cell.cellIndex;
@@ -4238,7 +4238,7 @@
       }
 
       // If not in list, show notification
-      showNotification('⚠️ Indent works only in lists', 'warning');
+      showNotification('âš ï¸ Indent works only in lists', 'warning');
     });
 
     document.getElementById('outdentBtn').addEventListener('click', () => {
@@ -4260,7 +4260,7 @@
       }
 
       // If not in list, show notification
-      showNotification('⚠️ Outdent works only in lists', 'warning');
+      showNotification('âš ï¸ Outdent works only in lists', 'warning');
     });
 
     document.getElementById('ulBtn').addEventListener('click', () => {
@@ -4312,11 +4312,11 @@
       const selection = window.getSelection();
 
       if (!selection.rangeCount || !selection.toString()) {
-        alert('Моля, избери текст първо');
+        alert('ÐœÐ¾Ð»Ñ, Ð¸Ð·Ð±ÐµÑ€Ð¸ Ñ‚ÐµÐºÑÑ‚ Ð¿ÑŠÑ€Ð²Ð¾');
         return;
       }
 
-      const url = prompt('Въведи URL:');
+      const url = prompt('Ð’ÑŠÐ²ÐµÐ´Ð¸ URL:');
 
       if (!url || url.trim() === '') {
         return;
@@ -4402,7 +4402,7 @@
 
         const selection = window.getSelection();
         if (!selection || selection.rangeCount === 0 || !editor.contains(selection.anchorNode)) {
-          // No active selection in the editor — fall back to appending at the end.
+          // No active selection in the editor â€” fall back to appending at the end.
           editor.focus();
           const range = document.createRange();
           range.selectNodeContents(editor);
@@ -4924,7 +4924,7 @@
 
       // If no selection or selection is in editor
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
-        alert('Моля, избери текст първо');
+        alert('ÐœÐ¾Ð»Ñ, Ð¸Ð·Ð±ÐµÑ€Ð¸ Ñ‚ÐµÐºÑÑ‚ Ð¿ÑŠÑ€Ð²Ð¾');
         return;
       }
 
@@ -5079,7 +5079,7 @@
         };
 
         // Update page title
-        document.title = fileName + ' — Text Editor';
+        document.title = fileName + ' â€” Text Editor';
       };
       reader.readAsText(file);
 
@@ -5240,7 +5240,7 @@
     document.getElementById('htmlEditorBtn').addEventListener('click', () => {
       // Check if editor has content
       if (!editor.innerHTML.trim()) {
-        alert('⚠️ No content to edit.\n\nPlease open a file first.');
+        alert('âš ï¸ No content to edit.\n\nPlease open a file first.');
         return;
       }
 
@@ -5281,7 +5281,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       document.getElementById('htmlEditorModal').style.display = 'none';
 
       // Show confirmation
-      showNotification('✅ HTML updated successfully!', 'success');
+      showNotification('âœ… HTML updated successfully!', 'success');
     });
 
     // HTML Editor Close
@@ -5384,7 +5384,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       };
 
       // Update page title
-      document.title = cleanName + ' — Text Editor';
+      document.title = cleanName + ' â€” Text Editor';
     }
 
     // Close file browser modal
@@ -6546,7 +6546,7 @@ renderMathInElement(document.body, {
 
       const key = e.key;
 
-      if (key === 'b' || key === 'B' || key === 'Б' || key === 'б') {
+      if (key === 'b' || key === 'B' || key === 'Ð‘' || key === 'Ð±') {
         e.preventDefault();
         wrapTextareaSelection(noteTextInput, '**');
         return;
@@ -6575,7 +6575,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if (key === 'g' || key === 'G' || key === 'Г' || key === 'г') {
+      if (key === 'g' || key === 'G' || key === 'Ð“' || key === 'Ð³') {
         e.preventDefault();
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
           if (!line.trim()) return line;
@@ -6584,7 +6584,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if ((key === 'o' || key === 'O' || key === 'О' || key === 'о') && e.shiftKey) {
+      if ((key === 'o' || key === 'O' || key === 'Ðž' || key === 'Ð¾') && e.shiftKey) {
         e.preventDefault();
         let index = 1;
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
@@ -6596,7 +6596,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if (key === 'q' || key === 'Q' || key === 'й' || key === 'Й') {
+      if (key === 'q' || key === 'Q' || key === 'Ð¹' || key === 'Ð™') {
         e.preventDefault();
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
           if (!line.trim()) return line;
@@ -6605,7 +6605,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if (key === 's' || key === 'S' || key === 'С' || key === 'с') {
+      if (key === 's' || key === 'S' || key === 'Ð¡' || key === 'Ñ') {
         e.preventDefault();
         document.getElementById('insertNoteBtn').click();
       }
@@ -7517,7 +7517,7 @@ renderMathInElement(document.body, {
 
       // Show notification
       const notification = document.createElement('div');
-      notification.textContent = '✓ Font sizes reset to default';
+      notification.textContent = 'âœ“ Font sizes reset to default';
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
       document.body.appendChild(notification);
 
@@ -7540,23 +7540,23 @@ renderMathInElement(document.body, {
     const geminiBtn = document.getElementById('geminiBtn');
     if (geminiBtn) {
       geminiBtn.addEventListener('click', () => {
-        const geminiPrompt = `Преобразувай целия следващ текст в СУРОВ MD КОД с цел максимална четимост и ясна структура.
+        const geminiPrompt = `ÐŸÑ€ÐµÐ¾Ð±Ñ€Ð°Ð·ÑƒÐ²Ð°Ð¹ Ñ†ÐµÐ»Ð¸Ñ ÑÐ»ÐµÐ´Ð²Ð°Ñ‰ Ñ‚ÐµÐºÑÑ‚ Ð² Ð¡Ð£Ð ÐžÐ’ MD ÐšÐžÐ” Ñ Ñ†ÐµÐ» Ð¼Ð°ÐºÑÐ¸Ð¼Ð°Ð»Ð½Ð° Ñ‡ÐµÑ‚Ð¸Ð¼Ð¾ÑÑ‚ Ð¸ ÑÑÐ½Ð° ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð°.
 
-Изисквания за форматиране:
-1. Генерирай само и единствено самия .md код, ОГРАДЕН В БЛОК ЗА КОД (markdown...), за да може да бъде копиран.
-2. Използвай **H1 (#)** само веднъж за главното заглавие на темата.
-3. Използвай **H2 (##)**, **H3 (###)**, и **H4 (#####)** за всички подтеми и секции. Не използвай H5 или по-ниски.
-4. Искам да структурираш текста така, че едновременно да е максимално четим и ясен. Искам да не е само bullet points, но не и само свободен текст - искам логична комбинация от параграфи, списъци, и заглавия, така че да е лесно за четене и възприемане.
-5. Използвай удебеляване (bold) за ключови термини, синдроми и анатомични структури.
-6. Не добавяй LaTeX, емоджита, cite_start или снимки.
-7. Ако има препратки към фигури (напр. "фиг. 8.1"), ги премахни.
-8. Ако изпращам текста на части, продължавай смислово от последната завършена секция.`;
+Ð˜Ð·Ð¸ÑÐºÐ²Ð°Ð½Ð¸Ñ Ð·Ð° Ñ„Ð¾Ñ€Ð¼Ð°Ñ‚Ð¸Ñ€Ð°Ð½Ðµ:
+1. Ð“ÐµÐ½ÐµÑ€Ð¸Ñ€Ð°Ð¹ ÑÐ°Ð¼Ð¾ Ð¸ ÐµÐ´Ð¸Ð½ÑÑ‚Ð²ÐµÐ½Ð¾ ÑÐ°Ð¼Ð¸Ñ .md ÐºÐ¾Ð´, ÐžÐ“Ð ÐÐ”Ð•Ð Ð’ Ð‘Ð›ÐžÐš Ð—Ð ÐšÐžÐ” (markdown...), Ð·Ð° Ð´Ð° Ð¼Ð¾Ð¶Ðµ Ð´Ð° Ð±ÑŠÐ´Ðµ ÐºÐ¾Ð¿Ð¸Ñ€Ð°Ð½.
+2. Ð˜Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ **H1 (#)** ÑÐ°Ð¼Ð¾ Ð²ÐµÐ´Ð½ÑŠÐ¶ Ð·Ð° Ð³Ð»Ð°Ð²Ð½Ð¾Ñ‚Ð¾ Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ðµ Ð½Ð° Ñ‚ÐµÐ¼Ð°Ñ‚Ð°.
+3. Ð˜Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ **H2 (##)**, **H3 (###)**, Ð¸ **H4 (#####)** Ð·Ð° Ð²ÑÐ¸Ñ‡ÐºÐ¸ Ð¿Ð¾Ð´Ñ‚ÐµÐ¼Ð¸ Ð¸ ÑÐµÐºÑ†Ð¸Ð¸. ÐÐµ Ð¸Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ H5 Ð¸Ð»Ð¸ Ð¿Ð¾-Ð½Ð¸ÑÐºÐ¸.
+4. Ð˜ÑÐºÐ°Ð¼ Ð´Ð° ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð¸Ñ€Ð°Ñˆ Ñ‚ÐµÐºÑÑ‚Ð° Ñ‚Ð°ÐºÐ°, Ñ‡Ðµ ÐµÐ´Ð½Ð¾Ð²Ñ€ÐµÐ¼ÐµÐ½Ð½Ð¾ Ð´Ð° Ðµ Ð¼Ð°ÐºÑÐ¸Ð¼Ð°Ð»Ð½Ð¾ Ñ‡ÐµÑ‚Ð¸Ð¼ Ð¸ ÑÑÐµÐ½. Ð˜ÑÐºÐ°Ð¼ Ð´Ð° Ð½Ðµ Ðµ ÑÐ°Ð¼Ð¾ bullet points, Ð½Ð¾ Ð½Ðµ Ð¸ ÑÐ°Ð¼Ð¾ ÑÐ²Ð¾Ð±Ð¾Ð´ÐµÐ½ Ñ‚ÐµÐºÑÑ‚ - Ð¸ÑÐºÐ°Ð¼ Ð»Ð¾Ð³Ð¸Ñ‡Ð½Ð° ÐºÐ¾Ð¼Ð±Ð¸Ð½Ð°Ñ†Ð¸Ñ Ð¾Ñ‚ Ð¿Ð°Ñ€Ð°Ð³Ñ€Ð°Ñ„Ð¸, ÑÐ¿Ð¸ÑÑŠÑ†Ð¸, Ð¸ Ð·Ð°Ð³Ð»Ð°Ð²Ð¸Ñ, Ñ‚Ð°ÐºÐ° Ñ‡Ðµ Ð´Ð° Ðµ Ð»ÐµÑÐ½Ð¾ Ð·Ð° Ñ‡ÐµÑ‚ÐµÐ½Ðµ Ð¸ Ð²ÑŠÐ·Ð¿Ñ€Ð¸ÐµÐ¼Ð°Ð½Ðµ.
+5. Ð˜Ð·Ð¿Ð¾Ð»Ð·Ð²Ð°Ð¹ ÑƒÐ´ÐµÐ±ÐµÐ»ÑÐ²Ð°Ð½Ðµ (bold) Ð·Ð° ÐºÐ»ÑŽÑ‡Ð¾Ð²Ð¸ Ñ‚ÐµÑ€Ð¼Ð¸Ð½Ð¸, ÑÐ¸Ð½Ð´Ñ€Ð¾Ð¼Ð¸ Ð¸ Ð°Ð½Ð°Ñ‚Ð¾Ð¼Ð¸Ñ‡Ð½Ð¸ ÑÑ‚Ñ€ÑƒÐºÑ‚ÑƒÑ€Ð¸.
+6. ÐÐµ Ð´Ð¾Ð±Ð°Ð²ÑÐ¹ LaTeX, ÐµÐ¼Ð¾Ð´Ð¶Ð¸Ñ‚Ð°, cite_start Ð¸Ð»Ð¸ ÑÐ½Ð¸Ð¼ÐºÐ¸.
+7. ÐÐºÐ¾ Ð¸Ð¼Ð° Ð¿Ñ€ÐµÐ¿Ñ€Ð°Ñ‚ÐºÐ¸ ÐºÑŠÐ¼ Ñ„Ð¸Ð³ÑƒÑ€Ð¸ (Ð½Ð°Ð¿Ñ€. "Ñ„Ð¸Ð³. 8.1"), Ð³Ð¸ Ð¿Ñ€ÐµÐ¼Ð°Ñ…Ð½Ð¸.
+8. ÐÐºÐ¾ Ð¸Ð·Ð¿Ñ€Ð°Ñ‰Ð°Ð¼ Ñ‚ÐµÐºÑÑ‚Ð° Ð½Ð° Ñ‡Ð°ÑÑ‚Ð¸, Ð¿Ñ€Ð¾Ð´ÑŠÐ»Ð¶Ð°Ð²Ð°Ð¹ ÑÐ¼Ð¸ÑÐ»Ð¾Ð²Ð¾ Ð¾Ñ‚ Ð¿Ð¾ÑÐ»ÐµÐ´Ð½Ð°Ñ‚Ð° Ð·Ð°Ð²ÑŠÑ€ÑˆÐµÐ½Ð° ÑÐµÐºÑ†Ð¸Ñ.`;
 
         // Copy to clipboard
         navigator.clipboard.writeText(geminiPrompt).then(() => {
           // Show notification
           const notification = document.createElement('div');
-          notification.textContent = '✓ Prompt copied to clipboard! Opening Gemini...';
+          notification.textContent = 'âœ“ Prompt copied to clipboard! Opening Gemini...';
           notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
           document.body.appendChild(notification);
 
@@ -7572,7 +7572,7 @@ renderMathInElement(document.body, {
           console.error('Failed to copy:', err);
           // Show error notification
           const notification = document.createElement('div');
-          notification.textContent = '✗ Failed to copy prompt';
+          notification.textContent = 'âœ— Failed to copy prompt';
           notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #ef4444; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
           document.body.appendChild(notification);
 
@@ -7746,7 +7746,7 @@ renderMathInElement(document.body, {
 
               // Show notification
               const notification = document.createElement('div');
-              notification.textContent = '✓ Списъци обединени';
+              notification.textContent = 'âœ“ Ð¡Ð¿Ð¸ÑÑŠÑ†Ð¸ Ð¾Ð±ÐµÐ´Ð¸Ð½ÐµÐ½Ð¸';
               notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
               document.body.appendChild(notification);
 
@@ -7756,7 +7756,7 @@ renderMathInElement(document.body, {
                 setTimeout(() => notification.remove(), 300);
               }, 2000);
             } else {
-              alert('Няма съседен списък за обединяване');
+              alert('ÐÑÐ¼Ð° ÑÑŠÑÐµÐ´ÐµÐ½ ÑÐ¿Ð¸ÑÑŠÐº Ð·Ð° Ð¾Ð±ÐµÐ´Ð¸Ð½ÑÐ²Ð°Ð½Ðµ');
             }
           }
           return;
@@ -7764,7 +7764,7 @@ renderMathInElement(document.body, {
         currentNode = currentNode.parentNode;
       }
 
-      alert('Моля, позиционирай курсора в списък');
+      alert('ÐœÐ¾Ð»Ñ, Ð¿Ð¾Ð·Ð¸Ñ†Ð¸Ð¾Ð½Ð¸Ñ€Ð°Ð¹ ÐºÑƒÑ€ÑÐ¾Ñ€Ð° Ð² ÑÐ¿Ð¸ÑÑŠÐº');
     }
 
     // Keyboard shortcuts
@@ -8415,7 +8415,7 @@ renderMathInElement(document.body, {
           e.preventDefault();
           document.execCommand('italic', false, null);
           saveToHistory();
-        } else if (e.key === 's' || e.key === 'S' || e.key === 'С' || e.key === 'с') {
+        } else if (e.key === 's' || e.key === 'S' || e.key === 'Ð¡' || e.key === 'Ñ') {
           e.preventDefault();
           // Open save modal (same as download button)
           document.getElementById('saveFileModal').style.display = 'block';
@@ -8443,16 +8443,16 @@ renderMathInElement(document.body, {
           e.preventDefault();
           insertFormat('p');
           saveToHistory();
-        } else if (e.key === 'g' || e.key === 'G' || e.key === 'Г' || e.key === 'г') {
+        } else if (e.key === 'g' || e.key === 'G' || e.key === 'Ð“' || e.key === 'Ð³') {
           e.preventDefault();
           insertList('ul');
-        } else if ((e.key === 'o' || e.key === 'O'|| e.key === 'О' || e.key === 'о') && e.shiftKey) {
+        } else if ((e.key === 'o' || e.key === 'O'|| e.key === 'Ðž' || e.key === 'Ð¾') && e.shiftKey) {
           e.preventDefault();
           insertList('ol');
-        } else if (e.key === 't' || e.key === 'T' || e.key === 'т' || e.key === 'Т') {
+        } else if (e.key === 't' || e.key === 'T' || e.key === 'Ñ‚' || e.key === 'Ð¢') {
           e.preventDefault();
           insertTable();
-        } else if (e.key === 'D' || e.key === 'd'|| e.key === 'Д' || e.key === 'д') {
+        } else if (e.key === 'D' || e.key === 'd'|| e.key === 'Ð”' || e.key === 'Ð´') {
           if (e.shiftKey) {
             e.preventDefault();
             removeTextColorFormatting();
@@ -8463,28 +8463,28 @@ renderMathInElement(document.body, {
             applyFormatting('color', lastColor);
             saveToHistory();
           }
-        } else if (e.key === 'q' || e.key === 'Q' || e.key === 'я' || e.key === 'Я') {
+        } else if (e.key === 'q' || e.key === 'Q' || e.key === 'Ñ' || e.key === 'Ð¯') {
           e.preventDefault();
           toggleBlockquote();
-        } else if ((e.key === 'z' || e.key === 'Z'|| e.key === 'З' || e.key === 'з') && !e.shiftKey) {
+        } else if ((e.key === 'z' || e.key === 'Z'|| e.key === 'Ð—' || e.key === 'Ð·') && !e.shiftKey) {
           e.preventDefault();
           if (historyIndex > 0) {
             historyIndex--;
             editor.innerHTML = history[historyIndex];
           }
-        } else if (((e.key === 'z' || e.key === 'Z') && e.shiftKey) || (e.key === 'y' || e.key === 'Y' || e.key === 'ъ' || e.key === 'Ъ')) {
+        } else if (((e.key === 'z' || e.key === 'Z') && e.shiftKey) || (e.key === 'y' || e.key === 'Y' || e.key === 'ÑŠ' || e.key === 'Ðª')) {
           e.preventDefault();
           if (historyIndex < history.length - 1) {
             historyIndex++;
             editor.innerHTML = history[historyIndex];
           }
-        } else if ((e.key === 'c' || e.key === 'C' || e.key === 'С' || e.key === 'с') && e.altKey) {
+        } else if ((e.key === 'c' || e.key === 'C' || e.key === 'Ð¡' || e.key === 'Ñ') && e.altKey) {
           e.preventDefault();
           // Apply last used text color
           const lastColor = localStorage.getItem('textEditorTextColor') || '#1f2937';
           applyFormatting('color', lastColor);
           saveToHistory();
-        } else if (e.key === 'h' || e.key === 'H' || e.key === 'Х' || e.key === 'х') {
+        } else if (e.key === 'h' || e.key === 'H' || e.key === 'Ð¥' || e.key === 'Ñ…') {
           if (e.shiftKey) {
             e.preventDefault();
             // Remove highlight
@@ -8565,7 +8565,7 @@ renderMathInElement(document.body, {
     function cleanupHeadingInlineArtifacts() {
       // Properties that are pure browser/paste artifacts inside a heading and
       // can be safely stripped (the heading itself controls font, weight, size).
-      // `color` is NOT in this list — intentional per-selection coloring must survive.
+      // `color` is NOT in this list â€” intentional per-selection coloring must survive.
       const HEADING_ARTIFACT_PROPS = new Set([
         'font-weight',
         'font-size',
@@ -9201,7 +9201,7 @@ renderMathInElement(document.body, {
 
               // Show notification
               const notification = document.createElement('div');
-              notification.textContent = `🔗 Opening: ${href}`;
+              notification.textContent = `ðŸ”— Opening: ${href}`;
               notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
               document.body.appendChild(notification);
 
@@ -10087,7 +10087,7 @@ renderMathInElement(document.body, {
 
             // Update page title
             const cleanName = fileName.replace(/\.(md|txt|html)$/i, '').replace(/^\d+(\.\d+)?-/, '').replace(/^msg-/i, '');
-            document.title = cleanName + ' — Text Editor';
+            document.title = cleanName + ' â€” Text Editor';
 
             // Clear sessionStorage
             sessionStorage.removeItem('editFileContent');
@@ -10097,7 +10097,7 @@ renderMathInElement(document.body, {
             window.history.replaceState({}, document.title, window.location.pathname);
             return;
           } catch (err) {
-            alert('Грешка при зареждане на съдържанието: ' + err.message);
+            alert('Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° ÑÑŠÐ´ÑŠÑ€Ð¶Ð°Ð½Ð¸ÐµÑ‚Ð¾: ' + err.message);
             console.error('Load error:', err);
             sessionStorage.removeItem('editFileContent');
             sessionStorage.removeItem('editFilePath');
@@ -10141,13 +10141,13 @@ renderMathInElement(document.body, {
           // Update page title
           if (filePath) {
             const fileName = filePath.split('/').pop();
-            document.title = fileName.replace(/\.(md|txt)$/i, '').replace(/^\d+-/, '').replace(/^msg-/i, '') + ' — Text Editor';
+            document.title = fileName.replace(/\.(md|txt)$/i, '').replace(/^\d+-/, '').replace(/^msg-/i, '') + ' â€” Text Editor';
           }
 
           // Clear URL parameters to prevent auto-reload on refresh
           window.history.replaceState({}, document.title, window.location.pathname);
         } catch (err) {
-          alert('Грешка при зареждане на съдържанието: ' + err.message);
+          alert('Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° ÑÑŠÐ´ÑŠÑ€Ð¶Ð°Ð½Ð¸ÐµÑ‚Ð¾: ' + err.message);
           console.error('Load error:', err);
         }
       } else if (filePath) {
@@ -10264,14 +10264,14 @@ renderMathInElement(document.body, {
             historyIndex = 0;
 
             // Update page title
-            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' — Text Editor';
+            document.title = fileName.replace(/\.(md|txt|html)$/i, '') + ' â€” Text Editor';
           })
           .catch(err => {
             const isFile = window.location.protocol === 'file:';
             const hint = isFile
-              ? '\n\nСъвет: Отвори сайта през локален HTTP сървър (напр. VS Code Live Server), тъй като браузърите блокират fetch от file://'
+              ? '\n\nÐ¡ÑŠÐ²ÐµÑ‚: ÐžÑ‚Ð²Ð¾Ñ€Ð¸ ÑÐ°Ð¹Ñ‚Ð° Ð¿Ñ€ÐµÐ· Ð»Ð¾ÐºÐ°Ð»ÐµÐ½ HTTP ÑÑŠÑ€Ð²ÑŠÑ€ (Ð½Ð°Ð¿Ñ€. VS Code Live Server), Ñ‚ÑŠÐ¹ ÐºÐ°Ñ‚Ð¾ Ð±Ñ€Ð°ÑƒÐ·ÑŠÑ€Ð¸Ñ‚Ðµ Ð±Ð»Ð¾ÐºÐ¸Ñ€Ð°Ñ‚ fetch Ð¾Ñ‚ file://'
               : '';
-            alert('Грешка при зареждане на файла: ' + err.message + hint);
+            alert('Ð“Ñ€ÐµÑˆÐºÐ° Ð¿Ñ€Ð¸ Ð·Ð°Ñ€ÐµÐ¶Ð´Ð°Ð½Ðµ Ð½Ð° Ñ„Ð°Ð¹Ð»Ð°: ' + err.message + hint);
             console.error('Load error:', err);
           });
       } else {
@@ -10478,7 +10478,7 @@ renderMathInElement(document.body, {
       const headingType = document.getElementById('anchorHeadingTypeInput').value;
 
       if (!anchorId || !anchorText) {
-        alert('⚠️ Please fill in both Anchor ID and Anchor Text');
+        alert('âš ï¸ Please fill in both Anchor ID and Anchor Text');
         return;
       }
 
@@ -10516,7 +10516,7 @@ renderMathInElement(document.body, {
 
       // Show success message
       const notification = document.createElement('div');
-      notification.textContent = '✅ Anchor created: #' + anchorId;
+      notification.textContent = 'âœ… Anchor created: #' + anchorId;
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
       document.body.appendChild(notification);
 
@@ -10533,7 +10533,7 @@ renderMathInElement(document.body, {
       let linkText = document.getElementById('linkTextInput').value.trim();
 
       if (!selectedAnchor) {
-        alert('⚠️ Please select an anchor first');
+        alert('âš ï¸ Please select an anchor first');
         return;
       }
 
@@ -10579,7 +10579,7 @@ renderMathInElement(document.body, {
 
       // Show success message
       const notification = document.createElement('div');
-      notification.textContent = '✅ Link created to #' + selectedAnchor;
+      notification.textContent = 'âœ… Link created to #' + selectedAnchor;
       notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #3b82f6; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
       document.body.appendChild(notification);
 
@@ -10663,12 +10663,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=2026050518ao"></script>
+  <script src="js/user-identity.js?v=202605051908"></script>
     <!-- CHAT SYSTEM -->
-  <script src="js/chat.js?v=2026050518ao"></script>
+  <script src="js/chat.js?v=202605051908"></script>
 
 <script src="js/version-check.js?v=202605021hcw"></script>
-  <script src="js/mobile-nav.js?v=2026050518ao"></script>
+  <script src="js/mobile-nav.js?v=202605051908"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');

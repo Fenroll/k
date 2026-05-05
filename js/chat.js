@@ -3003,7 +3003,7 @@ class ChatUIManager {
       const replyText = '#1f2937';
       const replyAuthor = '#111827';
       replyHTML = `
-         <div class="chat-reply-preview" style="background: ${replyBg}; border-left: 3px solid ${replyBorder}; color: ${replyText}; padding: 4px 8px; margin-bottom: 2px; font-size: 11px; border-radius: 4px; opacity: 0.92;">
+         <div class="chat-reply-preview" style="background: ${replyBg}; border-left: 3px solid ${replyBorder}; color: ${replyText}; padding: 4px 8px; margin-bottom: 0; font-size: 11px; border-radius: 4px; opacity: 0.92;">
            <b style="color: ${replyAuthor};">${this.escapeHtml(msg.replyAuthor || 'Someone')}:</b> ${this.linkifyText(originalMsg.text.substring(0, 50))}...
          </div>
       `;
@@ -3055,7 +3055,7 @@ class ChatUIManager {
     // Reactions are now rendered from cache, so the initial div is populated
     const reactionsHTML = this.getReactionsHTML(msg.id);
 
-    const marginBottom = (isContinuation || isFollowedByContinuation) ? '0px' : '2px';
+    const marginBottom = isFollowedByContinuation ? '2px' : (isContinuation ? '5px' : '7px');
 
     const actionClass = isCurrentUser ? '' : 'two-btns';
 
@@ -5714,12 +5714,11 @@ class ChatUIManager {
 }
 
 #chat-widget .chat-message.is-continuation-message {
-  margin-top: -1px;
-  margin-bottom: 0 !important;
+  margin-top: 0;
 }
 
 #chat-widget .chat-message.is-followed-by-continuation {
-  margin-bottom: 0 !important;
+  margin-bottom: 2px !important;
 }
 
 #chat-widget .chat-message.is-continuation-message .message-avatar-container {
@@ -5741,11 +5740,11 @@ class ChatUIManager {
 }
 
 #chat-widget .message-bubble-container {
-  gap: 3px;
+  gap: 4px;
 }
 
 #chat-widget .chat-reply-preview {
-  margin-bottom: 2px !important;
+  margin-bottom: 0 !important;
   border-radius: 8px !important;
   background: #eef5ec !important;
   border-left-color: #8aad82 !important;
