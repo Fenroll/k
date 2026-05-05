@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202605051lhb"></script>
+  <script src="js/auth-guard.js?v=202605051m7z"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -16,7 +16,7 @@
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <!-- Mobile Navigation CSS -->
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605051lhb">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605051m7z">
 
   <!-- Firebase SDKs - Moved to head and using compat versions -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
@@ -151,6 +151,24 @@
     .markdown-body h2 { font-size: 1.3em; color: #000000; }
     .markdown-body h3 { font-size: 1.1em; color: #000000; margin-bottom: 0; }
     .markdown-body h4 { font-size: 1.05em; color: #000000; margin-bottom: 0; }
+
+    .markdown-body h1.md-h1-jump-highlight {
+      color: #153f2d;
+      background: transparent;
+      border-radius: 8px;
+      animation: mdH1JumpHighlight 850ms ease-out;
+    }
+
+    @keyframes mdH1JumpHighlight {
+      0%, 58% {
+        background: rgba(88, 129, 87, 0.14);
+        box-shadow: 0 0 0 1px rgba(88, 129, 87, 0.28), 0 8px 22px rgba(47, 93, 80, 0.14);
+      }
+      100% {
+        background: rgba(88, 129, 87, 0);
+        box-shadow: 0 0 0 1px rgba(88, 129, 87, 0), 0 8px 22px rgba(47, 93, 80, 0);
+      }
+    }
 
     /* Paragraphs - match md-editor.html */
     .markdown-body p {
@@ -2213,7 +2231,7 @@
   </script>
 
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202605051lhb"></script>
+  <script src="courses.generated.js?v=202605051m7z"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2318,9 +2336,9 @@
 
 
 
-<script src="js/user-identity.js?v=202605051lhb"></script>
+<script src="js/user-identity.js?v=202605051m7z"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202605051lhb"></script>
+    <script src="js/chat.js?v=202605051m7z"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202605022sg"></script>
 
@@ -2963,12 +2981,16 @@
           currentH1Index = index;
 
           // Visual feedback - briefly highlight the h1
-          h1.style.transition = 'background-color 0.3s ease';
-          const originalBg = h1.style.backgroundColor;
-          h1.style.backgroundColor = 'rgba(124, 58, 237, 0.1)';
-          setTimeout(() => {
-            h1.style.backgroundColor = originalBg;
-          }, 600);
+          h1.classList.remove('md-h1-jump-highlight');
+          void h1.offsetWidth;
+          h1.classList.add('md-h1-jump-highlight');
+          if (h1._mdJumpHighlightTimer) {
+            clearTimeout(h1._mdJumpHighlightTimer);
+          }
+          h1._mdJumpHighlightTimer = setTimeout(() => {
+            h1.classList.remove('md-h1-jump-highlight');
+            h1._mdJumpHighlightTimer = null;
+          }, 850);
 
           prefetchAssetsAroundH1(index);
         }
