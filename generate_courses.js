@@ -14,6 +14,42 @@ const FILES_INDEX_FILE = path.join(__dirname, 'files-index.json');
 const COURSE_CONTENT_DIR = path.join(__dirname, 'courses-data');
 
 let generatedCourseContent = {};
+let generationStats = {
+  activeReassignments: 0,
+  archivedReassignments: 0,
+  htmlUpdated: 0,
+  htmlSkipped: 0,
+  htmlMissing: 0
+};
+
+const verboseOutput = process.argv.includes('--verbose');
+const normalLog = console.log.bind(console);
+const quietLogPrefixes = [
+  'Defragmenting ',
+  'Reassigning',
+  'Active courses after defragmentation:',
+  'Archived courses after defragmentation:',
+  'Updated ID mappings saved to:',
+  'Build timestamp:',
+  'coursesVersion:'
+];
+
+console.log = (...args) => {
+  const first = String(args[0] || '');
+  const isNoisyHtmlUpdate = first.includes(' Updated ') && first.includes(' with version ');
+  const isNoisyOptionalInfo = first.includes('Event info file not found');
+  const isNoisySavedVersion = first.includes('Saved version to:');
+  const isNoisyMissingHtml = first.includes('Skipping ') || first.includes('No versioned script tags found');
+  const isNoisy = quietLogPrefixes.some(prefix => first.startsWith(prefix)) ||
+    isNoisyHtmlUpdate ||
+    isNoisyOptionalInfo ||
+    isNoisySavedVersion ||
+    isNoisyMissingHtml;
+
+  if (verboseOutput || !isNoisy) {
+    normalLog(...args);
+  }
+};
 
 function padId(num) {
   return num.toString().padStart(6, '0');
@@ -83,7 +119,6 @@ function getAllFiles(dirPath, arrayOfFiles = []) {
 function saveIdMappings(mappings) {
   const data = JSON.stringify(mappings, null, 2);
   fs.writeFileSync(ID_MAPPING_FILE, data, 'utf8');
-  console.log('Updated ID mappings saved to:', ID_MAPPING_FILE);
 }
 
 function writeCourseContentFiles() {
@@ -103,7 +138,7 @@ function writeCourseContentFiles() {
     fs.writeFileSync(outputPath, js, 'utf8');
   });
 
-  console.log(`Generated ${Object.keys(generatedCourseContent).length} course content file(s):`, COURSE_CONTENT_DIR);
+  console.log(`Generated ${Object.keys(generatedCourseContent).length} course content file(s)`);
 }
 
 // Get or assign ID for a course title
@@ -538,7 +573,6 @@ function getAllCourses() {
   });
   
   // Defragment active courses - reassign sequential IDs from 1
-  console.log('\nDefragmenting active courses...');
   const courseIdMap = {}; // Maps old ID to new ID
   
   activeCourses.forEach((course, index) => {
@@ -546,7 +580,7 @@ function getAllCourses() {
     const newId = padId(index + 1);
     
     if (oldId !== newId) {
-      console.log(`Reassigning: ${oldId} -> ${newId} (${course.title})`);
+      generationStats.activeReassignments += 1;
       courseIdMap[oldId] = newId;
       course.id = newId;
     }
@@ -568,22 +602,18 @@ function getAllCourses() {
   });
   
   // Defragment archived courses - reassign sequential IDs from 1
-  console.log('\nDefragmenting archived courses...');
   archivedCourses.forEach((course, index) => {
     const oldId = course.id;
     const newId = padId(index + 1);
     
     if (oldId !== newId) {
-      console.log(`Reassigning archived: ${oldId} -> ${newId} (${course.title})`);
+      generationStats.archivedReassignments += 1;
       course.id = newId;
     }
   });
   
   // Save updated mappings after all defragmentation
   saveIdMappings(idMappings);
-  
-  console.log('Active courses after defragmentation:', activeCourses.map(c => `${c.id}: ${c.title}`).join(', '));
-  console.log('Archived courses after defragmentation:', archivedCourses.map(c => `${c.id}: ${c.title}`).join(', '));
   
   // Combine: active courses first, then archived courses
   const combinedCourses = [...activeCourses, ...archivedCourses];
@@ -740,7 +770,7 @@ function main() {
              'window.eventInfo = ' + JSON.stringify(eventInfo) + ';\n' +
              'window.buildTimestamp = "' + buildTimestamp + '";\n';
   fs.writeFileSync(OUTPUT_FILE, js, 'utf8');
-  console.log('Generated courses:', OUTPUT_FILE);
+  console.log(`Generated courses.generated.js (${Math.round(Buffer.byteLength(js, 'utf8') / 1024)} KB)`);
   console.log('Build timestamp:', buildTimestamp);
   console.log('coursesVersion:', version);
   writeCourseContentFiles();
@@ -752,8 +782,8 @@ function main() {
   console.log('✓ Saved version to:', VERSION_FILE);
 
   // Update HTML files with new version
-  console.log('\nUpdating HTML files...');
   updateHtmlFiles(version);
+  console.log('Updated HTML cache-busting.');
 }
 
 main();
