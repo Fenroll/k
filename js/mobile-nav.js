@@ -3,7 +3,7 @@
     if (document.getElementById('bottom-nav')) return;
 
     const THEME_KEY = 'index-copy-theme';
-    const NAV_CACHE_KEY = 'coursebook-mobile-nav-html-v2';
+    const NAV_CACHE_KEY = 'coursebook-mobile-nav-html-v3';
     const CRITICAL_STYLE_ID = 'coursebook-mobile-nav-critical';
 
     function installCriticalMobileNavStyles() {
@@ -20,20 +20,21 @@
     right: 0 !important;
     bottom: 0 !important;
     width: 100% !important;
-        height: calc(60px + var(--locked-safe-area-bottom, env(safe-area-inset-bottom))) !important;
+    height: calc(60px + var(--locked-safe-area-bottom, env(safe-area-inset-bottom))) !important;
     background: #fff !important;
     border-top: 1px solid #e0e0e0 !important;
     z-index: 9999 !important;
     justify-content: space-around !important;
     align-items: center !important;
-        box-sizing: border-box !important;
+    box-sizing: border-box !important;
     padding-bottom: var(--locked-safe-area-bottom, env(safe-area-inset-bottom)) !important;
     overflow: hidden !important;
-        transform: translate3d(0, 0, 0) !important;
-        will-change: transform !important;
-        backface-visibility: hidden !important;
-        -webkit-backface-visibility: hidden !important;
-        -webkit-transform: translate3d(0, 0, 0) !important;
+    transform: none !important;
+    transition: none !important;
+    contain: layout paint style !important;
+    backface-visibility: hidden !important;
+    -webkit-backface-visibility: hidden !important;
+    -webkit-transform: none !important;
   }
 
   #bottom-nav .bottom-nav-item {
@@ -100,6 +101,12 @@
     }
 
     installCriticalMobileNavStyles();
+
+    try {
+        localStorage.removeItem('coursebook-mobile-nav-html-v2');
+    } catch (_) {
+        // Ignore storage errors in private/restricted contexts.
+    }
 
     function setLockedSafeAreaInset() {
         const root = document.documentElement;

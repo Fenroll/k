@@ -144,11 +144,12 @@
         align-items: center;
         padding-bottom: var(--locked-safe-area-bottom, env(safe-area-inset-bottom));
         box-sizing: border-box;
-        transform: translate3d(0, 0, 0);
-        will-change: transform;
+        transform: none;
+        transition: none;
+        contain: layout paint style;
         backface-visibility: hidden;
         -webkit-backface-visibility: hidden;
-        -webkit-transform: translate3d(0, 0, 0);
+        -webkit-transform: none;
     }
     
     .bottom-nav-item {

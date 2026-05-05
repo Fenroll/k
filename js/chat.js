@@ -362,13 +362,18 @@ class ChatFirebaseREST {
     this._ensureInit().then(() => {
         const messagesRef = firebase.database().ref(`messages/${this.documentId}`);
 
-        // Get the latest timestamp from already loaded messages
-        const latestTimestamp = this.messages.length > 0
+        // If the initial history load failed on a fresh browser, there is no cache
+        // and no message timestamp to continue from. In that case, attach a bounded
+        // history listener so the chat can backfill instead of staying blank until
+        // the next browser restart.
+        const hasLoadedHistory = this.messages.length > 0;
+        const latestTimestamp = hasLoadedHistory
             ? this.messages[this.messages.length - 1].timestamp
-            : Date.now();
+            : null;
 
-        // Only listen for messages AFTER the ones we already have
-        const q = messagesRef.orderByChild('timestamp').startAfter(latestTimestamp);
+        const q = hasLoadedHistory
+            ? messagesRef.orderByChild('timestamp').startAfter(latestTimestamp)
+            : messagesRef.orderByChild('timestamp').limitToLast(200);
 
         const onChildAdded = (snapshot) => {
             const val = snapshot.val();
@@ -395,7 +400,27 @@ class ChatFirebaseREST {
         // Reconcile any messages that arrived in the gap between loadMessages() and
         // the realtime listener attaching (startAfter is exclusive on timestamp).
         setTimeout(async () => {
-            if (!this.messages.length) return;
+            if (!this.messages.length) {
+                try {
+                    const snap = await messagesRef.orderByChild('timestamp').limitToLast(200).once('value');
+                    if (!snap.exists()) return;
+                    let added = false;
+                    snap.forEach(child => {
+                        if (!this.messageIds.has(child.key)) {
+                            const val = child.val();
+                            const msg = this._normalizeMessageAuthor({ ...val, key: child.key, id: child.key, timestamp: val.timestamp || Date.now() });
+                            this.messages.push(msg);
+                            this.messageIds.add(child.key);
+                            added = true;
+                        }
+                    });
+                    if (added) {
+                        this.messages.sort((a, b) => a.timestamp - b.timestamp);
+                        callback(this.messages);
+                    }
+                } catch (e) {}
+                return;
+            }
             const gapTs = this.messages[this.messages.length - 1].timestamp;
             try {
                 const snap = await messagesRef.orderByChild('timestamp').startAt(gapTs).once('value');
