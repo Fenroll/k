@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605051nqw"></script>
+  <script src="js/auth-guard.js?v=2026050616og"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -159,7 +159,7 @@
   <link rel="icon" href="favicon.svg?v=202603151sxu" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605051nqw">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050616og">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605015kp">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
@@ -472,7 +472,7 @@
   padding: 0 1.2rem;
     }
   </style>
-  <script src="courses.generated.js?v=202605051nqw"></script>
+  <script src="courses.generated.js?v=2026050616og"></script>
   <script src="js/version-manager.js?v=202603151sxu"></script>
 
 <!-- Subtle UI tweaks -->
@@ -1228,8 +1228,8 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      CHAT SYSTEM - Complete (Firebase REST + UI)
      ============================================ -->
 
-<script src="js/user-identity.js?v=202605051nqw"></script>
-<script src="js/chat.js?v=202605051nqw"></script>
+<script src="js/user-identity.js?v=2026050616og"></script>
+<script src="js/chat.js?v=2026050616og"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -1480,7 +1480,6 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       try {
         const parsedUrl = new URL(file.url);
         const hostname = parsedUrl.hostname.toLowerCase();
-        const pathname = String(parsedUrl.pathname || '').toLowerCase();
         if (!hostname) {
           return { primary: '', fallbacks: [] };
         }
@@ -1505,30 +1504,6 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
 
         if (isPrivateCoursebookWorkerHost) {
           return { primary: '', fallbacks: [] };
-        }
-
-        // Force Google Docs-family links to use the correct app icon.
-        if (hostname === 'docs.google.com' || hostname.endsWith('.docs.google.com')) {
-          let docsPrimary = 'https://www.gstatic.com/images/branding/product/1x/docs_2020q4_48dp.png';
-          let docsFallback = 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_document_x16.png';
-
-          if (pathname.startsWith('/spreadsheets/')) {
-            docsPrimary = 'https://www.gstatic.com/images/branding/product/1x/sheets_2020q4_48dp.png';
-            docsFallback = 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_spreadsheet_x16.png';
-          } else if (pathname.startsWith('/presentation/')) {
-            docsPrimary = 'https://www.gstatic.com/images/branding/product/1x/slides_2020q4_48dp.png';
-            docsFallback = 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_presentation_x16.png';
-          } else if (pathname.startsWith('/forms/')) {
-            docsPrimary = 'https://www.gstatic.com/images/branding/product/1x/forms_2020q4_48dp.png';
-            docsFallback = 'https://ssl.gstatic.com/docs/doclist/images/mediatype/icon_1_form_x16.png';
-          }
-
-          return {
-            primary: docsPrimary,
-            fallbacks: [
-              docsFallback
-            ]
-          };
         }
 
         // Force Drive links to use a Drive icon instead of the generic Google icon.
@@ -1742,12 +1717,6 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
           // Determine file icon based on extension
           if (fileName.endsWith('.pdf')) {
             fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#dc2626" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
-          } else if (fileName.endsWith('.doc') || fileName.endsWith('.docx')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#2563eb" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
-          } else if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#16a34a" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
-          } else if (fileName.endsWith('.ppt') || fileName.endsWith('.pptx')) {
-            fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ea580c" style="flex-shrink:0;"><path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18.5,9L13,3.5V9H18.5Z"/></svg>`;
           } else if (fileName.endsWith('.jpg') || fileName.endsWith('.jpeg') || fileName.endsWith('.png') || fileName.endsWith('.gif') || fileName.endsWith('.bmp') || fileName.endsWith('.webp') || fileName.endsWith('.svg')) {
             fileIcon = `<svg width="18" height="18" viewBox="0 0 24 24" fill="#ec4899" style="flex-shrink:0;"><path d="M19,19H5V5H19M19,3H5A2,2 0 0,0 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M13.96,12.29L11.21,15.83L9.25,13.47L6.5,17H17.5L13.96,12.29Z"/></svg>`;
           } else if (fileName.endsWith('.zip') || fileName.endsWith('.rar') || fileName.endsWith('.7z')) {
@@ -2019,7 +1988,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       <script src="html-priority.js"></script>
       <script src="js/presence.js"></script>
       <script src="js/version-check.js?v=202605021hcw"></script>
-      <script src="js/mobile-nav.js?v=202605051nqw"></script>
+      <script src="js/mobile-nav.js?v=2026050616og"></script>
 <!-- Privacy Modal -->
 <div id="privacyModal" class="text-modal" style="display: none;">
   <div class="text-modal-content" style="max-width: 500px;">

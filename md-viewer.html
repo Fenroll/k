@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202605051nqw"></script>
+  <script src="js/auth-guard.js?v=2026050616og"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -16,7 +16,7 @@
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
   <!-- Mobile Navigation CSS -->
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605051nqw">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050616og">
 
   <!-- Firebase SDKs - Moved to head and using compat versions -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
@@ -282,42 +282,128 @@
     .markdown-body .audio-link-inline {
       display: inline-flex;
       align-items: center;
-      gap: 8px;
+      gap: 7px;
       margin: 0.2em 0;
       max-width: 100%;
       vertical-align: middle;
+      padding: 5px 7px;
+      border: 1px solid #d8e5d4;
+      border-radius: 9px;
+      background: #f4f9f2;
+      box-shadow: 0 1px 2px rgba(47, 93, 80, 0.08);
     }
 
     .markdown-body .audio-link-icon {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border: 1px solid #588157;
-      border-radius: 999px;
-      background: #f0f7f0;
+      border-radius: 8px !important;
+      background: transparent;
       color: #2f5d50;
       cursor: pointer;
-      font-size: 14px;
+      font-weight: 700;
       line-height: 1;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      flex: 0 0 auto;
+      flex: 0 0 26px;
+      padding: 0;
+      text-align: center;
+      font-size: 12px;
+      box-shadow: 0 1px 3px rgba(47, 93, 80, 0.14);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .markdown-body .audio-link-icon:hover {
+      background: #f1f8ef;
+      border-color: #4f754e;
+    }
+
+    .markdown-body .audio-link-icon.is-playing {
+      background: #588157;
+      color: #ffffff;
     }
 
     .markdown-body .audio-link-inline audio {
-      position: absolute;
-      width: 1px;
-      height: 1px;
-      opacity: 0;
-      overflow: hidden;
-      pointer-events: none;
+      display: none;
     }
 
-    .markdown-body .audio-link-icon img {
-      width: 14px;
-      height: 14px;
-      object-fit: contain;
-      pointer-events: none;
+    .markdown-body .audio-link-icon img,
+    .markdown-body .audio-time {
+      display: none !important;
+    }
+
+    .markdown-body .audio-link-label {
+      max-width: 125px;
+      min-width: 0;
+      color: var(--text);
+      font-size: 0.82em;
+      font-weight: 700;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .markdown-body .audio-link-label:empty {
+      display: none;
+    }
+
+    .markdown-body .audio-progress {
+      width: 118px;
+      accent-color: #588157;
+      cursor: pointer;
+    }
+
+    .markdown-body .audio-volume {
+      width: 44px;
+      accent-color: #588157;
+      cursor: pointer;
+    }
+
+    .markdown-body .audio-progress,
+    .markdown-body .audio-volume {
+      height: 4px;
+      appearance: none;
+      -webkit-appearance: none;
+      background: transparent;
+    }
+
+    .markdown-body .audio-progress::-webkit-slider-runnable-track,
+    .markdown-body .audio-volume::-webkit-slider-runnable-track {
+      height: 4px;
+      border-radius: 999px;
+      background: #d7e5d2;
+    }
+
+    .markdown-body .audio-progress::-webkit-slider-thumb,
+    .markdown-body .audio-volume::-webkit-slider-thumb {
+      appearance: none;
+      -webkit-appearance: none;
+      width: 8px;
+      height: 8px;
+      margin-top: -2px;
+      border-radius: 50%;
+      border: 0;
+      background: #588157;
+      box-shadow: 0 1px 2px rgba(47, 93, 80, 0.22);
+    }
+
+    .markdown-body .audio-progress::-moz-range-track,
+    .markdown-body .audio-volume::-moz-range-track {
+      height: 4px;
+      border-radius: 999px;
+      background: #d7e5d2;
+    }
+
+    .markdown-body .audio-progress::-moz-range-thumb,
+    .markdown-body .audio-volume::-moz-range-thumb {
+      width: 8px;
+      height: 8px;
+      border: 0;
+      border-radius: 50%;
+      background: #588157;
+      box-shadow: 0 1px 2px rgba(47, 93, 80, 0.22);
     }
 
     /* Links */
@@ -586,7 +672,7 @@
       renderer: {
         link(href, title, text) {
           const rawHref = String(href || '').trim();
-          const rawText = String(text || 'Audio').trim() || 'Audio';
+          const rawText = String(text || '').trim();
           const isMp3 = /\.mp3(?:[?#].*)?$/i.test(rawHref);
 
           if (!isMp3) {
@@ -597,7 +683,9 @@
           }
 
           const safeHref = rawHref.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-          return `<span class="audio-link-inline" data-audio-src="${safeHref}"><button type="button" class="audio-link-icon" aria-label="Play audio" title="Play audio"><img src="svg/md-editor/icon-sound.svg" alt="Play audio"></button><audio preload="none" src="${safeHref}"></audio></span>`;
+          const safeText = rawText.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          const safeLabel = rawText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+          return `<span class="audio-link-inline" data-audio-src="${safeHref}"${safeText ? ` data-audio-label="${safeText}"` : ''}><button type="button" class="audio-link-icon" aria-label="${safeText ? `Play ${safeText}` : 'Play audio'}" title="Play audio">▶</button><span class="audio-link-label">${safeLabel}</span><input class="audio-progress" type="range" min="0" max="1000" value="0" aria-label="Audio position"><input class="audio-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Audio volume"><audio preload="metadata" src="${safeHref}"></audio></span>`;
         },
         image(href, title, text) {
           href = String(href || '').trim().replace(/[.,;:!?]+$/g, '');
@@ -1411,6 +1499,7 @@
           const root = document.getElementById('content');
           root.innerHTML = html;
           applyViewerSpacingOverrides();
+          normalizeAudioWidgets(root);
 
           // Render LaTeX
           if (typeof renderMathInElement !== 'undefined') {
@@ -1448,32 +1537,139 @@
     initGenerousImageLoading();
     initImageLightbox();
 
-    let activeViewerAudio = null;
-    let activeViewerAudioButton = null;
-    let viewerAudioEngine = null;
+    function syncAudioWidget(audioWrap) {
+      if (!audioWrap) return;
+      const audio = audioWrap.querySelector('audio');
+      const progress = audioWrap.querySelector('.audio-progress');
+      const button = audioWrap.querySelector('.audio-link-icon');
+      if (!audio) return;
 
-    const ensureViewerAudioEngine = () => {
-      if (viewerAudioEngine && viewerAudioEngine.isConnected) return viewerAudioEngine;
+      if (progress && Number.isFinite(audio.duration) && audio.duration > 0) {
+        progress.value = String(Math.round((audio.currentTime / audio.duration) * 1000));
+      }
+      if (button) {
+        button.classList.toggle('is-playing', !audio.paused);
+        button.textContent = audio.paused ? '▶' : '❚❚';
+        button.title = audio.paused ? 'Play audio' : 'Pause audio';
+      }
+    }
 
-      const engine = document.createElement('audio');
-      engine.id = 'viewerAudioEngine';
-      engine.preload = 'auto';
-      engine.autoplay = false;
-      engine.controls = false;
-      engine.muted = false;
-      engine.volume = 1;
-      engine.setAttribute('playsinline', '');
-      engine.style.position = 'fixed';
-      engine.style.left = '-9999px';
-      engine.style.width = '1px';
-      engine.style.height = '1px';
-      engine.style.opacity = '0';
-      engine.style.pointerEvents = 'none';
-      document.body.appendChild(engine);
+    function normalizeAudioWidgets(root = document) {
+      if (!root || !root.querySelectorAll) return;
+      const deriveAudioLabel = (labelText, url = '') => {
+        const label = String(labelText || '').trim();
+        const href = String(url || '').trim();
+        const fileName = href.split(/[\\/]/).pop().split(/[?#]/)[0];
+        if (!label || label.toLowerCase() === 'audio' || label === href || label === fileName) return '';
+        return label;
+      };
 
-      viewerAudioEngine = engine;
-      return viewerAudioEngine;
-    };
+      root.querySelectorAll('.audio-link-icon').forEach((button) => {
+        if (button.closest('.audio-link-inline')) return;
+        const iconSrc = String(button.querySelector('img')?.getAttribute('src') || '').toLowerCase();
+        const buttonText = String(button.textContent || '').trim();
+        if (
+          iconSrc.includes('icon-sound.svg') ||
+          iconSrc.includes('icon-audio.svg') ||
+          buttonText === '▶' ||
+          buttonText === '❚❚'
+        ) {
+          button.remove();
+        }
+      });
+
+      root.querySelectorAll('a[href]').forEach((link) => {
+        const href = String(link.getAttribute('href') || '').trim();
+        if (!/\.mp3(?:[?#].*)?$/i.test(href) || link.closest('.audio-link-inline')) return;
+
+        const label = deriveAudioLabel(link.textContent, href);
+        const wrap = document.createElement('span');
+        wrap.className = 'audio-link-inline';
+        wrap.setAttribute('data-audio-src', href);
+        if (label) wrap.setAttribute('data-audio-label', label);
+        wrap.innerHTML = '<button type="button" class="audio-link-icon" aria-label="Play audio" title="Play audio">▶</button><span class="audio-link-label"></span><input class="audio-progress" type="range" min="0" max="1000" value="0" aria-label="Audio position"><input class="audio-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Audio volume"><audio preload="metadata"></audio>';
+        wrap.querySelector('.audio-link-label').textContent = label;
+        wrap.querySelector('audio').src = href;
+        link.replaceWith(wrap);
+      });
+
+      root.querySelectorAll('audio[src]').forEach((audio) => {
+        if (audio.closest('.audio-link-inline')) return;
+        const src = audio.getAttribute('src') || '';
+        if (!src) return;
+        const wrap = document.createElement('span');
+        wrap.className = 'audio-link-inline';
+        wrap.setAttribute('data-audio-src', src);
+        wrap.innerHTML = '<button type="button" class="audio-link-icon" aria-label="Play audio" title="Play audio">▶</button><span class="audio-link-label"></span><input class="audio-progress" type="range" min="0" max="1000" value="0" aria-label="Audio position"><input class="audio-volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="Audio volume">';
+        audio.preload = 'metadata';
+        wrap.appendChild(audio.cloneNode(true));
+        audio.replaceWith(wrap);
+      });
+
+      root.querySelectorAll('.audio-link-inline').forEach((wrap) => {
+        const button = wrap.querySelector('.audio-link-icon');
+        if (button) {
+          button.style.setProperty('border-radius', '8px', 'important');
+          button.querySelectorAll('img').forEach((img) => img.remove());
+          const labelInsideButton = button.querySelector('.audio-link-label');
+          if (labelInsideButton) wrap.insertBefore(labelInsideButton, button.nextSibling);
+          if (!button.textContent.trim() || button.textContent.trim() !== '❚❚') button.textContent = '▶';
+          button.title = 'Play audio';
+        }
+
+        wrap.querySelectorAll('.audio-time').forEach((time) => time.remove());
+
+        let audio = wrap.querySelector('audio');
+        const src = wrap.getAttribute('data-audio-src') || (audio && audio.getAttribute('src')) || '';
+        let label = wrap.querySelector('.audio-link-label');
+        const cleanLabel = deriveAudioLabel(
+          wrap.getAttribute('data-audio-label') || (label ? label.textContent : ''),
+          src
+        );
+        if (cleanLabel) {
+          wrap.setAttribute('data-audio-label', cleanLabel);
+        } else {
+          wrap.removeAttribute('data-audio-label');
+        }
+        if (!label) {
+          label = document.createElement('span');
+          label.className = 'audio-link-label';
+          const insertAfter = wrap.querySelector('.audio-link-icon');
+          wrap.insertBefore(label, insertAfter ? insertAfter.nextSibling : wrap.firstChild);
+        }
+        label.textContent = cleanLabel;
+        if (!audio && src) {
+          audio = document.createElement('audio');
+          audio.preload = 'metadata';
+          audio.src = src;
+          wrap.appendChild(audio);
+        }
+        if (audio && src && !audio.getAttribute('src')) audio.src = src;
+
+        if (!wrap.querySelector('.audio-progress')) {
+          const progress = document.createElement('input');
+          progress.className = 'audio-progress';
+          progress.type = 'range';
+          progress.min = '0';
+          progress.max = '1000';
+          progress.value = '0';
+          progress.setAttribute('aria-label', 'Audio position');
+          wrap.insertBefore(progress, audio || null);
+        }
+
+        if (!wrap.querySelector('.audio-volume')) {
+          const volume = document.createElement('input');
+          volume.className = 'audio-volume';
+          volume.type = 'range';
+          volume.min = '0';
+          volume.max = '1';
+          volume.step = '0.01';
+          volume.value = audio ? String(audio.volume || 1) : '1';
+          volume.setAttribute('aria-label', 'Audio volume');
+          wrap.insertBefore(volume, audio || null);
+        }
+      });
+    }
 
     document.addEventListener('click', (event) => {
       const target = event.target;
@@ -1482,103 +1678,65 @@
       const audioButton = target.closest('.audio-link-icon');
       if (!audioButton) return;
 
-      const resolveAudioContext = (button) => {
-        const wrap = button.closest('.audio-link-inline') || null;
-        const nearestDataSourceHolder = button.closest('[data-audio-src]');
-
-        // If wrapper is missing, use nearest practical container around the button.
-        const container = wrap
-          || nearestDataSourceHolder
-          || button.parentElement
-          || button;
-
-        const audioInContainer = container && container.querySelector
-          ? container.querySelector('audio[src]')
-          : null;
-
-        const audioNearParent = (!audioInContainer && button.parentElement && button.parentElement.querySelector)
-          ? button.parentElement.querySelector('audio[src]')
-          : null;
-
-        const mp3Link = (container && container.querySelector)
-          ? container.querySelector('a[href$=".mp3"],a[href*=".mp3?"],a[href*=".mp3#"]')
-          : null;
-
-        const src = (
-          (wrap && wrap.getAttribute('data-audio-src'))
-          || (nearestDataSourceHolder && nearestDataSourceHolder.getAttribute('data-audio-src'))
-          || button.getAttribute('data-audio-src')
-          || (audioInContainer && audioInContainer.getAttribute('src'))
-          || (audioNearParent && audioNearParent.getAttribute('src'))
-          || (mp3Link && mp3Link.getAttribute('href'))
-          || ''
-        ).trim();
-
-        return {
-          wrap,
-          container,
-          audioEl: audioInContainer || audioNearParent || null,
-          src
-        };
-      };
-
       event.preventDefault();
       event.stopPropagation();
-      const context = resolveAudioContext(audioButton);
-      const wrap = context.wrap;
-      const audioEl = context.audioEl;
-      const src = context.src;
-      if (!src) return;
+      const wrap = audioButton.closest('.audio-link-inline');
+      const audio = wrap ? wrap.querySelector('audio') : null;
+      if (!audio) return;
 
-      const player = ensureViewerAudioEngine();
-      const isSameSource = (player.getAttribute('data-current-src') || '') === src;
-      const isSameButton = activeViewerAudioButton === audioButton && isSameSource;
-      if (isSameButton && activeViewerAudio && !activeViewerAudio.paused) {
-        activeViewerAudio.pause();
-        audioButton.classList.remove('is-playing');
-        activeViewerAudio = null;
-        activeViewerAudioButton = null;
-        player.removeAttribute('data-current-src');
+      document.querySelectorAll('.audio-link-inline audio').forEach((otherAudio) => {
+        if (otherAudio !== audio && !otherAudio.paused) {
+          otherAudio.pause();
+          syncAudioWidget(otherAudio.closest('.audio-link-inline'));
+        }
+      });
+
+      if (audio.paused) {
+        audio.play().catch(() => {});
+      } else {
+        audio.pause();
+      }
+      syncAudioWidget(wrap);
+    });
+
+    document.addEventListener('input', (event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+
+      const progress = target.closest('.audio-progress');
+      if (progress) {
+        const wrap = progress.closest('.audio-link-inline');
+        const audio = wrap ? wrap.querySelector('audio') : null;
+        if (audio && Number.isFinite(audio.duration) && audio.duration > 0) {
+          audio.currentTime = (Number(progress.value) / 1000) * audio.duration;
+          syncAudioWidget(wrap);
+        }
         return;
       }
 
-      if (activeViewerAudio && !activeViewerAudio.paused) {
-        try { activeViewerAudio.pause(); } catch (_) {}
+      const volume = target.closest('.audio-volume');
+      if (volume) {
+        const wrap = volume.closest('.audio-link-inline');
+        const audio = wrap ? wrap.querySelector('audio') : null;
+        if (audio) audio.volume = Math.max(0, Math.min(1, Number(volume.value) || 0));
       }
-      if (activeViewerAudioButton) {
-        activeViewerAudioButton.classList.remove('is-playing');
-      }
-
-      player.loop = false;
-      player.muted = false;
-      player.volume = 1;
-      if (player.src !== src) {
-        player.src = src;
-      }
-      player.setAttribute('data-current-src', src);
-      player.play().catch(() => {});
-
-      activeViewerAudio = player;
-      activeViewerAudioButton = audioButton;
-      audioButton.classList.add('is-playing');
-
-      const onEnded = () => {
-        audioButton.classList.remove('is-playing');
-        if (activeViewerAudio === player) activeViewerAudio = null;
-        if (activeViewerAudioButton === audioButton) activeViewerAudioButton = null;
-      };
-
-      player.onended = onEnded;
-      player.onpause = () => {
-        if (player.ended) return;
-        if (activeViewerAudio === player) activeViewerAudio = null;
-        if (activeViewerAudioButton === audioButton) activeViewerAudioButton = null;
-        audioButton.classList.remove('is-playing');
-      };
-      player.onplay = () => {
-        audioButton.classList.add('is-playing');
-      };
     });
+
+    document.addEventListener('play', (event) => {
+      if (event.target instanceof HTMLAudioElement) syncAudioWidget(event.target.closest('.audio-link-inline'));
+    }, true);
+
+    document.addEventListener('pause', (event) => {
+      if (event.target instanceof HTMLAudioElement) syncAudioWidget(event.target.closest('.audio-link-inline'));
+    }, true);
+
+    document.addEventListener('timeupdate', (event) => {
+      if (event.target instanceof HTMLAudioElement) syncAudioWidget(event.target.closest('.audio-link-inline'));
+    }, true);
+
+    document.addEventListener('loadedmetadata', (event) => {
+      if (event.target instanceof HTMLAudioElement) syncAudioWidget(event.target.closest('.audio-link-inline'));
+    }, true);
 
     (function(){
       function getParam(name){ const u=new URL(window.location.href); return u.searchParams.get(name); }
@@ -1647,6 +1805,7 @@
           const htmlContent = decodeURIComponent(window.location.hash.substring(1));
           const root = document.getElementById('content');
           root.innerHTML = htmlContent;
+          normalizeAudioWidgets(root);
 
           // Render LaTeX with auto-render
           if (typeof renderMathInElement !== 'undefined') {
@@ -1738,6 +1897,7 @@
           const root = document.getElementById('content');
           root.innerHTML = html;
           applyViewerSpacingOverrides();
+          normalizeAudioWidgets(root);
 
           // Images now use relative paths like "assets/image.png" which resolve correctly
           // from md-viewer.html location since all assets are in the central assets/ folder
@@ -1881,6 +2041,7 @@
 
               contentDiv.innerHTML = html;
               applyViewerSpacingOverrides();
+              normalizeAudioWidgets(contentDiv);
 
               if (typeof renderMathInElement !== 'undefined') {
                 try {
@@ -2094,9 +2255,11 @@
 
               root.innerHTML = doc.body.innerHTML;
               applyViewerSpacingOverrides();
+              normalizeAudioWidgets(root);
             } else {
               root.innerHTML = fileData.content;
               applyViewerSpacingOverrides();
+              normalizeAudioWidgets(root);
             }
 
             window.scrollTo(0, 0);
@@ -2231,7 +2394,7 @@
   </script>
 
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202605051nqw"></script>
+  <script src="courses.generated.js?v=2026050616og"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2336,9 +2499,9 @@
 
 
 
-<script src="js/user-identity.js?v=202605051nqw"></script>
+<script src="js/user-identity.js?v=2026050616og"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202605051nqw"></script>
+    <script src="js/chat.js?v=2026050616og"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script src="js/notes-init.js?v=202605022sg"></script>
 
@@ -3260,6 +3423,7 @@
 
       root.innerHTML = html;
       applyViewerSpacingOverrides();
+      normalizeAudioWidgets(root);
 
       // Re-run KaTeX
       if (typeof renderMathInElement !== 'undefined') {
