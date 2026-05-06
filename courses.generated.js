@@ -1,4 +1,4 @@
-window.coursesVersion = "2026050616og";
+window.coursesVersion = "202605061g4y";
 window.courses = [
   {
     "id": "000001",
@@ -804,6 +804,13 @@ window.courses = [
             "url": "https://files.coursebook.lol/%D0%9F%D0%B0%D0%B8%D1%81%D0%B8%D0%B9/2026-04-29/%D0%9B%D0%B5%D0%BA%D1%86%D0%B8%D1%8F%2010.%20%D0%95%D0%BD%D0%B7%D0%B8%D0%BC%D0%B8.pdf",
             "order": 14,
             "source": "link.txt"
+          },
+          {
+            "name": "11. ССЗ..url",
+            "path": "files/Клинична лаборатория/Лекции/link.txt#15",
+            "url": "https://files.coursebook.lol/Fenroll/2026-05-06/%D0%9B%D0%B5%D0%BA%D1%86%D0%B8%D1%8F%2011.%20%D0%A1%D0%A1%D0%97.pdf",
+            "order": 15,
+            "source": "link.txt"
           }
         ]
       },
@@ -878,6 +885,13 @@ window.courses = [
             "path": "files/Клинична лаборатория/Упражнения/link.txt#10",
             "url": "https://files.coursebook.lol/%D0%9F%D0%B0%D0%B8%D1%81%D0%B8%D0%B9/2026-04-29/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%209.%20%D0%9F%D1%80%D0%BE%D1%82%D0%B5%D0%B8%D0%BD%D0%B8.pdf",
             "order": 10,
+            "source": "link.txt"
+          },
+          {
+            "name": "12. Ензими..url",
+            "path": "files/Клинична лаборатория/Упражнения/link.txt#11",
+            "url": "https://files.coursebook.lol/Fenroll/2026-05-06/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%2012.%20%D0%95%D0%BD%D0%B7%D0%B8%D0%BC%D0%B8.pdf",
+            "order": 11,
             "source": "link.txt"
           }
         ]
@@ -1240,4 +1254,4 @@ window.courses = [
     "_contentKey": "archived-000005"
   }
 ];
-window.buildTimestamp = "06.05.2026 15:21";
+window.buildTimestamp = "06.05.2026 18:46";

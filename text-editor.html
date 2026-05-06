@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026050616og"></script>
+  <script src="js/auth-guard.js?v=202605061g4y"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026050616og">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605061g4y">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -166,7 +166,7 @@
     }
 
     #audioBtn img {
-      opacity: 1;
+      opacity: 0.9;
       filter: none;
     }
 
@@ -1960,8 +1960,8 @@
 
     <!-- G4: Lists -->
     <div class="toolbar-group mobile-extra">
-      <button id="ulBtn" title="Unordered List (Ctrl+Shift+U)"><img src="svg/md-editor/icon-unordered.svg?v=2026031715gu" alt="Unordered List" class="toolbar-icon"></button>
-      <button id="olBtn" title="Ordered List (Ctrl+Shift+O)"><img src="svg/md-editor/icon-ordered.svg?v=2026031715gu" alt="Ordered List" class="toolbar-icon"></button>
+      <button id="ulBtn" title="Unordered List (Ctrl+G)"><img src="svg/md-editor/icon-unordered.svg?v=2026031715gu" alt="Unordered List" class="toolbar-icon"></button>
+      <button id="olBtn" title="Ordered List (Ctrl+Shift+G)"><img src="svg/md-editor/icon-ordered.svg?v=2026031715gu" alt="Ordered List" class="toolbar-icon"></button>
     </div>
 
     <!-- G5: Indent -->
@@ -1973,6 +1973,7 @@
     <!-- G6: Table -->
     <div class="toolbar-group mobile-extra" style="position: relative;">
       <button id="tableBtn" title="Insert Table"><img src="svg/md-editor/icon-table.svg?v=2026031715gu" alt="Table" class="toolbar-icon"></button>
+      <button id="editTableBtn" title="Edit table with Tables Generator"><img src="svg/md-editor/icon-edit-table.svg?v=2026031715gu" alt="Edit Table" class="toolbar-icon"></button>
       <div id="tableOptionsMenu" class="table-options-menu" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 220px; white-space: nowrap;">
         <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Insert row above</div>
         <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Insert row below</div>
@@ -1995,7 +1996,6 @@
       <button id="symbolsBtn" title="Insert Symbols"><img src="svg/md-editor/icon-symbols.svg?v=2026031715gu" alt="Symbols" class="toolbar-icon"></button>
       <button id="linkBtn" title="Link"><img src="svg/md-editor/icon-link.svg?v=2026031715gu" alt="Link" class="toolbar-icon"></button>
       <button id="audioBtn" title="Import MP3"><img src="svg/md-editor/icon-audio.svg?v=20260506a" alt="Audio" class="toolbar-icon"></button>
-      <button id="editTableBtn" title="Edit table with Tables Generator"><img src="svg/md-editor/icon-edit-table.svg?v=2026031715gu" alt="Edit Table" class="toolbar-icon"></button>
       <button id="noteBtn" title="Add Note"><img src="svg/md-editor/icon-note.svg?v=2026031715gu" alt="Note" class="toolbar-icon"></button>
       <button id="imageBtn" title="Add Image"><img src="svg/md-editor/icon-image.svg?v=2026031715gu" alt="Image" class="toolbar-icon"></button>
     </div>
@@ -2095,7 +2095,6 @@
         <input type="text" id="audioImportUrl" placeholder="https://example.com/audio.mp3" style="width:100%; margin-top:6px;">
       </div>
       <div class="modal-footer">
-        <button id="cancelAudioImportBtn" type="button">Cancel</button>
         <button id="insertAudioImportBtn" class="primary" type="button">Insert MP3</button>
       </div>
     </div>
@@ -2110,50 +2109,45 @@
         <h2>Keyboard Shortcuts</h2>
         <button class="close-btn" id="closeShortcutsBtn">✖</button>
       </div>
-      <div class="modal-body" style="max-height: 500px; overflow-y: auto;">
-        <h3>Formatting</h3>
-        <ul style="list-style: none; padding: 0;">
-          <li style="margin: 8px 0;"><strong>Ctrl+B</strong> - Bold</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+I</strong> - Italic</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+`</strong> - Code</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+S</strong> - Save/Download file</li>
+      <div class="modal-body" style="max-height: 500px; overflow-y: auto; padding-top: 8px;">
+        <h3 style="margin: 0 0 6px;">Formatting</h3>
+        <ul style="list-style: none; padding: 0; margin: 0 0 10px;">
+          <li style="margin: 4px 0;"><strong>Ctrl+B</strong> - Bold</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+I</strong> - Italic</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+U</strong> - Underline</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+S</strong> - Open save dialog</li>
         </ul>
-        <h3>Headings & Paragraphs</h3>
-        <ul style="list-style: none; padding: 0;">
-          <li style="margin: 8px 0;"><strong>Ctrl+0</strong> - Normal paragraph</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+1</strong> - Heading 1</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+2</strong> - Heading 2</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+3</strong> - Heading 3</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+4</strong> - Heading 4</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+Shift+J</strong> - Previous H1 heading</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+Shift+K</strong> - Next H1 heading</li>
+        <h3 style="margin: 10px 0 6px;">Headings & Paragraphs</h3>
+        <ul style="list-style: none; padding: 0; margin: 0 0 10px;">
+          <li style="margin: 4px 0;"><strong>Ctrl+0</strong> - Normal paragraph</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+1</strong> - Heading 1</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+2</strong> - Heading 2</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+3</strong> - Heading 3</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+4</strong> - Heading 4</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+Shift+J</strong> - Previous H1 heading</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+Shift+K</strong> - Next H1 heading</li>
         </ul>
-        <h3>Lists & Blocks</h3>
-        <ul style="list-style: none; padding: 0;">
-          <li style="margin: 8px 0;"><strong>Ctrl+G</strong> - Unordered list</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+Shift+O</strong> - Ordered list</li>
-          <li style="margin: 8px 0;"><strong>Tab</strong> - Indent list item</li>
-          <li style="margin: 8px 0;"><strong>Shift+Tab</strong> - Outdent list item</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+Q</strong> - Blockquote</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+T</strong> - Table</li>
+        <h3 style="margin: 10px 0 6px;">Lists & Blocks</h3>
+        <ul style="list-style: none; padding: 0; margin: 0 0 10px;">
+          <li style="margin: 4px 0;"><strong>Ctrl+G</strong> - Unordered list</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+Shift+G</strong> - Ordered list</li>
+          <li style="margin: 4px 0;"><strong>Tab</strong> - Indent list item</li>
+          <li style="margin: 4px 0;"><strong>Shift+Tab</strong> - Outdent list item</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+Q</strong> - Blockquote</li>
+          <li style="margin: 4px 0;"><strong>Shift+Enter</strong> - Line break</li>
         </ul>
-        <h3>Text Color & Styles</h3>
-        <ul style="list-style: none; padding: 0;">
-          <li style="margin: 8px 0;"><strong>Ctrl+M</strong> - Apply last text color</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+Shift+M</strong> - Remove text color</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+D</strong> - Apply last text color</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+Shift+D</strong> - Remove text color</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+H</strong> - Apply last highlight color</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+Shift+H</strong> - Remove highlight</li>
+        <h3 style="margin: 10px 0 6px;">Text Color & Styles</h3>
+        <ul style="list-style: none; padding: 0; margin: 0 0 10px;">
+          <li style="margin: 4px 0;"><strong>Ctrl+D</strong> - Apply last text color</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+Shift+D</strong> - Remove text color</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+H</strong> - Apply last highlight color</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+Shift+H</strong> - Remove highlight</li>
         </ul>
-        <h3>Undo/Redo</h3>
-        <ul style="list-style: none; padding: 0;">
-          <li style="margin: 8px 0;"><strong>Ctrl+Z</strong> - Undo</li>
-          <li style="margin: 8px 0;"><strong>Ctrl+Y</strong> or <strong>Ctrl+Shift+Z</strong> - Redo</li>
+        <h3 style="margin: 10px 0 6px;">Undo/Redo</h3>
+        <ul style="list-style: none; padding: 0; margin: 0;">
+          <li style="margin: 4px 0;"><strong>Ctrl+Z</strong> - Undo</li>
+          <li style="margin: 4px 0;"><strong>Ctrl+Y</strong> or <strong>Ctrl+Shift+Z</strong> - Redo</li>
         </ul>
-      </div>
-      <div class="modal-footer">
-        <button class="primary" id="closeShortcutsBtn2">Close</button>
       </div>
     </div>
   </div>
@@ -2172,9 +2166,6 @@
         <div id="fileListContainer" style="flex: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px;">
           <div id="fileList" style="padding: 0;"></div>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button id="closeFileBrowserBtn2">Cancel</button>
       </div>
     </div>
   </div>
@@ -2209,7 +2200,6 @@
 
       </div>
       <div class="modal-footer">
-        <button id="cancelImageBtn">Cancel</button>
         <button class="primary" id="insertImageBtn">Insert Image</button>
       </div>
     </div>
@@ -2247,7 +2237,6 @@
       </div>
       <div class="modal-footer">
         <button id="removeNoteBtn" style="display: none; background: #ef4444; color: #fff; border-color: #ef4444; margin-right: auto;">Remove Note</button>
-        <button id="cancelNoteBtn">Cancel</button>
         <button class="primary" id="insertNoteBtn">Save Note</button>
       </div>
     </div>
@@ -2275,7 +2264,6 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button id="cancelSaveBtn">Cancel</button>
         <button class="primary" id="confirmSaveBtn">Download</button>
       </div>
     </div>
@@ -2299,7 +2287,6 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button id="cancelTableBtn">Cancel</button>
         <button class="primary" id="confirmTableBtn">Create Table</button>
       </div>
     </div>
@@ -2324,9 +2311,6 @@
             <div>Merge Down</div>
           </button>
         </div>
-      </div>
-      <div class="modal-footer">
-        <button id="cancelMergeBtn">Cancel</button>
       </div>
     </div>
   </div>
@@ -2396,7 +2380,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=2026050616og"></script>
+  <script src="courses.generated.js?v=202605061g4y"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -3044,7 +3028,6 @@
     const shortcutsBtn = document.getElementById('shortcutsBtn');
     const shortcutsModal = document.getElementById('shortcutsModal');
     const closeShortcutsBtn = document.getElementById('closeShortcutsBtn');
-    const closeShortcutsBtn2 = document.getElementById('closeShortcutsBtn2');
 
     let editorContent = '';
     let rawContent = '';
@@ -3352,7 +3335,7 @@
       if (selection.rangeCount > 0) {
         savedTableRange = selection.getRangeAt(0).cloneRange();
       } else {
-        alert('Please click in the editor first');
+        showNotification('Please click in the editor first', 'warning');
         return;
       }
 
@@ -3452,7 +3435,7 @@
 
     function addTableColumnBefore() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
 
@@ -3466,7 +3449,7 @@
 
     function addTableColumnAfter() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
 
@@ -3480,7 +3463,7 @@
 
     function deleteTableColumn() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
 
@@ -3492,7 +3475,7 @@
 
     function addTableRowBefore() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
       const table = getTableFromCell(cell);
       const row = cell.closest('tr');
       const newRow = document.createElement('tr');
@@ -3507,7 +3490,7 @@
 
     function addTableRowAfter() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
       const table = getTableFromCell(cell);
       const row = cell.closest('tr');
       const newRow = document.createElement('tr');
@@ -3522,7 +3505,7 @@
 
     function deleteTableRow() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
       const row = cell.closest('tr');
       row.remove();
       saveToHistory();
@@ -3530,7 +3513,7 @@
 
     function deleteTable() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
       const table = getTableFromCell(cell);
       table.remove();
       saveToHistory();
@@ -3538,16 +3521,16 @@
 
     function mergeTableCells() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
 
       const row = cell.closest('tr');
-      if (!row) return alert('Позиционирай курсора в таблица');
+      if (!row) return showNotification('Позиционирай курсора в таблица', 'warning');
 
       // Get current cell index and next cell
       const cellIndex = cell.cellIndex;
       const nextCell = row.cells[cellIndex + 1];
 
-      if (!nextCell) return alert('Нямаш следваща клетка за мърджване');
+      if (!nextCell) return showNotification('Нямаш следваща клетка за мърджване', 'warning');
 
       // Merge content
       cell.textContent = (cell.textContent + ' ' + nextCell.textContent).trim();
@@ -3564,7 +3547,7 @@
 
     function setCellBackgroundColor() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
       const color = prompt('Цвят (hex):', '#FAF594');
       if (color) {
         cell.style.backgroundColor = color;
@@ -3574,11 +3557,11 @@
 
     function splitTableCell() {
       const cell = getTableCellFromSelection();
-      if (!cell) return alert('Позиционирай курсора в таблица');
+      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
 
       const colspan = parseInt(cell.getAttribute('colspan')) || 1;
 
-      if (colspan <= 1) return alert('Клетката няма colspan за разделяне');
+      if (colspan <= 1) return showNotification('Клетката няма colspan за разделяне', 'warning');
 
       const row = cell.closest('tr');
       const cellIndex = cell.cellIndex;
@@ -4660,7 +4643,6 @@
     });
 
     document.getElementById('closeAudioImportBtn').addEventListener('click', closeAudioImportModal);
-    document.getElementById('cancelAudioImportBtn').addEventListener('click', closeAudioImportModal);
     document.getElementById('insertAudioImportBtn').addEventListener('click', insertAudioFromImportModal);
     document.getElementById('audioImportModal').addEventListener('click', (e) => {
       if (e.target.id === 'audioImportModal') closeAudioImportModal();
@@ -4682,7 +4664,7 @@
       const selection = window.getSelection();
 
       if (!selection.rangeCount || !selection.toString()) {
-        alert('Моля, избери текст първо');
+        showNotification('Моля, избери текст първо', 'warning');
         return;
       }
 
@@ -4814,7 +4796,7 @@
       }
 
       if (!table) {
-        alert('No table found. Create a table first or click inside a table');
+        showNotification('No table found. Create a table first or click inside a table', 'warning');
         return;
       }
 
@@ -4822,11 +4804,11 @@
       const tableHtml = table.outerHTML;
       navigator.clipboard.writeText(tableHtml).then(() => {
         // Open Tables Generator
-        alert('Table copied to clipboard!\n\nNow:\n1. Go to tablesgenerator.com\n2. Click "Import" or "Paste" button\n3. Paste your table (Ctrl+V)\n4. Edit it\n5. Copy the HTML\n6. Come back and paste here');
+        showNotification('Table copied to clipboard. Opening Tables Generator...', 'info');
         window.open('https://www.tablesgenerator.com/html_tables', '_blank');
       }).catch(err => {
         console.error('Failed to copy:', err);
-        alert('Failed to copy table. Please try again');
+        showNotification('Failed to copy table. Please try again', 'error');
       });
     });
 
@@ -4980,7 +4962,7 @@
     function removeTextColorFormatting() {
       const selection = window.getSelection();
       if (!selection || selection.rangeCount === 0 || !editor.contains(selection.anchorNode)) {
-        alert('Please select text first');
+        showNotification('Please select text first', 'warning');
         return false;
       }
 
@@ -5143,7 +5125,7 @@
       }
 
       if (!removedAny && !selection.toString()) {
-        alert('Please select text first');
+        showNotification('Please select text first', 'warning');
         return false;
       }
 
@@ -5270,7 +5252,7 @@
 
       const selection = window.getSelection();
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
-        alert('Please select text first');
+        showNotification('Please select text first', 'warning');
         return;
       }
 
@@ -5286,7 +5268,7 @@
 
       // If no selection or selection is in editor
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
-        alert('Моля, избери текст първо');
+        showNotification('Моля, избери текст първо', 'warning');
         return;
       }
 
@@ -5453,7 +5435,7 @@
     document.getElementById('openCoursesBtn').addEventListener('click', () => {
       // Check if courses data is available
       if (typeof courses === 'undefined') {
-        alert('Courses data not found. Please make sure you are running this from index.html or include courses.generated.js');
+        showNotification('Courses data not found. Please make sure courses.generated.js is loaded.', 'error');
         return;
       }
 
@@ -5602,7 +5584,7 @@
     document.getElementById('htmlEditorBtn').addEventListener('click', () => {
       // Check if editor has content
       if (!editor.innerHTML.trim()) {
-        alert('⚠️ No content to edit.\n\nPlease open a file first.');
+        showNotification('No content to edit. Please open a file first.', 'warning');
         return;
       }
 
@@ -5695,7 +5677,7 @@ localStorage.setItem('textEditorContent', htmlContent);
         const protocolHint = window.location.protocol === 'file:'
           ? ' (on file:// this file must be in msgNotes or loaded from courses-data)'
           : '';
-        alert('Cannot load file content from courses: ' + (file.path || file.name) + protocolHint);
+        showNotification('Cannot load file content from courses: ' + (file.path || file.name) + protocolHint, 'error');
         return;
       }
 
@@ -5754,10 +5736,6 @@ localStorage.setItem('textEditorContent', htmlContent);
       document.getElementById('fileBrowserModal').style.display = 'none';
     });
 
-    document.getElementById('closeFileBrowserBtn2').addEventListener('click', () => {
-      document.getElementById('fileBrowserModal').style.display = 'none';
-    });
-
     // Close modal when clicking outside
     document.getElementById('fileBrowserModal').addEventListener('click', (e) => {
       if (e.target.id === 'fileBrowserModal') {
@@ -5788,7 +5766,7 @@ localStorage.setItem('textEditorContent', htmlContent);
       const name = document.getElementById('fileNameInput').value.trim();
 
       if (!name) {
-        alert('Please enter a file name');
+        showNotification('Please enter a file name', 'warning');
         return;
       }
 
@@ -6419,10 +6397,6 @@ renderMathInElement(document.body, {
       document.getElementById('saveFileModal').style.display = 'none';
     });
 
-    document.getElementById('cancelSaveBtn').addEventListener('click', () => {
-      document.getElementById('saveFileModal').style.display = 'none';
-    });
-
     document.getElementById('closeSaveModalBtn').addEventListener('click', () => {
       document.getElementById('saveFileModal').style.display = 'none';
     });
@@ -6437,10 +6411,6 @@ renderMathInElement(document.body, {
     document.getElementById('imageBtn').addEventListener('click', insertImage);
 
     document.getElementById('closeImageModalBtn').addEventListener('click', () => {
-      document.getElementById('imageModal').style.display = 'none';
-    });
-
-    document.getElementById('cancelImageBtn').addEventListener('click', () => {
       document.getElementById('imageModal').style.display = 'none';
     });
 
@@ -6496,7 +6466,7 @@ renderMathInElement(document.body, {
         } catch (error) {
           console.error('Cloudflare upload failed:', error);
           setImageUploadStatus('Upload failed: ' + error.message, true);
-          alert('Cloudflare upload failed: ' + error.message);
+          showNotification('Cloudflare upload failed: ' + error.message, 'error');
           return;
         } finally {
           insertButton.disabled = false;
@@ -6505,7 +6475,7 @@ renderMathInElement(document.body, {
       }
 
       if (!imageName) {
-        alert('Please enter image file name or URL');
+        showNotification('Please enter image file name or URL', 'warning');
         return;
       }
 
@@ -6525,7 +6495,7 @@ renderMathInElement(document.body, {
       try {
         insertImageAtRange(imgSrc, imageName, imageSize);
       } catch (error) {
-        alert(error.message);
+        showNotification(error.message, 'error');
         return;
       }
 
@@ -6594,10 +6564,6 @@ renderMathInElement(document.body, {
     });
 
     document.getElementById('closeNoteModalBtn').addEventListener('click', () => {
-      resetNoteModalState();
-    });
-
-    document.getElementById('cancelNoteBtn').addEventListener('click', () => {
       resetNoteModalState();
     });
 
@@ -6866,7 +6832,7 @@ renderMathInElement(document.body, {
           insertNoteImageBtn.textContent = 'Uploading...';
           src = await uploadImageFileToCloudflare(uploadFile, 'Uploading note image');
         } catch (error) {
-          alert('Note image upload failed: ' + error.message);
+          showNotification('Note image upload failed: ' + error.message, 'error');
           return;
         } finally {
           insertNoteImageBtn.disabled = false;
@@ -6875,7 +6841,7 @@ renderMathInElement(document.body, {
       }
 
       if (!src) {
-        alert('Choose an image file or paste an image URL for the note.');
+        showNotification('Choose an image file or paste an image URL for the note.', 'warning');
         return;
       }
 
@@ -6925,7 +6891,7 @@ renderMathInElement(document.body, {
         noteImageUploadFileInput.value = '';
         noteImageUploadFileName.textContent = '';
       } catch (error) {
-        alert('Note image upload failed: ' + error.message);
+        showNotification('Note image upload failed: ' + error.message, 'error');
       } finally {
         insertNoteImageBtn.disabled = false;
         insertNoteImageBtn.textContent = 'Insert image in note';
@@ -6966,7 +6932,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if (key === 'g' || key === 'G' || key === 'Г' || key === 'г') {
+      if ((key === 'g' || key === 'G' || key === 'Г' || key === 'г') && !e.shiftKey) {
         e.preventDefault();
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
           if (!line.trim()) return line;
@@ -6975,7 +6941,7 @@ renderMathInElement(document.body, {
         return;
       }
 
-      if ((key === 'o' || key === 'O' || key === 'О' || key === 'о') && e.shiftKey) {
+      if ((key === 'g' || key === 'G' || key === 'Г' || key === 'г') && e.shiftKey) {
         e.preventDefault();
         let index = 1;
         transformSelectedLines(noteTextInput, (lines) => lines.map(line => {
@@ -7521,10 +7487,6 @@ renderMathInElement(document.body, {
       tableModal.style.display = 'none';
     });
 
-    document.getElementById('cancelTableBtn').addEventListener('click', () => {
-      tableModal.style.display = 'none';
-    });
-
     tableModal.addEventListener('click', (e) => {
       if (e.target.id === 'tableModal') {
         tableModal.style.display = 'none';
@@ -7773,10 +7735,6 @@ renderMathInElement(document.body, {
       mergeCellsModal.style.display = 'none';
     });
 
-    document.getElementById('cancelMergeBtn').addEventListener('click', () => {
-      mergeCellsModal.style.display = 'none';
-    });
-
     mergeCellsModal.addEventListener('click', (e) => {
       if (e.target.id === 'mergeCellsModal') {
         mergeCellsModal.style.display = 'none';
@@ -7796,7 +7754,7 @@ renderMathInElement(document.body, {
           nextCell.remove();
           saveToHistory();
         } else {
-          alert('No cell to the right to merge with');
+          showNotification('No cell to the right to merge with', 'warning');
         }
       }
       mergeCellsModal.style.display = 'none';
@@ -7816,7 +7774,7 @@ renderMathInElement(document.body, {
           cellBelow.remove();
           saveToHistory();
         } else {
-          alert('No cell below to merge with');
+          showNotification('No cell below to merge with', 'warning');
         }
       }
       mergeCellsModal.style.display = 'none';
@@ -7876,10 +7834,6 @@ renderMathInElement(document.body, {
       shortcutsModal.classList.remove('open');
     });
 
-    closeShortcutsBtn2.addEventListener('click', () => {
-      shortcutsModal.classList.remove('open');
-    });
-
     shortcutsModal.addEventListener('click', (e) => {
       if (e.target === shortcutsModal) {
         shortcutsModal.classList.remove('open');
@@ -7906,17 +7860,7 @@ renderMathInElement(document.body, {
 
       saveToHistory();
 
-      // Show notification
-      const notification = document.createElement('div');
-      notification.textContent = '✓ Font sizes reset to default';
-      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
-      document.body.appendChild(notification);
-
-      setTimeout(() => {
-        notification.style.transition = 'opacity 0.3s';
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 300);
-      }, 2000);
+      showNotification('Font sizes reset to default', 'success');
     }
 
     // Reset font size button event listener
@@ -7945,33 +7889,13 @@ renderMathInElement(document.body, {
 
         // Copy to clipboard
         navigator.clipboard.writeText(geminiPrompt).then(() => {
-          // Show notification
-          const notification = document.createElement('div');
-          notification.textContent = '✓ Prompt copied to clipboard! Opening Gemini...';
-          notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
-          document.body.appendChild(notification);
-
-          setTimeout(() => {
-            notification.style.transition = 'opacity 0.3s';
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 300);
-          }, 2000);
+          showNotification('Prompt copied to clipboard. Opening Gemini...', 'info');
 
           // Open Gemini in new tab
           window.open('https://gemini.google.com/app', '_blank');
         }).catch(err => {
           console.error('Failed to copy:', err);
-          // Show error notification
-          const notification = document.createElement('div');
-          notification.textContent = '✗ Failed to copy prompt';
-          notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #ef4444; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
-          document.body.appendChild(notification);
-
-          setTimeout(() => {
-            notification.style.transition = 'opacity 0.3s';
-            notification.style.opacity = '0';
-            setTimeout(() => notification.remove(), 300);
-          }, 2000);
+          showNotification('Failed to copy prompt', 'error');
         });
       });
     }
@@ -8135,19 +8059,9 @@ renderMathInElement(document.body, {
               // Remove the now-empty list
               nextElement.remove();
 
-              // Show notification
-              const notification = document.createElement('div');
-              notification.textContent = '✓ Списъци обединени';
-              notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
-              document.body.appendChild(notification);
-
-              setTimeout(() => {
-                notification.style.transition = 'opacity 0.3s';
-                notification.style.opacity = '0';
-                setTimeout(() => notification.remove(), 300);
-              }, 2000);
+              showNotification('Списъци обединени', 'success');
             } else {
-              alert('Няма съседен списък за обединяване');
+              showNotification('Няма съседен списък за обединяване', 'warning');
             }
           }
           return;
@@ -8155,7 +8069,7 @@ renderMathInElement(document.body, {
         currentNode = currentNode.parentNode;
       }
 
-      alert('Моля, позиционирай курсора в списък');
+      showNotification('Моля, позиционирай курсора в списък', 'warning');
     }
 
     // Keyboard shortcuts
@@ -8834,10 +8748,10 @@ renderMathInElement(document.body, {
           e.preventDefault();
           insertFormat('p');
           saveToHistory();
-        } else if (e.key === 'g' || e.key === 'G' || e.key === 'Г' || e.key === 'г') {
+        } else if ((e.key === 'g' || e.key === 'G' || e.key === 'Г' || e.key === 'г') && !e.shiftKey) {
           e.preventDefault();
           insertList('ul');
-        } else if ((e.key === 'o' || e.key === 'O'|| e.key === 'О' || e.key === 'о') && e.shiftKey) {
+        } else if ((e.key === 'g' || e.key === 'G'|| e.key === 'Г' || e.key === 'г') && e.shiftKey) {
           e.preventDefault();
           insertList('ol');
         } else if (e.key === 't' || e.key === 'T' || e.key === 'т' || e.key === 'Т') {
@@ -8869,12 +8783,6 @@ renderMathInElement(document.body, {
             historyIndex++;
             editor.innerHTML = history[historyIndex];
           }
-        } else if ((e.key === 'c' || e.key === 'C' || e.key === 'С' || e.key === 'с') && e.altKey) {
-          e.preventDefault();
-          // Apply last used text color
-          const lastColor = localStorage.getItem('textEditorTextColor') || '#1f2937';
-          applyFormatting('color', lastColor);
-          saveToHistory();
         } else if (e.key === 'h' || e.key === 'H' || e.key === 'Х' || e.key === 'х') {
           if (e.shiftKey) {
             e.preventDefault();
@@ -9523,7 +9431,7 @@ renderMathInElement(document.body, {
       // Trigger input event to save history
       editor.dispatchEvent(new Event('input', { bubbles: true }));
     });
-    // Click handler for links (Ctrl+Click to open)
+    // Click handler for links
     function syncAudioWidget(audioWrap) {
       if (!audioWrap) return;
       const audio = audioWrap.querySelector('audio');
@@ -9574,41 +9482,10 @@ renderMathInElement(document.body, {
       // Find parent link if clicking on child element
       while (target && target !== editor) {
         if (target.tagName === 'A') {
-          // Ctrl+Click or Cmd+Click to open link
-          if (e.ctrlKey || e.metaKey) {
-            e.preventDefault();
-            const href = target.getAttribute('href');
-            if (href && href !== '#') {
-              window.open(href, '_blank');
-
-              // Show notification
-              const notification = document.createElement('div');
-              notification.textContent = `🔗 Opening: ${href}`;
-              notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #2563eb; color: white; padding: 10px 16px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 13px;';
-              document.body.appendChild(notification);
-
-              setTimeout(() => {
-                notification.style.transition = 'opacity 0.3s';
-                notification.style.opacity = '0';
-                setTimeout(() => notification.remove(), 300);
-              }, 2000);
-            }
-          } else {
-            // Regular click - show tooltip
-            e.preventDefault();
-            const href = target.getAttribute('href');
-            if (href && href !== '#') {
-              const tooltip = document.createElement('div');
-              tooltip.textContent = `Ctrl+Click to open: ${href}`;
-              tooltip.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #374151; color: white; padding: 8px 14px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 12px;';
-              document.body.appendChild(tooltip);
-
-              setTimeout(() => {
-                tooltip.style.transition = 'opacity 0.3s';
-                tooltip.style.opacity = '0';
-                setTimeout(() => tooltip.remove(), 300);
-              }, 1500);
-            }
+          e.preventDefault();
+          const href = target.getAttribute('href');
+          if (href && href !== '#') {
+            window.open(href, '_blank');
           }
           break;
         }
@@ -10519,7 +10396,7 @@ renderMathInElement(document.body, {
             window.history.replaceState({}, document.title, window.location.pathname);
             return;
           } catch (err) {
-            alert('Грешка при зареждане на съдържанието: ' + err.message);
+            showNotification('Грешка при зареждане на съдържанието: ' + err.message, 'error');
             console.error('Load error:', err);
             sessionStorage.removeItem('editFileContent');
             sessionStorage.removeItem('editFilePath');
@@ -10570,7 +10447,7 @@ renderMathInElement(document.body, {
           // Clear URL parameters to prevent auto-reload on refresh
           window.history.replaceState({}, document.title, window.location.pathname);
         } catch (err) {
-          alert('Грешка при зареждане на съдържанието: ' + err.message);
+          showNotification('Грешка при зареждане на съдържанието: ' + err.message, 'error');
           console.error('Load error:', err);
         }
       } else if (filePath) {
@@ -10696,7 +10573,7 @@ renderMathInElement(document.body, {
             const hint = isFile
               ? '\n\nСъвет: Отвори сайта през локален HTTP сървър (напр. VS Code Live Server), тъй като браузърите блокират fetch от file://' 
               : '';
-            alert('Грешка при зареждане на файла: ' + err.message + hint);
+            showNotification('Грешка при зареждане на файла: ' + err.message + hint, 'error');
             console.error('Load error:', err);
           });
       } else {
@@ -10728,9 +10605,9 @@ renderMathInElement(document.body, {
           const range = window.getSelection().getRangeAt(0);
           range.insertNode(fragment);
           saveToHistory();
-          alert('Table imported successfully!');
+          showNotification('Table imported successfully!', 'success');
         } else {
-          alert('Clipboard does not contain a table. Please copy HTML table from tablesgenerator.com');
+          showNotification('Clipboard does not contain a table. Please copy HTML table from tablesgenerator.com', 'warning');
         }
       }).catch(err => {
         console.error('Failed to read clipboard:', err);
@@ -10904,7 +10781,7 @@ renderMathInElement(document.body, {
       const headingType = document.getElementById('anchorHeadingTypeInput').value;
 
       if (!anchorId || !anchorText) {
-        alert('⚠️ Please fill in both Anchor ID and Anchor Text');
+        showNotification('Please fill in both Anchor ID and Anchor Text', 'warning');
         return;
       }
 
@@ -10940,17 +10817,7 @@ renderMathInElement(document.body, {
       // Refresh anchors list
       refreshAnchorsList();
 
-      // Show success message
-      const notification = document.createElement('div');
-      notification.textContent = '✅ Anchor created: #' + anchorId;
-      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #10b981; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
-      document.body.appendChild(notification);
-
-      setTimeout(() => {
-        notification.style.transition = 'opacity 0.3s';
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 300);
-      }, 2000);
+      showNotification('Anchor created: #' + anchorId, 'success');
     });
 
     // Create Link to Anchor
@@ -10959,7 +10826,7 @@ renderMathInElement(document.body, {
       let linkText = document.getElementById('linkTextInput').value.trim();
 
       if (!selectedAnchor) {
-        alert('⚠️ Please select an anchor first');
+        showNotification('Please select an anchor first', 'warning');
         return;
       }
 
@@ -11003,17 +10870,7 @@ renderMathInElement(document.body, {
       // Clear inputs
       document.getElementById('linkTextInput').value = '';
 
-      // Show success message
-      const notification = document.createElement('div');
-      notification.textContent = '✅ Link created to #' + selectedAnchor;
-      notification.style.cssText = 'position: fixed; top: 70px; right: 20px; background: #3b82f6; color: white; padding: 12px 18px; border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1000; font-size: 14px;';
-      document.body.appendChild(notification);
-
-      setTimeout(() => {
-        notification.style.transition = 'opacity 0.3s';
-        notification.style.opacity = '0';
-        setTimeout(() => notification.remove(), 300);
-      }, 2000);
+      showNotification('Link created to #' + selectedAnchor, 'info');
     });
 
     // Refresh anchors list from current editor content
@@ -11089,12 +10946,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=2026050616og"></script>
+  <script src="js/user-identity.js?v=202605061g4y"></script>
     <!-- CHAT SYSTEM -->
-  <script src="js/chat.js?v=2026050616og"></script>
+  <script src="js/chat.js?v=202605061g4y"></script>
 
 <script src="js/version-check.js?v=202605021hcw"></script>
-  <script src="js/mobile-nav.js?v=2026050616og"></script>
+  <script src="js/mobile-nav.js?v=202605061g4y"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');
@@ -11108,8 +10965,8 @@ renderMathInElement(document.body, {
           'Color': ['textColorToggleBtn','highlightToggleBtn','headingColorToggleBtn'],
           'Alignment': ['alignLeftBtn','alignCenterBtn','alignRightBtn'],
           'Indent': ['outdentBtn','indentBtn'],
-          'Table': ['tableBtn'],
-          'Insert': ['quoteBtn','symbolsBtn','linkBtn','audioBtn','editTableBtn','noteBtn','anchorLinkBtn','imageBtn'],
+          'Table': ['tableBtn','editTableBtn'],
+          'Insert': ['quoteBtn','symbolsBtn','linkBtn','audioBtn','noteBtn','anchorLinkBtn','imageBtn'],
           'Separators': ['hrBtn','dashedLineBtn'],
           'File': ['openLocalBtn','openCoursesBtn','htmlEditorBtn'],
           'Tools': ['clearBtn','resetFontSizeBtn','shortcutsBtn']
