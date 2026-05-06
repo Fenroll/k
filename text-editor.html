@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605061pz0"></script>
+  <script src="js/auth-guard.js?v=202605061qw5"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605061pz0">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605061qw5">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -670,6 +670,41 @@
       filter: invert(19%) sepia(67%) saturate(2410%) hue-rotate(346deg) brightness(93%) contrast(93%);
     }
 
+    .ordered-list-context-menu {
+      min-width: 58px !important;
+      padding: 6px !important;
+      border: 1px solid #d8e4d4 !important;
+      border-radius: 12px !important;
+      background: #fbfdf9 !important;
+      box-shadow: 0 14px 34px rgba(22, 34, 24, 0.18), 0 2px 8px rgba(22, 34, 24, 0.08) !important;
+    }
+
+    .ordered-list-number-editor {
+      display: flex;
+      align-items: center;
+      padding: 2px;
+    }
+
+    .ordered-list-number-editor input {
+      box-sizing: content-box;
+      width: 34px;
+      height: 32px;
+      padding: 0 8px;
+      border: 1px solid #cbdcc5;
+      border-radius: 8px;
+      background: #ffffff;
+      color: #203626;
+      font: inherit;
+      font-weight: 700;
+      text-align: center;
+      outline: none;
+    }
+
+    .ordered-list-number-editor input:focus {
+      border-color: #588157;
+      box-shadow: 0 0 0 3px rgba(88, 129, 87, 0.15);
+    }
+
     .heading-color-btn,
     .text-color-btn,
     .highlight-color-btn {
@@ -1164,111 +1199,6 @@
         left: auto;
       }
 
-      /* ── HTML editor modal: full screen ── */
-      .html-editor-container {
-        margin: 0;
-        width: 100%;
-        height: 100dvh;
-        border-radius: 0;
-        max-width: 100%;
-      }
-    }
-
-    /* HTML Editor Modal Styles */
-    #htmlEditorModal {
-      display: none;
-      position: fixed;
-      z-index: 2000;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-    }
-
-    .html-editor-container {
-      background-color: white;
-      margin: 30px auto;
-      padding: 20px;
-      border: 1px solid #888;
-      border-radius: 8px;
-      width: 95%;
-      max-width: 1200px;
-      height: 80vh;
-      display: flex;
-      flex-direction: column;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-    }
-
-    .html-editor-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 15px;
-      border-bottom: 2px solid #e5e7eb;
-      padding-bottom: 10px;
-    }
-
-    .html-editor-header h2 {
-      margin: 0;
-      color: #1f2937;
-      font-size: 1.3em;
-    }
-
-    .html-editor-actions {
-      display: flex;
-      gap: 10px;
-    }
-
-    #htmlEditorTextarea {
-      flex: 1;
-      padding: 15px;
-      border: 1px solid #d1d5db;
-      border-radius: 4px;
-      font-family: 'Monaco', 'Courier New', monospace;
-      font-size: 13px;
-      line-height: 1.5;
-      resize: none;
-      color: #1f2937;
-      background: #fafafa;
-      white-space: pre;
-      overflow-wrap: normal;
-      overflow: auto;
-    }
-
-    #htmlEditorTextarea:focus {
-      outline: none;
-      border-color: #3b82f6;
-      background: white;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-
-    .html-editor-button {
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 14px;
-      font-weight: 500;
-      transition: background-color 0.3s;
-    }
-
-    .html-editor-save {
-      background-color: #10b981;
-      color: white;
-    }
-
-    .html-editor-save:hover {
-      background-color: #059669;
-    }
-
-    .html-editor-close {
-      background-color: #ef4444;
-      color: white;
-    }
-
-    .html-editor-close:hover {
-      background-color: #dc2626;
     }
 
     /* Professional Color Picker Styles */
@@ -1824,40 +1754,6 @@
       background: #d9ecd4 !important;
     }
 
-    /* ── HTML Editor Modal ── */
-    #htmlEditorModal {
-      background: rgba(15,23,42,0.45) !important; backdrop-filter: blur(4px) !important;
-      -webkit-backdrop-filter: blur(4px) !important;
-      align-items: center !important;
-      justify-content: center !important; padding: 20px !important;
-    }
-    #htmlEditorModal[style*="flex"] { display: flex !important; }
-    .html-editor-container {
-      border-radius: var(--radius-lg) !important; border: 1px solid rgba(0,0,0,0.055) !important;
-      box-shadow: var(--shadow-lg) !important; padding: 0 !important; overflow: hidden !important;
-      animation: modalIn 0.22s cubic-bezier(0.22,1,0.36,1) both;
-    }
-    .html-editor-header {
-      padding: 14px 20px !important; border-bottom: 1px solid #f0f2ef !important;
-      background: #f8f9f7 !important; margin-bottom: 0 !important;
-    }
-    .html-editor-header h2 { font-family: var(--font) !important; font-size: 1rem !important; font-weight: 600 !important; color: var(--text) !important; }
-    .html-editor-actions { gap: 8px !important; }
-    .html-editor-button {
-      border-radius: var(--radius-sm) !important; padding: 7px 14px !important;
-      font-family: var(--font) !important; font-size: 0.875rem !important;
-      font-weight: 600 !important; border: none !important; transition: background var(--transition) !important;
-    }
-    .html-editor-save { background: var(--brand) !important; color: #fff !important; }
-    .html-editor-save:hover { background: var(--brand-dark) !important; }
-    .html-editor-close { background: #f0f2ef !important; color: var(--text) !important; }
-    .html-editor-close:hover { background: #e2e6e0 !important; }
-    #htmlEditorTextarea {
-      padding: 16px 20px !important; border: none !important; border-top: 1px solid #f0f2ef !important;
-      border-radius: 0 !important; font-size: 0.875rem !important; background: #fafcfa !important; color: var(--text) !important;
-    }
-    #htmlEditorTextarea:focus { border-color: transparent !important; outline: none !important; box-shadow: none !important; }
-
     /* ── Raw code textarea ── */
     .modal .raw-code {
       border: 1.5px solid var(--border) !important; border-radius: var(--radius-sm) !important;
@@ -2016,8 +1912,6 @@
     <div class="toolbar-group mobile-extra merge-right">
       <button id="openLocalBtn" title="Open file from computer"><img src="svg/md-editor/icon-open-local.svg?v=2026031715gu" alt="Open Local" class="toolbar-icon"></button>
       <button id="openCoursesBtn" title="Open file from courses"><img src="svg/md-editor/icon-open-courses.svg?v=2026031715gu" alt="Open Courses" class="toolbar-icon"></button>
-      
-      <button id="htmlEditorBtn" title="Edit HTML/Source Code"><img src="svg/md-editor/icon-html-editor.svg?v=2026031715gu" alt="HTML Editor" class="toolbar-icon"></button>
     </div>
     <div class="toolbar-group">
       <button id="downloadBtn" title="Download as .html file"><img src="svg/md-editor/icon-download.svg?v=2026031715gu" alt="Download" class="toolbar-icon"></button>
@@ -2078,6 +1972,13 @@
   <!-- Audio context menu -->
   <div id="audioContextMenu" class="table-context-menu audio-context-menu">
     <button id="deleteAudioCtx"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" alt="" aria-hidden="true"> Delete audio</button>
+  </div>
+
+  <!-- Ordered list context menu -->
+  <div id="orderedListContextMenu" class="table-context-menu ordered-list-context-menu">
+    <label class="ordered-list-number-editor" for="orderedListNumberInput">
+      <input id="orderedListNumberInput" type="text" inputmode="numeric" pattern="[0-9]*" aria-label="List number">
+    </label>
   </div>
 
   <!-- Audio import modal -->
@@ -2360,27 +2261,9 @@
     </div>
   </div>
 
-  <!-- HTML Editor Modal -->
-  <div id="htmlEditorModal">
-    <div class="html-editor-container">
-      <div class="html-editor-header">
-        <h2>📄 HTML Source Code Editor</h2>
-        <div class="html-editor-actions">
-          <button id="htmlEditorSaveBtn" class="html-editor-button html-editor-save">💾 Save & Update</button>
-          <button id="htmlEditorCloseBtn" class="html-editor-button html-editor-close">Close</button>
-        </div>
-      </div>
-      <textarea id="htmlEditorTextarea" spellcheck="false" placeholder="HTML Code will appear here..."></textarea>
-    </div>
-  </div>
-
-  
-    </div>
-  </div>
-
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202605061pz0"></script>
+  <script src="courses.generated.js?v=202605061qw5"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2573,24 +2456,21 @@
       const notification = document.createElement('div');
       notification.textContent = message;
 
-      const colors = {
-        success: '#10b981',
-        warning: '#588157',
-        error: '#ef4444',
-        info: '#3b82f6'
-      };
-
       notification.style.cssText = `
         position: fixed;
         top: 70px;
         right: 20px;
-        background-color: ${colors[type] || colors.info};
+        max-width: min(420px, calc(100vw - 40px));
+        background-color: #588157;
         color: white;
         padding: 12px 18px;
         border-radius: 6px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         z-index: 2000;
         font-size: 14px;
+        line-height: 1.35;
+        white-space: normal;
+        overflow-wrap: anywhere;
         opacity: 0;
         transform: translateX(20px);
         transition: opacity 0.3s ease, transform 0.3s ease;
@@ -3435,7 +3315,7 @@
 
     function addTableColumnBefore() {
       const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
 
@@ -3449,7 +3329,7 @@
 
     function addTableColumnAfter() {
       const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
 
@@ -3463,7 +3343,7 @@
 
     function deleteTableColumn() {
       const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
       const table = getTableFromCell(cell);
       const colIndex = cell.cellIndex;
 
@@ -3475,7 +3355,7 @@
 
     function addTableRowBefore() {
       const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
       const table = getTableFromCell(cell);
       const row = cell.closest('tr');
       const newRow = document.createElement('tr');
@@ -3490,7 +3370,7 @@
 
     function addTableRowAfter() {
       const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
       const table = getTableFromCell(cell);
       const row = cell.closest('tr');
       const newRow = document.createElement('tr');
@@ -3505,7 +3385,7 @@
 
     function deleteTableRow() {
       const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
       const row = cell.closest('tr');
       row.remove();
       saveToHistory();
@@ -3513,7 +3393,7 @@
 
     function deleteTable() {
       const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
       const table = getTableFromCell(cell);
       table.remove();
       saveToHistory();
@@ -3521,16 +3401,16 @@
 
     function mergeTableCells() {
       const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
 
       const row = cell.closest('tr');
-      if (!row) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!row) return showNotification('Place the cursor inside a table first', 'warning');
 
       // Get current cell index and next cell
       const cellIndex = cell.cellIndex;
       const nextCell = row.cells[cellIndex + 1];
 
-      if (!nextCell) return showNotification('Нямаш следваща клетка за мърджване', 'warning');
+      if (!nextCell) return showNotification('There is no next cell to merge with', 'warning');
 
       // Merge content
       cell.textContent = (cell.textContent + ' ' + nextCell.textContent).trim();
@@ -3547,7 +3427,7 @@
 
     function setCellBackgroundColor() {
       const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
       const color = prompt('Цвят (hex):', '#FAF594');
       if (color) {
         cell.style.backgroundColor = color;
@@ -3557,11 +3437,11 @@
 
     function splitTableCell() {
       const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Позиционирай курсора в таблица', 'warning');
+      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
 
       const colspan = parseInt(cell.getAttribute('colspan')) || 1;
 
-      if (colspan <= 1) return showNotification('Клетката няма colspan за разделяне', 'warning');
+      if (colspan <= 1) return showNotification('This cell has no colspan to split', 'warning');
 
       const row = cell.closest('tr');
       const cellIndex = cell.cellIndex;
@@ -4664,7 +4544,7 @@
       const selection = window.getSelection();
 
       if (!selection.rangeCount || !selection.toString()) {
-        showNotification('Моля, избери текст първо', 'warning');
+        showNotification('Please select text first', 'warning');
         return;
       }
 
@@ -4804,7 +4684,7 @@
       const tableHtml = table.outerHTML;
       navigator.clipboard.writeText(tableHtml).then(() => {
         // Open Tables Generator
-        showNotification('Table copied to clipboard. Opening Tables Generator...', 'info');
+        alert('Table copied to clipboard!\n\nNow:\n1. Go to tablesgenerator.com\n2. Click "Import" or "Paste" button\n3. Paste your table (Ctrl+V)\n4. Edit it\n5. Copy the HTML\n6. Come back and paste here');
         window.open('https://www.tablesgenerator.com/html_tables', '_blank');
       }).catch(err => {
         console.error('Failed to copy:', err);
@@ -5268,7 +5148,7 @@
 
       // If no selection or selection is in editor
       if (!selection.toString() || !editor.contains(selection.anchorNode)) {
-        showNotification('Моля, избери текст първо', 'warning');
+        showNotification('Please select text first', 'warning');
         return;
       }
 
@@ -5532,114 +5412,6 @@
       document.getElementById('fileSearchInput').focus();
     });
 
-    // HTML Editor functionality
-    let htmlEditorMode = false;
-    let htmlEditorOriginalContent = '';
-    let currentFileName = ''; // Track current file name
-
-    // Format HTML for readability with proper indentation
-    function formatHTML(html) {
-      let formatted = '';
-      let indent = 0;
-      const indentStr = '  '; // 2 spaces per indent level
-
-      // Split by tags
-      const tokens = html.match(/(<[^>]+>|[^<]+)/g) || [];
-
-      for (let token of tokens) {
-        token = token.trim();
-        if (!token) continue;
-
-        // Check if it's a closing tag
-        const isClosingTag = token.startsWith('</');
-        // Check if it's a self-closing tag or void element
-        const isSelfClosing = token.endsWith('/>') || /^<(img|br|hr|input|meta|link)[\s>]/i.test(token);
-        // Check if it's an opening tag
-        const isOpeningTag = token.startsWith('<') && !isClosingTag && !isSelfClosing;
-
-        if (isClosingTag) {
-          indent = Math.max(0, indent - 1);
-          formatted += indentStr.repeat(indent) + token + '\n';
-        } else if (isSelfClosing) {
-          formatted += indentStr.repeat(indent) + token + '\n';
-        } else if (isOpeningTag) {
-          formatted += indentStr.repeat(indent) + token + '\n';
-          // Don't increase indent for certain tags
-          if (!/^<(br|hr|img|input|meta|link|!DOCTYPE|!doctype)/i.test(token)) {
-            indent++;
-          }
-        } else {
-          // Text content
-          const text = token.trim();
-          if (text.length > 0) {
-            // Only add non-empty text
-            formatted += indentStr.repeat(indent) + text + '\n';
-          }
-        }
-      }
-
-      return formatted.trim();
-    }
-
-    document.getElementById('htmlEditorBtn').addEventListener('click', () => {
-      // Check if editor has content
-      if (!editor.innerHTML.trim()) {
-        showNotification('No content to edit. Please open a file first.', 'warning');
-        return;
-      }
-
-      // Get current HTML content from editor
-      let currentHtml = editor.innerHTML;
-
-      // Format HTML for readability
-      currentHtml = formatHTML(currentHtml);
-
-      // Set textarea content
-      document.getElementById('htmlEditorTextarea').value = currentHtml;
-
-      // Show modal
-      document.getElementById('htmlEditorModal').style.display = 'block';
-      document.getElementById('htmlEditorTextarea').focus();
-    });
-
-    // HTML Editor Save
-    document.getElementById('htmlEditorSaveBtn').addEventListener('click', () => {
-      let htmlContent = document.getElementById('htmlEditorTextarea').value;
-
-      // Minify HTML for storage (remove extra whitespace/newlines)
-      // But keep meaningful structure
-      htmlContent = htmlContent
-        .replace(/>\s+</g, '><') // Remove space between tags
-        .replace(/\n/g, '') // Remove newlines
-        .replace(/\s+/g, ' ') // Replace multiple spaces with single space
-        .trim();
-
-      // Update editor with minified HTML
-      editor.innerHTML = htmlContent;
-
-      // Save to history and storage
-      saveToHistory();
-localStorage.setItem('textEditorContent', htmlContent);
-
-      // Close modal
-      document.getElementById('htmlEditorModal').style.display = 'none';
-
-      // Show confirmation
-      showNotification('✅ HTML updated successfully!', 'success');
-    });
-
-    // HTML Editor Close
-    document.getElementById('htmlEditorCloseBtn').addEventListener('click', () => {
-      document.getElementById('htmlEditorModal').style.display = 'none';
-    });
-
-    // Close HTML editor on escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && document.getElementById('htmlEditorModal').style.display === 'block') {
-        document.getElementById('htmlEditorModal').style.display = 'none';
-      }
-    });
-
     // File search functionality
     document.getElementById('fileSearchInput').addEventListener('input', (e) => {
       const searchText = e.target.value.toLowerCase();
@@ -5763,12 +5535,7 @@ localStorage.setItem('textEditorContent', htmlContent);
 
     document.getElementById('confirmSaveBtn').addEventListener('click', () => {
       const number = document.getElementById('fileNumberInput').value.trim();
-      const name = document.getElementById('fileNameInput').value.trim();
-
-      if (!name) {
-        showNotification('Please enter a file name', 'warning');
-        return;
-      }
+      const name = document.getElementById('fileNameInput').value.trim() || 'document';
 
       const cleanName = name.replace(/\.(html|md|txt)$/i, '');
 
@@ -6385,9 +6152,9 @@ renderMathInElement(document.body, {
 
       let fileName = '';
       if (number) {
-        fileName = number + '-msg-' + name + '.html';
+        fileName = number + '-msg-' + cleanName + '.html';
       } else {
-        fileName = name + '.html';
+        fileName = cleanName + '.html';
       }
 
       link.download = fileName;
@@ -7534,8 +7301,11 @@ renderMathInElement(document.body, {
     // Table context menu functionality
     const tableContextMenu = document.getElementById('tableContextMenu');
     const audioContextMenu = document.getElementById('audioContextMenu');
+    const orderedListContextMenu = document.getElementById('orderedListContextMenu');
+    const orderedListNumberInput = document.getElementById('orderedListNumberInput');
     let contextMenuCell = null;
     let contextMenuAudioTarget = null;
+    let contextMenuListItem = null;
 
     function resolveAudioContextTarget(target) {
       if (!(target instanceof Element)) return null;
@@ -7561,6 +7331,86 @@ renderMathInElement(document.body, {
       return null;
     }
 
+    function getOrderedListItemTarget(event) {
+      if (!(event.target instanceof Element)) return null;
+
+      const item = event.target.closest('li');
+      if (!item || !editor.contains(item) || !item.parentElement || item.parentElement.tagName !== 'OL') {
+        return null;
+      }
+
+      const itemRect = item.getBoundingClientRect();
+      const listRect = item.parentElement.getBoundingClientRect();
+      const listStyle = window.getComputedStyle(item.parentElement);
+      const markerRight = itemRect.left + (listStyle.listStylePosition === 'inside' ? 32 : 8);
+      const markerLeft = Math.min(itemRect.left, listRect.left) - 8;
+
+      if (event.clientX >= markerLeft && event.clientX <= markerRight) {
+        return item;
+      }
+
+      return null;
+    }
+
+    function getOrderedListItemNumber(item) {
+      const list = item.parentElement;
+      let number = parseInt(list.getAttribute('start'), 10);
+      if (!Number.isFinite(number)) number = 1;
+
+      const items = Array.from(list.children).filter((child) => child.tagName === 'LI');
+      for (const currentItem of items) {
+        const explicitValue = parseInt(currentItem.getAttribute('value'), 10);
+        if (Number.isFinite(explicitValue)) {
+          number = explicitValue;
+        }
+
+        if (currentItem === item) {
+          return number;
+        }
+
+        number += 1;
+      }
+
+      return number;
+    }
+
+    function cleanupClonedOrderedListValues(root = editor) {
+      const lists = root instanceof Element && root.tagName === 'OL'
+        ? [root]
+        : Array.from(root.querySelectorAll('ol'));
+
+      lists.forEach((list) => {
+        const items = Array.from(list.children).filter((child) => child.tagName === 'LI');
+        for (let index = 1; index < items.length; index++) {
+          const item = items[index];
+          const previousItem = items[index - 1];
+          if (
+            item.hasAttribute('value') &&
+            previousItem.hasAttribute('value') &&
+            item.getAttribute('value') === previousItem.getAttribute('value')
+          ) {
+            item.removeAttribute('value');
+          }
+        }
+      });
+    }
+
+    function applyOrderedListNumberInput() {
+      if (!contextMenuListItem) return false;
+
+      const trimmedNumber = orderedListNumberInput.value.trim();
+      const nextNumber = Number(trimmedNumber);
+      if (!/^\d+$/.test(trimmedNumber) || !Number.isSafeInteger(nextNumber) || nextNumber < 1) {
+        showNotification('Enter a valid list number', 'warning');
+        return false;
+      }
+
+      contextMenuListItem.setAttribute('value', String(nextNumber));
+      cleanupClonedOrderedListValues(contextMenuListItem.parentElement || editor);
+      saveToHistory();
+      return true;
+    }
+
     // Show context menu on right-click in table
     editor.addEventListener('contextmenu', (e) => {
       const audioTarget = resolveAudioContextTarget(e.target);
@@ -7568,11 +7418,33 @@ renderMathInElement(document.body, {
         e.preventDefault();
         contextMenuAudioTarget = audioTarget;
         contextMenuCell = null;
+        contextMenuListItem = null;
         tableContextMenu.classList.remove('active');
+        orderedListContextMenu.classList.remove('active');
 
         audioContextMenu.style.left = e.pageX + 'px';
         audioContextMenu.style.top = e.pageY + 'px';
         audioContextMenu.classList.add('active');
+        return;
+      }
+
+      const orderedListItem = getOrderedListItemTarget(e);
+      if (orderedListItem) {
+        e.preventDefault();
+        contextMenuListItem = orderedListItem;
+        contextMenuCell = null;
+        contextMenuAudioTarget = null;
+        tableContextMenu.classList.remove('active');
+        audioContextMenu.classList.remove('active');
+
+        orderedListContextMenu.style.left = e.pageX + 'px';
+        orderedListContextMenu.style.top = e.pageY + 'px';
+        orderedListNumberInput.value = String(getOrderedListItemNumber(orderedListItem));
+        orderedListContextMenu.classList.add('active');
+        requestAnimationFrame(() => {
+          orderedListNumberInput.focus();
+          orderedListNumberInput.select();
+        });
         return;
       }
 
@@ -7585,7 +7457,9 @@ renderMathInElement(document.body, {
 
           contextMenuCell = node;
           contextMenuAudioTarget = null;
+          contextMenuListItem = null;
           audioContextMenu.classList.remove('active');
+          orderedListContextMenu.classList.remove('active');
 
           // Position the context menu
           tableContextMenu.style.left = e.pageX + 'px';
@@ -7602,6 +7476,34 @@ renderMathInElement(document.body, {
     document.addEventListener('click', () => {
       tableContextMenu.classList.remove('active');
       audioContextMenu.classList.remove('active');
+      orderedListContextMenu.classList.remove('active');
+    });
+
+    orderedListContextMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    orderedListNumberInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        if (applyOrderedListNumberInput()) {
+          contextMenuListItem = null;
+          orderedListContextMenu.classList.remove('active');
+          editor.focus();
+        }
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        contextMenuListItem = null;
+        orderedListContextMenu.classList.remove('active');
+        editor.focus();
+      }
+    });
+
+    orderedListNumberInput.addEventListener('change', () => {
+      if (applyOrderedListNumberInput()) {
+        contextMenuListItem = null;
+        orderedListContextMenu.classList.remove('active');
+      }
     });
 
     document.getElementById('deleteAudioCtx').addEventListener('click', () => {
@@ -8059,9 +7961,9 @@ renderMathInElement(document.body, {
               // Remove the now-empty list
               nextElement.remove();
 
-              showNotification('Списъци обединени', 'success');
+              showNotification('Lists merged', 'success');
             } else {
-              showNotification('Няма съседен списък за обединяване', 'warning');
+              showNotification('There is no adjacent list to merge', 'warning');
             }
           }
           return;
@@ -8069,7 +7971,7 @@ renderMathInElement(document.body, {
         currentNode = currentNode.parentNode;
       }
 
-      showNotification('Моля, позиционирай курсора в списък', 'warning');
+      showNotification('Place the cursor inside a list first', 'warning');
     }
 
     // Keyboard shortcuts
@@ -8980,6 +8882,7 @@ renderMathInElement(document.body, {
       cleanupHeadingInlineArtifacts();
       cleanupInlineFontArtifacts();
       normalizeAllEditorHrElements();
+      cleanupClonedOrderedListValues();
 
       // Debounced history save (don't save on every keystroke)
       clearTimeout(editor.historyTimeout);
@@ -10396,7 +10299,7 @@ renderMathInElement(document.body, {
             window.history.replaceState({}, document.title, window.location.pathname);
             return;
           } catch (err) {
-            showNotification('Грешка при зареждане на съдържанието: ' + err.message, 'error');
+            showNotification('Error loading content: ' + err.message, 'error');
             console.error('Load error:', err);
             sessionStorage.removeItem('editFileContent');
             sessionStorage.removeItem('editFilePath');
@@ -10447,7 +10350,7 @@ renderMathInElement(document.body, {
           // Clear URL parameters to prevent auto-reload on refresh
           window.history.replaceState({}, document.title, window.location.pathname);
         } catch (err) {
-          showNotification('Грешка при зареждане на съдържанието: ' + err.message, 'error');
+          showNotification('Error loading content: ' + err.message, 'error');
           console.error('Load error:', err);
         }
       } else if (filePath) {
@@ -10573,7 +10476,7 @@ renderMathInElement(document.body, {
             const hint = isFile
               ? '\n\nСъвет: Отвори сайта през локален HTTP сървър (напр. VS Code Live Server), тъй като браузърите блокират fetch от file://' 
               : '';
-            showNotification('Грешка при зареждане на файла: ' + err.message + hint, 'error');
+            showNotification('Error loading file: ' + err.message + hint, 'error');
             console.error('Load error:', err);
           });
       } else {
@@ -10946,12 +10849,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=202605061pz0"></script>
+  <script src="js/user-identity.js?v=202605061qw5"></script>
     <!-- CHAT SYSTEM -->
-  <script src="js/chat.js?v=202605061pz0"></script>
+  <script src="js/chat.js?v=202605061qw5"></script>
 
 <script src="js/version-check.js?v=202605021hcw"></script>
-  <script src="js/mobile-nav.js?v=202605061pz0"></script>
+  <script src="js/mobile-nav.js?v=202605061qw5"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');
@@ -10968,7 +10871,7 @@ renderMathInElement(document.body, {
           'Table': ['tableBtn','editTableBtn'],
           'Insert': ['quoteBtn','symbolsBtn','linkBtn','audioBtn','noteBtn','anchorLinkBtn','imageBtn'],
           'Separators': ['hrBtn','dashedLineBtn'],
-          'File': ['openLocalBtn','openCoursesBtn','htmlEditorBtn'],
+          'File': ['openLocalBtn','openCoursesBtn'],
           'Tools': ['clearBtn','resetFontSizeBtn','shortcutsBtn']
         };
         Object.keys(labels).forEach(function(name) {
