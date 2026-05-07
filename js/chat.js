@@ -1013,13 +1013,20 @@ class ChatUIManager {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  right: -79px;
+  right: -88px;
   display: none;
+  align-items: center;
+  background: rgba(251, 252, 247, 0.96);
+  border: 1px solid #cddbc8;
+  border-radius: 999px;
+  box-shadow: 0 4px 14px rgba(58, 90, 64, 0.14);
+  backdrop-filter: blur(6px);
   gap: 2px;
   z-index: 10;
+  padding: 3px;
 }
 .message-actions.two-btns {
-  right: -53px;
+  right: -62px;
 }
 @media (hover: hover) and (pointer: fine) {
   .chat-message:hover .message-actions {
@@ -1027,8 +1034,8 @@ class ChatUIManager {
   }
 }
 .message-actions button {
-  transition: background 0.2s;
-  border-radius: 8px !important;
+  transition: background 0.2s, opacity 0.2s, transform 0.2s;
+  border-radius: 999px !important;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1038,9 +1045,12 @@ class ChatUIManager {
   padding: 4px;
   width: 28px;
   height: 28px;
+  opacity: 0.82;
 }
 .message-actions button:hover {
-  background: rgba(0, 0, 0, 0.05) !important;
+  background: rgba(88, 129, 87, 0.1) !important;
+  opacity: 1;
+  transform: translateY(-1px);
 }
             @keyframes menuPop {
                 from { opacity: 0; transform: scale(0.92) translateY(4px); }
@@ -1123,7 +1133,7 @@ class ChatUIManager {
                 }
             }
             .message-actions button:hover {
-                background: #dbeafe !important;
+                background: rgba(88, 129, 87, 0.1) !important;
             }
             .reaction-tooltip {
                 position: fixed;
@@ -5199,7 +5209,7 @@ class ChatUIManager {
   position: fixed;
   bottom: 90px;
   right: 20px;
-  width: 550px;
+  width: 580px;
   height: 600px;
   background: white;
   border-radius: 12px;
@@ -5381,7 +5391,7 @@ class ChatUIManager {
   display: flex;
   flex-direction: column;
   gap: 2px;
-  margin-right: 80px; /* Increased to fit action buttons */
+  margin-right: 96px;
 }
 .message-header {
   display: flex;

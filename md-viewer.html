@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=202605061qw5"></script>
+  <script src="js/auth-guard.js?v=20260507zih"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -14,13 +14,13 @@
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Fira+Sans:wght@400;500;700&family=Rubik:wght@400;500;700&display=swap">
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
+  <link rel="stylesheet" href="vendor/katex.min.css?v=2026031715gu">
   <!-- Mobile Navigation CSS -->
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605061qw5">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260507zih">
 
   <!-- Firebase SDKs - Moved to head and using compat versions -->
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
+  <script defer src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -728,8 +728,8 @@
       }
     });
   </script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
+  <script src="vendor/katex.min.js?v=2026031715gu"></script>
+  <script src="vendor/auto-render.min.js?v=2026031715gu"></script>
   <script src="js/version-manager.js?v=2026031715gu"></script>
 </head>
 <body>
@@ -1443,95 +1443,163 @@
       document.head.appendChild(styleTag);
     }
 
-    // Function to load summary file
-    function loadSummary(summaryPath) {
-      console.log('loadSummary function called with:', summaryPath);
-      const decodedPath = decodeURIComponent(summaryPath);
-      const encodedPath = decodedPath.split('/').map(encodeURIComponent).join('/');
-      const absoluteUrl = (window.location.origin && window.location.origin !== 'null')
-        ? new URL(encodedPath, window.location.origin).href
-        : encodedPath;
+    const VIEWER_DEBUG = false;
 
-      console.log('Fetching from:', absoluteUrl);
+    function debugLog(...args) {
+      if (VIEWER_DEBUG) console.log(...args);
+    }
 
-      fetch(absoluteUrl).then(r=>{
-        if(!r.ok) throw new Error('HTTP '+r.status);
+    function debugWarn(...args) {
+      if (VIEWER_DEBUG) console.warn(...args);
+    }
+
+    function fetchText(url) {
+      return fetch(url).then(r => {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
         return r.text();
-      })
-        .then(content => {
-          let html;
+      });
+    }
 
-          if (/\.html$/i.test(decodedPath)) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(content, 'text/html');
+    function addImportantToCss(css) {
+      return css.replace(/;(?!important)/g, ' !important;');
+    }
 
-            // Extract CSS from <style> tags
-            const styles = doc.head.querySelectorAll('style');
-            let cssContent = '';
-            styles.forEach(style => {
-              cssContent += style.textContent;
-            });
+    function renderMarkdownToViewerHtml(content) {
+      let html = marked.parse(content);
+      html = html.replace(/<p>~~~<\/p>/g, '<hr style="border: none; border-top: 2px dashed #8B6F47;">');
+      if (html.includes('^')) html = processTableRowspans(html);
+      if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) html = processTableAlignment(html);
+      if (html.includes('&lt;')) html = processTableColspans(html);
+      return html;
+    }
 
-            // Add !important to override md-viewer styles
-            if (cssContent) {
-              const existingStyles = document.querySelectorAll('style');
-              let styleExists = false;
-              existingStyles.forEach(s => {
-                if (s.textContent.includes('/* Imported from file */')) {
-                  styleExists = true;
-                  s.remove();
-                }
-              });
+    function injectImportedStyles(doc, options = {}) {
+      if (options.styleMode === 'none') return;
 
-              cssContent = cssContent.replace(/;(?!important)/g, ' !important;');
-              cssContent = '/* Imported from file */\n' + cssContent;
-              const styleTag = document.createElement('style');
-              styleTag.textContent = cssContent;
-              document.head.appendChild(styleTag);
-              applyViewerSpacingOverrides();
-            }
+      const styles = doc.head.querySelectorAll('style');
+      let cssContent = '';
+      styles.forEach(style => {
+        cssContent += style.textContent;
+      });
+      if (!cssContent) return;
 
-            html = doc.body.innerHTML;
-          } else {
-            html = marked.parse(content);
+      if (options.removeMarkedStyles) {
+        document.querySelectorAll('style').forEach(style => {
+          if (style.textContent.includes('/* Imported from file */')) {
+            style.remove();
           }
-
-          const root = document.getElementById('content');
-          root.innerHTML = html;
-          applyViewerSpacingOverrides();
-          normalizeAudioWidgets(root);
-
-          // Render LaTeX
-          if (typeof renderMathInElement !== 'undefined') {
-            try {
-              renderMathInElement(root, {
-                delimiters: [
-                  {left: '$$', right: '$$', display: true},
-                  {left: '$', right: '$', display: false}
-                ],
-                throwOnError: false
-              });
-              root.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
-            } catch (e) {
-              console.error('KaTeX error:', e);
-            }
-          }
-
-          // Wrap tables
-          root.querySelectorAll('table').forEach(tbl => {
-            if(!tbl.parentElement.classList.contains('table-scroll')){
-              const wrap = document.createElement('div');
-              wrap.className = 'table-scroll';
-              tbl.parentElement.insertBefore(wrap, tbl);
-              wrap.appendChild(tbl);
-            }
-          });
-
-          root.querySelectorAll('a').forEach(a => a.target = '_blank');
-        })
-        .catch(err => {
-          console.error('Error loading summary:', err);
         });
+      }
+
+      if (options.scopeStyles) {
+        cssContent = cssContent.split('}').filter(rule => rule.trim()).map(rule => {
+          const selector = rule.split('{')[0].trim();
+          const styles = rule.split('{')[1] || '';
+          if (!selector || selector.match(/^(body|html|:root)$/i)) {
+            return rule + '}';
+          }
+          return `#content ${selector} { ${styles} }`;
+        }).join('');
+        cssContent = '/* Imported from file */\n' + addImportantToCss(cssContent);
+      } else {
+        cssContent = addImportantToCss(cssContent);
+      }
+
+      const styleTag = document.createElement('style');
+      styleTag.textContent = cssContent;
+      document.head.appendChild(styleTag);
+      applyViewerSpacingOverrides();
+    }
+
+    function contentLooksHtml(content, sourcePath, type) {
+      return type === 'html' || /\.html$/i.test(sourcePath || '') || String(content || '').includes('<!DOCTYPE');
+    }
+
+    function createViewerHtml(content, sourcePath, options = {}) {
+      if (contentLooksHtml(content, sourcePath, options.type)) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content, 'text/html');
+        injectImportedStyles(doc, options);
+        return doc.body.innerHTML;
+      }
+
+      if (options.rawNonHtml) {
+        return content;
+      }
+
+      return renderMarkdownToViewerHtml(content);
+    }
+
+    function renderViewerMath(root, label = '') {
+      if (typeof renderMathInElement === 'undefined') return;
+      try {
+        renderMathInElement(root, {
+          delimiters: [
+            {left: '$$', right: '$$', display: true},
+            {left: '$', right: '$', display: false}
+          ],
+          throwOnError: false
+        });
+        root.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
+      } catch (e) {
+        console.error(label ? `KaTeX error (${label}):` : 'KaTeX error:', e);
+      }
+    }
+
+    function wrapViewerTables(root) {
+      root.querySelectorAll('table').forEach(tbl => {
+        if(!tbl.parentElement.classList.contains('table-scroll')){
+          const wrap = document.createElement('div');
+          wrap.className = 'table-scroll';
+          tbl.parentElement.insertBefore(wrap, tbl);
+          wrap.appendChild(tbl);
+        }
+      });
+    }
+
+    function postProcessViewerContent(root, options = {}) {
+      if (options.spacing !== false) applyViewerSpacingOverrides();
+      if (options.audio !== false) normalizeAudioWidgets(root);
+      if (options.math !== false) renderViewerMath(root, options.mathLabel || '');
+      if (options.tables !== false) wrapViewerTables(root);
+      if (options.links !== false) root.querySelectorAll('a').forEach(a => a.target = '_blank');
+    }
+
+    function renderViewerContent(root, content, sourcePath, options = {}) {
+      root.innerHTML = createViewerHtml(content, sourcePath, options);
+      postProcessViewerContent(root, options);
+    }
+
+    function findItemInSection(section, normalizedPath) {
+      if (section.files) {
+        for (const file of section.files) {
+          if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) return file;
+        }
+      }
+      if (section.msgNotes) {
+        for (const note of section.msgNotes) {
+          if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) return note;
+        }
+      }
+      if (section.subsections) {
+        for (const subsection of section.subsections) {
+          const result = findItemInSection(subsection, normalizedPath);
+          if (result) return result;
+        }
+      }
+      return null;
+    }
+
+    function findFileInCoursesByPath(normalizedPath) {
+      if (typeof courses === 'undefined') return null;
+      for (const course of courses) {
+        if (!course.sections) continue;
+        for (const section of course.sections) {
+          const item = findItemInSection(section, normalizedPath);
+          if (item) return { item, course };
+        }
+      }
+      return null;
     }
 
     initGenerousImageLoading();
@@ -1780,10 +1848,6 @@
         .replace(/\.(html|md|txt)$/i, ''); // Remove extension
       document.title = title;
       document.getElementById('docTitle').textContent = title;
-      const dl = document.getElementById('downloadLink');
-      if (dl) {
-        dl.href = decodedPath;
-      }
 
       // Check if content is passed via sessionKey (sessionStorage)
       const sessionKey = getParam('sessionKey');
@@ -1797,7 +1861,7 @@
         } else {
           // Fallback to fetch if sessionStorage is empty
           const absoluteUrl = buildAbsoluteFileUrl(decodedPath);
-          contentPromise = fetch(absoluteUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
+          contentPromise = fetchText(absoluteUrl);
         }
       } else if (loadFromHash && window.location.hash) {
         // If content is passed in hash, use it directly (no fetch needed)
@@ -1805,33 +1869,7 @@
           const htmlContent = decodeURIComponent(window.location.hash.substring(1));
           const root = document.getElementById('content');
           root.innerHTML = htmlContent;
-          normalizeAudioWidgets(root);
-
-          // Render LaTeX with auto-render
-          if (typeof renderMathInElement !== 'undefined') {
-            try {
-              renderMathInElement(root, {
-                delimiters: [
-                  {left: '$$', right: '$$', display: true},
-                  {left: '$', right: '$', display: false}
-                ],
-                throwOnError: false
-              });
-              root.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
-            } catch (e) {
-              console.error('KaTeX error:', e);
-            }
-          }
-
-          // Wrap tables for horizontal scroll on mobile
-          root.querySelectorAll('table').forEach(tbl => {
-            if(!tbl.parentElement.classList.contains('table-scroll')){
-              const wrap = document.createElement('div');
-              wrap.className = 'table-scroll';
-              tbl.parentElement.insertBefore(wrap, tbl);
-              wrap.appendChild(tbl);
-            }
-          });
+          postProcessViewerContent(root, { spacing: false, links: false });
         } catch (err) {
           document.getElementById('content').textContent = 'Грешка при зареждане на съдържанието: ' + err.message;
         }
@@ -1842,106 +1880,19 @@
 
         // Add cache buster to ensure fresh content
         const fetchUrl = absoluteUrl + (absoluteUrl.includes('?') ? '&' : '?') + 't=' + Date.now();
-        contentPromise = fetch(fetchUrl).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); });
+        contentPromise = fetchText(fetchUrl);
       }
 
       contentPromise.then(content => {
-          let html;
-
-          // If it's an HTML file, extract body content directly
-          if (/\.html$/i.test(decodedPath)) {
-            const parser = new DOMParser();
-            const doc = parser.parseFromString(content, 'text/html');
-
-            // Extract CSS from <style> tags in <head>
-            const styles = doc.head.querySelectorAll('style');
-            let cssContent = '';
-            styles.forEach(style => {
-              cssContent += style.textContent;
-            });
-
-            // Inject CSS into current document if found
-            if (cssContent) {
-              const styleTag = document.createElement('style');
-              // Add !important to all rules to override md-viewer styles but preserve font-size
-              cssContent = cssContent.replace(/;(?!important)/g, ' !important;');
-              styleTag.textContent = cssContent;
-              document.head.appendChild(styleTag);
-              applyViewerSpacingOverrides();
-            }
-
-            html = doc.body.innerHTML;
-          } else {
-            // Otherwise parse as Markdown
-            html = marked.parse(content);
-
-            // Convert ~~~ paragraphs to dashed <hr>
-            html = html.replace(/<p>~~~<\/p>/g, '<hr style="border: none; border-top: 2px dashed #8B6F47;">');
-
-            // Process tables to support rowspan with ^ syntax (only if needed)
-            if (html.includes('^')) {
-              html = processTableRowspans(html);
-            }
-
-            // Process tables to support cell alignment with >>text<<, <<text, text>> (BEFORE colspan!)
-            if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) {
-              html = processTableAlignment(html);
-            }
-
-            // Process tables to support colspan with < syntax (only if needed)
-            if (html.includes('&lt;')) {
-              html = processTableColspans(html);
-            }
-          }
-
           const root = document.getElementById('content');
-          root.innerHTML = html;
-          applyViewerSpacingOverrides();
-          normalizeAudioWidgets(root);
+          renderViewerContent(root, content, decodedPath);
 
           // Images now use relative paths like "assets/image.png" which resolve correctly
           // from md-viewer.html location since all assets are in the central assets/ folder
           // No path fixing needed!
-
-          // Render LaTeX with auto-render - simple and direct
-          if (typeof renderMathInElement !== 'undefined') {
-            try {
-              renderMathInElement(root, {
-                delimiters: [
-                  {left: '$$', right: '$$', display: true},
-                  {left: '$', right: '$', display: false}
-                ],
-                throwOnError: false
-              });
-              root.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
-            } catch (e) {
-              console.error('KaTeX error:', e);
-            }
-          }
-
-          // Wrap tables for horizontal scroll on mobile
-          root.querySelectorAll('table').forEach(tbl => {
-            if(!tbl.parentElement.classList.contains('table-scroll')){
-              const wrap = document.createElement('div');
-              wrap.className = 'table-scroll';
-              tbl.parentElement.insertBefore(wrap, tbl);
-              wrap.appendChild(tbl);
-            }
-          });
-
-          // Make all links open in new tab
-          root.querySelectorAll('a').forEach(a => a.target = '_blank');
-
-          // Setup summary toggle button
-          const summaryBtn = document.getElementById('summaryBtn');
-          if (!summaryBtn) {
-            console.error('Summary button not found!');
-          } else {
-            // Summary button handler is set up outside IIFE
-          }
         })
         .catch(err => {
-          console.warn('Initial fetch failed, attempting to recover from courses data:', err);
+          debugWarn('Initial fetch failed, attempting to recover from courses data:', err);
 
           const contentDiv = document.getElementById('content');
           // Don't show error yet, keep "Зареждане..." or show a softer message if needed
@@ -1976,98 +1927,15 @@
               await loadCourseContent(targetCourse);
             }
 
-            // Search logic (duplicated for resilience inside this closure)
-            let fileData = null;
-
-            // Helper to search sections
-            const searchSection = (section) => {
-              if (section.files) {
-                for (const file of section.files) {
-                  if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) return file;
-                }
-              }
-              if (section.msgNotes) {
-                for (const note of section.msgNotes) {
-                  if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) return note;
-                }
-              }
-              if (section.subsections) {
-                for (const subsection of section.subsections) {
-                  const result = searchSection(subsection);
-                  if (result) return result;
-                }
-              }
-              return null;
-            };
-
-            for (const course of courses) {
-              if (course.sections) {
-                for (const section of course.sections) {
-                  const result = searchSection(section);
-                  if (result) {
-                    fileData = result;
-                    break;
-                  }
-                }
-              }
-              if (fileData) break;
-            }
+            const result = findFileInCoursesByPath(normalizedPath);
+            const fileData = result && result.item;
 
             if (fileData && fileData.content) {
-              console.log('Successfully recovered content from courses data');
-              // Render content
-              let html;
-              if (fileData.type === 'html' || fileData.content.includes('<!DOCTYPE')) {
-                 const parser = new DOMParser();
-                 const doc = parser.parseFromString(fileData.content, 'text/html');
-                 const styles = doc.head.querySelectorAll('style');
-                 let cssContent = '';
-                 styles.forEach(style => { cssContent += style.textContent; });
-                 if (cssContent) {
-                    const styleTag = document.createElement('style');
-                    cssContent = cssContent.replace(/;(?!important)/g, ' !important;');
-                    styleTag.textContent = cssContent;
-                    document.head.appendChild(styleTag);
-                      applyViewerSpacingOverrides();
-                 }
-                 html = doc.body.innerHTML;
-              } else {
-                 html = marked.parse(fileData.content);
-                 html = html.replace(/<p>~~~<\/p>/g, '<hr style="border: none; border-top: 2px dashed #8B6F47;">');
-                 if (html.includes('^')) html = processTableRowspans(html);
-                 if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) html = processTableAlignment(html);
-                 if (html.includes('&lt;')) html = processTableColspans(html);
-              }
-
-              contentDiv.innerHTML = html;
-              applyViewerSpacingOverrides();
-              normalizeAudioWidgets(contentDiv);
-
-              if (typeof renderMathInElement !== 'undefined') {
-                try {
-                  renderMathInElement(contentDiv, {
-                    delimiters: [
-                      {left: '$$', right: '$$', display: true},
-                      {left: '$', right: '$', display: false}
-                    ],
-                    throwOnError: false
-                  });
-                  contentDiv.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
-                } catch (e) {
-                  console.error('KaTeX error (recovery):', e);
-                }
-              }
-
-              contentDiv.querySelectorAll('table').forEach(tbl => {
-                if (!tbl.parentElement.classList.contains('table-scroll')) {
-                  const wrap = document.createElement('div');
-                  wrap.className = 'table-scroll';
-                  tbl.parentElement.insertBefore(wrap, tbl);
-                  wrap.appendChild(tbl);
-                }
+              debugLog('Successfully recovered content from courses data');
+              renderViewerContent(contentDiv, fileData.content, normalizedPath, {
+                type: fileData.type,
+                mathLabel: 'recovery'
               });
-
-              contentDiv.querySelectorAll('a').forEach(a => a.target = '_blank');
             } else {
               showError(err);
             }
@@ -2082,7 +1950,6 @@
 
     // Setup summary button - outside IIFE so it always works
     const summaryBtn = document.getElementById('summaryBtn');
-  //  console.log('Summary button setup starting, button exists:', !!summaryBtn);
 
     let originalPath = null;
     let isSummaryMode = false;
@@ -2092,10 +1959,8 @@
     // Setup button when page loads
     const setupButton = () => {
       if (buttonSetupDone) {
-     //   console.log('Button already setup, skipping');
         return;
       }
-      buttonSetupDone = true;
       if (!originalPath) {
         const urlParams = new URLSearchParams(window.location.search);
         const pathParam = urlParams.get('path');
@@ -2104,53 +1969,25 @@
         }
       }
 
-      if (!originalPath || !summaryBtn || typeof courses === 'undefined') {
-        console.log('Cannot setup button:', { originalPath, summaryBtn: !!summaryBtn, courses: typeof courses });
+      if (!originalPath || !summaryBtn) {
         return;
       }
 
-      summaryPath = originalPath.replace(/(-msg-)(.*)(\.(html|md|txt))$/i, '$1summary-$2$3');
-      console.log('Summary path:', summaryPath);
-
-      // Check if summary file exists in courses
-      let summaryFileExists = false;
-      const normalizedPath = summaryPath.replace(/\\/g, '/');
-
-      outerLoop: for (const course of courses) {
-        function searchSection(section) {
-          if (section.files) {
-            for (const file of section.files) {
-              if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) {
-                return true;
-              }
-            }
-          }
-          if (section.msgNotes) {
-            for (const note of section.msgNotes) {
-              if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) {
-                return true;
-              }
-            }
-          }
-          if (section.subsections) {
-            for (const subsection of section.subsections) {
-              if (searchSection(subsection)) return true;
-            }
-          }
-          return false;
-        }
-
-        if (course.sections) {
-          for (const section of course.sections) {
-            if (searchSection(section)) {
-              summaryFileExists = true;
-              break outerLoop;
-            }
-          }
-        }
+      if (typeof courses === 'undefined') {
+        debugLog('Cannot setup button:', { originalPath, summaryBtn: !!summaryBtn, courses: typeof courses });
+        return;
       }
 
-      console.log('Summary file exists:', summaryFileExists);
+      buttonSetupDone = true;
+
+      summaryPath = originalPath.replace(/(-msg-)(.*)(\.(html|md|txt))$/i, '$1summary-$2$3');
+      debugLog('Summary path:', summaryPath);
+
+      // Check if summary file exists in courses
+      const normalizedPath = summaryPath.replace(/\\/g, '/');
+      const summaryFileExists = !!findFileInCoursesByPath(normalizedPath);
+
+      debugLog('Summary file exists:', summaryFileExists);
       if (summaryFileExists) {
         summaryBtn.classList.add('visible');
       } else {
@@ -2163,7 +2000,7 @@
         if (originalPath) {
           isSummaryMode = !isSummaryMode;
           const pathToLoad = isSummaryMode ? summaryPath : originalPath;
-          console.log('Loading:', pathToLoad);
+          debugLog('Loading:', pathToLoad);
 
           // Find and display content
           async function findFileContent(filePath) {
@@ -2175,39 +2012,8 @@
               await loadCourseContent(targetCourse);
             }
 
-            for (const course of courses) {
-              function searchSection(section) {
-                if (section.files) {
-                  for (const file of section.files) {
-                    if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) {
-                      return file;
-                    }
-                  }
-                }
-                if (section.msgNotes) {
-                  for (const note of section.msgNotes) {
-                    if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) {
-                      return note;
-                    }
-                  }
-                }
-                if (section.subsections) {
-                  for (const subsection of section.subsections) {
-                    const result = searchSection(subsection);
-                    if (result) return result;
-                  }
-                }
-                return null;
-              }
-
-              if (course.sections) {
-                for (const section of course.sections) {
-                  const result = searchSection(section);
-                  if (result) return result;
-                }
-              }
-            }
-            return null;
+            const result = findFileInCoursesByPath(normalizedPath);
+            return result && result.item;
           }
 
           const fileData = await findFileContent(pathToLoad);
@@ -2215,51 +2021,14 @@
             const root = document.getElementById('content');
 
             if (fileData.type === 'html' || fileData.content.includes('<!DOCTYPE')) {
-              const parser = new DOMParser();
-              const doc = parser.parseFromString(fileData.content, 'text/html');
-
-              const styles = doc.head.querySelectorAll('style');
-              const existingStyles = document.querySelectorAll('style');
-              existingStyles.forEach(s => {
-                if (s.textContent.includes('/* Imported from file */')) {
-                  s.remove();
-                }
+              renderViewerContent(root, fileData.content, pathToLoad, {
+                type: fileData.type,
+                removeMarkedStyles: true,
+                scopeStyles: true
               });
-
-              let cssContent = '';
-              styles.forEach(style => {
-                cssContent += style.textContent;
-              });
-
-              if (cssContent) {
-                cssContent = cssContent.split('}').filter(rule => rule.trim()).map(rule => {
-                  const selector = rule.split('{')[0].trim();
-                  const styles = rule.split('{')[1] || '';
-
-                  // Skip only body, html, and :root selectors - include h1 and other tags
-                  if (!selector || selector.match(/^(body|html|:root)$/i)) {
-                    return rule + '}';
-                  }
-
-                  // Scope to #content for everything else including h1
-                  return `#content ${selector} { ${styles} }`;
-                }).join('');
-
-                cssContent = cssContent.replace(/;(?!important)/g, ' !important;');
-                cssContent = '/* Imported from file */\n' + cssContent;
-                const styleTag = document.createElement('style');
-                styleTag.textContent = cssContent;
-                document.head.appendChild(styleTag);
-                applyViewerSpacingOverrides();
-              }
-
-              root.innerHTML = doc.body.innerHTML;
-              applyViewerSpacingOverrides();
-              normalizeAudioWidgets(root);
             } else {
               root.innerHTML = fileData.content;
-              applyViewerSpacingOverrides();
-              normalizeAudioWidgets(root);
+              postProcessViewerContent(root, { math: false, tables: false, links: false });
             }
 
             window.scrollTo(0, 0);
@@ -2279,9 +2048,6 @@
     setTimeout(setupButton, 100);
 
     // Edit button handler
-    let currentEditPath = null;
-    let currentEditContent = null;
-
     function setupEditButton() {
       const editBtn = document.getElementById('editBtn');
       if (!editBtn) return;
@@ -2292,7 +2058,6 @@
       const filePath = urlParams.get('path');
 
       if (filePath) {
-        currentEditPath = filePath;
         // Make button visible on desktop/tablet
         if (window.innerWidth > 900) {
           editBtn.classList.add('visible');
@@ -2312,47 +2077,6 @@
             return false;
           }
 
-          function findFileInCoursesByPath(normalizedPath) {
-            if (typeof courses === 'undefined') return null;
-
-            function searchSection(section) {
-              if (section.files) {
-                for (const file of section.files) {
-                  if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) {
-                    return file;
-                  }
-                }
-              }
-              if (section.msgNotes) {
-                for (const note of section.msgNotes) {
-                  if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) {
-                    return note;
-                  }
-                }
-              }
-              if (section.subsections) {
-                for (const subsection of section.subsections) {
-                  const result = searchSection(subsection);
-                  if (result) return result;
-                }
-              }
-              return null;
-            }
-
-            for (const course of courses) {
-              if (course.sections) {
-                for (const section of course.sections) {
-                  const result = searchSection(section);
-                  if (result) {
-                    return { fileData: result, course };
-                  }
-                }
-              }
-            }
-
-            return null;
-          }
-
           // Find file content from courses data
           const normalizedPath = decodeURIComponent(filePath).replace(/\\/g, '/');
           const hasCourses = await waitForCoursesData();
@@ -2368,9 +2092,9 @@
             result = findFileInCoursesByPath(normalizedPath);
           }
 
-          if (result && result.fileData && result.fileData.content) {
+          if (result && result.item && result.item.content) {
             // Store content in sessionStorage to avoid URL length limits
-            sessionStorage.setItem('editFileContent', result.fileData.content);
+            sessionStorage.setItem('editFileContent', result.item.content);
             sessionStorage.setItem('editFilePath', filePath);
 
             // Navigate to md-editor
@@ -2394,7 +2118,7 @@
   </script>
 
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=202605061qw5"></script>
+  <script src="courses.generated.js?v=20260507zih"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
   function loadCourseContent(courseOrId) {
@@ -2420,7 +2144,7 @@
         resolve();
       };
       script.onerror = function() {
-        console.warn('Could not load content for course', contentKey);
+        debugWarn('Could not load content for course', contentKey);
         resolve();
       };
       document.head.appendChild(script);
@@ -2461,35 +2185,8 @@
     course._contentLoaded = true;
   }
   function findCourseForPath(normalizedPath) {
-    if (typeof courses === 'undefined') return null;
-    for (var i = 0; i < courses.length; i++) {
-      var course = courses[i];
-      if (!course.sections) continue;
-      for (var j = 0; j < course.sections.length; j++) {
-        if (_sectionContainsPath(course.sections[j], normalizedPath)) return course;
-      }
-    }
-    return null;
-  }
-  function _sectionContainsPath(section, normalizedPath) {
-    if (section.msgNotes) {
-      for (var k = 0; k < section.msgNotes.length; k++) {
-        var p = section.msgNotes[k].path;
-        if (p === normalizedPath || (p && p.replace(/\\/g, '/') === normalizedPath)) return true;
-      }
-    }
-    if (section.files) {
-      for (var k = 0; k < section.files.length; k++) {
-        var p = section.files[k].path;
-        if (p === normalizedPath || (p && p.replace(/\\/g, '/') === normalizedPath)) return true;
-      }
-    }
-    if (section.subsections) {
-      for (var k = 0; k < section.subsections.length; k++) {
-        if (_sectionContainsPath(section.subsections[k], normalizedPath)) return true;
-      }
-    }
-    return false;
+    var result = findFileInCoursesByPath(normalizedPath);
+    return result && result.course;
   }
   </script>
 
@@ -2499,11 +2196,11 @@
 
 
 
-<script src="js/user-identity.js?v=202605061qw5"></script>
+<script defer src="js/user-identity.js?v=202605061qw5"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202605061qw5"></script>
-  <script src="js/presence.js?v=202602171mhr"></script>
-  <script src="js/notes-init.js?v=202605022sg"></script>
+    <script defer src="js/chat.js?v=202605061qw5"></script>
+  <script defer src="js/presence.js?v=202602171mhr"></script>
+  <script defer src="js/notes-init.js?v=202605022sg"></script>
 
   <script>
     (function() {
@@ -3357,97 +3054,19 @@
     const decodedPath = decodeURIComponent(path);
     const normalizedPath = decodedPath.replace(/\\/g, '/');
 
-    // Recursive search function
-    function findFileInCourses(fileList) {
-      for (const course of fileList) {
-        if (course.sections) {
-          for (const section of course.sections) {
-            const result = searchSection(section);
-            if (result) return result;
-          }
-        }
-      }
-      return null;
-    }
-
-    function searchSection(section) {
-      if (section.files) {
-        for (const file of section.files) {
-          if (file.path === normalizedPath || file.path.replace(/\\/g, '/') === normalizedPath) {
-            return file;
-          }
-        }
-      }
-      if (section.msgNotes) {
-        for (const note of section.msgNotes) {
-          if (note.path === normalizedPath || note.path.replace(/\\/g, '/') === normalizedPath) {
-            return note;
-          }
-        }
-      }
-      if (section.subsections) {
-        for (const subsection of section.subsections) {
-          const result = searchSection(subsection);
-          if (result) return result;
-        }
-      }
-      return null;
-    }
-
     // Attempt to find the file in the fresh courses data
-    const fileData = findFileInCourses(courses);
+    const result = findFileInCoursesByPath(normalizedPath);
+    const fileData = result && result.item;
 
     // If we found the file and it has content (e.g. msgNote), force update the view
     // This overrides whatever might have been loaded from stale sessionStorage
     if (fileData && fileData.content) {
-      console.log('Hydrating content from fresh courses data for:', normalizedPath);
-
+      debugLog('Hydrating content from fresh courses data for:', normalizedPath);
       const root = document.getElementById('content');
-      let html;
-
-      if (fileData.type === 'html' || fileData.content.includes('<!DOCTYPE')) {
-         const parser = new DOMParser();
-         const doc = parser.parseFromString(fileData.content, 'text/html');
-         // Extract CSS... (simplified for hydration, assuming styles already loaded or we just replace body)
-         // For robustness, we re-run the style extraction logic briefly if needed,
-         // but for text notes, usually body innerHTML is enough.
-         html = doc.body.innerHTML;
-      } else {
-         // Re-parse markdown
-         html = marked.parse(fileData.content);
-         html = html.replace(/<p>~~~<\/p>/g, '<hr style="border: none; border-top: 2px dashed #8B6F47;">');
-         if (html.includes('^')) html = processTableRowspans(html);
-         if (html.includes('&gt;&gt;') || html.includes('&lt;&lt;')) html = processTableAlignment(html);
-         if (html.includes('&lt;')) html = processTableColspans(html);
-      }
-
-      root.innerHTML = html;
-      applyViewerSpacingOverrides();
-      normalizeAudioWidgets(root);
-
-      // Re-run KaTeX
-      if (typeof renderMathInElement !== 'undefined') {
-        renderMathInElement(root, {
-          delimiters: [
-            {left: '$$', right: '$$', display: true},
-            {left: '$', right: '$', display: false}
-          ],
-          throwOnError: false
-        });
-        root.querySelectorAll('.katex .katex-mathml').forEach((el) => el.remove());
-      }
-
-      // Re-wrap tables
-      root.querySelectorAll('table').forEach(tbl => {
-        if(!tbl.parentElement.classList.contains('table-scroll')){
-          const wrap = document.createElement('div');
-          wrap.className = 'table-scroll';
-          tbl.parentElement.insertBefore(wrap, tbl);
-          wrap.appendChild(tbl);
-        }
+      renderViewerContent(root, fileData.content, normalizedPath, {
+        type: fileData.type,
+        styleMode: 'none'
       });
-
-      root.querySelectorAll('a').forEach(a => a.target = '_blank');
     }
   })();
 

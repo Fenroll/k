@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605061qw5"></script>
+  <script src="js/auth-guard.js?v=20260507zih"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605061qw5">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=20260507zih">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -192,38 +192,6 @@
       width: 23px;
       height: 23px;
       object-fit: contain;
-    }
-
-    /* Table options dropdown menu */
-    .table-options-menu {
-      background: #ffffff;
-      border: 1px solid #d0d0d0;
-      border-radius: 4px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
-      min-width: 220px;
-      padding: 6px 0;
-    }
-
-    .table-menu-item {
-      padding: 10px 16px;
-      cursor: pointer;
-      font-size: 0.95em;
-      color: #4a4a4a;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background-color 0.15s ease;
-    }
-
-    .table-menu-item:hover {
-      background-color: #f0f0f0;
-      color: #1a1a1a;
-    }
-
-    .table-options-trigger {
-      padding: 8px 6px !important;
-      min-width: 32px;
-      font-size: 16px;
     }
 
     .toolbar select {
@@ -631,7 +599,9 @@
       line-height: 1.45;
     }
 
-    .audio-context-menu {
+    .audio-context-menu,
+    .link-context-menu,
+    .note-context-menu {
       min-width: 178px !important;
       padding: 6px !important;
       border: 1px solid #d8e4d4 !important;
@@ -640,7 +610,9 @@
       box-shadow: 0 14px 34px rgba(22, 34, 24, 0.18), 0 2px 8px rgba(22, 34, 24, 0.08) !important;
     }
 
-    .audio-context-menu button {
+    .audio-context-menu button,
+    .link-context-menu button,
+    .note-context-menu button {
       width: 100%;
       min-height: 38px;
       padding: 8px 10px !important;
@@ -658,19 +630,24 @@
       text-align: left;
     }
 
-    .audio-context-menu button:hover {
+    .audio-context-menu button:hover,
+    .link-context-menu button:hover,
+    .note-context-menu button:hover {
       background: #fee2e2 !important;
       color: #991b1b !important;
     }
 
-    .audio-context-menu img {
+    .audio-context-menu img,
+    .link-context-menu img,
+    .note-context-menu img {
       width: 16px;
       height: 16px;
       margin: 0 !important;
       filter: invert(19%) sepia(67%) saturate(2410%) hue-rotate(346deg) brightness(93%) contrast(93%);
     }
 
-    .ordered-list-context-menu {
+    .ordered-list-context-menu,
+    .link-url-context-menu {
       min-width: 58px !important;
       padding: 6px !important;
       border: 1px solid #d8e4d4 !important;
@@ -679,13 +656,15 @@
       box-shadow: 0 14px 34px rgba(22, 34, 24, 0.18), 0 2px 8px rgba(22, 34, 24, 0.08) !important;
     }
 
-    .ordered-list-number-editor {
+    .ordered-list-number-editor,
+    .link-url-editor {
       display: flex;
       align-items: center;
       padding: 2px;
     }
 
-    .ordered-list-number-editor input {
+    .ordered-list-number-editor input,
+    .link-url-editor input {
       box-sizing: content-box;
       width: 34px;
       height: 32px;
@@ -700,40 +679,46 @@
       outline: none;
     }
 
-    .ordered-list-number-editor input:focus {
+    .link-url-context-menu {
+      min-width: 260px !important;
+    }
+
+    .link-url-editor input {
+      box-sizing: border-box;
+      width: 248px;
+      font-weight: 600;
+      text-align: left;
+    }
+
+    .ordered-list-number-editor input:focus,
+    .link-url-editor input:focus {
       border-color: #588157;
       box-shadow: 0 0 0 3px rgba(88, 129, 87, 0.15);
     }
 
-    .heading-color-btn,
     .text-color-btn,
     .highlight-color-btn {
       transition: transform 0.2s, box-shadow 0.2s;
     }
 
-    .heading-color-btn:hover:not(.active),
     .text-color-btn:hover:not(.active),
     .highlight-color-btn:hover:not(.active) {
       transform: scale(1.1);
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
     }
 
-    .heading-color-btn.active,
     .text-color-btn.active,
     .highlight-color-btn.active {
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
       transform: scale(1.05);
     }
 
-    .heading-color-btn.active:hover,
     .text-color-btn.active:hover,
     .highlight-color-btn.active:hover {
       box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.3);
       transform: scale(1.05);
     }
 
-    .heading-color-btn:focus,
-    .heading-color-btn:focus-visible,
     .text-color-btn:focus,
     .text-color-btn:focus-visible,
     .highlight-color-btn:focus,
@@ -770,33 +755,6 @@
 
     #editor tbody tr:nth-child(odd) {
       background: rgba(88, 129, 87, 0.06); /* Very very slight tint of #588157 */
-    }
-
-    /* Raw code modal */
-    .raw-code-btn {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      width: 50px;
-      height: 50px;
-      border-radius: 50%;
-      background: #588157;
-      color: #fff;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      font-size: 1.2em;
-      transition: all 0.3s;
-      z-index: 200;
-    }
-
-    .raw-code-btn:hover {
-      background: #588157;
-      box-shadow: 0 6px 16px rgba(0,0,0,0.2);
-      transform: scale(1.1);
     }
 
     .modal {
@@ -859,18 +817,6 @@
       flex: 1;
       overflow: auto;
       padding: 20px 22px;
-    }
-
-    .raw-code {
-      width: 100%;
-      min-height: 300px;
-      padding: 12px;
-      border: 1px solid #e5e7eb;
-      border-radius: 4px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.9em;
-      resize: vertical;
-      line-height: 1.5;
     }
 
     .modal-footer {
@@ -1134,8 +1080,6 @@
         pointer-events: none;
       }
 
-      /* UpToDate larger icon */
-      #uptodateBtn img { width: 26px; height: 26px; }
       #shortcutsBtn img { width: 21px; height: 21px; }
       #ulBtn img { width: 21px; height: 21px; }
       #olBtn img { width: 22px; height: 22px; }
@@ -1158,14 +1102,6 @@
         padding-bottom: calc(80px + env(safe-area-inset-bottom));
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-      }
-
-      /* ── FAB raw-code button ── */
-      .raw-code-btn {
-        width: 44px;
-        height: 44px;
-        bottom: calc(76px + env(safe-area-inset-bottom));
-        right: 14px;
       }
 
       /* ── Chat widget above nav bar ── */
@@ -1191,13 +1127,6 @@
       #editor code { font-size: 0.82em; }
       #editor blockquote { font-size: 0.92em; }
       #editor table { font-size: 0.85em; }
-
-      /* ── Table options: full-width on mobile ── */
-      .table-options-menu {
-        min-width: 180px;
-        right: 0;
-        left: auto;
-      }
 
     }
 
@@ -1350,50 +1279,6 @@
       padding: 3px;
       background: #fff;
       flex-shrink: 0;
-    }
-
-    /* Heading color picker */
-    .heading-color-dropdown {
-      position: absolute;
-      top: 100%;
-      left: 0;
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 10px;
-      padding: 10px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.12);
-      z-index: 1000;
-      min-width: 200px;
-    }
-
-    .heading-color-dropdown .heading-color-label {
-      font-size: 11px;
-      font-weight: 600;
-      color: #9ca3af;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      padding: 0 2px 8px;
-    }
-
-    .heading-color-grid {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .heading-color-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      border: 2px solid #e5e7eb;
-      cursor: pointer;
-      transition: transform 0.12s, box-shadow 0.12s, border-color 0.12s;
-    }
-
-    .heading-color-btn:hover {
-      transform: scale(1.15);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      border-color: #9ca3af;
     }
 
     /* Toggle button active state */
@@ -1565,12 +1450,10 @@
     .format-option:hover { background: var(--brand-light); }
 
     /* ── Table / context menus ── */
-    .table-options-menu, .table-context-menu {
+    .table-context-menu {
       border-radius: var(--radius-md) !important; border: 1px solid var(--border) !important;
       box-shadow: var(--shadow-md) !important; padding: 4px 0 !important; overflow: hidden;
     }
-    .table-menu-item { padding: 8px 14px; font-size: 0.875rem; color: var(--text); transition: background var(--transition); }
-    .table-menu-item:hover { background: var(--brand-light); color: var(--brand); }
     .table-context-menu button {
       padding: 8px 14px !important; font-size: 0.875rem !important; color: var(--text) !important;
       border-radius: 0 !important; background: transparent !important; transition: background var(--transition) !important;
@@ -1754,17 +1637,6 @@
       background: #d9ecd4 !important;
     }
 
-    /* ── Raw code textarea ── */
-    .modal .raw-code {
-      border: 1.5px solid var(--border) !important; border-radius: var(--radius-sm) !important;
-      font-size: 0.875rem !important; background: #fafcfa !important; color: var(--text) !important; padding: 12px 14px !important;
-    }
-    .modal .raw-code:focus { border-color: var(--brand) !important; box-shadow: 0 0 0 3px rgba(88,129,87,0.1) !important; outline: none !important; }
-
-    /* ── FAB ── */
-    .raw-code-btn { background: var(--brand) !important; border-radius: 14px !important; }
-    .raw-code-btn:hover { background: var(--brand-dark) !important; transform: scale(1.06) !important; }
-
     /* ── Choose image labels ── */
     label[for="imageUploadFileInput"], label[for="noteImageUploadFileInput"] {
       border-radius: var(--radius-sm) !important; background: var(--brand) !important;
@@ -1870,20 +1742,6 @@
     <div class="toolbar-group mobile-extra" style="position: relative;">
       <button id="tableBtn" title="Insert Table"><img src="svg/md-editor/icon-table.svg?v=2026031715gu" alt="Table" class="toolbar-icon"></button>
       <button id="editTableBtn" title="Edit table with Tables Generator"><img src="svg/md-editor/icon-edit-table.svg?v=2026031715gu" alt="Edit Table" class="toolbar-icon"></button>
-      <div id="tableOptionsMenu" class="table-options-menu" style="display: none; position: absolute; top: 100%; left: 0; background: white; border: 1px solid #ddd; border-radius: 4px; box-shadow: 0 2px 8px rgba(0,0,0,0.15); z-index: 1000; min-width: 220px; white-space: nowrap;">
-        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Insert row above</div>
-        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableRowAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Insert row below</div>
-        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableColumnBefore(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Insert column left</div>
-        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); addTableColumnAfter(); closeTableMenu();"><img src="svg/md-editor/icon-add.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Insert column right</div>
-        <hr style="margin: 4px 0; border: none; border-top: 1px solid #eee;">
-        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTableRow(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Remove Table Row</div>
-        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTableColumn(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Delete column</div>
-        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); deleteTable(); closeTableMenu();"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Delete table</div>
-        <hr style="margin: 4px 0; border: none; border-top: 1px solid #eee;">
-        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); setCellBackgroundColor(); closeTableMenu();"><img src="svg/md-editor/icon-table-colors.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Set Cell Background Color</div>
-        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); mergeTableCells(); closeTableMenu();"><img src="svg/md-editor/icon-cell-merge.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Merge cells</div>
-        <div class="table-menu-item" onclick="setCursorInTable(lastTableContext); splitTableCell(); closeTableMenu();"><img src="svg/md-editor/icon-split-cells.svg?v=2026031715gu" alt="Table" class="toolbar-icon"> Split cell</div>
-      </div>
     </div>
 
     <!-- G7: Insert -->
@@ -1932,12 +1790,12 @@
 
     <!-- Back to courses (far right) -->
     <div class="toolbar-group toolbar-group-back">
-      <a href="index.html" id="backToCoursesBtn" class="toolbar-back-link" title="Back to courses">
+      <a href="index.html" class="toolbar-back-link" title="Back to courses">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <line x1="19" y1="12" x2="5" y2="12"></line>
           <polyline points="12 19 5 12 12 5"></polyline>
         </svg>
-        <span class="toolbar-back-label">Courses</span>
+        <span>Courses</span>
       </a>
     </div>
   </div>
@@ -1974,10 +1832,27 @@
     <button id="deleteAudioCtx"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" alt="" aria-hidden="true"> Delete audio</button>
   </div>
 
+  <!-- Link context menu -->
+  <div id="linkContextMenu" class="table-context-menu link-context-menu">
+    <button id="deleteLinkCtx"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" alt="" aria-hidden="true"> Delete link</button>
+  </div>
+
+  <!-- Inline note context menu -->
+  <div id="noteContextMenu" class="table-context-menu note-context-menu">
+    <button id="deleteNoteCtx"><img src="svg/md-editor/icon-deleteTable.svg?v=2026031715gu" alt="" aria-hidden="true"> Delete note</button>
+  </div>
+
   <!-- Ordered list context menu -->
   <div id="orderedListContextMenu" class="table-context-menu ordered-list-context-menu">
     <label class="ordered-list-number-editor" for="orderedListNumberInput">
       <input id="orderedListNumberInput" type="text" inputmode="numeric" pattern="[0-9]*" aria-label="List number">
+    </label>
+  </div>
+
+  <!-- Link input popup -->
+  <div id="linkUrlContextMenu" class="table-context-menu link-url-context-menu">
+    <label class="link-url-editor" for="linkUrlInput">
+      <input id="linkUrlInput" type="url" inputmode="url" autocomplete="url" aria-label="Link URL" placeholder="Paste link">
     </label>
   </div>
 
@@ -2064,7 +1939,7 @@
         <div style="margin-bottom: 12px;">
           <input type="text" id="fileSearchInput" placeholder="Search files..." style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
         </div>
-        <div id="fileListContainer" style="flex: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px;">
+        <div style="flex: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px;">
           <div id="fileList" style="padding: 0;"></div>
         </div>
       </div>
@@ -2216,7 +2091,7 @@
     </div>
   </div>
 
-  <div id="symbolsModal" class="modal symbols-modal">
+  <div id="symbolsModal" class="modal">
     <div class="modal-content symbols-modal-content">
       <div class="modal-header">
         <h2>Insert symbol</h2>
@@ -2263,7 +2138,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202605061qw5"></script>
+  <script src="courses.generated.js?v=20260507zih"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2587,50 +2462,7 @@
         }
 
     // ========================================
-    // 1. HEADER ENTER KEY LOGIC
-    // ========================================
-    /* editor.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter' && !e.shiftKey) {
-        const selection = window.getSelection();
-        if (selection.rangeCount === 0) return;
-
-        const range = selection.getRangeAt(0);
-        let node = range.startContainer;
-
-        // Find the heading element if we're inside one
-        while (node && node !== editor) {
-          if (node.nodeType === 1 && /^H[1-4]$/.test(node.tagName)) {
-            // Check if cursor is at the start of the heading
-            const textNode = node.firstChild;
-            const isAtStart = range.startContainer === textNode && range.startOffset === 0;
-
-            if (isAtStart || (range.startContainer === node && range.startOffset === 0)) {
-              e.preventDefault();
-
-              // Create a new paragraph before the heading
-              const newParagraph = document.createElement('p');
-              newParagraph.innerHTML = '<br>';
-              node.parentNode.insertBefore(newParagraph, node);
-
-              // Move cursor to the new paragraph
-              const newRange = document.createRange();
-              newRange.setStart(newParagraph, 0);
-              newRange.collapse(true);
-              selection.removeAllRanges();
-              selection.addRange(newRange);
-
-              saveToHistory();
-              return;
-            }
-            break;
-          }
-          node = node.parentNode;
-        }
-      }
-    }); */
-
-    // ========================================
-    // 2. PROFESSIONAL COLOR PICKER INITIALIZATION
+    // PROFESSIONAL COLOR PICKER INITIALIZATION
     // ========================================
     const themeBaseColors = [
       { name: 'Black', base: '#000000' },
@@ -2909,10 +2741,6 @@
     const shortcutsModal = document.getElementById('shortcutsModal');
     const closeShortcutsBtn = document.getElementById('closeShortcutsBtn');
 
-    let editorContent = '';
-    let rawContent = '';
-    let originalHtml = '<p>Start typing here...</p>';
-
     // Global base path for images
     let globalImageBasePath = '';
 
@@ -3092,19 +2920,6 @@
       sel.addRange(newRange);
     }
 
-    function insertInline(tag) {
-      const selection = window.getSelection();
-      if (selection.toString().length > 0) {
-        if (tag === 'code') {
-          document.execCommand('formatBlock', false, 'code');
-        } else {
-          document.execCommand(tag, false, null);
-        }
-      }
-      saveToHistory();
-      editor.focus();
-    }
-
     function insertList(type) {
       const getSelectionListItem = () => {
         const selection = window.getSelection();
@@ -3248,44 +3063,6 @@
       return table;
     }
 
-    // Advanced table functions
-    function getTableCellFromSelection() {
-      const selection = window.getSelection();
-      if (selection.rangeCount === 0) return null;
-      let node = selection.getRangeAt(0).startContainer;
-      while (node && node !== editor) {
-        if (node.tagName === 'TD' || node.tagName === 'TH') return node;
-        node = node.parentNode;
-      }
-      return null;
-    }
-
-    // Helper to set cursor in a table cell
-    function setCursorInTable(table) {
-      if (!table) return;
-
-      const selection = window.getSelection();
-
-      // Use the last saved cell if it's still in this table
-      if (lastTableCell && table.contains(lastTableCell)) {
-        const range = document.createRange();
-        range.setStart(lastTableCell, 0);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      } else {
-        // Otherwise go to first cell
-        const firstCell = table.querySelector('td') || table.querySelector('th');
-        if (firstCell) {
-          const range = document.createRange();
-          range.setStart(firstCell, 0);
-          range.collapse(true);
-          selection.removeAllRanges();
-          selection.addRange(range);
-        }
-      }
-    }
-
     // Helper to set cursor in a specific table cell
     function setCursorInCell(cell) {
       if (!cell) return;
@@ -3302,166 +3079,6 @@
 
       // Update last table cell
       lastTableCell = cell;
-    }
-
-    function getTableFromCell(cell) {
-      let node = cell;
-      while (node && node !== editor) {
-        if (node.tagName === 'TABLE') return node;
-        node = node.parentNode;
-      }
-      return null;
-    }
-
-    function addTableColumnBefore() {
-      const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
-      const table = getTableFromCell(cell);
-      const colIndex = cell.cellIndex;
-
-      table.querySelectorAll('tr').forEach(row => {
-        const newCell = document.createElement(row.querySelector('th') ? 'th' : 'td');
-        newCell.textContent = ' ';
-        row.insertBefore(newCell, row.cells[colIndex]);
-      });
-      saveToHistory();
-    }
-
-    function addTableColumnAfter() {
-      const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
-      const table = getTableFromCell(cell);
-      const colIndex = cell.cellIndex;
-
-      table.querySelectorAll('tr').forEach(row => {
-        const newCell = document.createElement(row.querySelector('th') ? 'th' : 'td');
-        newCell.textContent = ' ';
-        row.insertBefore(newCell, row.cells[colIndex + 1]);
-      });
-      saveToHistory();
-    }
-
-    function deleteTableColumn() {
-      const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
-      const table = getTableFromCell(cell);
-      const colIndex = cell.cellIndex;
-
-      table.querySelectorAll('tr').forEach(row => {
-        if (row.cells[colIndex]) row.deleteCell(colIndex);
-      });
-      saveToHistory();
-    }
-
-    function addTableRowBefore() {
-      const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
-      const table = getTableFromCell(cell);
-      const row = cell.closest('tr');
-      const newRow = document.createElement('tr');
-      const colCount = table.querySelector('tr').cells.length;
-
-      for (let i = 0; i < colCount; i++) {
-        newRow.appendChild(document.createElement('td'));
-      }
-      row.parentNode.insertBefore(newRow, row);
-      saveToHistory();
-    }
-
-    function addTableRowAfter() {
-      const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
-      const table = getTableFromCell(cell);
-      const row = cell.closest('tr');
-      const newRow = document.createElement('tr');
-      const colCount = table.querySelector('tr').cells.length;
-
-      for (let i = 0; i < colCount; i++) {
-        newRow.appendChild(document.createElement('td'));
-      }
-      row.parentNode.insertBefore(newRow, row.nextSibling);
-      saveToHistory();
-    }
-
-    function deleteTableRow() {
-      const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
-      const row = cell.closest('tr');
-      row.remove();
-      saveToHistory();
-    }
-
-    function deleteTable() {
-      const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
-      const table = getTableFromCell(cell);
-      table.remove();
-      saveToHistory();
-    }
-
-    function mergeTableCells() {
-      const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
-
-      const row = cell.closest('tr');
-      if (!row) return showNotification('Place the cursor inside a table first', 'warning');
-
-      // Get current cell index and next cell
-      const cellIndex = cell.cellIndex;
-      const nextCell = row.cells[cellIndex + 1];
-
-      if (!nextCell) return showNotification('There is no next cell to merge with', 'warning');
-
-      // Merge content
-      cell.textContent = (cell.textContent + ' ' + nextCell.textContent).trim();
-
-      // Add colspan if it doesn't exist
-      const colspan = parseInt(cell.getAttribute('colspan')) || 1;
-      cell.setAttribute('colspan', colspan + 1);
-
-      // Remove next cell
-      nextCell.remove();
-
-      saveToHistory();
-    }
-
-    function setCellBackgroundColor() {
-      const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
-      const color = prompt('Цвят (hex):', '#FAF594');
-      if (color) {
-        cell.style.backgroundColor = color;
-        saveToHistory();
-      }
-    }
-
-    function splitTableCell() {
-      const cell = getTableCellFromSelection();
-      if (!cell) return showNotification('Place the cursor inside a table first', 'warning');
-
-      const colspan = parseInt(cell.getAttribute('colspan')) || 1;
-
-      if (colspan <= 1) return showNotification('This cell has no colspan to split', 'warning');
-
-      const row = cell.closest('tr');
-      const cellIndex = cell.cellIndex;
-
-      // Reduce colspan
-      cell.setAttribute('colspan', colspan - 1);
-
-      // Create new cell
-      const newCell = document.createElement(cell.tagName);
-      newCell.textContent = ' ';
-
-      // Insert new cell after current
-      const nextCell = row.cells[cellIndex + 1];
-      if (nextCell) {
-        row.insertBefore(newCell, nextCell);
-      } else {
-        row.appendChild(newCell);
-      }
-
-      saveToHistory();
     }
 
     // Store cursor position for image insertion
@@ -4539,35 +4156,54 @@
       }
     });
 
-    // Link Button - Simple prompt
-    document.getElementById('linkBtn').addEventListener('click', () => {
-      const selection = window.getSelection();
+    const linkUrlContextMenu = document.getElementById('linkUrlContextMenu');
+    const linkUrlInput = document.getElementById('linkUrlInput');
+    let savedLinkSelection = null;
+    let savedLinkText = '';
 
-      if (!selection.rangeCount || !selection.toString()) {
-        showNotification('Please select text first', 'warning');
-        return;
+    function closeLinkUrlPopup() {
+      savedLinkSelection = null;
+      savedLinkText = '';
+      linkUrlInput.value = '';
+      linkUrlContextMenu.classList.remove('active');
+    }
+
+    function positionLinkUrlPopup(range) {
+      const rangeRect = range.getBoundingClientRect();
+      const buttonRect = document.getElementById('linkBtn').getBoundingClientRect();
+      const anchorRect = rangeRect.width || rangeRect.height ? rangeRect : buttonRect;
+      const popupWidth = 274;
+      const left = Math.max(8, Math.min(anchorRect.left, window.innerWidth - popupWidth - 8));
+      const top = Math.max(8, anchorRect.bottom + 8);
+
+      linkUrlContextMenu.style.left = left + 'px';
+      linkUrlContextMenu.style.top = top + 'px';
+    }
+
+    function applyLinkUrlInput() {
+      if (!savedLinkSelection || !savedLinkText) return false;
+
+      const normalizedUrl = linkUrlInput.value.trim();
+      if (!normalizedUrl) {
+        closeLinkUrlPopup();
+        editor.focus();
+        return false;
       }
 
-      const selectedText = selection.toString();
-      const selectedRange = saveSelection();
-      const url = prompt('Въведи URL:');
-
-      if (!url || url.trim() === '') {
-        return;
-      }
-
-      const normalizedUrl = url.trim();
+      const selectedRange = savedLinkSelection.cloneRange();
+      const selectedText = savedLinkText;
+      closeLinkUrlPopup();
 
       if (isMp3LinkUrl(normalizedUrl)) {
         openAudioImportModal(normalizedUrl, selectedText);
         savedAudioImportSelection = selectedRange;
-        return;
+        return true;
       }
 
       restoreSelection(selectedRange);
-      const range = window.getSelection().getRangeAt(0);
+      const selection = window.getSelection();
+      const range = selection.getRangeAt(0);
 
-      // Create link with wavy underline
       const link = document.createElement('a');
       link.href = normalizedUrl;
       link.textContent = selectedText;
@@ -4575,11 +4211,9 @@
       link.style.textDecorationSkipInk = 'none';
       link.style.textDecorationColor = '#74b673';
 
-      // Insert link
       range.deleteContents();
       range.insertNode(link);
 
-      // Move cursor after link
       range.setStartAfter(link);
       range.collapse(true);
       selection.removeAllRanges();
@@ -4587,6 +4221,46 @@
 
       saveToHistory();
       editor.focus();
+      return true;
+    }
+
+    // Link Button - small URL popup
+    document.getElementById('linkBtn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const selection = window.getSelection();
+
+      if (!selection.rangeCount || !selection.toString()) {
+        showNotification('Please select text first', 'warning');
+        return;
+      }
+
+      savedLinkText = selection.toString();
+      savedLinkSelection = saveSelection();
+      positionLinkUrlPopup(savedLinkSelection);
+      linkUrlContextMenu.classList.add('active');
+      requestAnimationFrame(() => {
+        linkUrlInput.focus();
+        linkUrlInput.select();
+      });
+    });
+
+    linkUrlContextMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    linkUrlInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        applyLinkUrlInput();
+      } else if (e.key === 'Escape') {
+        e.preventDefault();
+        closeLinkUrlPopup();
+        editor.focus();
+      }
+    });
+
+    linkUrlInput.addEventListener('change', () => {
+      applyLinkUrlInput();
     });
 
     let savedSymbolsSelection = null;
@@ -4693,26 +4367,21 @@
     });
 
     // Table buttons
-    // Table menu dropdown
-    let lastTableContext = null; // Store last table context
     let lastTableCell = null; // Store last selected cell
 
-    // Track when cursor enters/leaves table
+    // Track when cursor leaves table
     editor.addEventListener('click', () => {
-
       const selection = window.getSelection();
       if (selection.rangeCount > 0) {
         const range = selection.getRangeAt(0);
         let node = range.startContainer;
         while (node && node !== editor) {
           if (node.tagName === 'TABLE') {
-            lastTableContext = node;
             return;
           }
           node = node.parentNode;
         }
       }
-      lastTableContext = null;
       lastTableCell = null;
     });
 
@@ -5025,47 +4694,6 @@
       savedTextColorSelection = null;
     });
 
-    const headingColorToggleButton = document.getElementById('headingColorToggleBtn');
-
-    // Heading Color Toggle Button
-    if (headingColorToggleButton) {
-      headingColorToggleButton.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        const headingColorOptions = document.getElementById('headingColorOptions');
-        const isHidden = headingColorOptions.style.display === 'none' || headingColorOptions.style.display === '';
-        headingColorOptions.style.display = isHidden ? 'flex' : 'none';
-        if (isHidden) positionDropdown(headingColorOptions, document.getElementById('headingColorToggleBtn'));
-      });
-    }
-
-    // Close heading color dropdown when clicking outside
-    document.addEventListener('click', (e) => {
-      const headingColorOptions = document.getElementById('headingColorOptions');
-      const headingColorToggleBtn = document.getElementById('headingColorToggleBtn');
-      if (headingColorOptions && headingColorToggleBtn && !headingColorOptions.contains(e.target) && !headingColorToggleBtn.contains(e.target)) {
-        headingColorOptions.style.display = 'none';
-      }
-    });
-
-    // Heading Color Control
-    document.querySelectorAll('.heading-color-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.preventDefault();
-        const color = btn.dataset.color;
-
-        applyGlobalHeadingColor(color);
-        applyDashedSeparatorColor(color);
-
-        document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-
-        localStorage.setItem('textEditorHeadingColor', color);
-        document.getElementById('headingColorOptions').style.display = 'none';
-        btn.blur();
-      });
-    });
-
     // Highlight Toggle Button
     document.getElementById('highlightToggleBtn').addEventListener('click', (e) => {
       e.preventDefault();
@@ -5207,24 +4835,7 @@
         if (defaultBtn) defaultBtn.classList.add('active');
       }
 
-      if (savedHeadingColor) {
-        const btn = document.querySelector(`.heading-color-btn[data-color="${savedHeadingColor}"]`);
-        if (btn) {
-          applyDashedSeparatorColor(savedHeadingColor);
-
-          // Clear all active classes first
-          document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-        }
-      } else {
-        // If no saved color, activate the default (Lime Green)
-        document.querySelectorAll('.heading-color-btn').forEach(b => b.classList.remove('active'));
-        const defaultBtn = document.querySelector('.heading-color-btn[data-color="#588157"]');
-        if (defaultBtn) {
-          defaultBtn.classList.add('active');
-          applyDashedSeparatorColor('#588157');
-        }
-      }
+      applyDashedSeparatorColor(activeHeadingColor);
 
       // Load saved highlight color
       const savedHighlight = localStorage.getItem('textEditorHighlight');
@@ -6390,8 +6001,6 @@ renderMathInElement(document.body, {
 
     document.getElementById('insertNoteBtn').addEventListener('click', () => {
       const noteText = document.getElementById('noteTextInput').value.trim();
-      const selectedTextContent = document.getElementById('noteSelectedTextInput').value;
-
       if (!noteText) {
         showNotification('Please enter some text for the note.', 'warning');
         return;
@@ -7301,11 +6910,31 @@ renderMathInElement(document.body, {
     // Table context menu functionality
     const tableContextMenu = document.getElementById('tableContextMenu');
     const audioContextMenu = document.getElementById('audioContextMenu');
+    const linkContextMenu = document.getElementById('linkContextMenu');
+    const noteContextMenu = document.getElementById('noteContextMenu');
     const orderedListContextMenu = document.getElementById('orderedListContextMenu');
     const orderedListNumberInput = document.getElementById('orderedListNumberInput');
     let contextMenuCell = null;
     let contextMenuAudioTarget = null;
+    let contextMenuLinkTarget = null;
+    let contextMenuNoteTarget = null;
     let contextMenuListItem = null;
+
+    function unwrapInlineElement(element) {
+      if (!(element instanceof Element) || !element.parentNode) return;
+
+      const parent = element.parentNode;
+      while (element.firstChild) {
+        parent.insertBefore(element.firstChild, element);
+      }
+      element.remove();
+    }
+
+    function hideInlineContextMenus() {
+      audioContextMenu.classList.remove('active');
+      linkContextMenu.classList.remove('active');
+      noteContextMenu.classList.remove('active');
+    }
 
     function resolveAudioContextTarget(target) {
       if (!(target instanceof Element)) return null;
@@ -7348,6 +6977,15 @@ renderMathInElement(document.body, {
       if (event.clientX >= markerLeft && event.clientX <= markerRight) {
         return item;
       }
+
+      return null;
+    }
+
+    function resolveLinkContextTarget(target) {
+      if (!(target instanceof Element)) return null;
+
+      const link = target.closest('a[href]');
+      if (link && editor.contains(link)) return link;
 
       return null;
     }
@@ -7418,13 +7056,58 @@ renderMathInElement(document.body, {
         e.preventDefault();
         contextMenuAudioTarget = audioTarget;
         contextMenuCell = null;
+        contextMenuLinkTarget = null;
+        contextMenuNoteTarget = null;
         contextMenuListItem = null;
         tableContextMenu.classList.remove('active');
         orderedListContextMenu.classList.remove('active');
+        closeLinkUrlPopup();
+        linkContextMenu.classList.remove('active');
+        noteContextMenu.classList.remove('active');
 
         audioContextMenu.style.left = e.pageX + 'px';
         audioContextMenu.style.top = e.pageY + 'px';
         audioContextMenu.classList.add('active');
+        return;
+      }
+
+      const noteTarget = getNoteSpanFromEventTarget(e.target);
+      if (noteTarget && editor.contains(noteTarget)) {
+        e.preventDefault();
+        contextMenuNoteTarget = noteTarget;
+        contextMenuCell = null;
+        contextMenuAudioTarget = null;
+        contextMenuLinkTarget = null;
+        contextMenuListItem = null;
+        tableContextMenu.classList.remove('active');
+        orderedListContextMenu.classList.remove('active');
+        closeLinkUrlPopup();
+        audioContextMenu.classList.remove('active');
+        linkContextMenu.classList.remove('active');
+
+        noteContextMenu.style.left = e.pageX + 'px';
+        noteContextMenu.style.top = e.pageY + 'px';
+        noteContextMenu.classList.add('active');
+        return;
+      }
+
+      const linkTarget = resolveLinkContextTarget(e.target);
+      if (linkTarget) {
+        e.preventDefault();
+        contextMenuLinkTarget = linkTarget;
+        contextMenuCell = null;
+        contextMenuAudioTarget = null;
+        contextMenuNoteTarget = null;
+        contextMenuListItem = null;
+        tableContextMenu.classList.remove('active');
+        orderedListContextMenu.classList.remove('active');
+        closeLinkUrlPopup();
+        audioContextMenu.classList.remove('active');
+        noteContextMenu.classList.remove('active');
+
+        linkContextMenu.style.left = e.pageX + 'px';
+        linkContextMenu.style.top = e.pageY + 'px';
+        linkContextMenu.classList.add('active');
         return;
       }
 
@@ -7434,8 +7117,11 @@ renderMathInElement(document.body, {
         contextMenuListItem = orderedListItem;
         contextMenuCell = null;
         contextMenuAudioTarget = null;
+        contextMenuLinkTarget = null;
+        contextMenuNoteTarget = null;
         tableContextMenu.classList.remove('active');
-        audioContextMenu.classList.remove('active');
+        hideInlineContextMenus();
+        closeLinkUrlPopup();
 
         orderedListContextMenu.style.left = e.pageX + 'px';
         orderedListContextMenu.style.top = e.pageY + 'px';
@@ -7457,9 +7143,12 @@ renderMathInElement(document.body, {
 
           contextMenuCell = node;
           contextMenuAudioTarget = null;
+          contextMenuLinkTarget = null;
+          contextMenuNoteTarget = null;
           contextMenuListItem = null;
-          audioContextMenu.classList.remove('active');
+          hideInlineContextMenus();
           orderedListContextMenu.classList.remove('active');
+          closeLinkUrlPopup();
 
           // Position the context menu
           tableContextMenu.style.left = e.pageX + 'px';
@@ -7475,11 +7164,20 @@ renderMathInElement(document.body, {
     // Hide context menu on click outside
     document.addEventListener('click', () => {
       tableContextMenu.classList.remove('active');
-      audioContextMenu.classList.remove('active');
+      hideInlineContextMenus();
       orderedListContextMenu.classList.remove('active');
+      closeLinkUrlPopup();
     });
 
     orderedListContextMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    linkContextMenu.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+
+    noteContextMenu.addEventListener('click', (e) => {
       e.stopPropagation();
     });
 
@@ -7535,6 +7233,32 @@ renderMathInElement(document.body, {
 
       contextMenuAudioTarget = null;
       audioContextMenu.classList.remove('active');
+    });
+
+    document.getElementById('deleteLinkCtx').addEventListener('click', () => {
+      if (contextMenuLinkTarget) {
+        unwrapInlineElement(contextMenuLinkTarget);
+        saveToHistory();
+      }
+
+      contextMenuLinkTarget = null;
+      linkContextMenu.classList.remove('active');
+      editor.focus();
+    });
+
+    document.getElementById('deleteNoteCtx').addEventListener('click', () => {
+      if (contextMenuNoteTarget) {
+        if (currentEditingNoteSpan === contextMenuNoteTarget) {
+          currentEditingNoteSpan = null;
+        }
+        unwrapInlineElement(contextMenuNoteTarget);
+        hideNoteTooltip();
+        saveToHistory();
+      }
+
+      contextMenuNoteTarget = null;
+      noteContextMenu.classList.remove('active');
+      editor.focus();
     });
 
     // Context menu actions
@@ -7771,207 +7495,6 @@ renderMathInElement(document.body, {
       resetFontSizeBtn.addEventListener('click', () => {
         resetFontSizes();
       });
-    }
-
-    // Gemini button - Copy prompt to clipboard and open Gemini
-    const geminiBtn = document.getElementById('geminiBtn');
-    if (geminiBtn) {
-      geminiBtn.addEventListener('click', () => {
-        const geminiPrompt = `Преобразувай целия следващ текст в СУРОВ MD КОД с цел максимална четимост и ясна структура.
-
-      Изисквания за форматиране:
-      1. Генерирай само и единствено самия .md код, ОГРАДЕН В БЛОК ЗА КОД (markdown...), за да може да бъде копиран.
-      2. Използвай **H1 (#)** само веднъж за главното заглавие на темата.
-      3. Използвай **H2 (##)**, **H3 (###)**, и **H4 (#####)** за всички подтеми и секции. Не използвай H5 или по-ниски.
-      4. Искам да структурираш текста така, че едновременно да е максимално четим и ясен. Искам да не е само bullet points, но не и само свободен текст - искам логична комбинация от параграфи, списъци, и заглавия, така че да е лесно за четене и възприемане.
-      5. Използвай удебеляване (bold) за ключови термини, синдроми и анатомични структури.
-      6. Не добавяй LaTeX, емоджита, cite_start или снимки.
-      7. Ако има препратки към фигури (напр. "фиг. 8.1"), ги премахни.
-      8. Ако изпращам текста на части, продължавай смислово от последната завършена секция.`;
-
-        // Copy to clipboard
-        navigator.clipboard.writeText(geminiPrompt).then(() => {
-          showNotification('Prompt copied to clipboard. Opening Gemini...', 'info');
-
-          // Open Gemini in new tab
-          window.open('https://gemini.google.com/app', '_blank');
-        }).catch(err => {
-          console.error('Failed to copy:', err);
-          showNotification('Failed to copy prompt', 'error');
-        });
-      });
-    }
-
-    // ChatGPT button - Open ChatGPT
-    const chatgptBtn = document.getElementById('chatgptBtn');
-    if (chatgptBtn) {
-      chatgptBtn.addEventListener('click', () => {
-        window.open('https://chatgpt.com', '_blank');
-      });
-    }
-
-    // UpToDate button - Open UpToDate
-    const uptodateBtn = document.getElementById('uptodateBtn');
-    if (uptodateBtn) {
-      uptodateBtn.addEventListener('click', () => {
-        window.open('https://www.uptodate.com/contents/search', '_blank');
-      });
-    }
-
-    // Raw code modal - TOGGLE MODE
-    // Function to apply syntax highlighting to markdown
-    function highlightMarkdown(text) {
-      // Escape HTML to prevent code execution
-      let highlighted = text
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
-
-      // Headers (h1-h4)
-      highlighted = highlighted.replace(/^(#{1,4})\s+(.*)$/gm, '<span style="color: #588157; font-weight: 600;">$1</span> <span style="color: #588157; font-weight: 600;">$2</span>');
-
-      // Bold **text**
-      highlighted = highlighted.replace(/\*\*([^*]+)\*\*/g, '<span style="color: #1f2937; font-weight: 600;">**</span><span style="color: #374151; font-weight: 600;">$1</span><span style="color: #1f2937; font-weight: 600;">**</span>');
-
-      // Italic *text*
-      highlighted = highlighted.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<span style="color: #6b7280;">*</span><span style="color: #6b7280; font-style: italic;">$1</span><span style="color: #6b7280;">*</span>');
-
-      // Underline __text__
-      highlighted = highlighted.replace(/__([^_]+)__/g, '<span style="color: #9ca3af;">__</span><span style="color: #9ca3af; text-decoration: underline;">$1</span><span style="color: #9ca3af;">__</span>');
-
-      // Inline code `code`
-      highlighted = highlighted.replace(/`([^`]+)`/g, '<span style="color: #059669;">`</span><span style="color: #059669; background: rgba(5, 150, 105, 0.1);">$1</span><span style="color: #059669;">`</span>');
-
-      // Links [text](url)
-      highlighted = highlighted.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<span style="color: #2563eb;">[</span><span style="color: #3b82f6;">$1</span><span style="color: #2563eb;">](</span><span style="color: #60a5fa; text-decoration: underline;">$2</span><span style="color: #2563eb;">)</span>');
-
-      // Images ![alt](url)
-      highlighted = highlighted.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<span style="color: #588157;">![</span><span style="color: #588157;">$1</span><span style="color: #588157;">](</span><span style="color: #588157; text-decoration: underline;">$2</span><span style="color: #588157;">)</span>');
-
-      // Unordered list - keep original - or * marker
-      highlighted = highlighted.replace(/^(\s*)([-*])\s+(.*)$/gm, '$1<span style="color: #588157; font-weight: 600;">$2</span> <span style="color: #374151;">$3</span>');
-
-      // Ordered list
-      highlighted = highlighted.replace(/^(\s*)(\d+)\.\s+(.*)$/gm, '$1<span style="color: #588157; font-weight: 600;">$2.</span> <span style="color: #374151;">$3</span>');
-
-      // Blockquote
-      highlighted = highlighted.replace(/^(&gt;)\s+(.*)$/gm, '<span style="color: #74b673; font-weight: 600;">$1</span> <span style="color: #588157; font-style: italic;">$2</span>');
-
-      // Horizontal rule
-      highlighted = highlighted.replace(/^---+$/gm, '<span style="color: #6b7280;">---</span>');
-
-      // Dashed divider (topic separator)
-      highlighted = highlighted.replace(/^~~~+$/gm, '<span style="color: #73a372; border-bottom: 2px dashed #73a372; display: inline-block; padding-bottom: 2px;">~~~</span>');
-
-      return highlighted;
-    }
-
-    // Flatten nested lists - remove unnecessary nesting
-    function flattenNestedLists() {
-      // Recursively flatten all nested lists
-      let changed = true;
-      while (changed) {
-        changed = false;
-
-        // Find all OL and UL elements
-        const allLists = Array.from(editor.querySelectorAll('ol, ul'));
-
-        for (let list of allLists) {
-          // Check if this list is nested inside an LI
-          const parentLi = list.parentElement;
-          if (parentLi && parentLi.tagName === 'LI') {
-            // This is a nested list
-            const grandparentList = parentLi.parentElement;
-
-            // Only flatten if both parent and child are same type or if parent is OL
-            if (grandparentList && (grandparentList.tagName === 'OL' || grandparentList.tagName === 'UL')) {
-              // Move all items from nested list to after the parent LI
-              const items = Array.from(list.querySelectorAll(':scope > li'));
-
-              for (let item of items) {
-                // If this is an OL > LI > OL, move items to parent OL
-                if (grandparentList.tagName === 'OL' && list.tagName === 'OL') {
-                  const nextSibling = parentLi.nextElementSibling;
-                  if (nextSibling) {
-                    grandparentList.insertBefore(item.cloneNode(true), nextSibling);
-                  } else {
-                    grandparentList.appendChild(item.cloneNode(true));
-                  }
-                }
-              }
-
-              // Remove the nested list if we moved items
-              if (items.length > 0 && list.tagName === 'OL' && grandparentList.tagName === 'OL') {
-                list.remove();
-                changed = true;
-              }
-            }
-          }
-        }
-      }
-
-      // Second pass: remove any remaining nested OL/UL that are direct children of LI
-      const nestedLists = editor.querySelectorAll('ol ol, ol ul, ul ol, ul ul');
-      nestedLists.forEach(nestedList => {
-        const parent = nestedList.parentElement;
-        if (parent && parent.tagName === 'LI') {
-          // Move all items up
-          const items = Array.from(nestedList.children);
-          const grandparent = parent.parentElement;
-
-          items.forEach((item, index) => {
-            const clone = item.cloneNode(true);
-            const nextSibling = parent.nextElementSibling;
-            if (nextSibling) {
-              grandparent.insertBefore(clone, nextSibling);
-            } else {
-              grandparent.appendChild(clone);
-            }
-          });
-
-          nestedList.remove();
-        }
-      });
-    }
-
-    // Merge adjacent lists of the same type
-    function mergeAdjacentLists() {
-      const selection = window.getSelection();
-      let currentNode = selection.focusNode;
-
-      // Find the list item we're in
-      while (currentNode && currentNode !== editor) {
-        if (currentNode.nodeType === 1 && currentNode.tagName === 'LI') {
-          const listItem = currentNode;
-          const list = listItem.parentNode;
-
-          if (list && (list.tagName === 'OL' || list.tagName === 'UL')) {
-            // Check if there's an identical list immediately after this one
-            let nextElement = list.nextElementSibling;
-            while (nextElement && nextElement.nodeType === 8) {
-              // Skip comment nodes
-              nextElement = nextElement.nextElementSibling;
-            }
-
-            if (nextElement && nextElement.tagName === list.tagName) {
-              // Move all items from next list to current list
-              while (nextElement.firstChild) {
-                list.appendChild(nextElement.firstChild);
-              }
-              // Remove the now-empty list
-              nextElement.remove();
-
-              showNotification('Lists merged', 'success');
-            } else {
-              showNotification('There is no adjacent list to merge', 'warning');
-            }
-          }
-          return;
-        }
-        currentNode = currentNode.parentNode;
-      }
-
-      showNotification('Place the cursor inside a list first', 'warning');
     }
 
     // Keyboard shortcuts
@@ -9659,7 +9182,6 @@ renderMathInElement(document.body, {
 
       // Repair invalid heading structures like: <h1><hr>...<p>Title</p></h1>
       // by keeping only inline/text content inside headings and moving blocks out.
-      const headingTags = new Set(['h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
       const blockInsideHeadingTags = new Set(['hr', 'p', 'div', 'ul', 'ol', 'table', 'blockquote', 'pre']);
       const hasMeaningfulHeadingContent = (headingEl) => {
         return Array.from(headingEl.childNodes).some(child => {
@@ -10636,207 +10158,6 @@ renderMathInElement(document.body, {
       }
     });
 
-    // Anchor Link Functions
-    let anchorLinkModalOpen = false;
-    let savedAnchorSelection = null; // Save selection when modal opens
-
-    document.getElementById('anchorLinkBtn').addEventListener('click', () => {
-      // Save current selection BEFORE opening modal
-      const selection = window.getSelection();
-      if (selection.rangeCount > 0) {
-        savedAnchorSelection = selection.getRangeAt(0).cloneRange();
-      }
-
-      document.getElementById('anchorLinkModal').style.display = 'block';
-      anchorLinkModalOpen = true;
-      refreshAnchorsList();
-    });
-
-    document.getElementById('closeAnchorLinkModalBtn').addEventListener('click', () => {
-      document.getElementById('anchorLinkModal').style.display = 'none';
-      anchorLinkModalOpen = false;
-    });
-
-    // Tab switching
-    document.getElementById('createAnchorTabBtn').addEventListener('click', () => {
-      document.getElementById('createAnchorTab').style.display = 'block';
-      document.getElementById('linkToAnchorTab').style.display = 'none';
-      document.getElementById('createAnchorTabBtn').style.background = '#2563eb';
-      document.getElementById('createAnchorTabBtn').style.color = 'white';
-      document.getElementById('linkToAnchorTabBtn').style.background = '#d1d5db';
-      document.getElementById('linkToAnchorTabBtn').style.color = '#374151';
-    });
-
-    document.getElementById('linkToAnchorTabBtn').addEventListener('click', () => {
-      document.getElementById('createAnchorTab').style.display = 'none';
-      document.getElementById('linkToAnchorTab').style.display = 'block';
-      document.getElementById('linkToAnchorTabBtn').style.background = '#2563eb';
-      document.getElementById('linkToAnchorTabBtn').style.color = 'white';
-      document.getElementById('createAnchorTabBtn').style.background = '#d1d5db';
-      document.getElementById('createAnchorTabBtn').style.color = '#374151';
-      refreshAnchorsList();
-    });
-
-    // Create Anchor
-    document.getElementById('createAnchorBtn').addEventListener('click', () => {
-      const anchorId = document.getElementById('anchorIdInput').value.trim().toLowerCase().replace(/\s+/g, '-');
-      const anchorText = document.getElementById('anchorTextInput').value.trim();
-      const headingType = document.getElementById('anchorHeadingTypeInput').value;
-
-      if (!anchorId || !anchorText) {
-        showNotification('Please fill in both Anchor ID and Anchor Text', 'warning');
-        return;
-      }
-
-      // Create heading element
-      const heading = document.createElement(headingType);
-      heading.id = anchorId;
-      heading.textContent = anchorText;
-      heading.style.marginTop = '20px';
-      heading.style.marginBottom = '10px';
-
-      // Insert at saved cursor position
-      if (savedAnchorSelection) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedAnchorSelection);
-
-        const range = savedAnchorSelection;
-        range.insertNode(heading);
-        range.setStartAfter(heading);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      } else {
-        editor.appendChild(heading);
-      }
-
-      saveToHistory();
-
-      // Clear inputs
-      document.getElementById('anchorIdInput').value = '';
-      document.getElementById('anchorTextInput').value = '';
-
-      // Refresh anchors list
-      refreshAnchorsList();
-
-      showNotification('Anchor created: #' + anchorId, 'success');
-    });
-
-    // Create Link to Anchor
-    document.getElementById('createLinkBtn').addEventListener('click', () => {
-      const selectedAnchor = document.getElementById('existingAnchorsSelect').value;
-      let linkText = document.getElementById('linkTextInput').value.trim();
-
-      if (!selectedAnchor) {
-        showNotification('Please select an anchor first', 'warning');
-        return;
-      }
-
-      // Get anchor text if link text is empty
-      if (!linkText) {
-        const anchorElement = document.getElementById(selectedAnchor);
-        if (anchorElement) {
-          linkText = anchorElement.textContent;
-        } else {
-          linkText = selectedAnchor;
-        }
-      }
-
-      // Create link element
-      const link = document.createElement('a');
-      link.href = '#' + selectedAnchor;
-      link.textContent = linkText;
-      link.style.textDecoration = 'underline wavy';
-      link.style.textDecorationSkipInk = 'none';
-      link.style.textDecorationColor = '#74b673';
-      link.style.cursor = 'pointer';
-
-      // Insert at saved cursor position
-      if (savedAnchorSelection) {
-        const selection = window.getSelection();
-        selection.removeAllRanges();
-        selection.addRange(savedAnchorSelection);
-
-        const range = savedAnchorSelection;
-        range.insertNode(link);
-        range.setStartAfter(link);
-        range.collapse(true);
-        selection.removeAllRanges();
-        selection.addRange(range);
-      } else {
-        editor.appendChild(link);
-      }
-
-      saveToHistory();
-
-      // Clear inputs
-      document.getElementById('linkTextInput').value = '';
-
-      showNotification('Link created to #' + selectedAnchor, 'info');
-    });
-
-    // Refresh anchors list from current editor content
-    function refreshAnchorsList() {
-      const select = document.getElementById('existingAnchorsSelect');
-      select.innerHTML = '';
-
-      // Find all elements with IDs (h2, h3, h4, etc.)
-      const anchors = editor.querySelectorAll('[id]');
-
-      if (anchors.length === 0) {
-        select.innerHTML = '<option value="">-- No anchors found --</option>';
-        return;
-      }
-
-      anchors.forEach(anchor => {
-        const option = document.createElement('option');
-        option.value = anchor.id;
-        option.textContent = anchor.textContent || anchor.id;
-        select.appendChild(option);
-      });
-    }
-
-    // Handle anchor link clicks - scroll to anchor instead of following href
-    // Works both in editor and on regular HTML pages
-    function handleAnchorClick(e) {
-      if (e.target.tagName === 'A' && e.target.href && e.target.href.includes('#')) {
-        const href = e.target.getAttribute('href');
-        // Only prevent default if href is local anchor (starts with #)
-        if (href.startsWith('#')) {
-          e.preventDefault();
-
-          const anchorId = href.substring(1);
-          const targetElement = document.getElementById(anchorId);
-
-          console.log('Anchor click - ID:', anchorId, 'Found:', !!targetElement);
-
-          if (targetElement) {
-            // Scroll to the element
-            targetElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-            // Highlight the element briefly
-            const originalBg = window.getComputedStyle(targetElement).backgroundColor;
-            targetElement.style.backgroundColor = '#fff3cd';
-            targetElement.style.transition = 'background-color 0.3s';
-
-            setTimeout(() => {
-              targetElement.style.backgroundColor = originalBg;
-            }, 1500);
-
-            // Update URL
-            window.history.pushState(null, null, href);
-          }
-        }
-      }
-    }
-
-    // Attach to editor
-    editor.addEventListener('click', handleAnchorClick);
-
-    // Also attach globally for any page
-    document.addEventListener('click', handleAnchorClick);
-
     editor.addEventListener('mouseout', (e) => {
       if (!resizingColumn && (e.target.tagName === 'TD' || e.target.tagName === 'TH')) {
         document.body.style.cursor = 'default';
@@ -10849,12 +10170,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=202605061qw5"></script>
+  <script src="js/user-identity.js?v=20260507zih"></script>
     <!-- CHAT SYSTEM -->
-  <script src="js/chat.js?v=202605061qw5"></script>
+  <script src="js/chat.js?v=20260507zih"></script>
 
 <script src="js/version-check.js?v=202605021hcw"></script>
-  <script src="js/mobile-nav.js?v=202605061qw5"></script>
+  <script src="js/mobile-nav.js?v=20260507zih"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');
@@ -10865,11 +10186,11 @@ renderMathInElement(document.body, {
       if (isMobile) {
         var labels = {
           'Formatting': ['strikeBtn','subscriptBtn','superscriptBtn'],
-          'Color': ['textColorToggleBtn','highlightToggleBtn','headingColorToggleBtn'],
+          'Color': ['textColorToggleBtn','highlightToggleBtn'],
           'Alignment': ['alignLeftBtn','alignCenterBtn','alignRightBtn'],
           'Indent': ['outdentBtn','indentBtn'],
           'Table': ['tableBtn','editTableBtn'],
-          'Insert': ['quoteBtn','symbolsBtn','linkBtn','audioBtn','noteBtn','anchorLinkBtn','imageBtn'],
+          'Insert': ['quoteBtn','symbolsBtn','linkBtn','audioBtn','noteBtn','imageBtn'],
           'Separators': ['hrBtn','dashedLineBtn'],
           'File': ['openLocalBtn','openCoursesBtn'],
           'Tools': ['clearBtn','resetFontSizeBtn','shortcutsBtn']
@@ -10915,7 +10236,7 @@ renderMathInElement(document.body, {
 
       morePanel.addEventListener('click', function(e) {
         var btn = e.target.closest('button');
-        if (btn && !btn.id.endsWith('ToggleBtn') && btn.id !== 'headingColorToggleBtn') {
+        if (btn && !btn.id.endsWith('ToggleBtn')) {
           morePanel.classList.remove('open');
         }
       });

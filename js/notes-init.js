@@ -400,7 +400,7 @@ class NotesUIManager {
             position: fixed;
             bottom: 20px;
             left: 20px;
-            width: min(430px, calc(100vw - 40px));
+            width: min(450px, calc(100vw - 40px));
             height: min(800px, calc(100dvh - 100px));
             max-height: calc(100dvh - 24px);
             background: #fff;
@@ -645,7 +645,7 @@ class NotesUIManager {
             display: flex;
             flex-direction: column;
             gap: 2px;
-            margin-right: 80px;
+            margin-right: 96px;
             min-width: 0;
             max-width: 100%;
             word-wrap: break-word;
@@ -773,17 +773,23 @@ class NotesUIManager {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            right: -79px;
+            right: -96px;
             display: none;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(58, 90, 64, 0.12);
-            border: 1px solid #dfe8dc;
+            align-items: center;
+            background: rgba(251, 252, 247, 0.96);
+            border-radius: 999px;
+            box-shadow: 0 4px 14px rgba(58, 90, 64, 0.14);
+            border: 1px solid #cddbc8;
+            backdrop-filter: blur(6px);
             gap: 2px;
             z-index: 10;
-            padding: 2px;
+            padding: 3px;
         }
-        .note-actions.two-btns { right: -53px; }
+        .note-actions.two-btns { right: -70px; }
+        .note-bubble-container.has-large-message .note-actions {
+            top: 4px;
+            transform: none;
+        }
         @media (hover: hover) and (pointer: fine) {
             .note-message:hover .note-actions { display: flex; }
         }
@@ -792,18 +798,19 @@ class NotesUIManager {
             border: none;
             cursor: pointer;
             padding: 4px;
-            border-radius: 8px;
+            border-radius: 999px;
             display: flex;
             align-items: center;
             justify-content: center;
             width: 28px;
             height: 28px;
-            transition: background 0.2s;
-            opacity: 0.85;
+            transition: background 0.2s, opacity 0.2s, transform 0.2s;
+            opacity: 0.82;
         }
         .note-action-btn:hover {
             background: rgba(88, 129, 87, 0.1);
             opacity: 1;
+            transform: translateY(-1px);
         }
 
         /* Reply indicator above input */
@@ -1778,6 +1785,9 @@ class NotesUIManager {
       const avatarVisibility = isContinuation ? 'visibility:hidden;' : 'visibility:visible;';
       const headerDisplay = isContinuation ? 'display:none;' : 'display:flex;';
       const actionClass = isMe ? '' : 'two-btns';
+      const messageText = String(msg.text || '');
+      const isLargeMessage = messageText.length > 90 || messageText.includes('\n') || /https?:\/\/\S+\.(?:png|jpe?g|gif|webp)(?:\?\S*)?/i.test(messageText);
+      const bubbleClass = isLargeMessage ? ' has-large-message' : '';
 
       let avatarHtml = '';
       if (currentAvatar && typeof currentAvatar === 'string' && currentAvatar.length > 5) {
@@ -1798,7 +1808,7 @@ class NotesUIManager {
                 <span class="note-time">${this.formatNoteTime(msg.timestamp)}</span>
              </div>
              ${replyHTML}
-             <div class="note-bubble-container">
+             <div class="note-bubble-container${bubbleClass}">
                <div class="note-text">${this.linkify(msg.text)}${msg.edited ? '<span style="font-size: 10px; opacity: 0.5; margin-left: 4px;">(edited)</span>' : ''}</div>
                <div class="note-actions ${actionClass}">
                <button class="note-action-btn reply-btn" title="Reply">
