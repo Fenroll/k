@@ -1,4 +1,4 @@
-window.coursesVersion = "202605081nsn";
+window.coursesVersion = "20260509kx";
 window.courses = [
   {
     "id": "000001",
@@ -1262,4 +1262,4 @@ window.courses = [
     "_contentKey": "archived-000005"
   }
 ];
-window.buildTimestamp = "08.05.2026 21:31";
+window.buildTimestamp = "09.05.2026 00:12";
