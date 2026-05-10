@@ -1010,8 +1010,12 @@
                         const fullName = primaryEvent.exam.fullName || primaryEvent.exam.subject || '';
                         const typeLabel = primaryEvent.type === 'regular' ? 'Редовен' : 'Поправка';
                         cell.title = `${typeLabel}: ${fullName}${primaryEvent.time ? ' @ ' + primaryEvent.time : ''}`;
+                        // Render BOTH the full name and the short abbreviation.
+                        // CSS shows one or the other based on viewport width:
+                        // desktop = full name; mobile = abbreviation.
                         label.innerHTML =
-                            `<span class="ve-cal-exam-subj">${escapeHtml(subj)}</span>` +
+                            `<span class="ve-cal-exam-subj ve-cal-exam-subj-full">${escapeHtml(fullName)}</span>` +
+                            `<span class="ve-cal-exam-subj ve-cal-exam-subj-short">${escapeHtml(subj)}</span>` +
                             (primaryEvent.time ? `<span class="ve-cal-exam-time">${escapeHtml(primaryEvent.time)}</span>` : '');
                         cell.appendChild(label);
 

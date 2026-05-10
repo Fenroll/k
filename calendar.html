@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202605101tbn"></script>
+  <script src="js/auth-guard.js?v=202605101tl4"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -1192,6 +1192,10 @@
     word-break: break-word;
     hyphens: auto;
   }
+  /* Desktop default: show the full name, hide the abbreviation. */
+  .cal-cal-exam-subj-short {
+    display: none;
+  }
   .cal-cal-exam-time {
     font-size: 11px;
     font-weight: 600;
@@ -1243,18 +1247,12 @@
       gap: 2px;
       min-width: 0;
     }
-    .cal-cal-day {
-      justify-content: center;
-    }
     .cal-cal-day-num {
       font-size: 12px;
       height: 16px;
       min-width: 16px;
       padding: 0 3px;
       border-radius: 8px;
-    }
-    .cal-cal-cell-has .cal-cal-day {
-      justify-content: flex-end;
     }
     .cal-cal-exam-label {
       padding: 1px 2px;
@@ -1264,6 +1262,13 @@
       font-size: 10.5px;
       -webkit-line-clamp: 2;
       line-height: 1.15;
+    }
+    /* Mobile: swap — show the abbreviation, hide the full name. */
+    .cal-cal-exam-subj-full {
+      display: none;
+    }
+    .cal-cal-exam-subj-short {
+      display: -webkit-box;
     }
     .cal-cal-exam-time {
       font-size: 9px;
@@ -2174,7 +2179,7 @@
     border-color: #3f3f3f !important;
   }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605101tbn">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605101tl4">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605015kp">
   <script src="js/version-manager.js?v=202603151sxu"></script>
@@ -4078,8 +4083,12 @@
             const fullName = primaryEvent.exam.fullName || primaryEvent.exam.subject || '';
             const typeLabel = primaryEvent.type === 'regular' ? 'Редовен' : 'Поправка';
             cell.title = `${typeLabel}: ${fullName}${primaryEvent.time ? ' @ ' + primaryEvent.time : ''}`;
+            // Render BOTH the full name and the short abbreviation. CSS shows
+            // one or the other based on viewport width: desktop = full name;
+            // mobile = abbreviation.
             label.innerHTML =
-              `<span class="cal-cal-exam-subj">${escapeHtml(subj)}</span>` +
+              `<span class="cal-cal-exam-subj cal-cal-exam-subj-full">${escapeHtml(fullName)}</span>` +
+              `<span class="cal-cal-exam-subj cal-cal-exam-subj-short">${escapeHtml(subj)}</span>` +
               (primaryEvent.time ? `<span class="cal-cal-exam-time">${escapeHtml(primaryEvent.time)}</span>` : '');
             cell.appendChild(label);
 
@@ -4536,12 +4545,12 @@
          CHAT SYSTEM - Complete (Firebase REST + UI)
          ============================================ -->
 
-<script src="js/user-identity.js?v=202605101tbn"></script>
+<script src="js/user-identity.js?v=202605101tl4"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202605101tbn"></script>
+    <script src="js/chat.js?v=202605101tl4"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202605021hcw"></script>
-<script src="js/mobile-nav.js?v=202605101tbn"></script>
+<script src="js/mobile-nav.js?v=202605101tl4"></script>
 </body>
     </html>

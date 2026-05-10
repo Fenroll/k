@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=202605101tbn"></script>
+    <script src="js/auth-guard.js?v=202605101tl4"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=202605101tbn"></script>
+    <script src="js/user-identity.js?v=202605101tl4"></script>
     <script src="js/admin-guard.js?v=202602171mhr"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202605101tbn">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605101tl4">
     <title>Admin Panel</title>
     <style>
         :root {
@@ -750,6 +750,10 @@
             word-break: break-word;
             hyphens: auto;
         }
+        /* Desktop default: show the full name, hide the abbreviation. */
+        .ve-cal-exam-subj-short {
+            display: none;
+        }
         .ve-cal-exam-time {
             font-size: 11px;
             font-weight: 600;
@@ -802,18 +806,12 @@
                 gap: 2px;
                 min-width: 0;
             }
-            .ve-cal-day {
-                justify-content: center;
-            }
             .ve-cal-day-num {
                 font-size: 12px;
                 height: 16px;
                 min-width: 16px;
                 padding: 0 3px;
                 border-radius: 8px;
-            }
-            .ve-cal-cell-has .ve-cal-day {
-                justify-content: flex-end;
             }
             .ve-cal-exam-label {
                 padding: 1px 2px;
@@ -823,6 +821,13 @@
                 font-size: 10.5px;
                 -webkit-line-clamp: 2;
                 line-height: 1.15;
+            }
+            /* Mobile: swap — show the abbreviation, hide the full name. */
+            .ve-cal-exam-subj-full {
+                display: none;
+            }
+            .ve-cal-exam-subj-short {
+                display: -webkit-box;
             }
             .ve-cal-exam-time {
                 font-size: 9px;
@@ -1650,10 +1655,10 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=202605101tbn"></script>
+    <script src="courses.generated.js?v=202605101tl4"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=20260429domain1"></script>
-    <script src="js/admin-visual-editor.js?v=20260510cal8"></script>
+    <script src="js/admin-visual-editor.js?v=20260510cal10"></script>
   </main>
 </body>
 </html>
