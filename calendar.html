@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202605101swz"></script>
+  <script src="js/auth-guard.js?v=202605101tbn"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -1028,6 +1028,19 @@
   }
 
   /* Exam Calendar (month grid) View — light theme */
+  /* Force border-box on every calendar element so 2px borders + padding stay
+     inside the cell width and don't push cells outside the month container. */
+  .cal-cal-month,
+  .cal-cal-cell,
+  .cal-cal-grid,
+  .cal-cal-weekdays,
+  .cal-cal-weekday,
+  .cal-cal-day,
+  .cal-cal-exam-label,
+  .cal-cal-legend,
+  .cal-cal-legend-dot {
+    box-sizing: border-box;
+  }
   .cal-cal-month {
     background: #ffffff;
     border-radius: 16px;
@@ -1204,34 +1217,94 @@
   }
 
   @media (max-width: 900px) {
+    /* Reclaim the inline padding wrapper so the calendar can use full width. */
+    #examScreen > div {
+      padding: 8px 6px !important;
+    }
     .cal-cal-month {
-      padding: 14px 12px 16px;
+      padding: 12px 8px 14px;
+      border-radius: 12px;
+      width: 100%;
     }
     .cal-cal-header-text {
-      font-size: 18px;
+      font-size: 17px;
+    }
+    .cal-cal-grid {
+      gap: 4px;
+    }
+    .cal-cal-weekdays {
+      gap: 4px;
     }
     .cal-cal-cell {
-      min-height: 78px;
-      padding: 5px 5px 6px;
-      border-radius: 7px;
-      gap: 3px;
+      min-height: 0;
+      aspect-ratio: 1 / 1.15;
+      padding: 4px 3px 4px;
+      border-radius: 6px;
+      gap: 2px;
+      min-width: 0;
+    }
+    .cal-cal-day {
+      justify-content: center;
     }
     .cal-cal-day-num {
-      font-size: 13px;
-      height: 18px;
-      min-width: 18px;
-      padding: 0 4px;
+      font-size: 12px;
+      height: 16px;
+      min-width: 16px;
+      padding: 0 3px;
+      border-radius: 8px;
+    }
+    .cal-cal-cell-has .cal-cal-day {
+      justify-content: flex-end;
+    }
+    .cal-cal-exam-label {
+      padding: 1px 2px;
+      gap: 1px;
     }
     .cal-cal-exam-subj {
-      font-size: 11px;
+      font-size: 10.5px;
       -webkit-line-clamp: 2;
+      line-height: 1.15;
     }
     .cal-cal-exam-time {
       font-size: 9px;
     }
     .cal-cal-weekday {
+      font-size: 9.5px;
+      padding: 3px 0;
+      letter-spacing: 0.06em;
+    }
+    .cal-cal-legend {
+      gap: 12px;
+      font-size: 11px;
+    }
+  }
+
+  /* Very thin screens: claw back even more horizontal space. */
+  @media (max-width: 480px) {
+    #examScreen > div {
+      padding: 4px 2px !important;
+    }
+    .cal-cal-month {
+      padding: 10px 5px 12px;
+      border-radius: 10px;
+    }
+    .cal-cal-grid,
+    .cal-cal-weekdays {
+      gap: 3px;
+    }
+    .cal-cal-cell {
+      padding: 3px 2px 3px;
+      border-radius: 5px;
+    }
+    .cal-cal-cell-has {
+      border-width: 1px;
+    }
+    .cal-cal-exam-subj {
       font-size: 10px;
-      padding: 4px 0;
+    }
+    .cal-cal-weekday {
+      font-size: 9px;
+      letter-spacing: 0.04em;
     }
   }
 
@@ -2101,7 +2174,7 @@
     border-color: #3f3f3f !important;
   }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605101swz">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605101tbn">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605015kp">
   <script src="js/version-manager.js?v=202603151sxu"></script>
@@ -4463,12 +4536,12 @@
          CHAT SYSTEM - Complete (Firebase REST + UI)
          ============================================ -->
 
-<script src="js/user-identity.js?v=202605101swz"></script>
+<script src="js/user-identity.js?v=202605101tbn"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202605101swz"></script>
+    <script src="js/chat.js?v=202605101tbn"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202605021hcw"></script>
-<script src="js/mobile-nav.js?v=202605101swz"></script>
+<script src="js/mobile-nav.js?v=202605101tbn"></script>
 </body>
     </html>

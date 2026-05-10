@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=202605101swz"></script>
+    <script src="js/auth-guard.js?v=202605101tbn"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=202605101swz"></script>
+    <script src="js/user-identity.js?v=202605101tbn"></script>
     <script src="js/admin-guard.js?v=202602171mhr"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202605101swz">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605101tbn">
     <title>Admin Panel</title>
     <style>
         :root {
@@ -781,33 +781,86 @@
 
         @media (max-width: 900px) {
             .ve-cal-month {
-                padding: 14px 12px 16px;
+                padding: 12px 8px 14px;
+                border-radius: 12px;
+                width: 100%;
             }
             .ve-cal-header-text {
-                font-size: 18px;
+                font-size: 17px;
+            }
+            .ve-cal-grid {
+                gap: 4px;
+            }
+            .ve-cal-weekdays {
+                gap: 4px;
             }
             .ve-cal-cell {
-                min-height: 78px;
-                padding: 5px 5px 6px;
-                border-radius: 7px;
-                gap: 3px;
+                min-height: 0;
+                aspect-ratio: 1 / 1.15;
+                padding: 4px 3px 4px;
+                border-radius: 6px;
+                gap: 2px;
+                min-width: 0;
+            }
+            .ve-cal-day {
+                justify-content: center;
             }
             .ve-cal-day-num {
-                font-size: 13px;
-                height: 18px;
-                min-width: 18px;
-                padding: 0 4px;
+                font-size: 12px;
+                height: 16px;
+                min-width: 16px;
+                padding: 0 3px;
+                border-radius: 8px;
+            }
+            .ve-cal-cell-has .ve-cal-day {
+                justify-content: flex-end;
+            }
+            .ve-cal-exam-label {
+                padding: 1px 2px;
+                gap: 1px;
             }
             .ve-cal-exam-subj {
-                font-size: 11px;
+                font-size: 10.5px;
                 -webkit-line-clamp: 2;
+                line-height: 1.15;
             }
             .ve-cal-exam-time {
                 font-size: 9px;
             }
             .ve-cal-weekday {
+                font-size: 9.5px;
+                padding: 3px 0;
+                letter-spacing: 0.06em;
+            }
+            .ve-cal-legend {
+                gap: 12px;
+                font-size: 11px;
+            }
+        }
+
+        /* Very thin screens: claw back even more horizontal space. */
+        @media (max-width: 480px) {
+            .ve-cal-month {
+                padding: 10px 5px 12px;
+                border-radius: 10px;
+            }
+            .ve-cal-grid,
+            .ve-cal-weekdays {
+                gap: 3px;
+            }
+            .ve-cal-cell {
+                padding: 3px 2px 3px;
+                border-radius: 5px;
+            }
+            .ve-cal-cell-has {
+                border-width: 1px;
+            }
+            .ve-cal-exam-subj {
                 font-size: 10px;
-                padding: 4px 0;
+            }
+            .ve-cal-weekday {
+                font-size: 9px;
+                letter-spacing: 0.04em;
             }
         }
 
@@ -1597,10 +1650,10 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=202605101swz"></script>
+    <script src="courses.generated.js?v=202605101tbn"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=20260429domain1"></script>
-    <script src="js/admin-visual-editor.js?v=20260510cal6"></script>
+    <script src="js/admin-visual-editor.js?v=20260510cal8"></script>
   </main>
 </body>
 </html>
