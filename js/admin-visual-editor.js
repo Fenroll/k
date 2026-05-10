@@ -853,101 +853,212 @@
         // --- EXAM VIEW Logic ---
         function renderExamView(currentWeek) {
             examListContainer.innerHTML = '';
+            examListContainer.style.maxWidth = '1280px';
+            examListContainer.style.gap = '18px';
+
             const allExams = currentScheduleData.exams || [];
-            
-            const periodStart = new Date(currentWeek.startDate);
-            const periodEnd = new Date(currentWeek.endDate);
-            periodStart.setHours(0,0,0,0);
-            periodEnd.setHours(0,0,0,0);
 
-            const filteredExams = allExams
-                .filter(exam => {
-                    if (!exam.examDate) return false;
-                    const d = new Date(exam.examDate);
-                    d.setHours(0, 0, 0, 0);
-                    return d >= periodStart && d <= periodEnd;
-                })
-                .sort((a, b) => {
-                    const da = new Date(a.examDate).getTime();
-                    const db = new Date(b.examDate).getTime();
-                    if (Number.isNaN(da) && Number.isNaN(db)) return 0;
-                    if (Number.isNaN(da)) return 1;
-                    if (Number.isNaN(db)) return -1;
-                    return da - db;
-                });
-
-            const months = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
-
-            // Always show add button container, handled by HTML button outside list
-            
-            if (filteredExams.length === 0) {
-                const emptyMsg = document.createElement('div');
-                emptyMsg.style.cssText = 'grid-column: 1/-1; text-align: center; color: #888; padding: 20px;';
-                emptyMsg.textContent = 'No exams found for this period. Add one!';
-                examListContainer.appendChild(emptyMsg);
-            }
-
-            const formatDate = (dStr) => {
-                const d = new Date(dStr);
-                if (isNaN(d.getTime())) return dStr;
-                return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+            // Parse YYYY-MM-DD as local-midnight to avoid UTC timezone shifting the
+            // boundary day on positive-UTC machines (Bulgaria is UTC+2/+3).
+            const parseLocalDate = (value) => {
+                if (value instanceof Date) {
+                    const copy = new Date(value.getTime());
+                    copy.setHours(0, 0, 0, 0);
+                    return copy;
+                }
+                if (typeof value === 'string') {
+                    const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+                    if (m) return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+                }
+                const d = new Date(value);
+                if (Number.isNaN(d.getTime())) return null;
+                d.setHours(0, 0, 0, 0);
+                return d;
             };
 
-            filteredExams.forEach((exam) => {
-                const originalIndex = allExams.indexOf(exam);
+            const periodStart = parseLocalDate(currentWeek.startDate) || new Date();
+            const periodEnd = parseLocalDate(currentWeek.endDate) || new Date();
+            periodStart.setHours(0, 0, 0, 0);
+            periodEnd.setHours(0, 0, 0, 0);
 
-                const card = document.createElement('div');
-                card.className = 'exam-card'; 
-                
-                const examDateFormatted = formatDate(exam.examDate);
-                let retakeDateFormatted = exam.retakeDate || '-';
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-                card.innerHTML = `
-                    <div class="exam-card-header">
-                        <h3 class="exam-card-title">${exam.fullName || exam.subject}</h3>
-                    </div>
-                    
-                    <div class="exam-section">
-                        <div class="exam-section-title">
-                            <svg class="exam-section-icon" viewBox="0 0 24 24"><path d="M9,10H7V12H9V10M13,10H11V12H13V10M17,10H15V12H17V10M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z"/></svg>
-                            Редовен изпит
-                        </div>
-                        <div class="exam-info-grid">
-                            <div class="exam-info-item">
-                                <span class="exam-info-label">Дата:</span>
-                                <span class="exam-info-value">${examDateFormatted}</span>
-                            </div>
-                            <div class="exam-info-item">
-                                <span class="exam-info-label">Час:</span>
-                                <span class="exam-info-value">${exam.examTime || ''}</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="exam-section">
-                        <div class="exam-section-title">
-                            <svg class="exam-section-icon" viewBox="0 0 24 24"><path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/></svg>
-                            Поправка
-                        </div>
-                        <div class="exam-info-grid">
-                            <div class="exam-info-item">
-                                <span class="exam-info-label">Дата:</span>
-                                <span class="exam-info-value">${retakeDateFormatted}</span>
-                            </div>
-                            <div class="exam-info-item">
-                                <span class="exam-info-label">Час:</span>
-                                <span class="exam-info-value">${exam.retakeTime || ''}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <button class="exam-card-edit-btn">Edit</button>
-                `;
-                card.querySelector('button').onclick = (e) => {
-                    e.stopPropagation();
-                    openExamEditor(originalIndex);
-                };
-                examListContainer.appendChild(card);
+            const months = ['януари', 'февруари', 'март', 'април', 'май', 'юни', 'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
+            const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
+
+            const ymd = (d) => {
+                const y = d.getFullYear();
+                const m = String(d.getMonth() + 1).padStart(2, '0');
+                const day = String(d.getDate()).padStart(2, '0');
+                return `${y}-${m}-${day}`;
+            };
+            const escapeHtml = (str) => String(str).replace(/[&<>"']/g, (c) => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+
+            // Build day -> events map. Each exam contributes a 'regular' event on
+            // examDate and (if set) a 'retake' event on retakeDate.
+            const dayEvents = new Map();
+            const addEvent = (dateStr, type, exam, examIndex) => {
+                const d = parseLocalDate(dateStr);
+                if (!d) return;
+                const key = ymd(d);
+                if (!dayEvents.has(key)) dayEvents.set(key, []);
+                dayEvents.get(key).push({
+                    type,
+                    exam,
+                    examIndex,
+                    time: type === 'regular' ? (exam.examTime || '') : (exam.retakeTime || '')
+                });
+            };
+            allExams.forEach((exam, i) => {
+                addEvent(exam.examDate, 'regular', exam, i);
+                if (exam.retakeDate) addEvent(exam.retakeDate, 'retake', exam, i);
             });
+
+            const openAddForDate = (dateStr) => {
+                currentEditingExamIndex = -1;
+                if (examForm && typeof examForm.reset === 'function') examForm.reset();
+                const dateInput = document.getElementById('ex-date');
+                if (dateInput) dateInput.value = dateStr;
+                const exDeleteBtn = document.getElementById('ex-delete-btn');
+                if (exDeleteBtn) exDeleteBtn.style.display = 'none';
+                showExamEditor();
+                document.getElementById('exam-modal').style.display = 'flex';
+            };
+
+            const buildMonthGrid = (year, month, mode) => {
+                const wrap = document.createElement('div');
+                wrap.className = 've-cal-month';
+
+                const header = document.createElement('div');
+                header.className = 've-cal-header';
+                header.innerHTML = '<span class="ve-cal-header-accent"></span>' +
+                    `<span class="ve-cal-header-text">${escapeHtml(months[month])} ${year}</span>`;
+                wrap.appendChild(header);
+
+                const weekdayRow = document.createElement('div');
+                weekdayRow.className = 've-cal-weekdays';
+                dayNames.forEach((name, idx) => {
+                    const c = document.createElement('div');
+                    c.className = 've-cal-weekday' + (idx >= 5 ? ' ve-cal-weekday-weekend' : '');
+                    c.textContent = name;
+                    weekdayRow.appendChild(c);
+                });
+                wrap.appendChild(weekdayRow);
+
+                const grid = document.createElement('div');
+                grid.className = 've-cal-grid';
+
+                const firstOfMonth = new Date(year, month, 1);
+                // JS getDay: Sun=0..Sat=6 — convert to Mon=0..Sun=6 to match header.
+                const firstWeekday = (firstOfMonth.getDay() + 6) % 7;
+                const lastDay = new Date(year, month + 1, 0).getDate();
+
+                let renderUpTo = lastDay;
+                if (mode === 'cropped') {
+                    // Render through the end of the week containing periodEnd.
+                    const cropDay = periodEnd.getDate();
+                    const cropWeekday = (periodEnd.getDay() + 6) % 7;
+                    renderUpTo = Math.min(lastDay, cropDay + (6 - cropWeekday));
+                }
+
+                // Padding cells before day 1 (first row's empty slots).
+                for (let i = 0; i < firstWeekday; i += 1) {
+                    const cell = document.createElement('div');
+                    cell.className = 've-cal-cell ve-cal-cell-pad';
+                    grid.appendChild(cell);
+                }
+
+                for (let day = 1; day <= renderUpTo; day += 1) {
+                    const date = new Date(year, month, day);
+                    date.setHours(0, 0, 0, 0);
+                    const inPeriod = date >= periodStart && date <= periodEnd;
+                    const isToday = date.getTime() === today.getTime();
+                    const key = ymd(date);
+                    const events = dayEvents.get(key) || [];
+                    const dowIdx = (date.getDay() + 6) % 7;
+                    const isWeekend = dowIdx >= 5;
+
+                    // We'll only ever have at most one exam per day. If the data
+                    // somehow has both a regular and a retake on the same day,
+                    // prefer the regular exam (regulars are the primary event;
+                    // retakes are reschedules).
+                    const primaryEvent = events.find((e) => e.type === 'regular') || events[0] || null;
+
+                    const cell = document.createElement('div');
+                    const classes = ['ve-cal-cell'];
+                    classes.push(inPeriod ? 've-cal-cell-in' : 've-cal-cell-out');
+                    if (primaryEvent) {
+                        classes.push('ve-cal-cell-has');
+                        if (primaryEvent.type === 'retake') classes.push('ve-cal-cell-retake');
+                    }
+                    if (isWeekend && inPeriod && !primaryEvent) classes.push('ve-cal-cell-weekend');
+                    if (isToday) classes.push('ve-cal-cell-today');
+                    cell.className = classes.join(' ');
+
+                    const dayRow = document.createElement('div');
+                    dayRow.className = 've-cal-day';
+                    dayRow.innerHTML = `<span class="ve-cal-day-num">${day}</span>`;
+                    cell.appendChild(dayRow);
+
+                    if (primaryEvent) {
+                        const label = document.createElement('div');
+                        label.className = 've-cal-exam-label';
+                        const subj = primaryEvent.exam.subject || '?';
+                        const fullName = primaryEvent.exam.fullName || primaryEvent.exam.subject || '';
+                        const typeLabel = primaryEvent.type === 'regular' ? 'Редовен' : 'Поправка';
+                        cell.title = `${typeLabel}: ${fullName}${primaryEvent.time ? ' @ ' + primaryEvent.time : ''}`;
+                        label.innerHTML =
+                            `<span class="ve-cal-exam-subj">${escapeHtml(subj)}</span>` +
+                            (primaryEvent.time ? `<span class="ve-cal-exam-time">${escapeHtml(primaryEvent.time)}</span>` : '');
+                        cell.appendChild(label);
+
+                        cell.addEventListener('click', () => {
+                            openExamEditor(primaryEvent.examIndex);
+                        });
+                    } else if (inPeriod) {
+                        cell.addEventListener('click', () => {
+                            openAddForDate(key);
+                        });
+                    }
+
+                    grid.appendChild(cell);
+                }
+
+                wrap.appendChild(grid);
+                return wrap;
+            };
+
+            // Render every month from periodStart through periodEnd. The last month
+            // is cropped to the week containing periodEnd; earlier months render in
+            // full so the user sees the full first month, then progressively fewer
+            // rows for the trailing month.
+            const startKey = periodStart.getFullYear() * 12 + periodStart.getMonth();
+            const endKey = periodEnd.getFullYear() * 12 + periodEnd.getMonth();
+            for (let key = startKey; key <= endKey; key += 1) {
+                const year = Math.floor(key / 12);
+                const month = ((key % 12) + 12) % 12;
+                const mode = (key === endKey && key !== startKey) ? 'cropped' : 'full';
+                examListContainer.appendChild(buildMonthGrid(year, month, mode));
+            }
+
+            // Legend
+            const legend = document.createElement('div');
+            legend.className = 've-cal-legend';
+            legend.innerHTML =
+                '<span><span class="ve-cal-legend-dot" style="background:#d27260;border:1px solid #8b4438;"></span>Редовен изпит</span>' +
+                '<span><span class="ve-cal-legend-dot" style="background:#5d97b8;border:1px solid #2f5670;"></span>Поправка</span>' +
+                '<span class="ve-cal-legend-hint">Click any empty day to add a new exam</span>';
+            examListContainer.appendChild(legend);
+
+            if (dayEvents.size === 0) {
+                const emptyMsg = document.createElement('div');
+                emptyMsg.style.cssText = 'text-align:center;color:#888;padding:14px;font-size:14px;';
+                emptyMsg.textContent = 'No exams in this period yet. Click any day to add one.';
+                examListContainer.appendChild(emptyMsg);
+            }
         }
 
         if (addExamBtnInView) {

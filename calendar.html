@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202605101rst"></script>
+  <script src="js/auth-guard.js?v=202605101swz"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -1027,6 +1027,214 @@
     text-align: left;
   }
 
+  /* Exam Calendar (month grid) View — light theme */
+  .cal-cal-month {
+    background: #ffffff;
+    border-radius: 16px;
+    padding: 22px 22px 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 8px 24px rgba(52,78,65,0.08);
+    border: 1px solid #d8e4d0;
+  }
+  .cal-cal-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf0eb;
+  }
+  .cal-cal-header-text {
+    color: #3a5a40;
+    font-size: 22px;
+    font-weight: 700;
+    text-transform: capitalize;
+    letter-spacing: 0.02em;
+  }
+  .cal-cal-header-accent {
+    display: inline-block;
+    width: 8px;
+    height: 22px;
+    border-radius: 2px;
+    background: #588157;
+  }
+  .cal-cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+  .cal-cal-weekday {
+    text-align: center;
+    color: #6b7280;
+    font-size: 11px;
+    font-weight: 800;
+    padding: 6px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .cal-cal-weekday-weekend {
+    color: #b8c2b6;
+  }
+  .cal-cal-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+  .cal-cal-cell {
+    position: relative;
+    background: #f8faf6;
+    border-radius: 10px;
+    padding: 10px 10px 12px;
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    border: 1px solid #e3eadc;
+    transition: background 0.18s ease, border-color 0.18s ease, transform 0.1s ease;
+  }
+  .cal-cal-cell-pad {
+    background: transparent;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+  .cal-cal-cell-weekend {
+    background: #f1f4ee;
+  }
+  .cal-cal-cell-out {
+    opacity: 0.45;
+    pointer-events: none;
+    background: #f3f5f1;
+  }
+  .cal-cal-cell-has {
+    background: #d27260;
+    border: 2px solid #8b4438;
+    color: #1a1a1a;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+    cursor: pointer;
+  }
+  .cal-cal-cell-has:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.22);
+    filter: brightness(1.05);
+  }
+  .cal-cal-cell-has.cal-cal-cell-retake {
+    background: #5d97b8;
+    border: 2px solid #2f5670;
+  }
+  .cal-cal-cell-today {
+    outline: 2px solid #588157;
+    outline-offset: -2px;
+  }
+  .cal-cal-cell-today:not(.cal-cal-cell-has) .cal-cal-day-num {
+    background: #588157;
+    color: #fff;
+  }
+  .cal-cal-day {
+    display: flex;
+    align-items: baseline;
+    justify-content: flex-end;
+  }
+  .cal-cal-day-num {
+    font-size: 15px;
+    font-weight: 700;
+    color: #3a5a40;
+    line-height: 1;
+    min-width: 22px;
+    height: 22px;
+    border-radius: 11px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 6px;
+  }
+  .cal-cal-cell-has .cal-cal-day-num {
+    color: rgba(26, 26, 26, 0.78);
+  }
+  .cal-cal-exam-label {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    text-align: center;
+    padding: 2px 4px;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .cal-cal-exam-subj {
+    font-size: 14px;
+    font-weight: 800;
+    line-height: 1.22;
+    color: #1a1a1a;
+    letter-spacing: 0.01em;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    word-break: break-word;
+    hyphens: auto;
+  }
+  .cal-cal-exam-time {
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(26, 26, 26, 0.72);
+  }
+  .cal-cal-legend {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 22px;
+    font-size: 12.5px;
+    color: #6b7280;
+    padding: 14px 4px 4px;
+    flex-wrap: wrap;
+  }
+  .cal-cal-legend-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+    vertical-align: middle;
+    margin-right: 7px;
+  }
+
+  @media (max-width: 900px) {
+    .cal-cal-month {
+      padding: 14px 12px 16px;
+    }
+    .cal-cal-header-text {
+      font-size: 18px;
+    }
+    .cal-cal-cell {
+      min-height: 78px;
+      padding: 5px 5px 6px;
+      border-radius: 7px;
+      gap: 3px;
+    }
+    .cal-cal-day-num {
+      font-size: 13px;
+      height: 18px;
+      min-width: 18px;
+      padding: 0 4px;
+    }
+    .cal-cal-exam-subj {
+      font-size: 11px;
+      -webkit-line-clamp: 2;
+    }
+    .cal-cal-exam-time {
+      font-size: 9px;
+    }
+    .cal-cal-weekday {
+      font-size: 10px;
+      padding: 4px 0;
+    }
+  }
+
   /* Show line break after "и" only on mobile */
   .mobile-break {
     display: none;
@@ -1679,6 +1887,51 @@
     border-left-color: #588157 !important;
   }
 
+  /* Dark mode for the exam calendar grid */
+  body.dark-mode .cal-cal-month {
+    background: #1f1f1f !important;
+    border-color: #2c2c2c !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45) !important;
+  }
+  body.dark-mode .cal-cal-header {
+    border-bottom-color: #2a2a2a !important;
+  }
+  body.dark-mode .cal-cal-header-text {
+    color: #f1d4cf !important;
+  }
+  body.dark-mode .cal-cal-header-accent {
+    background: #d27260 !important;
+  }
+  body.dark-mode .cal-cal-weekday {
+    color: #b89c95 !important;
+  }
+  body.dark-mode .cal-cal-weekday-weekend {
+    color: #886f6a !important;
+  }
+  body.dark-mode .cal-cal-cell {
+    background: #232323 !important;
+    border-color: #2c2c2c !important;
+  }
+  body.dark-mode .cal-cal-cell-weekend {
+    background: #1f1f1f !important;
+  }
+  body.dark-mode .cal-cal-cell-out {
+    background: #1a1a1a !important;
+  }
+  body.dark-mode .cal-cal-day-num {
+    color: #d8d2cf !important;
+  }
+  body.dark-mode .cal-cal-cell-today {
+    outline-color: #d27260 !important;
+  }
+  body.dark-mode .cal-cal-cell-today:not(.cal-cal-cell-has) .cal-cal-day-num {
+    background: #d27260 !important;
+    color: #1a1a1a !important;
+  }
+  body.dark-mode .cal-cal-legend {
+    color: #aaa !important;
+  }
+
   /* Dark mode event cards: muted jewel-tone palette */
   body.dark-mode .event-card {
     border: 1px solid rgba(130, 140, 156, 0.15) !important;
@@ -1848,7 +2101,7 @@
     border-color: #3f3f3f !important;
   }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605101rst">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605101swz">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605015kp">
   <script src="js/version-manager.js?v=202603151sxu"></script>
@@ -3588,131 +3841,212 @@
     }
 
     updateAdminButtonVisibility();
-    // Render exams list
+    // Render exams as a month-grid calendar (mirrors admin visual editor).
     function renderExams(examPeriod) {
       const examsList = document.getElementById('examsList');
+      examsList.innerHTML = '';
+      examsList.style.display = 'flex';
+      examsList.style.flexDirection = 'column';
+      examsList.style.gap = '18px';
+      examsList.style.maxWidth = '1280px';
+      examsList.style.margin = '0 auto';
+
       if (!scheduleData.exams || scheduleData.exams.length === 0) {
         examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">Няма информация за изпити.</p>';
         return;
       }
 
-      let examsToShow = scheduleData.exams;
-
-      // Filter if period is provided
-      if (examPeriod && examPeriod.start && examPeriod.end) {
-          const start = new Date(examPeriod.start);
-          const end = new Date(examPeriod.end);
-          start.setHours(0,0,0,0);
-          end.setHours(0,0,0,0);
-
-          examsToShow = examsToShow.filter(exam => {
-              if (!exam.examDate) return false;
-              const d = new Date(exam.examDate);
-              d.setHours(0,0,0,0);
-              return d >= start && d <= end;
-          });
-      }
-
-      // Sort by Редовен изпит (examDate) ascending — exams without a valid date go last
-      examsToShow = examsToShow.slice().sort((a, b) => {
-          const da = a && a.examDate ? new Date(a.examDate).getTime() : NaN;
-          const db = b && b.examDate ? new Date(b.examDate).getTime() : NaN;
-          if (Number.isNaN(da) && Number.isNaN(db)) return 0;
-          if (Number.isNaN(da)) return 1;
-          if (Number.isNaN(db)) return -1;
-          return da - db;
-      });
-
-      if (examsToShow.length === 0) {
-          examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">Няма изпити за този период.</p>';
-          return;
+      if (!examPeriod || !examPeriod.start || !examPeriod.end) {
+        examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">Няма зададен период за изпити.</p>';
+        return;
       }
 
       const months = ['януари', 'февруари', 'март', 'април', 'май', 'юни',
                       'юли', 'август', 'септември', 'октомври', 'ноември', 'декември'];
+      const dayNames = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Нд'];
 
-      examsList.innerHTML = examsToShow.map(exam => {
-        // Format exam date
-        const examDate = new Date(exam.examDate);
-        const examDay = examDate.getDate();
-        const examMonth = months[examDate.getMonth()];
-        const examYear = examDate.getFullYear();
-        const examDateFormatted = `${examDay} ${examMonth} ${examYear}`;
+      // Parse YYYY-MM-DD as local-midnight to avoid UTC drift on positive-UTC
+      // machines (Bulgaria is UTC+2/+3) shifting boundary days by one.
+      const parseLocalDate = (value) => {
+        if (value instanceof Date) {
+          const copy = new Date(value.getTime());
+          copy.setHours(0, 0, 0, 0);
+          return copy;
+        }
+        if (typeof value === 'string') {
+          const m = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+          if (m) return new Date(parseInt(m[1], 10), parseInt(m[2], 10) - 1, parseInt(m[3], 10));
+        }
+        const d = new Date(value);
+        if (Number.isNaN(d.getTime())) return null;
+        d.setHours(0, 0, 0, 0);
+        return d;
+      };
 
-        // Format retake date - handle multiple dates separated by " и " (and)
-        let retakeDateFormatted = '';
-        if (exam.retakeDate && exam.retakeDate.includes(' и ')) {
-          // Multiple dates
-          const retakeDates = exam.retakeDate.split(' и ').map(d => d.trim());
-          const formattedDates = retakeDates.map(dateStr => {
-            const d = new Date(dateStr);
-            if (isNaN(d.getTime())) return dateStr; // Return original if invalid
-            const day = d.getDate();
-            const month = months[d.getMonth()];
-            const year = d.getFullYear();
-            return `${day} ${month} ${year}`;
-          });
-          // Add <br> after "и" for mobile devices
-          retakeDateFormatted = formattedDates.join(' и <span class="mobile-break"></span>');
-        } else if (exam.retakeDate) {
-          // Single date
-          const retakeDate = new Date(exam.retakeDate);
-          if (!isNaN(retakeDate.getTime())) {
-            const retakeDay = retakeDate.getDate();
-            const retakeMonth = months[retakeDate.getMonth()];
-            const retakeYear = retakeDate.getFullYear();
-            retakeDateFormatted = `${retakeDay} ${retakeMonth} ${retakeYear}`;
+      const periodStart = parseLocalDate(examPeriod.start);
+      const periodEnd = parseLocalDate(examPeriod.end);
+      if (!periodStart || !periodEnd) {
+        examsList.innerHTML = '<p style="text-align: center; color: #6b7280;">Невалиден период за изпити.</p>';
+        return;
+      }
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const ymd = (d) => {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+      };
+      const escapeHtml = (str) => String(str).replace(/[&<>"']/g, (c) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      }[c]));
+
+      // Build day -> events map. Each exam contributes a 'regular' event on
+      // examDate and (if set) a 'retake' event on retakeDate. Retake field
+      // can be "DATE и DATE" (multiple dates separated by Cyrillic "и").
+      const dayEvents = new Map();
+      const addEvent = (dateStr, type, exam) => {
+        const d = parseLocalDate(dateStr);
+        if (!d) return;
+        const key = ymd(d);
+        if (!dayEvents.has(key)) dayEvents.set(key, []);
+        dayEvents.get(key).push({
+          type,
+          exam,
+          time: type === 'regular' ? (exam.examTime || '') : (exam.retakeTime || '')
+        });
+      };
+      scheduleData.exams.forEach((exam) => {
+        addEvent(exam.examDate, 'regular', exam);
+        if (exam.retakeDate) {
+          if (typeof exam.retakeDate === 'string' && exam.retakeDate.includes(' и ')) {
+            exam.retakeDate.split(' и ').map((s) => s.trim()).forEach((d) => addEvent(d, 'retake', exam));
           } else {
-            retakeDateFormatted = exam.retakeDate;
+            addEvent(exam.retakeDate, 'retake', exam);
           }
         }
+      });
 
-        return `
-          <div class="exam-card" onclick="showExamModal(${JSON.stringify(exam).replace(/"/g, '&quot;')})">
-            <div class="exam-card-header">
-              <h3 class="exam-card-title">${exam.fullName || exam.subject}</h3>
-            </div>
+      const buildMonthGrid = (year, month, mode) => {
+        const wrap = document.createElement('div');
+        wrap.className = 'cal-cal-month';
 
-            <div class="exam-section">
-              <div class="exam-section-title">
-                <svg class="exam-section-icon" viewBox="0 0 24 24">
-                  <path d="M9,10H7V12H9V10M13,10H11V12H13V10M17,10H15V12H17V10M19,3H18V1H16V3H8V1H6V3H5C3.89,3 3,3.9 3,5V19A2,2 0 0,0 5,21H19A2,2 0 0,0 21,19V5A2,2 0 0,0 19,3M19,19H5V8H19V19Z"/>
-                </svg>
-                Редовен изпит
-              </div>
-              <div class="exam-info-grid">
-                <div class="exam-info-item">
-                  <span class="exam-info-label">Дата:</span>
-                  <span class="exam-info-value">${examDateFormatted}</span>
-                </div>
-                <div class="exam-info-item">
-                  <span class="exam-info-label">Час:</span>
-                  <span class="exam-info-value">${exam.examTime || ''}</span>
-                </div>
-              </div>
-            </div>
+        const header = document.createElement('div');
+        header.className = 'cal-cal-header';
+        header.innerHTML = '<span class="cal-cal-header-accent"></span>' +
+          `<span class="cal-cal-header-text">${escapeHtml(months[month])} ${year}</span>`;
+        wrap.appendChild(header);
 
-            <div class="exam-section">
-              <div class="exam-section-title">
-                <svg class="exam-section-icon" viewBox="0 0 24 24">
-                  <path d="M12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22C6.47,22 2,17.5 2,12A10,10 0 0,1 12,2M12.5,7V12.25L17,14.92L16.25,16.15L11,13V7H12.5Z"/>
-                </svg>
-                Поправка
-              </div>
-              <div class="exam-info-grid">
-                <div class="exam-info-item">
-                  <span class="exam-info-label">Дата:</span>
-                  <span class="exam-info-value">${retakeDateFormatted}</span>
-                </div>
-                <div class="exam-info-item">
-                  <span class="exam-info-label">Час:</span>
-                  <span class="exam-info-value">${exam.retakeTime || ''}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        `;
-      }).join('');
+        const weekdayRow = document.createElement('div');
+        weekdayRow.className = 'cal-cal-weekdays';
+        dayNames.forEach((name, idx) => {
+          const c = document.createElement('div');
+          c.className = 'cal-cal-weekday' + (idx >= 5 ? ' cal-cal-weekday-weekend' : '');
+          c.textContent = name;
+          weekdayRow.appendChild(c);
+        });
+        wrap.appendChild(weekdayRow);
+
+        const grid = document.createElement('div');
+        grid.className = 'cal-cal-grid';
+
+        const firstOfMonth = new Date(year, month, 1);
+        const firstWeekday = (firstOfMonth.getDay() + 6) % 7;
+        const lastDay = new Date(year, month + 1, 0).getDate();
+
+        let renderUpTo = lastDay;
+        if (mode === 'cropped') {
+          const cropDay = periodEnd.getDate();
+          const cropWeekday = (periodEnd.getDay() + 6) % 7;
+          renderUpTo = Math.min(lastDay, cropDay + (6 - cropWeekday));
+        }
+
+        for (let i = 0; i < firstWeekday; i += 1) {
+          const padCell = document.createElement('div');
+          padCell.className = 'cal-cal-cell cal-cal-cell-pad';
+          grid.appendChild(padCell);
+        }
+
+        for (let day = 1; day <= renderUpTo; day += 1) {
+          const date = new Date(year, month, day);
+          date.setHours(0, 0, 0, 0);
+          const inPeriod = date >= periodStart && date <= periodEnd;
+          const isToday = date.getTime() === today.getTime();
+          const key = ymd(date);
+          const events = dayEvents.get(key) || [];
+          const dowIdx = (date.getDay() + 6) % 7;
+          const isWeekend = dowIdx >= 5;
+
+          // At most one exam per day; prefer regular over retake if both exist.
+          const primaryEvent = events.find((e) => e.type === 'regular') || events[0] || null;
+
+          const cell = document.createElement('div');
+          const classes = ['cal-cal-cell'];
+          classes.push(inPeriod ? 'cal-cal-cell-in' : 'cal-cal-cell-out');
+          if (primaryEvent) {
+            classes.push('cal-cal-cell-has');
+            if (primaryEvent.type === 'retake') classes.push('cal-cal-cell-retake');
+          }
+          if (isWeekend && inPeriod && !primaryEvent) classes.push('cal-cal-cell-weekend');
+          if (isToday) classes.push('cal-cal-cell-today');
+          cell.className = classes.join(' ');
+
+          const dayRow = document.createElement('div');
+          dayRow.className = 'cal-cal-day';
+          dayRow.innerHTML = `<span class="cal-cal-day-num">${day}</span>`;
+          cell.appendChild(dayRow);
+
+          if (primaryEvent) {
+            const label = document.createElement('div');
+            label.className = 'cal-cal-exam-label';
+            const subj = primaryEvent.exam.subject || '?';
+            const fullName = primaryEvent.exam.fullName || primaryEvent.exam.subject || '';
+            const typeLabel = primaryEvent.type === 'regular' ? 'Редовен' : 'Поправка';
+            cell.title = `${typeLabel}: ${fullName}${primaryEvent.time ? ' @ ' + primaryEvent.time : ''}`;
+            label.innerHTML =
+              `<span class="cal-cal-exam-subj">${escapeHtml(subj)}</span>` +
+              (primaryEvent.time ? `<span class="cal-cal-exam-time">${escapeHtml(primaryEvent.time)}</span>` : '');
+            cell.appendChild(label);
+
+            const examForClick = primaryEvent.exam;
+            cell.addEventListener('click', () => showExamModal(examForClick));
+          }
+
+          grid.appendChild(cell);
+        }
+
+        wrap.appendChild(grid);
+        return wrap;
+      };
+
+      // Render every month from periodStart through periodEnd. The last month
+      // is cropped to the week containing periodEnd; earlier months render in
+      // full so the user sees the full first month, then progressively fewer
+      // rows for the trailing month.
+      const startKey = periodStart.getFullYear() * 12 + periodStart.getMonth();
+      const endKey = periodEnd.getFullYear() * 12 + periodEnd.getMonth();
+      for (let key = startKey; key <= endKey; key += 1) {
+        const year = Math.floor(key / 12);
+        const month = ((key % 12) + 12) % 12;
+        const mode = (key === endKey && key !== startKey) ? 'cropped' : 'full';
+        examsList.appendChild(buildMonthGrid(year, month, mode));
+      }
+
+      const legend = document.createElement('div');
+      legend.className = 'cal-cal-legend';
+      legend.innerHTML =
+        '<span><span class="cal-cal-legend-dot" style="background:#d27260;border:1px solid #8b4438;"></span>Редовен изпит</span>' +
+        '<span><span class="cal-cal-legend-dot" style="background:#5d97b8;border:1px solid #2f5670;"></span>Поправка</span>';
+      examsList.appendChild(legend);
+
+      if (dayEvents.size === 0) {
+        const emptyMsg = document.createElement('div');
+        emptyMsg.style.cssText = 'text-align:center;color:#6b7280;padding:14px;font-size:14px;';
+        emptyMsg.textContent = 'Няма изпити в този период.';
+        examsList.appendChild(emptyMsg);
+      }
     }
 
     // Close modal on outside click
@@ -4129,12 +4463,12 @@
          CHAT SYSTEM - Complete (Firebase REST + UI)
          ============================================ -->
 
-<script src="js/user-identity.js?v=202605101rst"></script>
+<script src="js/user-identity.js?v=202605101swz"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202605101rst"></script>
+    <script src="js/chat.js?v=202605101swz"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202605021hcw"></script>
-<script src="js/mobile-nav.js?v=202605101rst"></script>
+<script src="js/mobile-nav.js?v=202605101swz"></script>
 </body>
     </html>

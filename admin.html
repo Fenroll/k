@@ -1,10 +1,10 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="js/auth-guard.js?v=202605101rst"></script>
+    <script src="js/auth-guard.js?v=202605101swz"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=202605101rst"></script>
+    <script src="js/user-identity.js?v=202605101swz"></script>
     <script src="js/admin-guard.js?v=202602171mhr"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202605101rst">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605101swz">
     <title>Admin Panel</title>
     <style>
         :root {
@@ -571,6 +571,244 @@
         }
         .exam-card-edit-btn:hover {
             background: #3a2a2a;
+        }
+
+        /* Exam Calendar (month grid) View */
+        .ve-cal-month {
+            background: linear-gradient(180deg, #1f1f1f 0%, #181818 100%);
+            border-radius: 16px;
+            padding: 22px 22px 24px;
+            box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            border: 1px solid #2c2c2c;
+        }
+        .ve-cal-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 18px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .ve-cal-header-text {
+            color: #f1d4cf;
+            font-size: 22px;
+            font-weight: 700;
+            text-transform: capitalize;
+            letter-spacing: 0.02em;
+        }
+        .ve-cal-header-accent {
+            display: inline-block;
+            width: 8px;
+            height: 22px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, #e8806f 0%, #b65648 100%);
+        }
+        .ve-cal-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .ve-cal-weekday {
+            text-align: center;
+            color: #b89c95;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 6px 0;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+        }
+        .ve-cal-weekday-weekend {
+            color: #886f6a;
+        }
+        .ve-cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 6px;
+        }
+        .ve-cal-cell {
+            position: relative;
+            background: #232323;
+            border-radius: 10px;
+            padding: 10px 10px 12px;
+            min-height: 130px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border: 1px solid #2c2c2c;
+            transition: background 0.18s ease, border-color 0.18s ease, transform 0.1s ease;
+        }
+        .ve-cal-cell-pad {
+            background: transparent;
+            min-height: 0;
+            padding: 0;
+            border: 0;
+            box-shadow: none;
+        }
+        .ve-cal-cell-weekend {
+            background: #1f1f1f;
+        }
+        .ve-cal-cell-out {
+            opacity: 0.32;
+            pointer-events: none;
+            background: #1a1a1a;
+        }
+        .ve-cal-cell-in {
+            cursor: pointer;
+        }
+        .ve-cal-cell-in:hover {
+            border-color: #d87060;
+            background: #2e2422;
+        }
+        .ve-cal-cell-in:hover::after {
+            content: '+';
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 300;
+            color: rgba(216, 112, 96, 0.18);
+            pointer-events: none;
+        }
+        /* When a day has an exam, the cell ITSELF becomes the chip — the exam
+           takes the full cell instead of a small badge inside it. */
+        .ve-cal-cell-has {
+            background: #d27260;
+            border: 2px solid #8b4438;
+            color: #1a1a1a;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+        }
+        .ve-cal-cell-has:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            filter: brightness(1.06);
+        }
+        .ve-cal-cell-has.ve-cal-cell-retake {
+            background: #5d97b8;
+            border: 2px solid #2f5670;
+        }
+        .ve-cal-cell-has::after {
+            display: none !important;
+        }
+        .ve-cal-cell-today {
+            outline: 2px solid #f1d4cf;
+            outline-offset: -2px;
+        }
+        .ve-cal-cell-today:not(.ve-cal-cell-has) .ve-cal-day-num {
+            background: #d87060;
+            color: #1a1a1a;
+        }
+        .ve-cal-day {
+            display: flex;
+            align-items: baseline;
+            justify-content: flex-end;
+        }
+        .ve-cal-day-num {
+            font-size: 15px;
+            font-weight: 700;
+            color: #d8d2cf;
+            line-height: 1;
+            min-width: 22px;
+            height: 22px;
+            border-radius: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+        }
+        .ve-cal-cell-has .ve-cal-day-num {
+            color: rgba(26, 26, 26, 0.78);
+        }
+        /* Subject label that takes the body of an exam-cell */
+        .ve-cal-exam-label {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 3px;
+            text-align: center;
+            padding: 2px 4px;
+            min-height: 0;
+            overflow: hidden;
+        }
+        .ve-cal-exam-subj {
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1.22;
+            color: #1a1a1a;
+            letter-spacing: 0.01em;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        .ve-cal-exam-time {
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(26, 26, 26, 0.72);
+        }
+        .ve-cal-legend {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 22px;
+            font-size: 12.5px;
+            color: #aaa;
+            padding: 14px 4px 4px;
+            flex-wrap: wrap;
+        }
+        .ve-cal-legend-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 3px;
+            vertical-align: middle;
+            margin-right: 7px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+        }
+        .ve-cal-legend-hint {
+            color: #6e6864;
+            font-style: italic;
+        }
+
+        @media (max-width: 900px) {
+            .ve-cal-month {
+                padding: 14px 12px 16px;
+            }
+            .ve-cal-header-text {
+                font-size: 18px;
+            }
+            .ve-cal-cell {
+                min-height: 78px;
+                padding: 5px 5px 6px;
+                border-radius: 7px;
+                gap: 3px;
+            }
+            .ve-cal-day-num {
+                font-size: 13px;
+                height: 18px;
+                min-width: 18px;
+                padding: 0 4px;
+            }
+            .ve-cal-exam-subj {
+                font-size: 11px;
+                -webkit-line-clamp: 2;
+            }
+            .ve-cal-exam-time {
+                font-size: 9px;
+            }
+            .ve-cal-weekday {
+                font-size: 10px;
+                padding: 4px 0;
+            }
         }
 
         @media (max-width: 900px) {
@@ -1359,10 +1597,10 @@
         </div>
     </div>
 
-    <script src="courses.generated.js?v=202605101rst"></script>
+    <script src="courses.generated.js?v=202605101swz"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/admin.js?v=20260429domain1"></script>
-    <script src="js/admin-visual-editor.js?v=20260510time6"></script>
+    <script src="js/admin-visual-editor.js?v=20260510cal6"></script>
   </main>
 </body>
 </html>
