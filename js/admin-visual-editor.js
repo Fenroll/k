@@ -55,11 +55,20 @@
             });
         }
 
-        function validateEventTimes(startTime, endTime) {
+        function validateEventTimes(startTime, endTime, options = {}) {
+            const { requireBoth = true } = options;
             const start = String(startTime || '').trim();
             const end = String(endTime || '').trim();
+            const hasStart = start.length > 0;
+            const hasEnd = end.length > 0;
 
-            if (!timePattern.test(start)) {
+            // Partial overrides may set only one of the two times — the other
+            // is inherited from the template and shouldn't trigger validation.
+            if (!requireBoth && !hasStart && !hasEnd) {
+                return { ok: true, fields: [], message: '' };
+            }
+
+            if ((requireBoth || hasStart) && !timePattern.test(start)) {
                 return {
                     ok: false,
                     fields: ['ve-start'],
@@ -67,7 +76,7 @@
                 };
             }
 
-            if (!timePattern.test(end)) {
+            if ((requireBoth || hasEnd) && !timePattern.test(end)) {
                 return {
                     ok: false,
                     fields: ['ve-end'],
@@ -75,7 +84,7 @@
                 };
             }
 
-            if (getTimeMinutes(end) <= getTimeMinutes(start)) {
+            if (hasStart && hasEnd && getTimeMinutes(end) <= getTimeMinutes(start)) {
                 return {
                     ok: false,
                     fields: ['ve-start', 've-end'],
@@ -92,6 +101,50 @@
             if (entry && entry.subject) parts.push(entry.subject);
             if (entry && entry.day) parts.push(entry.day);
             return parts.join(' - ') || 'Schedule item';
+        }
+
+        // Convert a raw override key (absolute index across all semesters) into
+        // a friendly label that matches what the UI shows when navigating —
+        // e.g., "Summer Week 8 (2026-04-13) [stored as #23]". Falls back to the
+        // raw key if the schedule structure isn't available.
+        function describeOverrideWeek(data, weekKey) {
+            const rawLabel = `Week ${weekKey} override`;
+            const weekIndex = parseInt(weekKey, 10) - 1;
+            const weeks = (data && Array.isArray(data.weeks)) ? data.weeks : [];
+            if (Number.isNaN(weekIndex) || weekIndex < 0 || weekIndex >= weeks.length) {
+                return `${rawLabel} (ORPHANED — no week #${weekKey} in current schedule)`;
+            }
+            const week = weeks[weekIndex];
+            if (!week || !week.startDate) return rawLabel;
+            const weekStartStr = week.startDate;
+
+            let semesterKey = null;
+            if (data && data.semesters && typeof data.semesters === 'object') {
+                const keys = Object.keys(data.semesters).sort((a, b) => {
+                    const aStart = (data.semesters[a] && data.semesters[a].startDate) || '';
+                    const bStart = (data.semesters[b] && data.semesters[b].startDate) || '';
+                    return String(aStart).localeCompare(String(bStart));
+                });
+                for (const key of keys) {
+                    const semStart = data.semesters[key] && data.semesters[key].startDate;
+                    if (semStart && weekStartStr >= semStart) semesterKey = key;
+                }
+            }
+
+            let relativeNum = parseInt(weekKey, 10);
+            let semLabel = '';
+            if (semesterKey && data.semesters[semesterKey] && data.semesters[semesterKey].startDate) {
+                const semStart = new Date(data.semesters[semesterKey].startDate);
+                const weekStart = new Date(weekStartStr);
+                const diffDays = Math.floor((weekStart - semStart) / (1000 * 60 * 60 * 24));
+                relativeNum = Math.floor(diffDays / 7) + 1;
+                if (relativeNum < 1) relativeNum = 1;
+                semLabel = (data.semesters[semesterKey].name || semesterKey).toString();
+                semLabel = semLabel.charAt(0).toUpperCase() + semLabel.slice(1);
+            }
+
+            const prefix = semLabel ? `${semLabel} Week ${relativeNum}` : `Week ${relativeNum}`;
+            return `${prefix} (${weekStartStr}) [stored as #${weekKey}] override`;
         }
 
         function findInvalidScheduleTime(data) {
@@ -113,7 +166,11 @@
             if (data.overrides && typeof data.overrides === 'object') {
                 Object.keys(data.overrides).forEach((week) => {
                     if (Array.isArray(data.overrides[week])) {
-                        collections.push({ source: `Week ${week} override`, items: data.overrides[week] });
+                        collections.push({
+                            source: describeOverrideWeek(data, week),
+                            items: data.overrides[week],
+                            weekKey: week
+                        });
                     }
                 });
             }
@@ -123,10 +180,41 @@
                     if (!entry || entry.remove || entry.removeDay || (entry.changes && entry.changes.removed === true)) continue;
                     const candidate = entry.changes ? { ...entry, ...entry.changes } : entry;
                     if (!candidate.startTime && !candidate.endTime) continue;
-                    const result = validateEventTimes(candidate.startTime, candidate.endTime);
+                    const result = validateEventTimes(candidate.startTime, candidate.endTime, { requireBoth: false });
                     if (!result.ok) {
+                        // Surface the actual offending value so it can be located in Firebase.
+                        const offendingValue = result.fields && result.fields.includes('ve-end')
+                            ? candidate.endTime
+                            : candidate.startTime;
+                        const offendingDisplay = offendingValue === undefined || offendingValue === null
+                            ? '(missing)'
+                            : `"${String(offendingValue)}"`;
+                        try {
+                            // Find sibling entries that target the same slot — these are
+                            // typically duplicate overrides accumulated from multiple edits
+                            // of the same event. The renderer applies them in order and the
+                            // last one wins, but the validator catches any of them.
+                            const siblings = collection.items.filter((other) => {
+                                if (!other || other === entry) return false;
+                                if (entry.day && other.day !== entry.day) return false;
+                                if (entry.subject && other.subject !== entry.subject) return false;
+                                return true;
+                            });
+                            console.warn('[Schedule validation] Bad entry:', {
+                                source: collection.source,
+                                weekKey: collection.weekKey,
+                                entry,
+                                candidate,
+                                badField: result.fields,
+                                badValue: offendingValue,
+                                siblingEntriesForSameSlot: siblings,
+                                hint: siblings.length > 0
+                                    ? `Found ${siblings.length} other override(s) for the same day+subject. Delete the entry with the bad value from Firebase under /.../overrides/${collection.weekKey}/.`
+                                    : 'No siblings — this is the only override for that slot. Fix or delete it.'
+                            });
+                        } catch (_) { /* noop */ }
                         return {
-                            message: `${describeEvent(candidate, collection.source)}: ${result.message}`,
+                            message: `${describeEvent(candidate, collection.source)}: ${result.message} (got ${offendingDisplay} — see browser console for full entry)`,
                             entry: candidate
                         };
                     }
@@ -136,26 +224,136 @@
             return null;
         }
 
+        // Auto-clean override arrays before save. Removes:
+        //   1. null/non-object slots (Firebase leftovers from manual deletions)
+        //   2. duplicate `changes:` entries for the same (day, subject, originalStartTime)
+        //      slot — merged into the latest one so no field edits are lost
+        //   3. entries whose merged candidate fails time validation (stale typos
+        //      that the renderer can't apply cleanly anyway)
+        // Returns { weeksTouched, removed: [{ weekKey, reason, entry }] }.
+        function cleanupOverrides(data) {
+            const summary = { weeksTouched: 0, removed: [] };
+            if (!data || !data.overrides || typeof data.overrides !== 'object') return summary;
+
+            Object.keys(data.overrides).forEach((weekKey) => {
+                const arr = data.overrides[weekKey];
+                if (!Array.isArray(arr)) return;
+                const originalLength = arr.length;
+
+                // Step 1: drop null/non-object entries.
+                let work = [];
+                arr.forEach((e) => {
+                    if (e && typeof e === 'object') {
+                        work.push(e);
+                    } else if (e !== undefined) {
+                        summary.removed.push({ weekKey, reason: 'null-slot', entry: e });
+                    }
+                });
+
+                // Step 2: walk in order. Merge `changes:` entries for the same slot into
+                // the first occurrence (later fields win per Object.assign). A `remove:`
+                // or `removeDay` for the same slot resets the merge tracker so any later
+                // `changes:` for that slot starts fresh.
+                const result = [];
+                const slotIndex = new Map(); // slotKey -> index in result
+
+                work.forEach((entry) => {
+                    const slotKey = (entry.day && entry.subject && entry.startTime)
+                        ? `${entry.day}|${entry.subject}|${entry.startTime}`
+                        : null;
+                    const isChangesEdit = !!entry.changes
+                        && !entry.remove
+                        && !entry.removeDay
+                        && entry.changes.removed !== true;
+
+                    if (isChangesEdit && slotKey && slotIndex.has(slotKey)) {
+                        const prev = result[slotIndex.get(slotKey)];
+                        prev.changes = { ...prev.changes, ...entry.changes };
+                        summary.removed.push({ weekKey, reason: 'duplicate-merged', entry });
+                        return;
+                    }
+
+                    result.push(entry);
+
+                    if (isChangesEdit && slotKey) {
+                        slotIndex.set(slotKey, result.length - 1);
+                    } else if (slotKey && (entry.remove || (entry.changes && entry.changes.removed === true))) {
+                        slotIndex.delete(slotKey);
+                    } else if (entry.removeDay) {
+                        Array.from(slotIndex.keys()).forEach((k) => {
+                            if (k.startsWith(`${entry.removeDay}|`)) slotIndex.delete(k);
+                        });
+                    }
+                });
+
+                // Step 3: drop any remaining entry whose merged candidate fails time
+                // validation. Form validation prevents new bad entries; anything bad
+                // here is stale data not displaying correctly anyway.
+                const validated = [];
+                result.forEach((entry) => {
+                    if (entry.remove || entry.removeDay || (entry.changes && entry.changes.removed === true)) {
+                        validated.push(entry);
+                        return;
+                    }
+                    const candidate = entry.changes ? { ...entry, ...entry.changes } : entry;
+                    if (!candidate.startTime && !candidate.endTime) {
+                        validated.push(entry);
+                        return;
+                    }
+                    const v = validateEventTimes(candidate.startTime, candidate.endTime, { requireBoth: false });
+                    if (v.ok) {
+                        validated.push(entry);
+                    } else {
+                        summary.removed.push({
+                            weekKey,
+                            reason: `invalid-times (${v.message})`,
+                            entry,
+                            candidate
+                        });
+                    }
+                });
+
+                if (validated.length === 0) {
+                    delete data.overrides[weekKey];
+                } else {
+                    data.overrides[weekKey] = validated;
+                }
+
+                if (validated.length !== originalLength) summary.weeksTouched += 1;
+            });
+
+            return summary;
+        }
+
         function openVisualEditorPanel(options = {}) {
             const { silentNoData = false } = options;
 
-            try {
-                const jsonContent = scheduleJsonEditor.value;
-                if (!jsonContent) {
-                    if (!silentNoData) {
-                        alert('Please load or import schedule data first.');
-                    }
-                    return false;
+            const jsonContent = scheduleJsonEditor.value;
+            if (!jsonContent) {
+                if (!silentNoData) {
+                    alert('Please load or import schedule data first.');
                 }
+                return false;
+            }
 
+            try {
                 currentScheduleData = JSON.parse(jsonContent);
+            } catch (e) {
+                if (!silentNoData) {
+                    alert('Invalid JSON in editor. Please fix errors before opening visual editor.\n' + e.message);
+                }
+                return false;
+            }
+
+            try {
                 initScheduleView(false); // False = don't preserve, reset to today
                 visualContainer.style.display = 'block';
                 document.body.style.overflow = 'hidden';
                 return true;
             } catch (e) {
+                console.error('Visual editor failed to render schedule:', e);
                 if (!silentNoData) {
-                    alert('Invalid JSON in editor. Please fix errors before opening visual editor.\n' + e.message);
+                    alert('Failed to render schedule view (JSON parsed OK, but rendering crashed). See browser console for details.\n\n' + (e && e.message ? e.message : e));
                 }
                 return false;
             }
@@ -218,6 +416,26 @@
                 if (!scheduleJsonEditor) {
                     alert('Schedule JSON editor is missing. Cannot save.');
                     return;
+                }
+
+                // Auto-clean stale/duplicate/invalid override entries before saving.
+                const cleanupSummary = cleanupOverrides(currentScheduleData);
+                if (cleanupSummary.removed.length > 0) {
+                    try {
+                        console.warn('[Schedule cleanup] Auto-removed override entries:', cleanupSummary.removed);
+                    } catch (_) { /* noop */ }
+                    const reasons = {};
+                    cleanupSummary.removed.forEach((r) => {
+                        reasons[r.reason] = (reasons[r.reason] || 0) + 1;
+                    });
+                    const reasonSummary = Object.keys(reasons)
+                        .map((k) => `${reasons[k]} ${k}`)
+                        .join(', ');
+                    if (typeof showAdminNotification === 'function') {
+                        showAdminNotification(`Cleaned ${cleanupSummary.removed.length} stale override entr${cleanupSummary.removed.length === 1 ? 'y' : 'ies'} (${reasonSummary}). See console for details.`, 'info');
+                    } else {
+                        console.info(`[Schedule cleanup] Removed ${cleanupSummary.removed.length} entries: ${reasonSummary}`);
+                    }
                 }
 
                 const invalidTime = findInvalidScheduleTime(currentScheduleData);
@@ -409,6 +627,9 @@
                 // Apply overrides
                 if (overrides[weekNumber]) {
                     overrides[weekNumber].forEach(override => {
+                        // Firebase leaves null slots when array elements are deleted in
+                        // the middle. Skip them so rendering doesn't crash.
+                        if (!override) return;
                         if (override.removeDay) {
                             schedule = schedule.filter(item => item.day !== override.removeDay);
                         } else if (override.remove) {

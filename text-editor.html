@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026051014jo"></script>
+  <script src="js/auth-guard.js?v=202605101rst"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026051014jo">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605101rst">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -2138,7 +2138,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=2026051014jo"></script>
+  <script src="courses.generated.js?v=202605101rst"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2765,10 +2765,24 @@
       }
       history.push(editor.innerHTML);
       historyIndex++;
-      if (history.length > 50) {
+      if (history.length > 15) {
         history.shift();
         historyIndex--;
       }
+    }
+
+    // Commit a custom DOM mutation done from a keydown handler:
+    // synthetically fire the input event so the editor's normalization
+    // pipeline runs (cleanup of headings, fonts, HR, divs, etc.), then
+    // snapshot history immediately so undo works without the 500ms debounce.
+    function commitEditorEdit() {
+      try {
+        editor.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText' }));
+      } catch (_) {
+        editor.dispatchEvent(new Event('input', { bubbles: true }));
+      }
+      clearTimeout(editor.historyTimeout);
+      saveToHistory();
     }
 
     function scheduleEditorAutoSave() {
@@ -7570,7 +7584,7 @@ renderMathInElement(document.body, {
               if (leftNode && leftNode.nodeType === Node.ELEMENT_NODE && leftNode.tagName === 'HR') {
                 e.preventDefault();
                 leftNode.remove();
-                saveToHistory();
+                commitEditorEdit();
                 return;
               }
             }
@@ -7580,7 +7594,7 @@ renderMathInElement(document.body, {
               if (rightNode && rightNode.nodeType === Node.ELEMENT_NODE && rightNode.tagName === 'HR') {
                 e.preventDefault();
                 rightNode.remove();
-                saveToHistory();
+                commitEditorEdit();
                 return;
               }
             }
@@ -7737,7 +7751,7 @@ renderMathInElement(document.body, {
                          selection.addRange(newRange);
                        }
                      }
-                     saveToHistory();
+                     commitEditorEdit();
                      return;
                  }
              }
@@ -7767,7 +7781,7 @@ renderMathInElement(document.body, {
 
                 selection.removeAllRanges();
                 selection.addRange(keepRange);
-                saveToHistory();
+                commitEditorEdit();
                 return;
               }
 
@@ -7775,7 +7789,7 @@ renderMathInElement(document.body, {
               if (prev && prev.tagName === 'HR') {
                 e.preventDefault();
                 prev.remove();
-                saveToHistory();
+                commitEditorEdit();
                 return;
               }
 
@@ -7788,7 +7802,7 @@ renderMathInElement(document.body, {
                 prev.remove();
                 selection.removeAllRanges();
                 selection.addRange(keepRange);
-                saveToHistory();
+                commitEditorEdit();
                 return;
               }
 
@@ -7821,7 +7835,7 @@ renderMathInElement(document.body, {
                 currentBlock.remove();
                 selection.removeAllRanges();
                 selection.addRange(joinRange);
-                saveToHistory();
+                commitEditorEdit();
                 return;
               }
             }
@@ -7832,7 +7846,7 @@ renderMathInElement(document.body, {
             if (e.key === 'Delete' && node.nextSibling && node.nextSibling.tagName === 'HR') {
               e.preventDefault();
               node.nextSibling.remove();
-              saveToHistory();
+              commitEditorEdit();
               return;
             }
           }
@@ -7897,6 +7911,26 @@ renderMathInElement(document.body, {
             };
             walk(fragment);
             return length === 0;
+          };
+
+          const isRangeAtEndOfElementForEnter = (inputRange, element) => {
+            if (!inputRange || !element) return false;
+            const probe = inputRange.cloneRange();
+            probe.selectNodeContents(element);
+            probe.setStart(inputRange.endContainer, inputRange.endOffset);
+
+            const fragment = probe.cloneContents();
+            let textLength = 0;
+            const walk = (n) => {
+              if (!n) return;
+              if (n.nodeType === Node.TEXT_NODE) {
+                textLength += (n.textContent || '').length;
+              }
+              const children = n.childNodes || [];
+              for (let i = 0; i < children.length; i += 1) walk(children[i]);
+            };
+            walk(fragment);
+            return textLength === 0;
           };
 
           // If caret is inside a note span, force next line outside that span.
@@ -7983,6 +8017,28 @@ renderMathInElement(document.body, {
             selection.removeAllRanges();
             selection.addRange(newRange);
             saveToHistory();
+            return;
+          }
+
+          // At end of a block immediately followed by an <hr>, manually insert
+          // a new paragraph between them. execCommand('insertParagraph') in this
+          // case can land the caret past the HR (Chromium skips selection over
+          // non-editable HR siblings). Covers both solid and dashed dividers.
+          if (currentBlock
+              && currentBlock.nextElementSibling
+              && currentBlock.nextElementSibling.tagName === 'HR'
+              && isRangeAtEndOfElementForEnter(range, currentBlock)) {
+            e.preventDefault();
+            const newParagraph = document.createElement('p');
+            newParagraph.innerHTML = '<br>';
+            currentBlock.parentNode.insertBefore(newParagraph, currentBlock.nextSibling);
+
+            const newRange = document.createRange();
+            newRange.setStart(newParagraph, 0);
+            newRange.collapse(true);
+            selection.removeAllRanges();
+            selection.addRange(newRange);
+            commitEditorEdit();
             return;
           }
 
@@ -8719,6 +8775,26 @@ renderMathInElement(document.body, {
       // Create temporary container with the HTML
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = html;
+
+      // markdownToHtml wraps even a single line of plain text in <p>...</p>.
+      // If the entire paste is one P/DIV with only inline content, unwrap it so
+      // it can flow inline into the caret position (e.g., into a heading)
+      // instead of being treated as a structural block.
+      const significantChildren = Array.from(tempDiv.childNodes).filter((n) => {
+        if (n.nodeType === Node.TEXT_NODE) return (n.textContent || '').trim().length > 0;
+        if (n.nodeType === Node.ELEMENT_NODE) return true;
+        return false;
+      });
+      if (significantChildren.length === 1
+          && significantChildren[0].nodeType === Node.ELEMENT_NODE
+          && /^(P|DIV)$/.test(significantChildren[0].tagName)
+          && !significantChildren[0].querySelector('p, div, h1, h2, h3, h4, h5, h6, ul, ol, table, blockquote, pre, hr, li')) {
+        const wrapper = significantChildren[0];
+        while (wrapper.firstChild) {
+          tempDiv.insertBefore(wrapper.firstChild, wrapper);
+        }
+        wrapper.remove();
+      }
 
       const structuralPasteTags = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'UL', 'OL', 'TABLE', 'BLOCKQUOTE', 'PRE', 'HR']);
       const pastedHasStructuralBlocks = Array.from(tempDiv.childNodes).some((node) => {
@@ -10170,12 +10246,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=2026051014jo"></script>
+  <script src="js/user-identity.js?v=202605101rst"></script>
     <!-- CHAT SYSTEM -->
-  <script src="js/chat.js?v=2026051014jo"></script>
+  <script src="js/chat.js?v=202605101rst"></script>
 
 <script src="js/version-check.js?v=202605021hcw"></script>
-  <script src="js/mobile-nav.js?v=2026051014jo"></script>
+  <script src="js/mobile-nav.js?v=202605101rst"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');
