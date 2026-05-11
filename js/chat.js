@@ -56,14 +56,48 @@ class ChatFirebaseREST {
 
   async _ensureInit() {
     if (this.db) return;
-    // If initSDK didn't run or failed, try again with global firebase.
-    // This provides a fallback if initSDK was called prematurely or firebase wasn't ready.
-    if (typeof firebase !== 'undefined' && !this.db) {
-        this.initApp(firebase);
-        if (this.db) return; // If successful now
+
+    // On a cold first load, chat.js can run before the Firebase SDK script tags
+    // have finished downloading (script ordering varies per page) AND before any
+    // other script has called firebase.initializeApp() (presence.js skips that
+    // for anonymous visitors). Without this wait, the very first chat open on a
+    // new browser/device shows neither messages nor the member list — the next
+    // open works only because the SDK is then in HTTP cache.
+    const maxWaitMs = 10000;
+    const pollMs = 50;
+    const waitStart = Date.now();
+    while (typeof firebase === 'undefined' || !firebase.database) {
+      if (Date.now() - waitStart > maxWaitMs) {
+        throw new Error('Firebase SDK never loaded after 10s; check <script> order.');
+      }
+      await new Promise((resolve) => setTimeout(resolve, pollMs));
     }
-    // If still not initialized, something is wrong.
-    throw new Error("Firebase not initialized. Check SDK loading and configuration.");
+
+    // SDK is loaded. Initialize the default app if nobody else has — this makes
+    // chat.js self-sufficient and removes the dependency on presence.js running
+    // first (which it doesn't for anonymous users).
+    if (!firebase.apps || firebase.apps.length === 0) {
+      try {
+        firebase.initializeApp({
+          apiKey: 'API_KEY',
+          authDomain: 'med-student-chat.firebaseapp.com',
+          databaseURL: 'https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app',
+          projectId: 'med-student-chat',
+          storageBucket: 'med-student-chat.appspot.com',
+          messagingSenderId: 'SENDER_ID',
+          appId: 'APP_ID'
+        });
+      } catch (e) {
+        // Race: another script initialized between our check and call. Only
+        // re-throw if init truly failed.
+        if (!firebase.apps || firebase.apps.length === 0) throw e;
+      }
+    }
+
+    this.initApp(firebase);
+    if (this.db) return;
+
+    throw new Error('Firebase initApp ran but did not set db; check SDK state.');
   }
 
   _trackCleanup(cleanupFn) {
