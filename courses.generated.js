@@ -1,4 +1,4 @@
-window.coursesVersion = "202605101uie";
+window.coursesVersion = "202605111bak";
 window.courses = [
   {
     "id": "000001",
@@ -498,7 +498,15 @@ window.courses = [
     "sections": [
       {
         "name": "Изпит",
-        "files": [],
+        "files": [
+          {
+            "name": "Нервни болести теми.url",
+            "path": "files/Неврология/Изпит/link.txt#1",
+            "url": "https://files.coursebook.lol/Fenroll/2026-05-11/%D0%9D%D0%B5%D0%B2%D1%80%D0%BE%D0%BB%D0%BE%D0%B3%D0%B8%D1%8F%20%D0%A2%D0%B5%D0%BC%D0%B8.pdf",
+            "order": 1,
+            "source": "link.txt"
+          }
+        ],
         "msgNotes": [
           {
             "name": "1-msg-Конспект.html",
@@ -1262,4 +1270,4 @@ window.courses = [
     "_contentKey": "archived-000005"
   }
 ];
-window.buildTimestamp = "10.05.2026 23:56";
+window.buildTimestamp = "11.05.2026 17:01";
