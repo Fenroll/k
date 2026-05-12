@@ -74,11 +74,11 @@
     </style>
     <title>Notes</title>
 
-    <script src="js/auth-guard.js?v=2026051210oz"></script>
+    <script src="js/auth-guard.js?v=2026051215xf"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=2026051210oz"></script>
-    <script src="courses.generated.js?v=2026051210oz"></script>
+    <script src="js/user-identity.js?v=2026051215xf"></script>
+    <script src="courses.generated.js?v=2026051215xf"></script>
 
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
@@ -86,7 +86,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700&display=swap">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=2026051210oz">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=2026051215xf">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
     <script src="js/version-manager.js?v=2026031715gu"></script>
@@ -2475,6 +2475,163 @@
                     || value.includes('cloudflare');
             }
 
+            function isNotesBucketImageUrl(url) {
+                const value = String(url || '').trim();
+                if (!value || value.startsWith('data:image/')) return false;
+                const lower = value.toLowerCase();
+                if (!lower.includes('notes-images/')) return false;
+                return lower.includes('files.coursebook.lol') ||
+                    lower.includes('r2.dev') ||
+                    lower.includes('cloudflare');
+            }
+
+            function normalizeImageReference(url) {
+                const value = String(url || '').trim();
+                if (!value) return '';
+                try {
+                    const parsed = new URL(value, window.location.href);
+                    parsed.hash = '';
+                    parsed.search = '';
+                    return parsed.href;
+                } catch (_) {
+                    return value.replace(/[?#].*$/, '');
+                }
+            }
+
+            function extractNotesBucketImageUrls(html) {
+                const root = document.createElement('div');
+                root.innerHTML = String(html || '');
+                const urls = new Set();
+                root.querySelectorAll('img').forEach((img) => {
+                    [img.getAttribute('src'), img.getAttribute('data-src')]
+                        .filter(Boolean)
+                        .forEach((src) => {
+                            if (isNotesBucketImageUrl(src)) {
+                                urls.add(normalizeImageReference(src));
+                            }
+                        });
+                });
+                return urls;
+            }
+
+            function getPendingImageDeletionStorageKey(courseId) {
+                return `courseNotesPendingImageDeletes:${courseId || 'unknown'}`;
+            }
+
+            function loadPendingImageDeletions(courseId) {
+                try {
+                    const raw = localStorage.getItem(getPendingImageDeletionStorageKey(courseId));
+                    const parsed = raw ? JSON.parse(raw) : [];
+                    return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+                } catch (_) {
+                    return [];
+                }
+            }
+
+            function savePendingImageDeletions(courseId, urls) {
+                const unique = Array.from(new Set((urls || []).filter(Boolean)));
+                try {
+                    if (unique.length) {
+                        localStorage.setItem(getPendingImageDeletionStorageKey(courseId), JSON.stringify(unique));
+                    } else {
+                        localStorage.removeItem(getPendingImageDeletionStorageKey(courseId));
+                    }
+                } catch (error) {
+                    console.warn('Could not save pending note image deletion queue:', error);
+                }
+            }
+
+            function queueRemovedNoteImages(courseId, previousHtml, nextHtml) {
+                if (!courseId) return [];
+                const previousUrls = extractNotesBucketImageUrls(previousHtml);
+                if (!previousUrls.size) return [];
+
+                const nextUrls = extractNotesBucketImageUrls(nextHtml);
+                const removed = Array.from(previousUrls).filter((url) => !nextUrls.has(url));
+                if (!removed.length) return [];
+
+                const pending = loadPendingImageDeletions(courseId);
+                const merged = Array.from(new Set(pending.concat(removed)));
+                savePendingImageDeletions(courseId, merged);
+                return removed;
+            }
+
+            function deriveDefaultBucketKeyFromUrl(url) {
+                const value = String(url || '').trim();
+                if (!value) return '';
+                try {
+                    const parsed = new URL(value, window.location.href);
+                    const host = parsed.hostname.toLowerCase();
+                    if (!host.includes('files.coursebook.lol') && !host.includes('r2.dev') && !host.includes('cloudflare')) {
+                        return '';
+                    }
+                    return decodeURIComponent(parsed.pathname.replace(/^\/+/, ''));
+                } catch (_) {
+                    return '';
+                }
+            }
+
+            async function deleteCloudflareNotesImage(url) {
+                const key = deriveDefaultBucketKeyFromUrl(url);
+                if (!key || !key.toLowerCase().includes('notes-images/')) return false;
+
+                const response = await fetch(NOTES_R2_WORKER_URL, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, bucketType: 'default' })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Cloudflare delete failed (${response.status})`);
+                }
+                return true;
+            }
+
+            async function loadHistoryEntriesForImageDeletion(courseId) {
+                const histRef = firebase.database().ref(`${COURSE_NOTE_HISTORY_ROOT}/${courseId}`);
+                const snap = await histRef.once('value');
+                const entries = [];
+                snap.forEach(child => { entries.push({ id: child.key, ...child.val() }); });
+                entries.sort((a, b) => (b.savedAt || 0) - (a.savedAt || 0));
+                return entries.slice(0, HISTORY_MAX_ENTRIES);
+            }
+
+            async function cleanupPendingDeletedNoteImages(courseId, currentHtml) {
+                if (!courseId) return;
+                const pending = loadPendingImageDeletions(courseId);
+                if (!pending.length) return;
+
+                const currentUrls = extractNotesBucketImageUrls(currentHtml);
+                let historyEntries = [];
+                try {
+                    historyEntries = await loadHistoryEntriesForImageDeletion(courseId);
+                } catch (error) {
+                    console.error('Skipping note image cleanup because history could not be verified:', error);
+                    return;
+                }
+                const protectedUrls = new Set(currentUrls);
+                historyEntries.forEach((entry) => {
+                    extractNotesBucketImageUrls(entry.html || '').forEach((url) => protectedUrls.add(url));
+                });
+
+                const stillPending = [];
+                for (const url of pending) {
+                    if (protectedUrls.has(url)) {
+                        stillPending.push(url);
+                        continue;
+                    }
+
+                    try {
+                        await deleteCloudflareNotesImage(url);
+                    } catch (error) {
+                        console.error('Failed to delete unused note image from Cloudflare:', error);
+                        stillPending.push(url);
+                    }
+                }
+
+                savePendingImageDeletions(courseId, stillPending);
+            }
+
             function removeBrokenCloudflareImage(img) {
                 if (!(img instanceof HTMLImageElement)) return;
                 if (!els.courseNotesEditor.contains(img)) return;
@@ -2808,7 +2965,7 @@
 
                     if (currentNormalized) {
                         // Always save the version being overwritten to history (dedup prevents identical entries)
-                        saveHistorySnapshot(
+                        await saveHistorySnapshot(
                             state.selectedCourseId,
                             currentNormalized,
                             currentValue.updatedBy || 'Unknown',
@@ -2823,6 +2980,10 @@
                         updatedAt: firebase.database.ServerValue.TIMESTAMP,
                         updatedBy
                     });
+
+                    queueRemovedNoteImages(state.selectedCourseId, state.lastSavedHtml, localNormalized);
+                    queueRemovedNoteImages(state.selectedCourseId, currentNormalized, localNormalized);
+                    cleanupPendingDeletedNoteImages(state.selectedCourseId, localNormalized);
 
                     state.lastSavedHtml = localNormalized;
 
@@ -3542,8 +3703,8 @@
     </script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=2026051210oz"></script>
+    <script src="js/chat.js?v=2026051215xf"></script>
     <script src="js/version-check.js?v=202605021hcw"></script>
-    <script src="js/mobile-nav.js?v=2026051210oz"></script>
+    <script src="js/mobile-nav.js?v=2026051215xf"></script>
 </body>
 </html>

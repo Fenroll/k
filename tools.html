@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026051210oz"></script>
+  <script src="js/auth-guard.js?v=2026051215xf"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -560,7 +560,7 @@
     }
 
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026051210oz">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026051215xf">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
   <script src="js/version-manager.js?v=202603101mce"></script>
@@ -1317,7 +1317,7 @@
     updateAdminButtonVisibility();
   </script>
 
-  <script src="js/user-identity.js?v=2026051210oz"></script>
+  <script src="js/user-identity.js?v=2026051215xf"></script>
   <!-- Mobile menu overlay -->
   <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
@@ -1325,7 +1325,7 @@
        FIREBASE & CHAT WIDGET
        ============================================ -->
   <!-- Initialize Chat Widget -->
-    <script src="js/chat.js?v=2026051210oz"></script>
+    <script src="js/chat.js?v=2026051215xf"></script>
 
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
@@ -1832,8 +1832,22 @@
         return raw + ' ' + decoded;
       }
 
-      function isTextEditorRow(row) { const h = getRowCategoryHaystack(row); return h.includes('text-editor') || h.includes('text editor') || h.includes('text_editor'); }
-      function isChatImagesRow(row) { const h = getRowCategoryHaystack(row); return h.includes('chat-images') || h.includes('chat images') || h.includes('chat_images'); }
+      function isTextEditorRow(row) {
+        const h = getRowCategoryHaystack(row);
+        return h.includes('text-editor') ||
+          h.includes('text editor') ||
+          h.includes('text_editor') ||
+          h.includes('coursebook assets/');
+      }
+      function isChatImagesRow(row) {
+        const h = getRowCategoryHaystack(row);
+        return h.includes('chat-images') ||
+          h.includes('chat images') ||
+          h.includes('chat_images') ||
+          h.includes('/banners/') ||
+          h.startsWith('banners/') ||
+          h.includes(' banners/');
+      }
       function isNotesImagesRow(row) {
         const h = getRowCategoryHaystack(row);
         return h.includes('notes-images') || h.includes('notes images') || h.includes('notes_images');
@@ -3069,6 +3083,6 @@
     }
   }
 </script>
-<script src="js/mobile-nav.js?v=2026051210oz"></script>
+<script src="js/mobile-nav.js?v=2026051215xf"></script>
 </body>
 </html>

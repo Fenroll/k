@@ -1,6 +1,9 @@
 (function() {
     // Prevent double initialization
-    if (document.getElementById('bottom-nav')) return;
+    if (document.getElementById('bottom-nav')) {
+        if (document.body) document.body.classList.add('mobile-nav-ready');
+        return;
+    }
 
     const THEME_KEY = 'index-copy-theme';
     const NAV_CACHE_KEY = 'coursebook-mobile-nav-html-v3';
@@ -191,6 +194,7 @@
     const div = document.createElement('div');
     div.innerHTML = navHTML;
     document.body.appendChild(div);
+    document.body.classList.add('mobile-nav-ready');
 
     if (navHTML !== builtNavHTML) {
         const currentActive = div.querySelector('.bottom-nav-item.active');
