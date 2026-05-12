@@ -30,6 +30,61 @@
         const app = firebase.apps.length === 0 ? firebase.initializeApp(firebaseConfig) : firebase.app();
         const db = firebase.database();
 
+        // One-shot migration: walk site_users, find every base64 (data:image/...) banner,
+        // upload to R2, replace the field with the public URL. Idempotent — re-running
+        // after success is a no-op because there are no more base64 banners to find.
+        // Run from the admin console:  await migrateBase64Banners()
+        window.migrateBase64Banners = async function migrateBase64Banners() {
+            const R2_WORKER = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+            const snap = await db.ref('site_users').once('value');
+            const users = snap.val() || {};
+            const targets = [];
+            Object.entries(users).forEach(([uid, u]) => {
+                if (typeof u.banner === 'string' && u.banner.startsWith('data:image/')) {
+                    targets.push({ uid, user: u });
+                }
+            });
+            console.log(`migrateBase64Banners: found ${targets.length} user(s) to migrate.`);
+            if (!targets.length) return { migrated: 0, failed: 0 };
+
+            let migrated = 0;
+            let failed = 0;
+            for (const { uid, user: u } of targets) {
+                const userName = u.userName || u.username || u.displayName || uid;
+                const sizeKb = Math.round(u.banner.length / 1024);
+                try {
+                    console.log(`  → ${userName} (uid=${uid}, ${sizeKb} KB base64)`);
+                    const blob = await (await fetch(u.banner)).blob();
+                    const type = blob.type || 'image/jpeg';
+                    const ext = (type.split('/')[1] || 'jpg').replace(/[^a-z0-9]/gi, '');
+                    const fileName = `${uid}-${Date.now()}.${ext}`;
+                    const file = new File([blob], fileName, { type });
+
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('path', `banners/${fileName}`);
+                    formData.append('userName', userName);
+
+                    const response = await fetch(R2_WORKER, { method: 'POST', body: formData });
+                    if (!response.ok) {
+                        const text = await response.text().catch(() => '');
+                        throw new Error(text || `HTTP ${response.status}`);
+                    }
+                    const data = await response.json();
+                    if (!data || !data.url) throw new Error('Upload returned no URL');
+
+                    await db.ref(`site_users/${uid}`).update({ banner: data.url });
+                    console.log(`    ✓ ${userName} → ${data.url}`);
+                    migrated += 1;
+                } catch (e) {
+                    console.error(`    ✗ ${userName} (uid=${uid}):`, e);
+                    failed += 1;
+                }
+            }
+            console.log(`migrateBase64Banners: done. migrated=${migrated} failed=${failed}`);
+            return { migrated, failed };
+        };
+
         const onlineUsersContainer = document.getElementById('online-users');
         const allUsersContainer = document.getElementById('all-users');
         const registrationForm = document.getElementById('registration-form-element');

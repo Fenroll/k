@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=20260512z2j"></script>
+  <script src="js/auth-guard.js?v=2026051210oz"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -41,12 +41,12 @@
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
 
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Noto+Serif:400,700&display=swap">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700&family=Noto+Serif:wght@400;700&display=swap">
 
   <!-- Markdown parser -->
-  <script src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/marked@11.1.1/marked.min.js"></script>
 
   <style>
   body { background: #f2f4f1; font-family: 'Open Sans', Arial, sans-serif; margin: 0; overflow-y: scroll; }
@@ -1886,323 +1886,13 @@
     }
   }
 
-  body.dark-mode {
-    background: #121212 !important;
-    color: #f1f1f1;
-  }
-
-  body.dark-mode #side-menu,
-  body.dark-mode .logo-header,
-  body.dark-mode .sidebar-nav a,
-  body.dark-mode .sidebar-nav a:hover,
-  body.dark-mode .sidebar-footer-links,
-  body.dark-mode .sidebar-footer-item {
-    background: #121212 !important;
-    color: #f1f1f1 !important;
-  }
-
-  body.dark-mode .logo-header {
-    border-bottom-color: #343a42 !important;
-  }
-
-  body.dark-mode .sidebar-nav .active a {
-    background: #1a1a1a !important;
-  }
-
-  body.dark-mode .sidebar-nav .active a::before {
-    background: #588157 !important;
-  }
-
-  body.dark-mode .sidebar-nav .svg-icon {
-    filter: brightness(0) invert(1) !important;
-  }
-
-  body.dark-mode .main-content,
-  body.dark-mode .schedule-container {
-    background: #121212 !important;
-  }
-
-  body.dark-mode .main-header {
-    background: #121212 !important;
-    color: #f1f1f1 !important;
-    border-bottom-color: #343a42 !important;
-  }
-
-  body.dark-mode .page-title,
-  body.dark-mode .week-info,
-  body.dark-mode .week-number,
-  body.dark-mode .schedule-notes-last-edit,
-  body.dark-mode .info-panel-content,
-  body.dark-mode .info-panel-content strong,
-  body.dark-mode .exam-section-title,
-  body.dark-mode .exam-info-value,
-  body.dark-mode .exam-info-label,
-  body.dark-mode .modal-info-label,
-  body.dark-mode .modal-info-value,
-  body.dark-mode #examAdditionalInfo {
-    color: #f1f1f1 !important;
-  }
-
-  body.dark-mode #infoContent,
-  body.dark-mode #infoContent * {
-    color: #f1f1f1 !important;
-  }
-
-  body.dark-mode .week-selector,
-  body.dark-mode .calendar-wrapper,
-  body.dark-mode .info-panel,
-  body.dark-mode .modal-content,
-  body.dark-mode .exam-card,
-  body.dark-mode .exam-info-row,
-  body.dark-mode .exam-info-item {
-    background: #181818 !important;
-    border-color: #303030 !important;
-    color: #f1f1f1 !important;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.35) !important;
-  }
-
-  body.dark-mode .exam-card {
-    border-left-color: #588157 !important;
-  }
-
-  /* Dark mode for the exam calendar grid */
-  body.dark-mode .cal-cal-month {
-    background: #1f1f1f !important;
-    border-color: #2c2c2c !important;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.45) !important;
-  }
-  body.dark-mode .cal-cal-header {
-    border-bottom-color: #2a2a2a !important;
-  }
-  body.dark-mode .cal-cal-header-text {
-    color: #f1d4cf !important;
-  }
-  body.dark-mode .cal-cal-header-accent {
-    background: #d27260 !important;
-  }
-  body.dark-mode .cal-cal-weekday {
-    color: #b89c95 !important;
-  }
-  body.dark-mode .cal-cal-weekday-weekend {
-    color: #886f6a !important;
-  }
-  body.dark-mode .cal-cal-cell {
-    background: #232323 !important;
-    border-color: #2c2c2c !important;
-  }
-  body.dark-mode .cal-cal-cell-weekend {
-    background: #1f1f1f !important;
-  }
-  body.dark-mode .cal-cal-cell-out {
-    background: #1a1a1a !important;
-  }
-  body.dark-mode .cal-cal-day-num {
-    color: #d8d2cf !important;
-  }
-  body.dark-mode .cal-cal-cell-today {
-    outline-color: #d27260 !important;
-  }
-  body.dark-mode .cal-cal-cell-today:not(.cal-cal-cell-has) .cal-cal-day-num {
-    background: #d27260 !important;
-    color: #1a1a1a !important;
-  }
-  body.dark-mode .cal-cal-legend {
-    color: #aaa !important;
-  }
-
-  /* Dark mode event cards: muted jewel-tone palette */
-  body.dark-mode .event-card {
-    border: 1px solid rgba(130, 140, 156, 0.15) !important;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5) !important;
-  }
-
-  body.dark-mode .type-exercise {
-    background: linear-gradient(180deg, #3d5a98 0%, #37538c 100%) !important;
-    border-left: 3px solid #2f4676 !important;
-    color: #eaf6ff !important;
-  }
-
-  body.dark-mode .type-test {
-    background: linear-gradient(180deg, #1c7272 0%, #186565 100%) !important;
-    border-left: 3px solid #145454 !important;
-    color: #e9fffb !important;
-  }
-
-  body.dark-mode .type-lecture {
-    background: linear-gradient(180deg, #c1bcbc 0%, #b8b2b2 100%) !important;
-    border-left: 3px solid #9d9898 !important;
-    color: #eef2ff !important;
-  }
-
-  body.dark-mode .type-important-lecture {
-    background: linear-gradient(180deg, #346e50 0%, #2e6247 100%) !important;
-    border-left: 3px solid #29553d !important;
-    color: #ecfff3 !important;
-  }
-
-  body.dark-mode .type-exam {
-    background: linear-gradient(180deg, #e15454 0%, #d94a4a 100%) !important;
-    border-left: 3px solid #b73e3e !important;
-    color: #ffeff3 !important;
-  }
-
-  body.dark-mode .type-makeup {
-    background: linear-gradient(180deg, #805426 0%, #744c21 100%) !important;
-    border-left: 3px solid #613f1c !important;
-    color: #fff4e8 !important;
-  }
-
-  body.dark-mode .type-exercise .event-time,
-  body.dark-mode .type-exercise .event-location,
-  body.dark-mode .type-test .event-time,
-  body.dark-mode .type-test .event-location,
-  body.dark-mode .type-lecture .event-time,
-  body.dark-mode .type-lecture .event-location,
-  body.dark-mode .type-important-lecture .event-time,
-  body.dark-mode .type-important-lecture .event-location,
-  body.dark-mode .type-exam .event-time,
-  body.dark-mode .type-exam .event-location,
-  body.dark-mode .type-makeup .event-time,
-  body.dark-mode .type-makeup .event-location {
-    color: inherit !important;
-    opacity: 0.94;
-  }
-
-  body.dark-mode .calendar-grid {
-    background: #181818 !important;
-  }
-
-  body.dark-mode .time-label {
-    color: #9ca3af !important;
-    border-right-color: #303030 !important;
-  }
-
-  body.dark-mode .header-cell {
-    border-right-color: #343a42 !important;
-  }
-
-  body.dark-mode .vertical-line {
-    border-right-color: #303030 !important;
-  }
-
-  body.dark-mode .grid-line {
-    border-top-color: #2a2a2a !important;
-  }
-
-  body.dark-mode .grid-line.hour-marker {
-    border-top-color: #3a3a3a !important;
-  }
-
-  body.dark-mode .schedule-notes-header,
-  body.dark-mode .exam-card-header,
-  body.dark-mode .info-panel-content hr,
-  body.dark-mode #calculatorSection {
-    border-bottom-color: #303030 !important;
-  }
-
-  body.dark-mode .modal-close {
-    color: #9ca3af !important;
-  }
-
-  body.dark-mode .modal-close:hover {
-    background: #2a2a2a !important;
-    color: #f1f1f1 !important;
-  }
-
-  body.dark-mode .schedule-notes-modal-error {
-    color: #fca5a5 !important;
-  }
-
-  body.dark-mode .schedule-notes-btn.cancel {
-    background: #2c2c2c !important;
-    color: #f1f1f1 !important;
-  }
-
-  body.dark-mode .schedule-notes-btn.save,
-  body.dark-mode .schedule-notes-edit-btn,
-  body.dark-mode .week-btn {
-    background: #588157 !important;
-    color: #fff !important;
-  }
-
-  body.dark-mode .schedule-notes-btn.save:hover,
-  body.dark-mode .schedule-notes-edit-btn:hover,
-  body.dark-mode .week-btn:hover {
-    background: #344e41 !important;
-  }
-
-  body.dark-mode .week-btn:disabled {
-    background: #4b5563 !important;
-    color: #e5e7eb !important;
-  }
-
-  body.dark-mode #modalAdditionalInfo code,
-  body.dark-mode .info-panel-content code {
-    background: #2a2a2a !important;
-    color: #f1f1f1 !important;
-  }
-
-  body.dark-mode #modalAdditionalInfo table thead,
-  body.dark-mode #modalAdditionalInfo table th,
-  body.dark-mode #examAdditionalInfo table thead,
-  body.dark-mode #examAdditionalInfo table th {
-    background-color: #202020 !important;
-    color: #f1f1f1 !important;
-  }
-
-  body.dark-mode #modalAdditionalInfo table td,
-  body.dark-mode #modalAdditionalInfo table th,
-  body.dark-mode #examAdditionalInfo table td,
-  body.dark-mode #examAdditionalInfo table th {
-    border-color: #303030 !important;
-  }
-
-  body.dark-mode #modalAdditionalInfo table tbody tr:nth-child(odd),
-  body.dark-mode #examAdditionalInfo table tbody tr:nth-child(odd) {
-    background-color: #171717 !important;
-  }
-
-  body.dark-mode #modalAdditionalInfo table tbody tr:hover,
-  body.dark-mode #examAdditionalInfo table tbody tr:hover {
-    background-color: #232323 !important;
-  }
-
-  body.dark-mode .calc-input-group label {
-    color: #d1d5db !important;
-  }
-
-  body.dark-mode .calc-input-group input,
-  body.dark-mode .calc-input-group select,
-  body.dark-mode #scheduleNotesEditor {
-    background: #121212 !important;
-    color: #f1f1f1 !important;
-    border-color: #3f3f3f !important;
-  }
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260512z2j">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026051210oz">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605015kp">
   <script src="js/version-manager.js?v=202603151sxu"></script>
 </head>
 <body>
-  <script>
-    (function applySavedTheme() {
-      const THEME_KEY = 'index-copy-theme';
-      const stored = localStorage.getItem(THEME_KEY);
-      const useDark = stored === 'dark';
-      const root = document.documentElement;
-      if (useDark) {
-        document.body.classList.add('dark-mode');
-        root.classList.add('dark-mode');
-        root.setAttribute('data-theme', 'dark');
-      } else {
-        root.classList.remove('dark-mode');
-        root.removeAttribute('data-theme');
-      }
-
-      window.dispatchEvent(new Event('themechange'));
-    })();
-  </script>
   <div class="layout">
     <!-- Sidebar -->
     <div id="side-menu">
@@ -2539,8 +2229,16 @@
       }
     }
 
+    let lastAppliedScheduleHash = null;
+
     function applyScheduleData(activeScheduleData) {
       if (!activeScheduleData) return false;
+
+      // Skip the work (regenerate weeks + re-render) when the payload is
+      // byte-identical to what's already rendered. Common on cold load + refresh.
+      const hash = JSON.stringify(activeScheduleData);
+      if (hash === lastAppliedScheduleHash) return true;
+      lastAppliedScheduleHash = hash;
 
       window.scheduleData = activeScheduleData;
 
@@ -2569,6 +2267,27 @@
 
     document.addEventListener('DOMContentLoaded', async function() {
       setupScheduleNotesEditor();
+
+      // Delegated click handlers (attach once, survive re-renders).
+      const scheduleGridEl = document.getElementById('scheduleGrid');
+      if (scheduleGridEl) {
+        scheduleGridEl.addEventListener('click', (e) => {
+          const card = e.target.closest('.event-card');
+          if (!card) return;
+          const idx = parseInt(card.dataset.eventIdx, 10);
+          const ev = scheduleByWeek[currentWeekIndex] && scheduleByWeek[currentWeekIndex].schedule[idx];
+          if (ev) openModal(ev);
+        });
+      }
+      const examsListEl = document.getElementById('examsList');
+      if (examsListEl) {
+        examsListEl.addEventListener('click', (e) => {
+          const cell = e.target.closest('.cal-cal-cell-has');
+          if (!cell || cell.dataset.examIdx === undefined) return;
+          const exam = window.scheduleData && window.scheduleData.exams && window.scheduleData.exams[parseInt(cell.dataset.examIdx, 10)];
+          if (exam) showExamModal(exam);
+        });
+      }
 
       // Render an empty timetable scaffold immediately to avoid layout flicker
       // while schedule data is loading from cache/Firebase.
@@ -2604,8 +2323,8 @@
         }
       }
 
-      // After timetable is rendered, refresh notes from Firebase (non-blocking)
-      refreshScheduleNotesFromFirebase();
+      // After timetable is rendered, subscribe to live notes updates from Firebase.
+      subscribeScheduleNotesRealtime();
     });
 
     const scheduleNotesDbRef = firebase.database().ref('scheduleNotes/content');
@@ -2639,16 +2358,25 @@
       };
     }
 
-    function applyScheduleNotesState(nextState) {
+    let lastRenderedNotesContent = null;
+
+    function applyScheduleNotesState(nextState, options = {}) {
+      const { skipCacheWrite = false } = options;
       scheduleNotesState = {
         content: nextState.content || '',
         lastEditedBy: nextState.lastEditedBy || '',
         lastEditedAt: nextState.lastEditedAt || null
       };
 
-      renderScheduleNotesContent(scheduleNotesState.content);
+      // Skip the markdown re-parse + innerHTML write when content didn't change.
+      // Realtime listener echoes (server timestamp after local optimistic save) hit this path.
+      if (lastRenderedNotesContent !== scheduleNotesState.content) {
+        renderScheduleNotesContent(scheduleNotesState.content);
+        lastRenderedNotesContent = scheduleNotesState.content;
+      }
       updateLastEditInfo(scheduleNotesState.lastEditedBy, scheduleNotesState.lastEditedAt);
-      writeCachedJson(SCHEDULE_NOTES_CACHE_KEY, scheduleNotesState);
+
+      if (!skipCacheWrite) writeCachedJson(SCHEDULE_NOTES_CACHE_KEY, scheduleNotesState);
     }
 
     function getEditorDisplayName(user) {
@@ -2752,13 +2480,14 @@
         };
 
         await scheduleNotesDbRef.set(payload);
+        // No need to manually refresh — the realtime listener will fire with the
+        // committed server payload (and the content-hash skip prevents a re-render).
         applyScheduleNotesState({
           content: editor.value,
           lastEditedBy: getEditorDisplayName(currentUser),
           lastEditedAt: Date.now()
         });
         closeScheduleNotesModal();
-        refreshScheduleNotesFromFirebase();
       } catch (error) {
         console.error('Error saving schedule notes:', error);
         if (errorEl) {
@@ -2790,42 +2519,13 @@
     window.closeScheduleNotesModal = closeScheduleNotesModal;
     window.saveScheduleNotesFromModal = saveScheduleNotesFromModal;
 
-    // Load current information from Markdown file
-    async function loadCurrentInfo(options = {}) {
-      const { preferCache = false } = options;
-      let renderedFromCache = false;
-
-      if (preferCache) {
-        const cachedNotes = readCachedJson(SCHEDULE_NOTES_CACHE_KEY);
-        if (cachedNotes) {
-          applyScheduleNotesState(normalizeScheduleNotesValue(cachedNotes));
-          renderedFromCache = true;
-        }
-      }
-
-      try {
-        const snapshot = await scheduleNotesDbRef.once('value');
+    // Subscribe to schedule-notes changes so multiple users editing see each other live.
+    function subscribeScheduleNotesRealtime() {
+      scheduleNotesDbRef.on('value', (snapshot) => {
         applyScheduleNotesState(normalizeScheduleNotesValue(snapshot.val()));
-      } catch (error) {
-        console.error('Error loading current info from Firebase:', error);
-        if (!renderedFromCache) {
-          applyScheduleNotesState({
-            content: '',
-            lastEditedBy: '',
-            lastEditedAt: null
-          });
-        }
-      }
-    }
-
-    // Lightweight refresh: fetches notes from Firebase without clearing on error
-    async function refreshScheduleNotesFromFirebase() {
-      try {
-        const snapshot = await scheduleNotesDbRef.once('value');
-        applyScheduleNotesState(normalizeScheduleNotesValue(snapshot.val()));
-      } catch (error) {
-        console.error('Error refreshing schedule notes from Firebase:', error);
-      }
+      }, (error) => {
+        console.error('Schedule notes realtime listener error:', error);
+      });
     }
 
     // Find the current week index based on today's date
@@ -2844,16 +2544,9 @@
 
           if (today >= examStart && today <= examEnd) {
               // Find the week that starts on (or closest before?) the exam start
-              // The weeks array usually has an entry for the Exam Start date.
-              const examStartIndex = scheduleByWeek.findIndex(w => {
-                  const wStart = new Date(w.startDate);
-                  wStart.setHours(0,0,0,0);
-                  return wStart.getTime() === examStart.getTime();
-              });
-
-              if (examStartIndex !== -1) {
-                  return examStartIndex;
-              }
+              const examStartMs = examStart.getTime();
+              const examStartIndex = scheduleByWeek.findIndex(w => w.startMs === examStartMs);
+              if (examStartIndex !== -1) return examStartIndex;
           }
       }
 
@@ -2865,51 +2558,45 @@
         christmasEnd.setHours(0, 0, 0, 0);
 
         if (today >= christmasStart && today <= christmasEnd) {
-             // Return index of the week that contains or precedes the break
-             // Or better, if we have a "Christmas" week entry (we do: Dec 24)
-             const xmasIndex = scheduleByWeek.findIndex(w => {
-                  const wStart = new Date(w.startDate);
-                  wStart.setHours(0,0,0,0);
-                  return wStart.getTime() === christmasStart.getTime();
-             });
+             const xmasStartMs = christmasStart.getTime();
+             const xmasIndex = scheduleByWeek.findIndex(w => w.startMs === xmasStartMs);
              if (xmasIndex !== -1) return xmasIndex;
         }
       }
 
-      // Check if today is Saturday (6) or Sunday (0)
+      // Check if today is Saturday (6) or Sunday (0) — show next week.
       const dayOfWeek = today.getDay();
       let targetDate = new Date(today);
-
-      if (dayOfWeek === 0) {
-        // Sunday - show next week (add 1 day to Monday)
-        targetDate.setDate(targetDate.getDate() + 1);
-      } else if (dayOfWeek === 6) {
-        // Saturday - show next week (add 2 days to Monday)
-        targetDate.setDate(targetDate.getDate() + 2);
-      }
+      if (dayOfWeek === 0) targetDate.setDate(targetDate.getDate() + 1);
+      else if (dayOfWeek === 6) targetDate.setDate(targetDate.getDate() + 2);
+      const targetMs = targetDate.getTime();
+      const WEEK_FRIDAY_OFFSET = 4 * 24 * 60 * 60 * 1000;
 
       for (let i = 0; i < scheduleByWeek.length; i++) {
-        const weekStart = new Date(scheduleByWeek[i].startDate);
-        weekStart.setHours(0, 0, 0, 0);
-
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekEnd.getDate() + 4); // End of week (Friday)
-
-        if (targetDate >= weekStart && targetDate <= weekEnd) {
-          return i;
-        }
+        const weekStartMs = scheduleByWeek[i].startMs;
+        if (!Number.isFinite(weekStartMs)) continue;
+        const weekEndMs = weekStartMs + WEEK_FRIDAY_OFFSET;
+        if (targetMs >= weekStartMs && targetMs <= weekEndMs) return i;
       }
 
       // If today is before first week, return 0
-      if (scheduleByWeek.length > 0) {
-        const firstWeek = new Date(scheduleByWeek[0].startDate);
-        if (targetDate < firstWeek) {
-          return 0;
-        }
-      }
+      if (scheduleByWeek.length > 0 && targetMs < scheduleByWeek[0].startMs) return 0;
 
       // If today is after all weeks, return last week
       return Math.max(0, scheduleByWeek.length - 1);
+    }
+
+    // Parse a YYYY-MM-DD date string to local midnight ms. Lets the week list
+    // store precomputed numeric boundaries so findCurrentWeekIndex doesn't
+    // allocate Date objects per iteration.
+    function parseLocalMidnightMs(dateStr) {
+      if (!dateStr) return NaN;
+      const m = String(dateStr).match(/^(\d{4})-(\d{2})-(\d{2})/);
+      if (m) return new Date(+m[1], +m[2] - 1, +m[3]).getTime();
+      const d = new Date(dateStr);
+      if (Number.isNaN(d.getTime())) return NaN;
+      d.setHours(0, 0, 0, 0);
+      return d.getTime();
     }
 
     // Generate schedule for all weeks from template
@@ -2992,6 +2679,7 @@
                 weeks.push({
                     weekNumber: weekNumber,
                     startDate: matchingExamPeriod.start,
+                    startMs: parseLocalMidnightMs(matchingExamPeriod.start),
                     endDate: matchingExamPeriod.end,
                     schedule: [],
                     semester: semesterKey,
@@ -3044,6 +2732,7 @@
         weeks.push({
           weekNumber: weekNumber,
           startDate: week.startDate,
+          startMs: parseLocalMidnightMs(week.startDate),
           schedule: schedule,
           semester: semesterKey,
           type: 'normal'
@@ -3311,25 +3000,22 @@
 
       if (!currentWeek) return; // Should not happen if data loaded
 
-      // Update Header Dates
+      // Update Header Dates — skip the innerHTML rewrite when nothing visible would change.
       if (currentWeek.startDate) {
-          const startDate = new Date(currentWeek.startDate);
-          headerCells.forEach((cell, i) => {
-              const date = new Date(startDate);
-              date.setDate(date.getDate() + i);
-              const d = date.getDate();
-              const m = date.getMonth() + 1;
-              const dateStr = `${d}.${m < 10 ? '0' + m : m}`;
-              // Using divs for flex column layout
-              cell.innerHTML = `<div class="hc-day"><span class="hc-day-full">${dayFullLabels[i]}</span><span class="hc-day-short">${days[i]}</span></div><div class="hc-date">${dateStr}</div>`;
-
-              // Highlight current day
-              if (days[i] === currentDay) {
-                  cell.style.backgroundColor = 'var(--col-pine)'; // Current day highlight
-              } else {
-                  cell.style.backgroundColor = ''; // Reset (uses CSS default)
-              }
-          });
+          const headerSig = `${currentWeek.startDate}|${currentDay || ''}`;
+          if (grid.dataset.headerSig !== headerSig) {
+              const startDate = new Date(currentWeek.startDate);
+              headerCells.forEach((cell, i) => {
+                  const date = new Date(startDate);
+                  date.setDate(date.getDate() + i);
+                  const d = date.getDate();
+                  const m = date.getMonth() + 1;
+                  const dateStr = `${d}.${m < 10 ? '0' + m : m}`;
+                  cell.innerHTML = `<div class="hc-day"><span class="hc-day-full">${dayFullLabels[i]}</span><span class="hc-day-short">${days[i]}</span></div><div class="hc-date">${dateStr}</div>`;
+                  cell.style.backgroundColor = (days[i] === currentDay) ? 'var(--col-pine)' : '';
+              });
+              grid.dataset.headerSig = headerSig;
+          }
       }
 
       // Check for Exam View
@@ -3360,7 +3046,8 @@
       const totalRows = totalMinutes / stepMinutes;
 
       // 2. Render Events
-      scheduleData.forEach(ev => {
+      const eventsFragment = document.createDocumentFragment();
+      scheduleData.forEach((ev, evIdx) => {
           if (!ev.startTime || !ev.endTime) return;
           if (ev.startTime === '00:00') return;
 
@@ -3469,9 +3156,10 @@
               <div class="event-location">${locationHtml}</div>
           `;
 
-          el.onclick = () => openModal(ev);
-          grid.appendChild(el);
+          el.dataset.eventIdx = evIdx;
+          eventsFragment.appendChild(el);
       });
+      grid.appendChild(eventsFragment);
     }
 
     function renderGridBackground(startHour, endHour, currentDay) {
@@ -3487,14 +3175,14 @@
       const existingBackground = grid.querySelectorAll('.time-label, .grid-line, .vertical-line, .current-day-column');
       existingBackground.forEach(el => el.remove());
 
+      const fragment = document.createDocumentFragment();
+
       for (let c = 3; c <= 6; c++) {
         const vLine = document.createElement('div');
         vLine.className = 'vertical-line';
         vLine.style.gridColumn = c;
         vLine.style.gridRow = `1 / ${gridEndRow}`;
-        const dividerColor = document.body.classList.contains('dark-mode') ? '#303030' : '#f4f4f4';
-        vLine.style.borderLeft = `1px solid ${dividerColor}`;
-        grid.appendChild(vLine);
+        fragment.appendChild(vLine);
       }
 
       if (currentDay) {
@@ -3503,7 +3191,7 @@
         highlight.className = 'current-day-column';
         highlight.style.gridColumn = dayCol;
         highlight.style.gridRow = `1 / ${gridEndRow}`;
-        grid.appendChild(highlight);
+        fragment.appendChild(highlight);
       }
 
       for (let i = 0; i <= totalRows; i++) {
@@ -3516,19 +3204,21 @@
           timeLabel.className = 'time-label';
           timeLabel.style.gridRow = rowNum;
           timeLabel.innerText = `${hour.toString().padStart(2, '0')}:00`;
-          grid.appendChild(timeLabel);
+          fragment.appendChild(timeLabel);
 
           const line = document.createElement('div');
           line.className = 'grid-line hour-marker';
           line.style.gridRow = rowNum;
-          grid.appendChild(line);
+          fragment.appendChild(line);
         } else {
           const line = document.createElement('div');
           line.className = 'grid-line';
           line.style.gridRow = rowNum;
-          grid.appendChild(line);
+          fragment.appendChild(line);
         }
       }
+
+      grid.appendChild(fragment);
     }
 
     function renderGridSkeleton() {
@@ -3985,7 +3675,7 @@
       // examDate and (if set) a 'retake' event on retakeDate. Retake field
       // can be "DATE и DATE" (multiple dates separated by Cyrillic "и").
       const dayEvents = new Map();
-      const addEvent = (dateStr, type, exam) => {
+      const addEvent = (dateStr, type, exam, examIndex) => {
         const d = parseLocalDate(dateStr);
         if (!d) return;
         const key = ymd(d);
@@ -3993,16 +3683,17 @@
         dayEvents.get(key).push({
           type,
           exam,
+          examIndex,
           time: type === 'regular' ? (exam.examTime || '') : (exam.retakeTime || '')
         });
       };
-      scheduleData.exams.forEach((exam) => {
-        addEvent(exam.examDate, 'regular', exam);
+      scheduleData.exams.forEach((exam, examIndex) => {
+        addEvent(exam.examDate, 'regular', exam, examIndex);
         if (exam.retakeDate) {
           if (typeof exam.retakeDate === 'string' && exam.retakeDate.includes(' и ')) {
-            exam.retakeDate.split(' и ').map((s) => s.trim()).forEach((d) => addEvent(d, 'retake', exam));
+            exam.retakeDate.split(' и ').map((s) => s.trim()).forEach((d) => addEvent(d, 'retake', exam, examIndex));
           } else {
-            addEvent(exam.retakeDate, 'retake', exam);
+            addEvent(exam.retakeDate, 'retake', exam, examIndex);
           }
         }
       });
@@ -4092,8 +3783,7 @@
               (primaryEvent.time ? `<span class="cal-cal-exam-time">${escapeHtml(primaryEvent.time)}</span>` : '');
             cell.appendChild(label);
 
-            const examForClick = primaryEvent.exam;
-            cell.addEventListener('click', () => showExamModal(examForClick));
+            cell.dataset.examIdx = primaryEvent.examIndex;
           }
 
           grid.appendChild(cell);
@@ -4185,372 +3875,16 @@
     });
   </script>
 
-  <script>
-    // Temporary developer tool: open calendar with ?exerciseColorPreview=1 to fine-tune dark-mode exercise color.
-    (function initExerciseColorPreviewTool() {
-      const params = new URLSearchParams(window.location.search);
-      if (!params.has('exerciseColorPreview')) return;
-
-      const STORAGE_KEY = 'calendar-exercise-dark-preview-color';
-      const STYLE_ID = 'exercise-dark-preview-style';
-
-      function clamp(value, min, max) {
-        return Math.min(max, Math.max(min, value));
-      }
-
-      function hsvToRgb(h, s, v) {
-        const sat = s / 100;
-        const val = v / 100;
-        const c = val * sat;
-        const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
-        const m = val - c;
-        let r = 0;
-        let g = 0;
-        let b = 0;
-
-        if (h >= 0 && h < 60) {
-          r = c; g = x; b = 0;
-        } else if (h < 120) {
-          r = x; g = c; b = 0;
-        } else if (h < 180) {
-          r = 0; g = c; b = x;
-        } else if (h < 240) {
-          r = 0; g = x; b = c;
-        } else if (h < 300) {
-          r = x; g = 0; b = c;
-        } else {
-          r = c; g = 0; b = x;
-        }
-
-        return {
-          r: Math.round((r + m) * 255),
-          g: Math.round((g + m) * 255),
-          b: Math.round((b + m) * 255)
-        };
-      }
-
-      function rgbToHex(r, g, b) {
-        const toHex = (n) => n.toString(16).padStart(2, '0');
-        return '#' + toHex(r) + toHex(g) + toHex(b);
-      }
-
-      function hexToRgb(hex) {
-        const normalized = (hex || '').replace('#', '').trim();
-        if (!/^[0-9a-fA-F]{6}$/.test(normalized)) return null;
-        return {
-          r: parseInt(normalized.slice(0, 2), 16),
-          g: parseInt(normalized.slice(2, 4), 16),
-          b: parseInt(normalized.slice(4, 6), 16)
-        };
-      }
-
-      function rgbToHsv(r, g, b) {
-        const rn = r / 255;
-        const gn = g / 255;
-        const bn = b / 255;
-        const max = Math.max(rn, gn, bn);
-        const min = Math.min(rn, gn, bn);
-        const delta = max - min;
-
-        let h = 0;
-        if (delta !== 0) {
-          if (max === rn) {
-            h = 60 * (((gn - bn) / delta) % 6);
-          } else if (max === gn) {
-            h = 60 * (((bn - rn) / delta) + 2);
-          } else {
-            h = 60 * (((rn - gn) / delta) + 4);
-          }
-        }
-        if (h < 0) h += 360;
-
-        const s = max === 0 ? 0 : (delta / max) * 100;
-        const v = max * 100;
-
-        return { h: Math.round(h), s: Math.round(s), v: Math.round(v) };
-      }
-
-      function getInitialHex() {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored && /^#[0-9a-fA-F]{6}$/.test(stored)) return stored;
-
-        const sample = document.querySelector('.type-exercise');
-        if (sample) {
-          const bg = getComputedStyle(sample).backgroundColor;
-          const match = bg.match(/rgb\((\d+),\s*(\d+),\s*(\d+)\)/i);
-          if (match) {
-            return rgbToHex(Number(match[1]), Number(match[2]), Number(match[3]));
-          }
-        }
-
-        return '#155F95';
-      }
-
-      const styleEl = document.createElement('style');
-      styleEl.textContent = `
-        .exercise-color-preview-panel {
-          position: fixed;
-          right: 16px;
-          top: 84px;
-          z-index: 12000;
-          width: 260px;
-          background: #ffffff;
-          border: 1px solid #d1d5db;
-          border-radius: 10px;
-          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-          padding: 10px;
-          font-family: 'Open Sans', Arial, sans-serif;
-          user-select: none;
-        }
-        body.dark-mode .exercise-color-preview-panel {
-          background: #171717;
-          border-color: #343a42;
-          color: #e5e7eb;
-        }
-        .exercise-color-preview-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          margin-bottom: 8px;
-          font-size: 12px;
-          font-weight: 700;
-        }
-        .exercise-color-preview-header button {
-          border: none;
-          background: transparent;
-          cursor: pointer;
-          font-size: 16px;
-          color: inherit;
-          line-height: 1;
-          padding: 0 4px;
-        }
-        .exercise-color-preview-note {
-          font-size: 11px;
-          opacity: 0.8;
-          margin-bottom: 8px;
-        }
-        .exercise-sv-wrap {
-          position: relative;
-          width: 100%;
-          height: 150px;
-          border-radius: 8px;
-          overflow: hidden;
-          cursor: crosshair;
-          border: 1px solid rgba(148, 163, 184, 0.6);
-        }
-        .exercise-sv-white,
-        .exercise-sv-black {
-          position: absolute;
-          inset: 0;
-          pointer-events: none;
-        }
-        .exercise-sv-white {
-          background: linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, 0) 100%);
-        }
-        .exercise-sv-black {
-          background: linear-gradient(180deg, rgba(0, 0, 0, 0) 0%, #000 100%);
-        }
-        .exercise-sv-cursor {
-          position: absolute;
-          width: 12px;
-          height: 12px;
-          border: 2px solid #ffffff;
-          border-radius: 50%;
-          box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.55);
-          transform: translate(-6px, -6px);
-          pointer-events: none;
-        }
-        .exercise-hue-slider {
-          margin-top: 10px;
-          width: 100%;
-          -webkit-appearance: none;
-          appearance: none;
-          height: 10px;
-          border-radius: 999px;
-          background: linear-gradient(90deg, #f00 0%, #ff0 17%, #0f0 33%, #0ff 50%, #00f 67%, #f0f 83%, #f00 100%);
-          outline: none;
-        }
-        .exercise-hue-slider::-webkit-slider-thumb {
-          -webkit-appearance: none;
-          width: 14px;
-          height: 14px;
-          border-radius: 50%;
-          border: 2px solid #fff;
-          background: #111;
-          box-shadow: 0 0 0 1px rgba(0,0,0,0.5);
-          cursor: pointer;
-        }
-        .exercise-preview-row {
-          margin-top: 10px;
-          display: grid;
-          grid-template-columns: 32px 1fr auto;
-          gap: 8px;
-          align-items: center;
-        }
-        .exercise-preview-swatch {
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
-          border: 1px solid rgba(148, 163, 184, 0.6);
-        }
-        .exercise-hex-input {
-          width: 100%;
-          border: 1px solid #cbd5e1;
-          border-radius: 6px;
-          padding: 6px 8px;
-          font-size: 12px;
-          text-transform: uppercase;
-          background: #fff;
-          color: #111827;
-        }
-        body.dark-mode .exercise-hex-input {
-          background: #0f141a;
-          border-color: #39424d;
-          color: #f1f5f9;
-        }
-        .exercise-reset-btn {
-          border: 1px solid #cbd5e1;
-          background: #fff;
-          color: #111827;
-          border-radius: 6px;
-          padding: 6px 8px;
-          font-size: 11px;
-          cursor: pointer;
-        }
-        body.dark-mode .exercise-reset-btn {
-          background: #111827;
-          border-color: #374151;
-          color: #e5e7eb;
-        }
-      `;
-      document.head.appendChild(styleEl);
-
-      const panel = document.createElement('div');
-      panel.className = 'exercise-color-preview-panel';
-      panel.innerHTML = `
-        <div class="exercise-color-preview-header">
-          <span>Exercise Color Preview</span>
-          <button type="button" id="exercisePreviewClose" aria-label="Close">&times;</button>
-        </div>
-        <div class="exercise-color-preview-note">Temporary tool. Updates only body.dark-mode .type-exercise.</div>
-        <div class="exercise-sv-wrap" id="exerciseSvWrap">
-          <div class="exercise-sv-white"></div>
-          <div class="exercise-sv-black"></div>
-          <div class="exercise-sv-cursor" id="exerciseSvCursor"></div>
-        </div>
-        <input id="exerciseHueSlider" class="exercise-hue-slider" type="range" min="0" max="360" step="1" value="0">
-        <div class="exercise-preview-row">
-          <div id="exercisePreviewSwatch" class="exercise-preview-swatch"></div>
-          <input id="exerciseHexInput" class="exercise-hex-input" type="text" maxlength="7" value="#155F95">
-          <button id="exercisePreviewReset" class="exercise-reset-btn" type="button">Reset</button>
-        </div>
-      `;
-      document.body.appendChild(panel);
-
-      const svWrap = document.getElementById('exerciseSvWrap');
-      const svCursor = document.getElementById('exerciseSvCursor');
-      const hueSlider = document.getElementById('exerciseHueSlider');
-      const swatch = document.getElementById('exercisePreviewSwatch');
-      const hexInput = document.getElementById('exerciseHexInput');
-      const closeBtn = document.getElementById('exercisePreviewClose');
-      const resetBtn = document.getElementById('exercisePreviewReset');
-
-      const initialHex = getInitialHex();
-      const initialRgb = hexToRgb(initialHex) || { r: 21, g: 95, b: 149 };
-      let state = rgbToHsv(initialRgb.r, initialRgb.g, initialRgb.b);
-      let draggingSv = false;
-
-      function applyPreviewColor(hex) {
-        let previewStyle = document.getElementById(STYLE_ID);
-        if (!previewStyle) {
-          previewStyle = document.createElement('style');
-          previewStyle.id = STYLE_ID;
-          document.head.appendChild(previewStyle);
-        }
-        previewStyle.textContent = `body.dark-mode .type-exercise { background: ${hex} !important; }`;
-      }
-
-      function updateUiAndApply() {
-        const rgb = hsvToRgb(state.h, state.s, state.v);
-        const hex = rgbToHex(rgb.r, rgb.g, rgb.b).toUpperCase();
-        const hueColor = rgbToHex(...Object.values(hsvToRgb(state.h, 100, 100))).toUpperCase();
-
-        svWrap.style.background = hueColor;
-        hueSlider.value = String(state.h);
-        swatch.style.background = hex;
-        hexInput.value = hex;
-
-        const x = (state.s / 100) * svWrap.clientWidth;
-        const y = ((100 - state.v) / 100) * svWrap.clientHeight;
-        svCursor.style.left = `${x}px`;
-        svCursor.style.top = `${y}px`;
-
-        applyPreviewColor(hex);
-        localStorage.setItem(STORAGE_KEY, hex);
-      }
-
-      function setSvFromPointer(clientX, clientY) {
-        const rect = svWrap.getBoundingClientRect();
-        const x = clamp(clientX - rect.left, 0, rect.width);
-        const y = clamp(clientY - rect.top, 0, rect.height);
-        state.s = Math.round((x / rect.width) * 100);
-        state.v = Math.round(100 - ((y / rect.height) * 100));
-        updateUiAndApply();
-      }
-
-      hueSlider.addEventListener('input', () => {
-        state.h = Number(hueSlider.value);
-        updateUiAndApply();
-      });
-
-      svWrap.addEventListener('mousedown', (event) => {
-        draggingSv = true;
-        setSvFromPointer(event.clientX, event.clientY);
-      });
-
-      window.addEventListener('mousemove', (event) => {
-        if (!draggingSv) return;
-        setSvFromPointer(event.clientX, event.clientY);
-      });
-
-      window.addEventListener('mouseup', () => {
-        draggingSv = false;
-      });
-
-      hexInput.addEventListener('change', () => {
-        const parsed = hexToRgb(hexInput.value);
-        if (!parsed) {
-          updateUiAndApply();
-          return;
-        }
-        state = rgbToHsv(parsed.r, parsed.g, parsed.b);
-        updateUiAndApply();
-      });
-
-      closeBtn.addEventListener('click', () => {
-        panel.remove();
-      });
-
-      resetBtn.addEventListener('click', () => {
-        state = rgbToHsv(21, 95, 149);
-        localStorage.removeItem(STORAGE_KEY);
-        updateUiAndApply();
-      });
-
-      updateUiAndApply();
-    })();
-  </script>
-
 <!-- ============================================
          CHAT SYSTEM - Complete (Firebase REST + UI)
          ============================================ -->
 
-<script src="js/user-identity.js?v=20260512z2j"></script>
+<script src="js/user-identity.js?v=2026051210oz"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=20260512z2j"></script>
+    <script src="js/chat.js?v=2026051210oz"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202605021hcw"></script>
-<script src="js/mobile-nav.js?v=20260512z2j"></script>
+<script src="js/mobile-nav.js?v=2026051210oz"></script>
 </body>
     </html>

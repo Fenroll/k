@@ -74,18 +74,19 @@
     </style>
     <title>Notes</title>
 
-    <script src="js/auth-guard.js?v=20260512z2j"></script>
+    <script src="js/auth-guard.js?v=2026051210oz"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=20260512z2j"></script>
-    <script src="courses.generated.js?v=20260512z2j"></script>
+    <script src="js/user-identity.js?v=2026051210oz"></script>
+    <script src="courses.generated.js?v=2026051210oz"></script>
 
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
     <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=20260512z2j">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700&display=swap">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=2026051210oz">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
     <script src="js/version-manager.js?v=2026031715gu"></script>
@@ -782,63 +783,6 @@
             background: #d9ecd4;
         }
 
-        body.dark-mode .modal {
-            background: rgba(8, 12, 10, 0.62);
-        }
-
-        body.dark-mode .modal-content {
-            background: #1f2937;
-            border-color: rgba(166, 197, 162, 0.12);
-            color: #e5e7eb;
-        }
-
-        body.dark-mode .modal-header {
-            background: #1a232f;
-            border-bottom-color: rgba(255, 255, 255, 0.06);
-        }
-
-        body.dark-mode .modal-header h2 { color: #f3f4f6; }
-        body.dark-mode .close:hover { background: rgba(255,255,255,0.08); color: #f3f4f6; }
-        body.dark-mode .symbol-btn {
-            background: #273241;
-            border-color: rgba(255,255,255,0.08);
-            color: #e5e7eb;
-        }
-        body.dark-mode .symbol-btn:hover {
-            background: #344e41;
-            border-color: #588157;
-            color: #fff;
-        }
-        body.dark-mode .image-modal-input {
-            background: #273241;
-            border-color: rgba(255,255,255,0.10);
-            color: #f3f4f6;
-        }
-        body.dark-mode .image-modal-input:focus {
-            border-color: #588157;
-            background: #1f2937;
-        }
-        body.dark-mode .image-upload-row {
-            background: #1f2937;
-            border-color: rgba(255,255,255,0.10);
-        }
-        body.dark-mode .image-upload-row:hover {
-            background: #25323f;
-            border-color: #588157;
-        }
-        body.dark-mode .image-modal-btn {
-            background: #273241;
-            border-color: rgba(255,255,255,0.10);
-            color: #e5e7eb;
-        }
-        body.dark-mode .image-modal-btn:hover {
-            background: #2f3a47;
-            color: #fff;
-        }
-        body.dark-mode .image-modal-footer {
-            border-top-color: rgba(255,255,255,0.06);
-        }
-
         .save-btn {
             background: #588157;
             color: #fff;
@@ -857,127 +801,6 @@
         .save-btn:disabled {
             background: #9ca3af;
             cursor: not-allowed;
-        }
-
-        body.dark-mode {
-            background: #121212;
-            color: #f1f1f1;
-        }
-
-        body.dark-mode .main-content {
-            background: #121212;
-        }
-
-
-        body.dark-mode .notes-header,
-        body.dark-mode .courses-panel,
-        body.dark-mode .editor-panel,
-        body.dark-mode .modal-content {
-            background: #181818;
-            border-color: #303030;
-            color: #f1f1f1;
-        }
-
-        body.dark-mode .notes-title,
-        body.dark-mode .panel-title,
-        body.dark-mode .editor-meta,
-        body.dark-mode .collab-meta,
-        body.dark-mode .notes-subtitle {
-            color: #f1f1f1;
-        }
-
-        body.dark-mode .panel-header,
-        body.dark-mode .md-toolbar,
-        body.dark-mode .notes-editor,
-        body.dark-mode .modal-header,
-        body.dark-mode .modal-footer {
-            border-color: #303030;
-        }
-
-        body.dark-mode .search-input,
-        body.dark-mode .mobile-course-select,
-        body.dark-mode .notes-editor {
-            background: #121212;
-            color: #f1f1f1;
-            border-color: #3f3f3f;
-        }
-
-        body.dark-mode .course-item {
-            color: #f1f1f1;
-        }
-
-        body.dark-mode .course-item:hover {
-            background: #252525;
-        }
-
-        body.dark-mode .course-item.active {
-            background: rgba(88, 129, 87, 0.2);
-            color: #f1f1f1;
-            border-left-color: #588157;
-        }
-
-        body.dark-mode .md-btn,
-        body.dark-mode .symbol-btn {
-            background: #202020;
-            color: #f1f1f1;
-            border-color: #3f3f3f;
-        }
-
-        body.dark-mode .md-btn img {
-            filter: brightness(0) invert(1);
-        }
-
-        body.dark-mode .md-btn:hover,
-        body.dark-mode .symbol-btn:hover {
-            background: #2a2a2a;
-            border-color: #4a4a4a;
-        }
-
-        body.dark-mode .status-chip {
-            border-color: #334333;
-            background: #162016;
-            color: #b8d4b0;
-        }
-
-        body.dark-mode .status-chip.error {
-            border-color: #513030;
-            background: #211717;
-            color: #e7aaa6;
-        }
-
-        body.dark-mode .status-chip.dirty {
-            border-color: #513030;
-            background: #211717;
-            color: #e7aaa6;
-        }
-
-        body.dark-mode .save-btn {
-            background: #588157;
-            color: #fff;
-        }
-
-        body.dark-mode .save-btn:hover {
-            background: #4a6d49;
-        }
-
-        body.dark-mode .save-btn:disabled {
-            background: #4b5563;
-        }
-
-        body.dark-mode .notes-editor h1,
-        body.dark-mode .notes-editor h2,
-        body.dark-mode .notes-editor h3,
-        body.dark-mode .notes-editor h4,
-        body.dark-mode .notes-editor a {
-            color: #588157;
-        }
-
-        body.dark-mode .close {
-            color: #9ca3af;
-        }
-
-        body.dark-mode .close:hover {
-            color: #f1f1f1;
         }
 
         @media (max-width: 900px) {
@@ -1349,13 +1172,6 @@
         .history-preview-render ul,
         .history-preview-render ol { padding-left: 1.4em; margin: 0.1em 0; }
         .history-preview-render img { max-width: 100%; border-radius: 6px; display: block; margin: 6px 0; }
-        body.dark-mode .history-preview-render {
-            background: #111827;
-            border-color: #303030;
-            color: #e5e7eb;
-        }
-        body.dark-mode .history-preview-btn { border-color: #374151; color: #9ca3af; }
-        body.dark-mode .history-preview-btn:hover { background: #1f2937; color: #e5e7eb; }
         .history-restore-btn {
             border: 1px solid #588157;
             background: transparent;
@@ -1372,16 +1188,6 @@
             background: #588157;
             color: #fff;
         }
-        body.dark-mode .history-entry {
-            background: #1f2937;
-            border-color: #303030;
-        }
-        body.dark-mode .history-entry-time { color: #f1f1f1; }
-        body.dark-mode .history-entry-author { color: #8aad82; }
-        body.dark-mode .history-entry-preview { color: #9ca3af; }
-        body.dark-mode .history-restore-btn { border-color: #588157; color: #8aad82; }
-        body.dark-mode .history-restore-btn:hover { background: #588157; color: #fff; }
-
     </style>
 </head>
 <body>
@@ -1597,15 +1403,6 @@
             localStorage.removeItem('loggedInUser');
             window.location.href = 'login.html';
         }
-
-        (function applySavedTheme() {
-            const THEME_KEY = 'index-copy-theme';
-            const stored = localStorage.getItem(THEME_KEY);
-            const useDark = stored === 'dark';
-            if (useDark) {
-                document.body.classList.add('dark-mode');
-            }
-        })();
 
         (function() {
             const firebaseConfig = {
@@ -2335,44 +2132,111 @@
                 return courses;
             }
 
+            // Diff-render the course list. Reuses existing <li>/option nodes when the
+            // filtered set is unchanged so typing in the search box doesn't flicker
+            // or re-attach listeners. A single delegated click handler is attached
+            // once below; per-item listeners are no longer wired.
+            let coursesListClickDelegated = false;
+            function ensureCoursesListDelegation() {
+                if (coursesListClickDelegated) return;
+                coursesListClickDelegated = true;
+                els.coursesList.addEventListener('click', async (event) => {
+                    const li = event.target.closest('li.course-item');
+                    if (!li || !els.coursesList.contains(li)) return;
+                    const courseId = li.dataset.courseId;
+                    if (!courseId || courseId === state.selectedCourseId) return;
+                    const course = state.courses.find(c => c.id === courseId)
+                        || state.filteredCourses.find(c => c.id === courseId);
+                    if (!course) return;
+                    if (state.isDirty) {
+                        const shouldDiscard = confirm('You have unsaved changes. Continue without saving?');
+                        if (!shouldDiscard) return;
+                    }
+                    await selectCourse(course.id, course.title);
+                });
+            }
+
             function renderCoursesList() {
-                els.coursesList.innerHTML = '';
-                els.courseSelectMobile.innerHTML = '';
+                ensureCoursesListDelegation();
+
+                const list = els.coursesList;
+                const select = els.courseSelectMobile;
 
                 if (!state.filteredCourses.length) {
-                    const li = document.createElement('li');
-                    li.className = 'empty-courses';
-                    li.textContent = 'No courses found.';
-                    els.coursesList.appendChild(li);
-
-                    const option = document.createElement('option');
-                    option.value = '';
-                    option.textContent = 'No courses found';
-                    els.courseSelectMobile.appendChild(option);
+                    if (list.children.length !== 1 || list.firstElementChild.className !== 'empty-courses') {
+                        list.innerHTML = '';
+                        const li = document.createElement('li');
+                        li.className = 'empty-courses';
+                        li.textContent = 'No courses found.';
+                        list.appendChild(li);
+                    }
+                    if (select.children.length !== 1 || select.firstElementChild.value !== '') {
+                        select.innerHTML = '';
+                        const option = document.createElement('option');
+                        option.value = '';
+                        option.textContent = 'No courses found';
+                        select.appendChild(option);
+                    }
                     return;
                 }
 
-                state.filteredCourses.forEach(course => {
-                    const option = document.createElement('option');
-                    option.value = course.id;
-                    option.textContent = course.title;
-                    if (course.id === state.selectedCourseId) option.selected = true;
-                    els.courseSelectMobile.appendChild(option);
+                // <ul>: reuse existing nodes keyed by courseId; reorder via appendChild.
+                const seenLi = new Set();
+                let cursor = null;
+                for (const course of state.filteredCourses) {
+                    seenLi.add(course.id);
+                    let li = list.querySelector(`:scope > li.course-item[data-course-id="${CSS.escape(course.id)}"]`);
+                    const wantClass = 'course-item' + (course.id === state.selectedCourseId ? ' active' : '');
+                    if (!li) {
+                        li = document.createElement('li');
+                        li.className = wantClass;
+                        li.textContent = course.title;
+                        li.dataset.courseId = course.id;
+                    } else {
+                        if (li.textContent !== course.title) li.textContent = course.title;
+                        if (li.className !== wantClass) li.className = wantClass;
+                    }
+                    const expectedNext = cursor ? cursor.nextElementSibling : list.firstElementChild;
+                    if (expectedNext !== li) {
+                        if (cursor) cursor.after(li); else list.prepend(li);
+                    }
+                    cursor = li;
+                }
+                // Remove leftovers (filtered out by search, or stale empty-courses row).
+                const leftovers = [];
+                for (const child of list.children) {
+                    if (child.className === 'empty-courses' || (child.dataset && !seenLi.has(child.dataset.courseId))) {
+                        leftovers.push(child);
+                    }
+                }
+                leftovers.forEach(n => n.remove());
 
-                    const li = document.createElement('li');
-                    li.className = 'course-item' + (course.id === state.selectedCourseId ? ' active' : '');
-                    li.textContent = course.title;
-                    li.dataset.courseId = course.id;
-                    li.addEventListener('click', async () => {
-                        if (course.id === state.selectedCourseId) return;
-                        if (state.isDirty) {
-                            const shouldDiscard = confirm('You have unsaved changes. Continue without saving?');
-                            if (!shouldDiscard) return;
-                        }
-                        await selectCourse(course.id, course.title);
-                    });
-                    els.coursesList.appendChild(li);
-                });
+                // <select>: same diff treatment.
+                const seenOpt = new Set();
+                let optCursor = null;
+                for (const course of state.filteredCourses) {
+                    seenOpt.add(course.id);
+                    let option = select.querySelector(`option[value="${CSS.escape(course.id)}"]`);
+                    const wantSelected = course.id === state.selectedCourseId;
+                    if (!option) {
+                        option = document.createElement('option');
+                        option.value = course.id;
+                        option.textContent = course.title;
+                    } else if (option.textContent !== course.title) {
+                        option.textContent = course.title;
+                    }
+                    if (option.selected !== wantSelected) option.selected = wantSelected;
+                    const expectedNext = optCursor ? optCursor.nextElementSibling : select.firstElementChild;
+                    if (expectedNext !== option) {
+                        if (optCursor) optCursor.after(option); else select.prepend(option);
+                    }
+                    optCursor = option;
+                }
+                const optLeftovers = [];
+                for (const child of select.children) {
+                    if (!seenOpt.has(child.value)) optLeftovers.push(child);
+                }
+                optLeftovers.forEach(n => n.remove());
             }
 
             function financeDate(value) {
@@ -2828,6 +2692,31 @@
                 state.lastHistorySavedHtml = '';
             }
 
+            // Apply a remote note update to the editor, preserving cursor position
+            // when the editor is focused. Updates lastSavedHtml so the next save
+            // doesn't conflict-detect against stale baseline.
+            function applyRemoteEditorContent(rawHtml) {
+                const editorActive = document.activeElement === els.courseNotesEditor;
+                let savedOffsets = null;
+                if (editorActive) {
+                    try { savedOffsets = getCurrentSelectionOffsets(); } catch (_) {}
+                }
+                setEditorHtml(rawHtml);
+                normalizeAuthorTitles();
+                state.lastSavedHtml = normalizeHtml(rawHtml);
+                setDraftState(false);
+                if (savedOffsets && editorActive) {
+                    try {
+                        const range = createRangeFromOffsets(els.courseNotesEditor, savedOffsets.start, savedOffsets.end);
+                        if (range) {
+                            const sel = window.getSelection();
+                            sel.removeAllRanges();
+                            sel.addRange(range);
+                        }
+                    } catch (_) {}
+                }
+            }
+
             async function subscribeCurrentNote() {
                 stopCurrentSubscription();
 
@@ -2836,29 +2725,45 @@
 
                 state.currentNoteRef = ref;
 
-                try {
-                    const snapshot = await ref.get();
+                // Realtime listener — keeps the editor in sync with Firebase even when
+                // Liveblocks isn't available (or another browser isn't in the room).
+                // First fire = initial load. Subsequent fires apply only when local
+                // editor isn't dirty (don't trample typing) and content actually differs.
+                state.noteListener = ref.on('value', (snapshot) => {
                     const value = snapshot.val() || {};
-                    const noteHtml = typeof value.html === 'string'
+                    const rawHtml = typeof value.html === 'string'
                         ? value.html
                         : plainTextToHtml(typeof value.text === 'string' ? value.text : '');
-
-                    if (!state.isDirty || !state.hasLoadedCurrentNote) {
-                        setEditorHtml(noteHtml);
-                        normalizeAuthorTitles();
-                        state.lastSavedHtml = normalizeHtml(noteHtml);
-                        setDraftState(false);
-                    }
+                    const incomingNormalized = normalizeHtml(rawHtml);
 
                     renderCurrentMeta(value);
-                    state.hasLoadedCurrentNote = true;
-                } catch (error) {
+
+                    if (!state.hasLoadedCurrentNote) {
+                        // Initial load for this note.
+                        setEditorHtml(rawHtml);
+                        normalizeAuthorTitles();
+                        state.lastSavedHtml = incomingNormalized;
+                        setDraftState(false);
+                        state.hasLoadedCurrentNote = true;
+                        return;
+                    }
+
+                    // Subsequent fires — apply only if safe.
+                    if (incomingNormalized === state.lastSavedHtml) return; // echo of our own save (or unchanged)
+                    if (state.isDirty) return;                              // user typing — saveCurrentCourseNote will conflict-detect
+
+                    applyRemoteEditorContent(rawHtml);
+                }, (error) => {
                     console.error('Failed loading course note:', error);
-                }
+                });
 
                 clearHistoryInterval();
                 state.historyIntervalTimer = setInterval(async () => {
+                    // Skip when there's nothing new to snapshot — saveHistorySnapshot
+                    // dedupes internally too, but this avoids the editor read + the
+                    // normalize/hash work entirely on quiet notes.
                     if (!state.selectedCourseId) return;
+                    if (!state.isDirty && state.lastSavedHtml === state.lastHistorySavedHtml) return;
                     const html = getEditorHtml();
                     if (!html) return;
                     const me = state.currentUser?.displayName || state.currentUser?.userName || 'Unknown';
@@ -2952,6 +2857,11 @@
             // HISTORY SYSTEM
             // ============================================================
 
+            // Counter so we don't fetch + prune on every single push — the cap is
+            // HISTORY_MAX_ENTRIES so we only need to look at the full list once per
+            // ~that many pushes. Keyed by courseId since each note has its own cap.
+            const historyPruneCounters = {};
+
             async function saveHistorySnapshot(courseId, html, savedBy, force = false) {
                 if (!courseId || !html) {
                     return;
@@ -2969,13 +2879,18 @@
 
                 try {
                     const histRef = firebase.database().ref(`${COURSE_NOTE_HISTORY_ROOT}/${courseId}`);
-                    const pushRef = await histRef.push({
+                    await histRef.push({
                         html: normalizedForHistory,
                         savedBy: savedBy || 'Unknown',
                         savedAt: firebase.database.ServerValue.TIMESTAMP
                     });
 
-                    // Prune: keep only the latest HISTORY_MAX_ENTRIES entries
+                    // Lazy prune: only fetch the list and trim every HISTORY_MAX_ENTRIES pushes.
+                    const nextCount = (historyPruneCounters[courseId] || 0) + 1;
+                    historyPruneCounters[courseId] = nextCount;
+                    if (nextCount < HISTORY_MAX_ENTRIES) return;
+                    historyPruneCounters[courseId] = 0;
+
                     const allSnap = await histRef.once('value');
                     const allEntries = [];
                     allSnap.forEach(child => { allEntries.push({ key: child.key, savedAt: (child.val() || {}).savedAt || 0 }); });
@@ -3627,8 +3542,8 @@
     </script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=20260512z2j"></script>
+    <script src="js/chat.js?v=2026051210oz"></script>
     <script src="js/version-check.js?v=202605021hcw"></script>
-    <script src="js/mobile-nav.js?v=20260512z2j"></script>
+    <script src="js/mobile-nav.js?v=2026051210oz"></script>
 </body>
 </html>
