@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -74,11 +74,11 @@
     </style>
     <title>Notes</title>
 
-    <script src="js/auth-guard.js?v=202605121b7o"></script>
+    <script src="js/auth-guard.js?v=202605121cyb"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=202605121b7o"></script>
-    <script src="courses.generated.js?v=202605121b7o"></script>
+    <script src="js/user-identity.js?v=202605121cyb"></script>
+    <script src="courses.generated.js?v=202605121cyb"></script>
 
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
@@ -86,7 +86,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700&display=swap">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202605121b7o">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605121cyb">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
     <script src="js/version-manager.js?v=2026031715gu"></script>
@@ -239,23 +239,35 @@
         }
 
         .course-item {
-            padding: 10px 12px;
-            border-radius: 8px;
+            position: relative;
+            padding: 11px 14px;
+            border: 1px solid rgb(from var(--course-accent, #588157) r g b / 0.22);
+            border-radius: 10px;
             cursor: pointer;
             font-size: 14px;
             color: #111827;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
+            background: #ffffff;
+            transition: background 140ms ease, border-color 140ms ease;
         }
 
         .course-item:hover {
-            background: #f3f4f6;
+            background: rgb(from var(--course-accent, #588157) r g b / 0.16);
+            border-color: rgb(from var(--course-accent, #588157) r g b / 0.55);
         }
 
         .course-item.active {
-            background: #e8f5e9;
-            color: #1f2937;
+            background: rgb(from var(--course-accent, #588157) r g b / 0.24);
+            border-color: rgb(from var(--course-accent, #588157) r g b / 0.7);
+            color: #111827;
             font-weight: 700;
-            border-left: 3px solid #588157;
+        }
+
+        /* CB-NOTES-MOBILE-BORDER */
+        @media (max-width: 768px) {
+            .course-item {
+                border: 1.5px solid rgb(from var(--course-accent, #588157) r g b / 0.5);
+            }
         }
 
         .empty-courses {
@@ -2110,6 +2122,64 @@
                 });
             }
 
+            const COURSE_ACCENT_PALETTE = ["#6fcf97","#81c7f5","#ffe066","#ff6f7d","#c8a2ff","#ffb46a","#62d7a1","#5fa8ff","#ffd166","#ff7f7f","#bfa6ff","#f9a66c","#7ad66f","#6ea8fe","#f6d365","#ff8b94","#d4a5ff","#d7b899","#7cc6a6","#4fc3f7","#ffd57e","#ff8fa3","#c7b8ff","#cfa18d","#75d0b1","#74b9d6","#f4c95d","#ff9a8b","#b39ddb","#8dd3b3","#8fc0ff","#f9d976","#f28b82","#c6a4ff","#98e0cc","#7da0fa","#ffdf8a","#ff7a8a","#7ec8c3","#9bb3ff","#f7e27d","#ff8298","#66d1c2","#a8d8ff","#f3d86f","#ff7388","#58c9b9","#6ec5ff","#f6cf65","#f97f7f","#4fd1a6","#5fb8f9","#ff647c","#70d6b5","#7fb7ff","#ff5f75","#ff6b7a"];
+            function familyOf(hex) {
+                // Simple bucket by hue ranges from the palette grouping (green/blue/yellow/red/purple/orange)
+                const greens = new Set(["#6fcf97","#62d7a1","#7ad66f","#7cc6a6","#75d0b1","#8dd3b3","#98e0cc","#7ec8c3","#66d1c2","#58c9b9","#4fd1a6","#70d6b5"]);
+                const blues  = new Set(["#81c7f5","#5fa8ff","#6ea8fe","#4fc3f7","#74b9d6","#8fc0ff","#7da0fa","#9bb3ff","#a8d8ff","#6ec5ff","#5fb8f9","#7fb7ff"]);
+                const yellows= new Set(["#ffe066","#ffd166","#f6d365","#ffd57e","#f4c95d","#f9d976","#ffdf8a","#f7e27d","#f3d86f","#f6cf65"]);
+                const reds   = new Set(["#ff6f7d","#ff7f7f","#ff8b94","#ff8fa3","#ff9a8b","#f28b82","#ff7a8a","#ff8298","#ff7388","#f97f7f","#ff647c","#ff5f75","#ff6b7a"]);
+                const purples= new Set(["#c8a2ff","#bfa6ff","#d4a5ff","#c7b8ff","#b39ddb","#c6a4ff"]);
+                const oranges= new Set(["#ffb46a","#f9a66c","#d7b899","#cfa18d"]);
+                if (greens.has(hex)) return 'g';
+                if (blues.has(hex)) return 'b';
+                if (yellows.has(hex)) return 'y';
+                if (reds.has(hex)) return 'r';
+                if (purples.has(hex)) return 'p';
+                if (oranges.has(hex)) return 'y';
+                return '?';
+            }
+
+            let __courseAccentOrder = null;
+            function buildCourseAccentOrder(palette) {
+                const arr = palette.slice();
+                let seed = 0x9e3779b9;
+                const rnd = () => { seed ^= seed<<13; seed ^= seed>>>17; seed ^= seed<<5; return (seed>>>0)/4294967296; };
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(rnd() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                // Multi-pass: ensure none of the previous 2 colors are in the same family
+                const W = 2;
+                for (let pass = 0; pass < 4; pass++) {
+                    let changed = false;
+                    for (let i = 1; i < arr.length; i++) {
+                        const fam = familyOf(arr[i]);
+                        const conflict = [];
+                        for (let w = 1; w <= W && i - w >= 0; w++) conflict.push(familyOf(arr[i - w]));
+                        if (!conflict.includes(fam)) continue;
+                        for (let k = i + 1; k < arr.length; k++) {
+                            const kFam = familyOf(arr[k]);
+                            if (conflict.includes(kFam)) continue;
+                            // also check k won't break its new neighbors
+                            const kPrev = i > 0 ? familyOf(arr[i - 1]) : null;
+                            if (kFam === kPrev) continue;
+                            [arr[i], arr[k]] = [arr[k], arr[i]];
+                            changed = true;
+                            break;
+                        }
+                    }
+                    if (!changed) break;
+                }
+                return arr;
+            }
+
+            function courseAccentColor(idx) {
+                if (!__courseAccentOrder) __courseAccentOrder = buildCourseAccentOrder(COURSE_ACCENT_PALETTE);
+                const i = ((idx % __courseAccentOrder.length) + __courseAccentOrder.length) % __courseAccentOrder.length;
+                return __courseAccentOrder[i];
+            }
+
             function getCoursesFromGlobal() {
                 if (!Array.isArray(window.courses)) return [];
                 const courses = window.courses
@@ -2183,7 +2253,9 @@
                 // <ul>: reuse existing nodes keyed by courseId; reorder via appendChild.
                 const seenLi = new Set();
                 let cursor = null;
+                let __accentIdx = 0;
                 for (const course of state.filteredCourses) {
+                    const __accent = courseAccentColor(__accentIdx++);
                     seenLi.add(course.id);
                     let li = list.querySelector(`:scope > li.course-item[data-course-id="${CSS.escape(course.id)}"]`);
                     const wantClass = 'course-item' + (course.id === state.selectedCourseId ? ' active' : '');
@@ -2192,8 +2264,10 @@
                         li.className = wantClass;
                         li.textContent = course.title;
                         li.dataset.courseId = course.id;
+                        li.style.setProperty('--course-accent', __accent);
                     } else {
                         if (li.textContent !== course.title) li.textContent = course.title;
+                    li.style.setProperty('--course-accent', __accent);
                         if (li.className !== wantClass) li.className = wantClass;
                     }
                     const expectedNext = cursor ? cursor.nextElementSibling : list.firstElementChild;
@@ -3703,8 +3777,8 @@
     </script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=202605121b7o"></script>
+    <script src="js/chat.js?v=202605121cyb"></script>
     <script src="js/version-check.js?v=202605021hcw"></script>
-    <script src="js/mobile-nav.js?v=202605121b7o"></script>
+    <script src="js/mobile-nav.js?v=202605121cyb"></script>
 </body>
 </html>
