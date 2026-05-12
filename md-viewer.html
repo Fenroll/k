@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="bg">
 <head>
-  <script src="js/auth-guard.js?v=2026051215xf"></script>
+  <script src="js/auth-guard.js?v=202605121b7o"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content" />
   <title>Course Viewer</title>
@@ -16,7 +16,7 @@
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="vendor/katex.min.css?v=2026031715gu">
   <!-- Mobile Navigation CSS -->
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026051215xf">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605121b7o">
 
   <!-- Firebase SDKs - Moved to head and using compat versions -->
   <script defer src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
@@ -1921,14 +1921,11 @@
             const decodedPath = decodeURIComponent(path);
             const normalizedPath = decodedPath.replace(/\\/g, '/');
 
-            // Find which course this file belongs to and load its content
-            const targetCourse = findCourseForPath(normalizedPath);
-            if (targetCourse) {
-              await loadCourseContent(targetCourse);
-            }
-
             const result = findFileInCoursesByPath(normalizedPath);
             const fileData = result && result.item;
+            if (fileData) {
+              await loadFileContent(fileData, result.course);
+            }
 
             if (fileData && fileData.content) {
               debugLog('Successfully recovered content from courses data');
@@ -2006,14 +2003,12 @@
           async function findFileContent(filePath) {
             const normalizedPath = filePath.replace(/\\/g, '/');
 
-            // Load content for the course that contains this file
-            const targetCourse = findCourseForPath(normalizedPath);
-            if (targetCourse) {
-              await loadCourseContent(targetCourse);
-            }
-
             const result = findFileInCoursesByPath(normalizedPath);
-            return result && result.item;
+            if (result && result.item) {
+              await loadFileContent(result.item, result.course);
+              return result.item;
+            }
+            return null;
           }
 
           const fileData = await findFileContent(pathToLoad);
@@ -2087,7 +2082,9 @@
 
           let result = findFileInCoursesByPath(normalizedPath);
 
-          if (result && result.course && typeof loadCourseContent === 'function') {
+          if (result && result.item && typeof loadFileContent === 'function') {
+            await loadFileContent(result.item, result.course);
+          } else if (result && result.course && typeof loadCourseContent === 'function') {
             await loadCourseContent(result.course);
             result = findFileInCoursesByPath(normalizedPath);
           }
@@ -2118,9 +2115,68 @@
   </script>
 
   <!-- Load courses data for summary file detection -->
-  <script src="courses.generated.js?v=2026051215xf"></script>
+  <script src="courses.generated.js?v=202605121b7o"></script>
   <script>
   // --- On-demand course content loader (works on file://) ---
+  function getVersionedCourseDataUrl(contentKey) {
+    var rawUrl = 'courses-data/' + contentKey + '.js';
+    return (window.VersionManager && typeof window.VersionManager.versionedUrl === 'function')
+      ? window.VersionManager.versionedUrl(rawUrl)
+      : (rawUrl + ((window.coursesVersion || '') ? ('?v=' + window.coursesVersion) : ''));
+  }
+  function loadCourseDataScript(contentKey) {
+    if (!contentKey) return Promise.resolve(false);
+    window.loadingCourseDataScripts = window.loadingCourseDataScripts || {};
+    if (window.loadingCourseDataScripts[contentKey]) {
+      return window.loadingCourseDataScripts[contentKey];
+    }
+
+    window.loadingCourseDataScripts[contentKey] = new Promise(function(resolve) {
+      var script = document.createElement('script');
+      script.src = getVersionedCourseDataUrl(contentKey);
+      script.onload = function() { resolve(true); };
+      script.onerror = function() { resolve(false); };
+      document.head.appendChild(script);
+    });
+
+    return window.loadingCourseDataScripts[contentKey];
+  }
+  function getCourseContentKey(course) {
+    return course && (course._contentKey || course.id);
+  }
+  function getLoadedFileContent(file, course) {
+    if (!file) return null;
+    if (file._contentKey && window.courseContentFiles && window.courseContentFiles[file._contentKey]) {
+      return window.courseContentFiles[file._contentKey];
+    }
+
+    var groupKey = getCourseContentKey(course);
+    if (groupKey && file.path && window.courseContent && window.courseContent[groupKey]) {
+      var contentMap = window.courseContent[groupKey];
+      var normalizedPath = file.path.replace(/\\/g, '/');
+      return contentMap[file.path] || contentMap[normalizedPath] || null;
+    }
+
+    return null;
+  }
+  function mergeLoadedFileContent(file, course) {
+    if (!file || file.content) return !!(file && file.content);
+    var loadedContent = getLoadedFileContent(file, course);
+    if (loadedContent) {
+      file.content = loadedContent;
+    }
+    return !!file.content;
+  }
+  function loadFileContent(file, course) {
+    if (!file || file.content) return Promise.resolve(!!(file && file.content));
+    if (mergeLoadedFileContent(file, course)) return Promise.resolve(true);
+    if (!file._contentKey) return Promise.resolve(false);
+
+    return loadCourseDataScript(file._contentKey).then(function(loaded) {
+      if (!loaded) return false;
+      return mergeLoadedFileContent(file, course);
+    });
+  }
   function loadCourseContent(courseOrId) {
     return new Promise(function(resolve) {
       if (!courseOrId || typeof courses === 'undefined') { resolve(); return; }
@@ -2134,29 +2190,49 @@
         resolve();
         return;
       }
-      var script = document.createElement('script');
-      var rawUrl = 'courses-data/' + contentKey + '.js';
-      script.src = (window.VersionManager && typeof window.VersionManager.versionedUrl === 'function')
-        ? window.VersionManager.versionedUrl(rawUrl)
-        : (rawUrl + ((window.coursesVersion || '') ? ('?v=' + window.coursesVersion) : ''));
-      script.onload = function() {
+
+      var contentKeys = [];
+      function collectContentKeys(section) {
+        if (section.msgNotes) {
+          section.msgNotes.forEach(function(note) {
+            if (note._contentKey && !note.content) contentKeys.push(note._contentKey);
+          });
+        }
+        if (section.files) {
+          section.files.forEach(function(file) {
+            if (file._contentKey && !file.content) contentKeys.push(file._contentKey);
+          });
+        }
+        if (section.subsections) {
+          section.subsections.forEach(collectContentKeys);
+        }
+      }
+      if (course.sections) {
+        course.sections.forEach(collectContentKeys);
+      }
+
+      if (contentKeys.length === 0) {
+        loadCourseDataScript(contentKey).then(function(loaded) {
+          if (loaded) {
+            _mergeCourseContent(course, contentKey);
+          }
+          resolve();
+        });
+        return;
+      }
+
+      Promise.all(contentKeys.map(loadCourseDataScript)).then(function() {
         _mergeCourseContent(course, contentKey);
         resolve();
-      };
-      script.onerror = function() {
-        debugWarn('Could not load content for course', contentKey);
-        resolve();
-      };
-      document.head.appendChild(script);
+      });
     });
   }
   function _mergeCourseContent(course, contentKey) {
-    if (!window.courseContent || !window.courseContent[contentKey]) return;
-    var contentMap = window.courseContent[contentKey];
+    var contentMap = window.courseContent && window.courseContent[contentKey];
     function getContentByPath(path) {
       if (!path) return null;
       var normalized = path.replace(/\\/g, '/');
-      return contentMap[path] || contentMap[normalized] || null;
+      return contentMap ? (contentMap[path] || contentMap[normalized] || null) : null;
     }
     function mergeSection(section) {
       if (section.msgNotes) {
@@ -2165,6 +2241,7 @@
           if (!note.content && noteContent) {
             note.content = noteContent;
           }
+          mergeLoadedFileContent(note, course);
         });
       }
       if (section.files) {
@@ -2173,6 +2250,7 @@
           if (!file.content && fileContent) {
             file.content = fileContent;
           }
+          mergeLoadedFileContent(file, course);
         });
       }
       if (section.subsections) {
@@ -3060,12 +3138,14 @@
 
     // If we found the file and it has content (e.g. msgNote), force update the view
     // This overrides whatever might have been loaded from stale sessionStorage
-    if (fileData && fileData.content) {
-      debugLog('Hydrating content from fresh courses data for:', normalizedPath);
-      const root = document.getElementById('content');
-      renderViewerContent(root, fileData.content, normalizedPath, {
-        type: fileData.type,
-        styleMode: 'none'
+    if (fileData) {
+      loadFileContent(fileData, result.course).then(function() {
+        if (!fileData.content) return;
+        debugLog('Hydrating content from fresh courses data for:', normalizedPath);
+        const root = document.getElementById('content');
+        renderViewerContent(root, fileData.content, normalizedPath, {
+          type: fileData.type
+        });
       });
     }
   })();

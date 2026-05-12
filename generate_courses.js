@@ -10,8 +10,60 @@ const ELEMENTS_DIR = path.join(__dirname, 'files');
 const OUTPUT_FILE = path.join(__dirname, 'courses.generated.js');
 const ID_MAPPING_FILE = path.join(__dirname, 'course-ids.json');
 const NAME_MAPPING_FILE = path.join(__dirname, 'folder-name-mappings.json');
-const FILES_INDEX_FILE = path.join(__dirname, 'files-index.json');
 const COURSE_CONTENT_DIR = path.join(__dirname, 'courses-data');
+const ARCHIVE_PREFIX = '[АРХИВ] ';
+const ORDER_PREFIX_PATTERN = /^([\d.]+)-/;
+const SUPPORTED_EXTENSIONS = new Set([
+  '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+  '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg',
+  '.zip', '.rar', '.7z',
+  '.txt', '.log', '.md', '.html',
+  '.one', '.onetoc2',
+  '.url'
+]);
+const MESSAGE_NOTE_EXTENSIONS = new Set(['.txt', '.md', '.html', '.docx']);
+const INLINE_CONTENT_EXTENSIONS = new Set(['.txt', '.md', '.html']);
+const HTML_FILE_PATHS = [
+  path.join(__dirname, 'index.html'),
+  path.join(__dirname, 'md-viewer.html'),
+  path.join(__dirname, 'text-editor.html'),
+  path.join(__dirname, 'admin.html'),
+  path.join(__dirname, 'account.html'),
+  path.join(__dirname, 'calendar.html'),
+  path.join(__dirname, 'anamnesis.html'),
+  path.join(__dirname, 'notes.html'),
+  path.join(__dirname, 'tools.html')
+];
+const VERSIONED_ASSET_REPLACEMENTS = [
+  {
+    pattern: /<script src="courses\.generated\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g,
+    build: version => `<script src="courses.generated.js?v=${version}"></script>`
+  },
+  {
+    pattern: /<script src="js\/chat\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g,
+    build: version => `<script src="js/chat.js?v=${version}"></script>`
+  },
+  {
+    pattern: /<script src="(?:\.\/)?js\/account-system\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g,
+    build: version => `<script src="./js/account-system.js?v=${version}"></script>`
+  },
+  {
+    pattern: /<script src="js\/auth-guard\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g,
+    build: version => `<script src="js/auth-guard.js?v=${version}"></script>`
+  },
+  {
+    pattern: /<script src="js\/user-identity\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g,
+    build: version => `<script src="js/user-identity.js?v=${version}"></script>`
+  },
+  {
+    pattern: /<link\s+rel="stylesheet"\s+href="(?:\.\/)?css\/mobile-nav(?:-[^"']+)?\.css(?:\?v=[a-zA-Z0-9_]+)?">/g,
+    build: version => `<link rel="stylesheet" href="css/mobile-nav.css?v=${version}">`
+  },
+  {
+    pattern: /<script\s+src="(?:\.\/)?js\/mobile-nav(?:-[^"']+)?\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g,
+    build: version => `<script src="js/mobile-nav.js?v=${version}"></script>`
+  }
+];
 
 let generatedCourseContent = {};
 let generationStats = {
@@ -36,7 +88,7 @@ const quietLogPrefixes = [
 
 console.log = (...args) => {
   const first = String(args[0] || '');
-  const isNoisyHtmlUpdate = first.includes(' Updated ') && first.includes(' with version ');
+  const isNoisyHtmlUpdate = first.startsWith('Updated ') && first.includes(' with version ');
   const isNoisySavedVersion = first.includes('Saved version to:');
   const isNoisyMissingHtml = first.includes('Skipping ') || first.includes('No versioned script tags found');
   const isNoisy = quietLogPrefixes.some(prefix => first.startsWith(prefix)) ||
@@ -97,22 +149,6 @@ function getCustomText(folderName, nameMappings) {
   return '';
 }
 
-// Рекурсивна функция за получаване на всички файлове
-function getAllFiles(dirPath, arrayOfFiles = []) {
-  const files = fs.readdirSync(dirPath);
-
-  files.forEach(file => {
-    const filePath = path.join(dirPath, file);
-    if (fs.statSync(filePath).isDirectory()) {
-      arrayOfFiles = getAllFiles(filePath, arrayOfFiles);
-    } else {
-      arrayOfFiles.push(filePath);
-    }
-  });
-
-  return arrayOfFiles;
-}
-
 // Save ID mappings to file
 function saveIdMappings(mappings) {
   const data = JSON.stringify(mappings, null, 2);
@@ -120,23 +156,59 @@ function saveIdMappings(mappings) {
 }
 
 function writeCourseContentFiles() {
-  if (!fs.existsSync(COURSE_CONTENT_DIR)) {
-    fs.mkdirSync(COURSE_CONTENT_DIR, { recursive: true });
+  if (fs.existsSync(COURSE_CONTENT_DIR)) {
+    fs.rmSync(COURSE_CONTENT_DIR, { recursive: true, force: true });
   }
+  fs.mkdirSync(COURSE_CONTENT_DIR, { recursive: true });
 
-  fs.readdirSync(COURSE_CONTENT_DIR)
-    .filter(file => file.toLowerCase().endsWith('.js'))
-    .forEach(file => {
-      fs.unlinkSync(path.join(COURSE_CONTENT_DIR, file));
-    });
-
-  Object.entries(generatedCourseContent).forEach(([contentKey, contentMap]) => {
+  Object.entries(generatedCourseContent).forEach(([contentKey, content]) => {
     const outputPath = path.join(COURSE_CONTENT_DIR, `${contentKey}.js`);
-    const js = `(window.courseContent = window.courseContent || {})[${JSON.stringify(contentKey)}] = ${JSON.stringify(contentMap)};\n`;
+    fs.mkdirSync(path.dirname(outputPath), { recursive: true });
+    const js = `(window.courseContentFiles = window.courseContentFiles || {})[${JSON.stringify(contentKey)}] = ${JSON.stringify(content)};\n`;
     fs.writeFileSync(outputPath, js, 'utf8');
   });
 
   console.log(`Generated ${Object.keys(generatedCourseContent).length} course content file(s)`);
+}
+
+function getContentByPath(contentMap, filePath) {
+  if (!filePath) return '';
+  const normalizedPath = String(filePath).replace(/\\/g, '/');
+  return contentMap[filePath] || contentMap[normalizedPath] || '';
+}
+
+function forEachGeneratedFile(course, callback) {
+  function walkSection(section) {
+    if (section.msgNotes) {
+      section.msgNotes.forEach(callback);
+    }
+    if (section.files) {
+      section.files.forEach(callback);
+    }
+    if (section.subsections) {
+      section.subsections.forEach(walkSection);
+    }
+  }
+
+  if (course.sections) {
+    course.sections.forEach(walkSection);
+  }
+}
+
+function splitCourseContent(course, courseContentKey, contentMap) {
+  let contentIndex = 0;
+
+  forEachGeneratedFile(course, file => {
+    const content = getContentByPath(contentMap, file.path);
+    if (!content) return;
+
+    contentIndex += 1;
+    const fileContentKey = `${courseContentKey}/${String(contentIndex).padStart(4, '0')}`;
+    file._contentKey = fileContentKey;
+    generatedCourseContent[fileContentKey] = content;
+  });
+
+  return contentIndex;
 }
 
 // Get or assign ID for a course title
@@ -197,8 +269,6 @@ function readLinkTxtFile(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
     const lines = content.split(/\r?\n/);
     const links = [];
-
-    const isLikelyUrl = (value) => /^(https?:\/\/|mailto:|tel:)/i.test((value || '').trim());
 
     lines.forEach((rawLine, idx) => {
       const line = rawLine.trim();
@@ -272,19 +342,13 @@ function getAllCourses() {
   const subjects = fs.readdirSync(ELEMENTS_DIR, { withFileTypes: true })
     .filter(dirent => dirent.isDirectory() && !dirent.name.startsWith('.') && !dirent.name.startsWith('_'))
     .map(dirent => dirent.name);
+  const activeSubjectNames = new Set(subjects.map(stripArchivePrefix));
   
   // Clean up ID mappings - remove entries for courses that no longer exist
   const originalCount = Object.keys(idMappings).length;
   Object.keys(idMappings).forEach(courseTitle => {
-    // Check if the subject (stripped of archive prefix) still exists
-    let strippedCourseTitle = courseTitle;
-    if (strippedCourseTitle.startsWith('[АРХИВ] ')) {
-      strippedCourseTitle = strippedCourseTitle.replace('[АРХИВ] ', '');
-    }
-    if (!subjects.some(s => {
-      if (s.startsWith('[АРХИВ] ')) return s.replace('[АРХИВ] ', '') === strippedCourseTitle;
-      return s === strippedCourseTitle;
-    })) {
+    const normalizedCourseTitle = stripArchivePrefix(courseTitle);
+    if (!activeSubjectNames.has(normalizedCourseTitle)) {
       console.log(`Removing ID for deleted course: ${courseTitle} (ID: ${idMappings[courseTitle]})`);
       delete idMappings[courseTitle];
     }
@@ -296,11 +360,12 @@ function getAllCourses() {
   
   // Find gaps in existing IDs to reuse, or find the next available ID
   const existingIds = Object.values(idMappings).map(id => parseInt(id, 10)).sort((a, b) => a - b);
+  const existingIdSet = new Set(existingIds);
   let nextIdValue = 1;
   
   // Find the first gap in the sequence
   for (let i = 1; i <= existingIds.length; i++) {
-    if (!existingIds.includes(i)) {
+    if (!existingIdSet.has(i)) {
       nextIdValue = i;
       break;
     }
@@ -319,8 +384,8 @@ function getAllCourses() {
     let isArchivedFolder = false;
 
     // Check if the folder name indicates an archived course
-    if (subject.startsWith('[АРХИВ] ')) {
-      subjectForMapping = subject.replace('[АРХИВ] ', ''); // Strip prefix for mapping
+    if (subject.startsWith(ARCHIVE_PREFIX)) {
+      subjectForMapping = stripArchivePrefix(subject); // Strip prefix for mapping
       isArchivedFolder = true;
     }
 
@@ -363,74 +428,9 @@ function getAllCourses() {
   // Recursive function to process sections and subsections
   function processSection(sectionName, sectionPath, relativePath, nameMappings, courseContentMap) {
     const entries = fs.readdirSync(sectionPath, { withFileTypes: true });
-    
-    // Supported file extensions
-    const supportedExtensions = [
-      '.pdf', '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
-      '.jpg', '.jpeg', '.png', '.gif', '.bmp', '.webp', '.svg',
-      '.zip', '.rar', '.7z',
-      '.txt', '.log', '.md', '.html',
-      '.one', '.onetoc2',
-      '.url'
-    ];
-
     const linkTxtPath = path.join(sectionPath, 'link.txt');
     const folderLinks = readLinkTxtFile(linkTxtPath);
     const hasLinkTxtEntries = folderLinks.length > 0;
-    
-    // Helper function to extract order prefix and convert to sortable number
-    // Supports: 1-, 2-, 11-, 1.1-, 2.1-, 2.2-, 2.11-
-    function extractOrderPrefix(fileName) {
-      const match = fileName.match(/^([\d.]+)-/);
-      if (!match) return null;
-      
-      const prefix = match[1];
-      
-      // If it contains a dot, parse as decimal (e.g., "1.1" -> 1.1, "2.22" -> 2.22)
-      if (prefix.includes('.')) {
-        return parseFloat(prefix);
-      }
-      
-      // Otherwise, parse as integer (e.g., "1" -> 1, "11" -> 11)
-      return parseInt(prefix, 10);
-    }
-    
-    // Helper function to remove order prefix for display
-    function removeOrderPrefix(fileName) {
-      return fileName.replace(/^[\d.]+-/, '');
-    }
-    
-    // Custom sort function: files with prefix first (sorted by number), then files without prefix (alphabetically)
-    function sortFiles(fileList) {
-      return fileList.sort((a, b) => {
-        const hasOrderA = Number.isFinite(a.order);
-        const hasOrderB = Number.isFinite(b.order);
-        if (hasOrderA && hasOrderB) return a.order - b.order;
-        if (hasOrderA && !hasOrderB) return -1;
-        if (!hasOrderA && hasOrderB) return 1;
-
-        const orderA = extractOrderPrefix(a.name);
-        const orderB = extractOrderPrefix(b.name);
-        
-        // Both have order prefix - sort by number
-        if (orderA !== null && orderB !== null) {
-          return orderA - orderB;
-        }
-        
-        // Only A has prefix - A comes first
-        if (orderA !== null && orderB === null) {
-          return -1;
-        }
-        
-        // Only B has prefix - B comes first
-        if (orderA === null && orderB !== null) {
-          return 1;
-        }
-        
-        // Neither has prefix - sort alphabetically
-        return a.name.localeCompare(b.name, 'bg');
-      });
-    }
     
     // Get all supported files in this section
     // Separate msg files from regular files
@@ -447,7 +447,7 @@ function getAllCourses() {
         if (fileName.endsWith('.lnk') || fileName === 'desktop.ini') return false;
         // link.txt is a metadata file, not a visible file entry
         if (fileName === 'link.txt') return false;
-        return supportedExtensions.some(ext => fileName.endsWith(ext));
+        return SUPPORTED_EXTENSIONS.has(path.extname(fileName));
       })
       .forEach(file => {
         const fileName = file.name;
@@ -455,10 +455,10 @@ function getAllCourses() {
         const fileExt = path.extname(fileName).toLowerCase();
         
         // Check if it's a msg file (txt, md, html, or docx with "msg" in name)
-        if ((fileExt === '.txt' || fileExt === '.md' || fileExt === '.html' || fileExt === '.docx') && fileName.toLowerCase().includes('msg')) {
+        if (MESSAGE_NOTE_EXTENSIONS.has(fileExt) && fileName.toLowerCase().includes('msg')) {
           // Read content for txt, md, and html files
           let content = '';
-          if (fileExt === '.txt' || fileExt === '.md' || fileExt === '.html') {
+          if (INLINE_CONTENT_EXTENSIONS.has(fileExt)) {
             content = readTextFile(filePath);
             content = replaceColors(content);
           }
@@ -619,8 +619,10 @@ function getAllCourses() {
     const contentMap = course.__contentMap || {};
     if (Object.keys(contentMap).length > 0) {
       const contentKey = `${course.isArchived ? 'archived-' : ''}${course.id}`;
-      course._contentKey = contentKey;
-      generatedCourseContent[contentKey] = contentMap;
+      const splitCount = splitCourseContent(course, contentKey, contentMap);
+      if (splitCount > 0) {
+        course._contentKey = contentKey;
+      }
     }
     delete course.__contentMap;
   });
@@ -628,21 +630,48 @@ function getAllCourses() {
   return combinedCourses;
 }
 
-function updateHtmlFiles(version) {
-  // HTML files that need cache-busting updates
-  const htmlFiles = [
-    path.join(__dirname, 'index.html'),
-    path.join(__dirname, 'md-viewer.html'),
-    path.join(__dirname, 'text-editor.html'),
-    path.join(__dirname, 'admin.html'),
-    path.join(__dirname, 'account.html'),
-    path.join(__dirname, 'calendar.html'),
-    path.join(__dirname, 'anamnesis.html'),
-    path.join(__dirname, 'notes.html'),
-    path.join(__dirname, 'tools.html')
-  ];
+function stripArchivePrefix(value) {
+  return String(value || '').startsWith(ARCHIVE_PREFIX)
+    ? String(value).slice(ARCHIVE_PREFIX.length)
+    : String(value || '');
+}
 
-  htmlFiles.forEach(filePath => {
+function isLikelyUrl(value) {
+  return /^(https?:\/\/|mailto:|tel:)/i.test((value || '').trim());
+}
+
+// Extract order prefix and convert to sortable number.
+// Supports: 1-, 2-, 11-, 1.1-, 2.1-, 2.2-, 2.11-
+function extractOrderPrefix(fileName) {
+  const match = fileName.match(ORDER_PREFIX_PATTERN);
+  if (!match) return null;
+
+  const prefix = match[1];
+  return prefix.includes('.') ? parseFloat(prefix) : parseInt(prefix, 10);
+}
+
+// Custom sort function: files with prefix first (sorted by number), then files without prefix (alphabetically)
+function sortFiles(fileList) {
+  return fileList.sort((a, b) => {
+    const hasOrderA = Number.isFinite(a.order);
+    const hasOrderB = Number.isFinite(b.order);
+    if (hasOrderA && hasOrderB) return a.order - b.order;
+    if (hasOrderA && !hasOrderB) return -1;
+    if (!hasOrderA && hasOrderB) return 1;
+
+    const orderA = extractOrderPrefix(a.name);
+    const orderB = extractOrderPrefix(b.name);
+
+    if (orderA !== null && orderB !== null) return orderA - orderB;
+    if (orderA !== null && orderB === null) return -1;
+    if (orderA === null && orderB !== null) return 1;
+
+    return a.name.localeCompare(b.name, 'bg');
+  });
+}
+
+function updateHtmlFiles(version) {
+  HTML_FILE_PATHS.forEach(filePath => {
     if (!fs.existsSync(filePath)) {
       console.log(`⚠ Skipping ${path.basename(filePath)} - file not found`);
       return;
@@ -651,74 +680,20 @@ function updateHtmlFiles(version) {
     try {
       let content = fs.readFileSync(filePath, 'utf8');
       let updated = false;
-      
-      // 1. Replace courses.generated.js script tags
-      const coursesPattern = /<script src="courses\.generated\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
-      const newCoursesTag = `<script src="courses.generated.js?v=${version}"></script>`;
-      
-      if (coursesPattern.test(content)) {
-        content = content.replace(coursesPattern, newCoursesTag);
+
+      VERSIONED_ASSET_REPLACEMENTS.forEach(({ pattern, build }) => {
+        pattern.lastIndex = 0;
+        if (!pattern.test(content)) return;
+        pattern.lastIndex = 0;
+        content = content.replace(pattern, build(version));
         updated = true;
-      }
+      });
 
-      // 2. Replace js/chat.js script tags
-      const chatPattern = /<script src="js\/chat\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
-      const newChatTag = `<script src="js/chat.js?v=${version}"></script>`;
-      
-      if (chatPattern.test(content)) {
-        content = content.replace(chatPattern, newChatTag);
-        updated = true;
-      }
-
-      // 3. Replace js/account-system.js script tags
-      const accountPattern = /<script src="(?:\.\/)?js\/account-system\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
-      const newAccountTag = `<script src="./js/account-system.js?v=${version}"></script>`;
-      
-      if (accountPattern.test(content)) {
-        content = content.replace(accountPattern, newAccountTag);
-        updated = true;
-      }
-
-      // 4. Replace js/auth-guard.js script tags
-      const guardPattern = /<script src="js\/auth-guard\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
-      const newGuardTag = `<script src="js/auth-guard.js?v=${version}"></script>`;
-      
-      if (guardPattern.test(content)) {
-        content = content.replace(guardPattern, newGuardTag);
-        updated = true;
-      }
-
-      // 5. Replace js/user-identity.js script tags
-      const userIdentityPattern = /<script src="js\/user-identity\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
-      const newUserIdentityTag = `<script src="js/user-identity.js?v=${version}"></script>`;
-
-      if (userIdentityPattern.test(content)) {
-        content = content.replace(userIdentityPattern, newUserIdentityTag);
-        updated = true;
-      }
-
-      // 6. Replace shared mobile navigation assets
-      const mobileNavCssPattern = /<link\s+rel="stylesheet"\s+href="(?:\.\/)?css\/mobile-nav(?:-[^"']+)?\.css(?:\?v=[a-zA-Z0-9_]+)?">/g;
-      const newMobileNavCssTag = `<link rel="stylesheet" href="css/mobile-nav.css?v=${version}">`;
-
-      if (mobileNavCssPattern.test(content)) {
-        content = content.replace(mobileNavCssPattern, newMobileNavCssTag);
-        updated = true;
-      }
-
-      const mobileNavJsPattern = /<script\s+src="(?:\.\/)?js\/mobile-nav(?:-[^"']+)?\.js(?:\?v=[a-zA-Z0-9_]+)?"><\/script>/g;
-      const newMobileNavJsTag = `<script src="js/mobile-nav.js?v=${version}"></script>`;
-
-      if (mobileNavJsPattern.test(content)) {
-        content = content.replace(mobileNavJsPattern, newMobileNavJsTag);
-        updated = true;
-      }
-      
       if (updated) {
         fs.writeFileSync(filePath, content, 'utf8');
-        console.log(`✓ Updated ${path.basename(filePath)} with version ${version}`);
+        console.log(`Updated ${path.basename(filePath)} with version ${version}`);
       } else {
-        console.log(`⚠ No versioned script tags found in ${path.basename(filePath)}`);
+        console.log(`No versioned script tags found in ${path.basename(filePath)}`);
       }
     } catch (error) {
       console.error(`✗ Error updating ${path.basename(filePath)}:`, error.message);

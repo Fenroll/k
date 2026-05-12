@@ -1,4 +1,4 @@
-window.coursesVersion = "2026051215xf";
+window.coursesVersion = "202605121b7o";
 window.courses = [
   {
     "id": "000001",
@@ -244,17 +244,20 @@ window.courses = [
           {
             "name": "1-msg-Сърдечни тонове и шумове.html",
             "path": "files/Вътрешни болести 1 ч/Кардиология/1-msg-Сърдечни тонове и шумове.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0001"
           },
           {
             "name": "2-msg-ЕКГ.html",
             "path": "files/Вътрешни болести 1 ч/Кардиология/2-msg-ЕКГ.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0002"
           },
           {
             "name": "3-msg-Теми по Кардиология.html",
             "path": "files/Вътрешни болести 1 ч/Кардиология/3-msg-Теми по Кардиология.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0003"
           }
         ]
       },
@@ -273,17 +276,20 @@ window.courses = [
           {
             "name": "1-msg-Конспект.html",
             "path": "files/Вътрешни болести 1 ч/Общи материали/1-msg-Конспект.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0004"
           },
           {
             "name": "2-msg-Анамнеза и Статус.html",
             "path": "files/Вътрешни болести 1 ч/Общи материали/2-msg-Анамнеза и Статус.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0005"
           },
           {
             "name": "3-msg-Тестове От Мега за Изпит.html",
             "path": "files/Вътрешни болести 1 ч/Общи материали/3-msg-Тестове От Мега за Изпит.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0006"
           }
         ]
       },
@@ -300,22 +306,26 @@ window.courses = [
           {
             "name": "0-msg-Теми по Пулмология.html",
             "path": "files/Вътрешни болести 1 ч/Пулмология/0-msg-Теми по Пулмология.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0007"
           },
           {
             "name": "1-msg-Изследвания в Пулмологията.html",
             "path": "files/Вътрешни болести 1 ч/Пулмология/1-msg-Изследвания в Пулмологията.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0008"
           },
           {
             "name": "16-msg-Пулмонална хипертония.html",
             "path": "files/Вътрешни болести 1 ч/Пулмология/16-msg-Пулмонална хипертония.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0009"
           },
           {
             "name": "20-msg-Белодробна хипертония 2.html",
             "path": "files/Вътрешни болести 1 ч/Пулмология/20-msg-Белодробна хипертония 2.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0010"
           }
         ]
       },
@@ -326,7 +336,8 @@ window.courses = [
           {
             "name": "1-msg-Теми по Ревматология.html",
             "path": "files/Вътрешни болести 1 ч/Ревматология/1-msg-Теми по Ревматология.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000002/0011"
           }
         ]
       }
@@ -396,17 +407,20 @@ window.courses = [
           {
             "name": "1-msg-Конспект.html",
             "path": "files/Клинична Патология/Изпит/1-msg-Конспект.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0001"
           },
           {
             "name": "2-msg-Микроскопски препарати.html",
             "path": "files/Клинична Патология/Изпит/2-msg-Микроскопски препарати.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0002"
           },
           {
             "name": "3-msg-Клинични задачи.html",
             "path": "files/Клинична Патология/Изпит/3-msg-Клинични задачи.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0003"
           }
         ]
       },
@@ -417,12 +431,14 @@ window.courses = [
           {
             "name": "3-msg-Отделителна и Нервна система.html",
             "path": "files/Клинична Патология/Колоквиуми/3-msg-Отделителна и Нервна система.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0004"
           },
           {
             "name": "4-msg-Полови системи и новородено.html",
             "path": "files/Клинична Патология/Колоквиуми/4-msg-Полови системи и новородено.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0005"
           }
         ]
       },
@@ -433,57 +449,68 @@ window.courses = [
           {
             "name": "1-msg-Дихателна система.html",
             "path": "files/Клинична Патология/Теми/1-msg-Дихателна система.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0006"
           },
           {
             "name": "2-msg-Сърдечно-съдова система.html",
             "path": "files/Клинична Патология/Теми/2-msg-Сърдечно-съдова система.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0007"
           },
           {
             "name": "3-msg-Храносмилателна система.html",
             "path": "files/Клинична Патология/Теми/3-msg-Храносмилателна система.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0008"
           },
           {
             "name": "4-msg-Отделителна система.html",
             "path": "files/Клинична Патология/Теми/4-msg-Отделителна система.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0009"
           },
           {
             "name": "5-msg-Кръвотворна и лимфоидна система.html",
             "path": "files/Клинична Патология/Теми/5-msg-Кръвотворна и лимфоидна система.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0010"
           },
           {
             "name": "6-msg-Мъжка полова система.html",
             "path": "files/Клинична Патология/Теми/6-msg-Мъжка полова система.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0011"
           },
           {
             "name": "7-msg-Женска полова система.html",
             "path": "files/Клинична Патология/Теми/7-msg-Женска полова система.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0012"
           },
           {
             "name": "8-msg-Бременност и Новороденото дете.html",
             "path": "files/Клинична Патология/Теми/8-msg-Бременност и Новороденото дете.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0013"
           },
           {
             "name": "9-msg-Инфекциозна патология.html",
             "path": "files/Клинична Патология/Теми/9-msg-Инфекциозна патология.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0014"
           },
           {
             "name": "10-msg-Ендокринна система.html",
             "path": "files/Клинична Патология/Теми/10-msg-Ендокринна система.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0015"
           },
           {
             "name": "11-msg-Нервна система.html",
             "path": "files/Клинична Патология/Теми/11-msg-Нервна система.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000003/0016"
           }
         ]
       }
@@ -511,12 +538,14 @@ window.courses = [
           {
             "name": "1-msg-Конспект.html",
             "path": "files/Неврология/Изпит/1-msg-Конспект.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000004/0001"
           },
           {
             "name": "2-msg-Нервен статус.html",
             "path": "files/Неврология/Изпит/2-msg-Нервен статус.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000004/0002"
           }
         ]
       },
@@ -535,7 +564,8 @@ window.courses = [
           {
             "name": "4-msg-Глупости.html",
             "path": "files/Неврология/Клинична Неврология/4-msg-Глупости.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000004/0003"
           }
         ]
       },
@@ -554,7 +584,8 @@ window.courses = [
           {
             "name": "1-msg-Обща Неврология.html",
             "path": "files/Неврология/Обща Неврология/1-msg-Обща Неврология.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000004/0004"
           }
         ]
       }
@@ -574,12 +605,14 @@ window.courses = [
           {
             "name": "1-msg-Колоквиум 1.html",
             "path": "files/Обща медицина/Материали/1-msg-Колоквиум 1.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000005/0001"
           },
           {
             "name": "2-msg-Колоквиум 2.html",
             "path": "files/Обща медицина/Материали/2-msg-Колоквиум 2.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000005/0002"
           }
         ]
       }
@@ -607,12 +640,14 @@ window.courses = [
           {
             "name": "1-msg-Обривни елементи.html",
             "path": "files/Дерматология и венерология/Общи материали/1-msg-Обривни елементи.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000006/0001"
           },
           {
             "name": "2-msg-Методи на изследване в дерматологията - клинични, лабораторни.html",
             "path": "files/Дерматология и венерология/Общи материали/2-msg-Методи на изследване в дерматологията - клинични, лабораторни.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000006/0002"
           }
         ]
       },
@@ -691,12 +726,14 @@ window.courses = [
           {
             "name": "1-msg-Аборт.html",
             "path": "files/Акушерство и Гинекология/Теми/1-msg-Аборт.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000007/0001"
           },
           {
             "name": "3-msg-Нормален и патологичен пуерпериум.html",
             "path": "files/Акушерство и Гинекология/Теми/3-msg-Нормален и патологичен пуерпериум.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000007/0002"
           }
         ]
       }
@@ -716,7 +753,8 @@ window.courses = [
           {
             "name": "1-msg-Въпроси.html",
             "path": "files/Клинична лаборатория/Изпит/1-msg-Въпроси.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000008/0001"
           }
         ]
       },
@@ -973,7 +1011,8 @@ window.courses = [
           {
             "name": "1-msg-Тест.html",
             "path": "files/Очни болести/Колоквиум/1-msg-Тест.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000010/0001"
           }
         ]
       }
@@ -1015,37 +1054,44 @@ window.courses = [
           {
             "name": "1-msg-Тема 1. Галваничен ток.html",
             "path": "files/Физиотерапия и рехабилитация/Материали/1-msg-Тема 1. Галваничен ток.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000012/0001"
           },
           {
             "name": "2-msg-Тема 2. Нискочестотна импулсна терапия.html",
             "path": "files/Физиотерапия и рехабилитация/Материали/2-msg-Тема 2. Нискочестотна импулсна терапия.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000012/0002"
           },
           {
             "name": "3-msg-Тема 3. Диадинамични токове.html",
             "path": "files/Физиотерапия и рехабилитация/Материали/3-msg-Тема 3. Диадинамични токове.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000012/0003"
           },
           {
             "name": "4-msg-Тема 4. Интерферентни токове.html",
             "path": "files/Физиотерапия и рехабилитация/Материали/4-msg-Тема 4. Интерферентни токове.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000012/0004"
           },
           {
             "name": "5-msg-Тема 5. Магнитотерапия. Ултразвук и Фонофореза..html",
             "path": "files/Физиотерапия и рехабилитация/Материали/5-msg-Тема 5. Магнитотерапия. Ултразвук и Фонофореза..html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000012/0005"
           },
           {
             "name": "6-msg-Тема 6. Токове с високо напрежение и висока честота.html",
             "path": "files/Физиотерапия и рехабилитация/Материали/6-msg-Тема 6. Токове с високо напрежение и висока честота.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000012/0006"
           },
           {
             "name": "7-msg-Тема 7. Фототерапия и Лазертерапия..html",
             "path": "files/Физиотерапия и рехабилитация/Материали/7-msg-Тема 7. Фототерапия и Лазертерапия..html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000012/0007"
           }
         ]
       }
@@ -1065,27 +1111,32 @@ window.courses = [
           {
             "name": "0-msg-Колоквиум.html",
             "path": "files/Хирургически болести/Гръдна хирургия/0-msg-Колоквиум.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000013/0001"
           },
           {
             "name": "1-msg-Заболявания на млечна жлеза.html",
             "path": "files/Хирургически болести/Гръдна хирургия/1-msg-Заболявания на млечна жлеза.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000013/0002"
           },
           {
             "name": "2-msg-Хирургически заболявания на щитовидната жлеза.html",
             "path": "files/Хирургически болести/Гръдна хирургия/2-msg-Хирургически заболявания на щитовидната жлеза.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000013/0003"
           },
           {
             "name": "3-msg-Възпалителни заболявания на белия дроб.html",
             "path": "files/Хирургически болести/Гръдна хирургия/3-msg-Възпалителни заболявания на белия дроб.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000013/0004"
           },
           {
             "name": "4-msg-Ехинококоза на белия дроб.html",
             "path": "files/Хирургически болести/Гръдна хирургия/4-msg-Ехинококоза на белия дроб.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "000013/0005"
           }
         ]
       }
@@ -1111,7 +1162,8 @@ window.courses = [
           {
             "name": "1-msg-Теми.html",
             "path": "files/[АРХИВ] УНГ/Изпит/1-msg-Теми.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000001/0001"
           }
         ]
       }
@@ -1131,17 +1183,20 @@ window.courses = [
           {
             "name": "1-msg-Изпитни задачи.html",
             "path": "files/[АРХИВ] Фармакология/Изпит/1-msg-Изпитни задачи.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000002/0001"
           },
           {
             "name": "2-msg-Задачи от колоквиуми.html",
             "path": "files/[АРХИВ] Фармакология/Изпит/2-msg-Задачи от колоквиуми.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000002/0002"
           },
           {
             "name": "3-msg-Полезни записки.html",
             "path": "files/[АРХИВ] Фармакология/Изпит/3-msg-Полезни записки.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000002/0003"
           }
         ]
       },
@@ -1152,17 +1207,20 @@ window.courses = [
           {
             "name": "1-msg-Въпроси.html",
             "path": "files/[АРХИВ] Фармакология/Колоквиум IV/1-msg-Въпроси.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000002/0004"
           },
           {
             "name": "2-msg-Лекарства за колоквиум.html",
             "path": "files/[АРХИВ] Фармакология/Колоквиум IV/2-msg-Лекарства за колоквиум.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000002/0005"
           },
           {
             "name": "3-msg-Всички лекции.html",
             "path": "files/[АРХИВ] Фармакология/Колоквиум IV/3-msg-Всички лекции.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000002/0006"
           }
         ]
       }
@@ -1182,12 +1240,14 @@ window.courses = [
           {
             "name": "1-msg-Теми.html",
             "path": "files/[АРХИВ] Клинична Генетика/Изпит/1-msg-Теми.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000003/0001"
           },
           {
             "name": "2-msg-Въпроси.html",
             "path": "files/[АРХИВ] Клинична Генетика/Изпит/2-msg-Въпроси.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000003/0002"
           }
         ]
       }
@@ -1207,12 +1267,14 @@ window.courses = [
           {
             "name": "1-msg-Теми.html",
             "path": "files/[АРХИВ] Клинична имунология/Материали/1-msg-Теми.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000004/0001"
           },
           {
             "name": "2-msg-Въпроси.html",
             "path": "files/[АРХИВ] Клинична имунология/Материали/2-msg-Въпроси.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000004/0002"
           }
         ]
       }
@@ -1232,17 +1294,20 @@ window.courses = [
           {
             "name": "1-msg-Рентгенология.html",
             "path": "files/[АРХИВ] Рентгенология/Изпит/1-msg-Рентгенология.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000005/0001"
           },
           {
             "name": "2-msg-Нуклеарна медицина.html",
             "path": "files/[АРХИВ] Рентгенология/Изпит/2-msg-Нуклеарна медицина.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000005/0002"
           },
           {
             "name": "3-msg-Лъчелечение.html",
             "path": "files/[АРХИВ] Рентгенология/Изпит/3-msg-Лъчелечение.html",
-            "type": "html"
+            "type": "html",
+            "_contentKey": "archived-000005/0003"
           }
         ]
       },
@@ -1270,4 +1335,4 @@ window.courses = [
     "_contentKey": "archived-000005"
   }
 ];
-window.buildTimestamp = "12.05.2026 15:05";
+window.buildTimestamp = "12.05.2026 16:59";

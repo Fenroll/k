@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026051215xf"></script>
+  <script src="js/auth-guard.js?v=202605121b7o"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026051215xf">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605121b7o">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -896,6 +896,154 @@
       display: none;
     }
 
+    .combine-file-row,
+    .combine-selected-row {
+      padding: 9px 12px;
+      border-bottom: 1px solid #eef0ed;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      background: #fff;
+      transition: background 0.16s ease, box-shadow 0.16s ease, transform 0.16s ease, opacity 0.16s ease;
+    }
+
+    .combine-file-row:hover,
+    .combine-selected-row:hover {
+      background: #f3f7f2;
+    }
+
+    .combine-file-name,
+    .combine-selected-name {
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #1f2937;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .combine-file-path,
+    .combine-selected-path {
+      font-size: 0.78rem;
+      color: #6b7280;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    .combine-selected-row {
+      cursor: grab;
+    }
+
+    .combine-selected-row:hover {
+      box-shadow: inset 3px 0 0 #a3b18a;
+      transform: translateX(1px);
+    }
+
+    .combine-selected-row.dragging {
+      opacity: 0.42;
+      cursor: grabbing;
+      background: #eef5eb;
+      box-shadow: 0 10px 24px rgba(31, 41, 55, 0.12);
+      transform: scale(0.99);
+    }
+
+    .combine-selected-row.drag-over-before {
+      box-shadow: inset 0 3px 0 #588157;
+    }
+
+    .combine-selected-row.drag-over-after {
+      box-shadow: inset 0 -3px 0 #588157;
+    }
+
+    .combine-row-actions {
+      display: inline-flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .combine-row-actions button {
+      border: 1px solid #d1d5db;
+      background: #fff;
+      border-radius: 6px;
+      min-width: 30px;
+      height: 30px;
+      cursor: pointer;
+      color: #374151;
+      transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, transform 0.12s ease;
+    }
+
+    .combine-row-actions button:hover {
+      background: #588157;
+      border-color: #588157;
+      color: #fff;
+      transform: translateY(-1px);
+    }
+
+    .combine-row-actions button:active {
+      transform: translateY(0);
+    }
+
+    #combineHtmlModal .modal-content {
+      max-height: calc(100vh - 32px);
+      overflow-y: auto;
+    }
+
+    #combineHtmlModal .modal-body {
+      overflow: visible !important;
+      max-height: none !important;
+    }
+
+    #combineHtmlModal .modal-body > div,
+    #combineFileList,
+    #combineSelectedList {
+      min-height: 0;
+    }
+
+    #combineFileList,
+    #combineSelectedList {
+      max-height: 52vh;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: #a3b18a #f3f4f6;
+    }
+
+    #combineFileList::-webkit-scrollbar,
+    #combineSelectedList::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    #combineFileList::-webkit-scrollbar-track,
+    #combineSelectedList::-webkit-scrollbar-track {
+      background: #f3f4f6;
+      border-radius: 999px;
+    }
+
+    #combineFileList::-webkit-scrollbar-thumb,
+    #combineSelectedList::-webkit-scrollbar-thumb {
+      background: #a3b18a;
+      border-radius: 999px;
+    }
+
+    .combine-empty-state {
+      padding: 16px;
+      color: #6b7280;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 900px) {
+      #combineHtmlModal .modal-body {
+        grid-template-columns: 1fr !important;
+      }
+      #combineFileList,
+      #combineSelectedList {
+        min-height: 180px !important;
+        max-height: none !important;
+      }
+    }
+
     /* Course group header */
     .course-header {
       padding: 10px 16px;
@@ -1770,6 +1918,7 @@
     <div class="toolbar-group mobile-extra merge-right">
       <button id="openLocalBtn" title="Open file from computer"><img src="svg/md-editor/icon-open-local.svg?v=2026031715gu" alt="Open Local" class="toolbar-icon"></button>
       <button id="openCoursesBtn" title="Open file from courses"><img src="svg/md-editor/icon-open-courses.svg?v=2026031715gu" alt="Open Courses" class="toolbar-icon"></button>
+      <button id="combineHtmlBtn" title="Combine course HTML files"><img src="svg/md-editor/icon-combine.svg?v=2026031715gu" alt="Combine" class="toolbar-icon"></button>
     </div>
     <div class="toolbar-group">
       <button id="downloadBtn" title="Download as .html file"><img src="svg/md-editor/icon-download.svg?v=2026031715gu" alt="Download" class="toolbar-icon"></button>
@@ -1942,6 +2091,42 @@
         <div style="flex: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px;">
           <div id="fileList" style="padding: 0;"></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Combine HTML Files Modal -->
+  <div id="combineHtmlModal" class="modal">
+    <div class="modal-content" style="width: min(94vw, 980px); max-width: 980px;">
+      <div class="modal-header">
+        <h2>Combine Course Files</h2>
+        <span class="close" id="closeCombineHtmlBtn">&times;</span>
+      </div>
+      <div class="modal-body" style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 360px); gap: 14px; max-height: 68vh; overflow: hidden;">
+        <div style="min-width: 0; display: flex; flex-direction: column; gap: 10px;">
+          <input type="text" id="combineFileSearchInput" placeholder="Search course files..." style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 14px;">
+          <div id="combineFileList" style="flex: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; min-height: 320px;"></div>
+        </div>
+        <div style="min-width: 0; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; gap: 8px; align-items: center; justify-content: space-between;">
+            <strong style="font-size: 0.95rem; color: #374151;">Selected order</strong>
+            <button type="button" id="clearCombineSelectionBtn" style="border: 1px solid #d1d5db; background: #fff; border-radius: 6px; padding: 6px 10px; cursor: pointer;">Clear</button>
+          </div>
+          <div id="combineSelectedList" style="flex: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px; min-height: 260px; background: #fafafa;"></div>
+          <label style="display: flex; gap: 8px; align-items: center; font-size: 0.9rem; color: #374151;">
+            <input type="checkbox" id="combineInsertHeadingsInput" checked>
+            Add heading before each file
+          </label>
+          <label style="display: flex; gap: 8px; align-items: center; font-size: 0.9rem; color: #374151;">
+            <input type="checkbox" id="combineReplaceEditorInput" checked>
+            Replace current editor content
+          </label>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; gap: 8px; justify-content: flex-end; align-items: center;">
+        <span id="combineHtmlStatus" style="margin-right: auto; font-size: 0.85rem; color: #6b7280;"></span>
+        <button type="button" id="combineSortByCourseBtn">Sort by course order</button>
+        <button class="primary" id="confirmCombineHtmlBtn">Combine</button>
       </div>
     </div>
   </div>
@@ -2138,7 +2323,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=2026051215xf"></script>
+  <script src="courses.generated.js?v=202605121b7o"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -2182,17 +2367,70 @@
       return course._contentKey || course.id || null;
     }
 
+    function getVersionedCourseDataUrl(contentKey) {
+      const rawUrl = 'courses-data/' + contentKey + '.js';
+      return (window.VersionManager && typeof window.VersionManager.versionedUrl === 'function')
+        ? window.VersionManager.versionedUrl(rawUrl)
+        : (rawUrl + ((window.coursesVersion || '') ? ('?v=' + window.coursesVersion) : ''));
+    }
+
+    function loadCourseDataScript(contentKey) {
+      if (!contentKey) return Promise.resolve(false);
+      window.loadingCourseDataScripts = window.loadingCourseDataScripts || {};
+      if (window.loadingCourseDataScripts[contentKey]) {
+        return window.loadingCourseDataScripts[contentKey];
+      }
+
+      window.loadingCourseDataScripts[contentKey] = new Promise((resolve) => {
+        const script = document.createElement('script');
+        script.src = getVersionedCourseDataUrl(contentKey);
+        script.onload = () => resolve(true);
+        script.onerror = () => resolve(false);
+        document.head.appendChild(script);
+      });
+
+      return window.loadingCourseDataScripts[contentKey];
+    }
+
+    function getContentFromLoadedMaps(contentKey, filePath, groupKey) {
+      if (contentKey && window.courseContentFiles && window.courseContentFiles[contentKey]) {
+        return window.courseContentFiles[contentKey];
+      }
+
+      if (groupKey && filePath && window.courseContent && window.courseContent[groupKey]) {
+        const contentMap = window.courseContent[groupKey];
+        const normalizedPath = filePath.replace(/\\/g, '/');
+        return contentMap[filePath] || contentMap[normalizedPath] || null;
+      }
+
+      return null;
+    }
+
+    function mergeLoadedFileContent(file, course) {
+      if (!file || file.content) return !!(file && file.content);
+      const groupKey = getCourseContentKey(course || file.courseRef);
+      const loadedContent = getContentFromLoadedMaps(file._contentKey, file.path, groupKey);
+      if (loadedContent) {
+        file.content = loadedContent;
+      }
+      return !!file.content;
+    }
+
     function mergeCourseContent(course, contentKey) {
-      if (!course || !contentKey || !window.courseContent || !window.courseContent[contentKey]) return;
-      const contentMap = window.courseContent[contentKey];
+      if (!course || !contentKey) return;
+      const contentMap = window.courseContent && window.courseContent[contentKey];
 
       function mergeSection(section) {
         if (section.msgNotes) {
           section.msgNotes.forEach(note => {
-            if (!note.content && contentMap[note.path]) {
+            if (contentMap && !note.content && contentMap[note.path]) {
               note.content = contentMap[note.path];
             }
+            mergeLoadedFileContent(note, course);
           });
+        }
+        if (section.files) {
+          section.files.forEach(file => mergeLoadedFileContent(file, course));
         }
         if (section.subsections) {
           section.subsections.forEach(mergeSection);
@@ -2239,24 +2477,50 @@
           return;
         }
 
-        const script = document.createElement('script');
-        const rawUrl = 'courses-data/' + contentKey + '.js';
-        script.src = (window.VersionManager && typeof window.VersionManager.versionedUrl === 'function')
-          ? window.VersionManager.versionedUrl(rawUrl)
-          : (rawUrl + ((window.coursesVersion || '') ? ('?v=' + window.coursesVersion) : ''));
-        script.onload = () => {
+        const contentKeys = [];
+        forEachSectionRecursive({ subsections: course.sections || [] }, section => {
+          if (section.msgNotes) {
+            section.msgNotes.forEach(note => {
+              if (note._contentKey && !note.content) contentKeys.push(note._contentKey);
+            });
+          }
+          if (section.files) {
+            section.files.forEach(file => {
+              if (file._contentKey && !file.content) contentKeys.push(file._contentKey);
+            });
+          }
+        });
+
+        if (contentKeys.length === 0) {
+          loadCourseDataScript(contentKey).then(loaded => {
+            if (loaded) {
+              mergeCourseContent(course, contentKey);
+            }
+            resolve(loaded);
+          });
+          return;
+        }
+
+        Promise.all(contentKeys.map(loadCourseDataScript)).then(results => {
           mergeCourseContent(course, contentKey);
-          resolve(true);
-        };
-        script.onerror = () => {
-          resolve(false);
-        };
-        document.head.appendChild(script);
+          resolve(results.some(Boolean));
+        });
       });
+    }
+
+    async function loadSingleFileContent(file) {
+      if (!file || file.content) return !!(file && file.content);
+      if (!file._contentKey) return false;
+      if (mergeLoadedFileContent(file, file.courseRef)) return true;
+      const loaded = await loadCourseDataScript(file._contentKey);
+      if (!loaded) return false;
+      return mergeLoadedFileContent(file, file.courseRef);
     }
 
     async function ensureFileContent(file) {
       if (!file) return file;
+      if (file.content) return file;
+      await loadSingleFileContent(file);
       if (file.content) return file;
 
       const resolveContentFromCourse = () => {
@@ -4936,6 +5200,64 @@
       e.target.value = '';
     });
 
+    function getCourseEditableFiles() {
+      const filesByCourse = {};
+      const allFiles = [];
+      if (typeof courses === 'undefined') {
+        return { filesByCourse, allFiles };
+      }
+
+      courses.forEach((course, courseIndex) => {
+        const courseName = course.title || course.name || 'Unknown';
+        filesByCourse[courseName] = [];
+
+        if (!course.sections) return;
+        course.sections.forEach((rootSection, rootSectionIndex) => {
+          forEachSectionRecursive(rootSection, section => {
+            const addFile = (sourceFile, fallbackType) => {
+              if (!sourceFile || !sourceFile.path || !sourceFile.path.match(/\.(html|md|txt)$/i)) return;
+              const file = {
+                name: sourceFile.name,
+                path: sourceFile.path,
+                content: sourceFile.content,
+                _contentKey: sourceFile._contentKey,
+                type: sourceFile.type || fallbackType || (sourceFile.path.match(/\.html$/i) ? 'html' : (sourceFile.path.match(/\.txt$/i) ? 'text' : 'markdown')),
+                courseName,
+                sectionName: section.name,
+                courseRef: course,
+                courseIndex,
+                rootSectionIndex,
+                originalRef: sourceFile
+              };
+              filesByCourse[courseName].push(file);
+              allFiles.push(file);
+            };
+
+            if (section.msgNotes) {
+              section.msgNotes.forEach(note => {
+                addFile(note, note.type || (note.path && note.path.match(/\.html$/i) ? 'html' : (note.path && note.path.match(/\.txt$/i) ? 'text' : 'markdown')));
+              });
+            }
+
+            if (section.files) {
+              section.files.forEach(file => addFile(file));
+            }
+          });
+        });
+      });
+
+      return { filesByCourse, allFiles };
+    }
+
+    function getCleanCourseFileName(file) {
+      return (file.name || file.path || 'document')
+        .split('/')
+        .pop()
+        .replace(/^\d+(\.\d+)?-/, '')
+        .replace(/^msg-/i, '')
+        .replace(/\.(md|txt|html)$/i, '');
+    }
+
     // Open .md/.html file from courses data
     document.getElementById('openCoursesBtn').addEventListener('click', () => {
       // Check if courses data is available
@@ -4960,6 +5282,7 @@
                     name: note.name,
                     path: note.path,
                     content: note.content,
+                    _contentKey: note._contentKey,
                     type: note.type,
                     courseName: courseName,
                     sectionName: section.name,
@@ -4976,6 +5299,7 @@
                     name: file.name,
                     path: file.path,
                     content: file.content,
+                    _contentKey: file._contentKey,
                     type: file.type || (file.path.match(/\.html$/i) ? 'html' : 'markdown'),
                     courseName: courseName,
                     sectionName: section.name,
@@ -5066,6 +5390,254 @@
         }
       });
     });
+
+    const combineSelectedFiles = [];
+
+    function renderCombineAvailableFiles(filesByCourse, searchText = '') {
+      const list = document.getElementById('combineFileList');
+      const query = searchText.trim().toLowerCase();
+      list.innerHTML = '';
+
+      Object.keys(filesByCourse).forEach(courseName => {
+        const files = filesByCourse[courseName].filter(file => {
+          if (!query) return true;
+          return (file.courseName + ' ' + file.sectionName + ' ' + file.name + ' ' + file.path).toLowerCase().includes(query);
+        });
+        if (files.length === 0) return;
+
+        const header = document.createElement('div');
+        header.className = 'course-header';
+        header.textContent = courseName;
+        list.appendChild(header);
+
+        files.forEach(file => {
+          const row = document.createElement('div');
+          row.className = 'combine-file-row';
+          row.innerHTML = `
+            <div style="min-width: 0;">
+              <div class="combine-file-name">${escapeHtml(getCleanCourseFileName(file))}</div>
+              <div class="combine-file-path">${escapeHtml(file.sectionName || '')}</div>
+            </div>
+            <div class="combine-row-actions">
+              <button type="button" title="Add">+</button>
+            </div>
+          `;
+          row.querySelector('button').addEventListener('click', () => addFileToCombineSelection(file));
+          row.addEventListener('dblclick', () => addFileToCombineSelection(file));
+          list.appendChild(row);
+        });
+      });
+
+      if (!list.children.length) {
+        list.innerHTML = '<div class="combine-empty-state">No matching files.</div>';
+      }
+    }
+
+    function renderCombineSelectedFiles() {
+      const selectedList = document.getElementById('combineSelectedList');
+      const status = document.getElementById('combineHtmlStatus');
+      selectedList.innerHTML = '';
+      status.textContent = combineSelectedFiles.length
+        ? `${combineSelectedFiles.length} file${combineSelectedFiles.length === 1 ? '' : 's'} selected`
+        : '';
+
+      if (combineSelectedFiles.length === 0) {
+        selectedList.innerHTML = '<div class="combine-empty-state">Add files, then arrange them here.</div>';
+        return;
+      }
+
+      combineSelectedFiles.forEach((file, index) => {
+        const row = document.createElement('div');
+        row.className = 'combine-selected-row';
+        row.draggable = true;
+        row.dataset.index = String(index);
+        row.innerHTML = `
+          <div style="min-width: 0;">
+            <div class="combine-selected-name">${escapeHtml(getCleanCourseFileName(file))}</div>
+            <div class="combine-selected-path">${escapeHtml(file.courseName)} / ${escapeHtml(file.sectionName || '')}</div>
+          </div>
+          <div class="combine-row-actions">
+            <button type="button" title="Remove" data-action="remove" data-index="${index}">×</button>
+          </div>
+        `;
+        selectedList.appendChild(row);
+      });
+    }
+
+    function addFileToCombineSelection(file) {
+      if (!file || combineSelectedFiles.some(selected => selected.path === file.path)) return;
+      combineSelectedFiles.push(file);
+      renderCombineSelectedFiles();
+    }
+
+    function htmlContentToEditorFragment(content, file) {
+      if (file.type === 'html' || /\.html$/i.test(file.path || '') || String(content || '').includes('<!DOCTYPE')) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(content || '', 'text/html');
+        return normalizeHtmlForEditor(doc.body.innerHTML.trim());
+      }
+
+      return normalizeHtmlForEditor(markdownToHtml(content || ''));
+    }
+
+    function openCombineHtmlModal() {
+      if (typeof courses === 'undefined') {
+        showNotification('Courses data not found. Please make sure courses.generated.js is loaded.', 'error');
+        return;
+      }
+
+      const { filesByCourse } = getCourseEditableFiles();
+      const searchInput = document.getElementById('combineFileSearchInput');
+      searchInput.value = '';
+      renderCombineAvailableFiles(filesByCourse);
+      renderCombineSelectedFiles();
+      document.getElementById('combineHtmlModal').style.display = 'flex';
+      searchInput.focus();
+      searchInput.oninput = () => renderCombineAvailableFiles(filesByCourse, searchInput.value);
+    }
+
+    async function combineSelectedHtmlFiles() {
+      if (combineSelectedFiles.length === 0) {
+        showNotification('Choose at least one file to combine.', 'warning');
+        return;
+      }
+
+      const confirmButton = document.getElementById('confirmCombineHtmlBtn');
+      const status = document.getElementById('combineHtmlStatus');
+      const addHeadings = document.getElementById('combineInsertHeadingsInput').checked;
+      const replaceEditor = document.getElementById('combineReplaceEditorInput').checked;
+
+      confirmButton.disabled = true;
+      confirmButton.textContent = 'Combining...';
+      status.textContent = 'Loading selected files...';
+
+      try {
+        const parts = [];
+        for (const file of combineSelectedFiles) {
+          await ensureFileContent(file);
+          if (!file.content && file.originalRef) {
+            await ensureFileContent(file.originalRef);
+            file.content = file.originalRef.content;
+          }
+          if (!file.content) continue;
+
+          if (addHeadings) {
+            parts.push(`<h1>${escapeHtml(getCleanCourseFileName(file))}</h1>`);
+          }
+          parts.push(htmlContentToEditorFragment(file.content, file));
+        }
+
+        if (parts.length === 0) {
+          showNotification('No selected file content could be loaded.', 'error');
+          return;
+        }
+
+        const combinedHtml = normalizeHtmlForEditor(parts.join('<hr>'), { preserveKatex: true });
+        if (replaceEditor) {
+          editor.innerHTML = combinedHtml;
+        } else {
+          editor.insertAdjacentHTML('beforeend', '<hr>' + combinedHtml);
+        }
+
+        currentFileInfo = {
+          name: 'combined-course-files',
+          number: '',
+          isFromCourses: true
+        };
+        saveToHistory();
+        scheduleEditorAutoSave();
+        document.getElementById('combineHtmlModal').style.display = 'none';
+        showNotification(`Combined ${combineSelectedFiles.length} file${combineSelectedFiles.length === 1 ? '' : 's'} into the editor.`, 'success');
+      } finally {
+        confirmButton.disabled = false;
+        confirmButton.textContent = 'Combine';
+      }
+    }
+
+    document.getElementById('combineHtmlBtn').addEventListener('click', openCombineHtmlModal);
+    document.getElementById('closeCombineHtmlBtn').addEventListener('click', () => {
+      document.getElementById('combineHtmlModal').style.display = 'none';
+    });
+    document.getElementById('combineHtmlModal').addEventListener('click', (e) => {
+      if (e.target.id === 'combineHtmlModal') {
+        document.getElementById('combineHtmlModal').style.display = 'none';
+      }
+    });
+    document.getElementById('clearCombineSelectionBtn').addEventListener('click', () => {
+      combineSelectedFiles.length = 0;
+      renderCombineSelectedFiles();
+    });
+    document.getElementById('combineSortByCourseBtn').addEventListener('click', () => {
+      combineSelectedFiles.sort((a, b) =>
+        (a.courseIndex - b.courseIndex) ||
+        (a.rootSectionIndex - b.rootSectionIndex) ||
+        String(a.path || '').localeCompare(String(b.path || ''), 'bg')
+      );
+      renderCombineSelectedFiles();
+    });
+    const combineSelectedListEl = document.getElementById('combineSelectedList');
+    combineSelectedListEl.addEventListener('click', (e) => {
+      const button = e.target.closest('button[data-action]');
+      if (!button) return;
+
+      const index = Number(button.dataset.index);
+      const action = button.dataset.action;
+      if (!Number.isFinite(index)) return;
+
+      if (action === 'remove') {
+        combineSelectedFiles.splice(index, 1);
+      }
+      renderCombineSelectedFiles();
+    });
+    combineSelectedListEl.addEventListener('dragstart', (e) => {
+      const row = e.target.closest('.combine-selected-row');
+      if (!row) return;
+      row.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', row.dataset.index || '');
+    });
+    combineSelectedListEl.addEventListener('dragend', (e) => {
+      const row = e.target.closest('.combine-selected-row');
+      if (row) row.classList.remove('dragging');
+      combineSelectedListEl.querySelectorAll('.drag-over-before, .drag-over-after').forEach(el => {
+        el.classList.remove('drag-over-before', 'drag-over-after');
+      });
+    });
+    combineSelectedListEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const draggingRow = combineSelectedListEl.querySelector('.combine-selected-row.dragging');
+      const targetRow = e.target.closest('.combine-selected-row');
+      if (!draggingRow || !targetRow || draggingRow === targetRow) return;
+
+      const targetRect = targetRow.getBoundingClientRect();
+      const insertAfter = e.clientY > targetRect.top + targetRect.height / 2;
+      combineSelectedListEl.querySelectorAll('.drag-over-before, .drag-over-after').forEach(el => {
+        if (el !== targetRow) el.classList.remove('drag-over-before', 'drag-over-after');
+      });
+      targetRow.classList.toggle('drag-over-before', !insertAfter);
+      targetRow.classList.toggle('drag-over-after', insertAfter);
+      combineSelectedListEl.insertBefore(draggingRow, insertAfter ? targetRow.nextSibling : targetRow);
+    });
+    combineSelectedListEl.addEventListener('drop', (e) => {
+      e.preventDefault();
+      combineSelectedListEl.querySelectorAll('.drag-over-before, .drag-over-after').forEach(el => {
+        el.classList.remove('drag-over-before', 'drag-over-after');
+      });
+      const fromIndex = Number(e.dataTransfer.getData('text/plain'));
+      const orderedPaths = Array.from(combineSelectedListEl.querySelectorAll('.combine-selected-row'))
+        .map(row => Number(row.dataset.index))
+        .filter(index => Number.isFinite(index) && combineSelectedFiles[index]);
+
+      if (!Number.isFinite(fromIndex) || orderedPaths.length !== combineSelectedFiles.length) {
+        renderCombineSelectedFiles();
+        return;
+      }
+
+      const reordered = orderedPaths.map(index => combineSelectedFiles[index]);
+      combineSelectedFiles.splice(0, combineSelectedFiles.length, ...reordered);
+      renderCombineSelectedFiles();
+    });
+    document.getElementById('confirmCombineHtmlBtn').addEventListener('click', combineSelectedHtmlFiles);
 
     // Function to load file from courses
     async function loadFileFromCourses(file) {
@@ -5158,60 +5730,56 @@
     document.getElementById('fileNumberInput').addEventListener('input', updateFileNamePreview);
     document.getElementById('fileNameInput').addEventListener('input', updateFileNamePreview);
 
+    function prepareEditorHtmlForExport(rawHtml) {
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = rawHtml || '';
+
+      tempDiv.querySelectorAll('[hidden], [aria-hidden="true"]').forEach(node => node.remove());
+      tempDiv.querySelectorAll('[style]').forEach(node => {
+        const display = (node.style.display || '').trim().toLowerCase();
+        const visibility = (node.style.visibility || '').trim().toLowerCase();
+        if (display === 'none' || visibility === 'hidden') {
+          node.remove();
+        }
+      });
+
+      tempDiv.querySelectorAll('p').forEach(paragraph => {
+        if (paragraph.innerHTML.trim() === '') {
+          paragraph.remove();
+        }
+      });
+
+      tempDiv.querySelectorAll('img[src]').forEach(img => {
+        let src = img.getAttribute('src') || '';
+        src = src
+          .replace(/^file:\/\/\/.*?\/Filen\/Personal\/Website\//i, '')
+          .replace(/^file:\/\/\/.*?\/Filen\/Personal\/Coursebook\//i, '');
+
+        if (!/^(?:https?:|data:|blob:)/i.test(src)) {
+          const assetsIndex = src.indexOf('assets/');
+          if (assetsIndex >= 0) {
+            src = src.slice(assetsIndex);
+          }
+        }
+
+        img.setAttribute('src', src);
+        img.setAttribute('data-original-src', src);
+      });
+
+      tempDiv.querySelectorAll('style').forEach(styleEl => {
+        styleEl.textContent = styleEl.textContent.replace(/(^|\s)img\s*\{/g, '.markdown-body img {');
+      });
+
+      return normalizeHtmlForEditor(tempDiv.innerHTML, { stripNonEssentialSpans: true });
+    }
+
     document.getElementById('confirmSaveBtn').addEventListener('click', () => {
       const number = document.getElementById('fileNumberInput').value.trim();
       const name = document.getElementById('fileNameInput').value.trim() || 'document';
 
       const cleanName = name.replace(/\.(html|md|txt)$/i, '');
 
-      let editorContentForBody = editor.innerHTML;
-
-      // Create a temporary container
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = editorContentForBody;
-
-      // Remove hidden elements
-      const removeHiddenElements = (element) => {
-        const nodesToRemove = [];
-        element.querySelectorAll('*').forEach(node => {
-          const style = window.getComputedStyle(node);
-          if (style.display === 'none' || style.visibility === 'hidden') {
-            nodesToRemove.push(node);
-          }
-        });
-        nodesToRemove.reverse().forEach(n => n.remove());
-      };
-      removeHiddenElements(tempDiv);
-      editorContentForBody = tempDiv.innerHTML;
-
-      // Remove only truly empty paragraphs; preserve <p><br></p> spacer lines.
-      let prevContent;
-      let iterations = 0;
-      do {
-        prevContent = editorContentForBody;
-        iterations++;
-        editorContentForBody = editorContentForBody.replace(/<p>\s*<\/p>/g, '');
-      } while (editorContentForBody !== prevContent && iterations < 2);
-
-      // Fix image paths - handle both local assets and external URLs
-      // For local assets: ensure path starts with assets/
-      // For external URLs: keep them as-is
-      editorContentForBody = editorContentForBody.replace(/src="(?!https?:\/\/)([^"]*?)(assets\/[^"]*)"(?=[^>]*>)/g, 'src="$2"');
-      // Sync data-original-src with src for all images
-      editorContentForBody = editorContentForBody.replace(/(<img[^>]*src="([^"]*?)"[^>]*)data-original-src="[^"]*?"(?=[^>]*>)/g, '$1data-original-src="$2"');
-      // Remove local file paths
-      editorContentForBody = editorContentForBody.replace(/file:\/\/\/.*?\/Filen\/Personal\/Website\//g, '');
-
-      // Sanitize <style> blocks
-      const styleSanitizeDiv = document.createElement('div');
-      styleSanitizeDiv.innerHTML = editorContentForBody;
-      styleSanitizeDiv.querySelectorAll('style').forEach(styleEl => {
-        styleEl.textContent = styleEl.textContent.replace(/(^|\s)img\s*\{/g, '.markdown-body img {');
-      });
-      editorContentForBody = styleSanitizeDiv.innerHTML;
-
-      // Normalize and aggressively remove non-essential span wrappers for clean exports.
-      editorContentForBody = normalizeHtmlForEditor(editorContentForBody, { stripNonEssentialSpans: true });
+      const editorContentForBody = prepareEditorHtmlForExport(editor.innerHTML);
 
       const savedHeadingColor = localStorage.getItem('textEditorHeadingColor') || '#588157';
 
@@ -10246,12 +10814,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=2026051215xf"></script>
+  <script src="js/user-identity.js?v=202605121b7o"></script>
     <!-- CHAT SYSTEM -->
-  <script src="js/chat.js?v=2026051215xf"></script>
+  <script src="js/chat.js?v=202605121b7o"></script>
 
 <script src="js/version-check.js?v=202605021hcw"></script>
-  <script src="js/mobile-nav.js?v=2026051215xf"></script>
+  <script src="js/mobile-nav.js?v=202605121b7o"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');
@@ -10268,7 +10836,7 @@ renderMathInElement(document.body, {
           'Table': ['tableBtn','editTableBtn'],
           'Insert': ['quoteBtn','symbolsBtn','linkBtn','audioBtn','noteBtn','imageBtn'],
           'Separators': ['hrBtn','dashedLineBtn'],
-          'File': ['openLocalBtn','openCoursesBtn'],
+          'File': ['openLocalBtn','openCoursesBtn','combineHtmlBtn'],
           'Tools': ['clearBtn','resetFontSizeBtn','shortcutsBtn']
         };
         Object.keys(labels).forEach(function(name) {
