@@ -593,6 +593,8 @@ class NotesUIManager {
             align-items: flex-start;
             padding: 0 12px;
             margin-bottom: 2px;
+        }
+        .note-message.note-message-new {
             animation: notesSlideIn 0.3s ease;
         }
         @keyframes notesSlideIn {
@@ -1616,6 +1618,7 @@ class NotesUIManager {
           }
 
           const messageEl = this.createMessageElement(newMsg, orderedMessages, this.isContinuationOf(prevMsg, newMsg));
+          messageEl.classList.add('note-message-new');
           list.appendChild(messageEl);
 
           this.lastRenderedMessages = orderedMessages.slice();

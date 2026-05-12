@@ -1,28 +1,33 @@
 (function() {
+    // ============================================================
+    //  Presence v3 — three-state (active / away / offline) model
+    //  with debounced visibility, mobile-aware thresholds, page
+    //  lifecycle handling, cross-tab BroadcastChannel sync, and
+    //  per-tab localStorage entries (no read-modify-write races).
+    // ============================================================
+
+    const IS_MOBILE_DEVICE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    const IDLE_TIMEOUT              = IS_MOBILE_DEVICE ? 10 * 60 * 1000 : 5 * 60 * 1000;
+    const VISIBILITY_HIDE_DEBOUNCE  = IS_MOBILE_DEVICE ? 60 * 1000      : 30 * 1000;
+    const ACTIVITY_CHECK_INTERVAL   = 30 * 1000;
+    const HEARTBEAT_INTERVAL        = 20 * 1000;        // wake-up cadence; actual writes are gated
+    const HEARTBEAT_MIN_WRITE_GAP   = 60 * 1000;        // never write more often than this while active
+    const ACTIVITY_UPDATE_THROTTLE  = 1000;
+    const TAB_BROADCAST_INTERVAL    = 5 * 1000;
+    const TAB_ENTRY_TTL             = 30 * 1000;
+    const TAB_ELECTION_INTERVAL     = 15 * 1000;
+    const LEADER_STALE_MS           = 10 * 1000;
+    const PERIODIC_CLEANUP_INTERVAL = 5 * 60 * 1000;
+    const MAX_DEVICES_PER_USER      = 5;
+    const LOCALSTORAGE_CLEANUP_DAYS = 7;
+    const MAX_RECONNECT_ATTEMPTS    = 5;
+
+    // --- Identity ---
     let currentUid = null;
     let currentUserName = null;
     let isGuest = false;
     let presenceRefPath = null;
-
-    // Activity tracking state
-    let lastActivityTime = Date.now();
-    let isPageVisible = !document.hidden;
-    let isUserActive = true;
-    let isConnected = false;
-    let reconnectAttempts = 0;
-    const IDLE_TIMEOUT = 5 * 60 * 1000; // 5 minutes of inactivity = idle
-    const ACTIVITY_CHECK_INTERVAL = 30000; // Check every 30 seconds
-    const HEARTBEAT_INTERVAL = 60000; // Update activity every 60 seconds when active
-    const MAX_RECONNECT_ATTEMPTS = 5;
-    const MAX_DEVICES_PER_USER = 5; // Max devices allowed per user
-    const PERIODIC_CLEANUP_INTERVAL = 5 * 60 * 1000; // Clean up every 5 minutes
-    const LOCALSTORAGE_CLEANUP_DAYS = 7; // Clean localStorage entries older than 7 days
-    const TAB_ELECTION_INTERVAL = 15000; // Re-elect leader every 15 seconds
-    const IS_MOBILE_DEVICE = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    // Tab coordination - only one tab performs cleanup to avoid race conditions
-    let isLeaderTab = true; // Start as leader, will be demoted if another tab exists
-    let tabId = 'tab_' + Math.random().toString(36).substr(2, 9);
 
     const loggedInUserStr = localStorage.getItem('loggedInUser');
     const urlParams = new URLSearchParams(window.location.search);
@@ -37,7 +42,6 @@
             }
             currentUid = user.uid;
             currentUserName = user.userName || user.displayName;
-            isGuest = false;
             presenceRefPath = '/online_users/';
         } catch (e) {
             console.error('Presence: Failed to parse loggedInUser:', e);
@@ -51,30 +55,27 @@
             sessionStorage.setItem('guestId', guestId);
         }
         currentUid = guestId;
-        currentUserName = `Guest-${currentUid.substring(6, 10)}`; // e.g., Guest-cd23
+        currentUserName = `Guest-${currentUid.substring(6, 10)}`;
         presenceRefPath = '/online_guests/';
     } else {
-        return; // No logged-in user and not in guest mode, so presence is not tracked
+        return;
     }
 
-    // Generate device fingerprint with browser info
+    // --- Device + tab identity ---
     function getDeviceFingerprint() {
         const ua = navigator.userAgent;
-        // Check Edge first (Edge includes "Chrome" in UA)
-        const browser = ua.includes('Edg/') || ua.includes('Edge/') ? 'Edge' : 
-                       ua.includes('Firefox') ? 'Firefox' : 
-                       ua.includes('Safari') && !ua.includes('Chrome') ? 'Safari' : 
-                       ua.includes('Chrome') ? 'Chrome' : 
+        const browser = ua.includes('Edg/') || ua.includes('Edge/') ? 'Edge' :
+                       ua.includes('Firefox') ? 'Firefox' :
+                       ua.includes('Safari') && !ua.includes('Chrome') ? 'Safari' :
+                       ua.includes('Chrome') ? 'Chrome' :
                        ua.includes('Opera') || ua.includes('OPR') ? 'Opera' : 'Other';
-        const os = ua.includes('Windows') ? 'Windows' : 
-                  ua.includes('Mac OS') || ua.includes('Macintosh') ? 'Mac' : 
-                  ua.includes('Linux') && !ua.includes('Android') ? 'Linux' : 
-                  ua.includes('Android') ? 'Android' : 
+        const os = ua.includes('Windows') ? 'Windows' :
+                  ua.includes('Mac OS') || ua.includes('Macintosh') ? 'Mac' :
+                  ua.includes('Linux') && !ua.includes('Android') ? 'Linux' :
+                  ua.includes('Android') ? 'Android' :
                   ua.includes('iPhone') || ua.includes('iPad') || ua.includes('iPod') ? 'iOS' : 'Other';
-        
         return {
-            browser: browser,
-            os: os,
+            browser, os,
             deviceName: `${os} - ${browser}`,
             screenResolution: `${window.screen.width}x${window.screen.height}`,
             timestamp: Date.now()
@@ -83,29 +84,453 @@
 
     let deviceId = localStorage.getItem('deviceId');
     let deviceInfo = null;
-    
     if (!deviceId) {
         deviceId = 'device_' + Math.random().toString(36).substr(2, 9);
         localStorage.setItem('deviceId', deviceId);
         deviceInfo = getDeviceFingerprint();
         localStorage.setItem('deviceInfo_' + deviceId, JSON.stringify(deviceInfo));
-        console.log('Presence: Created new device ID:', deviceId, deviceInfo);
     } else {
-        // Load existing device info or create if missing
         const storedInfo = localStorage.getItem('deviceInfo_' + deviceId);
         try {
             deviceInfo = storedInfo ? JSON.parse(storedInfo) : getDeviceFingerprint();
         } catch (e) {
-            console.warn('Presence: Invalid stored device info, recreating it');
             deviceInfo = getDeviceFingerprint();
         }
-        
-        // Update timestamp
         deviceInfo.timestamp = Date.now();
         localStorage.setItem('deviceInfo_' + deviceId, JSON.stringify(deviceInfo));
-        console.log('Presence: Using existing device ID:', deviceId, deviceInfo);
+    }
+    const tabId = 'tab_' + Math.random().toString(36).substr(2, 9);
+
+    // --- Cross-tab keys ---
+    const tabKeyPrefix = 'presence_tab_' + (currentUid || 'guest') + '_'; // per-tab entries (no shared map)
+    const myTabKey    = tabKeyPrefix + tabId;
+    const leaderKey   = 'presence_leader_' + (currentUid || 'guest');
+    const channelName = 'presence_' + (currentUid || 'guest');
+
+    // --- Local state ---
+    let lastActivityTime = Date.now();
+    let isPageVisible = !document.hidden;
+    let currentState = computeStateLocal();
+    let writtenState = null;
+    let lastWrittenActivityTs = 0;
+    let isConnected = false;
+    let reconnectAttempts = 0;
+    let isLeaderTab = false;
+    let hideDebounceTimer = null;
+    let lastActivityWriteTime = 0;
+
+    // Sibling tab snapshots received via BroadcastChannel
+    const siblings = new Map(); // tabId -> { visible, lastActivity, ts }
+
+    function pruneSiblings(now) {
+        for (const [id, entry] of siblings) {
+            if (!entry || (now - (entry.ts || 0)) > TAB_ENTRY_TTL) siblings.delete(id);
+        }
     }
 
+    // --- BroadcastChannel (preferred) with storage-event fallback ---
+    let channel = null;
+    try {
+        if (typeof BroadcastChannel !== 'undefined') channel = new BroadcastChannel(channelName);
+    } catch (e) { channel = null; }
+
+    if (channel) {
+        channel.onmessage = (e) => {
+            const msg = e.data;
+            if (!msg || msg.tabId === tabId) return;
+            if (msg.type === 'state') {
+                siblings.set(msg.tabId, { visible: !!msg.visible, lastActivity: msg.lastActivity || 0, ts: Date.now() });
+                recomputeState();
+            } else if (msg.type === 'leader-changed') {
+                electLeader(false);
+            } else if (msg.type === 'request-state') {
+                postBroadcast({ type: 'state', tabId, visible: isPageVisible, lastActivity: lastActivityTime });
+            }
+        };
+    }
+
+    function postBroadcast(msg) {
+        if (channel) {
+            try { channel.postMessage(msg); } catch (e) {}
+        }
+    }
+
+    function writeMyTabEntry() {
+        const now = Date.now();
+        try {
+            localStorage.setItem(myTabKey, JSON.stringify({
+                uid: currentUid,
+                visible: isPageVisible,
+                lastActivity: lastActivityTime,
+                ts: now
+            }));
+        } catch (e) {}
+    }
+
+    function removeMyTabEntry() {
+        try { localStorage.removeItem(myTabKey); } catch (e) {}
+    }
+
+    function readSiblingsFromStorage() {
+        // Fallback path: pull sibling state from localStorage on demand
+        // (used when BroadcastChannel isn't available or after long idle).
+        const now = Date.now();
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (!key || !key.startsWith(tabKeyPrefix)) continue;
+            const id = key.substring(tabKeyPrefix.length);
+            if (id === tabId) continue;
+            try {
+                const entry = JSON.parse(localStorage.getItem(key));
+                if (!entry || entry.uid !== currentUid) continue;
+                if ((now - (entry.ts || 0)) > TAB_ENTRY_TTL) {
+                    // Sweep stale entries (their writing tab is dead).
+                    try { localStorage.removeItem(key); } catch (e) {}
+                    siblings.delete(id);
+                    continue;
+                }
+                siblings.set(id, { visible: !!entry.visible, lastActivity: entry.lastActivity || 0, ts: entry.ts });
+            } catch (e) {
+                try { localStorage.removeItem(key); } catch (e2) {}
+            }
+        }
+    }
+
+    function broadcastTabState() {
+        writeMyTabEntry();
+        postBroadcast({ type: 'state', tabId, visible: isPageVisible, lastActivity: lastActivityTime });
+    }
+
+    // storage event = fallback signaling for browsers without BroadcastChannel and for leader key
+    window.addEventListener('storage', (e) => {
+        if (!e.key) return;
+        if (e.key === leaderKey) {
+            electLeader(false);
+        } else if (e.key.startsWith(tabKeyPrefix) && e.key !== myTabKey) {
+            const id = e.key.substring(tabKeyPrefix.length);
+            if (!e.newValue) {
+                siblings.delete(id);
+            } else {
+                try {
+                    const entry = JSON.parse(e.newValue);
+                    if (entry && entry.uid === currentUid) {
+                        siblings.set(id, { visible: !!entry.visible, lastActivity: entry.lastActivity || 0, ts: entry.ts || Date.now() });
+                    }
+                } catch (ex) {}
+            }
+            recomputeState();
+        }
+    });
+
+    // --- Aggregate state across this tab + siblings ---
+    function readAggregate() {
+        const now = Date.now();
+        pruneSiblings(now);
+        let anyVisible = isPageVisible;
+        let mostRecent = lastActivityTime;
+        for (const entry of siblings.values()) {
+            if (!entry) continue;
+            if (entry.visible) anyVisible = true;
+            if ((entry.lastActivity || 0) > mostRecent) mostRecent = entry.lastActivity;
+        }
+        return { anyVisible, lastActivity: mostRecent };
+    }
+
+    function computeStateLocal() {
+        // Used at bootstrap before any siblings have been heard from.
+        const now = Date.now();
+        if (isPageVisible && (now - lastActivityTime) < IDLE_TIMEOUT) return 'active';
+        return 'away';
+    }
+
+    function computeState() {
+        const agg = readAggregate();
+        const now = Date.now();
+        const online = (typeof navigator !== 'undefined') ? (navigator.onLine !== false) : true;
+        if (!online) return 'away';
+        if (agg.anyVisible && (now - agg.lastActivity) < IDLE_TIMEOUT) return 'active';
+        return 'away';
+    }
+
+    function recomputeState() {
+        const next = computeState();
+        if (next !== currentState) {
+            currentState = next;
+            flushStateToFirebase();
+            scheduleNextExpirationCheck();
+        }
+    }
+
+    // Schedule a single timer for the next state expiration (idle timeout edge).
+    // Replaces wasteful constant polling.
+    let nextExpirationTimer = null;
+    function scheduleNextExpirationCheck() {
+        if (nextExpirationTimer) {
+            clearTimeout(nextExpirationTimer);
+            nextExpirationTimer = null;
+        }
+        if (currentState !== 'active') return;
+        const agg = readAggregate();
+        const now = Date.now();
+        const msUntilIdle = IDLE_TIMEOUT - (now - agg.lastActivity);
+        if (msUntilIdle <= 0) {
+            recomputeState();
+            return;
+        }
+        nextExpirationTimer = setTimeout(() => {
+            nextExpirationTimer = null;
+            recomputeState();
+        }, msUntilIdle + 500);
+    }
+
+    // --- Activity tracking ---
+    function updateActivity() {
+        const now = Date.now();
+        lastActivityTime = now;
+        if (now - lastActivityWriteTime < ACTIVITY_UPDATE_THROTTLE) return;
+        lastActivityWriteTime = now;
+        broadcastTabState();
+        recomputeState();
+        scheduleNextExpirationCheck();
+    }
+
+    const activityEvents = ['mousedown', 'keypress', 'scroll', 'touchstart', 'touchmove', 'pointerdown', 'wheel', 'click'];
+    activityEvents.forEach(ev => document.addEventListener(ev, updateActivity, { passive: true }));
+
+    let mouseMoveTimeout = null;
+    document.addEventListener('mousemove', () => {
+        if (mouseMoveTimeout) return;
+        mouseMoveTimeout = setTimeout(() => {
+            updateActivity();
+            mouseMoveTimeout = null;
+        }, 2000);
+    }, { passive: true });
+
+    // --- Visibility with debounce ---
+    function handleVisibilityChange() {
+        if (!document.hidden) {
+            if (hideDebounceTimer) { clearTimeout(hideDebounceTimer); hideDebounceTimer = null; }
+            isPageVisible = true;
+            lastActivityTime = Date.now();
+            broadcastTabState();
+            recomputeState();
+            scheduleNextExpirationCheck();
+            return;
+        }
+        if (hideDebounceTimer) return;
+        hideDebounceTimer = setTimeout(() => {
+            hideDebounceTimer = null;
+            isPageVisible = false;
+            broadcastTabState();
+            recomputeState();
+        }, VISIBILITY_HIDE_DEBOUNCE);
+    }
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    // navigator online/offline -> recompute (we'll show as away when offline)
+    window.addEventListener('online', () => { lastActivityTime = Date.now(); recomputeState(); });
+    window.addEventListener('offline', () => { recomputeState(); });
+
+    // --- Page lifecycle: pagehide / freeze / resume / beforeunload ---
+    function relinquishLeadership() {
+        try {
+            const raw = localStorage.getItem(leaderKey);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && parsed.tabId === tabId) localStorage.removeItem(leaderKey);
+            }
+        } catch (e) {}
+        postBroadcast({ type: 'leader-changed', tabId });
+    }
+
+    function teardownTab() {
+        removeMyTabEntry();
+        if (isLeaderTab && window.userStatusDatabaseRef) {
+            try {
+                window.userStatusDatabaseRef.update({
+                    state: 'away',
+                    isActive: false,
+                    awayAt: firebase.database.ServerValue.TIMESTAMP,
+                    lastActivity: firebase.database.ServerValue.TIMESTAMP
+                });
+            } catch (e) {}
+        }
+        relinquishLeadership();
+    }
+
+    window.addEventListener('pagehide', () => {
+        isPageVisible = false;
+        teardownTab();
+    });
+    document.addEventListener('freeze', () => {
+        isPageVisible = false;
+        broadcastTabState();
+    });
+    document.addEventListener('resume', () => {
+        isPageVisible = !document.hidden;
+        lastActivityTime = Date.now();
+        broadcastTabState();
+        electLeader(false);
+        recomputeState();
+        scheduleNextExpirationCheck();
+    });
+    window.addEventListener('beforeunload', teardownTab);
+
+    // --- Leader election ---
+    function electLeader(allowTakeover) {
+        const now = Date.now();
+        let claim = false;
+        try {
+            const raw = localStorage.getItem(leaderKey);
+            if (!raw) {
+                claim = true;
+            } else {
+                const parsed = JSON.parse(raw);
+                const age = now - (parsed.timestamp || 0);
+                if (parsed.tabId === tabId) claim = true;
+                else if (age > LEADER_STALE_MS) claim = true;
+                else if (allowTakeover) claim = false;
+            }
+        } catch (e) { claim = true; }
+
+        const wasLeader = isLeaderTab;
+        isLeaderTab = claim;
+        if (claim) {
+            try { localStorage.setItem(leaderKey, JSON.stringify({ tabId, timestamp: now })); } catch (e) {}
+        }
+        if (!wasLeader && isLeaderTab) {
+            registerDisconnectHandler();
+            writtenState = null;
+            lastWrittenActivityTs = 0;
+            flushStateToFirebase();
+            postBroadcast({ type: 'leader-changed', tabId });
+        } else if (wasLeader && !isLeaderTab) {
+            if (window.userStatusDatabaseRef) {
+                try { window.userStatusDatabaseRef.onDisconnect().cancel(); } catch (e) {}
+            }
+        }
+    }
+
+    function registerDisconnectHandler() {
+        if (!window.userStatusDatabaseRef) return;
+        try {
+            // No offlineAt — consumer derives offline from staleness of state+timestamps.
+            window.userStatusDatabaseRef.onDisconnect().update({
+                state: 'away',
+                isActive: false,
+                awayAt: firebase.database.ServerValue.TIMESTAMP,
+                lastActivity: firebase.database.ServerValue.TIMESTAMP
+            });
+        } catch (e) {
+            console.warn('Presence: onDisconnect register failed:', e.message);
+        }
+    }
+
+    // --- Firebase writes ---
+    function flushStateToFirebase() {
+        if (typeof firebase === 'undefined' || !window.userStatusDatabaseRef || !isConnected) return;
+        if (!isLeaderTab) return;
+        if (writtenState === currentState) return;
+
+        const ts = firebase.database.ServerValue.TIMESTAMP;
+        if (currentState === 'active') {
+            const data = {
+                state: 'active',
+                isActive: true,
+                isMobile: IS_MOBILE_DEVICE,
+                isGuest: isGuest,
+                userName: currentUserName,
+                lastActivity: ts,
+                awayAt: null,
+                deviceName: deviceInfo ? deviceInfo.deviceName : 'Unknown',
+                browser: deviceInfo ? deviceInfo.browser : 'Unknown',
+                os: deviceInfo ? deviceInfo.os : 'Unknown',
+                screenResolution: deviceInfo ? deviceInfo.screenResolution : 'Unknown'
+            };
+            window.userStatusDatabaseRef.update(data).catch(err => {
+                console.warn('Presence: failed to flush active:', err.message);
+            });
+            if (!isGuest && currentUid) {
+                firebase.database().ref(`site_users/${currentUid}`).update({ lastSeen: ts })
+                    .catch(() => {});
+            }
+        } else {
+            window.userStatusDatabaseRef.update({
+                state: 'away',
+                isActive: false,
+                awayAt: ts,
+                lastActivity: ts
+            }).catch(err => console.warn('Presence: failed to flush away:', err.message));
+        }
+        writtenState = currentState;
+        lastWrittenActivityTs = Date.now();
+    }
+
+    // --- Device cleanup (leader only) ---
+    function performDeviceCleanup(db, forceRun = false) {
+        if (!presenceRefPath || !currentUid) return Promise.resolve();
+        if (!isLeaderTab && !forceRun) return Promise.resolve();
+
+        const userDevicesRef = db.ref(presenceRefPath + currentUid);
+        return db.ref('.info/serverTimeOffset').once('value').then(snap => {
+            const serverTimeOffset = snap.val() || 0;
+            return userDevicesRef.once('value').then(snapshot => {
+                const devices = snapshot.val();
+                if (!devices) return;
+                const now = Date.now() + serverTimeOffset;
+                const STALE_THRESHOLD = 30 * 60 * 1000;
+                const entries = Object.entries(devices);
+                const ops = [];
+
+                if (entries.length > MAX_DEVICES_PER_USER) {
+                    const sorted = entries
+                        .filter(([id]) => id !== deviceId)
+                        .sort(([, a], [, b]) => (a.lastActivity || 0) - (b.lastActivity || 0));
+                    const toRemove = entries.length - MAX_DEVICES_PER_USER;
+                    for (let i = 0; i < toRemove && i < sorted.length; i++) {
+                        ops.push(userDevicesRef.child(sorted[i][0]).remove());
+                    }
+                }
+
+                entries.forEach(([id, dev]) => {
+                    if (id === deviceId) return;
+                    if (!dev.deviceName && !dev.browser) {
+                        ops.push(userDevicesRef.child(id).remove());
+                        return;
+                    }
+                    const age = dev.lastActivity ? (now - dev.lastActivity) : STALE_THRESHOLD + 1;
+                    if (age > STALE_THRESHOLD) ops.push(userDevicesRef.child(id).remove());
+                });
+
+                return Promise.all(ops);
+            });
+        }).catch(err => console.warn('Presence: cleanup failed:', err.message));
+    }
+
+    function cleanupLocalStorage() {
+        const now = Date.now();
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (!key) continue;
+            if (key.startsWith('deviceInfo_')) {
+                try {
+                    const data = JSON.parse(localStorage.getItem(key));
+                    if ((now - (data.timestamp || 0)) > LOCALSTORAGE_CLEANUP_DAYS * 24 * 60 * 60 * 1000) {
+                        toRemove.push(key);
+                    }
+                } catch (e) { toRemove.push(key); }
+            } else if (key.startsWith(tabKeyPrefix)) {
+                try {
+                    const entry = JSON.parse(localStorage.getItem(key));
+                    if (!entry || (now - (entry.ts || 0)) > 24 * 60 * 60 * 1000) toRemove.push(key);
+                } catch (e) { toRemove.push(key); }
+            }
+        }
+        toRemove.forEach(k => { try { localStorage.removeItem(k); } catch (e) {} });
+    }
+
+    // --- Firebase boot ---
     const firebaseConfig = {
         apiKey: "API_KEY",
         authDomain: "med-student-chat.firebaseapp.com",
@@ -116,376 +541,81 @@
         appId: "APP_ID"
     };
 
-    // Track user activity events
-    let lastActivityUpdateTime = 0;
-    const ACTIVITY_UPDATE_THROTTLE = 1000; // Only update once per second
-    
-    function updateActivity() {
-        const now = Date.now();
-        lastActivityTime = now;
-        
-        // Throttle updates to prevent excessive Firebase writes
-        if (now - lastActivityUpdateTime < ACTIVITY_UPDATE_THROTTLE) {
-            return;
-        }
-        
-        lastActivityUpdateTime = now;
-        
-        if (!isUserActive && isPageVisible) {
-            isUserActive = true;
-            updatePresenceStatus();
-        }
-    }
-
-    // Listen for user interactions (mousemove throttled separately)
-    const activityEvents = ['mousedown', 'keypress', 'scroll', 'touchstart', 'click'];
-    activityEvents.forEach(event => {
-        document.addEventListener(event, updateActivity, { passive: true });
-    });
-    
-    // Throttle mousemove more aggressively
-    let mouseMoveTimeout = null;
-    document.addEventListener('mousemove', function() {
-        if (mouseMoveTimeout) return;
-        mouseMoveTimeout = setTimeout(function() {
-            updateActivity();
-            mouseMoveTimeout = null;
-        }, 2000); // Only track mousemove every 2 seconds
-    }, { passive: true });
-
-    // Track page visibility changes
-    document.addEventListener('visibilitychange', function() {
-        isPageVisible = !document.hidden;
-        if (isPageVisible) {
-            lastActivityTime = Date.now();
-            isUserActive = true;
-        } else {
-            isUserActive = false;
-        }
-        updatePresenceStatus();
-    });
-    
-    // Handle page unload - mark as inactive immediately
-    window.addEventListener('beforeunload', function() {
-        if (typeof firebase !== 'undefined' && window.userStatusDatabaseRef) {
-            // Use synchronous update for beforeunload
-            window.userStatusDatabaseRef.update({
-                isActive: false,
-                offlineAt: firebase.database.ServerValue.TIMESTAMP,
-                lastActivity: firebase.database.ServerValue.TIMESTAMP
-            });
-        }
-    });
-
-    // Check for idle timeout periodically
-    function checkIdleStatus() {
-        const timeSinceActivity = Date.now() - lastActivityTime;
-        const wasActive = isUserActive;
-        
-        // User is active if: page is visible AND activity within timeout
-        isUserActive = isPageVisible && (timeSinceActivity < IDLE_TIMEOUT);
-        
-        // Update presence if status changed
-        if (wasActive !== isUserActive) {
-            updatePresenceStatus();
-        }
-    }
-    
-    // Perform device cleanup
-    function performDeviceCleanup(db, forceRun = false) {
-        if (!presenceRefPath || !currentUid) return Promise.resolve();
-        
-        // Only leader tab performs periodic cleanup (but allow forced cleanup on connect)
-        if (!isLeaderTab && !forceRun) {
-            return Promise.resolve();
-        }
-        
-        const userDevicesRef = db.ref(presenceRefPath + currentUid);
-        
-        return db.ref(".info/serverTimeOffset").once("value").then(snap => {
-            const serverTimeOffset = snap.val() || 0;
-            
-            return userDevicesRef.once('value').then((snapshot) => {
-                const devices = snapshot.val();
-                if (!devices) return;
-                
-                const now = Date.now() + serverTimeOffset;
-                const CLEANUP_THRESHOLD = 2 * 60 * 1000;
-                const STALE_THRESHOLD = 30 * 60 * 1000;
-                
-                const deviceList = Object.entries(devices);
-                const removalPromises = [];
-                
-                // If too many devices, remove oldest inactive ones first
-                if (deviceList.length > MAX_DEVICES_PER_USER) {
-                    console.warn(`Presence: Too many devices (${deviceList.length}), enforcing limit`);
-                    
-                    // Sort by lastActivity, oldest first
-                    const sortedDevices = deviceList
-                        .filter(([devId]) => devId !== deviceId)
-                        .sort(([, a], [, b]) => (a.lastActivity || 0) - (b.lastActivity || 0));
-                    
-                    // Remove oldest excess devices
-                    const toRemove = deviceList.length - MAX_DEVICES_PER_USER;
-                    for (let i = 0; i < toRemove && i < sortedDevices.length; i++) {
-                        const [devId, dev] = sortedDevices[i];
-                        console.log(`Presence: Removing excess device ${devId} (${dev.deviceName || 'Unknown'})`);
-                        removalPromises.push(userDevicesRef.child(devId).remove());
-                    }
-                }
-                
-                // Regular cleanup logic
-                deviceList.forEach(([devId, device]) => {
-                    if (devId === deviceId) return;
-                    
-                    const deviceAge = device.lastActivity ? (now - device.lastActivity) : STALE_THRESHOLD + 1;
-                    
-                    if (!device.deviceName && !device.browser) {
-                        removalPromises.push(userDevicesRef.child(devId).remove());
-                    } else if (device.isActive === false) {
-                        removalPromises.push(userDevicesRef.child(devId).remove());
-                    } else if (device.offlineAt && (now - device.offlineAt > CLEANUP_THRESHOLD)) {
-                        removalPromises.push(userDevicesRef.child(devId).remove());
-                    } else if (deviceAge > STALE_THRESHOLD) {
-                        removalPromises.push(userDevicesRef.child(devId).remove());
-                    }
-                });
-                
-                return Promise.all(removalPromises).then(() => {
-                    if (removalPromises.length > 0) {
-                        console.log(`Presence: Periodic cleanup removed ${removalPromises.length} device(s)`);
-                    }
-                });
-            });
-        }).catch(err => {
-            console.warn('Presence: Periodic cleanup failed:', err.message);
-        });
-    }
-    
-    // Clean up old localStorage deviceInfo entries
-    function cleanupLocalStorage() {
-        const now = Date.now();
-        const keysToRemove = [];
-        
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith('deviceInfo_')) {
-                try {
-                    const data = JSON.parse(localStorage.getItem(key));
-                    const age = now - (data.timestamp || 0);
-                    
-                    // Remove entries older than LOCALSTORAGE_CLEANUP_DAYS
-                    if (age > LOCALSTORAGE_CLEANUP_DAYS * 24 * 60 * 60 * 1000) {
-                        keysToRemove.push(key);
-                    }
-                } catch (e) {
-                    // Invalid JSON, remove it
-                    keysToRemove.push(key);
-                }
-            }
-        }
-        
-        keysToRemove.forEach(key => {
-            console.log(`Presence: Removing old localStorage entry: ${key}`);
-            localStorage.removeItem(key);
-        });
-    }
-    
-    // Simple leader election - first tab to claim leadership or after 10s timeout
-    function electLeader() {
-        const storageKey = 'presence_leader_' + (currentUid || 'guest');
-        const leaderData = localStorage.getItem(storageKey);
-        const now = Date.now();
-        
-        if (leaderData) {
-            try {
-                const { tabId: leaderId, timestamp } = JSON.parse(leaderData);
-                const age = now - timestamp;
-                
-                // If current leader heartbeat is fresh (< 10s old) and it's us, stay leader
-                if (leaderId === tabId && age < 10000) {
-                    isLeaderTab = true;
-                }
-                // If it's us but stale, refresh it
-                else if (leaderId === tabId) {
-                    isLeaderTab = true;
-                }
-                // If leader is stale (> 10s old), claim leadership
-                else if (age > 10000) {
-                    isLeaderTab = true;
-                    console.log('Presence: Previous leader stale, claiming leadership');
-                }
-                // Fresh leader that's not us, step down
-                else {
-                    isLeaderTab = false;
-                }
-            } catch (e) {
-                // Invalid data, claim leadership
-                isLeaderTab = true;
-            }
-        } else {
-            // No leader, claim it
-            isLeaderTab = true;
-        }
-        
-        // Update our heartbeat if we're leader
-        if (isLeaderTab) {
-            localStorage.setItem(storageKey, JSON.stringify({
-                tabId: tabId,
-                timestamp: now
-            }));
-        }
-    }
-
-    // Update presence status in Firebase
-    function updatePresenceStatus() {
-        if (typeof firebase === 'undefined' || !window.userStatusDatabaseRef || !isConnected) return;
-        
-        if (isUserActive) {
-            const deviceData = {
-                isMobile: IS_MOBILE_DEVICE,
-                isGuest: isGuest,
-                userName: currentUserName,
-                isActive: true,
-                lastActivity: firebase.database.ServerValue.TIMESTAMP,
-                deviceName: deviceInfo ? deviceInfo.deviceName : 'Unknown',
-                browser: deviceInfo ? deviceInfo.browser : 'Unknown',
-                os: deviceInfo ? deviceInfo.os : 'Unknown',
-                screenResolution: deviceInfo ? deviceInfo.screenResolution : 'Unknown'
-            };
-            window.userStatusDatabaseRef.set(deviceData).catch(err => {
-                console.warn('Presence: Failed to update active status:', err.message);
-            });
-            
-            // Also update lastSeen in user profile (for persistent tracking)
-            if (!isGuest && currentUid) {
-                firebase.database().ref(`site_users/${currentUid}`).update({
-                    lastSeen: firebase.database.ServerValue.TIMESTAMP
-                }).catch(err => console.warn('Presence: Failed to update lastSeen:', err.message));
-            }
-        } else {
-            // Mark as inactive (but still connected)
-            window.userStatusDatabaseRef.update({
-                isActive: false,
-                lastInactive: firebase.database.ServerValue.TIMESTAMP,
-                lastActivity: firebase.database.ServerValue.TIMESTAMP
-            }).catch(err => {
-                console.warn('Presence: Failed to update inactive status:', err.message);
-            });
-        }
-    }
-
     if (typeof firebase !== 'undefined') {
-        const app = firebase.apps.length === 0 ? firebase.initializeApp(firebaseConfig) : firebase.app();
+        if (firebase.apps.length === 0) firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         const userStatusDatabaseRef = db.ref(presenceRefPath + currentUid + '/' + deviceId);
-        window.userStatusDatabaseRef = userStatusDatabaseRef; // Store globally for updates
+        window.userStatusDatabaseRef = userStatusDatabaseRef;
 
-        // Get server time offset
-        let serverTimeOffset = 0;
-        db.ref(".info/serverTimeOffset").on("value", (snap) => {
-            serverTimeOffset = snap.val() || 0;
-        });
-
-        db.ref('.info/connected').on('value', function(snapshot) {
+        db.ref('.info/connected').on('value', (snapshot) => {
             const wasConnected = isConnected;
             isConnected = snapshot.val() === true;
-            
             if (!isConnected) {
-                console.log('Presence: Disconnected from Firebase');
                 reconnectAttempts++;
                 if (reconnectAttempts > MAX_RECONNECT_ATTEMPTS) {
-                    console.error('Presence: Max reconnection attempts reached');
+                    console.warn('Presence: max reconnect attempts reached');
                 }
                 return;
             }
-            
-            if (!wasConnected && isConnected) {
-                console.log('Presence: Reconnected to Firebase');
-                reconnectAttempts = 0;
-            } else {
-                console.log('Presence: Connected to Firebase');
-            }
-            
-            const deviceData = {
-                isMobile: IS_MOBILE_DEVICE,
-                isGuest: isGuest,
-                userName: currentUserName,
-                isActive: isUserActive && isPageVisible,
-                lastActivity: firebase.database.ServerValue.TIMESTAMP,
-                deviceName: deviceInfo ? deviceInfo.deviceName : 'Unknown',
-                browser: deviceInfo ? deviceInfo.browser : 'Unknown',
-                os: deviceInfo ? deviceInfo.os : 'Unknown',
-                screenResolution: deviceInfo ? deviceInfo.screenResolution : 'Unknown'
-            };
+            if (!wasConnected) reconnectAttempts = 0;
 
-            userStatusDatabaseRef.onDisconnect().update({
-                isActive: false,
-                offlineAt: firebase.database.ServerValue.TIMESTAMP,
-                lastActivity: firebase.database.ServerValue.TIMESTAMP
-            }).then(function() {
-                // First set the current device data
-                return userStatusDatabaseRef.set(deviceData);
-            }).then(function() {
-                
-                // Update lastSeen in user profile (for persistent tracking)
+            readSiblingsFromStorage();
+            electLeader(false);
+            broadcastTabState();
+
+            if (isLeaderTab) {
+                registerDisconnectHandler();
+                // Force re-flush regardless of cached state — survives network blips.
+                writtenState = null;
+                lastWrittenActivityTs = 0;
+                currentState = computeState();
+                flushStateToFirebase();
                 if (!isGuest && currentUid) {
                     db.ref(`site_users/${currentUid}`).update({
                         lastSeen: firebase.database.ServerValue.TIMESTAMP
-                    }).catch(err => console.warn('Failed to update lastSeen on connect:', err.message));
+                    }).catch(() => {});
                 }
-                
-                // Then clean up old devices for this user after setting current device
-                console.log('Presence: Running initial device cleanup');
-                return performDeviceCleanup(db, true); // Force run on initial connect
-            }).catch(function(error) {
-                console.error('Presence: Error setting up presence:', error);
-            });
+                performDeviceCleanup(db, true);
+                scheduleNextExpirationCheck();
+            }
         });
 
-        // Check idle status periodically
-        setInterval(checkIdleStatus, ACTIVITY_CHECK_INTERVAL);
-        
-        // Heartbeat to keep presence fresh
-        setInterval(function() {
-            if (isUserActive && isPageVisible && isConnected) {
-                // Update lastActivity timestamp to show we're still here
-                window.userStatusDatabaseRef.update({
-                    lastActivity: firebase.database.ServerValue.TIMESTAMP
-                }).catch(err => {
-                    console.warn('Presence: Heartbeat failed:', err.message);
-                });
-            }
+        // Periodic local sweep — covers BroadcastChannel-unavailable browsers,
+        // long-idle tabs whose sibling channel went quiet, and stale-entry cleanup.
+        setInterval(() => {
+            readSiblingsFromStorage();
+            recomputeState();
+        }, ACTIVITY_CHECK_INTERVAL);
+
+        // Smart heartbeat — only writes when the consumer's freshness window would expire.
+        setInterval(() => {
+            if (!isLeaderTab || !isConnected) return;
+            if (currentState !== 'active') return;
+            const now = Date.now();
+            if ((now - lastWrittenActivityTs) < HEARTBEAT_MIN_WRITE_GAP) return;
+            window.userStatusDatabaseRef.update({
+                lastActivity: firebase.database.ServerValue.TIMESTAMP
+            }).then(() => { lastWrittenActivityTs = Date.now(); }).catch(() => {});
         }, HEARTBEAT_INTERVAL);
-        
-        // Periodic device cleanup
-        setInterval(function() {
-            if (isConnected) {
-                performDeviceCleanup(db);
-            }
-        }, PERIODIC_CLEANUP_INTERVAL);
-        
-        // Leader election for multi-tab coordination
-        setInterval(electLeader, TAB_ELECTION_INTERVAL);
-        electLeader(); // Run immediately
-        
-        // Clean up old localStorage entries on startup
+
+        setInterval(() => electLeader(true), TAB_ELECTION_INTERVAL);
+        electLeader(false);
+
+        setInterval(broadcastTabState, TAB_BROADCAST_INTERVAL);
+        broadcastTabState();
+
+        // Ask siblings to introduce themselves so we can build the initial picture fast.
+        postBroadcast({ type: 'request-state', tabId });
+
+        setInterval(() => { if (isConnected) performDeviceCleanup(db); }, PERIODIC_CLEANUP_INTERVAL);
         cleanupLocalStorage();
     }
-    
-    // Cleanup on page close
-    window.addEventListener('beforeunload', function() {
-        // Clear our leader status so another tab can take over immediately
-        if (isLeaderTab) {
-            const storageKey = 'presence_leader_' + (currentUid || 'guest');
-            localStorage.removeItem(storageKey);
-        }
-    });
 
-    // Expose activity state globally for chat system
+    // --- Public API ---
     window.userActivityState = {
-        isActive: () => isUserActive && isPageVisible,
+        isActive: () => currentState === 'active',
+        getState: () => currentState, // 'active' | 'away'
         getLastActivityTime: () => lastActivityTime,
         isConnected: () => isConnected,
         getDeviceId: () => deviceId,
@@ -493,39 +623,16 @@
         isLeaderTab: () => isLeaderTab,
         getTabId: () => tabId
     };
-    
-    // Expose manual cleanup function
+
     window.cleanupMyDevices = function() {
-        if (typeof firebase === 'undefined' || !presenceRefPath || !currentUid) {
-            console.error('Cleanup: Firebase not initialized or no user logged in');
-            return;
-        }
-        
+        if (typeof firebase === 'undefined' || !presenceRefPath || !currentUid) return;
         const db = firebase.database();
         const userDevicesRef = db.ref(presenceRefPath + currentUid);
-        
-        userDevicesRef.once('value').then((snapshot) => {
-            const devices = snapshot.val();
-            if (!devices) {
-                console.log('Cleanup: No devices found');
-                return;
-            }
-            
-            console.log(`Cleanup: Found ${Object.keys(devices).length} devices, cleaning up all except current...`);
-            
-            Object.keys(devices).forEach(devId => {
-                if (devId === deviceId) {
-                    console.log(`Cleanup: Keeping current device ${devId}`);
-                    return;
-                }
-                
-                console.log(`Cleanup: Removing device ${devId} (${devices[devId].deviceName || 'Unknown'})`);
-                userDevicesRef.child(devId).remove();
+        userDevicesRef.once('value').then(snap => {
+            const devices = snap.val() || {};
+            Object.keys(devices).forEach(id => {
+                if (id !== deviceId) userDevicesRef.child(id).remove();
             });
-            
-            console.log('Cleanup: Complete! Refresh the page to see updated device count.');
-        }).catch(err => {
-            console.error('Cleanup: Error:', err);
         });
     };
 })();

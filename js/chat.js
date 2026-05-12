@@ -667,37 +667,65 @@ class ChatFirebaseREST {
         let allOnlineAuthData = {};
         let allOnlineGuestData = {};
 
+        // Re-arms a single setTimeout pointing at the soonest state transition
+        // across all devices. Replaces blind polling so away->offline UI updates
+        // happen at the moment of expiration, not up to 60s later.
+        let nextTransitionTimer = null;
+        let nextTransitionAt = Infinity;
+        const armTransitionTimer = () => {
+            if (nextTransitionTimer) { clearTimeout(nextTransitionTimer); nextTransitionTimer = null; }
+            if (!isFinite(nextTransitionAt)) return;
+            const delay = Math.max(500, nextTransitionAt - (Date.now() + serverTimeOffset));
+            nextTransitionTimer = setTimeout(() => { nextTransitionTimer = null; processAndCallback(); }, delay);
+        };
+        this._trackCleanup(() => { if (nextTransitionTimer) clearTimeout(nextTransitionTimer); });
+
         const processAndCallback = () => {
                 const groupedUsers = {};
                 const now = Date.now() + serverTimeOffset;
-                const GRACE_PERIOD_ACTIVE = 5 * 60 * 1000; // 5 minutes for temporary disconnections
-                const GRACE_PERIOD_CLOSED = 2 * 60 * 1000; // 2 minutes for closed tabs
+                const ACTIVE_FRESHNESS = 90 * 1000;       // active state must be backed by recent lastActivity
+                const AWAY_FRESHNESS   = 10 * 60 * 1000;  // away within this window still counts as present
+                const OFFLINE_GRACE    = 2 * 60 * 1000;   // legacy offlineAt grace for closed tabs
 
-                const isUserOnline = (devices) => {
-                    return Object.values(devices).some(device => {
-                        // 1. Truly active - most important check
-                        if (device.isActive === true) {
-                            return true;
-                        }
+                let soonestTransition = Infinity;
+                const noteTransition = (t) => { if (t > now && t < soonestTransition) soonestTransition = t; };
 
-                        // 2. Recently active (within 30 seconds) - for transitions
-                        if (device.lastActivity && (now - device.lastActivity) < 30000) {
-                            return true;
-                        }
-
-                        // 3. Grace period for backgrounded tabs (still connected)
-                        if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD_ACTIVE) {
-                            return true;
-                        }
-
-                        // 4. Shorter grace period for disconnected devices (closed tabs)
-                        if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD_CLOSED) {
-                            return true;
-                        }
-
-                        return false;
-                    });
+                // Map a single device record (new or legacy shape) to a state,
+                // and record when its state would next change for re-arming the timer.
+                const deviceState = (device) => {
+                    if (!device) return 'offline';
+                    if (device.state === 'active') {
+                        const la = device.lastActivity || 0;
+                        if (!la || (now - la) < ACTIVE_FRESHNESS) { noteTransition(la + ACTIVE_FRESHNESS); return 'active'; }
+                        if ((now - la) < AWAY_FRESHNESS) { noteTransition(la + AWAY_FRESHNESS); return 'away'; }
+                        return 'offline';
+                    }
+                    if (device.state === 'away') {
+                        const t = device.awayAt || device.lastInactive || device.lastActivity || 0;
+                        if (t && (now - t) < AWAY_FRESHNESS) { noteTransition(t + AWAY_FRESHNESS); return 'away'; }
+                        return 'offline';
+                    }
+                    // Legacy fallback (devices written by older presence.js)
+                    const la = device.lastActivity || 0;
+                    if (device.isActive === true && (!la || (now - la) < ACTIVE_FRESHNESS)) { if (la) noteTransition(la + ACTIVE_FRESHNESS); return 'active'; }
+                    if (la && (now - la) < 30 * 1000) { noteTransition(la + 30 * 1000); return 'active'; }
+                    if (device.lastInactive && (now - device.lastInactive) < AWAY_FRESHNESS) { noteTransition(device.lastInactive + AWAY_FRESHNESS); return 'away'; }
+                    if (device.offlineAt && (now - device.offlineAt) < OFFLINE_GRACE) { noteTransition(device.offlineAt + OFFLINE_GRACE); return 'away'; }
+                    return 'offline';
                 };
+
+                // Aggregate device states -> user state (active > away > offline).
+                const aggregateUserState = (devices) => {
+                    let best = 'offline';
+                    Object.values(devices).forEach(d => {
+                        const s = deviceState(d);
+                        if (s === 'active') best = 'active';
+                        else if (s === 'away' && best !== 'active') best = 'away';
+                    });
+                    return best;
+                };
+
+                const isUserOnline = (devices) => aggregateUserState(devices) !== 'offline';
 
                 // ... (rest of processing)
                 // Process Authenticated Users
@@ -721,7 +749,8 @@ class ChatFirebaseREST {
                         }
                     });
 
-                    if (isUserOnline(devices)) {
+                    const userState = aggregateUserState(devices);
+                    if (userState !== 'offline') {
                         const deviceIds = Object.keys(devices);
                         const deviceCount = deviceIds.length;
                         const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
@@ -738,6 +767,7 @@ class ChatFirebaseREST {
                                 deviceCount: deviceCount,
                                 hasMobile: hasMobile,
                                 isGuest: false,
+                                state: userState,
                                 lastActivity: lastActivity
                             };
                         } else {
@@ -748,6 +778,7 @@ class ChatFirebaseREST {
                                 deviceCount: deviceCount,
                                 hasMobile: hasMobile,
                                 isGuest: false,
+                                state: userState,
                                 lastActivity: lastActivity
                             };
                         }
@@ -765,7 +796,8 @@ class ChatFirebaseREST {
                 // Process Guest Users
                 for (const guestId in allOnlineGuestData) {
                     const devices = allOnlineGuestData[guestId];
-                    if (isUserOnline(devices)) {
+                    const guestState = aggregateUserState(devices);
+                    if (guestState !== 'offline') {
                         const deviceIds = Object.keys(devices);
                         const deviceCount = deviceIds.length;
                         const hasMobile = deviceIds.some(deviceId => devices[deviceId].isMobile === true);
@@ -779,7 +811,8 @@ class ChatFirebaseREST {
                             color: '#9E9E9E',
                             deviceCount: deviceCount,
                             hasMobile: hasMobile,
-                            isGuest: true
+                            isGuest: true,
+                            state: guestState
                         };
                     }
                 }
@@ -790,11 +823,10 @@ class ChatFirebaseREST {
                     usersList: Object.keys(groupedUsers),
                     allUsers: allSiteUsers
                 });
-        };
 
-        // Run cleanup/refresh every 30 seconds to handle grace period expirations
-        const refreshInterval = setInterval(processAndCallback, 60000);
-        this._trackCleanup(() => clearInterval(refreshInterval));
+                nextTransitionAt = soonestTransition;
+                armTransitionTimer();
+        };
 
         // Listen for all site users (for username and color)
         const onSiteUsers = (snapshot) => {
