@@ -126,11 +126,6 @@
         contain: layout paint style;
     }
 
-    body.dark-mode:not(.mobile-nav-ready)::after {
-        background:
-            linear-gradient(#2a2a2a, #2a2a2a) top / 100% 1px no-repeat,
-            #1f1f1f;
-    }
 }
 
 /* Constrain nav icons unconditionally so SVGs never flash at natural size */
@@ -343,47 +338,4 @@
         opacity: 0.7;
     }
 
-    body.dark-mode .bottom-nav,
-    .bottom-nav.dark-mode {
-        background: #1f1f1f;
-        border-top-color: #2a2a2a;
-        box-shadow: 0 -2px 10px rgba(0,0,0,0.28);
-    }
-
-    body.dark-mode .bottom-nav-item,
-    .bottom-nav.dark-mode .bottom-nav-item {
-        color: #a3a3a3;
-    }
-
-    body.dark-mode .bottom-nav-item.active,
-    .bottom-nav.dark-mode .bottom-nav-item.active {
-        color: #8fbf8e;
-    }
-
-    body.dark-mode .bottom-nav-item svg,
-    .bottom-nav.dark-mode .bottom-nav-item svg {
-        fill: #a3a3a3;
-    }
-
-    body.dark-mode .bottom-nav-item.active svg,
-    .bottom-nav.dark-mode .bottom-nav-item.active svg {
-        fill: #8fbf8e;
-    }
-
-    body.dark-mode .others-menu-content,
-    .others-menu-content.dark-mode {
-        background: #1f1f1f;
-        box-shadow: 0 4px 22px rgba(0,0,0,0.45);
-    }
-
-    body.dark-mode .others-menu-item,
-    .others-menu-item.dark-mode {
-        color: #e5e7eb;
-    }
-
-    body.dark-mode .others-menu-item img,
-    .others-menu-item.dark-mode img {
-        filter: brightness(0) invert(1);
-        opacity: 0.78;
-    }
 }

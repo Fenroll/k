@@ -5,7 +5,6 @@
         return;
     }
 
-    const THEME_KEY = 'index-copy-theme';
     const NAV_CACHE_KEY = 'coursebook-mobile-nav-html-v3';
     const CRITICAL_STYLE_ID = 'coursebook-mobile-nav-critical';
 
@@ -204,87 +203,10 @@
         if (nextActive) nextActive.classList.add('active');
     }
 
-    cacheNavHTML(builtNavHTML);
-
-    function getStoredThemePreference() {
-        try {
-            return localStorage.getItem(THEME_KEY);
-        } catch (err) {
-            return null;
-        }
-    }
-
-    function isDarkThemeEnabled() {
-        const body = document.body;
-        const html = document.documentElement;
-        const bodyDark = body && body.classList.contains('dark-mode');
-        const htmlDark = html && (html.classList.contains('dark-mode') || html.getAttribute('data-theme') === 'dark');
-        const storedTheme = getStoredThemePreference();
-        const storedDark = storedTheme === 'dark';
-
-        let prefersDark = false;
-        if (window.matchMedia) {
-            prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-        }
-
-        if (storedTheme === 'light') {
-            return Boolean(bodyDark || htmlDark);
-        }
-
-        return Boolean(bodyDark || htmlDark || storedDark || prefersDark);
-    }
-
-    function syncMobileNavTheme() {
-        const useDark = isDarkThemeEnabled();
-        const bottomNav = document.getElementById('bottom-nav');
-        const menuOverlay = document.getElementById('others-menu-overlay');
-
-        if (bottomNav) {
-            bottomNav.classList.toggle('dark-mode', useDark);
-        }
-
-        if (menuOverlay) {
-            menuOverlay.classList.toggle('dark-mode', useDark);
-            const menuContent = menuOverlay.querySelector('.others-menu-content');
-            if (menuContent) {
-                menuContent.classList.toggle('dark-mode', useDark);
-            }
-
-            const menuItems = menuOverlay.querySelectorAll('.others-menu-item');
-            menuItems.forEach(item => item.classList.toggle('dark-mode', useDark));
-        }
-    }
-
-    syncMobileNavTheme();
-    window.requestAnimationFrame(syncMobileNavTheme);
-    window.setTimeout(syncMobileNavTheme, 80);
-    window.setTimeout(syncMobileNavTheme, 300);
-
-    const body = document.body;
-    const html = document.documentElement;
-    if (typeof MutationObserver !== 'undefined') {
-        const observer = new MutationObserver(syncMobileNavTheme);
-        if (body) {
-            observer.observe(body, { attributes: true, attributeFilter: ['class'] });
-        }
-        if (html) {
-            observer.observe(html, { attributes: true, attributeFilter: ['class', 'data-theme'] });
-        }
-    }
-
-    window.addEventListener('pageshow', syncMobileNavTheme);
-    window.addEventListener('focus', syncMobileNavTheme);
-    document.addEventListener('visibilitychange', syncMobileNavTheme);
-    window.addEventListener('storage', syncMobileNavTheme);
-    window.addEventListener('themechange', syncMobileNavTheme);
-
-    if (window.matchMedia) {
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        if (typeof mediaQuery.addEventListener === 'function') {
-            mediaQuery.addEventListener('change', syncMobileNavTheme);
-        } else if (typeof mediaQuery.addListener === 'function') {
-            mediaQuery.addListener(syncMobileNavTheme);
-        }
+    // Skip the localStorage write when the cached value already matches
+    // what we just rendered — avoids touching storage on every page load.
+    if (cachedNavHTML !== builtNavHTML) {
+        cacheNavHTML(builtNavHTML);
     }
 
     // Event Listeners
@@ -293,22 +215,25 @@
     const content = overlay.querySelector('.others-menu-content');
     const logoutBtn = document.getElementById('mobile-logout');
 
-    function installPressFeedback(selector) {
-        document.querySelectorAll(selector).forEach(item => {
-            const clearPress = () => item.classList.remove('is-pressing');
-
-            item.addEventListener('pointerdown', () => {
-                item.classList.add('is-pressing');
-            }, { passive: true });
-
-            item.addEventListener('pointerup', clearPress, { passive: true });
-            item.addEventListener('pointercancel', clearPress, { passive: true });
-            item.addEventListener('pointerleave', clearPress, { passive: true });
-            item.addEventListener('blur', clearPress);
-        });
+    // Delegated press feedback: 4 listeners on each container instead of 5 per item.
+    function installPressFeedback(container) {
+        if (!container) return;
+        const startPress = (e) => {
+            const item = e.target.closest('.bottom-nav-item, .others-menu-item');
+            if (item && container.contains(item)) item.classList.add('is-pressing');
+        };
+        const endPress = (e) => {
+            const item = e.target.closest('.bottom-nav-item, .others-menu-item');
+            if (item && container.contains(item)) item.classList.remove('is-pressing');
+        };
+        container.addEventListener('pointerdown', startPress, { passive: true });
+        container.addEventListener('pointerup', endPress, { passive: true });
+        container.addEventListener('pointercancel', endPress, { passive: true });
+        container.addEventListener('pointerleave', endPress, { passive: true });
     }
 
-    installPressFeedback('.bottom-nav-item, .others-menu-item');
+    installPressFeedback(document.getElementById('bottom-nav'));
+    installPressFeedback(document.getElementById('others-menu-overlay'));
 
     function toggleMenu() {
         if (overlay.classList.contains('open')) {
@@ -364,10 +289,6 @@
                 adminLink.style.display = 'flex';
             }
         });
-    }
-
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', syncMobileNavTheme, { once: true });
     }
 
 })();

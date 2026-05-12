@@ -1,9 +1,11 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605121dpc"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Tools</title>
+  <script src="js/auth-guard.js?v=202605121mxw"></script>
   <style>
     @media (max-width: 900px) {
       #side-menu {
@@ -14,15 +16,15 @@
       }
     }
   </style>
-  <meta name="robots" content="noindex, nofollow">
-  <title>Tools</title>
 
   <!-- Favicon -->
   <link rel="icon" href="favicon.svg?v=202603101mce" type="image/svg+xml">
   <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png?v=20260401ios2">
 
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700&display=swap">
 
   <style>
     /* Base styles */
@@ -560,7 +562,7 @@
     }
 
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605121dpc">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605121mxw">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
   <script src="js/version-manager.js?v=202603101mce"></script>
@@ -1317,18 +1319,17 @@
     updateAdminButtonVisibility();
   </script>
 
-  <script src="js/user-identity.js?v=202605121dpc"></script>
+  <script src="js/user-identity.js?v=202605121mxw"></script>
   <!-- Mobile menu overlay -->
   <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
   <!-- ============================================
        FIREBASE & CHAT WIDGET
        ============================================ -->
-  <!-- Initialize Chat Widget -->
-    <script src="js/chat.js?v=202605121dpc"></script>
-
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
+  <!-- Initialize Chat Widget (loaded after Firebase so module-eval is safe) -->
+  <script src="js/chat.js?v=202605121mxw"></script>
   <script src="js/presence.js?v=202602171mhr"></script>
   <script>
     (function() {
@@ -1343,7 +1344,25 @@
       };
 
       const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
+
+      // Row action icons — hoisted out of the per-row render loop so they're
+      // not re-allocated for every visible upload.
+      const ROW_SVG_OPEN     = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+      const ROW_SVG_DOWNLOAD = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
+      const ROW_SVG_LINK     = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
+      const ROW_SVG_TRASH    = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
+
+      function debounce(fn, ms) {
+        let t = null;
+        return function(...args) {
+          if (t) clearTimeout(t);
+          t = setTimeout(() => { t = null; fn.apply(this, args); }, ms);
+        };
+      }
+
       let initialized = false;
+      let currentRenderedRows = [];
+      let currentRenderedRowsDb = null;
       let currentUserName = '';
       let currentUserIdentitySet = new Set();
       let currentUserIsAdmin = false;
@@ -1993,7 +2012,8 @@
           return;
         }
 
-                // Build rows as divs for modern layout
+        // Build rows as divs for modern layout
+        currentRenderedRows = rows;
         tableBody.innerHTML = rows.map((r, idx) => {
           const safeName = escapeHtml(r.name);
           const uploaderProfile = getUploaderProfile(r.uploader);
@@ -2012,14 +2032,8 @@
             ? '<img src="' + safeAvatarUrl + '" class="upl-avatar" alt="avatar" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'inline-flex\'"><span class="upl-avatar-fb" style="display:none">' + uploaderInitial + '</span>'
             : '<span class="upl-avatar-fb">' + uploaderInitial + '</span>';
 
-          // SVG icons for actions
-          const svgOpen = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
-          const svgDownload = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>';
-          const svgLink = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>';
-          const svgTrash = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>';
-
           const openBtn = canOpenInBrowser
-            ? '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" class="upl-btn-icon" title="Open">' + svgOpen + '</a>'
+            ? '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" class="upl-btn-icon" title="Open">' + ROW_SVG_OPEN + '</a>'
             : '<span class="upl-btn-icon-spacer" aria-hidden="true"></span>';
 
           return '<div class="upl-row">' +
@@ -2032,165 +2046,178 @@
             '<div class="upl-cell upl-date">' + safeDate + '</div>' +
             '<div class="upl-cell"><div class="upl-actions">' +
               openBtn +
-              '<button class="upl-btn-icon tools-uploads-download" data-idx="' + idx + '" title="Download">' + svgDownload + '</button>' +
-              '<button class="upl-btn-icon tools-uploads-copy" data-idx="' + idx + '" title="Copy URL">' + svgLink + '</button>' +
-              (canDeleteRow(r) ? '<button class="upl-btn-icon upl-btn-icon-del tools-uploads-delete" data-idx="' + idx + '" title="Delete">' + svgTrash + '</button>' : '') +
+              '<button class="upl-btn-icon tools-uploads-download" data-idx="' + idx + '" title="Download">' + ROW_SVG_DOWNLOAD + '</button>' +
+              '<button class="upl-btn-icon tools-uploads-copy" data-idx="' + idx + '" title="Copy URL">' + ROW_SVG_LINK + '</button>' +
+              (canDeleteRow(r) ? '<button class="upl-btn-icon upl-btn-icon-del tools-uploads-delete" data-idx="' + idx + '" title="Delete">' + ROW_SVG_TRASH + '</button>' : '') +
             '</div></div>' +
           '</div>';
         }).join('');
 
-        tableBody.querySelectorAll('.tools-uploads-download').forEach((btn) => {
-          btn.addEventListener('click', async function(e) {
+        bindUploadsTableDelegation(tableBody);
+      }
+
+      // Bind all upload-table interactions once via delegation. Replaces N×4 per-row
+      // listener attachments that previously fired on every render.
+      async function rowDownload(row) {
+        if (!row || !row.url) return;
+        const fileName = String(row.name || getFileNameFromPath(row.path || row.url) || 'download');
+        const trigger = (url) => {
+          const a = document.createElement('a');
+          a.href = url; a.download = fileName; a.rel = 'noopener noreferrer'; a.style.display = 'none';
+          document.body.appendChild(a); a.click(); a.remove();
+        };
+        try {
+          const preferredDownloadUrl = getPreferredDownloadUrlForRow(row);
+          const response = await fetch(preferredDownloadUrl, { method: 'GET', mode: 'cors' });
+          if (!response.ok) throw new Error('HTTP ' + response.status);
+          const blob = await response.blob();
+          const blobUrl = URL.createObjectURL(blob);
+          trigger(blobUrl);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+        } catch (_) {
+          const preferredDownloadUrl = getPreferredDownloadUrlForRow(row);
+          trigger(preferredDownloadUrl || row.url);
+        }
+      }
+
+      function rowFromTarget(el) {
+        const i = Number(el && el.getAttribute && el.getAttribute('data-idx'));
+        return Number.isFinite(i) ? currentRenderedRows[i] : null;
+      }
+
+      function bindUploadsTableDelegation(tableBody) {
+        if (tableBody.dataset.delegationBound === '1') return;
+        tableBody.dataset.delegationBound = '1';
+
+        // Single click handler for all row actions + name-tip toggle.
+        tableBody.addEventListener('click', (e) => {
+          const downloadBtn = e.target.closest('.tools-uploads-download');
+          if (downloadBtn && tableBody.contains(downloadBtn)) {
             e.preventDefault();
-            const i = Number(btn.getAttribute('data-idx'));
-            const row = Number.isFinite(i) ? rows[i] : null;
-            if (!row || !row.url) return;
-
-            const fileName = String(row.name || getFileNameFromPath(row.path || row.url) || 'download');
-
-            const triggerDirectDownload = () => {
-              const a = document.createElement('a');
-              a.href = row.url;
-              a.download = fileName;
-              a.rel = 'noopener noreferrer';
-              a.style.display = 'none';
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-            };
-
-            const triggerUrlDownload = (url) => {
-              const a = document.createElement('a');
-              a.href = url;
-              a.download = fileName;
-              a.rel = 'noopener noreferrer';
-              a.style.display = 'none';
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-            };
-
-            try {
-              const preferredDownloadUrl = getPreferredDownloadUrlForRow(row);
-              const targetUrl = preferredDownloadUrl;
-              const response = await fetch(targetUrl, { method: 'GET', mode: 'cors' });
-              if (!response.ok) throw new Error('HTTP ' + response.status);
-
-              const blob = await response.blob();
-              const blobUrl = URL.createObjectURL(blob);
-              const a = document.createElement('a');
-              a.href = blobUrl;
-              a.download = fileName;
-              a.style.display = 'none';
-              document.body.appendChild(a);
-              a.click();
-              a.remove();
-              setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-            } catch (_) {
-              // Some sources block CORS blob downloads; fallback to URL download attempts.
-              const preferredDownloadUrl = getPreferredDownloadUrlForRow(row);
-              if (preferredDownloadUrl) {
-                triggerUrlDownload(preferredDownloadUrl);
-              } else {
-                triggerDirectDownload();
-              }
-            }
-          });
-        });
-
-        tableBody.querySelectorAll('.tools-uploads-copy').forEach((btn) => {
-          btn.addEventListener('click', function(e) {
+            const row = rowFromTarget(downloadBtn);
+            if (row) rowDownload(row);
+            return;
+          }
+          const copyBtn = e.target.closest('.tools-uploads-copy');
+          if (copyBtn && tableBody.contains(copyBtn)) {
             e.preventDefault();
-            const i = Number(btn.getAttribute('data-idx'));
-            const row = Number.isFinite(i) ? rows[i] : null;
+            const row = rowFromTarget(copyBtn);
             const url = getCopyUrlForRow(row);
             if (!url) return;
             navigator.clipboard.writeText(url).then(() => {
               showStatus(shouldHideOpenAction(row) ? 'Download URL copied to clipboard.' : 'URL copied to clipboard.', false);
             }).catch(() => showStatus('Could not copy URL.', true));
-          });
-        });
-
-        tableBody.querySelectorAll('.tools-uploads-delete').forEach((btn) => {
-          btn.addEventListener('click', function(e) {
+            return;
+          }
+          const deleteBtn = e.target.closest('.tools-uploads-delete');
+          if (deleteBtn && tableBody.contains(deleteBtn)) {
             e.preventDefault();
-            const i = Number(btn.getAttribute('data-idx'));
-            const row = Number.isFinite(i) ? rows[i] : null;
-            if (!row) return;
-            deleteUploadRow(row);
-          });
-        });
-
-        tableBody.querySelectorAll('.tools-uploads-preview-target').forEach((el) => {
-          const i = Number(el.getAttribute('data-idx'));
-          const row = Number.isFinite(i) ? rows[i] : null;
-          if (!row || !shouldHaveHoverPreview(row)) return;
-
-          el.addEventListener('mouseenter', () => showHoverPreview(row, el));
-          el.addEventListener('focus', () => showHoverPreview(row, el));
-          el.addEventListener('mouseleave', scheduleHideHoverPreview);
-          el.addEventListener('blur', scheduleHideHoverPreview);
-        });
-
-        if (tableBody.dataset.nameTipBound !== '1') {
-          document.addEventListener('click', () => {
-            tableBody.querySelectorAll('.upl-file-name.is-name-open').forEach((el) => {
-              el.classList.remove('is-name-open');
-            });
-          });
-          tableBody.dataset.nameTipBound = '1';
-        }
-
-        tableBody.querySelectorAll('.upl-file-name').forEach((el) => {
-          el.addEventListener('click', (e) => {
+            const row = rowFromTarget(deleteBtn);
+            if (row) deleteUploadRow(row);
+            return;
+          }
+          const nameEl = e.target.closest('.upl-file-name');
+          if (nameEl && tableBody.contains(nameEl)) {
             e.stopPropagation();
-            const isOpen = el.classList.contains('is-name-open');
+            const isOpen = nameEl.classList.contains('is-name-open');
             tableBody.querySelectorAll('.upl-file-name.is-name-open').forEach((openEl) => {
               openEl.classList.remove('is-name-open');
             });
-            if (!isOpen) el.classList.add('is-name-open');
-          });
+            if (!isOpen) nameEl.classList.add('is-name-open');
+          }
         });
 
-        if (tableBody.dataset.previewLeaveBound !== '1') {
-          tableBody.addEventListener('mouseleave', scheduleHideHoverPreview);
-          tableBody.dataset.previewLeaveBound = '1';
-        }
+        // Hover preview via mouseover/out (delegatable; mouseenter/leave don't bubble).
+        tableBody.addEventListener('mouseover', (e) => {
+          const target = e.target.closest('.tools-uploads-preview-target');
+          if (!target || !tableBody.contains(target)) return;
+          const row = rowFromTarget(target);
+          if (row && shouldHaveHoverPreview(row)) showHoverPreview(row, target);
+        });
+        tableBody.addEventListener('mouseout', (e) => {
+          const target = e.target.closest('.tools-uploads-preview-target');
+          if (!target || !tableBody.contains(target)) return;
+          scheduleHideHoverPreview();
+        });
+        // Keyboard focus support — focus/blur don't bubble, focusin/focusout do.
+        tableBody.addEventListener('focusin', (e) => {
+          const target = e.target.closest('.tools-uploads-preview-target');
+          if (!target || !tableBody.contains(target)) return;
+          const row = rowFromTarget(target);
+          if (row && shouldHaveHoverPreview(row)) showHoverPreview(row, target);
+        });
+        tableBody.addEventListener('focusout', (e) => {
+          const target = e.target.closest('.tools-uploads-preview-target');
+          if (!target || !tableBody.contains(target)) return;
+          scheduleHideHoverPreview();
+        });
+        tableBody.addEventListener('mouseleave', scheduleHideHoverPreview);
+
+        // Outside-click closes any open name tip.
+        document.addEventListener('click', () => {
+          tableBody.querySelectorAll('.upl-file-name.is-name-open').forEach((el) => {
+            el.classList.remove('is-name-open');
+          });
+        });
       }
 
       async function loadUploads(db) {
         const tableBody = byId('toolsUploadsTableBody');
         if (tableBody) tableBody.innerHTML = '<div style="padding:40px;text-align:center;color:#9ca3af;font-size:14px;">Loading…</div>';
         clearStatus();
-        try {
-          const roots = ['uploads', 'uploadLogs', 'filesUploads'];
-          const merged = [];
-          for (const root of roots) {
-            const snap = await db.ref(root).once('value');
-            const value = snap.val();
-            if (!value) continue;
-            collectRecords(value, [root], merged);
-          }
-          const unique = [];
-          const seen = new Set();
-          for (const row of merged) {
+
+        // Progressive load: render as each Firebase root resolves rather than
+        // blocking on all three. The user (almost always on the "general" tab)
+        // sees rows as soon as the fastest fetch returns instead of waiting
+        // for the slowest. Each arrival re-renders with the accumulated set;
+        // dedup is global via the shared `seen` Set so re-renders are stable.
+        allRows = [];
+        const seen = new Set();
+        let anyArrived = false;
+        let failures = 0;
+
+        const roots = ['uploads', 'uploadLogs', 'filesUploads'];
+        const tasks = roots.map((root) => db.ref(root).once('value').then((snap) => {
+          const value = snap.val();
+          if (!value) return;
+          const partial = [];
+          collectRecords(value, [root], partial);
+          let appended = 0;
+          for (const row of partial) {
             const key = row.id + '|' + row.url;
             if (seen.has(key)) continue;
             seen.add(key);
-            unique.push(row);
+            allRows.push(row);
+            appended += 1;
           }
-          allRows = unique;
+          if (appended > 0) {
+            anyArrived = true;
+            renderRows();
+          }
+        }).catch((err) => {
+          failures += 1;
+          console.warn('Upload root fetch failed for "' + root + '":', err);
+        }));
+
+        try {
+          await Promise.all(tasks);
           if (!allRows.length) {
             allRows = await loadFromWorkerFallback();
-            if (!allRows.length) showStatus('No upload metadata found and worker listing returned no files.', true);
-            else { console.info('Loaded ' + allRows.length + ' file(s) from Cloudflare worker fallback.'); clearStatus(); }
+            if (!allRows.length) {
+              showStatus(failures
+                ? 'Failed to load uploads from Firebase. Worker fallback returned no files.'
+                : 'No upload metadata found and worker listing returned no files.', true);
+            } else {
+              console.info('Loaded ' + allRows.length + ' file(s) from Cloudflare worker fallback.');
+              clearStatus();
+            }
+            renderRows();
           } else {
             showStatus('Loaded ' + allRows.length + ' upload record(s).', false);
           }
-          renderRows();
         } catch (error) {
           showStatus('Failed to load uploads: ' + error.message, true);
-          if (tableBody) tableBody.innerHTML = '<div style="padding:40px;text-align:center;color:#9ca3af;font-size:14px;">Failed to load files.</div>';
+          if (tableBody && !anyArrived) tableBody.innerHTML = '<div style="padding:40px;text-align:center;color:#9ca3af;font-size:14px;">Failed to load files.</div>';
         }
       }
 
@@ -2207,7 +2234,8 @@
         const db = firebase.database();
 
         if (!initialized) {
-          byId('toolsUploadsSearch').addEventListener('input', renderRows);
+          // Debounce search — avoids re-rendering on every keystroke for large tables.
+          byId('toolsUploadsSearch').addEventListener('input', debounce(renderRows, 180));
           updateSortArrows('newest');
           byId('toolsUploadsSort').addEventListener('change', renderRows);
           byId('toolsUploadsScope').addEventListener('change', renderRows);
@@ -3083,6 +3111,6 @@
     }
   }
 </script>
-<script src="js/mobile-nav.js?v=202605121dpc"></script>
+<script src="js/mobile-nav.js?v=202605121mxw"></script>
 </body>
 </html>
