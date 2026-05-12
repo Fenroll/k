@@ -111,6 +111,58 @@
             const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#FFA07A', '#98D8C8', '#F7DC6F', '#BB8FCE'];
             return colors[Math.floor(Math.random() * colors.length)];
         }
+
+        function escapeHtml(s) {
+            return String(s == null ? '' : s)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+
+        // Validate that a string is a safe CSS color value (hex / rgb / hsl / named).
+        // Prevents injection like `red; background: url(...)` from user-controlled fields.
+        const NAMED_COLORS = new Set(['red','blue','green','yellow','orange','purple','pink','brown','black','white','gray','grey','cyan','magenta','lime','navy','teal','olive','maroon','silver','gold','aqua','fuchsia']);
+        function safeColor(value, fallback = '#cccccc') {
+            if (typeof value !== 'string') return fallback;
+            const v = value.trim();
+            if (!v) return fallback;
+            if (/^#(?:[0-9a-f]{3}|[0-9a-f]{4}|[0-9a-f]{6}|[0-9a-f]{8})$/i.test(v)) return v;
+            if (/^(?:rgb|rgba|hsl|hsla)\(\s*-?[\d.%]+(?:\s*[,\s]\s*-?[\d.%]+){2,3}(?:\s*[\/,]\s*-?[\d.%]+)?\s*\)$/i.test(v)) return v;
+            if (NAMED_COLORS.has(v.toLowerCase())) return v;
+            return fallback;
+        }
+
+        // Diff-render a <ul>. items: [{ id, sig, build(li, item) }, ...].
+        // Existing <li> elements are reused when their signature is unchanged; out-of-order
+        // nodes are repositioned with appendChild; stale nodes are removed.
+        function diffRenderList(ul, items) {
+            const seen = new Set();
+            let cursor = null;
+            for (const item of items) {
+                seen.add(item.id);
+                let li = ul.querySelector(`:scope > li[data-key="${CSS.escape(item.id)}"]`);
+                if (!li) {
+                    li = document.createElement('li');
+                    li.dataset.key = item.id;
+                    item.build(li, item);
+                    li.dataset.sig = item.sig;
+                } else if (li.dataset.sig !== item.sig) {
+                    item.build(li, item);
+                    li.dataset.sig = item.sig;
+                }
+                const expectedNext = cursor ? cursor.nextElementSibling : ul.firstElementChild;
+                if (expectedNext !== li) {
+                    if (cursor) cursor.after(li);
+                    else ul.prepend(li);
+                }
+                cursor = li;
+            }
+            // Remove any leftovers
+            const leftovers = [];
+            for (const child of ul.children) {
+                if (!child.dataset || !seen.has(child.dataset.key)) leftovers.push(child);
+            }
+            leftovers.forEach(n => n.remove());
+        }
         
         function generateRandomPassword() {
             const length = 10;
@@ -670,54 +722,70 @@
 
         // User Management Logic
         const usersRef = db.ref('site_users');
+        let allUsersUl = null;
+        let allUsersCache = {};
+
+        // One-time event delegation (not re-attached on each Firebase update).
+        allUsersContainer.addEventListener('click', (e) => {
+            const btn = e.target.closest('.edit-user-btn');
+            if (!btn) return;
+            const uid = btn.dataset.uid;
+            const user = allUsersCache[uid];
+            if (!user) return;
+            document.getElementById('edit-user-uid').value = uid;
+            document.getElementById('edit-username').value = user.username || '';
+            document.getElementById('edit-displayname').value = user.displayName || '';
+            document.getElementById('edit-show-in-members').checked = user.showInMembersList || false;
+            modal.style.display = 'block';
+        });
+
         usersRef.on('value', (snapshot) => {
-            const users = snapshot.val();
-            let html = '<ul>';
-            for (const uid in users) {
-                const user = users[uid];
-                const displayName = user.displayName || user.username;
-                const deviceCount = user.devices ? Object.keys(user.devices).length : 0;
-                
-                // Avatar HTML
-                let avatarHtml;
-                if (user.avatar) {
-                    avatarHtml = `<img src="${user.avatar}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; margin-right:8px; vertical-align:middle; border:1px solid #444;">`;
-                } else {
-                    avatarHtml = `<span style="display:inline-block; width:24px; height:24px; border-radius:50%; background-color:${user.color || '#ccc'}; color:white; text-align:center; line-height:24px; font-size:12px; font-weight:bold; margin-right:8px; vertical-align:middle;">${(user.username || "?").charAt(0).toUpperCase()}</span>`;
-                }
+            const users = snapshot.val() || {};
+            allUsersCache = users;
 
-                html += `<li style="display:flex; align-items:center; padding:8px;">
-                    ${avatarHtml}
-                    <div style="flex:1;">
-                        <span style="font-weight:bold; color:${user.color || '#ccc'};">${user.username}</span> 
-                        <span style="color:#888;">(${displayName})</span>
-                        <span style="font-size:0.8em; color:#666; margin-left:10px;">${deviceCount} device(s)</span>
-                    </div>
-                    <button class="edit-user-btn" data-uid="${uid}">Edit</button>
-                </li>`;
+            if (!allUsersUl) {
+                allUsersContainer.innerHTML = '<ul></ul>';
+                allUsersUl = allUsersContainer.querySelector('ul');
             }
-            html += '</ul>';
-            allUsersContainer.innerHTML = html;
 
-            document.querySelectorAll('.edit-user-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    const uid = e.target.dataset.uid;
-                    const user = users[uid];
-                    document.getElementById('edit-user-uid').value = uid;
-                    document.getElementById('edit-username').value = user.username;
-                    document.getElementById('edit-displayname').value = user.displayName;
-                    document.getElementById('edit-show-in-members').checked = user.showInMembersList || false;
-                    modal.style.display = 'block';
-                });
+            const items = Object.entries(users).map(([uid, user]) => {
+                const displayName = user.displayName || user.username || '';
+                const deviceCount = user.devices ? Object.keys(user.devices).length : 0;
+                const color = safeColor(user.color, '#cccccc');
+                const initial = (user.username || '?').charAt(0).toUpperCase();
+
+                const avatarHtml = user.avatar
+                    ? `<img src="${escapeHtml(user.avatar)}" style="width:24px; height:24px; border-radius:50%; object-fit:cover; margin-right:8px; vertical-align:middle; border:1px solid #444;">`
+                    : `<span style="display:inline-block; width:24px; height:24px; border-radius:50%; background-color:${color}; color:white; text-align:center; line-height:24px; font-size:12px; font-weight:bold; margin-right:8px; vertical-align:middle;">${escapeHtml(initial)}</span>`;
+
+                const countLabel = `${deviceCount} device${deviceCount === 1 ? '' : 's'}`;
+                const innerHtml = `
+                    <div style="display:flex; align-items:center; padding:8px;">
+                        ${avatarHtml}
+                        <div style="flex:1;">
+                            <span style="font-weight:bold; color:${color};">${escapeHtml(user.username || '')}</span>
+                            <span style="color:#888;">(${escapeHtml(displayName)})</span>
+                            <span style="font-size:0.8em; color:#666; margin-left:10px;">${countLabel}</span>
+                        </div>
+                        <button class="edit-user-btn" data-uid="${escapeHtml(uid)}">Edit</button>
+                    </div>
+                `;
+
+                const sig = JSON.stringify({ u: user.username, d: displayName, c: color, a: user.avatar || '', n: deviceCount });
+                return {
+                    id: `all-user-${uid}`,
+                    sig,
+                    build: (li) => { li.innerHTML = innerHtml; }
+                };
             });
+
+            diffRenderList(allUsersUl, items);
         });
         
         closeModalBtn.onclick = () => modal.style.display = 'none';
-        window.onclick = (event) => {
-            if (event.target == modal) {
-                modal.style.display = "none";
-            }
-        }
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) modal.style.display = 'none';
+        });
         
         saveChangesBtn.onclick = async () => {
             const uid = document.getElementById('edit-user-uid').value;
@@ -1074,38 +1142,66 @@
         let allOnlineAuthData = {};
         let allOnlineGuestData = {};
 
-        function processAndDisplayOnlineUsers() {
-            onlineUsersContainer.innerHTML = '<ul></ul>';
-            const ul = onlineUsersContainer.querySelector('ul');
-            const allOnline = {}; // Consolidated list of all online users
-            
-            const now = Date.now() + serverTimeOffset;
-            const GRACE_PERIOD = 2 * 60 * 1000; // 2 minutes
+        let onlineTransitionTimer = null;
+        let onlineUl = null;
 
-            const isUserOnline = (devices) => {
-                return Object.values(devices).some(device => {
-                    // 1. Truly active - most important check
-                    if (device.isActive === true) {
-                        return true;
-                    }
-                    
-                    // 2. Recently active (within 30 seconds) - for transitions
-                    if (device.lastActivity && (now - device.lastActivity) < 30000) {
-                        return true;
-                    }
-                    
-                    // 3. Grace period for backgrounded tabs
-                    if (device.lastInactive && (now - device.lastInactive) < GRACE_PERIOD) {
-                        return true;
-                    }
-                    
-                    // 4. Grace period for disconnected devices
-                    if (device.offlineAt && (now - device.offlineAt) < GRACE_PERIOD) {
-                        return true;
-                    }
-                    
-                    return false;
+        function processAndDisplayOnlineUsers() {
+            if (!onlineUl) {
+                onlineUsersContainer.innerHTML = '<ul></ul>';
+                onlineUl = onlineUsersContainer.querySelector('ul');
+            }
+            const ul = onlineUl;
+            const allOnline = {};
+
+            const now = Date.now() + serverTimeOffset;
+            const ACTIVE_FRESHNESS = 90 * 1000;
+            const AWAY_FRESHNESS   = 10 * 60 * 1000;
+            const OFFLINE_GRACE    = 2 * 60 * 1000;
+
+            let soonestTransition = Infinity;
+            const noteTransition = (t) => { if (t > now && t < soonestTransition) soonestTransition = t; };
+
+            // Three-state classifier matching presence.js v3 + legacy fallback.
+            const deviceState = (device) => {
+                if (!device) return 'offline';
+                if (device.state === 'active') {
+                    const la = device.lastActivity || 0;
+                    if (!la || (now - la) < ACTIVE_FRESHNESS) { noteTransition(la + ACTIVE_FRESHNESS); return 'active'; }
+                    if ((now - la) < AWAY_FRESHNESS) { noteTransition(la + AWAY_FRESHNESS); return 'away'; }
+                    return 'offline';
+                }
+                if (device.state === 'away') {
+                    const t = device.awayAt || device.lastInactive || device.lastActivity || 0;
+                    if (t && (now - t) < AWAY_FRESHNESS) { noteTransition(t + AWAY_FRESHNESS); return 'away'; }
+                    return 'offline';
+                }
+                const la = device.lastActivity || 0;
+                if (device.isActive === true && (!la || (now - la) < ACTIVE_FRESHNESS)) { if (la) noteTransition(la + ACTIVE_FRESHNESS); return 'active'; }
+                if (la && (now - la) < 30 * 1000) { noteTransition(la + 30 * 1000); return 'active'; }
+                if (device.lastInactive && (now - device.lastInactive) < AWAY_FRESHNESS) { noteTransition(device.lastInactive + AWAY_FRESHNESS); return 'away'; }
+                if (device.offlineAt && (now - device.offlineAt) < OFFLINE_GRACE) { noteTransition(device.offlineAt + OFFLINE_GRACE); return 'away'; }
+                return 'offline';
+            };
+
+            const aggregateUserState = (devices) => {
+                let best = 'offline';
+                Object.values(devices).forEach(d => {
+                    const s = deviceState(d);
+                    if (s === 'active') best = 'active';
+                    else if (s === 'away' && best !== 'active') best = 'away';
                 });
+                return best;
+            };
+
+            const isUserOnline = (devices) => aggregateUserState(devices) !== 'offline';
+
+            const formatRelative = (ts) => {
+                if (!ts) return '';
+                const diff = now - ts;
+                if (diff < 60_000) return 'just now';
+                if (diff < 60 * 60_000) return `${Math.floor(diff / 60_000)}m ago`;
+                if (diff < 24 * 60 * 60_000) return `${Math.floor(diff / 3_600_000)}h ago`;
+                return `${Math.floor(diff / 86_400_000)}d ago`;
             };
 
             // Add authenticated online users
@@ -1120,20 +1216,21 @@
                     hasMobile = Object.values(devices).some(device => device.isMobile === true);
                 }
 
+                const userState = aggregateUserState(devices);
                 const userProfile = allSiteUsers[uid];
                 if (userProfile) {
                     allOnline[uid] = {
                         userId: uid,
                         userName: userProfile.displayName || userProfile.username,
                         color: userProfile.color,
-                        avatar: userProfile.avatar, // Add avatar
+                        avatar: userProfile.avatar,
                         deviceCount: deviceCount,
                         hasMobile: hasMobile,
                         isGuest: false,
-                        devices: devices // Add device details
+                        state: userState,
+                        devices: devices
                     };
                 } else {
-                    // Fallback for authenticated users whose profile might be missing
                     allOnline[uid] = {
                         userId: uid,
                         userName: `Unknown User (${uid})`,
@@ -1141,7 +1238,8 @@
                         deviceCount: deviceCount,
                         hasMobile: hasMobile,
                         isGuest: false,
-                        devices: devices // Add device details
+                        state: userState,
+                        devices: devices
                     };
                 }
             }
@@ -1165,11 +1263,12 @@
                 allOnline[guestId] = {
                     userId: guestId,
                     userName: guestUserName,
-                    color: '#9E9E9E', // Default grey for guests
+                    color: '#9E9E9E',
                     deviceCount: deviceCount,
                     hasMobile: hasMobile,
                     isGuest: true,
-                    devices: devices // Add device details
+                    state: aggregateUserState(devices),
+                    devices: devices
                 };
             }
 
@@ -1189,53 +1288,88 @@
                 return a.userName.localeCompare(b.userName);
             });
 
-            if (sortedOnlineUsers.length === 0) {
-                const li = document.createElement('li');
-                li.textContent = 'No users currently online.';
-                ul.appendChild(li);
-                return;
-            }
+            const stateBadge = (state) => {
+                if (state === 'active') return '<span title="Active" style="color:#2e7d32;">●</span>';
+                if (state === 'away')   return '<span title="Away"   style="color:#e6a800;">●</span>';
+                return                          '<span title="Offline" style="color:#9e9e9e;">●</span>';
+            };
 
-            sortedOnlineUsers.forEach(onlineUser => {
-                const li = document.createElement('li');
-                const userType = onlineUser.isGuest ? '' : ''; // Removed "(Guest)" for guest users
+            const items = sortedOnlineUsers.map(onlineUser => {
+                const userColor = safeColor(onlineUser.color, '#cccccc');
                 const mobileIcon = onlineUser.hasMobile ? ' 📱' : '';
-                
-                // Avatar HTML
-                let avatarHtml;
-                if (onlineUser.avatar) {
-                    avatarHtml = `<img src="${onlineUser.avatar}" style="width:20px; height:20px; border-radius:50%; object-fit:cover; margin-right:8px; vertical-align:middle;">`;
-                } else {
-                    avatarHtml = `<span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:${onlineUser.color}; color:white; text-align:center; line-height:20px; font-size:10px; font-weight:bold; margin-right:8px; vertical-align:middle;">${onlineUser.userName.charAt(0).toUpperCase()}</span>`;
-                }
+                const count = onlineUser.deviceCount;
+                const countLabel = `${count} device${count === 1 ? '' : 's'}`;
 
-                // Build device details if available
-                let deviceDetailsHtml = '';
-                if (onlineUser.devices && Object.keys(onlineUser.devices).length > 0) {
-                    deviceDetailsHtml = '<div style="margin-left:28px; margin-top:4px; font-size:0.75em; color:#666;">';
-                    Object.entries(onlineUser.devices).forEach(([devId, devData]) => {
-                        const shortDevId = devId.substring(0, 12);
-                        const deviceIcon = devData.isMobile ? '📱' : '🖥️';
-                        const deviceName = devData.deviceName || 'Unknown';
-                        const activeStatus = devData.isActive ? '✅' : '⏸️';
-                        deviceDetailsHtml += `<div>${deviceIcon} ${activeStatus} ${deviceName} (${shortDevId})</div>`;
-                    });
-                    deviceDetailsHtml += '</div>';
-                }
+                // Per-device rows
+                const devices = onlineUser.devices || {};
+                const deviceRows = Object.values(devices).map(devData => {
+                    const devIcon  = devData.isMobile ? '📱' : '🖥️';
+                    const devState = deviceState(devData);
+                    const os       = devData.os      || (devData.deviceName ? devData.deviceName.split(' - ')[0] : 'Unknown');
+                    const browser  = devData.browser || (devData.deviceName ? (devData.deviceName.split(' - ')[1] || '') : '');
+                    const label    = browser ? `${os} · ${browser}` : os;
+                    const lastSeen = devData.lastActivity ? formatRelative(devData.lastActivity) : '';
+                    const suffix   = devState === 'active' ? '' : (lastSeen ? ` — ${lastSeen}` : '');
+                    return { state: devState, html: `<div>${devIcon} ${stateBadge(devState)} ${escapeHtml(label)}${escapeHtml(suffix)}</div>` };
+                });
+                const deviceDetailsHtml = deviceRows.length
+                    ? `<div style="margin-left:28px; margin-top:4px; font-size:0.75em; color:#666;">${deviceRows.map(r => r.html).join('')}</div>`
+                    : '';
 
-                li.id = `online-user-${onlineUser.userId}`;
-                li.innerHTML = `
-                    <div style="display:flex; align-items:center; flex-direction:column; align-items:flex-start;">
+                const avatarHtml = onlineUser.avatar
+                    ? `<img src="${escapeHtml(onlineUser.avatar)}" style="width:20px; height:20px; border-radius:50%; object-fit:cover; margin-right:8px; vertical-align:middle;">`
+                    : `<span style="display:inline-block; width:20px; height:20px; border-radius:50%; background-color:${userColor}; color:white; text-align:center; line-height:20px; font-size:10px; font-weight:bold; margin-right:8px; vertical-align:middle;">${escapeHtml((onlineUser.userName || '?').charAt(0).toUpperCase())}</span>`;
+
+                const innerHtml = `
+                    <div style="display:flex; flex-direction:column; align-items:flex-start;">
                         <div style="display:flex; align-items:center;">
-                            ${avatarHtml}
-                            <span style="color: ${onlineUser.color}; font-weight: bold;">${onlineUser.userName}</span>
-                            <span style="margin-left:8px; font-size:0.9em; color:#888;">${userType}${mobileIcon} - ${onlineUser.deviceCount} device(s) online</span>
+                            ${stateBadge(onlineUser.state)}
+                            <span style="margin-left:6px;">${avatarHtml}</span>
+                            <span style="color: ${userColor}; font-weight: bold;">${escapeHtml(onlineUser.userName)}</span>
+                            <span style="margin-left:8px; font-size:0.9em; color:#888;">${mobileIcon} — ${countLabel}</span>
                         </div>
                         ${deviceDetailsHtml}
                     </div>
                 `;
-                ul.appendChild(li);
+
+                // Signature: only re-render when anything visible would change
+                const sig = JSON.stringify({
+                    n: onlineUser.userName, c: userColor, a: onlineUser.avatar || '',
+                    s: onlineUser.state, m: onlineUser.hasMobile, dc: count,
+                    d: deviceRows.map(r => r.html)
+                });
+
+                return {
+                    id: `online-user-${onlineUser.userId}`,
+                    sig,
+                    build: (li) => { li.innerHTML = innerHtml; }
+                };
             });
+
+            if (items.length === 0) {
+                if (ul.children.length !== 1 || ul.firstElementChild?.dataset?.key !== '__empty__') {
+                    ul.innerHTML = '';
+                    const li = document.createElement('li');
+                    li.dataset.key = '__empty__';
+                    li.textContent = 'No users currently online.';
+                    ul.appendChild(li);
+                }
+            } else {
+                // Drop the empty-state row if present
+                const emptyRow = ul.querySelector(':scope > li[data-key="__empty__"]');
+                if (emptyRow) emptyRow.remove();
+                diffRenderList(ul, items);
+            }
+
+            // Re-arm transition timer for the next state change.
+            if (onlineTransitionTimer) { clearTimeout(onlineTransitionTimer); onlineTransitionTimer = null; }
+            if (isFinite(soonestTransition)) {
+                const delay = Math.max(500, soonestTransition - (Date.now() + serverTimeOffset));
+                onlineTransitionTimer = setTimeout(() => {
+                    onlineTransitionTimer = null;
+                    processAndDisplayOnlineUsers();
+                }, delay);
+            }
         }
 
         // Listen for changes in site_users (for user details)

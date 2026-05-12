@@ -41,6 +41,50 @@ class AccountSystem {
         this.pendingBannerCrop = null;
     }
 
+    // --- R2 image upload (avatars/banners) ---
+    // Uploads via the existing Cloudflare worker used by chat/notes. Returns the
+    // public URL stored on `site_users/<uid>.avatar` / `.banner` (no base64 in DB).
+    async uploadProfileImageToR2(blob, kind) {
+        if (!blob) throw new Error('No image to upload');
+        const uid = (this.user && this.user.uid) || 'unknown';
+        const type = blob.type || 'image/jpeg';
+        const ext = (type.split('/')[1] || 'jpg').replace(/[^a-z0-9]/gi, '');
+        const fileName = `${uid}-${Date.now()}.${ext}`;
+        const path = `${kind}s/${fileName}`;
+        const file = blob instanceof File ? blob : new File([blob], fileName, { type });
+
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('path', path);
+        formData.append('userName', (this.user && (this.user.userName || this.user.username)) || 'user');
+
+        const response = await fetch('https://r2-upload.sergey-2210-pavlov.workers.dev', {
+            method: 'POST',
+            body: formData
+        });
+        if (!response.ok) {
+            const text = await response.text().catch(() => '');
+            throw new Error(text || 'Image upload failed');
+        }
+        const data = await response.json();
+        if (!data || !data.url) throw new Error('Upload succeeded but no URL was returned');
+        return data.url;
+    }
+
+    canvasToBlob(canvas, type = 'image/jpeg', quality = 0.9) {
+        return new Promise((resolve, reject) => {
+            canvas.toBlob(blob => {
+                if (blob) resolve(blob);
+                else reject(new Error('Failed to encode image'));
+            }, type, quality);
+        });
+    }
+
+    async dataUrlToBlob(dataUrl) {
+        const r = await fetch(dataUrl);
+        return await r.blob();
+    }
+
     decodeStoredPassword(passwordValue) {
         if (typeof passwordValue !== 'string') {
             return '';
@@ -681,119 +725,49 @@ class AccountSystem {
         this.hideError('change-avatar-error');
 
         try {
-            let finalAvatar = '';
+            // Both branches resolve to a resized Blob; we then upload to R2 and
+            // store only the resulting URL on the user record.
+            const resizeImgToBlob = (img) => {
+                const canvas = document.createElement('canvas');
+                let width = img.width;
+                let height = img.height;
+                const maxSize = 150;
+                if (width > height) {
+                    if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+                } else {
+                    if (height > maxSize) { width *= maxSize / height; height = maxSize; }
+                }
+                canvas.width = width;
+                canvas.height = height;
+                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+                return this.canvasToBlob(canvas, 'image/jpeg', 0.9);
+            };
 
+            let avatarBlob;
             if (typeof avatarSource === 'string') {
-                // It's a URL - fetch and process it with smart CORS handling
-                finalAvatar = await new Promise((resolve, reject) => {
-                    // First, try loading without CORS to check if image is accessible
+                // URL input: probe without CORS, then re-load with CORS so we can resize via canvas.
+                avatarBlob = await new Promise((resolve, reject) => {
                     const testImg = new Image();
-                    
                     testImg.onload = () => {
-                        // Image is accessible, now try processing with CORS
                         const img = new Image();
                         img.crossOrigin = 'anonymous';
-                        
-                        img.onload = () => {
-                            try {
-                                const canvas = document.createElement('canvas');
-                                let width = img.width;
-                                let height = img.height;
-                                const maxSize = 150;
-
-                                if (width > height) {
-                                    if (width > maxSize) {
-                                        height *= maxSize / width;
-                                        width = maxSize;
-                                    }
-                                } else {
-                                    if (height > maxSize) {
-                                        width *= maxSize / height;
-                                        height = maxSize;
-                                    }
-                                }
-                                
-                                canvas.width = width;
-                                canvas.height = height;
-                                const ctx = canvas.getContext('2d');
-                                ctx.drawImage(img, 0, 0, width, height);
-                                
-                                // High quality JPEG compression (95% quality, minimal artifacts)
-                                let dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                                
-                                // Fallback: If still too large (> 100KB), reduce quality slightly
-                                if (dataUrl.length > 100000) {
-                                    dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                                }
-                                
-                                resolve(dataUrl);
-                            } catch (err) {
-                                reject(new Error('Не можа да се обработи изображението. Опитайте да изтеглите и качите файла директно.'));
-                            }
-                        };
-                        
-                        img.onerror = () => {
-                            // CORS blocked this image
-                            reject(new Error('Този сървър блокира обработката на изображения (CORS). Моля, изтеглете изображението и го качете като файл.'));
-                        };
-                        
+                        img.onload = () => resizeImgToBlob(img).then(resolve, reject);
+                        img.onerror = () => reject(new Error('Този сървър блокира обработката на изображения (CORS). Моля, изтеглете изображението и го качете като файл.'));
                         img.src = avatarSource;
                     };
-                    
-                    testImg.onerror = () => {
-                        reject(new Error('Не можа да се зареди изображението от URL. Проверете дали е валидно и достъпно.'));
-                    };
-                    
-                    // Try loading without CORS first
+                    testImg.onerror = () => reject(new Error('Не можа да се зареди изображението от URL. Проверете дали е валидно и достъпно.'));
                     testImg.src = avatarSource;
                 });
             } else {
-                // It's a File object
                 const file = avatarSource;
-                
-                // 2MB limit check for uploads
                 if (file.size > 2 * 1024 * 1024) {
                     throw new Error('Файлът е твърде голям (макс 2MB).');
                 }
-
-                // Resize image logic
-                finalAvatar = await new Promise((resolve, reject) => {
+                avatarBlob = await new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.onload = (readerEvent) => {
                         const img = new Image();
-                        img.onload = () => {
-                            const canvas = document.createElement('canvas');
-                            let width = img.width;
-                            let height = img.height;
-                            const maxSize = 150;
-
-                            if (width > height) {
-                                if (width > maxSize) {
-                                    height *= maxSize / width;
-                                    width = maxSize;
-                                }
-                            } else {
-                                if (height > maxSize) {
-                                    width *= maxSize / height;
-                                    height = maxSize;
-                                }
-                            }
-                            
-                            canvas.width = width;
-                            canvas.height = height;
-                            const ctx = canvas.getContext('2d');
-                            ctx.drawImage(img, 0, 0, width, height);
-                            
-                            // High quality JPEG compression (95% quality, minimal artifacts)
-                            let dataUrl = canvas.toDataURL('image/jpeg', 0.95);
-                            
-                            // Fallback: If still too large (> 100KB), reduce quality slightly
-                            if (dataUrl.length > 100000) {
-                                dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                            }
-                            
-                            resolve(dataUrl);
-                        };
+                        img.onload = () => resizeImgToBlob(img).then(resolve, reject);
                         img.onerror = () => reject(new Error('Невалидно изображение.'));
                         img.src = readerEvent.target.result;
                     };
@@ -802,7 +776,8 @@ class AccountSystem {
                 });
             }
 
-            // Save to Firebase
+            const finalAvatar = await this.uploadProfileImageToR2(avatarBlob, 'avatar');
+
             const userRef = this.db.ref(`site_users/${this.user.uid}`);
             await userRef.update({ avatar: finalAvatar });
 
@@ -830,9 +805,18 @@ class AccountSystem {
         this.hideError('change-banner-error');
 
         try {
-            const finalBanner = bannerSource
-                ? (alreadyProcessed ? bannerSource : await this.renderBannerSourceToCrop(bannerSource))
-                : null;
+            let finalBanner;
+            if (!bannerSource) {
+                finalBanner = null;
+            } else if (alreadyProcessed) {
+                // `bannerSource` is the cropped JPEG data URL from renderBannerCropToDataUrl.
+                // Convert to a Blob, upload to R2, store the resulting URL.
+                const blob = await this.dataUrlToBlob(bannerSource);
+                finalBanner = await this.uploadProfileImageToR2(blob, 'banner');
+            } else {
+                // Opens the crop modal and throws — user must crop first.
+                finalBanner = await this.renderBannerSourceToCrop(bannerSource);
+            }
             const userRef = this.db.ref(`site_users/${this.user.uid}`);
             await userRef.update({ banner: finalBanner });
 
@@ -1131,9 +1115,7 @@ class AccountSystem {
         const sourceH = state.frame.height / metrics.scale;
         ctx.drawImage(image, sourceX, sourceY, sourceW, sourceH, 0, 0, canvas.width, canvas.height);
 
-        let dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-        if (dataUrl.length > 240000) dataUrl = canvas.toDataURL('image/jpeg', 0.78);
-        return dataUrl;
+        return canvas.toDataURL('image/jpeg', 0.9);
     }
 
     resetBannerCropControls() {
