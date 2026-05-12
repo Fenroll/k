@@ -74,11 +74,11 @@
     </style>
     <title>Notes</title>
 
-    <script src="js/auth-guard.js?v=202605121d0r"></script>
+    <script src="js/auth-guard.js?v=202605121dpc"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-    <script src="js/user-identity.js?v=202605121d0r"></script>
-    <script src="courses.generated.js?v=202605121d0r"></script>
+    <script src="js/user-identity.js?v=202605121dpc"></script>
+    <script src="courses.generated.js?v=202605121dpc"></script>
 
     <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
     <link rel="icon" href="favicon.ico?v=20260401ios2" sizes="any">
@@ -86,7 +86,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;700&display=swap">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202605121d0r">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605121dpc">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
     <script src="js/version-manager.js?v=2026031715gu"></script>
@@ -375,6 +375,30 @@
             position: absolute;
             border-radius: 3px;
             opacity: 0.28;
+        }
+
+        .remote-caret {
+            position: absolute;
+            width: 2px;
+            min-height: 16px;
+            border-radius: 999px;
+            opacity: 0.42;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5);
+            transform: translateX(-1px);
+            transition: left 0.12s ease, top 0.12s ease, height 0.12s ease, opacity 0.12s ease;
+        }
+
+        .remote-caret::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: -3px;
+            width: 6px;
+            height: 6px;
+            border-radius: 999px;
+            background: inherit;
+            transform: translateX(-50%);
+            opacity: 0.65;
         }
 
         .collab-avatars-wrap {
@@ -1435,10 +1459,21 @@
             const LIVEBLOCKS_START_DELAY_MS = 260;
             const NOTES_R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
             const NOTES_IMAGE_LAZY_PLACEHOLDER = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+            const IS_LOCAL_FILE_ORIGIN =
+                window.location.protocol === 'file:' ||
+                window.location.origin === 'null';
             const LIVEBLOCKS_AUTH_ENDPOINT =
-                window.LIVEBLOCKS_AUTH_ENDPOINT ||
-                localStorage.getItem('liveblocksAuthEndpoint') ||
-                'https://coursebook.lol/liveblocks-auth';
+                IS_LOCAL_FILE_ORIGIN
+                    ? (
+                        window.LIVEBLOCKS_AUTH_ENDPOINT ||
+                        localStorage.getItem('liveblocksAuthEndpoint') ||
+                        'https://coursebook-liveblocks-auth.sergey-2210-pavlov.workers.dev/liveblocks-auth'
+                    )
+                    : (
+                        window.LIVEBLOCKS_AUTH_ENDPOINT ||
+                        localStorage.getItem('liveblocksAuthEndpoint') ||
+                        'https://coursebook.lol/liveblocks-auth'
+                    );
             const LIVEBLOCKS_AUTH_FALLBACK_ENDPOINT = 'https://coursebook-liveblocks-auth.sergey-2210-pavlov.workers.dev/liveblocks-auth';
             const LIVEBLOCKS_ROOM_PREFIX = 'course-notes-';
 
@@ -1476,6 +1511,7 @@
                 liveblocksConnected: false,
                 liveblocksRenderHash: '',
                 liveblocksLastSelections: {},
+                liveblocksLastCaretRects: {},
                 liveblocksEnabled: !!LIVEBLOCKS_AUTH_ENDPOINT,
                 collabProfiles: {},
                 collabProfilesRef: null,
@@ -1540,6 +1576,7 @@
                 if (state.currentMetaValue) {
                     renderCurrentMeta(state.currentMetaValue);
                 }
+                renderLiveblocksOthers(state.liveblocksOthers || [], true);
             });
 
             function clearAutosaveTimer() {
@@ -1767,8 +1804,94 @@
                 }
             }
 
+            function getCaretRectFromRange(range) {
+                if (!range) return null;
+
+                const rects = Array.from(range.getClientRects ? range.getClientRects() : []);
+                const visibleRect = rects.find(rect => rect && (rect.width || rect.height));
+                if (visibleRect) return visibleRect;
+
+                const rect = range.getBoundingClientRect();
+                if (rect && (rect.width || rect.height)) return rect;
+
+                if (range.startContainer && range.startContainer.nodeType === Node.TEXT_NODE) {
+                    const text = range.startContainer.textContent || '';
+                    const offset = Math.max(0, Math.min(range.startOffset, text.length));
+                    if (offset > 0) {
+                        const fallbackRange = document.createRange();
+                        fallbackRange.setStart(range.startContainer, offset - 1);
+                        fallbackRange.setEnd(range.startContainer, offset);
+                        const fallbackRects = Array.from(fallbackRange.getClientRects ? fallbackRange.getClientRects() : []);
+                        const fallbackRect = fallbackRects[fallbackRects.length - 1] || fallbackRange.getBoundingClientRect();
+                        if (fallbackRect && (fallbackRect.width || fallbackRect.height)) {
+                            return {
+                                left: fallbackRect.right,
+                                right: fallbackRect.right,
+                                top: fallbackRect.top,
+                                bottom: fallbackRect.bottom,
+                                width: 0,
+                                height: fallbackRect.height
+                            };
+                        }
+                    }
+                }
+
+                return null;
+            }
+
             function renderRemoteSelections(activeEntries) {
                 clearSelectionOverlay();
+                if (!els.selectionOverlay || !els.courseNotesEditor || !Array.isArray(activeEntries)) return;
+
+                const currentUid = String(state.currentUser?.userId || state.currentUser?.uid || '');
+                const overlayRect = els.selectionOverlay.getBoundingClientRect();
+                const editorRect = els.courseNotesEditor.getBoundingClientRect();
+
+                activeEntries.forEach((entry) => {
+                    const uid = String(entry.userId || '');
+                    if (!uid || uid === currentUid || !entry.typing) return;
+
+                    const sel = entry.selection || state.liveblocksLastSelections[uid];
+                    if (!sel || !Number.isFinite(sel.start) || !Number.isFinite(sel.end)) return;
+
+                    const caretOffset = Math.max(sel.start, sel.end);
+                    const range = createRangeFromOffsets(els.courseNotesEditor, caretOffset, caretOffset);
+                    if (!range) return;
+
+                    let rect = getCaretRectFromRange(range);
+
+                    if (!rect || (!rect.width && !rect.height)) return;
+                    if (rect.bottom < editorRect.top || rect.top > editorRect.bottom) return;
+
+                    const previousRect = state.liveblocksLastCaretRects[uid];
+                    const lineHeight = Math.max(16, rect.height || previousRect?.height || 18);
+                    const looksLikeBoundaryJump = previousRect &&
+                        Math.abs(rect.top - previousRect.top) > lineHeight * 0.65 &&
+                        Math.abs(rect.left - previousRect.left) < 18;
+
+                    if (looksLikeBoundaryJump) {
+                        rect = previousRect;
+                    } else {
+                        state.liveblocksLastCaretRects[uid] = {
+                            left: rect.left,
+                            right: rect.right,
+                            top: rect.top,
+                            bottom: rect.bottom,
+                            width: rect.width,
+                            height: rect.height
+                        };
+                    }
+
+                    const profile = getCollabProfile(uid, entry);
+                    const caret = document.createElement('div');
+                    caret.className = 'remote-caret';
+                    caret.title = profile.name;
+                    caret.style.background = profile.color;
+                    caret.style.left = `${Math.max(0, (rect.right || rect.left) - overlayRect.left)}px`;
+                    caret.style.top = `${Math.max(0, rect.top - overlayRect.top)}px`;
+                    caret.style.height = `${Math.max(16, rect.height || 18)}px`;
+                    els.selectionOverlay.appendChild(caret);
+                });
             }
 
             function stopLiveblocksPresence() {
@@ -1796,6 +1919,7 @@
                 state.liveblocksConnected = false;
                 state.liveblocksRenderHash = '';
                 state.liveblocksLastSelections = {};
+                state.liveblocksLastCaretRects = {};
                 clearSelectionOverlay();
                 setCollabSimpleStatus('Offline');
             }
@@ -1959,8 +2083,7 @@
                                 const endpointCandidates = isLocalFileOrigin
                                     ? [
                                         LIVEBLOCKS_AUTH_FALLBACK_ENDPOINT,
-                                        LIVEBLOCKS_AUTH_ENDPOINT,
-                                        'https://coursebook.lol/liveblocks-auth'
+                                        LIVEBLOCKS_AUTH_ENDPOINT
                                     ]
                                     : [
                                         LIVEBLOCKS_AUTH_ENDPOINT,
@@ -3777,8 +3900,8 @@
     </script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
-    <script src="js/chat.js?v=202605121d0r"></script>
+    <script src="js/chat.js?v=202605121dpc"></script>
     <script src="js/version-check.js?v=202605021hcw"></script>
-    <script src="js/mobile-nav.js?v=202605121d0r"></script>
+    <script src="js/mobile-nav.js?v=202605121dpc"></script>
 </body>
 </html>
