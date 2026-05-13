@@ -1,4 +1,4 @@
-window.coursesVersion = "202605131ep";
+window.coursesVersion = "202605131el7";
 window.courses = [
   {
     "id": "000001",
@@ -860,7 +860,7 @@ window.courses = [
             "source": "link.txt"
           },
           {
-            "name": "11. ССЗ..url",
+            "name": "11. Липиди и ОМИ..url",
             "path": "files/Клинична лаборатория/Лекции/link.txt#15",
             "url": "https://files.coursebook.lol/Fenroll/2026-05-06/%D0%9B%D0%B5%D0%BA%D1%86%D0%B8%D1%8F%2011.%20%D0%A1%D0%A1%D0%97.pdf",
             "order": 15,
@@ -946,6 +946,13 @@ window.courses = [
             "path": "files/Клинична лаборатория/Упражнения/link.txt#11",
             "url": "https://files.coursebook.lol/Fenroll/2026-05-06/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%2012.%20%D0%95%D0%BD%D0%B7%D0%B8%D0%BC%D0%B8.pdf",
             "order": 11,
+            "source": "link.txt"
+          },
+          {
+            "name": "13. Липиди и ОМИ.url",
+            "path": "files/Клинична лаборатория/Упражнения/link.txt#12",
+            "url": "https://files.coursebook.lol/Fenroll/2026-05-13/%D0%A3%D0%BF%D1%80%D0%B0%D0%B6%D0%BD%D0%B5%D0%BD%D0%B8%D0%B5%2013.%20%D0%9B%D0%B8%D0%BF%D0%B8%D0%B4%D0%B8%20%D0%B8%20%D0%9E%D0%9C%D0%98.pdf",
+            "order": 12,
             "source": "link.txt"
           }
         ]
@@ -1335,4 +1342,4 @@ window.courses = [
     "_contentKey": "archived-000005"
   }
 ];
-window.buildTimestamp = "13.05.2026 00:30";
+window.buildTimestamp = "13.05.2026 18:12";
