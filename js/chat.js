@@ -1598,6 +1598,8 @@ class ChatUIManager {
     this.container.classList.remove('chat-open');
     this.container.classList.add('chat-hidden');
     document.body.classList.remove('chat-mobile-open');
+    document.documentElement.classList.remove('chat-mobile-open');
+    document.documentElement.style.removeProperty('--chat-scroll-lock-y');
     if (chatPanel) {
       chatPanel.classList.remove('open');
     }
@@ -4589,20 +4591,35 @@ class ChatUIManager {
     };
 
     // Only lock the underlying page scroll when the chat is full-screen
-    // (mobile-sized viewport). The CSS rule that consumes this class is
-    // gated by the same @media (max-width: 600px), so even if the user
-    // rotates to a wider viewport mid-session the rule simply stops
-    // applying and scrolling returns to normal.
+    // (mobile-sized viewport).
     const isMobileViewport = () => window.matchMedia('(max-width: 600px)').matches;
+    const lockMobilePageScroll = () => {
+      if (!isMobileViewport() || document.body.classList.contains('chat-mobile-open')) return;
+      this._chatPageScrollY = window.scrollY || document.documentElement.scrollTop || 0;
+      document.documentElement.style.setProperty('--chat-scroll-lock-y', `${this._chatPageScrollY}px`);
+      document.documentElement.classList.add('chat-mobile-open');
+      document.body.classList.add('chat-mobile-open');
+    };
+    const unlockMobilePageScroll = () => {
+      const wasLocked = document.body.classList.contains('chat-mobile-open') ||
+        document.documentElement.classList.contains('chat-mobile-open');
+
+      document.body.classList.remove('chat-mobile-open');
+      document.documentElement.classList.remove('chat-mobile-open');
+      document.documentElement.style.removeProperty('--chat-scroll-lock-y');
+
+      if (wasLocked && typeof this._chatPageScrollY === 'number') {
+        window.scrollTo({ top: this._chatPageScrollY, left: 0, behavior: 'auto' });
+      }
+      this._chatPageScrollY = null;
+    };
 
     if (this.isOpen) {
       clearIconRestoreTimer();
       this.container.classList.add('chat-open');
-      if (isMobileViewport()) {
-        document.body.classList.add('chat-mobile-open');
-      }
+      lockMobilePageScroll();
     } else {
-      document.body.classList.remove('chat-mobile-open');
+      unlockMobilePageScroll();
     }
 
     if (chatPanel) {
@@ -5827,11 +5844,26 @@ class ChatUIManager {
      also scrolling the underlying page. The class is set in JS only while
      a mobile-sized viewport is matched, so closing or rotating to desktop
      immediately restores normal scrolling. */
-  body.chat-mobile-open,
-  html:has(body.chat-mobile-open) {
-    overflow: hidden;
-    touch-action: none;
+  html.chat-mobile-open,
+  body.chat-mobile-open {
+    height: 100dvh !important;
+    overflow: hidden !important;
     overscroll-behavior: none;
+  }
+  body.chat-mobile-open {
+    position: fixed;
+    top: calc(var(--chat-scroll-lock-y, 0px) * -1);
+    left: 0;
+    right: 0;
+    width: 100%;
+  }
+  body.chat-mobile-open .chat-panel {
+    overscroll-behavior: contain;
+  }
+  body.chat-mobile-open .chat-messages {
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
   }
   .chat-widget.chat-open .chat-icon {
     opacity: 0;
