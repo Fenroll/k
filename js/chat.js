@@ -1616,6 +1616,7 @@ class ChatUIManager {
     this.isOpen = false;
     this.container.classList.remove('chat-open');
     this.container.classList.add('chat-hidden');
+    this.dismissMessageOverlays();
     document.body.classList.remove('chat-mobile-open');
     document.documentElement.classList.remove('chat-mobile-open');
     document.documentElement.style.removeProperty('--chat-scroll-lock-y');
@@ -1635,6 +1636,11 @@ class ChatUIManager {
       menu.hidden = true;
       menu.classList.remove('is-open');
     }
+  }
+
+  dismissMessageOverlays() {
+    document.getElementById('message-options-menu')?.remove();
+    document.querySelectorAll('.message-options-backdrop, .reaction-picker').forEach(el => el.remove());
   }
 
   showChatIconMenu(event) {
@@ -3521,6 +3527,7 @@ class ChatUIManager {
     if (replyItem) {
       replyItem.onclick = () => {
         dismiss();
+        this.dismissMessageOverlays();
         const targetMsgEl = sourceMessageEl || document.querySelector(`.chat-message[data-message-id="${messageId}"]`);
         if (targetMsgEl) this.startReply(messageId, targetMsgEl);
       };
@@ -3540,8 +3547,8 @@ class ChatUIManager {
     const deleteItem = menu.querySelector('.delete');
 
     if (isOwner && editItem && deleteItem) {
-      editItem.onclick = () => { dismiss(); this.startEditing(messageId, messageKey); };
-      deleteItem.onclick = () => { dismiss(); this.deleteMessage(messageKey); };
+      editItem.onclick = () => { dismiss(); this.dismissMessageOverlays(); this.startEditing(messageId, messageKey); };
+      deleteItem.onclick = () => { dismiss(); this.dismissMessageOverlays(); this.deleteMessage(messageKey); };
     }
 
     const onOutside = (e) => {
@@ -4646,6 +4653,7 @@ class ChatUIManager {
       this.container.classList.add('chat-open');
       lockMobilePageScroll();
     } else {
+      this.dismissMessageOverlays();
       unlockMobilePageScroll();
     }
 
@@ -4687,7 +4695,7 @@ class ChatUIManager {
         // content — without us having to enumerate the sources. Cheap: at
         // most ~22 frames at 60fps, each frame is a single scrollTop write.
         const pinUntil = (typeof performance !== 'undefined' ? performance.now() : Date.now()) +
-                         (isMobileLike ? 540 : 360);
+                         (isMobileLike ? 900 : 360);
         const pinScrollToBottom = () => {
           if (!this.isOpen || !messagesContainer) return;
           messagesContainer.scrollTop = messagesContainer.scrollHeight;
@@ -4698,6 +4706,12 @@ class ChatUIManager {
             // Final scroll + reveal. By now the layout has stopped shifting,
             // so what the user sees is already pinned to the latest message.
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            if (isMobileLike) {
+              setTimeout(() => {
+                if (!this.isOpen || !messagesContainer) return;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+              }, 220);
+            }
             messagesContainer.style.opacity = '';
           }
         };
