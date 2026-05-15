@@ -5853,10 +5853,11 @@ class ChatUIManager {
   }
   .chat-panel .chat-header-btn,
   .chat-panel .chat-close-btn {
-    width: 32px;
-    height: 32px;
-    min-width: 32px;
-    min-height: 32px;
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    min-height: 34px;
+    font-size: 20px;
   }
   .chat-panel .chat-user-info {
     border-radius: 0;
@@ -5898,11 +5899,11 @@ class ChatUIManager {
     display: flex;
     position: absolute;
     right: 0;
-    top: 75px;
+    top: 60px;
     bottom: 67px;
     z-index: 15;
     box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-    margin-top: -10px;
+    margin-top: 0;
     align-self: stretch;
   }
   /* No action buttons render on mobile, so the right-side reserve that
