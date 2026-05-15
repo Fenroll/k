@@ -36,9 +36,9 @@ class AccountSystem {
         this.changeColorForm = null;
         this.changeFontForm = null;
         this.changeBannerForm = null;
-        this.deleteAccountForm = null;
-        this.bannerCropState = null;
+        this.imageCropState = null;
         this.pendingBannerCrop = null;
+        this.pendingAvatarCrop = null;
     }
 
     // --- R2 image upload (avatars/banners) ---
@@ -137,9 +137,8 @@ class AccountSystem {
             this.changeFontForm = document.getElementById('change-font-form');
             this.changeAvatarForm = document.getElementById('change-avatar-form');
             this.changeBannerForm = document.getElementById('change-banner-form');
-            this.deleteAccountForm = document.getElementById('delete-account-form');
 
-            if (!this.accountInfo || !this.loadingSpinner || !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm || !this.changeFontForm || !this.changeAvatarForm || !this.changeBannerForm || !this.deleteAccountForm) {
+            if (!this.accountInfo || !this.loadingSpinner || !this.changePasswordForm || !this.changeUsernameForm || !this.changeDisplaynameForm || !this.changeColorForm || !this.changeFontForm || !this.changeAvatarForm || !this.changeBannerForm) {
                 console.error("Account page UI elements not found. Aborting.");
                 return;
             }
@@ -262,8 +261,6 @@ class AccountSystem {
                 });
             }
 
-            document.getElementById('show-delete-account-btn').addEventListener('click', () => this.showForm('delete-account'));
-
             // Show action forms
             document.getElementById('show-change-password-btn').addEventListener('click', () => this.showForm('change-password'));
             document.getElementById('show-change-username-btn').addEventListener('click', () => this.showForm('change-username'));
@@ -287,7 +284,10 @@ class AccountSystem {
                     this.applyFontPreview(fontSelect.value);
                 });
             }
-            document.getElementById('show-change-avatar-btn').addEventListener('click', () => this.showForm('change-avatar'));
+            document.getElementById('show-change-avatar-btn').addEventListener('click', () => {
+                this.updateAvatarFormPreview();
+                this.showForm('change-avatar');
+            });
             document.getElementById('show-change-banner-btn').addEventListener('click', () => {
                 this.updateBannerPreview();
                 this.showForm('change-banner');
@@ -295,12 +295,20 @@ class AccountSystem {
             const bannerFileInput = document.getElementById('new-banner-file');
             const bannerUrlInput = document.getElementById('new-banner-url');
             if (bannerFileInput) {
-                bannerFileInput.addEventListener('change', () => this.previewBannerFile(bannerFileInput.files && bannerFileInput.files[0]));
+                bannerFileInput.addEventListener('change', () => this.previewImageFile(bannerFileInput.files && bannerFileInput.files[0], 'banner'));
             }
             if (bannerUrlInput) {
-                bannerUrlInput.addEventListener('change', () => this.openBannerCropModal(bannerUrlInput.value.trim()));
+                bannerUrlInput.addEventListener('change', () => this.openImageCropModal(bannerUrlInput.value.trim(), 'banner'));
             }
-            this.initBannerCropModal();
+            const avatarFileInput = document.getElementById('new-avatar-file');
+            const avatarUrlInput = document.getElementById('new-avatar-url');
+            if (avatarFileInput) {
+                avatarFileInput.addEventListener('change', () => this.previewImageFile(avatarFileInput.files && avatarFileInput.files[0], 'avatar'));
+            }
+            if (avatarUrlInput) {
+                avatarUrlInput.addEventListener('change', () => this.openImageCropModal(avatarUrlInput.value.trim(), 'avatar'));
+            }
+            this.initImageCropModal();
 
             // Cancel buttons
             document.querySelectorAll('.cancel-action-btn').forEach(btn => {
@@ -344,13 +352,13 @@ class AccountSystem {
                 e.preventDefault();
                 const fileInput = document.getElementById('new-avatar-file');
                 const urlInput = document.getElementById('new-avatar-url');
-                
-                if (fileInput.files.length > 0) {
-                    this.changeAvatar(fileInput.files[0]);
-                } else if (urlInput.value.trim()) {
-                    this.changeAvatar(urlInput.value.trim());
+
+                if (this.pendingAvatarCrop) {
+                    this.changeAvatar(this.pendingAvatarCrop, true);
+                } else if (fileInput.files.length > 0 || urlInput.value.trim()) {
+                    this.showError('change-avatar-error', 'Please choose the crop first.');
                 } else {
-                    this.showError('change-avatar-error', 'Моля, изберете файл или въведете URL.');
+                    this.showError('change-avatar-error', 'Please choose an image file or enter an image URL.');
                 }
             });
 
@@ -369,12 +377,6 @@ class AccountSystem {
             });
 
             document.getElementById('remove-banner-btn').addEventListener('click', () => this.changeBanner(null));
-
-            document.getElementById('delete-account-form-element').addEventListener('submit', (e) => {
-                e.preventDefault();
-                const password = document.getElementById('password-for-delete').value;
-                this.deleteAccount(password);
-            });
         }
     }
 
@@ -714,7 +716,7 @@ class AccountSystem {
         }
     }
 
-    async changeAvatar(avatarSource) {
+    async changeAvatar(avatarSource, alreadyProcessed = false) {
         if (!avatarSource) {
             this.showError('change-avatar-error', 'Моля, изберете изображение или въведете URL.');
             return;
@@ -725,69 +727,32 @@ class AccountSystem {
         this.hideError('change-avatar-error');
 
         try {
-            // Both branches resolve to a resized Blob; we then upload to R2 and
-            // store only the resulting URL on the user record.
-            const resizeImgToBlob = (img) => {
-                const canvas = document.createElement('canvas');
-                let width = img.width;
-                let height = img.height;
-                const maxSize = 150;
-                if (width > height) {
-                    if (width > maxSize) { height *= maxSize / width; width = maxSize; }
-                } else {
-                    if (height > maxSize) { width *= maxSize / height; height = maxSize; }
-                }
-                canvas.width = width;
-                canvas.height = height;
-                canvas.getContext('2d').drawImage(img, 0, 0, width, height);
-                return this.canvasToBlob(canvas, 'image/jpeg', 0.9);
-            };
-
-            let avatarBlob;
-            if (typeof avatarSource === 'string') {
-                // URL input: probe without CORS, then re-load with CORS so we can resize via canvas.
-                avatarBlob = await new Promise((resolve, reject) => {
-                    const testImg = new Image();
-                    testImg.onload = () => {
-                        const img = new Image();
-                        img.crossOrigin = 'anonymous';
-                        img.onload = () => resizeImgToBlob(img).then(resolve, reject);
-                        img.onerror = () => reject(new Error('Този сървър блокира обработката на изображения (CORS). Моля, изтеглете изображението и го качете като файл.'));
-                        img.src = avatarSource;
-                    };
-                    testImg.onerror = () => reject(new Error('Не можа да се зареди изображението от URL. Проверете дали е валидно и достъпно.'));
-                    testImg.src = avatarSource;
-                });
+            let finalAvatar;
+            if (alreadyProcessed) {
+                // `avatarSource` is the cropped JPEG data URL from renderImageCropToDataUrl.
+                const blob = await this.dataUrlToBlob(avatarSource);
+                finalAvatar = await this.uploadProfileImageToR2(blob, 'avatar');
             } else {
-                const file = avatarSource;
-                if (file.size > 2 * 1024 * 1024) {
-                    throw new Error('Файлът е твърде голям (макс 2MB).');
-                }
-                avatarBlob = await new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = (readerEvent) => {
-                        const img = new Image();
-                        img.onload = () => resizeImgToBlob(img).then(resolve, reject);
-                        img.onerror = () => reject(new Error('Невалидно изображение.'));
-                        img.src = readerEvent.target.result;
-                    };
-                    reader.onerror = () => reject(new Error('Грешка при четене на файла.'));
-                    reader.readAsDataURL(file);
-                });
+                // Should not normally happen — file/URL inputs route through the
+                // crop modal which sets pendingAvatarCrop. Defensive fallback:
+                // open the crop modal so the user can crop and resubmit.
+                this.openImageCropModal(typeof avatarSource === 'string' ? avatarSource : null, 'avatar');
+                throw new Error('Please choose the crop first.');
             }
-
-            const finalAvatar = await this.uploadProfileImageToR2(avatarBlob, 'avatar');
 
             const userRef = this.db.ref(`site_users/${this.user.uid}`);
             await userRef.update({ avatar: finalAvatar });
 
             this.user.avatar = finalAvatar;
             localStorage.setItem('loggedInUser', JSON.stringify(this.user));
-            
-            // Clear inputs
-            document.getElementById('new-avatar-file').value = '';
-            document.getElementById('new-avatar-url').value = '';
-            
+
+            const fileInput = document.getElementById('new-avatar-file');
+            const urlInput = document.getElementById('new-avatar-url');
+            if (fileInput) fileInput.value = '';
+            if (urlInput) urlInput.value = '';
+            this.pendingAvatarCrop = null;
+            this.resetAvatarPreview();
+
             this.updateUI();
 
         } catch (error) {
@@ -796,6 +761,31 @@ class AccountSystem {
             this.showForm('change-avatar');
         } finally {
             this.loadingSpinner.style.display = 'none';
+        }
+    }
+
+    resetAvatarPreview() {
+        const preview = document.getElementById('current-avatar-preview');
+        if (preview) {
+            preview.style.display = 'none';
+            preview.style.backgroundImage = 'none';
+        }
+    }
+
+    // Show the user's current avatar (or the just-cropped pending one) at the
+    // top of the change-avatar form, matching the banner form's behavior.
+    updateAvatarFormPreview() {
+        const preview = document.getElementById('current-avatar-preview');
+        if (!preview) return;
+        const src = this.pendingAvatarCrop || (this.user && this.user.avatar) || '';
+        if (src) {
+            preview.style.display = 'block';
+            preview.style.backgroundImage = `url("${src}")`;
+            preview.style.backgroundPosition = 'center';
+            preview.style.backgroundSize = 'cover';
+        } else {
+            preview.style.display = 'none';
+            preview.style.backgroundImage = 'none';
         }
     }
 
@@ -809,13 +799,14 @@ class AccountSystem {
             if (!bannerSource) {
                 finalBanner = null;
             } else if (alreadyProcessed) {
-                // `bannerSource` is the cropped JPEG data URL from renderBannerCropToDataUrl.
+                // `bannerSource` is the cropped JPEG data URL from renderImageCropToDataUrl.
                 // Convert to a Blob, upload to R2, store the resulting URL.
                 const blob = await this.dataUrlToBlob(bannerSource);
                 finalBanner = await this.uploadProfileImageToR2(blob, 'banner');
             } else {
                 // Opens the crop modal and throws — user must crop first.
-                finalBanner = await this.renderBannerSourceToCrop(bannerSource);
+                this.openImageCropModal(bannerSource, 'banner');
+                throw new Error('Please choose the crop first.');
             }
             const userRef = this.db.ref(`site_users/${this.user.uid}`);
             await userRef.update({ banner: finalBanner });
@@ -828,7 +819,7 @@ class AccountSystem {
             if (fileInput) fileInput.value = '';
             if (urlInput) urlInput.value = '';
             this.pendingBannerCrop = null;
-            this.resetBannerCropControls();
+            this.closeImageCropModal();
 
             this.updateUI();
         } catch (error) {
@@ -860,24 +851,47 @@ class AccountSystem {
         }
     }
 
-    previewBannerFile(file) {
+    // Shared file → crop-modal entry point for both avatar and banner.
+    previewImageFile(file, kind) {
         if (!file) return;
-        if (file.size > 4 * 1024 * 1024) {
-            this.showError('change-banner-error', 'Banner image is too large. Maximum size is 4MB.');
+        const errorId = kind === 'avatar' ? 'change-avatar-error' : 'change-banner-error';
+        const maxSize = kind === 'avatar' ? 4 * 1024 * 1024 : 4 * 1024 * 1024;
+        if (file.size > maxSize) {
+            this.showError(errorId, 'Image is too large. Maximum size is 4MB.');
             return;
         }
         const reader = new FileReader();
-        reader.onload = (event) => this.openBannerCropModal(event.target.result);
-        reader.onerror = () => this.showError('change-banner-error', 'Could not read the banner file.');
+        reader.onload = (event) => this.openImageCropModal(event.target.result, kind);
+        reader.onerror = () => this.showError(errorId, 'Could not read the image file.');
         reader.readAsDataURL(file);
     }
 
-    async renderBannerSourceToCrop(src) {
-        this.openBannerCropModal(src);
-        throw new Error('Please choose the crop first.');
+    // Per-kind config used by the generic crop modal. Avatar produces a 384×384
+    // square JPEG; banner produces 640×190 (current behavior preserved).
+    getCropConfig(kind) {
+        if (kind === 'avatar') {
+            return {
+                kind: 'avatar',
+                title: 'Crop avatar',
+                outputWidth: 384,
+                outputHeight: 384,
+                errorId: 'change-avatar-error',
+                loadErrorMessage: 'Could not load this avatar image.',
+                modalClass: 'is-avatar'
+            };
+        }
+        return {
+            kind: 'banner',
+            title: 'Crop banner',
+            outputWidth: 640,
+            outputHeight: 190,
+            errorId: 'change-banner-error',
+            loadErrorMessage: 'Could not load this banner image.',
+            modalClass: null
+        };
     }
 
-    initBannerCropModal() {
+    initImageCropModal() {
         const modal = document.getElementById('banner-crop-modal');
         const stage = document.getElementById('banner-crop-stage');
         const image = document.getElementById('banner-crop-image');
@@ -887,8 +901,8 @@ class AccountSystem {
         if (!modal || !stage || !image || !zoom || !applyBtn || !cancelBtn) return;
 
         zoom.addEventListener('input', () => {
-            if (!this.bannerCropState) return;
-            this.setBannerCropZoom(Number(zoom.value) || 1);
+            if (!this.imageCropState) return;
+            this.setImageCropZoom(Number(zoom.value) || 1);
         });
 
         let dragState = null;
@@ -900,13 +914,13 @@ class AccountSystem {
             return Math.hypot(points[0].x - points[1].x, points[0].y - points[1].y);
         };
         stage.addEventListener('pointerdown', (event) => {
-            if (!this.bannerCropState) return;
+            if (!this.imageCropState) return;
             stage.setPointerCapture(event.pointerId);
             activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
             if (activePointers.size >= 2) {
                 pinchState = {
                     distance: pointerDistance(),
-                    zoom: this.bannerCropState.zoom
+                    zoom: this.imageCropState.zoom
                 };
                 dragState = null;
             } else {
@@ -914,27 +928,27 @@ class AccountSystem {
                     pointerId: event.pointerId,
                     startX: event.clientX,
                     startY: event.clientY,
-                    offsetX: this.bannerCropState.offsetX,
-                    offsetY: this.bannerCropState.offsetY
+                    offsetX: this.imageCropState.offsetX,
+                    offsetY: this.imageCropState.offsetY
                 };
             }
         });
 
         stage.addEventListener('pointermove', (event) => {
-            if (!this.bannerCropState || !activePointers.has(event.pointerId)) return;
+            if (!this.imageCropState || !activePointers.has(event.pointerId)) return;
             activePointers.set(event.pointerId, { x: event.clientX, y: event.clientY });
             if (pinchState && activePointers.size >= 2) {
                 const nextDistance = pointerDistance();
                 if (pinchState.distance > 0 && nextDistance > 0) {
-                    this.setBannerCropZoom(pinchState.zoom * (nextDistance / pinchState.distance));
+                    this.setImageCropZoom(pinchState.zoom * (nextDistance / pinchState.distance));
                 }
                 return;
             }
             if (!dragState || dragState.pointerId !== event.pointerId) return;
-            this.bannerCropState.offsetX = dragState.offsetX + event.clientX - dragState.startX;
-            this.bannerCropState.offsetY = dragState.offsetY + event.clientY - dragState.startY;
-            this.clampBannerCropOffset();
-            this.renderBannerCropModal();
+            this.imageCropState.offsetX = dragState.offsetX + event.clientX - dragState.startX;
+            this.imageCropState.offsetY = dragState.offsetY + event.clientY - dragState.startY;
+            this.clampImageCropOffset();
+            this.renderImageCropModal();
         });
 
         const endDrag = (event) => {
@@ -945,37 +959,49 @@ class AccountSystem {
         stage.addEventListener('pointerup', endDrag);
         stage.addEventListener('pointercancel', endDrag);
         stage.addEventListener('wheel', (event) => {
-            if (!this.bannerCropState) return;
+            if (!this.imageCropState) return;
             event.preventDefault();
             const direction = event.deltaY > 0 ? -1 : 1;
-            this.setBannerCropZoom(this.bannerCropState.zoom + direction * 0.08);
+            this.setImageCropZoom(this.imageCropState.zoom + direction * 0.08);
         }, { passive: false });
 
-        applyBtn.addEventListener('click', () => this.applyBannerCropFromModal());
-        cancelBtn.addEventListener('click', () => this.closeBannerCropModal());
+        applyBtn.addEventListener('click', () => this.applyImageCropFromModal());
+        cancelBtn.addEventListener('click', () => this.closeImageCropModal());
         modal.addEventListener('click', (event) => {
-            if (event.target === modal) this.closeBannerCropModal();
+            if (event.target === modal) this.closeImageCropModal();
         });
     }
 
-    openBannerCropModal(src) {
+    openImageCropModal(src, kind) {
         const modal = document.getElementById('banner-crop-modal');
         const stage = document.getElementById('banner-crop-stage');
         const image = document.getElementById('banner-crop-image');
         const zoom = document.getElementById('banner-modal-zoom');
+        const titleEl = document.getElementById('banner-crop-title');
         if (!modal || !stage || !image || !zoom || !src) return;
 
-        this.hideError('change-banner-error');
+        const config = this.getCropConfig(kind);
+
+        // Reset previous variant class, then apply this kind's class so CSS
+        // can shape the frame (square+circle for avatar, wide rect for banner).
+        modal.classList.remove('is-avatar');
+        if (config.modalClass) modal.classList.add(config.modalClass);
+        if (titleEl) titleEl.textContent = config.title;
+
+        this.hideError(config.errorId);
         modal.classList.add('is-open');
         modal.setAttribute('aria-hidden', 'false');
         image.crossOrigin = 'anonymous';
         image.onload = () => {
             const stageRect = stage.getBoundingClientRect();
-            const frame = this.getBannerCropFrameRect();
+            const frame = this.getImageCropFrameRect();
             const baseScale = Math.max(frame.width / image.naturalWidth, frame.height / image.naturalHeight);
             const minZoom = 1;
             const maxZoom = 3;
-            this.bannerCropState = {
+            this.imageCropState = {
+                kind: config.kind,
+                outputWidth: config.outputWidth,
+                outputHeight: config.outputHeight,
                 src,
                 naturalWidth: image.naturalWidth,
                 naturalHeight: image.naturalHeight,
@@ -993,34 +1019,35 @@ class AccountSystem {
             zoom.max = String(maxZoom);
             zoom.step = '0.01';
             zoom.value = String(minZoom);
-            this.renderBannerCropModal();
+            this.renderImageCropModal();
         };
         image.onerror = () => {
-            this.closeBannerCropModal();
-            this.showError('change-banner-error', 'Could not load this banner image.');
+            this.closeImageCropModal();
+            this.showError(config.errorId, config.loadErrorMessage);
         };
         image.src = src;
     }
 
-    closeBannerCropModal() {
+    closeImageCropModal() {
         const modal = document.getElementById('banner-crop-modal');
         if (modal) {
             modal.classList.remove('is-open');
+            modal.classList.remove('is-avatar');
             modal.setAttribute('aria-hidden', 'true');
         }
     }
 
-    setBannerCropZoom(nextZoom) {
-        const state = this.bannerCropState;
+    setImageCropZoom(nextZoom) {
+        const state = this.imageCropState;
         const zoom = document.getElementById('banner-modal-zoom');
         if (!state) return;
         state.zoom = Math.min(state.maxZoom, Math.max(state.minZoom, nextZoom));
         if (zoom) zoom.value = String(state.zoom);
-        this.clampBannerCropOffset();
-        this.renderBannerCropModal();
+        this.clampImageCropOffset();
+        this.renderImageCropModal();
     }
 
-    getBannerCropFrameRect() {
+    getImageCropFrameRect() {
         const stage = document.getElementById('banner-crop-stage');
         const frameEl = stage ? stage.querySelector('.banner-crop-frame') : null;
         if (!stage || !frameEl) return { left: 0, top: 0, width: 640, height: 190 };
@@ -1034,8 +1061,8 @@ class AccountSystem {
         };
     }
 
-    getBannerCropImageMetrics() {
-        const state = this.bannerCropState;
+    getImageCropImageMetrics() {
+        const state = this.imageCropState;
         if (!state) return null;
         const scale = state.baseScale * state.zoom;
         const width = state.naturalWidth * scale;
@@ -1045,13 +1072,13 @@ class AccountSystem {
         return { scale, width, height, left: centerX - width / 2, top: centerY - height / 2 };
     }
 
-    clampBannerCropOffset() {
-        const state = this.bannerCropState;
+    clampImageCropOffset() {
+        const state = this.imageCropState;
         if (!state) return;
         state.stageWidth = document.getElementById('banner-crop-stage').clientWidth;
         state.stageHeight = document.getElementById('banner-crop-stage').clientHeight;
-        state.frame = this.getBannerCropFrameRect();
-        const metrics = this.getBannerCropImageMetrics();
+        state.frame = this.getImageCropFrameRect();
+        const metrics = this.getImageCropImageMetrics();
         if (!metrics) return;
 
         const centerBaseX = state.stageWidth / 2;
@@ -1066,48 +1093,66 @@ class AccountSystem {
         state.offsetY = Math.min(maxCenterY, Math.max(minCenterY, currentCenterY)) - centerBaseY;
     }
 
-    renderBannerCropModal() {
+    renderImageCropModal() {
         const image = document.getElementById('banner-crop-image');
-        const state = this.bannerCropState;
+        const state = this.imageCropState;
         const stage = document.getElementById('banner-crop-stage');
         if (!image || !state || !stage) return;
         state.stageWidth = stage.clientWidth;
         state.stageHeight = stage.clientHeight;
-        state.frame = this.getBannerCropFrameRect();
+        state.frame = this.getImageCropFrameRect();
         const scale = state.baseScale * state.zoom;
         image.style.width = `${state.naturalWidth}px`;
         image.style.height = `${state.naturalHeight}px`;
         image.style.transform = `translate(-50%, -50%) translate(${state.offsetX}px, ${state.offsetY}px) scale(${scale})`;
     }
 
-    applyBannerCropFromModal() {
+    applyImageCropFromModal() {
+        const state = this.imageCropState;
+        if (!state) {
+            this.closeImageCropModal();
+            return;
+        }
+        const kind = state.kind;
+        const errorId = kind === 'avatar' ? 'change-avatar-error' : 'change-banner-error';
         try {
-            const cropped = this.renderBannerCropToDataUrl();
-            this.pendingBannerCrop = cropped;
-            const formPreview = document.getElementById('current-banner-preview');
-            if (formPreview) {
-                formPreview.style.display = 'block';
-                formPreview.style.backgroundImage = `url("${cropped}")`;
-                formPreview.style.backgroundPosition = 'center';
-                formPreview.style.backgroundSize = 'cover';
+            const cropped = this.renderImageCropToDataUrl();
+            if (kind === 'avatar') {
+                this.pendingAvatarCrop = cropped;
+                const preview = document.getElementById('current-avatar-preview');
+                if (preview) {
+                    preview.style.display = 'block';
+                    preview.style.backgroundImage = `url("${cropped}")`;
+                    preview.style.backgroundPosition = 'center';
+                    preview.style.backgroundSize = 'cover';
+                }
+            } else {
+                this.pendingBannerCrop = cropped;
+                const preview = document.getElementById('current-banner-preview');
+                if (preview) {
+                    preview.style.display = 'block';
+                    preview.style.backgroundImage = `url("${cropped}")`;
+                    preview.style.backgroundPosition = 'center';
+                    preview.style.backgroundSize = 'cover';
+                }
             }
-            this.closeBannerCropModal();
+            this.closeImageCropModal();
         } catch (error) {
-            this.showError('change-banner-error', error.message || 'Could not crop this image.');
-            this.closeBannerCropModal();
+            this.showError(errorId, error.message || 'Could not crop this image.');
+            this.closeImageCropModal();
         }
     }
 
-    renderBannerCropToDataUrl() {
+    renderImageCropToDataUrl() {
         const image = document.getElementById('banner-crop-image');
-        const state = this.bannerCropState;
-        this.clampBannerCropOffset();
-        const metrics = this.getBannerCropImageMetrics();
-        if (!image || !state || !metrics) throw new Error('No banner crop is selected.');
+        const state = this.imageCropState;
+        this.clampImageCropOffset();
+        const metrics = this.getImageCropImageMetrics();
+        if (!image || !state || !metrics) throw new Error('No crop is selected.');
 
         const canvas = document.createElement('canvas');
-        canvas.width = 640;
-        canvas.height = 190;
+        canvas.width = state.outputWidth;
+        canvas.height = state.outputHeight;
         const ctx = canvas.getContext('2d');
         const sourceX = (state.frame.left - metrics.left) / metrics.scale;
         const sourceY = (state.frame.top - metrics.top) / metrics.scale;
@@ -1116,43 +1161,6 @@ class AccountSystem {
         ctx.drawImage(image, sourceX, sourceY, sourceW, sourceH, 0, 0, canvas.width, canvas.height);
 
         return canvas.toDataURL('image/jpeg', 0.9);
-    }
-
-    resetBannerCropControls() {
-        this.pendingBannerCrop = null;
-        this.closeBannerCropModal();
-    }
-
-    async deleteAccount(password) {
-        if (!password) {
-            this.showError('delete-account-error', 'Моля, въведете паролата си.');
-            return;
-        }
-        this.loadingSpinner.style.display = 'block';
-        this.showForm(null);
-        this.hideError('delete-account-error');
-
-        try {
-            // 1. Verify password from local state (already fetched on session check)
-            if (password !== this.user.password) {
-                this.showError('delete-account-error', 'Грешна парола.');
-                this.loadingSpinner.style.display = 'none';
-                this.showForm('delete-account');
-                return;
-            }
-
-            // 2. Delete user from Firebase
-            const userRef = this.db.ref(`site_users/${this.user.uid}`);
-            await userRef.remove();
-
-            // 3. Logout
-            this.logout(); // This will clear localStorage and update UI to login form
-
-        } catch (error) {
-            console.error("Account deletion error:", error);
-            this.showError('delete-account-error', 'Възникна грешка при изтриване на акаунта.');
-            this.updateUI(); // Go back to profile view on error
-        }
     }
 
     // --- UI Helper Functions ---
@@ -1214,8 +1222,7 @@ class AccountSystem {
             if (this.changeFontForm) this.changeFontForm.style.display = 'none';
             if (this.changeAvatarForm) this.changeAvatarForm.style.display = 'none';
             if (this.changeBannerForm) this.changeBannerForm.style.display = 'none';
-            if (this.deleteAccountForm) this.deleteAccountForm.style.display = 'none';
-            
+
             if (formId === 'account' && this.accountInfo) this.accountInfo.style.display = 'block';
             else if (formId === 'change-password' && this.changePasswordForm) this.changePasswordForm.style.display = 'block';
             else if (formId === 'change-username' && this.changeUsernameForm) this.changeUsernameForm.style.display = 'block';
@@ -1224,7 +1231,6 @@ class AccountSystem {
             else if (formId === 'change-font' && this.changeFontForm) this.changeFontForm.style.display = 'block';
             else if (formId === 'change-avatar' && this.changeAvatarForm) this.changeAvatarForm.style.display = 'block';
             else if (formId === 'change-banner' && this.changeBannerForm) this.changeBannerForm.style.display = 'block';
-            else if (formId === 'delete-account' && this.deleteAccountForm) this.deleteAccountForm.style.display = 'block';
         }
     }
 

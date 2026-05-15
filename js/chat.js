@@ -1589,6 +1589,7 @@ class ChatUIManager {
     this.isOpen = false;
     this.container.classList.remove('chat-open');
     this.container.classList.add('chat-hidden');
+    document.body.classList.remove('chat-mobile-open');
     if (chatPanel) {
       chatPanel.classList.remove('open');
     }
@@ -1783,13 +1784,27 @@ class ChatUIManager {
          this.handleTyping();
       });
 
-      // Mobile keyboard: lift panel above keyboard using visualViewport
+      // Mobile keyboard: lift panel above keyboard using visualViewport.
+      //
+      // Continuously listen to visualViewport instead of mounting on focus and
+      // tearing down on blur — that previous approach had two bugs:
+      //  1. Some browsers fire the keyboard-open resize before our focus
+      //     handler installs the listener, so the offset never updates.
+      //  2. Clicking the Send button moves focus off the textarea -> blur
+      //     fires -> the listener was unmounted AND the offset was zeroed
+      //     80ms later. handleSendMessage immediately refocuses, but since
+      //     the keyboard never actually closed, no resize event arrived to
+      //     restore the offset. The panel visibly twitched down and stayed
+      //     mispositioned.
+      // The always-on listener is keyed off the actual viewport state, so
+      // focus changes can't desync it.
       if (window.visualViewport) {
         const panel = this.container.querySelector('.chat-panel');
         let _kbRaf = null;
         // Store the tallest vv.height we've seen — that's the no-keyboard baseline
         let _fullH = window.visualViewport.height;
-        const onViewport = () => {
+        let _lastOffset = 0;
+        const update = () => {
           cancelAnimationFrame(_kbRaf);
           _kbRaf = requestAnimationFrame(() => {
             if (!panel) return;
@@ -1800,26 +1815,20 @@ class ChatUIManager {
             // Safety cap: never push more than 70% of screen (avoids extreme values)
             const safeOffset = Math.min(keyboardH, _fullH * 0.7);
             panel.style.setProperty('--mobile-keyboard-offset', safeOffset + 'px');
-            if (safeOffset > 100) this.scrollToBottom();
+            // When the keyboard just opened (offset crossed up past ~100px),
+            // pull the messages to the latest so the focused input is visible.
+            if (safeOffset > 100 && _lastOffset <= 100) {
+              this.scrollToBottom();
+            }
+            _lastOffset = safeOffset;
           });
         };
-        const clearViewport = () => {
-          cancelAnimationFrame(_kbRaf);
-          if (panel) panel.style.setProperty('--mobile-keyboard-offset', '0px');
-        };
-        input.addEventListener('focus', () => {
-          // Update baseline now in case vv grew while we weren't watching
-          if (window.visualViewport.height > _fullH) _fullH = window.visualViewport.height;
-          window.visualViewport.addEventListener('resize', onViewport);
-        });
-        input.addEventListener('blur', () => {
-          window.visualViewport.removeEventListener('resize', onViewport);
-          setTimeout(clearViewport, 80);
-        });
-        // Keep baseline up to date while panel is idle
-        window.visualViewport.addEventListener('resize', () => {
-          if (window.visualViewport.height > _fullH) _fullH = window.visualViewport.height;
-        });
+        window.visualViewport.addEventListener('resize', update);
+        // Some Android Chrome versions report keyboard via scroll-offset rather
+        // than height changes; listen to both to stay correct.
+        window.visualViewport.addEventListener('scroll', update);
+        // Initial sync in case the keyboard is already up (e.g. autofocus).
+        update();
       }
     }
 
@@ -4532,9 +4541,21 @@ class ChatUIManager {
       }
     };
 
+    // Only lock the underlying page scroll when the chat is full-screen
+    // (mobile-sized viewport). The CSS rule that consumes this class is
+    // gated by the same @media (max-width: 600px), so even if the user
+    // rotates to a wider viewport mid-session the rule simply stops
+    // applying and scrolling returns to normal.
+    const isMobileViewport = () => window.matchMedia('(max-width: 600px)').matches;
+
     if (this.isOpen) {
       clearIconRestoreTimer();
       this.container.classList.add('chat-open');
+      if (isMobileViewport()) {
+        document.body.classList.add('chat-mobile-open');
+      }
+    } else {
+      document.body.classList.remove('chat-mobile-open');
     }
 
     if (chatPanel) {
@@ -5665,20 +5686,42 @@ class ChatUIManager {
   font-weight: 600;
 }
 @media (max-width: 600px) {
+  /* Cover the entire viewport on phones. Safe-area insets keep content out
+     of the iOS notch / home-indicator; the keyboard offset is added at the
+     bottom so the panel shrinks (instead of sliding underneath) when the
+     virtual keyboard opens. */
   .chat-panel {
-    width: min(720px, calc(100vw - 16px));
+    width: auto;
     height: auto;
-    top: max(8px, env(safe-area-inset-top));
-    bottom: calc(max(8px, env(safe-area-inset-bottom)) + var(--mobile-keyboard-offset, 0px));
-    right: auto;
-    left: 50%;
+    top: env(safe-area-inset-top, 0px);
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--mobile-keyboard-offset, 0px));
+    left: 0;
+    right: 0;
     max-width: none;
     transform-origin: bottom center;
-    transform: translateX(-50%) translateY(16px) scale(0.22);
-    border-radius: 12px;
+    transform: translateY(16px) scale(0.22);
+    border-radius: 0;
   }
   .chat-panel.open {
-    transform: translateX(-50%) translateY(0) scale(1);
+    transform: translateY(0) scale(1);
+  }
+  /* Header and user-info bar also carry their own rounded corners that
+     would peek out at the panel edges when full-screen. Flatten them too. */
+  .chat-panel .chat-header {
+    border-radius: 0;
+  }
+  .chat-panel .chat-user-info {
+    border-radius: 0;
+  }
+  /* Lock the page behind the chat so the user can scroll messages without
+     also scrolling the underlying page. The class is set in JS only while
+     a mobile-sized viewport is matched, so closing or rotating to desktop
+     immediately restores normal scrolling. */
+  body.chat-mobile-open,
+  html:has(body.chat-mobile-open) {
+    overflow: hidden;
+    touch-action: none;
+    overscroll-behavior: none;
   }
   .chat-widget.chat-open .chat-icon {
     opacity: 0;
@@ -5698,6 +5741,12 @@ class ChatUIManager {
     box-shadow: -2px 0 10px rgba(0,0,0,0.1);
     margin-top: -10px;
     align-self: stretch;
+  }
+  /* No action buttons render on mobile, so the right-side reserve that
+     keeps room for them on desktop just wastes width here. Drop it so
+     message bubbles can use the full panel. */
+  .message-content {
+    margin-right: 0;
   }
   .chat-online-count {
     display: none !important;

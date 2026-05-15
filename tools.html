@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="robots" content="noindex, nofollow">
   <title>Tools</title>
-  <script src="js/auth-guard.js?v=202605151dtj"></script>
+  <script src="js/auth-guard.js?v=202605162y4"></script>
   <style>
     @media (max-width: 900px) {
       #side-menu {
@@ -562,7 +562,7 @@
     }
 
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605151dtj">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605162y4">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605014kp">
   <script src="js/version-manager.js?v=202603101mce"></script>
@@ -726,7 +726,7 @@
         <div id="financeTool" class="test-container" style="display: none;">
           <div style="max-width: 1000px; margin: 24px auto; padding: 24px; background: #fff; border-radius: 12px; box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 0 0 1px rgba(0,0,0,0.04);">
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
-              <h2 id="financeInfoTrigger" style="margin: 0; color: #1f2937; cursor: pointer;" title="Покажи снимка">Finances</h2>
+              <h2 style="margin: 0; color: #1f2937;">Finances</h2>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <button id="financePrevMonthBtn" type="button" class="btn btn-secondary" style="padding: 8px 12px;">◀</button>
                 <div id="financeMonthLabel" style="min-width: 180px; text-align: center; font-weight: 700; color: #374151;"></div>
@@ -955,24 +955,16 @@
     const uploadResults = document.getElementById('uploadResults');
     const uploadResultsList = document.getElementById('uploadResultsList');
 
-    const DROP_DEBUG = true;
-
-    function dropLog(...args) {
-      if (!DROP_DEBUG) return;
-      console.log('[TOOLS DROP]', ...args);
+    // Escape user-controlled strings (filenames, server error messages) before
+    // injecting them into innerHTML to prevent XSS via crafted filenames.
+    function escapeHtml(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
-
-    function dropWarn(...args) {
-      if (!DROP_DEBUG) return;
-      console.warn('[TOOLS DROP]', ...args);
-    }
-
-    dropLog('Init', {
-      hasDropZone: Boolean(dropZone),
-      hasFileInput: Boolean(fileInput),
-      hasSingleFileInput: Boolean(singleFileInput),
-      readyState: document.readyState
-    });
 
     // Format file size
     function formatFileSize(bytes) {
@@ -1001,8 +993,7 @@
       if (!dropZone) return false;
       try {
         return target === dropZone || dropZone.contains(target);
-      } catch (err) {
-        dropWarn('isInsideDropZone failed', err);
+      } catch (_) {
         return false;
       }
     }
@@ -1012,7 +1003,6 @@
         e.preventDefault();
         dropDepth++;
         dropZone.classList.add('drag-over');
-        dropLog('dragenter', { dropDepth });
       }
     }, false);
 
@@ -1031,7 +1021,6 @@
           dropDepth = 0;
           dropZone.classList.remove('drag-over');
         }
-        dropLog('dragleave', { dropDepth });
       }
     }, false);
 
@@ -1043,20 +1032,10 @@
       dropDepth = 0;
 
       const inside = isInsideDropZone(e.target);
-      dropLog('drop event', {
-        insideDropZone: inside,
-        targetTag: e.target && e.target.tagName ? e.target.tagName : null,
-        fileCount: e.dataTransfer && e.dataTransfer.files ? e.dataTransfer.files.length : 0,
-        itemCount: e.dataTransfer && e.dataTransfer.items ? e.dataTransfer.items.length : 0
-      });
-
       if (!inside) return;
 
       var dt = e.dataTransfer;
-      if (!dt || !dt.files || dt.files.length === 0) {
-        dropWarn('No files found on DataTransfer');
-        return;
-      }
+      if (!dt || !dt.files || dt.files.length === 0) return;
 
       var directFiles = Array.from(dt.files || []);
 
@@ -1077,7 +1056,6 @@
         }
 
         if (!hasDirectoryEntry) {
-          dropLog('Using direct dt.files path', { count: directFiles.length });
           handleFiles(directFiles);
           return;
         }
@@ -1095,15 +1073,12 @@
       }
 
       if (directoryEntries.length > 0) {
-        dropLog('Using directory entry traversal', { entryCount: directoryEntries.length });
         Promise.all(directoryEntries.map(function(entry) { return traverseFileTree(entry); }))
           .then(function(results) {
             var files = results.flat();
-            dropLog('Entry traversal finished', { traversedCount: files.length, fallbackCount: directFiles.length });
             handleFiles(files.length > 0 ? files : directFiles);
           })
-          .catch(function(err) {
-            dropWarn('Entry traversal failed, using dt.files fallback', err);
+          .catch(function() {
             handleFiles(directFiles);
           });
         return;
@@ -1111,10 +1086,46 @@
 
       // Final fallback
       if (directFiles.length > 0) {
-        dropLog('Using final dt.files fallback', { count: directFiles.length });
         handleFiles(directFiles);
       }
     }, false);
+
+    // Ctrl+V / Cmd+V on the Upload tab: stage clipboard images into the
+    // selected-files list so the user can review and click "Upload all".
+    // Skipped while the user is typing in a form field or contenteditable,
+    // and only active while the Upload tab is the visible one.
+    document.addEventListener('paste', (e) => {
+      const uploadTool = document.getElementById('uploadTool');
+      if (!uploadTool || uploadTool.style.display === 'none') return;
+
+      const target = e.target;
+      if (target && typeof target.matches === 'function'
+          && (target.matches('input, textarea, select') || target.isContentEditable)) {
+        return;
+      }
+
+      const items = Array.from((e.clipboardData && e.clipboardData.items) || []);
+      const imageItems = items.filter(item => item.kind === 'file' && item.type.startsWith('image/'));
+      if (imageItems.length === 0) return;
+
+      e.preventDefault();
+
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+      const pastedFiles = [];
+      imageItems.forEach((item, idx) => {
+        const file = item.getAsFile();
+        if (!file) return;
+        // Clipboard images come with a generic name like "image.png" (Chrome)
+        // or no name at all. Give each one a unique, sortable filename so
+        // multiple pastes in a row don't dedup as the same file.
+        const ext = (file.type.split('/')[1] || 'png').replace(/[^a-z0-9]+/gi, '').toLowerCase();
+        const suffix = imageItems.length > 1 ? `-${idx + 1}` : '';
+        file.fullPath = `pasted-${stamp}${suffix}.${ext}`;
+        pastedFiles.push(file);
+      });
+
+      if (pastedFiles.length > 0) handleFiles(pastedFiles);
+    });
 
     // Traverse folder tree
     function traverseFileTree(item, path = '') {
@@ -1140,17 +1151,23 @@
       });
     }
 
+    // Composite identity for dedup — fullPath alone isn't unique enough when
+    // a user re-picks the same filename from different folders without a
+    // webkitRelativePath (e.g. two unrelated PDFs both literally named
+    // "lecture.pdf"). (size, lastModified) disambiguates them reliably.
+    function fileDedupeKey(file) {
+      return `${file.fullPath}|${file.size}|${file.lastModified}`;
+    }
+
     // Handle selected files
     function handleFiles(files) {
-      dropLog('handleFiles called', { incomingCount: files.length });
       files.forEach(file => {
-        // Add fullPath if not set
         if (!file.fullPath) {
           file.fullPath = file.webkitRelativePath || file.name;
         }
 
-        // Check if file already exists
-        if (!selectedFiles.find(f => f.fullPath === file.fullPath)) {
+        const key = fileDedupeKey(file);
+        if (!selectedFiles.find(f => fileDedupeKey(f) === key)) {
           selectedFiles.push(file);
         }
       });
@@ -1158,7 +1175,6 @@
       renderFileList();
       fileList.style.display = 'block';
       uploadResults.style.display = 'none';
-      dropLog('Selected files total', { selectedCount: selectedFiles.length });
     }
 
     // Render file list
@@ -1166,7 +1182,7 @@
       fileListContainer.innerHTML = selectedFiles.map((file, index) => `
         <div class="file-item" data-index="${index}">
           <div class="file-item-info">
-            <span class="file-item-name" title="${file.fullPath}">📄 ${file.fullPath}</span>
+            <span class="file-item-name" title="${escapeHtml(file.fullPath)}">📄 ${escapeHtml(file.fullPath)}</span>
             <span class="file-item-size">${formatFileSize(file.size)}</span>
           </div>
           <button class="btn btn-secondary" style="padding: 6px 12px; font-size: 13px;" onclick="removeFile(${index})">Remove</button>
@@ -1193,6 +1209,40 @@
     });
 
     // Upload files
+    const UPLOAD_CONCURRENCY = 4;
+
+    async function uploadSingleFile(file, userName) {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('path', file.fullPath);
+      formData.append('userName', userName);
+
+      const response = await fetch(R2_WORKER_URL, {
+        method: 'POST',
+        body: formData
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        return { file: file.fullPath, status: 'success', url: data.url };
+      }
+
+      const errorText = await response.text();
+      console.error('Upload error for', file.fullPath, ':', errorText);
+      let errorMessage = errorText;
+      try {
+        const parsedError = JSON.parse(errorText);
+        if (parsedError && typeof parsedError.message === 'string') {
+          errorMessage = parsedError.message;
+        } else if (parsedError && typeof parsedError.error === 'string') {
+          errorMessage = parsedError.error;
+        }
+      } catch (_) {
+        // Keep raw error text when response is not JSON.
+      }
+      return { file: file.fullPath, status: 'error', message: errorMessage };
+    }
+
     uploadBtn.addEventListener('click', async () => {
       if (selectedFiles.length === 0) return;
 
@@ -1212,61 +1262,53 @@
       uploadBtn.disabled = true;
       clearFilesBtn.disabled = true;
 
-      const results = [];
-      let completed = 0;
+      const queue = selectedFiles.slice();
+      const totalBytes = queue.reduce((sum, f) => sum + (Number.isFinite(f.size) ? f.size : 0), 0) || 1;
+      let completedBytes = 0;
+      let completedCount = 0;
+      const results = new Array(queue.length);
 
-      for (const file of selectedFiles) {
-        try {
-          uploadStatusText.textContent = `Upload на ${file.fullPath}...`;
-
-          const formData = new FormData();
-          formData.append('file', file);
-          formData.append('path', file.fullPath);
-          formData.append('userName', userName);
-
-          const response = await fetch(R2_WORKER_URL, {
-            method: 'POST',
-            body: formData
-          });
-
-          if (response.ok) {
-            const data = await response.json();
-            results.push({ file: file.fullPath, status: 'success', url: data.url });
-          } else {
-            const errorText = await response.text();
-            console.error('Upload error for', file.fullPath, ':', errorText);
-            let errorMessage = errorText;
-            try {
-              const parsedError = JSON.parse(errorText);
-              if (parsedError && typeof parsedError.message === 'string') {
-                errorMessage = parsedError.message;
-              } else if (parsedError && typeof parsedError.error === 'string') {
-                errorMessage = parsedError.error;
-              }
-            } catch (_) {
-              // Keep raw error text when response is not JSON.
-            }
-            results.push({ file: file.fullPath, status: 'error', message: errorMessage });
-          }
-        } catch (error) {
-          results.push({ file: file.fullPath, status: 'error', message: error.message });
-        }
-
-        completed++;
-        const percentage = Math.round((completed / selectedFiles.length) * 100);
+      const updateProgress = () => {
+        const percentage = Math.round((completedBytes / totalBytes) * 100);
         uploadPercentage.textContent = `${percentage}%`;
         progressBarFill.style.width = `${percentage}%`;
+      };
+      updateProgress();
+
+      // Worker-pool: up to UPLOAD_CONCURRENCY files in flight at once.
+      // Files are dispatched in input order via a shared cursor; results
+      // are stored at their original index so they can be rendered in
+      // the same order the user picked them.
+      let cursor = 0;
+      async function worker() {
+        while (true) {
+          const i = cursor++;
+          if (i >= queue.length) return;
+          const file = queue[i];
+          uploadStatusText.textContent = `Upload (${completedCount + 1}/${queue.length}): ${file.fullPath}`;
+          try {
+            results[i] = await uploadSingleFile(file, userName);
+          } catch (error) {
+            results[i] = { file: file.fullPath, status: 'error', message: error.message };
+          }
+          completedBytes += Number.isFinite(file.size) ? file.size : 0;
+          completedCount += 1;
+          updateProgress();
+        }
       }
 
-      // Show results
+      const workerCount = Math.min(UPLOAD_CONCURRENCY, queue.length);
+      await Promise.all(Array.from({ length: workerCount }, worker));
+
+      // Show results (escape filenames + server-controlled error text).
       uploadProgress.style.display = 'none';
       uploadResults.style.display = 'block';
       uploadResultsList.innerHTML = results.map(result => `
         <div class="file-item">
           <div class="file-item-info">
             <div>
-              <span class="file-item-name">${result.file}</span>
-              ${result.status === 'error' && result.message ? `<div style="margin-top: 4px; color: #991b1b; font-size: 12px;">${result.message}</div>` : ''}
+              <span class="file-item-name">${escapeHtml(result.file)}</span>
+              ${result.status === 'error' && result.message ? `<div style="margin-top: 4px; color: #991b1b; font-size: 12px;">${escapeHtml(result.message)}</div>` : ''}
             </div>
           </div>
           <span class="file-item-status ${result.status}">
@@ -1319,7 +1361,7 @@
     updateAdminButtonVisibility();
   </script>
 
-  <script src="js/user-identity.js?v=202605151dtj"></script>
+  <script src="js/user-identity.js?v=202605162y4"></script>
   <!-- Mobile menu overlay -->
   <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
 
@@ -1328,10 +1370,10 @@
        ============================================ -->
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
-  <!-- Initialize Chat Widget (loaded after Firebase so module-eval is safe) -->
-  <script src="js/chat.js?v=202605151dtj"></script>
-  <script src="js/presence.js?v=202602171mhr"></script>
   <script>
+    // Single Firebase init for this page. Both the uploads and finance
+    // modules consume `firebase.database()` directly; they no longer carry
+    // their own config copy.
     (function() {
       const firebaseConfig = {
         apiKey: 'API_KEY',
@@ -1342,7 +1384,16 @@
         messagingSenderId: 'SENDER_ID',
         appId: 'APP_ID'
       };
-
+      if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+      }
+    })();
+  </script>
+  <!-- Initialize Chat Widget (loaded after Firebase so module-eval is safe) -->
+  <script src="js/chat.js?v=202605162y4"></script>
+  <script src="js/presence.js?v=202602171mhr"></script>
+  <script>
+    (function() {
       const R2_WORKER_URL = 'https://r2-upload.sergey-2210-pavlov.workers.dev';
 
       // Row action icons — hoisted out of the per-row render loop so they're
@@ -2224,12 +2275,9 @@
       async function init() {
         if (!byId('uploadsTool')) return;
 
-        if (typeof firebase === 'undefined') {
+        if (typeof firebase === 'undefined' || !firebase.apps.length) {
           showStatus('Firebase SDK is not available.', true);
           return;
-        }
-        if (!firebase.apps.length) {
-          firebase.initializeApp(firebaseConfig);
         }
         const db = firebase.database();
 
@@ -2354,23 +2402,8 @@
   </script>
 <script>
   (function() {
-    const firebaseConfig = {
-      apiKey: "API_KEY",
-      authDomain: "med-student-chat.firebaseapp.com",
-      databaseURL: "https://med-student-chat-default-rtdb.europe-west1.firebasedatabase.app",
-      projectId: "med-student-chat",
-      storageBucket: "med-student-chat.appspot.com",
-      messagingSenderId: "SENDER_ID",
-      appId: "APP_ID"
-    };
-
-    try {
-      if (typeof firebase !== 'undefined' && firebase.apps && !firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-      }
-    } catch (error) {
-      console.warn('Firebase init warning in tools finance module:', error);
-    }
+    // Firebase is initialized once at the top of the page; this module just
+    // consumes firebase.database() directly. No local config copy.
 
     const state = {
       monthDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -2405,39 +2438,6 @@
       const y = date.getFullYear();
       const m = String(date.getMonth() + 1).padStart(2, '0');
       return `${y}-${m}`;
-    }
-
-    const FINANCE_INFO_IMAGE_URL = 'https://scontent.fvar1-1.fna.fbcdn.net/v/t1.15752-9/657753822_26362734963367001_8238548511824153356_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=9f807c&_nc_ohc=2qSUKxyCN_IQ7kNvwEIsOvg&_nc_oc=Ado899XNtd1ry9tRXN6v33rsMbidhDkCyr9T5NU5dQBwHlAsMO2buCwGNjpCZKoIngY&_nc_zt=23&_nc_ht=scontent.fvar1-1.fna&_nc_ss=7a3a8&oh=03_Q7cD5AFNX77VHngGs1XqVcMQIzl8b2NmbzQOoplZWdmPHgbiaA&oe=69F4FFEA';
-
-    function openFinanceInfoModal() {
-      let modal = document.getElementById('financeInfoModal');
-      if (!modal) {
-        modal = document.createElement('div');
-        modal.id = 'financeInfoModal';
-        modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:5000;display:none;align-items:center;justify-content:center;padding:20px;';
-
-        const panel = document.createElement('div');
-        panel.style.cssText = 'position:relative;max-width:min(96vw,1100px);max-height:92vh;';
-
-        const img = document.createElement('img');
-        img.src = FINANCE_INFO_IMAGE_URL;
-        img.alt = 'Finance info';
-        img.loading = 'lazy';
-        img.referrerPolicy = 'no-referrer';
-        img.style.cssText = 'display:block;max-width:100%;max-height:92vh;border-radius:12px;box-shadow:0 16px 40px rgba(0,0,0,0.45);';
-
-        modal.addEventListener('click', (event) => {
-          if (event.target === modal) {
-            modal.style.display = 'none';
-          }
-        });
-
-        panel.appendChild(img);
-        modal.appendChild(panel);
-        document.body.appendChild(modal);
-      }
-
-      modal.style.display = 'flex';
     }
 
     function normalizeText(value) {
@@ -3003,7 +3003,6 @@
     }
 
     async function initFinanceTool() {
-      const financeInfoTrigger = document.getElementById('financeInfoTrigger');
       const financeMenuBtn = document.getElementById('financeMenuBtn');
       const adminPanel = document.getElementById('financeAdminPanel');
       const donationsSection = document.getElementById('financeDonationsSection');
@@ -3019,11 +3018,6 @@
       const saveBtn = document.getElementById('financeSaveBtn');
 
       if (!financeMenuBtn || !adminPanel) return;
-
-      if (financeInfoTrigger && financeInfoTrigger.dataset.modalBound !== '1') {
-        financeInfoTrigger.addEventListener('click', openFinanceInfoModal);
-        financeInfoTrigger.dataset.modalBound = '1';
-      }
 
       if (!window.currentUserPromise) {
         financeMenuBtn.style.display = 'none';
@@ -3111,6 +3105,6 @@
     }
   }
 </script>
-<script src="js/mobile-nav.js?v=202605151dtj"></script>
+<script src="js/mobile-nav.js?v=202605162y4"></script>
 </body>
 </html>

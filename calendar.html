@@ -20,7 +20,7 @@
       firebase.initializeApp(firebaseConfig);
     }
   </script>
-  <script src="js/auth-guard.js?v=202605151dtj"></script>
+  <script src="js/auth-guard.js?v=202605162y4"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -576,7 +576,21 @@
 
   .event-card:hover {
     transform: scale(1.02);
-    z-index: 15;
+    z-index: 20;
+  }
+
+  /* Stacking order when events overlap on the grid:
+     exercises / colloquia / tests / makeups sit ON TOP of lectures, since
+     they're more important to see at a glance. Hover (z-index 20) still wins. */
+  .event-card.type-lecture,
+  .event-card.type-important-lecture {
+    z-index: 4;
+  }
+  .event-card.type-exercise,
+  .event-card.type-exam,
+  .event-card.type-test,
+  .event-card.type-makeup {
+    z-index: 10;
   }
 
   .event-title {
@@ -1887,7 +1901,7 @@
   }
 
   </style>
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605151dtj">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605162y4">
   <script src="js/desktop-nav.js?v=20260502dn5"></script>
   <link rel="stylesheet" href="css/desktop-nav.css?v=202605015kp">
   <script src="js/version-manager.js?v=202603151sxu"></script>
@@ -2267,6 +2281,7 @@
 
     document.addEventListener('DOMContentLoaded', async function() {
       setupScheduleNotesEditor();
+      setupMobileMenu();
 
       // Delegated click handlers (attach once, survive re-renders).
       const scheduleGridEl = document.getElementById('scheduleGrid');
@@ -2358,7 +2373,14 @@
       };
     }
 
-    let lastRenderedNotesContent = null;
+    let lastRenderedNotesKey = null;
+
+    // Dedupe key that ignores cosmetic whitespace (CRLF vs LF, trailing
+    // blank lines) so realtime echoes after a save don't trigger a re-render
+    // just because the server normalized whitespace.
+    function notesDedupeKey(content) {
+      return String(content || '').replace(/\r\n/g, '\n').replace(/\s+$/g, '');
+    }
 
     function applyScheduleNotesState(nextState, options = {}) {
       const { skipCacheWrite = false } = options;
@@ -2370,9 +2392,10 @@
 
       // Skip the markdown re-parse + innerHTML write when content didn't change.
       // Realtime listener echoes (server timestamp after local optimistic save) hit this path.
-      if (lastRenderedNotesContent !== scheduleNotesState.content) {
+      const nextKey = notesDedupeKey(scheduleNotesState.content);
+      if (lastRenderedNotesKey !== nextKey) {
         renderScheduleNotesContent(scheduleNotesState.content);
-        lastRenderedNotesContent = scheduleNotesState.content;
+        lastRenderedNotesKey = nextKey;
       }
       updateLastEditInfo(scheduleNotesState.lastEditedBy, scheduleNotesState.lastEditedAt);
 
@@ -2518,6 +2541,39 @@
 
     window.closeScheduleNotesModal = closeScheduleNotesModal;
     window.saveScheduleNotesFromModal = saveScheduleNotesFromModal;
+
+    function setupMobileMenu() {
+      const mobileToggle = document.getElementById('mobileMenuToggle');
+      const sidebar = document.getElementById('side-menu');
+      const overlay = document.getElementById('mobileMenuOverlay');
+      if (!mobileToggle || !sidebar || !overlay) return;
+
+      function closeMobileMenu() {
+        sidebar.classList.remove('mobile-open');
+        overlay.classList.remove('active');
+        mobileToggle.classList.remove('hidden');
+        document.body.classList.remove('menu-open');
+        document.body.style.overflow = '';
+      }
+
+      mobileToggle.addEventListener('click', function() {
+        sidebar.classList.toggle('mobile-open');
+        overlay.classList.toggle('active');
+        mobileToggle.classList.toggle('hidden');
+        if (sidebar.classList.contains('mobile-open')) {
+          document.body.classList.add('menu-open');
+          document.body.style.overflow = 'hidden';
+        } else {
+          document.body.classList.remove('menu-open');
+          document.body.style.overflow = '';
+        }
+      });
+
+      overlay.addEventListener('click', closeMobileMenu);
+      sidebar.querySelectorAll('a').forEach(link => {
+        link.addEventListener('click', closeMobileMenu);
+      });
+    }
 
     // Subscribe to schedule-notes changes so multiple users editing see each other live.
     function subscribeScheduleNotesRealtime() {
@@ -2690,7 +2746,9 @@
         }
 
         const currentTemplate = processedTemplates[semesterKey] || [];
-        let schedule = JSON.parse(JSON.stringify(currentTemplate)); // Deep copy
+        // Schedule items are flat (string fields only); shallow clone is enough
+        // and ~10× cheaper than JSON round-tripping for a hot per-week path.
+        let schedule = currentTemplate.map(item => ({ ...item }));
 
         // Apply overrides for this week if they exist
         if (overrides[weekNumber]) {
@@ -3835,56 +3893,18 @@
       }
     });
 
-    // Mobile menu toggle
-    document.addEventListener('DOMContentLoaded', function() {
-      const mobileToggle = document.getElementById('mobileMenuToggle');
-      const sidebar = document.getElementById('side-menu');
-      const overlay = document.getElementById('mobileMenuOverlay');
-
-      function closeMobileMenu() {
-        sidebar.classList.remove('mobile-open');
-        overlay.classList.remove('active');
-        mobileToggle.classList.remove('hidden');
-        document.body.classList.remove('menu-open');
-        document.body.style.overflow = '';
-      }
-
-      if (mobileToggle && sidebar && overlay) {
-        mobileToggle.addEventListener('click', function() {
-          sidebar.classList.toggle('mobile-open');
-          overlay.classList.toggle('active');
-          mobileToggle.classList.toggle('hidden');
-          // Add/remove menu-open class on body to prevent scrolling
-          if (sidebar.classList.contains('mobile-open')) {
-            document.body.classList.add('menu-open');
-            document.body.style.overflow = 'hidden';
-          } else {
-            document.body.classList.remove('menu-open');
-            document.body.style.overflow = '';
-          }
-        });
-
-        // Close menu when clicking on overlay
-        overlay.addEventListener('click', closeMobileMenu);
-
-        // Close menu on link click
-        sidebar.querySelectorAll('a').forEach(link => {
-          link.addEventListener('click', closeMobileMenu);
-        });
-      }
-    });
   </script>
 
 <!-- ============================================
          CHAT SYSTEM - Complete (Firebase REST + UI)
          ============================================ -->
 
-<script src="js/user-identity.js?v=202605151dtj"></script>
+<script src="js/user-identity.js?v=202605162y4"></script>
     <!-- CHAT SYSTEM -->
-    <script src="js/chat.js?v=202605151dtj"></script>
+    <script src="js/chat.js?v=202605162y4"></script>
 
     <script src="js/presence.js?v=202602171mhr"></script>
 <script src="js/version-check.js?v=202605021hcw"></script>
-<script src="js/mobile-nav.js?v=202605151dtj"></script>
+<script src="js/mobile-nav.js?v=202605162y4"></script>
 </body>
     </html>

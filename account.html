@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="bg">
 <head>
-    <script src="js/auth-guard.js?v=202605151dtj"></script>
+    <script src="js/auth-guard.js?v=202605162y4"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="robots" content="noindex, nofollow">
@@ -13,7 +13,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;500;700&family=Noto+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Fira+Sans:wght@400;500;700&family=Rubik:wght@400;500;700&display=swap">
-    <link rel="stylesheet" href="css/mobile-nav.css?v=202605151dtj">
+    <link rel="stylesheet" href="css/mobile-nav.css?v=202605162y4">
     <style>
         :root {
             --page-bg: #eef1ec;
@@ -496,6 +496,26 @@
             pointer-events: none;
         }
 
+        /* Avatar variant: same crop modal, but with a square 1:1 frame and a
+           circular cut-out so the user sees what their avatar will look like. */
+        .banner-crop-modal.is-avatar .banner-crop-frame {
+            width: min(70%, 320px);
+            aspect-ratio: 1 / 1;
+            border-radius: 50%;
+        }
+
+        .avatar-preview {
+            width: 96px;
+            height: 96px;
+            border-radius: 50%;
+            background-size: cover;
+            background-position: center;
+            border: 1px solid var(--card-border);
+            background-color: #eee;
+            margin: 0 auto 14px;
+            display: none;
+        }
+
         .banner-crop-modal-controls {
             display: grid;
             grid-template-columns: 72px 1fr;
@@ -646,7 +666,6 @@
                 </div>
             </div>
             <div class="account-footer-actions">
-                <button id="show-delete-account-btn" type="button" class="btn btn-danger" onclick="window.accountSystem && window.accountSystem.showForm('delete-account')">Delete Account</button>
                 <button onclick="window.location.href='index.html'" class="btn">Go back</button>
             </div>
         </div>
@@ -656,6 +675,7 @@
             <h2>Change Avatar</h2>
             <div id="change-avatar-error" class="error-message"></div>
             <form id="change-avatar-form-element">
+                <div id="current-avatar-preview" class="avatar-preview"></div>
                 <div class="form-group">
                     <label for="new-avatar-file">Upload Image</label>
                     <input type="file" id="new-avatar-file" accept="image/*">
@@ -807,21 +827,6 @@
             </form>
         </div>
 
-        <!-- Delete Account Form -->
-        <div id="delete-account-form" class="form-container">
-            <h2>Delete Account</h2>
-            <p style="text-align: center; color: #ef4444; margin-bottom: 1rem;"><strong>Warning!</strong> This operation is irreversible. All your data will be deleted.</p>
-            <div id="delete-account-error" class="error-message"></div>
-            <form id="delete-account-form-element">
-                <div class="form-group">
-                    <label for="password-for-delete">Enter your password to confirm.</label>
-                    <input type="password" id="password-for-delete" required>
-                </div>
-                <button type="submit" class="btn btn-danger">Confirm deletion</button>
-                <button type="button" class="cancel-action-btn btn">Отказ</button>
-            </form>
-        </div>
-
         <!-- Loading Spinner -->
         <div id="loading-spinner" style="text-align: center; display: none;">
             <p>Loading...</p>
@@ -851,7 +856,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
 
     <!-- Нашият скрипт за акаунти -->
-    <script src="./js/account-system.js?v=202605151dtj"></script>
+    <script src="./js/account-system.js?v=202605162y4"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
     <script src="js/version-check.js?v=202605021vc"></script>
     <script>
