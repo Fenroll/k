@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=202605131el7"></script>
+  <script src="js/auth-guard.js?v=202605151dtj"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=202605131el7">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605151dtj">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -268,6 +268,7 @@
       margin-top: 0.7em;
       margin-bottom: 0;
       font-weight: 600;
+      line-height: 1.3;
     }
 
     #editor h1 { font-size: 1.65em; color: #588157; }
@@ -278,6 +279,9 @@
     #editor p {
       margin: 0.3em 0;
       white-space: pre-wrap;
+    }
+    #editor p + p {
+      margin-top: 0.55em;
     }
 
     #editor hr {
@@ -356,6 +360,13 @@
       margin-top: 0;
     }
 
+    #editor h1 + table,
+    #editor h2 + table,
+    #editor h3 + table,
+    #editor h4 + table {
+      margin-top: -0.2em;
+    }
+
     /* Reduce space between consecutive headings */
     #editor h1 + h2,
     #editor h1 + h3,
@@ -363,7 +374,7 @@
     #editor h2 + h3,
     #editor h2 + h4,
     #editor h3 + h4 {
-      margin-top: 0.1em;
+      margin-top: 0;
     }
 
     #editor ul,
@@ -1152,6 +1163,23 @@
       outline: 2px solid #588157;
       outline-offset: -2px;
       background: rgba(88, 129, 87, 0.05);
+    }
+
+    /* Multi-cell drag selection highlight */
+    #editor table td.cell-selected,
+    #editor table th.cell-selected {
+      background: rgba(88, 129, 87, 0.18) !important;
+      box-shadow: inset 0 0 0 2px #588157;
+    }
+    #editor table.is-selecting-cells,
+    #editor table.is-selecting-cells td,
+    #editor table.is-selecting-cells th {
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    #editor table.is-selecting-cells td:after,
+    #editor table.is-selecting-cells th:after {
+      pointer-events: none;
     }
 
     /* Table row hover effect */
@@ -2253,29 +2281,6 @@
     </div>
   </div>
 
-  <!-- Merge Cells Modal -->
-  <div id="mergeCellsModal" class="modal">
-    <div class="modal-content" style="max-width: 400px;">
-      <div class="modal-header">
-        <h2>Merge Cells</h2>
-        <span class="close" id="closeMergeCellsModalBtn">&times;</span>
-      </div>
-      <div class="modal-body">
-        <p style="margin-bottom: 16px; color: #6b7280;">Select merge direction:</p>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-          <button id="mergeRightBtn" style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; background: white; transition: all 0.2s;">
-            <div style="font-size: 24px; margin-bottom: 4px;">→</div>
-            <div>Merge Right</div>
-          </button>
-          <button id="mergeDownBtn" style="padding: 16px; border: 1px solid #d1d5db; border-radius: 6px; cursor: pointer; font-size: 14px; background: white; transition: all 0.2s;">
-            <div style="font-size: 24px; margin-bottom: 4px;">↓</div>
-            <div>Merge Down</div>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <div id="symbolsModal" class="modal">
     <div class="modal-content symbols-modal-content">
       <div class="modal-header">
@@ -2323,7 +2328,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=202605131el7"></script>
+  <script src="courses.generated.js?v=202605151dtj"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -5804,15 +5809,19 @@
       margin-top: 0.7em;
       margin-bottom: 0;
       color: ${savedHeadingColor};
+      line-height: 1.3;
     }
     h1 { font-size: 1.65em; }
     h2 { font-size: 1.3em; }
     h3 { font-size: 1.1em; margin-bottom: 0; }
     h4 { font-size: 1.05em; margin-bottom: 0; }
-    h1 + h2, h1 + h3, h1 + h4, h2 + h3, h2 + h4, h3 + h4 { margin-top: 0.1em; }
+    h1 + h2, h1 + h3, h1 + h4, h2 + h3, h2 + h4, h3 + h4 { margin-top: 0; }
     p {
       margin: 0.3em 0;
       white-space: pre-wrap;
+    }
+    p + p {
+      margin-top: 0.55em;
     }
     hr {
       margin: 0.45em 0 0.2em;
@@ -5836,6 +5845,9 @@
     h1 + ul, h2 + ul, h3 + ul, h4 + ul,
     h1 + ol, h2 + ol, h3 + ol, h4 + ol {
       margin-top: 0;
+    }
+    h1 + table, h2 + table, h3 + table, h4 + table {
+      margin-top: -0.2em;
     }
     ul, ol {
       margin: 0.2em 0;
@@ -6021,6 +6033,7 @@
       h2 { font-size: 1.3em; }
       h3 { font-size: 1.1em; }
       p { margin: 0.3em 0; }
+      p + p { margin-top: 0.55em; }
       ul, ol { padding-left: 1.5em; }
       li { margin: 0.2em 0; }
       table { font-size: 0.9em; }
@@ -7927,91 +7940,312 @@ renderMathInElement(document.body, {
       tableContextMenu.classList.remove('active');
     });
 
+    // ── Multi-cell selection (drag-to-select) for tables ──
+    // Builds a logical grid that respects existing colspan/rowspan so
+    // merge math works on tables that already contain merged cells.
+    function buildTableGrid(table) {
+      const grid = [];
+      const rows = Array.from(table.rows);
+      rows.forEach((row, rowIdx) => {
+        if (!grid[rowIdx]) grid[rowIdx] = [];
+        let colIdx = 0;
+        Array.from(row.cells).forEach((cell) => {
+          while (grid[rowIdx][colIdx]) colIdx++;
+          const colspan = parseInt(cell.getAttribute('colspan'), 10) || 1;
+          const rowspan = parseInt(cell.getAttribute('rowspan'), 10) || 1;
+          for (let r = 0; r < rowspan; r++) {
+            if (!grid[rowIdx + r]) grid[rowIdx + r] = [];
+            for (let c = 0; c < colspan; c++) {
+              grid[rowIdx + r][colIdx + c] = cell;
+            }
+          }
+          colIdx += colspan;
+        });
+      });
+      return grid;
+    }
+
+    function findCellGridPosition(grid, cell) {
+      for (let r = 0; r < grid.length; r++) {
+        const rowArr = grid[r] || [];
+        for (let c = 0; c < rowArr.length; c++) {
+          if (rowArr[c] === cell) return { row: r, col: c };
+        }
+      }
+      return null;
+    }
+
+    let selectedTable = null;
+    let selectedCells = new Set();
+    let cellSelectStart = null;
+    let isDragSelectingCells = false;
+
+    function clearCellSelection() {
+      if (selectedTable) {
+        selectedTable.classList.remove('is-selecting-cells');
+      }
+      selectedCells.forEach((c) => c.classList.remove('cell-selected'));
+      selectedCells = new Set();
+      selectedTable = null;
+      cellSelectStart = null;
+      isDragSelectingCells = false;
+    }
+
+    function updateCellSelectionRect(endCell) {
+      if (!selectedTable || !cellSelectStart || !endCell) return;
+      if (endCell.closest('table') !== selectedTable) return;
+
+      const grid = buildTableGrid(selectedTable);
+      const startPos = findCellGridPosition(grid, cellSelectStart);
+      const endPos = findCellGridPosition(grid, endCell);
+      if (!startPos || !endPos) return;
+
+      let r1 = Math.min(startPos.row, endPos.row);
+      let r2 = Math.max(startPos.row, endPos.row);
+      let c1 = Math.min(startPos.col, endPos.col);
+      let c2 = Math.max(startPos.col, endPos.col);
+
+      // Expand the rectangle until it covers complete cells (spans may
+      // straddle the rectangle edges).
+      let changed = true;
+      while (changed) {
+        changed = false;
+        for (let r = r1; r <= r2; r++) {
+          for (let c = c1; c <= c2; c++) {
+            const cell = grid[r] && grid[r][c];
+            if (!cell) continue;
+            const pos = findCellGridPosition(grid, cell);
+            const colspan = parseInt(cell.getAttribute('colspan'), 10) || 1;
+            const rowspan = parseInt(cell.getAttribute('rowspan'), 10) || 1;
+            if (pos.row < r1) { r1 = pos.row; changed = true; }
+            if (pos.col < c1) { c1 = pos.col; changed = true; }
+            if (pos.row + rowspan - 1 > r2) { r2 = pos.row + rowspan - 1; changed = true; }
+            if (pos.col + colspan - 1 > c2) { c2 = pos.col + colspan - 1; changed = true; }
+          }
+        }
+      }
+
+      const newSelected = new Set();
+      for (let r = r1; r <= r2; r++) {
+        for (let c = c1; c <= c2; c++) {
+          const cell = grid[r] && grid[r][c];
+          if (cell) newSelected.add(cell);
+        }
+      }
+
+      selectedCells.forEach((cell) => {
+        if (!newSelected.has(cell)) cell.classList.remove('cell-selected');
+      });
+      newSelected.forEach((cell) => cell.classList.add('cell-selected'));
+      selectedCells = newSelected;
+    }
+
+    // Multi-cell selection is gated behind Ctrl (or Cmd on macOS) so that
+    // a plain click+drag in a cell still does normal text editing/selection.
+    const isCellSelectModifier = (e) => e.ctrlKey || e.metaKey;
+
+    editor.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      if (!isCellSelectModifier(e)) {
+        // Plain click in the editor cancels any prior multi-cell selection.
+        if (selectedCells.size > 0) clearCellSelection();
+        return;
+      }
+      const cell = e.target.closest('td, th');
+      if (!cell || !editor.contains(cell)) {
+        if (selectedCells.size > 0) clearCellSelection();
+        return;
+      }
+
+      // Don't start cell-drag when clicking on the right-edge resize handle.
+      const rect = cell.getBoundingClientRect();
+      if (rect.right - e.clientX < 6) return;
+
+      e.preventDefault();
+      const table = cell.closest('table');
+      if (selectedTable && selectedTable !== table) clearCellSelection();
+
+      // Reset any previous highlight, then arm a potential drag.
+      selectedCells.forEach((c) => c.classList.remove('cell-selected'));
+      selectedCells = new Set();
+      selectedTable = table;
+      cellSelectStart = cell;
+      isDragSelectingCells = true;
+      table.classList.add('is-selecting-cells');
+      // Seed the selection with the start cell so a Ctrl+click on a single
+      // cell still counts as a 1-cell selection until drag extends it.
+      cell.classList.add('cell-selected');
+      selectedCells.add(cell);
+    });
+
+    editor.addEventListener('mousemove', (e) => {
+      if (!isDragSelectingCells || !cellSelectStart) return;
+      const cell = e.target.closest('td, th');
+      if (!cell || cell.closest('table') !== selectedTable) return;
+      e.preventDefault();
+      updateCellSelectionRect(cell);
+      // Suppress contenteditable's own text selection while drag-selecting cells.
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0) sel.removeAllRanges();
+    });
+
+    function finishCellDragSelection() {
+      if (!isDragSelectingCells) return;
+      isDragSelectingCells = false;
+      if (selectedTable) selectedTable.classList.remove('is-selecting-cells');
+      // Single-cell "selection" isn't really a selection — let the caret behave normally.
+      if (selectedCells.size <= 1) clearCellSelection();
+    }
+    document.addEventListener('mouseup', finishCellDragSelection);
+
     document.getElementById('mergeCells').addEventListener('click', () => {
-      if (contextMenuCell) {
-        // Open merge cells modal
-        const mergeCellsModal = document.getElementById('mergeCellsModal');
-        mergeCellsModal.style.display = 'flex';
-      }
       tableContextMenu.classList.remove('active');
-    });
+      if (!contextMenuCell) return;
 
-    // Merge Cells Modal events
-    const mergeCellsModal = document.getElementById('mergeCellsModal');
+      const table = contextMenuCell.closest('table');
+      if (!table) return;
 
-    document.getElementById('closeMergeCellsModalBtn').addEventListener('click', () => {
-      mergeCellsModal.style.display = 'none';
-    });
-
-    mergeCellsModal.addEventListener('click', (e) => {
-      if (e.target.id === 'mergeCellsModal') {
-        mergeCellsModal.style.display = 'none';
+      // If the right-clicked cell isn't part of the active selection,
+      // treat it as a single-cell "selection" — nothing to merge.
+      const usingSelection = selectedCells.size > 1 && selectedCells.has(contextMenuCell);
+      if (!usingSelection) {
+        showNotification('Hold Ctrl and drag across 2 or more cells, then choose Merge Cells', 'warning');
+        return;
       }
-    });
 
-    document.getElementById('mergeRightBtn').addEventListener('click', () => {
-      if (contextMenuCell) {
-        const row = contextMenuCell.closest('tr');
-        const cellIndex = contextMenuCell.cellIndex;
-        const nextCell = row.cells[cellIndex + 1];
+      const grid = buildTableGrid(table);
+      const positions = Array.from(selectedCells)
+        .map((cell) => ({ cell, pos: findCellGridPosition(grid, cell) }))
+        .filter((item) => item.pos);
+      if (positions.length < 2) {
+        showNotification('Need at least 2 cells selected to merge', 'warning');
+        return;
+      }
 
-        if (nextCell) {
-          contextMenuCell.textContent = (contextMenuCell.textContent + ' ' + nextCell.textContent).trim();
-          const colspan = parseInt(contextMenuCell.getAttribute('colspan')) || 1;
-          contextMenuCell.setAttribute('colspan', colspan + 1);
-          nextCell.remove();
-          saveToHistory();
-        } else {
-          showNotification('No cell to the right to merge with', 'warning');
+      let r1 = Infinity, c1 = Infinity, r2 = -Infinity, c2 = -Infinity;
+      positions.forEach(({ cell, pos }) => {
+        const colspan = parseInt(cell.getAttribute('colspan'), 10) || 1;
+        const rowspan = parseInt(cell.getAttribute('rowspan'), 10) || 1;
+        if (pos.row < r1) r1 = pos.row;
+        if (pos.col < c1) c1 = pos.col;
+        if (pos.row + rowspan - 1 > r2) r2 = pos.row + rowspan - 1;
+        if (pos.col + colspan - 1 > c2) c2 = pos.col + colspan - 1;
+      });
+
+      const anchor = grid[r1] && grid[r1][c1];
+      if (!anchor) return;
+
+      // Collect unique cells inside the rectangle in row-major order, anchor first.
+      const seen = new Set();
+      const ordered = [];
+      for (let r = r1; r <= r2; r++) {
+        for (let c = c1; c <= c2; c++) {
+          const cell = grid[r] && grid[r][c];
+          if (!cell || seen.has(cell)) continue;
+          seen.add(cell);
+          ordered.push(cell);
         }
       }
-      mergeCellsModal.style.display = 'none';
-    });
 
-    document.getElementById('mergeDownBtn').addEventListener('click', () => {
-      if (contextMenuCell) {
-        const currentRow = contextMenuCell.closest('tr');
-        const nextRow = currentRow.nextElementSibling;
-        const cellIndex = contextMenuCell.cellIndex;
+      // Concatenate non-empty cell HTML into the anchor.
+      const otherCells = ordered.filter((cell) => cell !== anchor);
+      const anchorHtml = anchor.innerHTML.trim();
+      const parts = [];
+      if (anchorHtml) parts.push(anchorHtml);
+      otherCells.forEach((cell) => {
+        const html = cell.innerHTML.trim();
+        if (html) parts.push(html);
+      });
+      anchor.innerHTML = parts.length ? parts.join(' ') : '';
 
-        if (nextRow && nextRow.cells[cellIndex]) {
-          const cellBelow = nextRow.cells[cellIndex];
-          contextMenuCell.textContent = (contextMenuCell.textContent + ' ' + cellBelow.textContent).trim();
-          const rowspan = parseInt(contextMenuCell.getAttribute('rowspan')) || 1;
-          contextMenuCell.setAttribute('rowspan', rowspan + 1);
-          cellBelow.remove();
-          saveToHistory();
-        } else {
-          showNotification('No cell below to merge with', 'warning');
-        }
-      }
-      mergeCellsModal.style.display = 'none';
+      anchor.setAttribute('colspan', String(c2 - c1 + 1));
+      anchor.setAttribute('rowspan', String(r2 - r1 + 1));
+
+      otherCells.forEach((cell) => cell.remove());
+
+      clearCellSelection();
+      saveToHistory();
     });
 
     document.getElementById('splitCell').addEventListener('click', () => {
-      if (contextMenuCell) {
-        const colspan = parseInt(contextMenuCell.getAttribute('colspan')) || 1;
+      tableContextMenu.classList.remove('active');
+      if (!contextMenuCell) return;
 
-        if (colspan > 1) {
-          const row = contextMenuCell.closest('tr');
-          contextMenuCell.setAttribute('colspan', colspan - 1);
-          const newCell = document.createElement('td');
-          row.insertBefore(newCell, contextMenuCell.nextSibling);
-          saveToHistory();
+      const colspan = parseInt(contextMenuCell.getAttribute('colspan'), 10) || 1;
+      const rowspan = parseInt(contextMenuCell.getAttribute('rowspan'), 10) || 1;
+      if (colspan === 1 && rowspan === 1) return;
+
+      const table = contextMenuCell.closest('table');
+      const grid = buildTableGrid(table);
+      const pos = findCellGridPosition(grid, contextMenuCell);
+      if (!pos) return;
+
+      const rows = Array.from(table.rows);
+
+      // Reset the anchor cell to 1x1; add (colspan - 1) cells after it for the first row.
+      contextMenuCell.removeAttribute('colspan');
+      contextMenuCell.removeAttribute('rowspan');
+
+      const tag = contextMenuCell.tagName.toLowerCase();
+      const makeCell = () => document.createElement(tag);
+
+      // Add the rest of the cells on the anchor's row (to the right).
+      for (let c = 1; c < colspan; c++) {
+        const newCell = makeCell();
+        contextMenuCell.parentNode.insertBefore(newCell, contextMenuCell.nextSibling);
+      }
+
+      // For each subsequent row covered by the original rowspan, insert
+      // `colspan` new cells at the correct column position.
+      for (let r = 1; r < rowspan; r++) {
+        const targetRow = rows[pos.row + r];
+        if (!targetRow) continue;
+
+        // Find which existing cell in targetRow currently sits at >= pos.col.
+        // Use the grid we already built (it reflects pre-split state).
+        const rowGrid = grid[pos.row + r] || [];
+        let insertBefore = null;
+        for (let c = pos.col; c < rowGrid.length; c++) {
+          const cellAt = rowGrid[c];
+          if (cellAt && cellAt !== contextMenuCell) {
+            // Only consider cells whose anchor sits in this row, otherwise they're
+            // ghosts from rowspans that started earlier and we shouldn't insert ahead of them.
+            if (cellAt.parentNode === targetRow) {
+              insertBefore = cellAt;
+              break;
+            }
+          }
+        }
+
+        for (let c = 0; c < colspan; c++) {
+          const newCell = makeCell();
+          if (insertBefore) {
+            targetRow.insertBefore(newCell, insertBefore);
+          } else {
+            targetRow.appendChild(newCell);
+          }
         }
       }
-      tableContextMenu.classList.remove('active');
+
+      saveToHistory();
     });
 
     document.getElementById('setCellBg').addEventListener('click', () => {
-      if (contextMenuCell) {
-        const color = prompt('Enter background color (hex):', '#FAF594');
-        if (color) {
-          contextMenuCell.style.backgroundColor = color;
-          saveToHistory();
-        }
-      }
       tableContextMenu.classList.remove('active');
+      if (!contextMenuCell) return;
+
+      // If a multi-cell selection is active and includes the right-clicked
+      // cell, apply the background to every selected cell. Otherwise fall
+      // back to the single right-clicked cell.
+      const targets = (selectedCells.size > 1 && selectedCells.has(contextMenuCell))
+        ? Array.from(selectedCells)
+        : [contextMenuCell];
+
+      const color = prompt('Enter background color (hex):', '#FAF594');
+      if (!color) return;
+      targets.forEach((cell) => { cell.style.backgroundColor = color; });
+      clearCellSelection();
+      saveToHistory();
     });
 
     document.getElementById('deleteTableCtx').addEventListener('click', () => {
@@ -10204,11 +10438,22 @@ renderMathInElement(document.body, {
         }
         // Tables
         else if (line.includes('|')) {
+          // Split a markdown table row. Strip only the empty entries that
+          // come from leading/trailing | (i.e. `| a | b |` -> ['a','b']).
+          // Interior empty cells (e.g. `| **Title** | | | |`) must be kept
+          // so section-header-style rows don't collapse to a single cell.
+          const splitRow = (rawLine) => {
+            const parts = rawLine.split('|');
+            if (parts.length > 0 && parts[0].trim() === '') parts.shift();
+            if (parts.length > 0 && parts[parts.length - 1].trim() === '') parts.pop();
+            return parts.map(c => c.trim());
+          };
+
           let tableHtml = '<table><tbody>';
           let tableIterations = 0;
           while (i < lines.length && lines[i].includes('|') && tableIterations < 1000) {
             tableIterations++;
-            const cells = lines[i].split('|').map(c => c.trim()).filter(c => c !== '');
+            const cells = splitRow(lines[i]);
 
             // Skip header separator lines (lines where ALL cells are dashes/colons)
             const isHeaderSeparator = cells.length > 0 && cells.every(c => /^:?-+:?$/.test(c));
@@ -10814,12 +11059,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=202605131el7"></script>
+  <script src="js/user-identity.js?v=202605151dtj"></script>
     <!-- CHAT SYSTEM -->
-  <script src="js/chat.js?v=202605131el7"></script>
+  <script src="js/chat.js?v=202605151dtj"></script>
 
 <script src="js/version-check.js?v=202605021hcw"></script>
-  <script src="js/mobile-nav.js?v=202605131el7"></script>
+  <script src="js/mobile-nav.js?v=202605151dtj"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');
