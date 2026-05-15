@@ -5899,8 +5899,8 @@ class ChatUIManager {
     display: flex;
     position: absolute;
     right: 0;
-    top: 60px;
-    bottom: 67px;
+    top: 59px;
+    bottom: 69px;
     z-index: 15;
     box-shadow: -2px 0 10px rgba(0,0,0,0.1);
     margin-top: 0;
