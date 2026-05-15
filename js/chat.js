@@ -1704,6 +1704,12 @@ class ChatUIManager {
         sendBtn.disabled = true;
       }
 
+      // Keep focus on the textarea when the Send button is pressed. Without
+      // this, clicking Send moves focus to the button, the mobile keyboard
+      // closes, then handleSendMessage refocuses and the keyboard reopens —
+      // visible as a quick close/open flicker on every send.
+      sendBtn.addEventListener('pointerdown', (e) => e.preventDefault());
+      sendBtn.addEventListener('mousedown', (e) => e.preventDefault());
       sendBtn.addEventListener('click', () => this.handleSendMessage());
 
       const plusBtn = this.container.querySelector('.chat-plus-btn');
