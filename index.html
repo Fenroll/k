@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=20260516433"></script>
+  <script src="js/auth-guard.js?v=2026051646m"></script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -159,7 +159,7 @@
   <link rel="icon" href="favicon.svg" type="image/svg+xml">
   <link rel="icon" href="favicon.ico" sizes="any">
   <link rel="apple-touch-icon" sizes="256x256" href="apple-touch-icon.png">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=20260516433">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=2026051646m">
   <script src="js/desktop-nav.js"></script>
   <link rel="stylesheet" href="css/desktop-nav.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,400,500,700&display=swap">
@@ -472,7 +472,7 @@
   padding: 0 1.2rem;
     }
   </style>
-  <script src="courses.generated.js?v=20260516433"></script>
+  <script src="courses.generated.js?v=2026051646m"></script>
   <script src="js/version-manager.js"></script>
 
 <!-- Subtle UI tweaks -->
@@ -1234,8 +1234,8 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
      CHAT SYSTEM - Complete (Firebase REST + UI)
      ============================================ -->
 
-<script src="js/user-identity.js?v=20260516433"></script>
-<script src="js/chat.js?v=20260516433"></script>
+<script src="js/user-identity.js?v=2026051646m"></script>
+<script src="js/chat.js?v=2026051646m"></script>
 
 <!-- Chat widget is injected by chat.js -->
 
@@ -1992,7 +1992,7 @@ window.toggleFileDropdown = function toggleFileDropdown(sectionId) {
       <script src="html-priority.js"></script>
       <script src="js/presence.js"></script>
       <script src="js/version-check.js"></script>
-      <script src="js/mobile-nav.js?v=20260516433"></script>
+      <script src="js/mobile-nav.js?v=2026051646m"></script>
 <!-- Privacy Modal -->
 <div id="privacyModal" class="text-modal" style="display: none;">
   <div class="text-modal-content" style="max-width: 500px;">
@@ -2865,6 +2865,18 @@ body.index-beta .archive-separator::after {
     border-style: solid !important;
     border-color: rgb(from var(--course-accent, #588157) r g b / 0.6) !important;
     border-left-width: 2px !important;
+  }
+}
+
+@media (max-width: 900px) and (hover: none),
+       (max-width: 900px) and (pointer: coarse) {
+  body.index-beta .element-card:hover,
+  body.index-beta .element-card:active,
+  body.index-beta .element-card:focus,
+  body.index-beta .element-card.active {
+    background: #ffffff !important;
+    border-color: rgb(from var(--course-accent, #588157) r g b / 0.6) !important;
+    color: #111827 !important;
   }
 }
 </style>

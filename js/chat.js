@@ -5805,8 +5805,8 @@ class ChatUIManager {
     height: auto;
     top: env(safe-area-inset-top, 0px);
     bottom: calc(env(safe-area-inset-bottom, 0px) + var(--mobile-keyboard-offset, 0px));
-    left: max(8px, env(safe-area-inset-left, 0px));
-    right: max(8px, env(safe-area-inset-right, 0px));
+    left: 0;
+    right: 0;
     max-width: none;
     transform-origin: bottom center;
     transform: translateY(16px) scale(0.22);
@@ -5857,6 +5857,10 @@ class ChatUIManager {
      message bubbles can use the full panel. */
   .message-content {
     margin-right: 0;
+  }
+  .chat-messages {
+    padding-right: max(8px, env(safe-area-inset-right, 0px));
+    box-sizing: border-box;
   }
   .chat-online-count {
     display: none !important;
