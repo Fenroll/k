@@ -1064,11 +1064,19 @@ class ChatUIManager {
             }
             .chat-controls-row {
                 display: flex !important;
-                align-items: center !important;
+                /* Pin the +/send buttons to the bottom of the row so they
+                   stay put when the textarea grows over multiple lines,
+                   instead of riding the vertical center upward. */
+                align-items: flex-end !important;
                 width: 100% !important;
                 padding-top: 6px;
                 position: relative;
                 gap: 12px !important;
+            }
+            .chat-controls-row .chat-plus-btn,
+            .chat-controls-row .chat-send-btn {
+                flex-shrink: 0;
+                align-self: flex-end;
             }
             .reply-indicator {
                 width: 100%;
@@ -1781,10 +1789,34 @@ class ChatUIManager {
         }
       });
 
-      // Auto-resize textarea
-      input.addEventListener('input', () => {
+      // Auto-resize textarea.
+      const getTextareaMetrics = () => {
+         const styles = window.getComputedStyle(input);
+         const fontSize = parseFloat(styles.fontSize) || 13;
+         const lineHeight = parseFloat(styles.lineHeight) || fontSize * 1.35;
+         const paddingY = (parseFloat(styles.paddingTop) || 0) + (parseFloat(styles.paddingBottom) || 0);
+         const borderY = (parseFloat(styles.borderTopWidth) || 0) + (parseFloat(styles.borderBottomWidth) || 0);
+         const maxHeight = parseFloat(styles.maxHeight) || Infinity;
+
+         input._singleLineHeight = Math.ceil(lineHeight + paddingY + borderY);
+         input._textareaBorderY = borderY;
+         input._textareaMaxHeight = maxHeight;
+      };
+
+      const resizeInputToContent = () => {
+         getTextareaMetrics();
          input.style.height = 'auto';
-         input.style.height = (input.scrollHeight) + 'px';
+         const nextHeight = Math.max(input._singleLineHeight, input.scrollHeight + input._textareaBorderY);
+         const cappedHeight = Math.min(nextHeight, input._textareaMaxHeight);
+         input.style.height = cappedHeight + 'px';
+         input.style.overflowY = nextHeight > input._textareaMaxHeight ? 'auto' : 'hidden';
+      };
+
+      input._resizeToContent = resizeInputToContent;
+      requestAnimationFrame(resizeInputToContent);
+
+      input.addEventListener('input', () => {
+         resizeInputToContent();
 
          this.handleMentionInput(input);
          this.handleTyping();
@@ -2562,7 +2594,7 @@ class ChatUIManager {
         input.value = '';
         input.dataset.replyTo = '';
         input.dataset.replyAuthor = '';
-        input.style.height = 'auto';
+        if (typeof input._resizeToContent === 'function') input._resizeToContent();
         input.focus();
 
         const replyIndicator = this.container.querySelector('.reply-indicator');
@@ -2581,7 +2613,7 @@ class ChatUIManager {
         input.value = '';
         input.dataset.replyTo = '';
         input.dataset.replyAuthor = '';
-        input.style.height = 'auto';
+        if (typeof input._resizeToContent === 'function') input._resizeToContent();
         input.focus();
 
         const replyIndicator = this.container.querySelector('.reply-indicator');
@@ -2608,8 +2640,12 @@ class ChatUIManager {
       input.dataset.replyTo = '';
       input.dataset.replyAuthor = '';
 
-      // Reset textarea height after sending
-      input.style.height = 'auto';
+      // Reset textarea height after sending.
+      if (typeof input._resizeToContent === 'function') {
+        input._resizeToContent();
+      } else {
+        input.style.height = 'auto';
+      }
       input.focus();
 
       // Премахни reply indicator
@@ -3504,8 +3540,12 @@ class ChatUIManager {
     if (!input) return;
 
     input.value = msg.text;
-    input.style.height = 'auto';
-    input.style.height = input.scrollHeight + 'px';
+    if (typeof input._resizeToContent === 'function') {
+      input._resizeToContent();
+    } else {
+      input.style.height = 'auto';
+      input.style.height = input.scrollHeight + 'px';
+    }
     this.editingMessage = { id: messageId, key: messageKey };
 
     const inputArea = this.container.querySelector('.chat-input-area');
@@ -3551,6 +3591,7 @@ class ChatUIManager {
     if (input) {
       input.value = '';
       input.placeholder = "Write a message...";
+      if (typeof input._resizeToContent === 'function') input._resizeToContent();
     }
     if (inputArea) {
       inputArea.style.borderTop = '1px solid var(--chat-border)';
@@ -4565,6 +4606,19 @@ class ChatUIManager {
     }
 
     if (chatPanel) {
+      const messagesContainer = this.container.querySelector('.chat-messages');
+
+      // Hide the message list while we settle scroll position. Required
+      // because the visible message list otherwise shows pre-scroll layout
+      // for a moment before scrollToBottom lands — caused by lazy images,
+      // late renderMessages calls, or layout that finalizes a frame or two
+      // after the .open class flip. A short fade keeps the reveal from
+      // looking like an abrupt snap when content finally appears.
+      if (this.isOpen && messagesContainer) {
+        messagesContainer.style.transition = 'opacity 0.15s ease-out';
+        messagesContainer.style.opacity = '0';
+      }
+
       chatPanel.classList.toggle('open', this.isOpen);
       if (this.isOpen) {
         const input = this.container.querySelector('.chat-input');
@@ -4580,14 +4634,30 @@ class ChatUIManager {
         // Маркирай съобщенията като прочетени
         this.markAsRead();
 
-        // Превърти до долу веднага и след малко закъснение (заради анимацията)
         this.scrollToBottom();
-        requestAnimationFrame(() => this.scrollToBottom());
-        setTimeout(() => this.scrollToBottom(), 100);
-        setTimeout(() => this.scrollToBottom(), 300);
-        if (isMobileLike) {
-          setTimeout(() => this.scrollToBottom(), 520);
-        }
+
+        // Continuously re-pin scrollTop to scrollHeight for the next ~360ms
+        // (matches the panel's open transition + a small buffer). This
+        // absorbs *any* late layout change — lazy images deciding their
+        // final height, fonts swapping in, message render passes appending
+        // content — without us having to enumerate the sources. Cheap: at
+        // most ~22 frames at 60fps, each frame is a single scrollTop write.
+        const pinUntil = (typeof performance !== 'undefined' ? performance.now() : Date.now()) +
+                         (isMobileLike ? 540 : 360);
+        const pinScrollToBottom = () => {
+          if (!this.isOpen || !messagesContainer) return;
+          messagesContainer.scrollTop = messagesContainer.scrollHeight;
+          const now = (typeof performance !== 'undefined' ? performance.now() : Date.now());
+          if (now < pinUntil) {
+            requestAnimationFrame(pinScrollToBottom);
+          } else {
+            // Final scroll + reveal. By now the layout has stopped shifting,
+            // so what the user sees is already pinned to the latest message.
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            messagesContainer.style.opacity = '';
+          }
+        };
+        requestAnimationFrame(pinScrollToBottom);
       } else {
         const input = this.container.querySelector('.chat-input');
         if (input && document.activeElement === input) {
@@ -5485,6 +5555,8 @@ class ChatUIManager {
   flex-direction: column;
   gap: 2px;
   margin-right: 96px;
+  min-width: 0;
+  max-width: 100%;
 }
 .message-header {
   display: flex;
@@ -5504,13 +5576,38 @@ class ChatUIManager {
   font-size: 13px;
   color: var(--chat-text);
   word-break: break-word;
+  overflow-wrap: anywhere;
   background: var(--chat-secondary);
   padding: 4px 10px;
   border-radius: 8px;
   line-height: 1.4;
   box-sizing: border-box;
-  max-width: 100%;
+  max-width: min(100%, 360px) !important;
   width: fit-content;
+}
+.chat-message,
+.message-bubble-container,
+.message-main-row {
+  max-width: 100%;
+  min-width: 0;
+}
+.message-bubble-container,
+.message-main-row {
+  box-sizing: border-box;
+}
+.message-text a {
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+.chat-image-preview,
+.chat-message-image,
+.chat-audio-player {
+  max-width: 100%;
+  box-sizing: border-box;
+}
+.chat-message-image {
+  width: auto;
+  object-fit: contain;
 }
 .mention {
   background: rgba(88, 129, 87, 0.15);
@@ -5630,7 +5727,9 @@ class ChatUIManager {
 }
 .chat-controls-row {
   display: flex;
-  align-items: center;
+  /* Bottom-align so the +/send buttons stay pinned next to the bottom of
+     the textarea even when it grows tall. */
+  align-items: flex-end;
   width: 100%;
 }
 .chat-tool-btn {
@@ -5648,12 +5747,17 @@ class ChatUIManager {
   flex: 0.98;
   border: 1px solid var(--chat-border);
   border-radius: 8px;
-  padding: 8px 12px;
   font-size: 13px;
   font-family: inherit;
   outline: none;
   transition: all 0.2s;
   resize: none;
+  box-sizing: border-box;
+  line-height: 18px;
+  min-height: 36px;
+  max-height: 120px;
+  padding: 8px 12px;
+  overflow-y: hidden;
 }
 .chat-input:focus {
   border-color: var(--chat-primary);
