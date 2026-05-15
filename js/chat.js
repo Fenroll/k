@@ -1131,64 +1131,79 @@ class ChatUIManager {
                 to   { opacity: 1; transform: scale(1)    translateY(0);    }
             }
             @keyframes sheetSlideUp {
-                from { opacity: 0; transform: translateY(100%); }
-                to   { opacity: 1; transform: translateY(0);    }
+                from { opacity: 0; transform: translate(-50%, 100%); }
+                to   { opacity: 1; transform: translate(-50%, 0);    }
             }
             .message-options-menu {
                 position: fixed;
-                background: white;
-                border-radius: 12px;
-                box-shadow: 0 4px 20px rgba(0,0,0,0.18);
-                border: 1px solid var(--chat-border);
+                background: rgba(251, 252, 247, 0.98);
+                border-radius: 999px;
+                box-shadow: 0 8px 24px rgba(58, 90, 64, 0.18);
+                border: 1px solid rgba(88, 129, 87, 0.22);
                 padding: 4px;
-                z-index: 10002;
+                z-index: 10004;
                 display: flex;
-                flex-direction: column;
-                min-width: 140px;
+                flex-direction: row;
+                align-items: center;
+                gap: 4px;
+                min-width: unset;
                 animation: menuPop 0.15s ease both;
                 transform-origin: top center;
             }
             .message-options-menu.mobile-sheet {
-                bottom: 0 !important;
-                left: 0 !important;
-                right: 0 !important;
+                bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
+                left: 50% !important;
+                right: auto !important;
                 top: auto !important;
-                border-radius: 20px 20px 0 0 !important;
-                padding: 8px 8px calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
-                min-width: unset !important;
-                box-shadow: 0 -4px 30px rgba(0,0,0,0.15) !important;
-                animation: sheetSlideUp 0.22s cubic-bezier(0.32, 0.72, 0, 1) both !important;
+                border-radius: 999px !important;
+                padding: 6px !important;
+                max-width: calc(100vw - 24px) !important;
+                background: rgba(251, 252, 247, 0.98) !important;
+                border: 1px solid rgba(88, 129, 87, 0.24) !important;
+                box-shadow: 0 10px 28px rgba(58, 90, 64, 0.22) !important;
+                animation: sheetSlideUp 0.18s cubic-bezier(0.32, 0.72, 0, 1) both !important;
                 transform-origin: bottom center !important;
+                backdrop-filter: blur(10px);
             }
             .message-options-backdrop {
                 position: fixed;
                 inset: 0;
                 z-index: 10001;
-                background: rgba(0,0,0,0.25);
+                background: transparent;
                 animation: menuPop 0.15s ease both;
             }
             .message-option-item {
                 display: flex;
                 align-items: center;
-                gap: 10px;
-                padding: 10px 14px;
-                font-size: 14px;
+                justify-content: center;
+                padding: 0;
+                width: 36px;
+                height: 36px;
+                min-width: 36px;
+                min-height: 36px;
+                font-size: 13px;
+                font-weight: 700;
                 cursor: pointer;
-                border-radius: 10px;
-                color: var(--chat-text);
-                transition: background 0.15s;
+                border-radius: 999px;
+                color: #3a5a40;
+                transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
                 -webkit-tap-highlight-color: transparent;
                 user-select: none;
             }
             .message-option-item:hover {
-                background: var(--chat-secondary);
+                background: rgba(88, 129, 87, 0.13);
+                box-shadow: inset 0 0 0 1px rgba(88, 129, 87, 0.10);
             }
             .message-option-item:active {
-                background: var(--chat-secondary);
+                background: rgba(88, 129, 87, 0.18);
                 transform: scale(0.98);
             }
             .message-option-item.delete {
                 color: #ef4444;
+            }
+            .message-option-item.delete:hover {
+                background: rgba(239, 68, 68, 0.10);
+                box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.14);
             }
             .message-option-item img {
                 width: 16px;
@@ -1196,10 +1211,14 @@ class ChatUIManager {
                 flex-shrink: 0;
             }
             @media (hover: none) and (pointer: coarse) {
+                .message-options-menu.mobile-sheet {
+                    justify-content: center;
+                }
                 .message-option-item {
-                    padding: 13px 18px;
-                    font-size: 15px;
-                    border-radius: 12px;
+                    width: 42px;
+                    height: 42px;
+                    min-width: 42px;
+                    min-height: 42px;
                 }
                 .message-option-item img {
                     width: 18px;
@@ -3269,7 +3288,7 @@ class ChatUIManager {
     msgEl.addEventListener('contextmenu', (e) => {
       e.preventDefault();
       e.stopPropagation();
-      this.showMessageOptions(msgEl.dataset.messageId, msgEl.dataset.messageKey, msgEl, e, msgEl, 'full');
+      this.showMessageTools(msgEl, e);
     });
 
     // Long-press for mobile
@@ -3285,7 +3304,7 @@ class ChatUIManager {
         if (_lpMoved) return;
         if (navigator.vibrate) navigator.vibrate(30);
         msgEl.classList.add('lp-active');
-        this.showMessageOptions(msgEl.dataset.messageId, msgEl.dataset.messageKey, msgEl, { clientX: touchX, clientY: touchY }, msgEl, 'full');
+        this.showMessageTools(msgEl, { clientX: touchX, clientY: touchY });
         setTimeout(() => msgEl.classList.remove('lp-active'), 300);
       }, 450);
     }, { passive: true });
@@ -3429,6 +3448,13 @@ class ChatUIManager {
     document.addEventListener('keydown', escHandler);
   }
 
+  showMessageTools(msgEl, triggerEvent = null) {
+    if (!msgEl) return;
+    const bubbleEl = msgEl.querySelector('.message-text') || msgEl;
+    this.showReactionPicker(msgEl.dataset.messageId, bubbleEl);
+    this.showMessageOptions(msgEl.dataset.messageId, msgEl.dataset.messageKey, msgEl, triggerEvent, msgEl, 'full');
+  }
+
   showMessageOptions(messageId, messageKey, anchorEl, triggerEvent = null, messageEl = null, mode = 'full') {
     const existingMenu = document.getElementById('message-options-menu');
     if (existingMenu) existingMenu.remove();
@@ -3444,16 +3470,14 @@ class ChatUIManager {
 
     const isOwnerOnly = mode === 'owner-only';
     menu.innerHTML = `
-      ${isOwnerOnly ? '' : '<div class="message-option-item reply"><img src="svg/chat/icon-reply.svg" alt="Reply">Reply</div>'}
-      ${isOwnerOnly ? '' : '<div class="message-option-item reaction"><img src="svg/chat/icon-reaction.svg" alt="Reaction">Reaction</div>'}
-      <div class="message-option-item edit">
-        <img src="svg/chat/icon-edit.svg" alt="Edit">
-        Edit
+      ${isOwnerOnly ? '' : '<div class="message-option-item reply" title="Reply" aria-label="Reply"><img src="svg/chat/icon-reply.svg" alt=""></div>'}
+      ${isOwnerOnly ? '' : '<div class="message-option-item copy" title="Copy" aria-label="Copy"><img src="svg/chat/icon-copy.svg" alt=""></div>'}
+      ${isOwner ? `<div class="message-option-item edit" title="Edit" aria-label="Edit">
+        <img src="svg/chat/icon-edit.svg" alt="">
       </div>
-      <div class="message-option-item delete">
-        <img src="svg/chat/icon-delete.svg" alt="Delete">
-        Delete
-      </div>
+      <div class="message-option-item delete" title="Delete" aria-label="Delete">
+        <img src="svg/chat/icon-delete.svg" alt="">
+      </div>` : ''}
     `;
 
     const isMobile = window.matchMedia('(hover: none) and (pointer: coarse)').matches;
@@ -3502,26 +3526,20 @@ class ChatUIManager {
       };
     }
 
-    const reactionItem = menu.querySelector('.reaction');
-    if (reactionItem) {
-      reactionItem.onclick = () => {
+    const copyItem = menu.querySelector('.copy');
+    if (copyItem) {
+      copyItem.onclick = async () => {
+        const textEl = sourceMessageEl ? sourceMessageEl.querySelector('.message-text') : null;
+        const rawText = textEl ? (textEl.getAttribute('data-raw-text') || textEl.innerText || '') : '';
+        await this.copyMessageText(rawText);
         dismiss();
-        const bubbleEl = sourceMessageEl ? sourceMessageEl.querySelector('.message-text') : null;
-        this.showReactionPicker(messageId, bubbleEl || sourceMessageEl);
       };
     }
 
     const editItem = menu.querySelector('.edit');
     const deleteItem = menu.querySelector('.delete');
 
-    if (!isOwner) {
-      editItem.style.opacity = '0.45';
-      editItem.style.pointerEvents = 'none';
-      deleteItem.style.opacity = '0.45';
-      deleteItem.style.pointerEvents = 'none';
-    }
-
-    if (isOwner) {
+    if (isOwner && editItem && deleteItem) {
       editItem.onclick = () => { dismiss(); this.startEditing(messageId, messageKey); };
       deleteItem.onclick = () => { dismiss(); this.deleteMessage(messageKey); };
     }
@@ -4229,11 +4247,11 @@ class ChatUIManager {
     if (oldPicker) oldPicker.remove();
 
     const emojis = ['\u{1F44D}', '\u{1F44E}', '\u{1F602}', '\u{2764}\u{FE0F}', '\u{1F62D}', '\u{1F62E}', '\u{1F410}'];
-    const pickerBg = '#ffffff';
+    const pickerBg = 'rgba(251, 252, 247, 0.98)';
     const pickerText = '#1f2937';
-    const pickerHover = 'var(--chat-secondary)';
-    const customBtnBg = '#f3f4f6';
-    const customBtnText = '#6b7280';
+    const pickerHover = 'rgba(88, 129, 87, 0.14)';
+    const customBtnBg = 'rgba(88, 129, 87, 0.12)';
+    const customBtnText = '#3a5a40';
 
     const picker = document.createElement('div');
     picker.className = 'reaction-picker';
@@ -4241,14 +4259,15 @@ class ChatUIManager {
       position: fixed;
       background: ${pickerBg};
       color: ${pickerText};
-      border: 1px solid var(--chat-border);
-      border-radius: 20px;
-      padding: 6px 10px;
+      border: 1px solid rgba(88, 129, 87, 0.24);
+      border-radius: 999px;
+      padding: 6px;
       display: flex;
       align-items: center;
-      gap: 4px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-      z-index: 10000;
+      gap: 3px;
+      box-shadow: 0 8px 24px rgba(58, 90, 64, 0.18);
+      z-index: 10005;
+      backdrop-filter: blur(10px);
     `;
 
     const addEmojiButton = (emoji, messageId) => {
@@ -4257,17 +4276,21 @@ class ChatUIManager {
       btn.style.cssText = `
         background: none;
         border: none;
-        font-size: 18px;
+        font-size: 19px;
         cursor: pointer;
-        padding: 4px;
+        padding: 0;
+        width: 34px;
+        height: 34px;
         border-radius: 50%;
-        transition: background 0.2s;
+        transition: background 0.15s, transform 0.15s;
         display: flex;
         align-items: center;
         justify-content: center;
       `;
       btn.addEventListener('mouseenter', () => btn.style.background = pickerHover);
       btn.addEventListener('mouseleave', () => btn.style.background = 'none');
+      btn.addEventListener('mousedown', () => btn.style.transform = 'scale(0.95)');
+      btn.addEventListener('mouseup', () => btn.style.transform = '');
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         this.addReaction(messageId, emoji);
@@ -4293,15 +4316,15 @@ class ChatUIManager {
     customBtn.title = "Добави друга реакция";
     customBtn.style.cssText = `
       background: ${customBtnBg};
-      border: none;
-      width: 28px;
-      height: 28px;
+      border: 1px solid rgba(88, 129, 87, 0.18);
+      width: 34px;
+      height: 34px;
       border-radius: 50%;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: 4px;
+      margin-left: 2px;
       color: ${customBtnText};
       transition: all 0.2s;
     `;
@@ -4333,7 +4356,7 @@ class ChatUIManager {
 
     // Функция за затваряне на picker
     const closePicker = (e) => {
-      if (!picker.contains(e.target) && !e.target.closest('.message-reaction-btn')) {
+      if (!picker.contains(e.target) && !e.target.closest('.message-reaction-btn, .message-options-menu')) {
         picker.remove();
         document.removeEventListener('click', closePicker);
       }
@@ -4720,6 +4743,38 @@ class ChatUIManager {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+  }
+
+  async copyMessageText(text) {
+    const value = String(text || '');
+    if (!value) return false;
+
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(value);
+        return true;
+      }
+    } catch (error) {
+      console.warn('Clipboard API failed, using fallback copy.', error);
+    }
+
+    const textarea = document.createElement('textarea');
+    textarea.value = value;
+    textarea.setAttribute('readonly', '');
+    textarea.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, textarea.value.length);
+
+    let copied = false;
+    try {
+      copied = document.execCommand('copy');
+    } catch (error) {
+      console.warn('Fallback copy failed.', error);
+    } finally {
+      textarea.remove();
+    }
+    return copied;
   }
 
   formatAudioTime(seconds) {
