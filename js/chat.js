@@ -5843,6 +5843,8 @@ class ChatUIManager {
     min-height: 44px;
     padding: 8px 12px !important;
     align-items: center;
+    position: relative;
+    z-index: 20;
   }
   .chat-panel .chat-header-title > div:first-child {
     font-size: 16px !important;
@@ -5899,12 +5901,15 @@ class ChatUIManager {
     display: flex;
     position: absolute;
     right: 0;
-    top: 59px;
-    bottom: 69px;
+    top: 57px !important;
+    bottom: 65px !important;
     z-index: 15;
     box-shadow: -2px 0 10px rgba(0,0,0,0.1);
     margin-top: 0;
     align-self: stretch;
+  }
+  .chat-panel .chat-input-area {
+    z-index: 20;
   }
   /* No action buttons render on mobile, so the right-side reserve that
      keeps room for them on desktop just wastes width here. Drop it so
