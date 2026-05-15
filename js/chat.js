@@ -1600,6 +1600,10 @@ class ChatUIManager {
     document.body.classList.remove('chat-mobile-open');
     document.documentElement.classList.remove('chat-mobile-open');
     document.documentElement.style.removeProperty('--chat-scroll-lock-y');
+    if (typeof this._chatPageScrollY === 'number') {
+      window.scrollTo({ top: this._chatPageScrollY, left: 0, behavior: 'auto' });
+      this._chatPageScrollY = null;
+    }
     if (chatPanel) {
       chatPanel.classList.remove('open');
     }
@@ -5836,6 +5840,23 @@ class ChatUIManager {
      would peek out at the panel edges when full-screen. Flatten them too. */
   .chat-panel .chat-header {
     border-radius: 0;
+    min-height: 44px;
+    padding: 8px 12px !important;
+    align-items: center;
+  }
+  .chat-panel .chat-header-title > div:first-child {
+    font-size: 16px !important;
+    line-height: 1.1;
+  }
+  .chat-panel .chat-header > div:last-child {
+    gap: 6px !important;
+  }
+  .chat-panel .chat-header-btn,
+  .chat-panel .chat-close-btn {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    min-height: 32px;
   }
   .chat-panel .chat-user-info {
     border-radius: 0;
