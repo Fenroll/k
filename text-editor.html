@@ -1,7 +1,7 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
 <head>
-  <script src="js/auth-guard.js?v=2026051654m"></script>
+  <script src="js/auth-guard.js?v=202605161ms9"></script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Тext Editor</title>
@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <!-- KaTeX CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.css">
-  <link rel="stylesheet" href="css/mobile-nav.css?v=2026051654m">
+  <link rel="stylesheet" href="css/mobile-nav.css?v=202605161ms9">
 
   <style>
     /* Avoid browser find matching hidden KaTeX accessibility text. */
@@ -1019,6 +1019,35 @@
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: #a3b18a #f3f4f6;
+    }
+
+    #fileBrowserModal,
+    #combineHtmlModal {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+    }
+
+    #fileBrowserModal .modal-content,
+    #combineHtmlModal .modal-content {
+      contain: layout paint style;
+      transform: translateZ(0);
+    }
+
+    #fileListScroller,
+    #combineFileList,
+    #combineSelectedList {
+      contain: layout paint style;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      will-change: scroll-position;
+      transform: translateZ(0);
+    }
+
+    #fileBrowserModal .file-item,
+    #combineHtmlModal .combine-file-row,
+    #combineHtmlModal .combine-selected-row {
+      transition: none !important;
+      backface-visibility: hidden;
     }
 
     #combineFileList::-webkit-scrollbar,
@@ -2116,7 +2145,7 @@
         <div style="margin-bottom: 12px;">
           <input type="text" id="fileSearchInput" placeholder="Search files..." style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px;">
         </div>
-        <div style="flex: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px;">
+        <div id="fileListScroller" style="flex: 1; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 4px;">
           <div id="fileList" style="padding: 0;"></div>
         </div>
       </div>
@@ -2328,7 +2357,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/katex.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/katex@0.16.4/dist/contrib/auto-render.min.js"></script>
-  <script src="courses.generated.js?v=2026051654m"></script>
+  <script src="courses.generated.js?v=202605161ms9"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database-compat.js"></script>
     <script src="js/presence.js?v=202602171mhr"></script>
@@ -3060,6 +3089,29 @@
       editor.saveTimeout = setTimeout(() => {
         localStorage.setItem('textEditorContent', editor.innerHTML);
       }, 2000);
+    }
+
+    function replaceEditorHtmlFast(html, options = {}) {
+      const { renderMath = false, resetHistory = true } = options;
+      isLoadingFile = true;
+      observer.disconnect();
+      editor.innerHTML = html || '';
+      if (renderMath) {
+        renderMathInEditorContent();
+      }
+      observer.observe(editor, {
+        childList: true,
+        subtree: true,
+        attributes: false
+      });
+
+      if (resetHistory) {
+        history = [html || ''];
+        historyIndex = 0;
+      } else {
+        saveToHistory();
+      }
+      setTimeout(() => { isLoadingFile = false; }, 100);
     }
 
     // Toolbar functions
@@ -5263,6 +5315,19 @@
         .replace(/\.(md|txt|html)$/i, '');
     }
 
+    let cachedCourseEditableFiles = null;
+    let cachedCourseEditableFilesSignature = '';
+    let fileBrowserAvailableFiles = [];
+
+    function getCachedCourseEditableFiles() {
+      const signature = `${window.coursesVersion || ''}:${typeof courses !== 'undefined' ? courses.length : 0}`;
+      if (!cachedCourseEditableFiles || cachedCourseEditableFilesSignature !== signature) {
+        cachedCourseEditableFiles = getCourseEditableFiles();
+        cachedCourseEditableFilesSignature = signature;
+      }
+      return cachedCourseEditableFiles;
+    }
+
     // Open .md/.html file from courses data
     document.getElementById('openCoursesBtn').addEventListener('click', () => {
       // Check if courses data is available
@@ -5271,55 +5336,13 @@
         return;
       }
 
-      // Group files by course
-      const filesByCourse = {};
-      courses.forEach(course => {
-        const courseName = course.title || course.name || 'Unknown';
-        filesByCourse[courseName] = [];
-
-        if (!course.sections) return;
-        course.sections.forEach(rootSection => {
-          forEachSectionRecursive(rootSection, section => {
-            if (section.msgNotes) {
-              section.msgNotes.forEach(note => {
-                if (note.path && ((/\.md$/i.test(note.path) && note.type === 'markdown') || (/\.html$/i.test(note.path) && note.type === 'html') || (/\.txt$/i.test(note.path) && note.type === 'text'))) {
-                  filesByCourse[courseName].push({
-                    name: note.name,
-                    path: note.path,
-                    content: note.content,
-                    _contentKey: note._contentKey,
-                    type: note.type,
-                    courseName: courseName,
-                    sectionName: section.name,
-                    courseRef: course
-                  });
-                }
-              });
-            }
-
-            if (section.files) {
-              section.files.forEach(file => {
-                if (file.path && file.path.match(/\.(html|md|txt)$/i)) {
-                  filesByCourse[courseName].push({
-                    name: file.name,
-                    path: file.path,
-                    content: file.content,
-                    _contentKey: file._contentKey,
-                    type: file.type || (file.path.match(/\.html$/i) ? 'html' : 'markdown'),
-                    courseName: courseName,
-                    sectionName: section.name,
-                    courseRef: course
-                  });
-                }
-              });
-            }
-          });
-        });
-      });
+      const { filesByCourse, allFiles } = getCachedCourseEditableFiles();
+      fileBrowserAvailableFiles = allFiles;
 
       // Populate file list with course headers
       const fileList = document.getElementById('fileList');
       fileList.innerHTML = '';
+      const fragment = document.createDocumentFragment();
 
       Object.keys(filesByCourse).forEach(courseName => {
         const files = filesByCourse[courseName];
@@ -5330,12 +5353,13 @@
         courseHeader.className = 'course-header';
         courseHeader.textContent = courseName;
         courseHeader.setAttribute('data-course', courseName);
-        fileList.appendChild(courseHeader);
+        fragment.appendChild(courseHeader);
 
         // Add files for this course
-        files.forEach((file, idx) => {
+        files.forEach((file) => {
           const fileItem = document.createElement('div');
           fileItem.className = 'file-item';
+          fileItem.dataset.fileIndex = String(allFiles.indexOf(file));
           fileItem.setAttribute('data-course', courseName);
           fileItem.setAttribute('data-type', file.type);
           fileItem.setAttribute('data-search-text', (file.courseName + ' ' + file.sectionName + ' ' + file.name).toLowerCase());
@@ -5351,14 +5375,10 @@
             <div class="file-item-path">${file.sectionName}</div>
           `;
 
-          fileItem.addEventListener('click', async () => {
-            await loadFileFromCourses(file);
-            document.getElementById('fileBrowserModal').style.display = 'none';
-          });
-
-          fileList.appendChild(fileItem);
+          fragment.appendChild(fileItem);
         });
       });
+      fileList.appendChild(fragment);
 
       // Show modal
       document.getElementById('fileBrowserModal').style.display = 'flex';
@@ -5396,12 +5416,27 @@
       });
     });
 
+    document.getElementById('fileList').addEventListener('click', async (e) => {
+      const fileItem = e.target.closest('.file-item');
+      if (!fileItem) return;
+
+      const file = fileBrowserAvailableFiles[Number(fileItem.dataset.fileIndex)];
+      if (!file) return;
+
+      await loadFileFromCourses(file);
+      document.getElementById('fileBrowserModal').style.display = 'none';
+    });
+
     const combineSelectedFiles = [];
+    let combineAvailableFiles = [];
+    let combineSearchTimeout = null;
 
     function renderCombineAvailableFiles(filesByCourse, searchText = '') {
       const list = document.getElementById('combineFileList');
       const query = searchText.trim().toLowerCase();
       list.innerHTML = '';
+      combineAvailableFiles = [];
+      const fragment = document.createDocumentFragment();
 
       Object.keys(filesByCourse).forEach(courseName => {
         const files = filesByCourse[courseName].filter(file => {
@@ -5413,11 +5448,13 @@
         const header = document.createElement('div');
         header.className = 'course-header';
         header.textContent = courseName;
-        list.appendChild(header);
+        fragment.appendChild(header);
 
         files.forEach(file => {
+          const fileIndex = combineAvailableFiles.push(file) - 1;
           const row = document.createElement('div');
           row.className = 'combine-file-row';
+          row.dataset.fileIndex = String(fileIndex);
           row.innerHTML = `
             <div style="min-width: 0;">
               <div class="combine-file-name">${escapeHtml(getCleanCourseFileName(file))}</div>
@@ -5427,11 +5464,10 @@
               <button type="button" title="Add">+</button>
             </div>
           `;
-          row.querySelector('button').addEventListener('click', () => addFileToCombineSelection(file));
-          row.addEventListener('dblclick', () => addFileToCombineSelection(file));
-          list.appendChild(row);
+          fragment.appendChild(row);
         });
       });
+      list.appendChild(fragment);
 
       if (!list.children.length) {
         list.innerHTML = '<div class="combine-empty-state">No matching files.</div>';
@@ -5491,14 +5527,19 @@
         return;
       }
 
-      const { filesByCourse } = getCourseEditableFiles();
+      const { filesByCourse } = getCachedCourseEditableFiles();
       const searchInput = document.getElementById('combineFileSearchInput');
       searchInput.value = '';
       renderCombineAvailableFiles(filesByCourse);
       renderCombineSelectedFiles();
       document.getElementById('combineHtmlModal').style.display = 'flex';
       searchInput.focus();
-      searchInput.oninput = () => renderCombineAvailableFiles(filesByCourse, searchInput.value);
+      searchInput.oninput = () => {
+        clearTimeout(combineSearchTimeout);
+        combineSearchTimeout = setTimeout(() => {
+          renderCombineAvailableFiles(filesByCourse, searchInput.value);
+        }, 80);
+      };
     }
 
     async function combineSelectedHtmlFiles() {
@@ -5517,13 +5558,16 @@
       status.textContent = 'Loading selected files...';
 
       try {
-        const parts = [];
-        for (const file of combineSelectedFiles) {
+        await Promise.all(combineSelectedFiles.map(async (file) => {
           await ensureFileContent(file);
           if (!file.content && file.originalRef) {
             await ensureFileContent(file.originalRef);
             file.content = file.originalRef.content;
           }
+        }));
+
+        const parts = [];
+        for (const file of combineSelectedFiles) {
           if (!file.content) continue;
 
           if (addHeadings) {
@@ -5539,9 +5583,10 @@
 
         const combinedHtml = normalizeHtmlForEditor(parts.join('<hr>'), { preserveKatex: true });
         if (replaceEditor) {
-          editor.innerHTML = combinedHtml;
+          replaceEditorHtmlFast(combinedHtml, { resetHistory: true });
         } else {
           editor.insertAdjacentHTML('beforeend', '<hr>' + combinedHtml);
+          saveToHistory();
         }
 
         currentFileInfo = {
@@ -5549,8 +5594,7 @@
           number: '',
           isFromCourses: true
         };
-        saveToHistory();
-        scheduleEditorAutoSave();
+        setTimeout(scheduleEditorAutoSave, 150);
         document.getElementById('combineHtmlModal').style.display = 'none';
         showNotification(`Combined ${combineSelectedFiles.length} file${combineSelectedFiles.length === 1 ? '' : 's'} into the editor.`, 'success');
       } finally {
@@ -5571,6 +5615,16 @@
     document.getElementById('clearCombineSelectionBtn').addEventListener('click', () => {
       combineSelectedFiles.length = 0;
       renderCombineSelectedFiles();
+    });
+    document.getElementById('combineFileList').addEventListener('click', (e) => {
+      const row = e.target.closest('.combine-file-row');
+      if (!row) return;
+      addFileToCombineSelection(combineAvailableFiles[Number(row.dataset.fileIndex)]);
+    });
+    document.getElementById('combineFileList').addEventListener('dblclick', (e) => {
+      const row = e.target.closest('.combine-file-row');
+      if (!row) return;
+      addFileToCombineSelection(combineAvailableFiles[Number(row.dataset.fileIndex)]);
     });
     document.getElementById('combineSortByCourseBtn').addEventListener('click', () => {
       combineSelectedFiles.sort((a, b) =>
@@ -5667,7 +5721,6 @@
       }
 
       // Convert markdown to HTML or use HTML directly
-      isLoadingFile = true;
       let html;
 
       // If it's an HTML file, use content directly (extract body content)
@@ -5686,10 +5739,7 @@
         html = markdownToHtml(file.content);
       }
 
-      editor.innerHTML = html;
-      renderMathInEditorContent();
-      saveToHistory();
-      setTimeout(() => { isLoadingFile = false; }, 100); // Reset after load
+      replaceEditorHtmlFast(html, { renderMath: true, resetHistory: true });
 
       // Extract file info for saving later
       const numberMatch = file.name.match(/^(\d+(\.\d+)?)-/);
@@ -9884,15 +9934,17 @@ renderMathInElement(document.body, {
         const textSemanticTags = new Set([
           'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
           'li', 'blockquote', 'code', 'pre', 'td', 'th',
-          'span', 'strong', 'em', 'u', 'a'
+          'span', 'strong', 'em', 'u', 'a', 'sup', 'sub'
         ]);
         const isTextSemanticTag = textSemanticTags.has(element.tagName.toLowerCase());
+        const isSuperSubTag = element.tagName === 'SUP' || element.tagName === 'SUB';
 
         const keptDeclarations = parseStyleDeclarations(styleValue).filter(({ property, value }) => {
           const normalizedValue = value.toLowerCase();
           if (property === 'white-space-collapse') return false;
           if (property === 'font-size' && (isTextSemanticTag || normalizedValue === 'inherit')) return false;
           if (property === 'font-weight' && (normalizedValue === 'normal' || normalizedValue === '400')) return false;
+          if (isSuperSubTag && ['line-height', 'position', 'vertical-align', 'top', 'bottom'].includes(property)) return false;
           return true;
         });
 
@@ -9937,6 +9989,30 @@ renderMathInElement(document.body, {
           strongNode.appendChild(bNode.firstChild);
         }
         bNode.replaceWith(strongNode);
+      });
+
+      root.querySelectorAll('span[style]').forEach(spanNode => {
+        const styleText = spanNode.getAttribute('style') || '';
+        const styleDeclarations = parseStyleDeclarations(styleText);
+        const verticalAlign = styleDeclarations.find(d => d.property === 'vertical-align');
+        if (!verticalAlign) return;
+
+        const normalizedValue = verticalAlign.value.toLowerCase().trim();
+        const targetTag = /^(super|text-top)$/.test(normalizedValue)
+          ? 'sup'
+          : (/^(sub|text-bottom)$/.test(normalizedValue) ? 'sub' : '');
+        if (!targetTag) return;
+
+        const replacement = doc.createElement(targetTag);
+        Array.from(spanNode.attributes).forEach(attr => {
+          if (attr.name.toLowerCase() !== 'style') {
+            replacement.setAttribute(attr.name, attr.value);
+          }
+        });
+        while (spanNode.firstChild) {
+          replacement.appendChild(spanNode.firstChild);
+        }
+        spanNode.replaceWith(replacement);
       });
 
       root.querySelectorAll('span').forEach(spanNode => {
@@ -11059,12 +11135,12 @@ renderMathInElement(document.body, {
        CHAT SYSTEM - Firebase
        ============================================ -->
 
-  <script src="js/user-identity.js?v=2026051654m"></script>
+  <script src="js/user-identity.js?v=202605161ms9"></script>
     <!-- CHAT SYSTEM -->
-  <script src="js/chat.js?v=2026051654m"></script>
+  <script src="js/chat.js?v=202605161ms9"></script>
 
 <script src="js/version-check.js?v=202605021hcw"></script>
-  <script src="js/mobile-nav.js?v=2026051654m"></script>
+  <script src="js/mobile-nav.js?v=202605161ms9"></script>
   <script>
     (function() {
       var moreBtn = document.getElementById('moreToolsBtn');

@@ -906,7 +906,8 @@ class ChatUIManager {
     this.reactionHtmlCache = new Map();
     this.activeUsers = {}; // Списък с активни потребители за логика с реакции
     this.activeTyping = {}; // State for typing indicators
-    this.showMembers = localStorage.getItem(`showMembers_${this.documentId}`) === 'true'; // Default to false if not set
+    this._membersPreferenceScope = this.getMembersPreferenceScope();
+    this.showMembers = this.loadMembersPreference();
     this.lastActiveMembersSignature = '';
     this.lastReadStorageKey = `lastReadMessage_${this.documentId}`;
     this.crossTabReadSyncKey = `chatReadSync_${this.documentId}`;
@@ -1505,9 +1506,7 @@ class ChatUIManager {
 
       // Приложи начално състояние на списъка с членове
       const chatPanel = this.container.querySelector('.chat-panel');
-      if (chatPanel && this.showMembers) {
-        chatPanel.classList.add('show-members');
-      }
+      this.applyMembersPreference(chatPanel);
 
       // Инициализирай бутон за уведомления един път
       this.initNotificationButton();
@@ -1616,6 +1615,10 @@ class ChatUIManager {
     this.isOpen = false;
     this.container.classList.remove('chat-open');
     this.container.classList.add('chat-hidden');
+    if (this._openScrollTimerIds) {
+      this._openScrollTimerIds.forEach(timerId => clearTimeout(timerId));
+      this._openScrollTimerIds = [];
+    }
     this.dismissMessageOverlays();
     document.body.classList.remove('chat-mobile-open');
     document.documentElement.classList.remove('chat-mobile-open');
@@ -1636,6 +1639,37 @@ class ChatUIManager {
       menu.hidden = true;
       menu.classList.remove('is-open');
     }
+  }
+
+  getMembersPreferenceScope() {
+    return window.matchMedia && window.matchMedia('(max-width: 600px)').matches ? 'mobile' : 'desktop';
+  }
+
+  getMembersPreferenceKey(scope = this.getMembersPreferenceScope()) {
+    return `showMembers_${scope}_${this.documentId}`;
+  }
+
+  loadMembersPreference(scope = this.getMembersPreferenceScope()) {
+    const scopedValue = localStorage.getItem(this.getMembersPreferenceKey(scope));
+    if (scopedValue !== null) return scopedValue === 'true';
+
+    // Keep the old saved value as the desktop default only. Mobile starts
+    // closed unless the user opens it on mobile.
+    if (scope === 'desktop') {
+      return localStorage.getItem(`showMembers_${this.documentId}`) === 'true';
+    }
+    return false;
+  }
+
+  saveMembersPreference(value, scope = this.getMembersPreferenceScope()) {
+    localStorage.setItem(this.getMembersPreferenceKey(scope), String(!!value));
+  }
+
+  applyMembersPreference(chatPanel = this.container && this.container.querySelector('.chat-panel')) {
+    if (!chatPanel) return;
+    this._membersPreferenceScope = this.getMembersPreferenceScope();
+    this.showMembers = this.loadMembersPreference(this._membersPreferenceScope);
+    chatPanel.classList.toggle('show-members', this.showMembers);
   }
 
   dismissMessageOverlays() {
@@ -1911,9 +1945,24 @@ class ChatUIManager {
         e.stopPropagation();
 
         this.showMembers = !chatPanel.classList.contains('show-members');
-        chatPanel.classList.toggle('show-members');
-        localStorage.setItem(`showMembers_${this.documentId}`, this.showMembers);
+        chatPanel.classList.toggle('show-members', this.showMembers);
+        this.saveMembersPreference(this.showMembers);
       });
+    }
+
+    if (chatPanel && window.matchMedia) {
+      const membersViewport = window.matchMedia('(max-width: 600px)');
+      const handleMembersViewportChange = () => {
+        const nextScope = this.getMembersPreferenceScope();
+        if (nextScope === this._membersPreferenceScope) return;
+        this.applyMembersPreference(chatPanel);
+      };
+
+      if (membersViewport.addEventListener) {
+        membersViewport.addEventListener('change', handleMembersViewportChange);
+      } else if (membersViewport.addListener) {
+        membersViewport.addListener(handleMembersViewportChange);
+      }
     }
 
     if (messagesContainer) {
@@ -4675,6 +4724,7 @@ class ChatUIManager {
       if (this.isOpen) {
         const input = this.container.querySelector('.chat-input');
         const isMobileLike = window.matchMedia('(max-width: 768px), (pointer: coarse)').matches;
+        this.autoScroll = true;
         if (input && !isMobileLike) {
           input.focus();
         }
@@ -4685,6 +4735,11 @@ class ChatUIManager {
 
         // Маркирай съобщенията като прочетени
         this.markAsRead();
+
+        if (this._openScrollTimerIds) {
+          this._openScrollTimerIds.forEach(timerId => clearTimeout(timerId));
+        }
+        this._openScrollTimerIds = [];
 
         this.scrollToBottom();
 
@@ -4707,16 +4762,23 @@ class ChatUIManager {
             // so what the user sees is already pinned to the latest message.
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
             if (isMobileLike) {
-              setTimeout(() => {
-                if (!this.isOpen || !messagesContainer) return;
-                messagesContainer.scrollTop = messagesContainer.scrollHeight;
-              }, 220);
+              [120, 280, 520, 900, 1300].forEach(delay => {
+                const timerId = setTimeout(() => {
+                  if (!this.isOpen || !messagesContainer) return;
+                  messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                }, delay);
+                this._openScrollTimerIds.push(timerId);
+              });
             }
             messagesContainer.style.opacity = '';
           }
         };
         requestAnimationFrame(pinScrollToBottom);
       } else {
+        if (this._openScrollTimerIds) {
+          this._openScrollTimerIds.forEach(timerId => clearTimeout(timerId));
+          this._openScrollTimerIds = [];
+        }
         const input = this.container.querySelector('.chat-input');
         if (input && document.activeElement === input) {
           input.blur();
