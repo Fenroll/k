@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Boss Fight</title>
+  <link rel="icon" href="favicon.svg?v=2026031715gu" type="image/svg+xml">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: "Segoe UI", "Noto Sans", system-ui, sans-serif;
+      background: radial-gradient(ellipse at center 70%, #0a1311, #050908 70%);
+      color: #e8eee8;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 16px;
+    }
+    .title { margin-bottom: 4px; font-size: 20px; font-weight: 600; letter-spacing: -0.02em; color: #c4d6b1; }
+    .subtitle { color: #6e7c6e; font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 14px; }
+
+    .layout {
+      display: flex;
+      gap: 14px;
+      width: min(95vw, 1380px);
+      align-items: stretch;
+    }
+    .stage {
+      flex: 1;
+      min-width: 0;
+      position: relative;
+      aspect-ratio: 11 / 7;
+      background: linear-gradient(180deg, #0a0f0e 0%, #101a17 55%, #18231f 100%);
+      border: 1px solid #2a3b30;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 14px 50px rgba(0,0,0,0.6);
+      user-select: none;
+    }
+    .stage canvas { display: block; width: 100%; height: 100%; cursor: default; }
+    .stage canvas.targeting { cursor: crosshair; }
+
+    /* Chat panel */
+    .chat-panel {
+      width: 280px;
+      flex-shrink: 0;
+      display: flex; flex-direction: column;
+      background: #0e1612;
+      border: 1px solid #2a3b30;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 14px 50px rgba(0,0,0,0.6);
+    }
+    .chat-header {
+      padding: 12px 14px;
+      border-bottom: 1px solid #2a3b30;
+      background: #14201b;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .chat-title { font-size: 13px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: #c4d6b1; }
+    .chat-online { font-size: 10px; color: #6ea670; font-weight: 600; }
+    .chat-online::before {
+      content: ''; display: inline-block; width: 6px; height: 6px;
+      border-radius: 50%; background: #4ade80; margin-right: 5px;
+      box-shadow: 0 0 6px rgba(74, 222, 128, 0.7);
+    }
+    .chat-messages {
+      flex: 1; overflow-y: auto; padding: 10px;
+      display: flex; flex-direction: column; gap: 6px; min-height: 0;
+    }
+    .chat-messages::-webkit-scrollbar { width: 6px; }
+    .chat-messages::-webkit-scrollbar-thumb { background: #2a3b30; border-radius: 3px; }
+    .chat-msg { display: flex; gap: 8px; animation: chatIn 0.2s ease-out; }
+    @keyframes chatIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    .chat-msg.sys { color: #6e7c6e; font-size: 11px; font-style: italic; padding: 2px 0; justify-content: center; text-align: center; }
+    .chat-avatar { width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: #0a1311; flex-shrink: 0; }
+    .chat-bubble { flex: 1; min-width: 0; }
+    .chat-name { font-size: 10px; font-weight: 700; color: #8ec78e; margin-bottom: 1px; }
+    .chat-name .class-tag { font-size: 9px; font-weight: 600; margin-left: 4px; opacity: 0.7; }
+    .chat-msg.me .chat-name { color: #fde047; }
+    .chat-text { font-size: 12px; line-height: 1.35; color: #d8ddd6; word-break: break-word; }
+    .chat-input-row { display: flex; gap: 6px; padding: 10px; border-top: 1px solid #2a3b30; background: #0e1612; }
+    .chat-input { flex: 1; padding: 8px 10px; background: #1a2620; border: 1px solid #2e4030; border-radius: 8px; color: #e8eee8; font-family: inherit; font-size: 12px; outline: none; min-width: 0; }
+    .chat-input:focus { border-color: #6ea670; }
+    .chat-send { padding: 8px 12px; background: #588157; border: none; border-radius: 8px; color: #fff; font-weight: 700; cursor: pointer; font-size: 14px; }
+    .chat-send:hover { background: #6ea670; }
+
+    /* Top UI: boss HP */
+    .top-ui {
+      position: absolute; top: 14px; left: 50%; transform: translateX(-50%);
+      width: min(70%, 480px); pointer-events: none;
+    }
+    .bar { position: relative; height: 14px; background: rgba(20, 30, 25, 0.7); border-radius: 8px; overflow: hidden; backdrop-filter: blur(4px); }
+    .bar-fill { position: absolute; inset: 0; transform-origin: left; transition: transform 0.2s ease-out; }
+    .bar-text { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: #fff; text-shadow: 0 1px 2px rgba(0,0,0,0.7); letter-spacing: 0.04em; }
+    .boss-bar { border: 1px solid #5a2a2a; box-shadow: 0 0 10px rgba(220,70,90,0.2); }
+    .boss-bar .bar-fill { background: linear-gradient(90deg, #ef4444, #d46a78); }
+    .boss-name { text-align: center; font-size: 12px; letter-spacing: 0.2em; text-transform: uppercase; font-weight: 800; margin-bottom: 5px; color: #ef6a78; text-shadow: 0 1px 3px rgba(0,0,0,0.7); }
+
+    /* Round banner */
+    .round-banner {
+      position: absolute; top: 80px; left: 50%; transform: translateX(-50%);
+      width: min(70%, 480px); padding: 8px 14px;
+      background: rgba(14, 22, 18, 0.78); border: 1px solid #2e4030;
+      border-radius: 10px; text-align: center; pointer-events: none; backdrop-filter: blur(4px);
+    }
+    .round-info { display: flex; align-items: center; justify-content: space-between; font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; }
+    .round-label { color: #c4d6b1; }
+    .round-phase { color: #fde047; }
+    .round-phase.resolving { color: #ef9090; }
+    .round-timer-bar { height: 4px; background: rgba(0,0,0,0.4); border-radius: 2px; overflow: hidden; }
+    .round-timer-fill { height: 100%; width: 100%; background: linear-gradient(90deg, #fde047, #facc15); transform-origin: left; transform: scaleX(1); transition: transform 0.08s linear; }
+    .round-timer-fill.resolving { background: linear-gradient(90deg, #ef9090, #ef4444); }
+    .telegraph-line { margin-top: 6px; font-size: 11px; color: #fca5a5; font-weight: 700; letter-spacing: 0.06em; }
+
+    /* Event log */
+    .log { position: absolute; left: 14px; top: 14px; width: 170px; max-height: 32%; font-size: 10px; color: #a8b0a6; pointer-events: none; overflow: hidden; }
+    .log-item { padding: 2px 0; animation: logSlideIn 0.25s ease-out; line-height: 1.35; opacity: 0.85; }
+    .log-item.dmg { color: #f87171; }
+    .log-item.heal { color: #6ee7b7; }
+    .log-item.defend { color: #93c5fd; }
+    .log-item.charge { color: #fde047; }
+    .log-item.taunt { color: #f59e0b; font-weight: 600; }
+    .log-item.boss { color: #fca5a5; font-weight: 600; }
+    @keyframes logSlideIn { from { opacity: 0; transform: translateX(-6px); } to { opacity: 0.85; transform: translateX(0); } }
+
+    /* Local player HP + class badge */
+    .local-hp { position: absolute; bottom: 108px; left: 50%; transform: translateX(-50%); width: 220px; pointer-events: none; }
+    .local-hp-label { font-size: 10px; text-align: center; color: #c4d6b1; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
+    .local-hp-bar { border: 1px solid #2e4a2e; box-shadow: 0 0 8px rgba(80,170,80,0.15); }
+    .local-hp-bar .bar-fill { background: linear-gradient(90deg, #4ade80, #22c55e); }
+
+    /* Action bar */
+    .action-bar {
+      position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+      display: flex; gap: 8px; padding: 8px;
+      background: rgba(10, 18, 14, 0.78); border: 1px solid #2e4030;
+      border-radius: 14px; backdrop-filter: blur(8px);
+    }
+    .action-btn {
+      position: relative; width: 78px; height: 78px;
+      background: linear-gradient(180deg, #1e2a22, #131c17);
+      border: 1px solid #3a4e3c; border-radius: 10px;
+      color: #e8eee8; cursor: pointer;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 2px; font-family: inherit; transition: all 0.12s ease; overflow: hidden;
+    }
+    .action-btn:hover:not(:disabled) { border-color: #6ea670; transform: translateY(-1px); }
+    .action-btn.selected { border-color: #fde047; background: linear-gradient(180deg, #3a3a1e, #2a2a14); box-shadow: 0 0 14px rgba(253, 224, 71, 0.4); }
+    .action-btn.targeting { border-color: #fff; background: linear-gradient(180deg, #2a3a2a, #1a2a1a); box-shadow: 0 0 14px rgba(255,255,255,0.35); animation: pulse 0.8s ease-in-out infinite alternate; }
+    @keyframes pulse { from { box-shadow: 0 0 8px rgba(255,255,255,0.2); } to { box-shadow: 0 0 18px rgba(255,255,255,0.6); } }
+    .action-btn:disabled { cursor: not-allowed; opacity: 0.6; }
+    .action-icon { font-size: 22px; line-height: 1; }
+    .action-name { font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; text-align: center; }
+    .action-key { position: absolute; top: 4px; left: 6px; font-size: 9px; font-weight: 800; color: #6e7c6e; }
+    .action-badge { position: absolute; top: 4px; right: 6px; font-size: 10px; font-weight: 800; color: #fde047; }
+    .action-tt { position: absolute; bottom: -2px; right: 4px; font-size: 8px; color: #6e7c6e; }
+
+    /* Class picker */
+    .class-picker { position: absolute; inset: 0; background: rgba(8, 12, 10, 0.92); backdrop-filter: blur(10px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; z-index: 20; padding: 18px; }
+    .class-picker h2 { font-size: 22px; color: #c4d6b1; letter-spacing: -0.02em; }
+    .class-picker .sub { font-size: 11px; color: #6e7c6e; margin-top: -10px; letter-spacing: 0.12em; text-transform: uppercase; }
+    .class-options { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; max-width: 480px; width: 100%; }
+    .class-opt { padding: 14px 12px; background: linear-gradient(180deg, #1e2a22, #131c17); border: 1px solid #3a4e3c; border-radius: 12px; color: #e8eee8; cursor: pointer; text-align: center; font-family: inherit; transition: all 0.15s; position: relative; overflow: hidden; }
+    .class-opt:hover { border-color: #6ea670; transform: translateY(-2px); }
+    .class-icon { font-size: 32px; line-height: 1; margin-bottom: 4px; }
+    .class-name { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+    .class-desc { font-size: 10px; color: #a8b0a6; line-height: 1.4; }
+    .class-opt[data-class="warrior"] { box-shadow: inset 0 -3px 0 #ef4444; }
+    .class-opt[data-class="healer"]  { box-shadow: inset 0 -3px 0 #22c55e; }
+    .class-opt[data-class="tank"]    { box-shadow: inset 0 -3px 0 #3b82f6; }
+    .class-opt[data-class="mage"]    { box-shadow: inset 0 -3px 0 #a855f7; }
+
+    /* End screen */
+    .end-screen { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 14px; background: rgba(8, 12, 10, 0.88); backdrop-filter: blur(8px); z-index: 10; }
+    .end-title { font-size: 48px; font-weight: 800; letter-spacing: -0.03em; }
+    .end-title.win { color: #4ade80; text-shadow: 0 0 30px rgba(74, 222, 128, 0.4); }
+    .end-title.lose { color: #ef4444; text-shadow: 0 0 30px rgba(239, 68, 68, 0.4); }
+    .end-desc { color: #a8b0a6; font-size: 14px; }
+    .end-btn { margin-top: 8px; padding: 12px 28px; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; background: #2a3b2c; color: #e8eee8; border: 1px solid #4a6b4c; border-radius: 10px; cursor: pointer; }
+    .end-btn:hover { background: #3a4f3c; }
+
+    /* Targeting hint banner */
+    .target-hint { position: absolute; bottom: 200px; left: 50%; transform: translateX(-50%); padding: 6px 16px; background: rgba(255,255,255,0.92); color: #1a2620; font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; border-radius: 8px; pointer-events: none; box-shadow: 0 4px 16px rgba(0,0,0,0.4); display: none; }
+    .target-hint.active { display: block; }
+
+    @media (max-width: 900px) {
+      .layout { flex-direction: column; width: 95vw; }
+      .chat-panel { width: 100%; height: 240px; }
+      .action-btn { width: 58px; height: 64px; }
+      .action-icon { font-size: 18px; }
+      .action-name { font-size: 9px; }
+      .log { width: 140px; font-size: 10px; }
+      .local-hp { bottom: 88px; width: 180px; }
+      .target-hint { bottom: 170px; font-size: 10px; }
+      .class-options { grid-template-columns: 1fr; max-width: 320px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="title">Boss Fight</div>
+  <div class="subtitle">Prototype · v0.4 — Classes + Targeting</div>
+
+  <div class="layout">
+    <div class="stage">
+      <canvas id="arena"></canvas>
+
+      <div class="top-ui">
+        <div class="boss-name" id="bossName">The Pathogen</div>
+        <div class="bar boss-bar">
+          <div class="bar-fill" id="bossHpFill"></div>
+          <div class="bar-text" id="bossHpText">15000 / 15000</div>
+        </div>
+      </div>
+
+      <div class="round-banner">
+        <div class="round-info">
+          <div class="round-label">Round <span id="roundNum">1</span> / 30</div>
+          <div class="round-phase" id="roundPhase">Plan</div>
+        </div>
+        <div class="round-timer-bar"><div class="round-timer-fill" id="roundTimerFill"></div></div>
+        <div class="telegraph-line" id="telegraphLine"></div>
+      </div>
+
+      <div class="log" id="logFeed"></div>
+
+      <div class="target-hint" id="targetHint">Click a player to target</div>
+
+      <div class="local-hp">
+        <div class="local-hp-label" id="localHpLabel">You · 300 / 300</div>
+        <div class="bar local-hp-bar"><div class="bar-fill" id="localHpFill"></div></div>
+      </div>
+
+      <div class="action-bar" id="actionBar"></div>
+
+      <div class="class-picker" id="classPicker">
+        <h2>Choose your class</h2>
+        <div class="sub">Your role in the fight</div>
+        <div class="class-options" id="classOptions"></div>
+      </div>
+
+      <div class="end-screen" id="endScreen" style="display: none;">
+        <div class="end-title" id="endTitle">Victory!</div>
+        <div class="end-desc" id="endDesc"></div>
+        <button class="end-btn" id="restartBtn">Fight again</button>
+      </div>
+    </div>
+
+    <div class="chat-panel">
+      <div class="chat-header">
+        <div class="chat-title">Group Chat</div>
+        <div class="chat-online" id="chatOnline">10 online</div>
+      </div>
+      <div class="chat-messages" id="chatMessages"></div>
+      <div class="chat-input-row">
+        <input class="chat-input" id="chatInput" type="text" placeholder="Type a message…" maxlength="120">
+        <button class="chat-send" id="chatSend">→</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============================================================
+    // ACTIONS
+    // ============================================================
+    // needsTarget=true → click a player after selecting to pick target
+    // Damage/heal numbers are intentionally generous; tune to taste.
+    const ACTIONS = {
+      strike:     { name: 'Strike',     icon: '⚔️', tip: 'Basic damage' },
+      heavy:      { name: 'Heavy',      icon: '🔥', tip: 'Big damage' },
+      fireball:   { name: 'Fireball',   icon: '💥', tip: 'Massive damage' },
+      charge:     { name: 'Charge',     icon: '⚡', tip: '2× next attack' },
+      defend:     { name: 'Defend',     icon: '🛡️', tip: 'Reduce damage on self' },
+      shield:     { name: 'Shield',     icon: '✋', tip: 'Defend an ally',     needsTarget: true },
+      heal:       { name: 'Heal',       icon: '✨', tip: 'Heal an ally',       needsTarget: true },
+      group_heal: { name: 'Group Heal', icon: '💚', tip: 'Heal all allies' },
+      taunt:      { name: 'Taunt',      icon: '📢', tip: 'Boss targets YOU + self-defend' },
+    };
+
+    // ============================================================
+    // CLASSES
+    // ============================================================
+    const CLASSES = {
+      warrior: {
+        name: 'Warrior', icon: '⚔️', color: '#ef4444', maxHp: 380,
+        actions: ['strike', 'heavy', 'defend', 'charge', 'heal'],
+        desc: 'Steady DPS. Hits hard, takes hits.',
+      },
+      healer: {
+        name: 'Healer', icon: '✨', color: '#22c55e', maxHp: 260,
+        actions: ['strike', 'heal', 'group_heal', 'shield', 'charge'],
+        desc: 'Keeps the party alive. Soft HP.',
+      },
+      tank: {
+        name: 'Tank', icon: '🛡️', color: '#3b82f6', maxHp: 460,
+        actions: ['strike', 'defend', 'taunt', 'shield', 'heal'],
+        desc: 'Soaks hits. Pulls boss aggro with Taunt.',
+      },
+      mage: {
+        name: 'Mage', icon: '🔥', color: '#a855f7', maxHp: 240,
+        actions: ['strike', 'heavy', 'fireball', 'charge', 'defend'],
+        desc: 'Glass cannon. Burst damage king.',
+      },
+    };
+
+    // ============================================================
+    // STATE
+    // ============================================================
+    const ROSTER = [
+      'You', 'Bob', 'Marciana', 'MD',
+      'mustafaladin', 'Nayle', 'simona', 'stambi',
+      'vesna', 'vikopiko'
+    ];
+
+    function makePlayer(name, index, classKey) {
+      const cls = CLASSES[classKey];
+      return {
+        name, index, classKey,
+        angle: Math.PI + (index / ROSTER.length) * Math.PI * 2,
+        hue: (index * 36 + 140) % 360,
+        bobPhase: Math.random() * Math.PI * 2,
+        bobSpeed: 1.3 + Math.random() * 0.6,
+        hp: cls.maxHp, maxHp: cls.maxHp,
+        selectedAction: null,  // { key, target }
+        chargeMul: 1,
+        pendingChargeMul: 1,
+        defendStack: 0,
+        downedRounds: 0,
+        flashTimer: 0,
+        aiDelay: 1,
+      };
+    }
+
+    // Guarantee party balance: 1 Tank + 2 Healers + 6 mixed DPS for the 9 NPCs.
+    function assignNpcClasses() {
+      const out = ['tank', 'healer', 'healer'];
+      for (let i = 0; i < 6; i++) out.push(Math.random() < 0.5 ? 'warrior' : 'mage');
+      // Fisher-Yates so the tank/healers don't all bunch at adjacent indices.
+      for (let i = out.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [out[i], out[j]] = [out[j], out[i]];
+      }
+      return out;
+    }
+    const NPC_CLASSES = assignNpcClasses();
+
+    const state = {
+      phase: 'choosing', // 'choosing' | 'planning' | 'resolving' | 'won' | 'lost'
+      round: 1,
+      maxRounds: 30,
+      phaseTimer: 12,
+      PLAN_DURATION: 12,
+      RESOLVE_DURATION: 5,
+      boss: {
+        name: 'The Pathogen',
+        hp: 16000, maxHp: 16000,
+        nextTargetIndex: -1,
+        flashTimer: 0,
+        bobPhase: 0,
+        enraged: false,
+      },
+      players: [],          // populated when local picks class
+      effects: [],
+      log: [],
+      time: 0,
+      targetingAction: null, // action key while in target-pick mode
+    };
+    let localPlayer = null;
+
+    // ============================================================
+    // CLASS PICKER
+    // ============================================================
+    function buildClassPicker() {
+      const opts = document.getElementById('classOptions');
+      opts.innerHTML = Object.entries(CLASSES).map(([key, c]) => `
+        <button class="class-opt" data-class="${key}">
+          <div class="class-icon">${c.icon}</div>
+          <div class="class-name">${c.name}</div>
+          <div class="class-desc">${c.desc}</div>
+        </button>
+      `).join('');
+      opts.querySelectorAll('.class-opt').forEach(el => {
+        el.addEventListener('click', () => startGameWithClass(el.dataset.class));
+      });
+    }
+    buildClassPicker();
+
+    function startGameWithClass(localClassKey) {
+      // Build the roster: local first, then NPCs with pre-rolled classes.
+      state.players = ROSTER.map((name, i) => makePlayer(name, i, i === 0 ? localClassKey : NPC_CLASSES[i - 1]));
+      localPlayer = state.players[0];
+      document.getElementById('classPicker').style.display = 'none';
+      buildActionBar();
+      startPlanning();
+      // Seed chat
+      chatNpc('Bob', 'gl everyone');
+      chatNpc('simona', 'lets do this');
+      const tank = state.players.find(p => p.classKey === 'tank' && p !== localPlayer);
+      if (tank) setTimeout(() => chatNpc(tank.name, 'i\'ll tank'), 600);
+    }
+
+    // ============================================================
+    // CHAT
+    // ============================================================
+    const chatMessagesEl = document.getElementById('chatMessages');
+    const chatInputEl    = document.getElementById('chatInput');
+    const chatSendEl     = document.getElementById('chatSend');
+    const chatMessages = [];
+    const MAX_CHAT = 80;
+
+    function escapeHtml(s) {
+      return String(s == null ? '' : s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+
+    function pushChat(msg) {
+      chatMessages.push(msg);
+      if (chatMessages.length > MAX_CHAT) chatMessages.shift();
+      renderChat();
+    }
+    function chatSystem(text) { pushChat({ type: 'sys', text }); }
+    function chatLocal(text)  { pushChat({ type: 'me', name: localPlayer.name, text, classKey: localPlayer.classKey }); }
+    function chatNpc(name, text) {
+      const p = state.players.find(pl => pl.name === name);
+      pushChat({ type: 'msg', name, text, classKey: p ? p.classKey : null });
+    }
+
+    function renderChat() {
+      chatMessagesEl.innerHTML = chatMessages.map(m => {
+        if (m.type === 'sys') return `<div class="chat-msg sys">${escapeHtml(m.text)}</div>`;
+        const me = m.type === 'me' ? ' me' : '';
+        const player = state.players.find(p => p.name === m.name);
+        const hue = player ? player.hue : 200;
+        const initial = (m.name || '?').charAt(0).toUpperCase();
+        const cls = m.classKey && CLASSES[m.classKey] ? CLASSES[m.classKey] : null;
+        const tag = cls ? `<span class="class-tag" style="color:${cls.color}">${cls.icon}</span>` : '';
+        return `
+          <div class="chat-msg${me}">
+            <div class="chat-avatar" style="background:hsl(${hue},70%,55%)">${escapeHtml(initial)}</div>
+            <div class="chat-bubble">
+              <div class="chat-name">${escapeHtml(m.name)}${tag}</div>
+              <div class="chat-text">${escapeHtml(m.text)}</div>
+            </div>
+          </div>`;
+      }).join('');
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }
+
+    function sendLocalChat() {
+      const text = chatInputEl.value.trim();
+      if (!text || !localPlayer) return;
+      chatLocal(text);
+      chatInputEl.value = '';
+    }
+    chatSendEl.addEventListener('click', sendLocalChat);
+    chatInputEl.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); sendLocalChat(); } });
+
+    function npcChatRandom(lines, maxDelaySec = 2) {
+      const candidates = state.players.slice(1).filter(p => p.downedRounds <= 0);
+      if (!candidates.length) return;
+      const npc = candidates[Math.floor(Math.random() * candidates.length)];
+      const raw = lines[Math.floor(Math.random() * lines.length)];
+      const text = raw.replace('{target}', state.players[state.boss.nextTargetIndex]?.name || '');
+      setTimeout(() => chatNpc(npc.name, text), Math.random() * maxDelaySec * 1000);
+    }
+
+    // ============================================================
+    // EVENT LOG
+    // ============================================================
+    const logFeedEl = document.getElementById('logFeed');
+    function logEvent(text, type = '') {
+      state.log.unshift({ text, type, t: state.time });
+      if (state.log.length > 7) state.log.pop();
+      logFeedEl.innerHTML = state.log.map(e => `<div class="log-item ${e.type}">${escapeHtml(e.text)}</div>`).join('');
+    }
+
+    // ============================================================
+    // HELPERS
+    // ============================================================
+    function aliveAndKicking() { return state.players.filter(p => p.downedRounds <= 0); }
+    function lowestHpAlive() {
+      const list = aliveAndKicking();
+      if (!list.length) return null;
+      return list.reduce((a, b) => (a.hp / a.maxHp) < (b.hp / b.maxHp) ? a : b);
+    }
+    function canTarget(actionKey, target) {
+      if (!target) return false;
+      // Heal/shield can target any alive player (including self).
+      return target.downedRounds <= 0;
+    }
+
+    // ============================================================
+    // ROUND FLOW
+    // ============================================================
+    function startPlanning() {
+      state.phase = 'planning';
+      state.phaseTimer = state.PLAN_DURATION;
+      state.targetingAction = null;
+
+      for (const p of state.players) {
+        if (p.downedRounds > 0) {
+          p.downedRounds--;
+          if (p.downedRounds === 0) {
+            p.hp = Math.round(p.maxHp * 0.3);
+            chatSystem(`${p.name} got back up`);
+            logEvent(`${p.name} revives`, 'heal');
+          }
+        }
+        p.chargeMul = p.pendingChargeMul || 1;
+        p.pendingChargeMul = 1;
+        p.selectedAction = null;
+      }
+
+      const alive = aliveAndKicking();
+      if (alive.length === 0) { endFight(false); return; }
+      const target = alive[Math.floor(Math.random() * alive.length)];
+      state.boss.nextTargetIndex = state.players.indexOf(target);
+
+      for (let i = 1; i < state.players.length; i++) {
+        const p = state.players[i];
+        if (p.downedRounds <= 0) p.aiDelay = 0.5 + Math.random() * (state.PLAN_DURATION - 2);
+      }
+
+      // Telegraph chatter
+      if (target && target !== localPlayer && Math.random() < 0.4) {
+        npcChatRandom(['shield up @{target}!', '{target} defend!', 'boss going for {target}'], 2);
+      }
+      if (state.round === Math.floor(state.maxRounds / 2)) {
+        npcChatRandom(['halfway', 'keep going'], 2);
+      }
+      if (state.boss.hp / state.boss.maxHp < 0.2 && Math.random() < 0.5) {
+        npcChatRandom(['burst now', 'one more push'], 1.5);
+      }
+
+      updatePhaseUI();
+    }
+
+    function pickNpcAction(p) {
+      const cls = CLASSES[p.classKey];
+      const myActions = cls.actions;
+      const targetIndex = state.boss.nextTargetIndex;
+      const low = lowestHpAlive();
+      const bossTarget = state.players[targetIndex];
+
+      // Tank: taunt if a fragile teammate is targeted
+      if (myActions.includes('taunt') && bossTarget && bossTarget !== p) {
+        const targetIsFragile = bossTarget.hp / bossTarget.maxHp < 0.5 || CLASSES[bossTarget.classKey].maxHp < 300;
+        if (targetIsFragile && Math.random() < 0.7) return { key: 'taunt', target: null };
+      }
+      // Healer/Tank: shield boss's target
+      if (myActions.includes('shield') && bossTarget && bossTarget !== p && Math.random() < 0.5) {
+        return { key: 'shield', target: bossTarget };
+      }
+      // Healer: group heal if many are low
+      if (myActions.includes('group_heal') && state.players.filter(pl => pl.hp / pl.maxHp < 0.6).length >= 3 && Math.random() < 0.6) {
+        return { key: 'group_heal', target: null };
+      }
+      // Heal lowest if critical
+      if (myActions.includes('heal') && low && low.hp / low.maxHp < 0.45 && Math.random() < 0.7) {
+        return { key: 'heal', target: low };
+      }
+      // I'm targeted myself? defend
+      if (p.index === targetIndex && myActions.includes('defend') && Math.random() < 0.6) {
+        return { key: 'defend', target: null };
+      }
+      // Charge stored → fire biggest hit
+      if (p.chargeMul > 1) {
+        if (myActions.includes('fireball')) return { key: 'fireball', target: null };
+        if (myActions.includes('heavy'))    return { key: 'heavy',    target: null };
+        return { key: 'strike', target: null };
+      }
+      // Occasionally charge
+      if (myActions.includes('charge') && Math.random() < 0.14) return { key: 'charge', target: null };
+      // Occasionally big hit
+      if (myActions.includes('fireball') && Math.random() < 0.2) return { key: 'fireball', target: null };
+      if (myActions.includes('heavy') && Math.random() < 0.2)    return { key: 'heavy',    target: null };
+      // Default: strike
+      return { key: 'strike', target: null };
+    }
+
+    function updatePlanning(dt) {
+      state.phaseTimer -= dt;
+      for (let i = 1; i < state.players.length; i++) {
+        const p = state.players[i];
+        if (p.downedRounds > 0 || p.selectedAction) continue;
+        p.aiDelay -= dt;
+        if (p.aiDelay <= 0) {
+          const choice = pickNpcAction(p);
+          applySelection(p, choice.key, choice.target);
+        }
+      }
+      if (state.phaseTimer <= 0) startResolving();
+    }
+
+    // applySelection handles immediate side-effects of selecting (specifically Taunt
+    // redirects the telegraph right away so other players can plan around it).
+    function applySelection(player, key, target) {
+      player.selectedAction = { key, target: target || null };
+      if (key === 'taunt') {
+        state.boss.nextTargetIndex = player.index;
+        if (player !== localPlayer) logEvent(`${player.name} taunts`, 'taunt');
+        updatePhaseUI();
+      }
+    }
+
+    function startResolving() {
+      state.phase = 'resolving';
+      state.phaseTimer = state.RESOLVE_DURATION;
+
+      // Default any un-picked alive players to a basic strike (anti-AFK).
+      for (const p of state.players) {
+        if (!p.selectedAction && p.downedRounds <= 0) p.selectedAction = { key: 'strike', target: null };
+      }
+      state.targetingAction = null;
+
+      resolveCharges();
+      setTimeout(resolveDamage,  450);
+      setTimeout(resolveSupport, 1800);
+      setTimeout(resolveBossAttack, 3200);
+      updatePhaseUI();
+    }
+
+    function resolveCharges() {
+      for (const p of state.players) {
+        if (p.selectedAction?.key === 'charge') {
+          p.pendingChargeMul = Math.min(4, (p.pendingChargeMul || 1) * 2);
+          spawnChargeEffect(p);
+          logEvent(`${p.name} charges`, 'charge');
+        }
+      }
+    }
+    function resolveDamage() {
+      let total = 0;
+      for (const p of state.players) {
+        const a = p.selectedAction?.key;
+        if (a !== 'strike' && a !== 'heavy' && a !== 'fireball') continue;
+        const cls = CLASSES[p.classKey];
+        let base;
+        if (a === 'strike') {
+          base = 60 + Math.random() * 30;
+          if (cls.name === 'Warrior') base *= 1.2;
+          if (cls.name === 'Tank')    base *= 0.85;
+          if (cls.name === 'Healer')  base *= 0.7;
+        } else if (a === 'heavy') {
+          base = 170 + Math.random() * 70;
+        } else if (a === 'fireball') {
+          base = 280 + Math.random() * 100;
+        }
+        const dmg = Math.round(base * (p.chargeMul || 1));
+        total += dmg;
+        spawnProjectile(p, dmg, a);
+        p.chargeMul = 1;
+        logEvent(`${p.name}: ${dmg}`, 'dmg');
+      }
+      state.boss.hp = Math.max(0, state.boss.hp - total);
+
+      if (!state.boss.enraged && state.boss.hp <= state.boss.maxHp * 0.5) {
+        state.boss.enraged = true;
+        chatSystem(`${state.boss.name} is ENRAGED`);
+        logEvent('Boss ENRAGED', 'boss');
+      }
+      if (state.boss.hp <= 0) setTimeout(() => endFight(true), 1500);
+    }
+    function resolveSupport() {
+      for (const p of state.players) {
+        const sa = p.selectedAction;
+        if (!sa) continue;
+        const a = sa.key;
+        if (a === 'heal') {
+          const cls = CLASSES[p.classKey];
+          const target = sa.target && canTarget('heal', sa.target) ? sa.target : (lowestHpAlive() || p);
+          let amt = 60 + Math.random() * 40;
+          if (cls.name === 'Healer') amt *= 1.6;
+          if (cls.name === 'Warrior' || cls.name === 'Mage') amt *= 0.7;
+          amt = Math.round(amt);
+          target.hp = Math.min(target.maxHp, target.hp + amt);
+          spawnHealEffect(target, amt);
+          logEvent(`${p.name} → ${target.name}: +${amt}`, 'heal');
+        } else if (a === 'group_heal') {
+          const amt = Math.round(50 + Math.random() * 25);
+          for (const ally of aliveAndKicking()) {
+            ally.hp = Math.min(ally.maxHp, ally.hp + amt);
+            spawnHealEffect(ally, amt);
+          }
+          logEvent(`${p.name} group heal +${amt}`, 'heal');
+        } else if (a === 'defend') {
+          const cls = CLASSES[p.classKey];
+          const bonus = cls.name === 'Tank' ? 0.55 : 0.4;
+          p.defendStack = Math.min(0.9, (p.defendStack || 0) + bonus);
+          spawnShieldEffect(p);
+          logEvent(`${p.name} defends`, 'defend');
+        } else if (a === 'shield') {
+          const target = sa.target && canTarget('shield', sa.target) ? sa.target : p;
+          target.defendStack = Math.min(0.9, (target.defendStack || 0) + 0.45);
+          spawnShieldEffect(target);
+          logEvent(`${p.name} shields ${target.name}`, 'defend');
+        } else if (a === 'taunt') {
+          // Self-defend bonus on top of redirection (already applied in applySelection)
+          p.defendStack = Math.min(0.9, (p.defendStack || 0) + 0.3);
+          spawnShieldEffect(p);
+          logEvent(`${p.name} TAUNTS`, 'taunt');
+        }
+      }
+    }
+    function resolveBossAttack() {
+      if (state.boss.hp <= 0) return;
+      const target = state.players[state.boss.nextTargetIndex];
+      if (!target || target.downedRounds > 0) return;
+      const baseDmg = (state.boss.enraged ? 220 : 150) + Math.random() * 40;
+      const reduction = target.defendStack || 0;
+      const dmg = Math.round(baseDmg * (1 - reduction));
+      target.hp = Math.max(0, target.hp - dmg);
+      target.defendStack = 0;
+      target.flashTimer = 0.3;
+      const a = currentArena();
+      const pos = playerScreenPos(target, a);
+      spawnDamageNumber({ x: pos.x, y: pos.y - 40 }, dmg, '#ff4444');
+      logEvent(`Boss → ${target.name}: ${dmg}`, 'boss');
+      if (target.hp <= 0) {
+        target.downedRounds = 3;
+        chatSystem(`${target.name} is down 💀`);
+        logEvent(`${target.name} DOWN`, 'boss');
+      }
+    }
+
+    function updateResolving(dt) {
+      state.phaseTimer -= dt;
+      if (state.phaseTimer <= 0 && state.phase === 'resolving') {
+        if (aliveAndKicking().length === 0) { endFight(false); return; }
+        if (state.round >= state.maxRounds) { endFight(false); return; }
+        state.round++;
+        startPlanning();
+      }
+    }
+
+    function endFight(won) {
+      state.phase = won ? 'won' : 'lost';
+      document.getElementById('endTitle').textContent = won ? 'Victory!' : 'Wiped';
+      document.getElementById('endTitle').className = 'end-title ' + (won ? 'win' : 'lose');
+      document.getElementById('endDesc').textContent = won
+        ? `You felled ${state.boss.name} in ${state.round} round${state.round !== 1 ? 's' : ''}.`
+        : `${state.boss.name} drops the party at round ${state.round}.`;
+      document.getElementById('endScreen').style.display = 'flex';
+      chatSystem(won ? '🎉 Victory!' : '💀 Wiped.');
+    }
+
+    // ============================================================
+    // EFFECTS
+    // ============================================================
+    function spawnProjectile(player, dmg, kind) {
+      const a = currentArena();
+      const from = playerScreenPos(player, a);
+      const to = { x: a.cx, y: a.cy - 90 };
+      let color = '#ffd966', size = 5;
+      if (kind === 'heavy')    { color = '#ef4444'; size = 9; }
+      if (kind === 'fireball') { color = '#fb923c'; size = 13; }
+      state.effects.push({
+        kind: 'projectile', from, to, progress: 0, duration: 0.4,
+        color, size,
+        onHit: () => {
+          state.boss.flashTimer = 0.15;
+          spawnDamageNumber(to, dmg, kind === 'strike' ? '#fff' : '#fbbf24');
+        }
+      });
+      player.flashTimer = 0.18;
+    }
+    function spawnDamageNumber(pos, amount, color) {
+      state.effects.push({
+        kind: 'number', x: pos.x + (Math.random() - 0.5) * 30, y: pos.y,
+        vy: -40, text: '-' + amount, color, life: 0, duration: 1.1,
+      });
+    }
+    function spawnHealEffect(player, amt) {
+      const a = currentArena();
+      const pos = playerScreenPos(player, a);
+      state.effects.push({
+        kind: 'number', x: pos.x + (Math.random() - 0.5) * 20, y: pos.y - 60,
+        vy: -36, text: '+' + amt, color: '#6ee7b7', life: 0, duration: 1.1,
+      });
+      player.flashTimer = 0.18;
+    }
+    function spawnShieldEffect(player) { state.effects.push({ kind: 'shield', playerIndex: player.index, life: 0, duration: 2.5 }); player.flashTimer = 0.18; }
+    function spawnChargeEffect(player) { state.effects.push({ kind: 'charge', playerIndex: player.index, life: 0, duration: 1.0 }); player.flashTimer = 0.22; }
+
+    function updateEffects(dt) {
+      for (let i = state.effects.length - 1; i >= 0; i--) {
+        const e = state.effects[i];
+        if (e.kind === 'projectile') {
+          e.progress += dt / e.duration;
+          if (e.progress >= 1) { e.onHit && e.onHit(); state.effects.splice(i, 1); }
+        } else if (e.kind === 'number') {
+          e.life += dt; e.y += e.vy * dt; e.vy += 24 * dt;
+          if (e.life >= e.duration) state.effects.splice(i, 1);
+        } else if (e.kind === 'shield' || e.kind === 'charge') {
+          e.life += dt;
+          if (e.life >= e.duration) state.effects.splice(i, 1);
+        }
+      }
+    }
+
+    // ============================================================
+    // CANVAS
+    // ============================================================
+    const canvas = document.getElementById('arena');
+    const ctx = canvas.getContext('2d');
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.round(rect.width * dpr);
+      canvas.height = Math.round(rect.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function currentArena() {
+      const dpr = window.devicePixelRatio || 1;
+      const W = canvas.width / dpr;
+      const H = canvas.height / dpr;
+      return { cx: W/2, cy: H * 0.66, rx: W * 0.42, ry: H * 0.20, W, H };
+    }
+    function playerScreenPos(p, a) {
+      return { x: a.cx + a.rx * Math.sin(p.angle), y: a.cy - a.ry * Math.cos(p.angle) };
+    }
+
+    // Canvas click: target selection in target mode
+    canvas.addEventListener('click', (e) => {
+      if (!state.targetingAction || !localPlayer) return;
+      const rect = canvas.getBoundingClientRect();
+      const cx = e.clientX - rect.left;
+      const cy = e.clientY - rect.top;
+      const a = currentArena();
+      let best = null, bestDist = 60;
+      for (const p of state.players) {
+        if (!canTarget(state.targetingAction, p)) continue;
+        const pos = playerScreenPos(p, a);
+        const dx = pos.x - cx;
+        const dy = pos.y - cy - 25;
+        const d = Math.sqrt(dx*dx + dy*dy);
+        if (d < bestDist) { bestDist = d; best = p; }
+      }
+      if (best) {
+        applySelection(localPlayer, state.targetingAction, best);
+        state.targetingAction = null;
+        canvas.classList.remove('targeting');
+        hideTargetHint();
+      }
+    });
+
+    function render() {
+      const a = currentArena();
+      ctx.clearRect(0, 0, a.W, a.H);
+      drawFloor(a);
+
+      const items = [];
+      for (const p of state.players) {
+        const sinA = Math.sin(p.angle);
+        const cosA = Math.cos(p.angle);
+        const x = a.cx + a.rx * sinA;
+        const y = a.cy - a.ry * cosA;
+        const t = (1 - cosA) / 2;
+        const scale = 0.6 + 0.4 * t;
+        items.push({ kind: 'p', x, y, scale, sort: -cosA, data: p });
+      }
+      items.push({ kind: 'boss', x: a.cx, y: a.cy, scale: 1, sort: 0, data: state.boss });
+      items.sort((aa, bb) => aa.sort - bb.sort);
+
+      for (const it of items) {
+        if (it.kind === 'boss') drawBoss(it.x, it.y, it.data);
+        else drawPlayer(it.x, it.y, it.scale, it.data);
+      }
+      drawEffects();
+      updateBars();
+    }
+
+    function drawFloor(a) {
+      const grad = ctx.createRadialGradient(a.cx, a.cy + a.ry*0.35, 0, a.cx, a.cy, a.rx);
+      grad.addColorStop(0, '#3c4d3c'); grad.addColorStop(0.55, '#23332a'); grad.addColorStop(1, '#13201a');
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.ellipse(a.cx, a.cy, a.rx, a.ry, 0, 0, Math.PI*2); ctx.fill();
+      ctx.lineWidth = 1.5; ctx.strokeStyle = 'rgba(140,180,140,0.22)';
+      ctx.beginPath(); ctx.ellipse(a.cx, a.cy, a.rx, a.ry, 0, 0, Math.PI*2); ctx.stroke();
+      ctx.strokeStyle = 'rgba(100,140,100,0.14)';
+      for (const f of [0.78, 0.55, 0.32]) {
+        ctx.beginPath(); ctx.ellipse(a.cx, a.cy, a.rx*f, a.ry*f, 0, 0, Math.PI*2); ctx.stroke();
+      }
+    }
+
+    function drawBoss(x, y, b) {
+      const bob = Math.sin(b.bobPhase) * 4;
+      const aura = ctx.createRadialGradient(x, y - 95, 20, x, y - 95, 160);
+      const auraIntensity = b.enraged ? 0.5 : 0.32;
+      aura.addColorStop(0, `rgba(220, 70, 90, ${auraIntensity})`);
+      aura.addColorStop(1, 'rgba(220, 70, 90, 0)');
+      ctx.fillStyle = aura;
+      ctx.beginPath(); ctx.arc(x, y - 95, 160, 0, Math.PI*2); ctx.fill();
+
+      ctx.fillStyle = 'rgba(0,0,0,0.55)';
+      ctx.beginPath(); ctx.ellipse(x, y + 6, 95, 22, 0, 0, Math.PI*2); ctx.fill();
+
+      const top = y - 175 + bob;
+      const waist = y - 95 + bob*0.6;
+      const base = y - 18;
+      const body = ctx.createLinearGradient(x - 70, top, x + 70, base);
+      body.addColorStop(0, b.enraged ? '#691212' : '#4d1212');
+      body.addColorStop(0.55, b.enraged ? '#a82323' : '#8b2727');
+      body.addColorStop(1, '#2d0a0a');
+      ctx.fillStyle = body;
+      ctx.beginPath();
+      ctx.moveTo(x - 55, base);
+      ctx.quadraticCurveTo(x - 78, waist, x - 50, top + 35);
+      ctx.quadraticCurveTo(x - 30, top - 5, x, top);
+      ctx.quadraticCurveTo(x + 30, top - 5, x + 50, top + 35);
+      ctx.quadraticCurveTo(x + 78, waist, x + 55, base);
+      ctx.closePath(); ctx.fill();
+      if (b.flashTimer > 0) { ctx.fillStyle = `rgba(255,255,255,${b.flashTimer * 5})`; ctx.fill(); }
+      ctx.strokeStyle = 'rgba(255,140,140,0.18)'; ctx.lineWidth = 1.5; ctx.stroke();
+
+      const eyeY = top + 45;
+      const eyeColor = b.enraged ? '#ff3333' : '#ffe066';
+      drawEye(x - 18, eyeY, 9, eyeColor);
+      drawEye(x + 18, eyeY, 9, eyeColor);
+
+      ctx.fillStyle = '#170303';
+      ctx.beginPath();
+      const mouthY = top + 85;
+      ctx.moveTo(x - 26, mouthY);
+      for (let i = 0; i <= 8; i++) {
+        const tx = x - 26 + (52/8) * i;
+        ctx.lineTo(tx, mouthY + (i % 2 === 0 ? 10 : 2));
+      }
+      ctx.lineTo(x + 26, mouthY);
+      ctx.closePath(); ctx.fill();
+    }
+    function drawEye(x, y, r, color) {
+      const rgba = hexToRgba(color, 0.55);
+      const glow = ctx.createRadialGradient(x, y, 0, x, y, r*2.5);
+      glow.addColorStop(0, rgba); glow.addColorStop(1, hexToRgba(color, 0));
+      ctx.fillStyle = glow;
+      ctx.beginPath(); ctx.arc(x, y, r*2.5, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#1a0000';
+      ctx.beginPath(); ctx.arc(x, y, r*0.45, 0, Math.PI*2); ctx.fill();
+    }
+    function hexToRgba(hex, alpha) {
+      const m = hex.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+      if (!m) return `rgba(255, 220, 80, ${alpha})`;
+      return `rgba(${parseInt(m[1],16)}, ${parseInt(m[2],16)}, ${parseInt(m[3],16)}, ${alpha})`;
+    }
+
+    function drawPlayer(x, y, scale, p) {
+      const downed = p.downedRounds > 0;
+      const bob = downed ? 0 : Math.sin(p.bobPhase) * 2.2;
+      const headR = 14 * scale;
+      const bodyW = 26 * scale;
+      const bodyH = 38 * scale;
+      const feetY = y;
+      const bodyBottomY = feetY - 2;
+      const bodyTopY = bodyBottomY - bodyH + bob;
+      const headCenterY = bodyTopY - headR + 2;
+      const cls = CLASSES[p.classKey];
+
+      // Defend/shield aura
+      const shieldEff = state.effects.find(e => e.kind === 'shield' && e.playerIndex === p.index);
+      if (shieldEff || p.defendStack > 0) {
+        const t = shieldEff ? (1 - shieldEff.life / shieldEff.duration) : 1;
+        const alpha = 0.35 * t;
+        ctx.fillStyle = `rgba(96, 165, 250, ${alpha})`;
+        ctx.beginPath();
+        ctx.arc(x, headCenterY + 4, headR + bodyH * 0.5 + 6, 0, Math.PI*2);
+        ctx.fill();
+      }
+      // Charge aura
+      const chargeEff = state.effects.find(e => e.kind === 'charge' && e.playerIndex === p.index);
+      if (chargeEff || p.chargeMul > 1 || p.pendingChargeMul > 1) {
+        const t = chargeEff ? (1 - chargeEff.life / chargeEff.duration) : 1;
+        const pulseAlpha = 0.45 * (0.5 + 0.5 * Math.sin(state.time * 8)) * t;
+        const r = (headR * 2 + bodyH) * 0.7;
+        const grad = ctx.createRadialGradient(x, headCenterY + 4, 0, x, headCenterY + 4, r);
+        grad.addColorStop(0, `rgba(253, 224, 71, ${pulseAlpha})`); grad.addColorStop(1, 'rgba(253, 224, 71, 0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath(); ctx.arc(x, headCenterY + 4, r, 0, Math.PI*2); ctx.fill();
+      }
+
+      // Targeting outline (white pulse) when local is in target mode
+      if (state.targetingAction && canTarget(state.targetingAction, p)) {
+        const pulse = 0.5 + 0.5 * Math.sin(state.time * 5);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${0.6 + 0.4 * pulse})`;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(x, headCenterY + 4, headR + bodyH * 0.5 + 10, 0, Math.PI*2);
+        ctx.stroke();
+      }
+
+      ctx.fillStyle = 'rgba(0,0,0,0.45)';
+      ctx.beginPath(); ctx.ellipse(x, feetY + 1, bodyW * 0.55, bodyW * 0.18, 0, 0, Math.PI*2); ctx.fill();
+
+      // Body — color by class
+      if (downed) {
+        ctx.fillStyle = '#3a3a3a';
+      } else {
+        const c1 = shadeHex(cls.color, 1.15);
+        const c2 = shadeHex(cls.color, 0.65);
+        const bodyGrad = ctx.createLinearGradient(x - bodyW/2, bodyTopY, x + bodyW/2, bodyBottomY);
+        bodyGrad.addColorStop(0, c1); bodyGrad.addColorStop(1, c2);
+        ctx.fillStyle = bodyGrad;
+      }
+      roundedRect(x - bodyW/2, bodyTopY, bodyW, bodyH, [bodyW*0.3, bodyW*0.3, bodyW*0.18, bodyW*0.18]);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = 1; ctx.stroke();
+
+      // Head
+      ctx.fillStyle = downed ? '#888' : '#f0d8b5';
+      ctx.beginPath(); ctx.arc(x, headCenterY, headR, 0, Math.PI*2); ctx.fill();
+      ctx.strokeStyle = 'rgba(0,0,0,0.4)'; ctx.stroke();
+
+      // Eyes
+      ctx.fillStyle = '#1a1a1a';
+      const eyeR = Math.max(0.8, 1.3 * scale);
+      if (downed) {
+        ctx.lineWidth = Math.max(1, 1.4 * scale); ctx.strokeStyle = '#1a1a1a';
+        ctx.beginPath();
+        ctx.moveTo(x - headR*0.45, headCenterY - headR*0.2);
+        ctx.lineTo(x - headR*0.2,  headCenterY + headR*0.05);
+        ctx.moveTo(x - headR*0.2,  headCenterY - headR*0.2);
+        ctx.lineTo(x - headR*0.45, headCenterY + headR*0.05);
+        ctx.moveTo(x + headR*0.2,  headCenterY - headR*0.2);
+        ctx.lineTo(x + headR*0.45, headCenterY + headR*0.05);
+        ctx.moveTo(x + headR*0.45, headCenterY - headR*0.2);
+        ctx.lineTo(x + headR*0.2,  headCenterY + headR*0.05);
+        ctx.stroke();
+      } else {
+        ctx.beginPath();
+        ctx.arc(x - headR*0.35, headCenterY - headR*0.1, eyeR, 0, Math.PI*2);
+        ctx.arc(x + headR*0.35, headCenterY - headR*0.1, eyeR, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+      if (p.flashTimer > 0 && !downed) {
+        ctx.fillStyle = `rgba(255, 255, 200, ${p.flashTimer * 2})`;
+        ctx.beginPath(); ctx.arc(x, headCenterY + bodyH * 0.3, (headR + bodyH * 0.4), 0, Math.PI*2); ctx.fill();
+      }
+
+      // Per-player HP bar
+      const barW = 38 * scale;
+      const barH = 3.5 * scale;
+      const barX = x - barW/2;
+      const barY = headCenterY - headR - 8 * scale;
+      const hpPct = downed ? 0 : Math.max(0, p.hp / p.maxHp);
+      ctx.fillStyle = 'rgba(20, 25, 22, 0.85)'; ctx.fillRect(barX - 1, barY - 1, barW + 2, barH + 2);
+      const hpColor = hpPct > 0.6 ? '#4ade80' : hpPct > 0.3 ? '#facc15' : '#ef4444';
+      ctx.fillStyle = hpColor; ctx.fillRect(barX, barY, barW * hpPct, barH);
+
+      // Boss-target marker
+      if (state.boss.nextTargetIndex === p.index && state.phase === 'planning' && !downed) {
+        ctx.strokeStyle = 'rgba(239, 68, 68, 0.85)';
+        ctx.lineWidth = 2.2;
+        const pulse = 0.5 + 0.5 * Math.sin(state.time * 4);
+        ctx.globalAlpha = 0.55 + 0.45 * pulse;
+        ctx.beginPath(); ctx.arc(x, headCenterY + 4, headR + bodyH * 0.5 + 9, 0, Math.PI*2); ctx.stroke();
+        ctx.globalAlpha = 1;
+        ctx.fillStyle = 'rgba(239, 68, 68, 0.9)';
+        ctx.beginPath();
+        ctx.moveTo(x, barY - 12); ctx.lineTo(x - 5, barY - 4); ctx.lineTo(x + 5, barY - 4);
+        ctx.closePath(); ctx.fill();
+      }
+
+      // Class icon next to name
+      ctx.font = `${Math.max(10, Math.round(11 * scale))}px "Segoe UI", system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.shadowColor = 'rgba(0,0,0,0.85)'; ctx.shadowBlur = 4;
+      const isYou = (p === localPlayer);
+      ctx.fillStyle = downed ? '#888' : (isYou ? '#fde047' : '#eef3ec');
+      const tag = downed ? ' (DOWN)' : (isYou ? ' (you)' : '');
+      ctx.fillText(`${cls.icon} ${p.name}${tag}`, x, barY - 4);
+      ctx.shadowBlur = 0;
+    }
+
+    function shadeHex(hex, mult) {
+      const m = hex.match(/^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i);
+      if (!m) return hex;
+      const clamp = v => Math.max(0, Math.min(255, Math.round(v)));
+      return '#' +
+        clamp(parseInt(m[1],16) * mult).toString(16).padStart(2, '0') +
+        clamp(parseInt(m[2],16) * mult).toString(16).padStart(2, '0') +
+        clamp(parseInt(m[3],16) * mult).toString(16).padStart(2, '0');
+    }
+
+    function drawEffects() {
+      for (const e of state.effects) {
+        if (e.kind === 'projectile') {
+          const t = e.progress;
+          const x = lerp(e.from.x, e.to.x, t);
+          const yLin = lerp(e.from.y - 36, e.to.y, t);
+          const arc = -Math.sin(t * Math.PI) * 40;
+          const y = yLin + arc;
+          ctx.fillStyle = e.color;
+          ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.arc(x, y, e.size * 1.4, 0, Math.PI*2); ctx.fill();
+          ctx.globalAlpha = 1; ctx.beginPath(); ctx.arc(x, y, e.size, 0, Math.PI*2); ctx.fill();
+        } else if (e.kind === 'number') {
+          const fade = 1 - (e.life / e.duration);
+          ctx.fillStyle = e.color; ctx.globalAlpha = fade;
+          ctx.font = '700 18px "Segoe UI", system-ui, sans-serif';
+          ctx.textAlign = 'center';
+          ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = 4;
+          ctx.fillText(e.text, e.x, e.y);
+          ctx.shadowBlur = 0; ctx.globalAlpha = 1;
+        }
+      }
+    }
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function roundedRect(x, y, w, h, r) {
+      const [tl, tr, br, bl] = Array.isArray(r) ? r : [r, r, r, r];
+      ctx.beginPath();
+      ctx.moveTo(x + tl, y); ctx.lineTo(x + w - tr, y);
+      ctx.quadraticCurveTo(x + w, y, x + w, y + tr);
+      ctx.lineTo(x + w, y + h - br);
+      ctx.quadraticCurveTo(x + w, y + h, x + w - br, y + h);
+      ctx.lineTo(x + bl, y + h);
+      ctx.quadraticCurveTo(x, y + h, x, y + h - bl);
+      ctx.lineTo(x, y + tl);
+      ctx.quadraticCurveTo(x, y, x + tl, y);
+      ctx.closePath();
+    }
+
+    // ============================================================
+    // HUD
+    // ============================================================
+    const bossHpFill = document.getElementById('bossHpFill');
+    const bossHpText = document.getElementById('bossHpText');
+    const localHpFill = document.getElementById('localHpFill');
+    const localHpLabel = document.getElementById('localHpLabel');
+    function updateBars() {
+      const bp = state.boss.hp / state.boss.maxHp;
+      bossHpFill.style.transform = `scaleX(${bp})`;
+      bossHpText.textContent = `${Math.round(state.boss.hp).toLocaleString()} / ${state.boss.maxHp.toLocaleString()}`;
+      if (localPlayer) {
+        const lp = Math.max(0, localPlayer.hp / localPlayer.maxHp);
+        localHpFill.style.transform = `scaleX(${lp})`;
+        const cls = CLASSES[localPlayer.classKey];
+        const downedNote = localPlayer.downedRounds > 0 ? ` · DOWN (${localPlayer.downedRounds})` : '';
+        localHpLabel.textContent = `${cls.icon} ${cls.name} · ${Math.round(localPlayer.hp)} / ${localPlayer.maxHp}${downedNote}`;
+      }
+    }
+
+    const roundNumEl = document.getElementById('roundNum');
+    const roundPhaseEl = document.getElementById('roundPhase');
+    const roundTimerFillEl = document.getElementById('roundTimerFill');
+    const telegraphLineEl = document.getElementById('telegraphLine');
+    function updatePhaseUI() {
+      roundNumEl.textContent = state.round;
+      if (state.phase === 'planning') {
+        roundPhaseEl.textContent = 'Plan your move';
+        roundPhaseEl.classList.remove('resolving');
+        roundTimerFillEl.classList.remove('resolving');
+      } else if (state.phase === 'resolving') {
+        roundPhaseEl.textContent = 'Resolving…';
+        roundPhaseEl.classList.add('resolving');
+        roundTimerFillEl.classList.add('resolving');
+      }
+      const target = state.players[state.boss.nextTargetIndex];
+      if (target && state.phase === 'planning') {
+        const who = target === localPlayer ? 'YOU' : target.name;
+        telegraphLineEl.innerHTML = `⚠ Boss targets <strong>${escapeHtml(who)}</strong>`;
+      } else {
+        telegraphLineEl.textContent = '';
+      }
+    }
+    function tickPhaseTimer() {
+      const dur = state.phase === 'planning' ? state.PLAN_DURATION : state.RESOLVE_DURATION;
+      const t = Math.max(0, state.phaseTimer) / dur;
+      roundTimerFillEl.style.transform = `scaleX(${t})`;
+    }
+
+    // ============================================================
+    // ACTION BAR
+    // ============================================================
+    const actionBarEl = document.getElementById('actionBar');
+    const actionBtnEls = {};
+    function buildActionBar() {
+      actionBarEl.innerHTML = '';
+      Object.keys(actionBtnEls).forEach(k => delete actionBtnEls[k]);
+      const keys = CLASSES[localPlayer.classKey].actions;
+      keys.forEach((key, idx) => {
+        const def = ACTIONS[key];
+        const btn = document.createElement('button');
+        btn.className = 'action-btn';
+        btn.dataset.action = key;
+        btn.title = def.tip || def.name;
+        btn.innerHTML = `
+          <span class="action-key">${idx + 1}</span>
+          <span class="action-badge" data-badge></span>
+          <div class="action-icon">${def.icon}</div>
+          <div class="action-name">${def.name}</div>
+          ${def.needsTarget ? '<div class="action-tt">→</div>' : ''}
+        `;
+        btn.addEventListener('click', () => selectLocalAction(key));
+        actionBtnEls[key] = btn;
+        actionBarEl.appendChild(btn);
+      });
+    }
+
+    function selectLocalAction(actionKey) {
+      if (state.phase !== 'planning') return;
+      if (!localPlayer || localPlayer.downedRounds > 0) return;
+      if (!ACTIONS[actionKey]) return;
+      // Must be in your class's action set
+      if (!CLASSES[localPlayer.classKey].actions.includes(actionKey)) return;
+
+      const def = ACTIONS[actionKey];
+      if (def.needsTarget) {
+        if (state.targetingAction === actionKey) {
+          // Toggle off
+          state.targetingAction = null;
+          canvas.classList.remove('targeting');
+          hideTargetHint();
+        } else {
+          state.targetingAction = actionKey;
+          canvas.classList.add('targeting');
+          showTargetHint(`Click a player to ${def.name.toLowerCase()}`);
+        }
+      } else {
+        applySelection(localPlayer, actionKey, null);
+        state.targetingAction = null;
+        canvas.classList.remove('targeting');
+        hideTargetHint();
+      }
+    }
+
+    const targetHintEl = document.getElementById('targetHint');
+    function showTargetHint(text) { targetHintEl.textContent = text; targetHintEl.classList.add('active'); }
+    function hideTargetHint() { targetHintEl.classList.remove('active'); }
+
+    function updateActionBar() {
+      if (!localPlayer) return;
+      const allowed = state.phase === 'planning' && localPlayer.downedRounds <= 0;
+      for (const key of CLASSES[localPlayer.classKey].actions) {
+        const btn = actionBtnEls[key];
+        if (!btn) continue;
+        const isTargeting = state.targetingAction === key;
+        const isSelected = localPlayer.selectedAction?.key === key;
+        btn.classList.toggle('selected', isSelected);
+        btn.classList.toggle('targeting', isTargeting);
+        btn.disabled = !allowed;
+        const badge = btn.querySelector('[data-badge]');
+        if ((key === 'heavy' || key === 'strike' || key === 'fireball') && localPlayer.chargeMul > 1) {
+          badge.textContent = `×${localPlayer.chargeMul}`;
+        } else if (key === 'charge' && localPlayer.pendingChargeMul > 1) {
+          badge.textContent = `→×${localPlayer.pendingChargeMul}`;
+        } else if (isSelected && localPlayer.selectedAction?.target) {
+          badge.textContent = '→' + (localPlayer.selectedAction.target === localPlayer ? 'self' : localPlayer.selectedAction.target.name.slice(0, 4));
+        } else {
+          badge.textContent = '';
+        }
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (!localPlayer || state.phase !== 'planning') return;
+      if (document.activeElement === chatInputEl) return;
+      const idx = parseInt(e.key, 10);
+      const actions = CLASSES[localPlayer.classKey].actions;
+      if (idx >= 1 && idx <= actions.length) selectLocalAction(actions[idx - 1]);
+      if (e.key === 'Escape' && state.targetingAction) {
+        state.targetingAction = null;
+        canvas.classList.remove('targeting');
+        hideTargetHint();
+      }
+    });
+
+    document.getElementById('restartBtn').addEventListener('click', () => location.reload());
+
+    // ============================================================
+    // MAIN LOOP
+    // ============================================================
+    let last = performance.now();
+    function tick(now) {
+      const dt = Math.min(0.1, (now - last) / 1000);
+      last = now;
+      state.time += dt;
+
+      for (const p of state.players) {
+        p.bobPhase += dt * p.bobSpeed;
+        if (p.flashTimer > 0) p.flashTimer = Math.max(0, p.flashTimer - dt);
+      }
+      if (state.boss.flashTimer > 0) state.boss.flashTimer = Math.max(0, state.boss.flashTimer - dt);
+      state.boss.bobPhase += dt * 0.9;
+
+      if (state.phase === 'planning') updatePlanning(dt);
+      else if (state.phase === 'resolving') updateResolving(dt);
+
+      updateEffects(dt);
+      if (state.players.length) {
+        render();
+        updateActionBar();
+        tickPhaseTimer();
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  </script>
+</body>
+</html>
